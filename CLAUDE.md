@@ -29,17 +29,28 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | Pfad | Inhalt | Braucht |
 |---|---|---|
 | `packages/combat/` | Kampflogik, reines Dart, 23 Tests | nur Dart-SDK |
-| `packages/combat/example/play.dart` | spielbarer Kampf im Terminal, echte Timed Hits | nur Dart-SDK |
+| `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | Balance-Simulation, 2000 Kämpfe in 0,4 s | nur Dart-SDK |
-| *(noch nicht angelegt)* | Flutter-App, Tracker-Screens, Flame-Kampfbildschirm | Flutter-SDK |
+| `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
+| `lib/combat/combat_screen.dart` | HUD: Statusleisten, Move-Buttons, Log | Flutter |
+| `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
+
+**Schichtregel:** Kampfregeln nur in `packages/combat`. Der Controller reicht Züge
+durch und hält den laufenden Kampf, Flame spielt Events ab. Sobald in `lib/`
+eine Spielzahl berechnet wird, gehört sie nach `packages/combat`.
 
 ```bash
+# App
+flutter pub get
+flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
+flutter test             # 6 Tests
+flutter analyze          # muss sauber sein
+
+# Kampflogik allein, ohne Flutter
 cd packages/combat
-dart pub get
 dart test                              # 23 Tests
-dart analyze                           # muss sauber sein
-dart format --set-exit-if-changed .    # muss sauber sein
-dart run example/play.dart             # Kampf selbst spielen
+dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # Balance prüfen
 ```
 
@@ -88,9 +99,16 @@ Beide Entwickler bekommen sie beim Clone automatisch — keine Installation nöt
 
 ## Setup-Status
 
-Dart 3.12.2 ist installiert (per `winget install --id Google.DartSDK`), damit läuft
-`packages/combat` vollständig. **Flutter fehlt noch** — die App-Schicht ist deshalb
-noch nicht begonnen.
+Flutter 3.44.9 (Dart 3.12.2) liegt unter `C:\Users\frekk\flutter`, `flutter\bin`
+steht im User-PATH.
+
+Build-Ziele auf diesem Rechner:
+
+| Ziel | Status |
+|---|---|
+| Web (Chrome/Edge) | funktioniert — Standard für die Entwicklung |
+| Android | Android Studio da, aber `cmdline-tools` fehlen und Lizenzen sind nicht akzeptiert |
+| Windows-Desktop | geht nicht, Visual Studio mit C++-Workload fehlt |
 
 Achtung: Die VS-Code-Erweiterungen `dart-code.dart-code` und `dart-code.flutter`
 installieren **kein** SDK. Siehe [`docs/context/gotchas.md`](docs/context/gotchas.md).

@@ -3,6 +3,40 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## GridView mit childAspectRatio kann Widgets unsichtbar machen
+
+Die vier Move-Buttons lagen zuerst in einem `GridView.count` mit
+`childAspectRatio: 4.2`. Das koppelt die **Zellenhöhe an die Fensterbreite**: Auf
+einem breiten Fenster werden die Zellen so hoch, dass die zweite Reihe aus dem
+Sichtbereich rutscht. Weil GridView faul baut, existierten „Giftklinge" und
+„Sammeln" dann gar nicht im Widget-Baum — nicht nur unsichtbar, sondern nicht
+gebaut.
+
+Auf dem Handy wäre es vermutlich nie aufgefallen. Gefunden hat es der Widget-Test,
+der einfach prüft, ob alle vier Move-Namen da sind.
+
+**Regel:** Bei fester Höhe keine `childAspectRatio`-Grids. Zeilen mit `Expanded`
+sind bei jeder Breite verlässlich.
+
+## Windows-Desktop-Builds brauchen Visual Studio
+
+`flutter devices` listet „Windows (desktop)" auch dann, wenn der Build gar nicht
+funktioniert. Dafür braucht es Visual Studio mit dem Workload „Desktop development
+with C++" (mehrere GB). Ist hier nicht installiert.
+
+Entwickelt wird deshalb gegen **Chrome** (`flutter run -d chrome`). Für Android
+fehlen noch die `cmdline-tools` und die akzeptierten Lizenzen
+(`flutter doctor --android-licenses`).
+
+## PowerShell 5.1 verschluckt sich an `2>&1` bei Flutter
+
+`flutter --version 2>&1` wirft einen `NativeCommandError` und Exit-Code 255,
+obwohl der Befehl erfolgreich war. Grund: PowerShell 5.1 verpackt jede
+stderr-Zeile eines nativen Programms in einen ErrorRecord — und Flutter schreibt
+Fortschrittsmeldungen („Building flutter tool...") auf stderr.
+
+Einfach **nicht umleiten**, dann läuft alles normal.
+
 ## Kurze Kämpfe verstärken jeden Multiplikator
 
 Die Timed-Hit-Grenze von +50 % klang im Konzept nach einem Randbonus. In der

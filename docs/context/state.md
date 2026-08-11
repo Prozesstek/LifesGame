@@ -10,7 +10,12 @@
 
 ## Phase
 
-**Kampflogik steht und ist getestet. App-Schicht noch nicht begonnen.**
+**Kampf läuft als echte App im Browser.** Habits, Theorie, Dungeon und Shop fehlen
+noch — der Rest des Konzepts ist unberührt.
+
+```bash
+flutter run -d chrome
+```
 
 ## Fertig
 
@@ -27,6 +32,12 @@
   Timed Hits laufen über echte Reaktionszeit (unter 300 ms perfekt, unter 550 ms gut).
   Braucht kein Flutter — damit ist der Kern-Loop schon heute erfahrbar.
 - **`packages/combat/example/balance_sim.dart`** — 2000 Kämpfe in 0,4 s
+- **Flutter-App** (`lib/`) — Kampfbildschirm mit Flame-Darstellung, Statusleisten,
+  Move-Buttons, Ereignis-Log und Timing-Leiste für Timed Hits. 6 Tests grün,
+  Web-Build läuft. Flutter 3.44.9 installiert.
+  - `combat_controller.dart` hält den laufenden Kampf, **enthält keine Regeln**
+  - `battle_game.dart` spielt nur `CombatEvent`s ab — die Naht aus ADR-0002
+    steht damit in echtem Code, nicht nur auf dem Papier
 
 ## Größte offene Frage: die Kampfbalance trägt noch nicht
 
@@ -68,13 +79,18 @@ Simulationslauf. Genau dafür wurde das gebaut.
 
 ## Als Nächstes
 
-1. **Balance-Frage oben klären** — mit der Simulation, nicht nach Gefühl.
-2. **Flutter-SDK installieren.** Dart 3.12.2 ist da (per winget), Flutter fehlt noch.
-   Danach `flutter create` im Repo-Wurzelverzeichnis.
-3. **Offene Konzeptpunkte 1–3** (Streak-Deckel, Gold-Abflüsse, Niederlagen-Regel) —
+1. **Balance-Frage oben klären** — jetzt gut möglich: erst im Browser spielen,
+   dann `balance.dart` anfassen und mit `balance_sim.dart` gegenprüfen.
+2. **Offene Konzeptpunkte 1–3** (Streak-Deckel, Gold-Abflüsse, Niederlagen-Regel) —
    beeinflussen das Datenmodell, siehe `konzept.md` Abschnitt 6.
-4. **Drift-Schema** für Habits, Streaks, Charakter, Inventar.
-5. **Flame-Kampfbildschirm**, der die Events aus `packages/combat` abspielt.
+3. **Drift-Schema** für Habits, Streaks, Charakter, Inventar. Damit beginnt die
+   Tracker-Seite, die bisher komplett fehlt.
+4. **Habits-Screen** — Vorlagen wählen, abhaken, Streak sehen.
+5. **Stats aus Habits speisen**, statt den Angriffswert wie jetzt fest auf 16 zu
+   setzen. Erst damit schließt sich der Kern-Loop aus dem Konzept.
+
+Später, kein MVP-Blocker: Rive-Animationen statt der Rechtecke in `battle_game.dart`,
+Dungeon mit 4 Gegnern und Boss, Shop.
 
 ## Aufgabenteilung
 
