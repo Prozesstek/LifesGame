@@ -1,0 +1,49 @@
+# ---- Flutter / Dart ----
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+# pubspec.lock wird BEWUSST committed: Apps pinnen ihre Abhaengigkeiten,
+# damit beide Entwickler identische Versionen bauen.
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+coverage/
+doc/api/
+
+# ---- Plattform-Buildartefakte ----
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+android/key.properties
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+macos/Pods/
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+!.vscode/settings.json
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Claude Code: persoenlich, NICHT teilen ----
+.claude/settings.local.json
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks

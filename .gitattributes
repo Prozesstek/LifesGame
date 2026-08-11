@@ -1,0 +1,21 @@
+# Einheitliche Zeilenenden, egal auf welchem Betriebssystem gearbeitet wird.
+* text=auto eol=lf
+
+*.dart    text eol=lf
+*.md      text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.json    text eol=lf
+
+*.bat     text eol=crlf
+*.ps1     text eol=crlf
+
+*.png     binary
+*.jpg     binary
+*.webp    binary
+*.riv     binary
+*.ttf     binary
+*.otf     binary
+*.mp3     binary
+*.ogg     binary
+*.wav     binary

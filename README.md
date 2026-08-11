@@ -1,0 +1,63 @@
+# Lifes Game
+
+Ein Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
+Was du im echten Leben tust, bestimmt, wie stark dein Charakter ist.
+
+**Status:** Konzeptphase. Noch kein Code.
+
+## Für Mitentwickler: erste Schritte
+
+```bash
+git clone https://github.com/Prozesstek/LifesGame.git
+cd LifesGame
+```
+
+Danach in dieser Reihenfolge lesen — es sind zusammen keine 15 Minuten:
+
+1. **[`konzept.md`](konzept.md)** — was wir bauen und warum es funktionieren soll
+2. **[`docs/context/state.md`](docs/context/state.md)** — wo wir gerade stehen, was als Nächstes ansteht
+3. **[`docs/decisions/`](docs/decisions/)** — warum der Stack so aussieht, wie er aussieht
+
+Flutter-SDK installieren: <https://docs.flutter.dev/get-started/install>
+Danach `flutter doctor` bis alles grün ist.
+
+## Wie dieses Repo sein Gedächtnis behält
+
+Wir arbeiten beide mit Claude Code. Claude vergisst zwischen Sitzungen alles, und
+lokale Notizen auf einem Rechner sieht der andere nie. Deshalb liegt der gesamte
+Kontext **im Repo** und wandert über Git mit:
+
+| Datei | Beantwortet |
+|---|---|
+| `CLAUDE.md` | Wird von Claude Code automatisch geladen. Stack, Regeln, Konventionen. |
+| `konzept.md` | Was bauen wir? |
+| `docs/context/state.md` | Wo stehen wir? |
+| `docs/decisions/NNNN-*.md` | Warum ist das so? |
+| `docs/context/gotchas.md` | Worüber bin ich schon gestolpert? |
+
+**Die Regel:** Wer arbeitet, aktualisiert am Ende `state.md`. Wer eine Entscheidung
+trifft, die man in drei Monaten hinterfragen würde, schreibt einen ADR
+(Vorlage in `docs/decisions/TEMPLATE.md`). Alles andere veraltet von selbst.
+
+ADRs werden nie umgeschrieben. Eine überholte Entscheidung bekommt den Status
+`Abgelöst durch ADR-NNNN` — so bleibt nachvollziehbar, was wir mal geglaubt haben.
+
+## Werkzeuge
+
+`.claude/` bringt eine kuratierte Auswahl aus [ECC](https://github.com/affaan-m/ECC) 2.2.0 mit:
+Flutter-/Dart-Agents, Review-Commands und Coding-Rules. Du bekommst sie beim Clone
+automatisch — **nichts zu installieren.**
+
+- `/flutter-review` — Review auf Widget-Praxis, State Management, Performance
+- `/flutter-build` — Analyzer- und Build-Fehler inkrementell fixen
+- `/flutter-test` — Tests laufen lassen und Fehler beheben
+
+Deine persönlichen Permission-Freigaben landen in `.claude/settings.local.json`.
+Die Datei ist gitignored — sie ist deine, nicht unsere.
+
+## Konventionen
+
+- `dart format` vor jedem Commit (Zeilenlänge 80)
+- Commits: `<type>: <beschreibung>` — `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`
+- Größere Änderungen über Branch + PR, damit der andere den Kontext mitbekommt
+- Spiellogik-Tests laufen ohne Renderer — siehe [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md)
