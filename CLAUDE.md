@@ -29,6 +29,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | Pfad | Inhalt | Braucht |
 |---|---|---|
 | `packages/combat/` | Kampflogik, reines Dart, 23 Tests | nur Dart-SDK |
+| `packages/combat/example/play.dart` | spielbarer Kampf im Terminal, echte Timed Hits | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | Balance-Simulation, 2000 Kämpfe in 0,4 s | nur Dart-SDK |
 | *(noch nicht angelegt)* | Flutter-App, Tracker-Screens, Flame-Kampfbildschirm | Flutter-SDK |
 
@@ -38,6 +39,7 @@ dart pub get
 dart test                              # 23 Tests
 dart analyze                           # muss sauber sein
 dart format --set-exit-if-changed .    # muss sauber sein
+dart run example/play.dart             # Kampf selbst spielen
 dart run example/balance_sim.dart      # Balance prüfen
 ```
 

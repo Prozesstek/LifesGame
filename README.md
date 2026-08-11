@@ -15,6 +15,7 @@ cd LifesGame
 #   winget install --id Google.DartSDK --exact
 cd packages/combat
 dart pub get
+dart run example/play.dart         # Kampf im Terminal spielen
 dart test                          # 23 Tests
 dart run example/balance_sim.dart  # 2000 simulierte Kämpfe
 ```

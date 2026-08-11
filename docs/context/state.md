@@ -23,6 +23,9 @@
   - Timed Hits mit Deckel, Energie, Gift, Verteidigungssenkung, Heilung, Schild
   - Vollständiges Event-Vokabular als Naht zu Flame
   - Deterministisch per Seed → Balance-Simulation möglich
+- **`packages/combat/example/play.dart`** — spielbarer Kampf im Terminal.
+  Timed Hits laufen über echte Reaktionszeit (unter 300 ms perfekt, unter 550 ms gut).
+  Braucht kein Flutter — damit ist der Kern-Loop schon heute erfahrbar.
 - **`packages/combat/example/balance_sim.dart`** — 2000 Kämpfe in 0,4 s
 
 ## Größte offene Frage: die Kampfbalance trägt noch nicht
