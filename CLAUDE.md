@@ -21,6 +21,31 @@ außerhalb dieses Repos — was nicht committed ist, existiert für den anderen 
 **Architektur-Kernregel:** Kampflogik ist reines Dart **ohne Flame-Imports**.
 Die Logik gibt Events aus, Flame spielt sie nur ab. Begründung: [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md)
 
+Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
+`dependencies`-Block, ein Flame-Import schlägt dort schlicht fehl ([ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md)).
+
+## Aufbau
+
+| Pfad | Inhalt | Braucht |
+|---|---|---|
+| `packages/combat/` | Kampflogik, reines Dart, 23 Tests | nur Dart-SDK |
+| `packages/combat/example/balance_sim.dart` | Balance-Simulation, 2000 Kämpfe in 0,4 s | nur Dart-SDK |
+| *(noch nicht angelegt)* | Flutter-App, Tracker-Screens, Flame-Kampfbildschirm | Flutter-SDK |
+
+```bash
+cd packages/combat
+dart pub get
+dart test                              # 23 Tests
+dart analyze                           # muss sauber sein
+dart format --set-exit-if-changed .    # muss sauber sein
+dart run example/balance_sim.dart      # Balance prüfen
+```
+
+**Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
+`packages/combat/lib/src/balance.dart`. Eine Zahl ändern, `balance_sim.dart`
+laufen lassen, Siegquoten vergleichen. Steht eine Zahl im Kampfcode statt in
+`balance.dart`, ist das ein Bug.
+
 ## Gedächtnis-Protokoll
 
 Diese vier Dateien sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
@@ -61,6 +86,11 @@ Beide Entwickler bekommen sie beim Clone automatisch — keine Installation nöt
 
 ## Setup-Status
 
-Flutter-SDK ist auf Frederiks Rechner **nicht** installiert. Es existiert noch kein
-Dart-Code — das Projekt ist in der Konzeptphase. Nächster Schritt siehe
-[`docs/context/state.md`](docs/context/state.md).
+Dart 3.12.2 ist installiert (per `winget install --id Google.DartSDK`), damit läuft
+`packages/combat` vollständig. **Flutter fehlt noch** — die App-Schicht ist deshalb
+noch nicht begonnen.
+
+Achtung: Die VS-Code-Erweiterungen `dart-code.dart-code` und `dart-code.flutter`
+installieren **kein** SDK. Siehe [`docs/context/gotchas.md`](docs/context/gotchas.md).
+
+Aktueller Stand und nächste Schritte: [`docs/context/state.md`](docs/context/state.md).

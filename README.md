@@ -3,14 +3,24 @@
 Ein Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
 Was du im echten Leben tust, bestimmt, wie stark dein Charakter ist.
 
-**Status:** Konzeptphase. Noch kein Code.
+**Status:** Kampflogik steht und ist getestet. App-Schicht noch nicht begonnen.
 
 ## Für Mitentwickler: erste Schritte
 
 ```bash
 git clone https://github.com/Prozesstek/LifesGame.git
 cd LifesGame
+
+# Kampflogik läuft schon — dafür reicht das Dart-SDK, kein Flutter noetig:
+#   winget install --id Google.DartSDK --exact
+cd packages/combat
+dart pub get
+dart test                          # 23 Tests
+dart run example/balance_sim.dart  # 2000 simulierte Kämpfe
 ```
+
+Achtung: Die VS-Code-Erweiterungen „Dart" und „Flutter" installieren **kein** SDK,
+nur Editor-Werkzeug. Siehe [`docs/context/gotchas.md`](docs/context/gotchas.md).
 
 Danach in dieser Reihenfolge lesen — es sind zusammen keine 15 Minuten:
 
