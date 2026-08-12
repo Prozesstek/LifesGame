@@ -5,8 +5,12 @@ Vollständiges Produktkonzept: [`konzept.md`](konzept.md)
 
 ## Team
 
-Zwei Entwickler, geteiltes Repo. Es gibt **kein** gemeinsames Gedächtnis
-außerhalb dieses Repos — was nicht committed ist, existiert für den anderen nicht.
+Zwei Entwickler, geteiltes Repo: **@Prozesstek** (Frederik) und
+**@AktivesBrett**, beide mit Schreibrechten auf
+[`Prozesstek/LifesGame`](https://github.com/Prozesstek/LifesGame).
+
+Es gibt **kein** gemeinsames Gedächtnis außerhalb dieses Repos — was nicht
+committed ist, existiert für den anderen nicht.
 
 ## Stack
 
@@ -31,20 +35,39 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/combat/` | Kampflogik, reines Dart, 23 Tests | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | Balance-Simulation, 2000 Kämpfe in 0,4 s | nur Dart-SDK |
+| `packages/theory/` | Skillbaum, Inhalte, Lernfortschritt, reines Dart, 43 Tests | nur Dart-SDK |
+| `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
+| `packages/theory/lib/src/skill_tree.dart` | welche Zweige es gibt und ab welchem Level | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, reines Dart, 11 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 52 Tests | nur Dart-SDK |
+| `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
+| `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
+| `lib/main.dart` | App-Shell und Theme | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm, Weg zu allen Bereichen | Flutter |
+| `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
+| `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/habits/habits_screen.dart` | Werte, Tagesliste, freigeschaltete Vorlagen | Flutter |
+| `lib/ui/palette.dart` | alle Farben der App | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Move-Buttons, Log | Flutter |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
+| `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/theory/skill_tree_screen.dart` | der Baum: alle Zweige und ihre Levelsperren | Flutter |
+| `lib/theory/branch_screen.dart` | Zweig-Übersicht mit Fortschritt und Lektionssperren | Flutter |
+| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
 
-**Schichtregel:** Kampfregeln nur in `packages/combat`. Der Controller reicht Züge
-durch und hält den laufenden Kampf, Flame spielt Events ab. Sobald in `lib/`
-eine Spielzahl berechnet wird, gehört sie nach `packages/combat`.
+**Schichtregel:** Kampfregeln nur in `packages/combat`, Inhalte und
+Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
+`packages/progression`, Streaks und Charakterwerte nur in `packages/habits`.
+Die Controller reichen durch und halten den laufenden Zustand. Sobald in
+`lib/` eine Spielzahl berechnet wird, gehört sie in eines der vier Packages.
 
 ```bash
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 6 Tests
+flutter test             # 54 Tests
 flutter analyze          # muss sauber sein
 
 # Kampflogik allein, ohne Flutter
@@ -52,12 +75,50 @@ cd packages/combat
 dart test                              # 23 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # Balance prüfen
+
+# Gewohnheiten allein, ohne Flutter
+cd packages/habits
+dart test                              # 52 Tests
+dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
+
+# Theorie und Levelkurve allein, ohne Flutter
+cd packages/theory      ; dart test    # 43 Tests, prüft auch den Inhalt
+cd packages/progression ; dart test    # 11 Tests
 ```
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
 `packages/combat/lib/src/balance.dart`. Eine Zahl ändern, `balance_sim.dart`
 laufen lassen, Siegquoten vergleichen. Steht eine Zahl im Kampfcode statt in
 `balance.dart`, ist das ein Bug.
+
+**Theorie schreiben heißt testen lassen.** Neue Lektionen kommen nach
+`packages/theory/lib/src/content/`, ein neuer Zweig zusätzlich in
+`theoryTree` (`skill_tree.dart`) — danach `dart test`. Die Tests laufen über
+den ganzen Baum und prüfen den Inhalt mit: eindeutige Ids, gültige
+`correctIndex`, keine doppelten Antworten. Was eine Lektion einbringt, steht
+ausschließlich in `rewards.dart`, ab welchem Level ein Zweig offen ist am
+Zweig selbst (`unlockLevel`).
+
+**Gewohnheiten ändern heißt ebenfalls simulieren.** Alle Zahlen —
+Erfahrung je Häkchen, Streak-Meilensteine, Deckel, Stat-Kurve — stehen in
+`packages/habits/lib/src/rewards.dart`. Eine ändern, `curve_sim.dart` laufen
+lassen, die 90-Tage-Tabelle vergleichen. Neue Vorlagen kommen nach
+`catalog.dart` und brauchen eine Lektion mit passendem `unlocksHabit` —
+sonst schlägt `test/habits_theory_test.dart` fehl.
+
+**Drei Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
+Häkchen-Ertrag (`habits/rewards.dart`) und Level
+(`progression/level_curve.dart`) hängen zusammen: Passen sie nicht, wird der
+Baum zur Sackgasse — oder er öffnet sich in zwei Tagen komplett und die
+Levelsperre ist Deko. `flutter test test/progression_test.dart` spielt beides
+durch und meldet genau das. Wer eine dieser Zahlen ändert, lässt diesen Test
+laufen.
+
+**Der Kern-Loop verbindet alle vier Packages.** Lektion (`theory`) schaltet
+Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`) und
+Charakterwerte, die Werte gehen in den Kampf (`combat`). Die einzige Stelle,
+an der Erfahrung zusammenläuft, ist `totalXpProvider`; die einzige, an der
+Werte in den Kampf gehen, ist `_freshFight()` in `combat_controller.dart`.
 
 ## Gedächtnis-Protokoll
 

@@ -40,6 +40,13 @@ optional 8–12 Minuten Dungeon.
 - 6 Ausrüstungs-Slots (Waffe, Rüstung, …)
 - 4 aktive Fähigkeiten
 
+**Levelkurve:** linear steigend — Stufe 2 kostet 100 Erfahrung, jede
+weitere 25 mehr als die vorige. Bewusst nicht exponentiell: Fortschritt
+kommt aus echten Gewohnheiten und lässt sich nicht grinden, deshalb dürfen
+späte Stufen nicht unerreichbar werden
+([ADR-0006](docs/decisions/0006-levelkurve-als-eigenes-package.md)).
+Das Level öffnet die Zweige des Skilltrees (3.3).
+
 **Empfehlung:** Ausrüstung sollte Ressourcen beeinflussen, nicht nur
 Zahlen erhöhen. Ein Ring, der Energie schneller füllt, erzeugt eine
 Entscheidung. „+3 Angriff" nicht.
@@ -60,12 +67,28 @@ Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 
 ### 3.3 Theorie / Skilltree
 Text plus Multiple-Choice-Fragen, mehrere Zweige, verknüpft mit
-Habit-Vorlagen.
+Habit-Vorlagen. Ein Zweig ist eine geordnete Folge von Lektionen;
+Lektion n+1 öffnet sich mit bestandener Lektion n.
+
+**Der Baum** besteht aus einem Wurzelzweig und vier Themenzweigen. Die
+Themenzweige öffnen sich über das **Charakterlevel**, nicht über gelesene
+Lektionen — so belohnt der Baum alles, was Erfahrung bringt, und nicht nur
+Lesen ([ADR-0007](docs/decisions/0007-theorie-als-skillbaum.md)):
+
+| Zweig | Ab Level | Inhalt |
+|---|---|---|
+| Gewohnheiten | offen | wie Verhalten entsteht und abreißt — erklärt zugleich die App |
+| Körper | 2 | Schlaf, Bewegung, Essen |
+| Geist | 3 | Aufmerksamkeit, Gedanken, Impulse |
+| Wissenschaft | 4 | Belege prüfen, Selbstversuche |
+| Gesellschaft | 5 | Umfeld, Zugehörigkeit, Grenzen |
 
 > **Größtes Projektrisiko — und es ist kein technisches.**
-> Jeder Zweig kostet Wochen an Schreibarbeit. Mit **einem** Zweig
-> starten, ihn komplett fertigstellen, Architektur für weitere offen
-> halten.
+> Jeder Zweig kostet Wochen an Schreibarbeit. Die ursprüngliche Empfehlung
+> lautete: mit **einem** Zweig starten, ihn komplett fertigstellen. Anders
+> entschieden — es liegen jetzt vier angefangene Zweige mit je drei
+> Lektionen vor. Das Risiko bleibt bestehen: Wer weiterarbeitet, sollte
+> einen Zweig zu Ende bringen, bevor ein sechster dazukommt.
 
 ### 3.4 Dungeon
 4 Gegner + 1 Boss, etwa 8–12 Minuten.
@@ -89,16 +112,32 @@ Offen. Braucht: Move-Set, Stats, Drop-Tabelle, Timing-Muster für die
 Timed Hits.
 
 ### 3.7 Habits (= Daily Quests)
-Aus Vorlagen wählbar, jede Vorlage fest verknüpft mit Stats und einem
-Theoriezweig.
+Aus Vorlagen wählbar, jede Vorlage fest verknüpft mit einem Stat und einem
+Theoriezweig. Gebaut, siehe
+[ADR-0008](docs/decisions/0008-gewohnheiten-als-eigenes-package.md).
+
+**Vier Werte**, jeder mit einer Wirkung im Kampf:
+
+| Wert | Kampf | Beispielvorlage |
+|---|---|---|
+| Stärke | Angriff | Zehn Minuten am Stück gehen |
+| Ausdauer | Lebenspunkte | Feste Aufstehzeit |
+| Disziplin | Verteidigung | Drei Aufgaben für morgen festlegen |
+| Klarheit | Energie | Fünf Minuten still sitzen |
 
 **Streak-System:** Streaks erzeugen XP-Multiplikatoren, die bei
-Meilensteinen steigen. Verpasste Habits werden nicht bestraft — der
-Bonus fehlt einfach.
+Meilensteinen steigen (3 / 7 / 14 / 30 / 60 Tage). Verpasste Habits werden
+nicht bestraft — der Bonus fehlt einfach, und die Kette stirbt erst, wenn
+der Tag vorbei ist, nicht beim Aufwachen.
 
-> **Empfehlung:** Multiplikator bei etwa x2 deckeln. Bei x3 wird der
-> Verlust einer langen Streak so schmerzhaft, dass Nutzer aufgeben
-> statt neu anzufangen.
+Der Multiplikator ist bei **x2 gedeckelt** — die Empfehlung wurde
+übernommen: Bei x3 wird der Verlust einer langen Streak so schmerzhaft, dass
+Nutzer aufgeben statt neu anzufangen. **Gold folgt dem Streak bewusst
+nicht**, sonst wird eine lange Kette zur Abkürzung durch den Shop.
+
+**Höchstens fünf Gewohnheiten gleichzeitig.** Ohne Grenze hakt man alle
+Vorlagen an und keine davon ab; außerdem hält die Grenze die Erfahrung pro
+Tag berechenbar, worauf die Levelkurve angewiesen ist.
 
 ### 3.8 Errungenschaften
 Offen.
@@ -130,10 +169,12 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 
 ## 6. Offene Punkte
 
-1. Multiplikator-Deckel und Streak-Meilenstein-Kurve festlegen
-2. Gold-Abflüsse erweitern (Tränke, Wiederbelebung, Streak-Schutz)
+1. ~~Multiplikator-Deckel und Streak-Meilenstein-Kurve festlegen~~ —
+   erledigt, siehe 3.7 und ADR-0008
+2. Gold-Abflüsse erweitern (Tränke, Wiederbelebung, Streak-Schutz) —
+   dringender geworden: Gold entsteht jetzt täglich, hat aber keinen Zweck
 3. Niederlagen-Regel entschärfen
-4. Ersten Theoriezweig auswählen
+4. ~~Ersten Theoriezweig auswählen~~ — erledigt, siehe 3.3 und ADR-0005/0007
 5. Errungenschaften definieren
 6. Gegner-Design: Move-Sets und Drop-Tabellen
 7. Timed-Hit-Fenster in Millisekunden festlegen
