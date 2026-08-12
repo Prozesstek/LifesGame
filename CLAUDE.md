@@ -5,8 +5,12 @@ Vollständiges Produktkonzept: [`konzept.md`](konzept.md)
 
 ## Team
 
-Zwei Entwickler, geteiltes Repo. Es gibt **kein** gemeinsames Gedächtnis
-außerhalb dieses Repos — was nicht committed ist, existiert für den anderen nicht.
+Zwei Entwickler, geteiltes Repo: **@Prozesstek** (Frederik) und
+**@AktivesBrett**, beide mit Schreibrechten auf
+[`Prozesstek/LifesGame`](https://github.com/Prozesstek/LifesGame).
+
+Es gibt **kein** gemeinsames Gedächtnis außerhalb dieses Repos — was nicht
+committed ist, existiert für den anderen nicht.
 
 ## Stack
 
