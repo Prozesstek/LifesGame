@@ -15,6 +15,21 @@ dependencies:
   combat:
     path: packages/combat
 
+  # Theorie-Inhalte und Lernfortschritt. Ebenfalls reines Dart, damit
+  # Lektionen ohne laufende App geschrieben und geprueft werden koennen
+  # (ADR-0004).
+  theory:
+    path: packages/theory
+
+  # Levelkurve. Entscheidet, welche Theoriezweige offen sind (ADR-0006).
+  progression:
+    path: packages/progression
+
+  # Gewohnheiten, Streaks und die daraus folgenden Charakterwerte. Reines
+  # Dart, damit sich Streak- und Statkurven durchrechnen lassen (ADR-0008).
+  habits:
+    path: packages/habits
+
   # State Management (ADR-0001).
   flutter_riverpod: ^3.0.1
 

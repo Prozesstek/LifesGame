@@ -1,0 +1,16 @@
+name: progression
+description: >-
+  Levelkurve und Charakterfortschritt fuer Lifes Game. Reines Dart, damit die
+  Kurve simuliert werden kann, ohne die App zu starten (siehe ADR-0006).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Bewusst leer. Eine Kurve braucht keine Infrastruktur.
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0

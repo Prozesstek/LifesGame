@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ui/palette.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
@@ -73,6 +74,10 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     final state = session.state;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kampf'),
+        backgroundColor: Palette.background,
+      ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -84,14 +89,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
                   Expanded(
                     child: FighterStatus(
                       combatant: state.player,
-                      accent: const Color(0xFF5B8DEF),
+                      accent: Palette.accent,
                     ),
                   ),
                   const SizedBox(width: 28),
                   Expanded(
                     child: FighterStatus(
                       combatant: state.enemy,
-                      accent: const Color(0xFFE05B5B),
+                      accent: Palette.enemy,
                       alignEnd: true,
                     ),
                   ),
@@ -103,7 +108,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141824),
+                  color: Palette.surface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -237,10 +242,7 @@ class _LogPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (lines.isEmpty) {
       return const Center(
-        child: Text(
-          'Wähle einen Zug.',
-          style: TextStyle(color: Color(0xFF6B7285)),
-        ),
+        child: Text('Wähle einen Zug.', style: TextStyle(color: Palette.muted)),
       );
     }
 

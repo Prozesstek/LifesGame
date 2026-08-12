@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'combat/combat_screen.dart';
+import 'home/home_screen.dart';
+import 'ui/palette.dart';
 
 void main() {
   runApp(const ProviderScope(child: LifesGameApp()));
@@ -13,7 +14,7 @@ class LifesGameApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF5B8DEF),
+      seedColor: Palette.accent,
       brightness: Brightness.dark,
     );
 
@@ -22,10 +23,10 @@ class LifesGameApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: scheme,
-        scaffoldBackgroundColor: const Color(0xFF0E1119),
+        scaffoldBackgroundColor: Palette.background,
         useMaterial3: true,
       ),
-      home: const CombatScreen(),
+      home: const HomeScreen(),
     );
   }
 }

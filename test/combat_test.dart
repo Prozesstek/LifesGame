@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
-import 'package:lifes_game/main.dart';
+import 'package:lifes_game/combat/combat_screen.dart';
 
 void main() {
   group('CombatController', () {
@@ -65,9 +65,15 @@ void main() {
   });
 
   group('CombatScreen', () {
-    testWidgets('zeigt die vier Move-Slots', (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+    Future<void> pumpScreen(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: CombatScreen())),
+      );
       await tester.pump();
+    }
+
+    testWidgets('zeigt die vier Move-Slots', (tester) async {
+      await pumpScreen(tester);
 
       for (final move in Moves.defaultLoadout) {
         expect(find.text(move.name), findsOneWidget);
@@ -75,8 +81,7 @@ void main() {
     });
 
     testWidgets('Moves ohne genug Energie sind deaktiviert', (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
-      await tester.pump();
+      await pumpScreen(tester);
 
       // Zu Beginn hat der Spieler 0 Energie: nur Schlag ist bezahlbar.
       final heavy = tester.widget<FilledButton>(

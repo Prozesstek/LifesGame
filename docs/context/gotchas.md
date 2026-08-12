@@ -3,6 +3,65 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Lokale `DateTime`-Arithmetik verschluckt bei Zeitumstellung einen Tag
+
+Ein Tracker rechnet ständig mit Tagen: „war gestern abgehakt?", „wie lang ist
+die Kette?". Naheliegend wäre `DateTime.now().subtract(Duration(days: 1))`.
+Das ist falsch. In lokaler Zeit hat der Tag der Zeitumstellung 23 oder 25
+Stunden — `Duration(days: 1)` sind aber immer exakt 24. Am Umstellungstag
+landet man dadurch auf demselben oder auf dem übernächsten Tag, und eine
+Streak reißt ohne Grund.
+
+Zweites Problem derselben Wurzel: Zwei Häkchen am selben Tag zu
+unterschiedlichen Uhrzeiten sind als `DateTime` nicht gleich. Als Schlüssel
+in einer Map taugt `DateTime` deshalb nicht.
+
+Lösung in `packages/habits/lib/src/day.dart`: ein eigener `Day`-Typ ohne
+Uhrzeit, der intern in **UTC** rechnet (dort hat jeder Tag 24 Stunden) und
+nur zur Anzeige lokal bleibt. `day_test.dart` prüft das ausdrücklich am
+25.10.2026.
+
+## Riverpod 3 exportiert `Override` nicht
+
+`overrides: <Override>[...]` in einem `ProviderContainer` sieht richtig aus
+und schlägt mit „'Override' isn't a type" fehl. Der Typ existiert in
+`package:riverpod`, wird aber von `flutter_riverpod` nicht re-exportiert.
+
+Einfach die Typangabe weglassen — `overrides: [foo.overrideWithValue(x)]`
+wird korrekt inferiert. Nebenwirkung: Der Fehler bricht den Compiler für den
+**ganzen** Testlauf ab, nicht nur für die eine Datei. Wer plötzlich
+unerklärliche „The Dart compiler exited unexpectedly" in fremden Testdateien
+sieht, sucht den echten Fehler weiter oben in der Ausgabe.
+
+## `pumpAndSettle` läuft im Kampfbildschirm in den Timeout
+
+Der Test „Kampf führt zum Kampfbildschirm" hing 10 Sekunden und schlug dann mit
+`pumpAndSettle timed out` fehl. Der Grund ist kein Bug: `GameWidget` von Flame
+rendert dauerhaft weiter, es gibt also nie einen Frame, nach dem nichts mehr
+ansteht. `pumpAndSettle` wartet aber genau darauf.
+
+**Regel:** Überall dort, wo ein Flame-Widget im Baum sein kann, mit `pump()`
+arbeiten — einmal für den Start der Navigation, einmal mit einer Dauer für das
+Ende der Übergangsanimation:
+
+```dart
+await tester.pump();
+await tester.pump(const Duration(seconds: 1));
+```
+
+`pumpAndSettle` bleibt für alles andere richtig.
+
+## Widget-Tests laufen in einem 800x600-Fenster
+
+Lektionstexte und lange Antwortmöglichkeiten sind höher als das Standardfenster
+im Test. Was in einer `ListView` außerhalb des Sichtbereichs liegt, wird gar
+nicht gebaut — `find.text(...)` findet dann nichts, und der Test schlägt fehl,
+obwohl die App in Ordnung ist.
+
+Lösung steht in `test/test_view.dart` (`useTallView`): Fenstergröße hochsetzen
+und per `addTearDown` zurücksetzen. Alternative wäre `scrollUntilVisible`, das
+macht die Tests aber deutlich unleserlicher.
+
 ## GridView mit childAspectRatio kann Widgets unsichtbar machen
 
 Die vier Move-Buttons lagen zuerst in einem `GridView.count` mit

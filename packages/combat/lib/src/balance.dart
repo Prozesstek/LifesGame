@@ -91,15 +91,17 @@ class Balance {
 /// Sie stehen hier, damit sie nicht vergessen werden, wenn die
 /// Entscheidungen fallen.
 ///
-/// 1. Streak-Multiplikator: Konzept empfiehlt Deckel bei x2. Noch offen,
-///    beeinflusst die Stat-Kurve und damit jede Gegnerauslegung.
-/// 2. Gold-Abfluesse: Traenke, Wiederbelebung, Streak-Schutz fehlen im
+/// 1. Gold-Abfluesse: Traenke, Wiederbelebung, Streak-Schutz fehlen im
 ///    Shop. Betrifft die Dungeon-Oekonomie, nicht den Einzelkampf.
-/// 3. Niederlagen-Regel: verfallener Dungeon-Eintritt plus Neustart
+/// 2. Niederlagen-Regel: verfallener Dungeon-Eintritt plus Neustart
 ///    bestraft doppelt. Ohne Wiederbelebung droht eine Abwaertsspirale.
 ///    Betrifft die Dungeon-Schicht, die auf dieser Kampflogik aufsetzt.
+///
+/// Der Streak-Multiplikator ist mit ADR-0008 entschieden (Deckel x2) und
+/// steht in `packages/habits/lib/src/rewards.dart`. Die Spielerwerte kommen
+/// seither von dort: Angriff 13 bis 20, HP 100 bis 140. Wer an dieser Datei
+/// dreht, muss die Stat-Kurve dort mitdenken.
 const List<String> openBalanceQuestions = <String>[
-  'Streak-Multiplikator-Deckel festlegen (Empfehlung: x2)',
   'Gold-Abfluesse erweitern (Traenke, Wiederbelebung, Streak-Schutz)',
   'Niederlagen-Regel entschaerfen (Wiederbelebungs-Item?)',
 ];

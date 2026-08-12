@@ -1,0 +1,17 @@
+name: theory
+description: >-
+  Theorie-Inhalte und Lernfortschritt fuer Lifes Game. Reines Dart, damit
+  Inhalte und Belohnungslogik ohne Flutter geschrieben und geprueft werden
+  koennen (siehe ADR-0004).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Bewusst leer. Inhalte sind Daten, keine Infrastruktur.
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0

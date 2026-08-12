@@ -1,6 +1,8 @@
 import 'package:combat/combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../habits/habits_controller.dart';
+
 /// Was der Bildschirm über einen laufenden Kampf wissen muss.
 class CombatSession {
   const CombatSession({required this.state, required this.log});
@@ -28,16 +30,21 @@ class CombatController extends Notifier<CombatSession> {
   @override
   CombatSession build() => CombatSession(state: _freshFight(), log: const []);
 
-  static CombatState _freshFight() {
+  /// Die Werte des Spielers kommen aus seinen Gewohnheiten (ADR-0008).
+  ///
+  /// Bewusst `read` statt `watch`: Ein Häkchen während eines laufenden
+  /// Kampfes soll den Kampf nicht neu aufsetzen. Neue Werte gelten ab dem
+  /// nächsten Kampf.
+  CombatState _freshFight() {
+    final stats = ref.read(characterStatsProvider);
+
     return CombatState.start(
-      // Angriff 16: laut Balance-Simulation der einzige Wert, bei dem der
-      // Kampf offen ist. Kommt später aus den Habits des Spielers.
       player: Combatant.fresh(
         name: 'Du',
-        maxHp: 120,
-        attack: 16,
-        defense: 10,
-        maxEnergy: 10,
+        maxHp: stats.maxHp,
+        attack: stats.attack,
+        defense: stats.defense,
+        maxEnergy: stats.maxEnergy,
       ),
       enemy: Combatant.fresh(
         name: 'Gegner',
