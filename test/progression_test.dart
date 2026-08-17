@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -41,6 +42,8 @@ List<int?> _barelyPassing(Lesson lesson) {
 }
 
 void main() {
+  _goldZuflussPasstZuDenPreisen();
+
   group('Level aus Theorie', () {
     test('ohne Fortschritt ist der Spieler Level 1', () {
       final container = ProviderContainer();
@@ -233,4 +236,62 @@ void _expectTreeOpensCompletely(List<int?> Function(Lesson) answersFor) {
   }
 
   expect(theoryTree.lockedAt(level), isEmpty);
+}
+
+/// Der vierte Fadenschluss: Passen die Preise im Laden zum Gold, das
+/// tatsächlich hereinkommt?
+///
+/// `packages/gear/test/catalog_test.dart` prüft die Preise gegen eine
+/// **angenommene** Tageseinnahme — es muss annehmen, weil `package:gear`
+/// und `package:habits` einander bewusst nicht kennen. Hier steht die
+/// Gegenprobe: Nur die App sieht beide Seiten. Ohne diesen Test könnte
+/// jemand `HabitRewards.goldPerCheck` halbieren, und der Laden wäre
+/// unbemerkt doppelt so teuer.
+void _goldZuflussPasstZuDenPreisen() {
+  group('Preise und Gold-Zufluss', () {
+    /// Was ein Tag mit vollem Häkchen-Satz einbringt.
+    final goldProTag = HabitRewards.goldPerCheck * HabitRewards.maxActiveHabits;
+
+    test('die Annahme im Gear-Package stimmt noch', () {
+      // Steht diese Zahl in `packages/gear/test/catalog_test.dart` als
+      // `goldProTag`. Ändert sich die eine, muss die andere mit.
+      expect(goldProTag, 25);
+    });
+
+    test('der erste Satz Ausrüstung ist in etwa einem Monat tragbar', () {
+      final tage = GearCatalog.cheapestFullSetPrice / goldProTag;
+
+      expect(
+        tage,
+        greaterThan(20),
+        reason: 'Der Laden ist leer gekauft, bevor er interessant wird.',
+      );
+      expect(
+        tage,
+        lessThan(60),
+        reason: 'Bis dahin hat niemand mehr Lust — der Laden bleibt Deko.',
+      );
+    });
+
+    test('der ganze Skillbaum allein kauft den Laden nicht leer', () {
+      // Theorie ist einmalig, Gewohnheiten sind täglich. Käme der ganze
+      // Laden schon aus dem Lesen, hätte das Abhaken keinen Zweck mehr —
+      // und das Konzept stellt Gewohnheiten ausdrücklich an die erste
+      // Stelle.
+      var progress = const TheoryProgress.empty();
+      for (final branch in theoryTree.branches) {
+        for (final lesson in branch.lessons) {
+          progress = progress.submit(lesson, _perfect(lesson)).progress;
+        }
+      }
+
+      final alles = GearCatalog.all.fold<int>(0, (sum, i) => sum + i.price);
+
+      expect(
+        progress.totalGold,
+        lessThan(alles),
+        reason: 'Der Skillbaum allein finanziert den kompletten Laden.',
+      );
+    });
+  });
 }

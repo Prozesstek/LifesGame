@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear/gear.dart';
 import 'package:theory/theory.dart';
 
-import '../combat/combat_screen.dart';
+import '../character/character_screen.dart';
+import '../combat/combat_controller.dart';
+import '../combat/enemy_picker_screen.dart';
+import '../gear/gear_controller.dart';
+import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
@@ -32,6 +37,8 @@ class HomeScreen extends ConsumerWidget {
     final unlockedHabits = ref.watch(unlockedHabitsProvider);
     final today = ref.watch(todayProvider);
     final activeHabits = tracker.activeTemplates;
+    final enemy = ref.watch(selectedEnemyProvider);
+    final equippedCount = ref.watch(loadoutProvider).equippedCount;
 
     return Scaffold(
       body: SafeArea(
@@ -69,22 +76,25 @@ class HomeScreen extends ConsumerWidget {
                 HubTile(
                   icon: Icons.sports_martial_arts,
                   title: 'Kampf',
-                  subtitle: 'Einzelgegner — Dungeon kommt später',
-                  onTap: () => _open(context, const CombatScreen()),
+                  subtitle: 'Drei Gegner — Dungeon kommt später',
+                  status: enemy.name,
+                  onTap: () => _open(context, const EnemyPickerScreen()),
                 ),
                 const SizedBox(height: 10),
                 HubTile(
                   icon: Icons.storefront_outlined,
-                  title: 'Shop',
-                  subtitle: 'Ausrüstung, Tränke, Dungeon-Zugänge',
-                  status: 'in Arbeit',
+                  title: 'Laden',
+                  subtitle: 'Ausrüstung für sechs Plätze',
+                  status: '$gold Gold',
+                  onTap: () => _open(context, const ShopScreen()),
                 ),
                 const SizedBox(height: 10),
                 HubTile(
                   icon: Icons.person_outline,
                   title: 'Charakter',
-                  subtitle: 'Werte, Ausrüstung, Fähigkeiten',
-                  status: 'in Arbeit',
+                  subtitle: 'Werte und Ausrüstung',
+                  status: '$equippedCount / ${GearSlot.values.length}',
+                  onTap: () => _open(context, const CharacterScreen()),
                 ),
               ],
             ),

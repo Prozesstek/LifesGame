@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:progression/progression.dart';
 
+import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../theory/theory_controller.dart';
 
@@ -26,9 +27,25 @@ final playerLevelProvider = Provider<PlayerLevel>((ref) {
   return LevelCurve.levelFor(ref.watch(totalXpProvider));
 });
 
-/// Gold des Spielers, aus denselben beiden Quellen.
-final goldProvider = Provider<int>((ref) {
+/// Gold, das eingenommen wurde — vor Ausgaben.
+final goldEarnedProvider = Provider<int>((ref) {
   final theory = ref.watch(theoryProgressProvider).totalGold;
   final habits = ref.watch(habitTrackerProvider).totalGold;
   return theory + habits;
+});
+
+/// Verfügbares Gold: Zufluss minus Besitz.
+///
+/// Der Goldstand wird **gerechnet, nicht gezählt** — dieselbe Entscheidung
+/// wie bei Erfahrung und Charakterwerten (ADR-0008). Es gibt keinen
+/// gespeicherten Kontostand, der von den Buchungen abweichen könnte: Der
+/// Zufluss steht in den Häkchen und Lektionen, der Abfluss in der Liste
+/// der gekauften Stücke (ADR-0011).
+///
+/// Deshalb kann diese Zahl nie negativ werden: Gekauft wird nur, was
+/// bezahlbar ist, und was gekauft wurde, bleibt gekauft.
+final goldProvider = Provider<int>((ref) {
+  final earned = ref.watch(goldEarnedProvider);
+  final spent = ref.watch(loadoutProvider).spentGold;
+  return earned - spent;
 });

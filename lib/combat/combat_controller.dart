@@ -1,7 +1,26 @@
 import 'package:combat/combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../habits/habits_controller.dart';
+import '../gear/gear_controller.dart';
+
+/// Gegen wen der nächste Kampf geht.
+///
+/// Kein Teil des Speicherstands: Die Wahl gilt für die Sitzung und beginnt
+/// jedes Mal beim leichtesten Gegner. Ein Spieler, der die App eine Woche
+/// nicht offen hatte, soll nicht sofort vor dem Bergwaechter stehen.
+class EnemyChoiceController extends Notifier<EnemyBlueprint> {
+  @override
+  EnemyBlueprint build() => Enemies.all.first;
+
+  void select(EnemyBlueprint enemy) {
+    state = enemy;
+  }
+}
+
+final selectedEnemyProvider =
+    NotifierProvider<EnemyChoiceController, EnemyBlueprint>(
+      EnemyChoiceController.new,
+    );
 
 /// Was der Bildschirm über einen laufenden Kampf wissen muss.
 class CombatSession {
@@ -30,13 +49,15 @@ class CombatController extends Notifier<CombatSession> {
   @override
   CombatSession build() => CombatSession(state: _freshFight(), log: const []);
 
-  /// Die Werte des Spielers kommen aus seinen Gewohnheiten (ADR-0008).
+  /// Die Werte des Spielers kommen aus seinen Gewohnheiten (ADR-0008) und
+  /// seiner Ausrüstung (ADR-0011), der Gegner aus `package:combat`.
   ///
-  /// Bewusst `read` statt `watch`: Ein Häkchen während eines laufenden
-  /// Kampfes soll den Kampf nicht neu aufsetzen. Neue Werte gelten ab dem
-  /// nächsten Kampf.
+  /// Bewusst `read` statt `watch`: Ein Häkchen oder ein Ausrüstungswechsel
+  /// während eines laufenden Kampfes soll den Kampf nicht neu aufsetzen.
+  /// Neue Werte gelten ab dem nächsten Kampf.
   CombatState _freshFight() {
-    final stats = ref.read(characterStatsProvider);
+    final stats = ref.read(equippedStatsProvider);
+    final enemy = ref.read(selectedEnemyProvider);
 
     return CombatState.start(
       player: Combatant.fresh(
@@ -46,13 +67,7 @@ class CombatController extends Notifier<CombatSession> {
         defense: stats.defense,
         maxEnergy: stats.maxEnergy,
       ),
-      enemy: Combatant.fresh(
-        name: 'Gegner',
-        maxHp: 120,
-        attack: 18,
-        defense: 10,
-        maxEnergy: 10,
-      ),
+      enemy: enemy.spawn(),
     );
   }
 
