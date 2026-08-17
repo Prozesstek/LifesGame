@@ -101,8 +101,10 @@ void main() {
         const PlayerAction(move: Moves.mend),
       );
 
-      expect(step.eventsOfType<Healed>().first.amount, 25);
-      expect(step.state.player.hp, 65);
+      // Heilung haengt am Angriffswert, nicht an den maximalen HP:
+      // hero() hat 20 ATK, healFactorOfAttack ist 1.0.
+      expect(step.eventsOfType<Healed>().first.amount, 20);
+      expect(step.state.player.hp, 60);
       expect(step.state.player.activeShield, isNotNull);
     });
 
@@ -115,6 +117,25 @@ void main() {
 
       expect(step.state.player.hp, 100);
       expect(step.eventsOfType<Healed>().first.amount, 5);
+    });
+
+    test('Schild bemisst sich am Angriffswert, nicht an den maximalen HP', () {
+      // Der Unterschied ist keine Kosmetik: An maxHp gekoppelt wuchs
+      // Heilung mit dem HP-Pool mit, waehrend der Schaden gleich blieb --
+      // ab einer bestimmten Poolgroesse endete kein Kampf mehr. Siehe
+      // `docs/context/gotchas.md`.
+      final engine = engineWith();
+      final step = engine.resolveRound(
+        CombatState.start(
+          player: hero(maxHp: 1000, hp: 500, attack: 20, energy: 4),
+          enemy: dummy(),
+        ),
+        const PlayerAction(move: Moves.mend),
+      );
+
+      // shieldFactorOfAttack ist 0.6 -- unabhaengig von den 1000 maxHp.
+      expect(step.state.player.activeShield?.absorb, 12);
+      expect(step.eventsOfType<Healed>().first.amount, 20);
     });
 
     test('Schild faengt Schaden ab, bevor HP verloren gehen', () {

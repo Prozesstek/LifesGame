@@ -18,12 +18,25 @@ abstract interface class EnemyPolicy {
 /// Zweckmaessige Standard-KI: heilt in Not, schlaegt hart wenn moeglich,
 /// vergiftet wenn es sich lohnt, sonst Basisangriff.
 ///
-/// Bewusst simpel. Interessante Gegner entstehen im Konzept ueber Stats,
-/// Move-Sets und Timing-Muster, nicht ueber schlaue Suche.
+/// Bewusst simpel und **zustandslos**. Interessante Gegner entstehen im
+/// Konzept ueber Stats, Move-Sets und Timing-Muster, nicht ueber schlaue
+/// Suche. Zustandslos ist dabei kein Detail, sondern die Voraussetzung
+/// dafuer, dass ein Kampf bei gleichem Seed reproduzierbar bleibt.
 class SimpleEnemyPolicy implements EnemyPolicy {
   const SimpleEnemyPolicy({this.healBelowHpRatio = 0.3});
 
-  /// Unterhalb dieses HP-Anteils wird Heilung bevorzugt.
+  /// Unterhalb dieses HP-Anteils wird Heilung bevorzugt -- aber nur, wenn
+  /// kein Schild mehr steht.
+  ///
+  /// Die Schild-Bedingung ist der Grund, warum Kaempfe ueberhaupt enden.
+  /// Ohne sie heilt sich ein angeschlagener Gegner jede zweite Runde und
+  /// damit schneller, als ein Spieler zuschlagen kann: In der Simulation
+  /// sank die Siegquote, *weil* der Spieler mehr Schaden machte -- mehr
+  /// Schaden trieb den Gegner nur frueher in den Dauerheilmodus (siehe
+  /// `docs/context/gotchas.md`). Da "Sammeln" immer auch einen Schild
+  /// setzt und der zwei Runden haelt, begrenzt diese eine Bedingung die
+  /// Heilrate auf etwa jede dritte Runde -- ohne dass die Policy sich
+  /// etwas merken muss.
   final double healBelowHpRatio;
 
   @override
@@ -39,7 +52,7 @@ class SimpleEnemyPolicy implements EnemyPolicy {
     }
 
     final inTrouble = self.hp / self.maxHp < healBelowHpRatio;
-    if (inTrouble) {
+    if (inTrouble && self.activeShield == null) {
       final heal = _firstWithEffect<HealSelf>(affordable);
       if (heal != null) return heal;
     }

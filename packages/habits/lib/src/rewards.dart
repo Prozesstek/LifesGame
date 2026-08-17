@@ -118,13 +118,19 @@ abstract final class StatCurve {
     maxBonus: 7,
   );
 
-  /// Lebenspunkte: 100 bis 140. Längere Kämpfe dämpfen jeden
-  /// Multiplikator — siehe `docs/context/gotchas.md`.
+  /// Lebenspunkte: 160 bis 224.
+  ///
+  /// Der Pool ist gegenüber dem ersten Entwurf (100 bis 140) um zwei
+  /// Drittel gewachsen, damit ein Kampf statt fünf Runden gut zehn dauert.
+  /// Nicht wegen der Multiplikatoren — die wirken über jede Länge gleich —
+  /// sondern damit im Kampf überhaupt Entscheidungen vorkommen: Bei fünf
+  /// Runden reicht die Energie für genau einen Wuchtschlag, der vierte
+  /// Slot kommt nie zum Einsatz (ADR-0009).
   static const StatRule _ausdauer = StatRule(
-    base: 100,
+    base: 160,
     checksPerPoint: 4,
-    pointStep: 5,
-    maxBonus: 40,
+    pointStep: 8,
+    maxBonus: 64,
   );
 
   /// Verteidigung: 8 bis 14.

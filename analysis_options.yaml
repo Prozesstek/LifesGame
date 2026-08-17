@@ -9,6 +9,13 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    # `tool/` sind Kommandozeilen-Programme. Fuer sie *ist* print die
+    # Ausgabe, nicht ein vergessener Debug-Aufruf -- dieselbe Ausnahme,
+    # die die Beispiele in den Packages ohnehin haben.
+    avoid_print: ignore
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

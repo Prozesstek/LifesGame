@@ -54,7 +54,7 @@ void main() {
       const stats = CharacterStats.fresh();
 
       expect(stats.attack, 13);
-      expect(stats.maxHp, 100);
+      expect(stats.maxHp, 160);
       expect(stats.defense, 8);
       expect(stats.maxEnergy, 8);
       expect(stats.totalChecks, 0);

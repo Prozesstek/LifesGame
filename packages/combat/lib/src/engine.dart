@@ -197,7 +197,10 @@ class CombatEngine {
           round,
           side,
           Shield(
-            absorb: max(1, (actor.maxHp * balance.shieldFactorOfMaxHp).round()),
+            absorb: max(
+              1,
+              (actor.attack * balance.shieldFactorOfAttack).round(),
+            ),
             remainingTurns: balance.shieldDurationTurns,
           ),
         );
@@ -206,7 +209,7 @@ class CombatEngine {
 
   void _heal(_Round round, Side side) {
     final actor = round.of(side);
-    final wanted = (actor.maxHp * balance.healFactorOfMaxHp).round();
+    final wanted = (actor.attack * balance.healFactorOfAttack).round();
     final healed = actor.withHpDelta(wanted);
     final actual = healed.hp - actor.hp;
     round.set(side, healed);
