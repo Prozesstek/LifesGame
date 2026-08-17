@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 import 'package:theory/theory.dart';
 
+import '../save/save_providers.dart';
 import '../theory/theory_controller.dart';
 
 /// Der heutige Kalendertag.
@@ -10,8 +11,9 @@ import '../theory/theory_controller.dart';
 /// wäre jeder Streak-Test vom Systemdatum abhängig.
 ///
 /// Achtung: Der Wert wird nicht von selbst neu berechnet. Wer die App über
-/// Mitternacht offen lässt, sieht bis zum Neustart den gestrigen Tag. Das
-/// fällt weg, sobald der Fortschritt persistent ist.
+/// Mitternacht offen lässt, sieht bis zum Neustart den gestrigen Tag —
+/// beim nächsten Start stimmt er wieder. Ein Wecker auf Mitternacht wäre
+/// die saubere Lösung und steht in `docs/context/state.md`.
 final todayProvider = Provider<Day>((ref) => Day.from(DateTime.now()));
 
 /// Bindeglied zwischen dem Gewohnheits-Modell und der Oberfläche.
@@ -20,11 +22,12 @@ final todayProvider = Provider<Day>((ref) => Day.from(DateTime.now()));
 /// eine Streak lebt und wie viele Gewohnheiten gleichzeitig laufen dürfen,
 /// steht in `package:habits`.
 ///
-/// Noch ohne Persistenz — wie beim Theorie-Fortschritt lebt der Stand nur,
-/// solange die App läuft.
+/// Der Anfangsstand kommt aus dem Speicher (ADR-0010). Gespeichert wird
+/// nicht hier, sondern an einer Stelle für alle drei Bereiche —
+/// `lib/save/save_watcher.dart`.
 class HabitsController extends Notifier<HabitTracker> {
   @override
-  HabitTracker build() => const HabitTracker.empty();
+  HabitTracker build() => ref.watch(savedGameProvider).habits;
 
   void activate(String habitId) {
     state = state.activate(habitId);

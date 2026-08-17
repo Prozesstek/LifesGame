@@ -30,8 +30,21 @@ dependencies:
   habits:
     path: packages/habits
 
+  # Ausruestung, Preise und Inventar. Der einzige Gold-Abfluss des Spiels
+  # (ADR-0011).
+  gear:
+    path: packages/gear
+
   # State Management (ADR-0001).
   flutter_riverpod: ^3.0.1
+
+  # Persistenz. Bewusst nicht Drift: Zu speichern sind drei
+  # Schluessel-Wert-Paare, kein relationales Modell -- und auf Web braucht
+  # Drift zusaetzlich sqlite3.wasm plus Worker als Assets. Der
+  # Speicher-Anschluss in `lib/save/` ist so geschnitten, dass Drift
+  # spaeter dahinter passt, ohne dass ein Controller sich aendert
+  # (ADR-0010).
+  shared_preferences: ^2.3.0
 
   # Game-Engine. Ausschliesslich fuer den Kampfbildschirm, eingebettet als
   # Widget -- nicht fuer die Tracker-Screens.

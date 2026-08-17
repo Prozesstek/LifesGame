@@ -12,6 +12,31 @@ class LessonRecord {
     required this.goldAwarded,
   });
 
+  /// Liest einen gespeicherten Eintrag. Null, wenn er unbrauchbar ist —
+  /// eine einzelne kaputte Lektion darf nicht den ganzen Stand kosten.
+  static LessonRecord? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final bestCorrect = json['bestCorrect'];
+    final questionCount = json['questionCount'];
+    final xpAwarded = json['xpAwarded'];
+    final goldAwarded = json['goldAwarded'];
+    if (bestCorrect is! int ||
+        questionCount is! int ||
+        xpAwarded is! int ||
+        goldAwarded is! int) {
+      return null;
+    }
+    if (bestCorrect < 0 || questionCount < 0 || bestCorrect > questionCount) {
+      return null;
+    }
+    return LessonRecord(
+      bestCorrect: bestCorrect,
+      questionCount: questionCount,
+      xpAwarded: xpAwarded,
+      goldAwarded: goldAwarded,
+    );
+  }
+
   /// Bestes Ergebnis, nicht das letzte. Ein schlechterer zweiter Versuch
   /// nimmt niemandem etwas weg.
   final int bestCorrect;
@@ -19,6 +44,15 @@ class LessonRecord {
   final int questionCount;
   final int xpAwarded;
   final int goldAwarded;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'bestCorrect': bestCorrect,
+      'questionCount': questionCount,
+      'xpAwarded': xpAwarded,
+      'goldAwarded': goldAwarded,
+    };
+  }
 
   bool get isPassed => TheoryRewards.passes(bestCorrect, questionCount);
 
@@ -66,7 +100,36 @@ class TheoryProgress {
 
   const TheoryProgress.empty() : _records = const <String, LessonRecord>{};
 
+  /// Liest einen gespeicherten Fortschritt.
+  ///
+  /// Nachsichtig wie [HabitTracker.fromJson]: Lektions-Ids, die es nicht
+  /// mehr gibt, werden übersprungen. Der Fortschritt bleibt trotzdem
+  /// stimmig, weil Erfahrung und Gold je Lektion mitgespeichert sind —
+  /// eine entfernte Lektion nimmt genau ihren eigenen Beitrag mit und
+  /// nicht mehr.
+  factory TheoryProgress.fromJson(Map<String, Object?> json) {
+    final records = <String, LessonRecord>{};
+    final raw = json['records'];
+    if (raw is Map) {
+      for (final entry in raw.entries) {
+        final lessonId = entry.key;
+        if (lessonId is! String) continue;
+        final record = LessonRecord.fromJson(entry.value);
+        if (record != null) records[lessonId] = record;
+      }
+    }
+    return TheoryProgress(records);
+  }
+
   final Map<String, LessonRecord> _records;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'records': <String, Object?>{
+        for (final entry in _records.entries) entry.key: entry.value.toJson(),
+      },
+    };
+  }
 
   LessonRecord? recordFor(String lessonId) => _records[lessonId];
 
