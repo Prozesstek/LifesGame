@@ -3,10 +3,11 @@
 Ein Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
 Was du im echten Leben tust, bestimmt, wie stark dein Charakter ist.
 
-**Status:** Der Kern-Loop steht und ist spielbar — Lektion lesen, Gewohnheit
-freischalten, täglich abhaken, Werte steigen, Kampf wird gewinnbar. Es fehlen
-Dungeon, Shop und die Persistenz: Zurzeit überlebt **kein** Fortschritt einen
-Neustart. Details in [`docs/context/state.md`](docs/context/state.md).
+**Status:** Der MVP steht bis auf den Dungeon und ist spielbar — Lektion lesen,
+Gewohnheit freischalten, täglich abhaken, Werte steigen, Gold sammeln,
+Ausrüstung kaufen, nächsten Gegner schlagen. Der Fortschritt überlebt einen
+Neustart. Es fehlt der Dungeon (und mit ihm Tränke und Drops).
+Details in [`docs/context/state.md`](docs/context/state.md).
 
 ## Für Mitentwickler: erste Schritte
 
@@ -17,19 +18,25 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome
-flutter test                       # 54 Tests
+flutter test                       # 77 Tests
 flutter analyze                    # muss sauber sein
+
+# Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
+dart run tool/balance_sim.dart
 
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/combat
-dart test                          # 23 Tests
+dart test                          # 27 Tests
 dart run example/play.dart         # Kampf im Terminal spielen
-dart run example/balance_sim.dart  # 2000 simulierte Kämpfe
+dart run example/balance_sim.dart  # prüft die Engine, nicht das Spiel
 
 cd packages/habits
-dart test                          # 52 Tests
+dart test                          # 63 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
+
+cd packages/gear
+dart test                          # 27 Tests, prüft auch die Preise
 ```
 
 Windows-Desktop-Builds brauchen Visual Studio mit C++-Workload und sind hier nicht
@@ -51,22 +58,31 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/combat` | Kampfregeln, reines Dart ohne Flame | 23 |
-| `packages/theory` | 17 Lektionen in 5 Zweigen, 51 Fragen, Lernfortschritt | 43 |
+| `packages/combat` | Kampfregeln und drei Gegner, reines Dart ohne Flame | 27 |
+| `packages/theory` | 17 Lektionen in 5 Zweigen, 51 Fragen, Lernfortschritt | 50 |
 | `packages/progression` | Levelkurve | 11 |
-| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 52 |
-| `lib/` | Flutter-App: Startbildschirm, Skillbaum, Tracker, Kampf | 54 |
+| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 63 |
+| `packages/gear` | 9 Ausrüstungsstücke auf 6 Plätzen, Preise, Inventar | 27 |
+| `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 77 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl
-berechnet, gehört sie in eines der vier Packages — Begründung in
+berechnet, gehört sie in eines der fünf Packages — Begründung in
 [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md) und
 [ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md).
 
 **Balance ändern heißt simulieren, nicht raten.** Jedes Package hat seine
-Zahlen an einer Stelle (`balance.dart`, `rewards.dart`, `level_curve.dart`),
-und die beiden wichtigsten haben eine Simulation daneben. Eine Zahl ändern,
-Simulation laufen lassen, Ergebnis vergleichen.
+Zahlen an einer Stelle (`balance.dart`, `rewards.dart`, `level_curve.dart`,
+`prices.dart`). Eine Zahl ändern, `dart run tool/balance_sim.dart` laufen
+lassen, Ergebnis vergleichen.
+
+Wichtig dabei: `tool/balance_sim.dart` ist die maßgebliche Simulation, weil
+sie als einzige mehrere Packages zugleich sieht und deshalb mit dem echten
+Werte-Pfad rechnet. Die Simulation im Combat-Package bewegt einen Wert und
+hält die übrigen fest — das tut das Spiel nie, und genau diese Verwechslung
+hat den ersten Balance-Befund des Projekts falsch gedeutet
+([ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md)).
 
 ## Wer hier arbeitet
 

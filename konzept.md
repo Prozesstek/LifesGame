@@ -53,8 +53,19 @@ Entscheidung. „+3 Angriff" nicht.
 
 ### 3.2 Kampfsystem
 Rundenbasiert, 4 Moves, keine Typen-Effektivität. Timed Hits als
-Skill-Element (Tap im richtigen Moment → Schadensbonus, gedeckelt bei
-etwa +50 %, damit Habits der Hauptfaktor bleiben).
+Skill-Element: Tap im richtigen Moment → Schadensbonus, gedeckelt bei
+**+20 %**.
+
+> Ursprünglich waren +50 % vorgesehen. Die Simulation zeigte, dass das den
+> Kampf allein entscheidet — bei gleichen Werten 56 % Siegquote ohne Timing
+> gegen 100 % mit perfektem. Gesenkt mit
+> [ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md).
+
+**Gegner sind eine Reihe, kein einzelner.** Drei Stufen, jede an einem
+anderen Punkt des Gewohnheits-Pfads knapp. Der Grund ist grundsätzlich: Ein
+Kampf mit beidseitig festen Werten ist ein Rennen und kippt scharf von
+„unmöglich" auf „geschenkt". Ein breites Band spannender Kämpfe lässt sich
+deshalb nicht in einen Gegner einstellen — es entsteht nur aus mehreren.
 
 Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 
@@ -103,9 +114,20 @@ Lesen ([ADR-0007](docs/decisions/0007-theorie-als-skillbaum.md)):
 > Ohne ein Wiederbelebungs-Item wird das zur Abwärtsspirale.
 
 ### 3.5 Shop
-Ausrüstung, Dungeon-Zugänge.
+Ausrüstung über sechs Plätze, in zwei Stufen. Gebaut, siehe
+[ADR-0011](docs/decisions/0011-ausruestung-als-eigenes-package.md).
 
-**Fehlend, dringend empfohlen:** Tränke, Wiederbelebung, Streak-Schutz.
+**Gold wird abgeleitet, nicht gezählt:** Zufluss aus Theorie und
+Gewohnheiten minus Preis des Besitzes. Deshalb gibt es keinen Verkauf — er
+bräuchte eine Verkaufshistorie und damit eine zweite Wahrheit.
+
+Die Empfehlung, Ausrüstung solle Ressourcen beeinflussen statt nur Zahlen
+(Abschnitt 3.1), ist übernommen: Energie sitzt auf Ring und Talisman, und
+der Ring ist auf beiden Stufen das teuerste Stück.
+
+**Noch offen:** Tränke, Wiederbelebung, Streak-Schutz — bewusst zusammen mit
+dem Dungeon. Zwischen Einzelkämpfen sind die HP ohnehin voll; ein Trank
+wäre ein Knopf ohne Situation.
 
 ### 3.6 Gegner
 Offen. Braucht: Move-Set, Stats, Drop-Tabelle, Timing-Muster für die
@@ -171,13 +193,15 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 
 1. ~~Multiplikator-Deckel und Streak-Meilenstein-Kurve festlegen~~ —
    erledigt, siehe 3.7 und ADR-0008
-2. Gold-Abflüsse erweitern (Tränke, Wiederbelebung, Streak-Schutz) —
-   dringender geworden: Gold entsteht jetzt täglich, hat aber keinen Zweck
+2. ~~Gold-Abflüsse schaffen~~ — Ausrüstung erledigt, siehe 3.5 und ADR-0011.
+   Offen bleiben Tränke, Wiederbelebung und Streak-Schutz; sie gehören zum
+   Dungeon
 3. Niederlagen-Regel entschärfen
 4. ~~Ersten Theoriezweig auswählen~~ — erledigt, siehe 3.3 und ADR-0005/0007
 5. Errungenschaften definieren
 6. Gegner-Design: Move-Sets und Drop-Tabellen
-7. Timed-Hit-Fenster in Millisekunden festlegen
+7. Timed-Hit-Fenster in Millisekunden festlegen (der Deckel selbst ist mit
+   ADR-0009 entschieden)
 8. Onboarding: erste Sitzung bis zum ersten Kampf
 
 ---
@@ -187,6 +211,10 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 **Drin:** Habits aus Vorlagen · Streaks · Stats · 1 Theoriezweig ·
 Kampf mit 4 Moves und Timed Hits · 1 Dungeon · Shop mit Ausrüstung und
 Tränken
+
+**Stand 17.08.2026:** alles davon gebaut außer dem Dungeon — und damit außer
+den Tränken, die ohne ihn wirkungslos wären. Statt einem Theoriezweig gibt es
+fünf (ADR-0007), statt einem Gegner drei (ADR-0009).
 
 **Raus für später:** mehrere Theoriezweige · Errungenschaften ·
 Drop-Tabellen · Kosmetik · Cloud-Sync

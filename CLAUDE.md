@@ -18,7 +18,7 @@ committed ist, existiert für den anderen nicht.
 |---|---|---|
 | App-Shell, alle Tracker-Screens | Flutter / Dart | — |
 | Kampfbildschirm | Flame | nur als eingebettetes Widget |
-| Persistenz | Drift (SQLite) | offline-first, keine Cloud im MVP |
+| Persistenz | `SaveStore` + shared_preferences | offline-first, Drift verschoben ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)) |
 | State | Riverpod | — |
 | Animationen | Rive | Skills und Treffer |
 
@@ -32,23 +32,35 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 23 Tests | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 27 Tests | nur Dart-SDK |
+| `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
-| `packages/combat/example/balance_sim.dart` | Balance-Simulation, 2000 Kämpfe in 0,4 s | nur Dart-SDK |
-| `packages/theory/` | Skillbaum, Inhalte, Lernfortschritt, reines Dart, 43 Tests | nur Dart-SDK |
+| `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
+| `packages/theory/` | Skillbaum, Inhalte, Lernfortschritt, reines Dart, 50 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | welche Zweige es gibt und ab welchem Level | nur Dart-SDK |
 | `packages/progression/` | Levelkurve, reines Dart, 11 Tests | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 52 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 63 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `lib/main.dart` | App-Shell und Theme | Flutter |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
+| `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
+| `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
+| `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
+| `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm, Weg zu allen Bereichen | Flutter |
+| `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
+| `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
+| `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, freigeschaltete Vorlagen | Flutter |
+| `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
+| `lib/character/character_screen.dart` | Werte mit Herkunft, sechs Ausrüstungsplätze | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/combat/enemy_picker_screen.dart` | Gegnerwahl mit Einschätzung vor dem Kampf | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Move-Buttons, Log | Flutter |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
@@ -57,39 +69,59 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/theory/branch_screen.dart` | Zweig-Übersicht mit Fortschritt und Lektionssperren | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
 
-**Schichtregel:** Kampfregeln nur in `packages/combat`, Inhalte und
-Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
-`packages/progression`, Streaks und Charakterwerte nur in `packages/habits`.
-Die Controller reichen durch und halten den laufenden Zustand. Sobald in
-`lib/` eine Spielzahl berechnet wird, gehört sie in eines der vier Packages.
+**Schichtregel:** Kampfregeln und Gegnerwerte nur in `packages/combat`,
+Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
+`packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
+Preise und Ausrüstungsboni nur in `packages/gear`. Die Controller reichen
+durch und halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl
+berechnet wird, gehört sie in eines der fünf Packages.
 
 ```bash
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 54 Tests
+flutter test             # 77 Tests
 flutter analyze          # muss sauber sein
+
+# Balance des Spiels prüfen -- die maßgebliche Simulation
+dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 23 Tests
+dart test                              # 27 Tests
 dart run example/play.dart             # Kampf im Terminal
-dart run example/balance_sim.dart      # Balance prüfen
+dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 52 Tests
+dart test                              # 63 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
-# Theorie und Levelkurve allein, ohne Flutter
-cd packages/theory      ; dart test    # 43 Tests, prüft auch den Inhalt
+# Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
+cd packages/theory      ; dart test    # 50 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 11 Tests
+cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
 ```
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
-`packages/combat/lib/src/balance.dart`. Eine Zahl ändern, `balance_sim.dart`
-laufen lassen, Siegquoten vergleichen. Steht eine Zahl im Kampfcode statt in
-`balance.dart`, ist das ein Bug.
+`packages/combat/lib/src/balance.dart`, die Gegnerwerte in `enemy.dart`. Eine
+Zahl ändern, `dart run tool/balance_sim.dart` laufen lassen, Siegquoten
+vergleichen. Steht eine Zahl im Kampfcode statt in `balance.dart`, ist das ein
+Bug.
+
+**Es gibt zwei Simulationen, und sie beantworten verschiedene Fragen.**
+`tool/balance_sim.dart` ist die maßgebliche: Sie sieht `combat` **und**
+`habits` und spielt die echte Werte-Kurve gegen alle Gegner. Die Simulation
+im Combat-Package bewegt dagegen einen Wert und hält die übrigen fest — das
+tut das Spiel nie, und genau diese Verwechslung hat den ersten
+Balance-Befund des Projekts falsch gedeutet ([ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md)).
+Sie bleibt nützlich für Fragen an die Engine allein.
+
+**Ein Kampf muss enden.** `packages/combat/test/termination_test.dart` prüft
+das über Wertebereiche, die kein Beispielkampf abdeckt. Der Anlass war real:
+Heilung als Anteil der maximalen HP wuchs mit dem HP-Pool mit, während der
+Schaden gleich blieb — ab einer bestimmten Größe endete kein Kampf mehr.
+Details in `docs/context/gotchas.md`.
 
 **Theorie schreiben heißt testen lassen.** Neue Lektionen kommen nach
 `packages/theory/lib/src/content/`, ein neuer Zweig zusätzlich in
@@ -106,19 +138,36 @@ lassen, die 90-Tage-Tabelle vergleichen. Neue Vorlagen kommen nach
 `catalog.dart` und brauchen eine Lektion mit passendem `unlocksHabit` —
 sonst schlägt `test/habits_theory_test.dart` fehl.
 
-**Drei Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
-Häkchen-Ertrag (`habits/rewards.dart`) und Level
-(`progression/level_curve.dart`) hängen zusammen: Passen sie nicht, wird der
-Baum zur Sackgasse — oder er öffnet sich in zwei Tagen komplett und die
-Levelsperre ist Deko. `flutter test test/progression_test.dart` spielt beides
-durch und meldet genau das. Wer eine dieser Zahlen ändert, lässt diesen Test
-laufen.
+**Ausrüstung ändern heißt gegen den Gold-Zufluss rechnen.** Alle Preise
+stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`
+nicht und muss den Zufluss deshalb annehmen (25 Gold am Tag); dass die
+Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
+kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
+mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
+muss auch besser sein.
 
-**Der Kern-Loop verbindet alle vier Packages.** Lektion (`theory`) schaltet
-Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`) und
-Charakterwerte, die Werte gehen in den Kampf (`combat`). Die einzige Stelle,
-an der Erfahrung zusammenläuft, ist `totalXpProvider`; die einzige, an der
-Werte in den Kampf gehen, ist `_freshFight()` in `combat_controller.dart`.
+**Vier Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
+Häkchen-Ertrag (`habits/rewards.dart`), Level
+(`progression/level_curve.dart`) und Preise (`gear/prices.dart`) hängen
+zusammen: Passen sie nicht, wird der Baum zur Sackgasse — oder er öffnet sich
+in zwei Tagen komplett, oder der Laden ist leer gekauft, bevor er interessant
+wird. `flutter test test/progression_test.dart` spielt alles durch und meldet
+genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
+
+**Der Kern-Loop verbindet alle fünf Packages.** Lektion (`theory`) schaltet
+Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
+Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), Werte plus
+Ausrüstung gehen in den Kampf (`combat`). Es gibt genau drei Stellen, an
+denen etwas zusammenläuft: `totalXpProvider` für Erfahrung, `goldProvider`
+für Gold, `equippedStatsProvider` für die Kampfwerte. In den Kampf gehen sie
+ausschließlich über `_freshFight()` in `combat_controller.dart`.
+
+**Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
+Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen
+sechsten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
+gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
+(`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
+nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).
 
 ## Gedächtnis-Protokoll
 
