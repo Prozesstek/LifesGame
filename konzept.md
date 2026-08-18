@@ -69,7 +69,8 @@ weitere 25 mehr als die vorige. Bewusst nicht exponentiell: Fortschritt
 kommt aus echten Gewohnheiten und lässt sich nicht grinden, deshalb dürfen
 späte Stufen nicht unerreichbar werden
 ([ADR-0006](docs/decisions/0006-levelkurve-als-eigenes-package.md)).
-Das Level öffnet die Zweige des Skilltrees (3.3).
+Jeder Aufstieg gibt einen Theoriepunkt, jeder dritte zusätzlich einen
+Fähigkeitspunkt (3.3).
 
 **Empfehlung:** Ausrüstung sollte Ressourcen beeinflussen, nicht nur
 Zahlen erhöhen. Ein Ring, der Energie schneller füllt, erzeugt eine
@@ -106,9 +107,9 @@ Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 | 4 | Utility (Heilung, Schild) | mittel |
 
 ### 3.3 Theorie / Skilltree
-Text plus Multiple-Choice-Fragen, mehrere Zweige, verknüpft mit
-Habit-Vorlagen. Ein Zweig ist eine geordnete Folge von Lektionen;
-Lektion n+1 öffnet sich mit bestandener Lektion n.
+Text plus Multiple-Choice-Fragen, verknüpft mit Habit-Vorlagen. Innerhalb
+eines Knotens ist die Reihenfolge der Lektionen verbindlich: Lektion n+1
+öffnet sich mit bestandener Lektion n.
 
 **Der Baum ist ein echter Baum** mit zwei Wurzeln und beliebiger Tiefe. Er
 wird nach unten hin immer spezieller. Knoten öffnen sich über

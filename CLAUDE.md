@@ -3,6 +3,18 @@
 Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
 Vollständiges Produktkonzept: [`konzept.md`](konzept.md)
 
+## Immer mitlesen
+
+Diese Dateien werden bei jedem Sitzungsstart automatisch mitgeladen — nicht als
+Link, sondern als Inhalt:
+
+@docs/context/state.md
+@docs/context/gotchas.md
+
+`konzept.md`, `README.md` und die ADRs unter `docs/decisions/` bleiben bewusst
+Links: zu groß und zu selten geändert, um sie in jede Sitzung zu ziehen. Sie
+werden gelesen, wenn die Arbeit sie berührt.
+
 ## Team
 
 Zwei Entwickler, geteiltes Repo: **@Prozesstek** (Frederik) und
