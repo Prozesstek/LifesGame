@@ -4,6 +4,10 @@
 .pub-cache/
 .pub/
 build/
+# Generiert von `flutter pub get`, sobald ein Plugin im Spiel ist (bei uns
+# seit shared_preferences). Enthaelt lokale Pfade in den Pub-Cache und ist
+# auf einem anderen Rechner wertlos.
+.flutter-plugins-dependencies
 # pubspec.lock wird BEWUSST committed: Apps pinnen ihre Abhaengigkeiten,
 # damit beide Entwickler identische Versionen bauen.
 *.g.dart

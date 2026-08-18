@@ -12,6 +12,31 @@ class Day implements Comparable<Day> {
   /// Nutzer hakt in seiner Zeitzone ab.
   factory Day.from(DateTime time) => Day(time.year, time.month, time.day);
 
+  /// Liest die ISO-Form aus [toString] zurück. Null bei allem, was nicht
+  /// passt.
+  ///
+  /// Bewusst nachsichtig statt werfend: Der Aufrufer ist ein
+  /// Speicherstand, der von einer älteren Programmversion stammen kann.
+  /// Ein einzelner unlesbarer Tag darf einen Ladevorgang nicht abbrechen —
+  /// sonst kostet ein Formatfehler den ganzen Fortschritt.
+  static Day? tryParse(String value) {
+    final parts = value.split('-');
+    if (parts.length != 3) return null;
+
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final day = int.tryParse(parts[2]);
+    if (year == null || month == null || day == null) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    // Fängt den 31. Februar: Die Grenzen oben lassen ihn durch, aber
+    // `DateTime.utc` schiebt ihn auf den 3. März, und dann stimmt der
+    // normalisierte Tag nicht mehr mit dem gelesenen überein.
+    final parsed = Day(year, month, day);
+    final normalised = Day.from(DateTime.utc(year, month, day));
+    return normalised == parsed ? parsed : null;
+  }
+
   final int year;
   final int month;
   final int day;

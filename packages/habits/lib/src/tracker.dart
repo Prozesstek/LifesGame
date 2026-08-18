@@ -59,10 +59,78 @@ class HabitTracker {
       : _activeIds = const <String>[],
         _checks = const <String, Set<Day>>{};
 
+  /// Liest einen gespeicherten Stand.
+  ///
+  /// **Nachsichtig mit Absicht.** Was hier ankommt, hat eine ältere
+  /// Programmversion geschrieben: Vorlagen können umbenannt oder entfernt
+  /// worden sein, ein Tag kann unlesbar sein. Nichts davon darf den
+  /// Ladevorgang abbrechen, denn der Preis wäre der gesamte Fortschritt
+  /// des Nutzers. Unbekanntes wird übersprungen, nicht geworfen — dieselbe
+  /// Entscheidung wie in [HabitCatalog.byNames].
+  ///
+  /// Die Gegenprobe dazu ist ein Test, nicht eine Ausnahme:
+  /// `test/persistence_test.dart` prüft, dass ein voller Stand
+  /// unverändert durch [toJson] und zurück kommt.
+  factory HabitTracker.fromJson(Map<String, Object?> json) {
+    final ids = <String>[];
+    final rawIds = json['activeIds'];
+    if (rawIds is List) {
+      for (final id in rawIds) {
+        if (id is String && HabitCatalog.byId(id) != null) ids.add(id);
+      }
+    }
+
+    final checks = <String, Set<Day>>{};
+    final rawChecks = json['checks'];
+    if (rawChecks is Map) {
+      for (final entry in rawChecks.entries) {
+        final habitId = entry.key;
+        final days = entry.value;
+        if (habitId is! String || days is! List) continue;
+
+        final parsed = <Day>{};
+        for (final day in days) {
+          if (day is! String) continue;
+          final value = Day.tryParse(day);
+          if (value != null) parsed.add(value);
+        }
+        if (parsed.isNotEmpty) checks[habitId] = parsed;
+      }
+    }
+
+    // Die Obergrenze wird beim Laden erzwungen, nicht nur beim Anlegen:
+    // Ein Stand aus einer Version mit anderer Grenze darf sie nicht
+    // unterlaufen.
+    final begrenzt = ids.length > HabitRewards.maxActiveHabits
+        ? ids.sublist(0, HabitRewards.maxActiveHabits)
+        : ids;
+
+    return HabitTracker(activeIds: begrenzt, checks: checks);
+  }
+
   final List<String> _activeIds;
 
   /// Je Gewohnheit die Tage, an denen sie erledigt wurde.
   final Map<String, Set<Day>> _checks;
+
+  /// Der Stand als JSON.
+  ///
+  /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
+  /// laufen und an welchen Tagen sie erledigt wurden. Erfahrung, Gold und
+  /// Charakterwerte stehen **nicht** hier — sie werden abgeleitet
+  /// (ADR-0008). Wären sie gespeichert, gäbe es zwei Wahrheiten, und die
+  /// eine würde irgendwann von der anderen abweichen.
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'activeIds': _activeIds,
+      'checks': <String, Object?>{
+        for (final entry in _checks.entries)
+          entry.key: (entry.value.toList()..sort())
+              .map((day) => day.toString())
+              .toList(),
+      },
+    };
+  }
 
   static Map<String, Set<Day>> _frozen(Map<String, Set<Day>> checks) {
     return Map<String, Set<Day>>.unmodifiable(<String, Set<Day>>{

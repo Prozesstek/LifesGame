@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
+import 'package:lifes_game/combat/enemy_picker_screen.dart';
 
 void main() {
   group('CombatController', () {
@@ -28,7 +29,7 @@ void main() {
       expect(events.whereType<DamageDealt>(), isNotEmpty);
       expect(
         container.read(combatControllerProvider).state.enemy.hp,
-        lessThan(120),
+        lessThan(Enemies.all.first.maxHp),
       );
     });
 
@@ -99,6 +100,64 @@ void main() {
         ),
       );
       expect(basic.onPressed, isNotNull);
+    });
+  });
+
+  group('Gegnerwahl', () {
+    test('beginnt beim leichtesten Gegner', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(selectedEnemyProvider).id, Enemies.all.first.id);
+      expect(
+        container.read(combatControllerProvider).state.enemy.name,
+        Enemies.all.first.name,
+      );
+    });
+
+    test('ein anderer Gegner gilt ab dem nächsten Kampf', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      container
+          .read(selectedEnemyProvider.notifier)
+          .select(Enemies.bergwaechter);
+      container.read(combatControllerProvider.notifier).restart();
+
+      final gegner = container.read(combatControllerProvider).state.enemy;
+      expect(gegner.name, Enemies.bergwaechter.name);
+      expect(gegner.maxHp, Enemies.bergwaechter.maxHp);
+    });
+
+    test('die Gegner werden nach oben hin härter', () {
+      // Die Reihenfolge ist kein Zufall: Der Bildschirm zeigt sie so an,
+      // und die Einschätzung darunter setzt sie voraus.
+      for (var i = 1; i < Enemies.all.length; i++) {
+        final leichter = Enemies.all[i - 1];
+        final schwerer = Enemies.all[i];
+        expect(schwerer.maxHp, greaterThan(leichter.maxHp));
+        expect(
+          schwerer.attack + schwerer.defense,
+          greaterThanOrEqualTo(leichter.attack + leichter.defense),
+        );
+      }
+    });
+  });
+
+  group('EnemyPickerScreen', () {
+    testWidgets('zeigt alle Gegner mit einer Einschaetzung', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: EnemyPickerScreen())),
+      );
+      await tester.pumpAndSettle();
+
+      for (final gegner in Enemies.all) {
+        expect(find.text(gegner.name), findsOneWidget, reason: gegner.name);
+      }
+      // Ein frischer Charakter schafft den ersten knapp und die anderen
+      // nicht -- genau das soll der Bildschirm vorher sagen.
+      expect(find.text('wird knapp'), findsOneWidget);
+      expect(find.text('vermutlich noch zu stark'), findsNWidgets(2));
     });
   });
 }

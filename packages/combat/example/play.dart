@@ -20,21 +20,19 @@ void main() {
   _printIntro();
 
   final engine = CombatEngine(seed: DateTime.now().millisecondsSinceEpoch);
+
+  // Werte eines Charakters, der etwa eine Woche Gewohnheiten hinter sich
+  // hat. Die echten Werte liefert `package:habits`, das dieses Package
+  // bewusst nicht kennt -- hier stehen sie nur, um spielbar zu sein.
   var state = CombatState.start(
     player: Combatant.fresh(
       name: 'Du',
-      maxHp: 120,
-      attack: 16,
+      maxHp: 168,
+      attack: 14,
       defense: 10,
       maxEnergy: 10,
     ),
-    enemy: Combatant.fresh(
-      name: 'Gegner',
-      maxHp: 120,
-      attack: 18,
-      defense: 10,
-      maxEnergy: 10,
-    ),
+    enemy: Enemies.wegelagerer.spawn(),
   );
 
   while (!state.isOver) {

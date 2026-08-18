@@ -36,9 +36,33 @@ optional 8–12 Minuten Dungeon.
 ## 3. Systeme
 
 ### 3.1 Charakter
-- Level, Gold, Stats
-- 6 Ausrüstungs-Slots (Waffe, Rüstung, …)
-- 4 aktive Fähigkeiten
+
+Der Charakterbildschirm ist die **Kommandozentrale**
+([ADR-0013](docs/decisions/0013-charakter-als-kommandozentrale.md)). Die
+Trennung zum Startbildschirm ist inhaltlich: Start zeigt **was ich tue**,
+Charakter zeigt **wer ich bin**.
+
+- Name und verdienter Titel, Level, Gold, offene Punkte
+- 4 Charakterwerte, jeweils mit Herkunft (Alltag / Ausrüstung)
+- **4 Fähigkeitsslots** — drei frei wählbar, einer von der getragenen Waffe
+  bestimmt; offen ab Level 3 / 6 / 10
+- 6 Ausrüstungs-Slots (Waffe, Rüstung, Helm, Schuhe, Ring, Talisman)
+- Wege zu Errungenschaften, Streaks, Freunden und in den Laden
+
+> **Es gibt keine Klassenwahl, und es wird nie eine geben.**
+> Jeder formt seinen Charakter durch seinen persönlichen Stil. Eine Klasse,
+> die man in der ersten Minute in einem Menü anklickt, gibt die Antwort,
+> bevor die App ihre Frage stellen konnte. Wo eine Klasse sichtbar werden
+> soll, wird sie aus dem tatsächlichen Verhalten **abgeleitet**.
+
+**Fähigkeiten:** 20 Stück. Sie kommen aus dem Theoriebaum (einen Knoten
+**abschließen**, nicht öffnen), aus Streak-Marken bei 7 / 14 / 30 / 60 Tagen
+und aus Waffen; später zusätzlich aus Errungenschaften. Einmal verdient
+heißt behalten — auch wenn die Streak reißt (siehe 3.7). Fähigkeitspunkte
+kommen auf jedem dritten Levelaufstieg und sind gegen Gold umverteilbar.
+
+**Identität:** Name und Titel jetzt, Aussehen später. Der Titel ist der
+kürzeste Weg zwischen dem, was jemand tut, und dem, was sein Charakter ist.
 
 **Levelkurve:** linear steigend — Stufe 2 kostet 100 Erfahrung, jede
 weitere 25 mehr als die vorige. Bewusst nicht exponentiell: Fortschritt
@@ -51,10 +75,26 @@ Das Level öffnet die Zweige des Skilltrees (3.3).
 Zahlen erhöhen. Ein Ring, der Energie schneller füllt, erzeugt eine
 Entscheidung. „+3 Angriff" nicht.
 
+> Zweimal übernommen: Energie sitzt auf Ring und Talisman (3.5), und die
+> **Waffe bestimmt den vierten Fähigkeitsslot**. Damit ist eine Waffe kein
+> Zahlenaufschlag mehr, sondern ein Spielstil — und es lohnt sich, mehrere
+> zu besitzen und zu wechseln.
+
 ### 3.2 Kampfsystem
 Rundenbasiert, 4 Moves, keine Typen-Effektivität. Timed Hits als
-Skill-Element (Tap im richtigen Moment → Schadensbonus, gedeckelt bei
-etwa +50 %, damit Habits der Hauptfaktor bleiben).
+Skill-Element: Tap im richtigen Moment → Schadensbonus, gedeckelt bei
+**+20 %**.
+
+> Ursprünglich waren +50 % vorgesehen. Die Simulation zeigte, dass das den
+> Kampf allein entscheidet — bei gleichen Werten 56 % Siegquote ohne Timing
+> gegen 100 % mit perfektem. Gesenkt mit
+> [ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md).
+
+**Gegner sind eine Reihe, kein einzelner.** Drei Stufen, jede an einem
+anderen Punkt des Gewohnheits-Pfads knapp. Der Grund ist grundsätzlich: Ein
+Kampf mit beidseitig festen Werten ist ein Rennen und kippt scharf von
+„unmöglich" auf „geschenkt". Ein breites Band spannender Kämpfe lässt sich
+deshalb nicht in einen Gegner einstellen — es entsteht nur aus mehreren.
 
 Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 
@@ -70,25 +110,54 @@ Text plus Multiple-Choice-Fragen, mehrere Zweige, verknüpft mit
 Habit-Vorlagen. Ein Zweig ist eine geordnete Folge von Lektionen;
 Lektion n+1 öffnet sich mit bestandener Lektion n.
 
-**Der Baum** besteht aus einem Wurzelzweig und vier Themenzweigen. Die
-Themenzweige öffnen sich über das **Charakterlevel**, nicht über gelesene
-Lektionen — so belohnt der Baum alles, was Erfahrung bringt, und nicht nur
-Lesen ([ADR-0007](docs/decisions/0007-theorie-als-skillbaum.md)):
+**Der Baum ist ein echter Baum** mit zwei Wurzeln und beliebiger Tiefe. Er
+wird nach unten hin immer spezieller. Knoten öffnen sich über
+**Theoriepunkte**, die es bei jedem Levelaufstieg gibt — ein Punkt, ein
+Knoten, unabhängig von der Tiefe
+([ADR-0012](docs/decisions/0012-theoriebaum-ueber-punkte.md)):
 
-| Zweig | Ab Level | Inhalt |
-|---|---|---|
-| Gewohnheiten | offen | wie Verhalten entsteht und abreißt — erklärt zugleich die App |
-| Körper | 2 | Schlaf, Bewegung, Essen |
-| Geist | 3 | Aufmerksamkeit, Gedanken, Impulse |
-| Wissenschaft | 4 | Belege prüfen, Selbstversuche |
-| Gesellschaft | 5 | Umfeld, Zugehörigkeit, Grenzen |
+```
+Gewohnheiten  (frei — das Handbuch der App)
+
+Körper                          Geist
+├── Sport                       ├── Aufmerksamkeit
+├── Ernährung                   ├── Psychologie
+├── Schlaf                      ├── Lernen
+├── Substanzen                  ├── Entscheidungen
+├── Erholung                    ├── Soziales
+└── Haltung                     ├── Wissenschaft
+                                └── Sinn & Werte ── Ideengeschichte
+```
+
+Ein Knoten ist ein **Thema mit Lektionen**, keine Einzellektion; innerhalb
+bleibt die Reihenfolge verbindlich. Ein Knoten braucht seinen Elternknoten.
+Ein Knoten erscheint erst, wenn sein Inhalt geschrieben ist.
+
+**Ein Knoten verdient seinen Platz nur**, wenn er drei Lektionen trägt,
+mindestens eine täglich abhakbare Gewohnheit hervorbringt und auf einen der
+vier Charakterwerte einzahlt. Die mittlere Bedingung ist die schärfste: Ein
+Thema ohne tägliche Handlung ist ein Essay, kein Knoten.
+
+**Was ein Levelaufstieg gibt:**
+
+| Aufstieg | gibt |
+|---|---|
+| jeder | 1 Theoriepunkt |
+| jeder dritte | 1 Fähigkeitspunkt |
+| Level 3 / 6 / 10 | Fähigkeitsslot 2 / 3 / 4 |
 
 > **Größtes Projektrisiko — und es ist kein technisches.**
-> Jeder Zweig kostet Wochen an Schreibarbeit. Die ursprüngliche Empfehlung
-> lautete: mit **einem** Zweig starten, ihn komplett fertigstellen. Anders
-> entschieden — es liegen jetzt vier angefangene Zweige mit je drei
-> Lektionen vor. Das Risiko bleibt bestehen: Wer weiterarbeitet, sollte
-> einen Zweig zu Ende bringen, bevor ein sechster dazukommt.
+> Der geplante Baum hat rund 45 Knoten, also etwa **150 Lektionen**. Es gibt
+> heute 17. Das ist der ehrliche Maßstab des Projekts, und er liegt komplett
+> auf der Schreibseite.
+>
+> Die Obergrenze ist hart: `maxLevel` ist 50, also gibt es über ein
+> Spielerleben genau **49 Theoriepunkte** und damit nie mehr als 49 öffenbare
+> Knoten.
+>
+> Die Regel dagegen ist die Erscheinungsregel: Ein Knoten kommt erst in den
+> Baum, wenn sein Inhalt steht. Ein halber Knoten ist schlimmer als keiner —
+> für ihn wurde ein Punkt bezahlt.
 
 ### 3.4 Dungeon
 4 Gegner + 1 Boss, etwa 8–12 Minuten.
@@ -103,9 +172,20 @@ Lesen ([ADR-0007](docs/decisions/0007-theorie-als-skillbaum.md)):
 > Ohne ein Wiederbelebungs-Item wird das zur Abwärtsspirale.
 
 ### 3.5 Shop
-Ausrüstung, Dungeon-Zugänge.
+Ausrüstung über sechs Plätze, in zwei Stufen. Gebaut, siehe
+[ADR-0011](docs/decisions/0011-ausruestung-als-eigenes-package.md).
 
-**Fehlend, dringend empfohlen:** Tränke, Wiederbelebung, Streak-Schutz.
+**Gold wird abgeleitet, nicht gezählt:** Zufluss aus Theorie und
+Gewohnheiten minus Preis des Besitzes. Deshalb gibt es keinen Verkauf — er
+bräuchte eine Verkaufshistorie und damit eine zweite Wahrheit.
+
+Die Empfehlung, Ausrüstung solle Ressourcen beeinflussen statt nur Zahlen
+(Abschnitt 3.1), ist übernommen: Energie sitzt auf Ring und Talisman, und
+der Ring ist auf beiden Stufen das teuerste Stück.
+
+**Noch offen:** Tränke, Wiederbelebung, Streak-Schutz — bewusst zusammen mit
+dem Dungeon. Zwischen Einzelkämpfen sind die HP ohnehin voll; ein Trank
+wäre ein Knopf ohne Situation.
 
 ### 3.6 Gegner
 Offen. Braucht: Move-Set, Stats, Drop-Tabelle, Timing-Muster für die
@@ -140,7 +220,14 @@ Vorlagen an und keine davon ab; außerdem hält die Grenze die Erfahrung pro
 Tag berechenbar, worauf die Levelkurve angewiesen ist.
 
 ### 3.8 Errungenschaften
-Offen.
+Offen. Sie sollen später eine dritte Quelle für Fähigkeiten sein (3.1) und
+bekommen einen eigenen Weg von der Kommandozentrale aus. Bewusst
+zurückgestellt, bis die zwanzig Fähigkeiten stehen.
+
+### 3.9 Freunde
+Offen, und der einzige geplante Teil, der einen **Server** braucht — alles
+andere läuft offline (ADR-0010). Steht als Weg auf der Kommandozentrale,
+ohne dass damit über Umfang oder Zeitpunkt entschieden wäre.
 
 ---
 
@@ -171,14 +258,21 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 
 1. ~~Multiplikator-Deckel und Streak-Meilenstein-Kurve festlegen~~ —
    erledigt, siehe 3.7 und ADR-0008
-2. Gold-Abflüsse erweitern (Tränke, Wiederbelebung, Streak-Schutz) —
-   dringender geworden: Gold entsteht jetzt täglich, hat aber keinen Zweck
+2. ~~Gold-Abflüsse schaffen~~ — Ausrüstung erledigt, siehe 3.5 und ADR-0011.
+   Offen bleiben Tränke, Wiederbelebung und Streak-Schutz; sie gehören zum
+   Dungeon
 3. Niederlagen-Regel entschärfen
 4. ~~Ersten Theoriezweig auswählen~~ — erledigt, siehe 3.3 und ADR-0005/0007
 5. Errungenschaften definieren
 6. Gegner-Design: Move-Sets und Drop-Tabellen
-7. Timed-Hit-Fenster in Millisekunden festlegen
+7. Timed-Hit-Fenster in Millisekunden festlegen (der Deckel selbst ist mit
+   ADR-0009 entschieden)
 8. Onboarding: erste Sitzung bis zum ersten Kampf
+9. **Die zwanzig Fähigkeiten festlegen** — Wirkung, Energiekosten,
+   Aufwertungspfad, und welche an welcher Waffe hängt (3.1, ADR-0013)
+10. **Titel-Katalog** — welche Titel es gibt und woran sie hängen
+11. **Inhalt für die neuen Baumknoten** — der Engpass des Projekts, siehe
+    den Risikokasten in 3.3
 
 ---
 
@@ -187,6 +281,10 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 **Drin:** Habits aus Vorlagen · Streaks · Stats · 1 Theoriezweig ·
 Kampf mit 4 Moves und Timed Hits · 1 Dungeon · Shop mit Ausrüstung und
 Tränken
+
+**Stand 17.08.2026:** alles davon gebaut außer dem Dungeon — und damit außer
+den Tränken, die ohne ihn wirkungslos wären. Statt einem Theoriezweig gibt es
+fünf (ADR-0007), statt einem Gegner drei (ADR-0009).
 
 **Raus für später:** mehrere Theoriezweige · Errungenschaften ·
 Drop-Tabellen · Kosmetik · Cloud-Sync

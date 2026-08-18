@@ -3,6 +3,72 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Heilung als Anteil der maximalen HP macht Kämpfe unendlich
+
+„Sammeln" heilte 25 % der maximalen HP. Schaden dagegen ist ein Vielfaches des
+**Angriffswerts**. Solange beide Größen zufällig zusammenpassten, fiel nichts
+auf. Als der HP-Pool angehoben wurde (100–140 → 160–224), heilte sich jede
+Seite schneller, als die andere zuschlagen konnte.
+
+Sichtbar wurde das nicht als Absturz und nicht als Endlosschleife, sondern als
+**Unsinn in den Zahlen**: Die Siegquote *sank*, wenn der Spieler stärker wurde.
+Bei Tag 7 standen 80 % ohne Timing gegen 31 % mit gemischtem Timing. Mehr
+Schaden trieb den Gegner nur früher unter die Heilschwelle, wo er dann festsaß.
+
+**Zwei Ursachen, beide nötig:**
+
+1. Die *Höhe* — behoben, indem Heilung und Schild am Angriffswert hängen
+   (`healFactorOfAttack`, `shieldFactorOfAttack`). Damit sind Heilen und
+   Schlagen dieselbe Einheit, und das Verhältnis überlebt jede Poolgröße.
+   Gift war schon immer so gebaut.
+2. Die *Häufigkeit* — die Policy heilte jede zweite Runde. Behoben durch eine
+   einzige Bedingung: heilen nur, wenn kein Schild mehr steht. Da „Sammeln"
+   immer auch einen Schild setzt und der zwei Runden hält, begrenzt das die
+   Heilrate auf etwa jede dritte Runde — **zustandslos**, die Policy muss sich
+   nichts merken.
+
+**Regel:** Wenn eine Zahl als Anteil einer anderen definiert ist, prüfen, ob
+beide dieselbe Einheit haben. `packages/combat/test/termination_test.dart`
+prüft das jetzt dauerhaft — und zwar skalenfrei: Die **Summe** beider HP-Balken
+muss sinken. Eine Rundenzahl taugt dafür nicht, weil ein Kampf bei großen Pools
+zu Recht lange dauert.
+
+## Ein Zufallsgenerator für Seeds und Eingaben macht Spalten unvergleichbar
+
+Die Balance-Simulation zog Kampf-Seeds und Timing-Würfe aus **einem** `Random`.
+Weil längere Kämpfe mehr Würfe verbrauchen, verschob die Timing-Spalte alle
+folgenden Seeds — jede Spalte simulierte am Ende andere Kämpfe.
+
+Gemerkt hat man es an einem unmöglichen Ergebnis (31 % Siegquote mit Timing
+gegen 80 % ohne). Das war hier ein Glücksfall, weil der Widerspruch grob war.
+Bei kleineren Verschiebungen sieht so ein Fehler wie ein Balance-Befund aus.
+
+**Regel:** Ein Generator je Rolle. In `tool/balance_sim.dart` heißen sie
+`seeds` und `timing`. Dann bekommt jede Spalte dieselben Kämpfe, und der
+Unterschied zwischen ihnen ist tatsächlich der Unterschied, den man messen
+wollte.
+
+Zweite Lehre aus demselben Lauf: Die alte Simulation variierte **einen** Wert
+und hielt die übrigen fest. Das Spiel bewegt nie einen Wert allein. Der
+ursprüngliche Befund „das umkämpfte Band ist zwei Angriffspunkte breit" kam aus
+genau dieser Verwechslung.
+
+## Ein Provider, der sich über eine Ecke selbst liest
+
+`goldProvider` rechnet Zufluss minus Besitz und liest dafür `loadoutProvider`.
+Der `GearController` wollte beim Kauf wissen, wie viel Gold da ist — und las
+`goldProvider`. Riverpod bricht das mit `CircularDependencyError` ab, und die
+Fehlermeldung nennt nur `Provider<int>#d5f5b`, nicht die Kette.
+
+Der Kreis ist echt und kein Riverpod-Detail: Der Controller fragt nach einer
+Zahl, in die sein eigener Zustand eingeht.
+
+**Lösung:** die Zahl *vor* dem eigenen Beitrag lesen und ihn selbst abziehen —
+`goldEarnedProvider` minus `state.spentGold`. Dasselbe Ergebnis, kein Kreis.
+
+**Regel:** Wenn ein abgeleiteter Wert den eigenen Zustand enthält, darf ein
+Notifier ihn nicht lesen. Er braucht die Quelle davor.
+
 ## Lokale `DateTime`-Arithmetik verschluckt bei Zeitumstellung einen Tag
 
 Ein Tracker rechnet ständig mit Tagen: „war gestern abgehakt?", „wie lang ist
@@ -96,19 +162,35 @@ Fortschrittsmeldungen („Building flutter tool...") auf stderr.
 
 Einfach **nicht umleiten**, dann läuft alles normal.
 
-## Kurze Kämpfe verstärken jeden Multiplikator
+## Ein Multiplikator wirkt über jede Kampflänge gleich — anders als hier stand
+
+> **Dieser Eintrag stand ursprünglich mit der umgekehrten Aussage hier.** Er
+> bleibt stehen, weil der Denkfehler naheliegend ist und jemand sonst denselben
+> Weg noch einmal geht.
 
 Die Timed-Hit-Grenze von +50 % klang im Konzept nach einem Randbonus. In der
-Simulation entscheidet sie den Kampf komplett (55 % Siegquote ohne Timing gegen
-100 % mit perfektem Timing, bei gleichen Stats).
+Simulation entschied sie den Kampf komplett: 55 % Siegquote ohne Timing gegen
+100 % mit perfektem Timing, bei gleichen Werten.
 
-Der Grund ist nicht der Bonus selbst, sondern die Kampflänge: Bei ~7 Treffern pro
-Kampf spart ein 1,5-Multiplikator zwei ganze Runden. Faustregel für alles Weitere:
-**Je kürzer der Kampf, desto brutaler wirkt jeder Prozentsatz.** Wer Balance
-anfassen will, sollte zuerst über die Kampflänge nachdenken, nicht über den
-Multiplikator.
+**Die alte Erklärung lautete:** Bei ~7 Treffern pro Kampf spart ein
+1,5-Multiplikator zwei ganze Runden — je kürzer der Kampf, desto brutaler wirke
+jeder Prozentsatz. Daraus folgte der Vorschlag, die HP zu erhöhen.
 
-Details und Zahlen in `docs/context/state.md`.
+**Das stimmt nicht.** Ein Kampf mit festen Werten ist ein Rennen. Ein
+pauschaler Schadensmultiplikator verkürzt die eigene Zeit um denselben Anteil,
+egal ob das Rennen fünf oder fünfzig Runden dauert. Was sich mit der Länge
+ändert, ist der **Zufall**: Über mehr Runden mittelt sich die Streuung aus, der
+Ausgang wird berechenbarer — das umkämpfte Band wird also *schmaler*, nicht
+breiter. Längere Kämpfe hätten das Problem verstärkt.
+
+**Was tatsächlich hilft:** mehrere Gegner statt eines. Dann ist zu jedem
+Zeitpunkt einer knapp, und Timing entscheidet genau dort — was die gewünschte
+Aussage ergibt: Gewohnheiten entscheiden, *ob* ein Kampf knapp wird, Timing
+entscheidet den knappen Kampf. Begründung und Zahlen in
+[ADR-0009](../decisions/0009-kampfbalance-ueber-gegnerreihe.md).
+
+**Regel, die bleibt:** Eine Simulation, die einen Wert bewegt und die anderen
+festhält, beantwortet nicht die Frage, die das Spiel stellt.
 
 ## Die VS-Code-Erweiterungen sind nicht das SDK
 
