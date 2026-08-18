@@ -1,7 +1,7 @@
 # ADR-0007: Theorie wird ein Skillbaum mit levelgebundenen Zweigen
 
 **Datum:** 12.08.2026
-**Status:** Aktiv
+**Status:** Abgelöst durch ADR-0012
 **Entschieden von:** Frederik
 
 ## Kontext

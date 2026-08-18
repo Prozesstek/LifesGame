@@ -4,7 +4,7 @@
 > Am Ende jeder Arbeitssitzung aktualisieren. Alte Einträge unter „Verlauf"
 > zusammenfassen, nicht löschen.
 
-**Zuletzt aktualisiert:** 17.08.2026 · Frederik
+**Zuletzt aktualisiert:** 18.08.2026 · Frederik
 
 ---
 
@@ -111,36 +111,92 @@ knappen Kampf.
 
 Nachrechnen: `dart run tool/balance_sim.dart`. Details in ADR-0009.
 
-## Der Stat-Deckel ist kein Problem mehr, aber auch nicht weg
+## Der Stat-Deckel ist kein Problem mehr
 
 Nach etwa einem Monat stehen alle vier Werte am Maximum (160–224 HP,
-13–20 Angriff). Danach wächst der Charakter **über Ausrüstung** weiter, und
-der Bergwaechter ist genau darauf ausgelegt: bei Tag 30 ohne Ausrüstung
-36 %, mit dem zweiten Satz deutlich darüber.
+13–20 Angriff). Das bleibt so und ist gewollt — ohne Deckel überholt ein
+alter Account jede Gegnerauslegung.
 
-Damit ist der Langzeit-Anreiz für die ersten zwei bis drei Monate gedeckt.
-Danach ist der Laden leer gekauft. Der nächste Schritt dafür ist der
-Dungeon mit Drops — nicht ein höherer Deckel.
+Bis zum 18.08. stand hier, der Charakter erstarre danach und der nächste
+Schritt dagegen sei der Dungeon mit Drops. **Das gilt nicht mehr.** Mit
+ADR-0012 und ADR-0013 wächst der Charakter über vier andere Wege weiter:
+Theoriepunkte bis Level 50, Fähigkeitspunkte alle drei Level, Fähigkeiten
+aus abgeschlossenen Baumknoten und Streak-Marken, Waffen als Spielstile.
+
+## Konzeptrunde Charakter — 18.08.2026, entschieden, noch nichts gebaut
+
+Der Charakter wurde vollständig durchgesprochen, bevor eine Zeile Code
+entsteht. Zwei ADRs halten das Ergebnis:
+
+**[ADR-0012](../decisions/0012-theoriebaum-ueber-punkte.md) — der Theoriebaum
+wird ein echter Baum.** Zwei Wurzeln (Körper, Geist), beliebige Tiefe,
+Knoten öffnen über **Theoriepunkte** statt über Levelsperren. Ein Punkt je
+Levelaufstieg, ein Punkt je Knoten, unabhängig von der Tiefe. „Gewohnheiten"
+bleibt frei — es ist das Handbuch. **ADR-0007 ist damit abgelöst.**
+
+Der geplante Baum hat rund 45 Knoten. Der vorhandene Inhalt verteilt sich
+sauber: Körpers drei Lektionen sind Schlaf, Sport und Ernährung — die
+Aufspaltung war im Text längst vorweggenommen. Soziales und Wissenschaft
+sind fertig, alles andere braucht Schreibarbeit.
+
+**[ADR-0013](../decisions/0013-charakter-als-kommandozentrale.md) — der
+Charakter wird eine Kommandozentrale.** Vier Fähigkeitsslots, drei frei
+wählbar, einer von der Waffe bestimmt. Zwanzig Fähigkeiten aus Theoriebaum
+(Knoten **abschließen**), Streak-Marken und Waffen. Fähigkeitspunkte alle
+drei Level, umverteilbar. Name und Titel jetzt, Aussehen später.
+
+> **Es wird nie eine Klassenwahl geben.** Jeder formt seinen Charakter durch
+> seinen persönlichen Stil. Wo eine Klasse sichtbar werden soll, wird sie
+> aus dem Verhalten abgeleitet, nie gewählt.
+
+### Zwei Zahlen, die das Projekt bemessen
+
+- **49 Knoten sind die harte Obergrenze.** `maxLevel` ist 50, also gibt es
+  über ein Spielerleben genau 49 Theoriepunkte.
+- **Ein voller Baum heißt rund 150 Lektionen.** Es gibt heute 17.
+
+Der Engpass des Projekts ist damit vollständig die Schreibarbeit, nicht der
+Code. Dagegen steht eine Regel: **Ein Knoten erscheint erst im Baum, wenn
+sein Inhalt geschrieben ist.** Ein halber Knoten ist schlimmer als keiner —
+für ihn wurde ein Punkt bezahlt.
+
+### Eine Schieflage, die dabei auffiel
+
+Die elf Habit-Vorlagen verteilen sich auf die vier Werte als 4 Klarheit,
+3 Disziplin, **2 Ausdauer, 2 Stärke**. Die beiden Werte, die den Kampf am
+direktesten entscheiden, haben die wenigsten Quellen — und beide hängen an
+Körper. Der Ausbau von Körper repariert deshalb nicht nur den Baum.
 
 ## Als Nächstes
 
-1. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
-   das im MVP-Schnitt noch fehlt. Die Gegner gibt es bereits, `EnemyBlueprint`
-   trägt ein eigenes Moveset. Offen bleibt die Niederlagen-Regel
+Reihenfolge offen — der Charakter ist konzeptionell fertig, gebaut ist davon
+nichts.
+
+1. **Charakter umsetzen** (ADR-0012, ADR-0013): Baumstruktur in
+   `packages/theory` auf Knoten mit Kindern umbauen, Punkteökonomie,
+   Fähigkeitsslots, Name und Titel, der Bildschirm selbst. Der sichtbarste
+   Teil ist die Baumdarstellung — `skill_tree_screen.dart` zeigt heute eine
+   Liste, ein Baum braucht etwas anderes.
+2. **Die zwanzig Fähigkeiten festlegen** — Wirkung, Energiekosten,
+   Aufwertungspfad, Zuordnung zu Waffen. Ohne sie sind die Slots leer.
+3. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
+   das im MVP-Schnitt noch fehlt. Offen bleibt die Niederlagen-Regel
    (`konzept.md` Punkt 3): verfallener Eintritt plus Neustart bestraft
    doppelt.
-2. **Tränke und Wiederbelebung** — bewusst mit dem Dungeon zusammen. Ohne
-   ihn wäre ein Trank ein Knopf ohne Situation, weil HP zwischen
-   Einzelkämpfen ohnehin voll sind.
-3. **Tageswechsel bei laufender App** — `todayProvider` rechnet sich nicht
+4. **Tränke und Wiederbelebung** — bewusst mit dem Dungeon zusammen.
+5. **Kampfsystem-Umbau** — es liegt eine Design-Notiz von Frederik vor
+   (`Kampfsystem.docx`, noch nicht im Repo): Initiative über ein Minispiel
+   mit drei Situationen, Attacken in Angriff und Ausweichen geteilt,
+   Kontern, dazu ein Sparring-Tutorial beim Lieutenant, das in die
+   Bibliothek und damit in die Theorie überleitet. Nicht entschieden.
+6. **Tageswechsel bei laufender App** — `todayProvider` rechnet sich nicht
    von selbst neu. Wer die App über Mitternacht offen lässt, sieht bis zum
    Neustart den gestrigen Tag. Ein Wecker auf Mitternacht behebt das.
-4. **Rive-Animationen** statt der Rechtecke in `battle_game.dart`.
-5. **Offene Konzeptpunkte** 5 bis 8 (Errungenschaften, Gegner-Movesets,
-   Timed-Hit-Fenster in Millisekunden, Onboarding).
+7. **Rive-Animationen** statt der Rechtecke in `battle_game.dart`.
 
-Bei der Theorie gilt weiterhin: **einen Zweig zu Ende bringen, bevor ein
-sechster dazukommt.**
+**Balance ist bewusst zurückgestellt.** Erst fertig bauen, dann tarieren.
+Mit drei aus zwanzig Fähigkeiten plus Waffe wird sie ohnehin eine
+Stichprobe statt einer Rechnung.
 
 ## Signale, an denen Entscheidungen neu anstehen
 
@@ -166,6 +222,12 @@ Darstellung, Inhalte, Ökonomie.
 
 ## Verlauf
 
+- **18.08.2026** — Konzeptrunde Charakter, kein Code. Theoriebaum wird ein
+  echter Baum mit Punkten statt Levelsperren (ADR-0012, löst ADR-0007 ab),
+  Charakter wird Kommandozentrale mit vier Fähigkeitsslots und ohne
+  Klassenwahl (ADR-0013). Dabei zwei Dinge gefunden: Der vorhandene
+  Körper-Inhalt hatte seine eigene Aufspaltung vorweggenommen, und die
+  Habit-Vorlagen sind auf Stärke und Ausdauer zu dünn besetzt.
 - **17.08.2026** — MVP bis auf den Dungeon geschlossen. Kampfbalance über
   eine Gegnerreihe gelöst (ADR-0009) und dabei zwei Fehler gefunden: einen
   Heal-Lock, der Kämpfe nicht enden ließ, und eine Simulation, die die
