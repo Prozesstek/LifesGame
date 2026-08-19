@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Der Web-Server antwortet, lange bevor die App fertig gebaut ist
+
+`flutter run -d web-server` liefert sofort eine Seite aus — HTTP 200, Titel
+korrekt, alles sieht fertig aus. Die Dart-Kompilierung läuft zu dem Zeitpunkt
+aber noch. Wer auf „antwortet der Server?" wartet, wartet auf das falsche
+Signal und schaut dann auf eine leere Seite.
+
+Sichtbar wird es nur in der Browser-Konsole:
+
+```
+Refused to execute script from 'http://localhost:8080/main.dart.js'
+because its MIME type ('text/html') is not executable
+```
+
+Der Server schickt für `main.dart.js` die `index.html` zurück, weil das Bundle
+noch nicht existiert. Kein Fehler, nur ein Zwischenzustand.
+
+**Regel:** Auf das Bundle prüfen, nicht auf die Wurzel.
+
+```bash
+curl -s -I http://localhost:8080/main.dart.js | grep -i "content-type"
+```
+
+Steht dort `javascript`, ist der Build durch. Im Terminal ist das Äquivalent
+die Zeile mit `is being served at` — solange dort `Waiting for connection from
+debug service` steht, läuft er noch. Der erste Build braucht ein bis zwei
+Minuten, jeder weitere ist deutlich schneller.
+
 ## Heilung als Anteil der maximalen HP macht Kämpfe unendlich
 
 „Sammeln" heilte 25 % der maximalen HP. Schaden dagegen ist ein Vielfaches des
