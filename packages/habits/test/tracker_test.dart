@@ -203,6 +203,36 @@ void main() {
       expect(gemeldet, <int>[3, 7]);
     });
 
+    test('longestStreak ist die längste je gelaufene Kette', () {
+      final tracker = _streak(_withActive(<String>[staerke.id]), staerke.id, 5);
+
+      expect(tracker.longestStreak, 5);
+    });
+
+    test('longestStreak bleibt, wenn die Kette reißt', () {
+      // Der eigentliche Zweck der Zahl: An ihr hängen die Titel, und ein
+      // verdienter Titel darf durch einen verpassten Tag nicht wieder
+      // verschwinden (ADR-0013).
+      var tracker = _streak(_withActive(<String>[staerke.id]), staerke.id, 5);
+      final nachLuecke = _tag1.next.next.next.next.next.next.next;
+      tracker = tracker.check(staerke.id, nachLuecke).tracker;
+
+      expect(tracker.currentStreak(staerke.id, nachLuecke), 1);
+      expect(tracker.longestStreak, 5);
+    });
+
+    test('longestStreak nimmt die beste über alle Gewohnheiten', () {
+      var tracker = _withActive(<String>[staerke.id, ausdauer.id]);
+      tracker = _streak(tracker, staerke.id, 2);
+      tracker = _streak(tracker, ausdauer.id, 4);
+
+      expect(tracker.longestStreak, 4);
+    });
+
+    test('ohne Häkchen ist longestStreak null', () {
+      expect(_withActive(<String>[staerke.id]).longestStreak, 0);
+    });
+
     test('Streaks laufen je Gewohnheit getrennt', () {
       var tracker = _withActive(<String>[staerke.id, ausdauer.id]);
       tracker = _streak(tracker, staerke.id, 3);

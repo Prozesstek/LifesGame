@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:identity/identity.dart';
 import 'package:theory/theory.dart';
 
 /// Der komplette Spielstand als ein Wert.
@@ -20,6 +21,7 @@ class SaveData {
     this.theory = const TheoryProgress.empty(),
     this.habits = const HabitTracker.empty(),
     this.loadout = const Loadout.empty(),
+    this.identity = const Identity.empty(),
   });
 
   const SaveData.empty() : this();
@@ -35,11 +37,18 @@ class SaveData {
   final HabitTracker habits;
   final Loadout loadout;
 
+  /// Name und gewählter Titel. Die einzige Ausnahme von „gespeichert wird,
+  /// was der Nutzer *getan* hat" — ein Name ist eine Eingabe, kein
+  /// Ergebnis. Welche Titel verdient sind, steht weiterhin nicht hier,
+  /// sondern ergibt sich aus dem Fortschritt (ADR-0013).
+  final Identity identity;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
         habits.activeIds.isEmpty &&
-        loadout.owned.isEmpty;
+        loadout.owned.isEmpty &&
+        !identity.hasName;
   }
 
   Map<String, Object?> toJson() {
@@ -48,6 +57,7 @@ class SaveData {
       'theory': theory.toJson(),
       'habits': habits.toJson(),
       'gear': loadout.toJson(),
+      'identity': identity.toJson(),
     };
   }
 
@@ -60,6 +70,7 @@ class SaveData {
     final theory = json['theory'];
     final habits = json['habits'];
     final gear = json['gear'];
+    final identity = json['identity'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -71,6 +82,9 @@ class SaveData {
       loadout: gear is Map<String, Object?>
           ? Loadout.fromJson(gear)
           : const Loadout.empty(),
+      identity: identity is Map<String, Object?>
+          ? Identity.fromJson(identity)
+          : const Identity.empty(),
     );
   }
 
@@ -94,11 +108,13 @@ class SaveData {
     TheoryProgress? theory,
     HabitTracker? habits,
     Loadout? loadout,
+    Identity? identity,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
       habits: habits ?? this.habits,
       loadout: loadout ?? this.loadout,
+      identity: identity ?? this.identity,
     );
   }
 }

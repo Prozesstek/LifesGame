@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:identity/identity.dart';
 
 import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
 import '../progression/level_provider.dart';
 import '../ui/palette.dart';
+import 'identity_controller.dart';
 import 'widgets/equipment_slot_tile.dart';
+import 'widgets/identity_card.dart';
+import 'widgets/name_dialog.dart';
+import 'widgets/title_dialog.dart';
 
 /// Der Charakterbildschirm: Werte, Ausrüstung, Herkunft der Zahlen.
 ///
@@ -27,6 +32,8 @@ class CharacterScreen extends ConsumerWidget {
     final loadout = ref.watch(loadoutProvider);
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
+    final identity = ref.watch(identityProvider);
+    final titleStats = ref.watch(titleStatsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -40,7 +47,15 @@ class CharacterScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               children: <Widget>[
-                _Summary(level: level.level, gold: gold),
+                IdentityCard(
+                  identity: identity,
+                  stats: titleStats,
+                  level: level.level,
+                  gold: gold,
+                  onEditName: () => _editName(context, ref, identity),
+                  onChooseTitle: () =>
+                      _chooseTitle(context, ref, identity, titleStats),
+                ),
                 const SizedBox(height: 20),
                 const _SectionTitle('Werte im Kampf'),
                 const SizedBox(height: 10),
@@ -89,61 +104,39 @@ class CharacterScreen extends ConsumerWidget {
       ),
     );
   }
-}
 
-class _Summary extends StatelessWidget {
-  const _Summary({required this.level, required this.gold});
+  /// Fragt den Namen ab und übernimmt ihn.
+  ///
+  /// Abbrechen gibt null zurück und ändert nichts — ein leeres Feld
+  /// dagegen ist eine gültige Antwort und löscht den Namen wieder.
+  Future<void> _editName(
+    BuildContext context,
+    WidgetRef ref,
+    Identity identity,
+  ) async {
+    final name = await showNameDialog(context, current: identity.name);
+    if (name == null) return;
 
-  final int level;
-  final int gold;
+    ref.read(identityProvider.notifier).setName(name);
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Palette.surfaceRaised,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: <Widget>[
-          const Icon(Icons.person_outline, size: 30, color: Palette.accent),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Level $level',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Alles hier kommt aus dem, was du getan hast.',
-                  style: TextStyle(fontSize: 12, color: Palette.textDim),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '$gold Gold',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Palette.gold,
-            ),
-          ),
-        ],
-      ),
+  Future<void> _chooseTitle(
+    BuildContext context,
+    WidgetRef ref,
+    Identity identity,
+    TitleStats stats,
+  ) async {
+    final selection = await showTitleDialog(
+      context,
+      current: identity.chosenTitleId,
+      stats: stats,
     );
+    if (selection == null) return;
+
+    ref.read(identityProvider.notifier).chooseTitle(selection.titleId);
   }
 }
 
-/// Eine Zeile je Charakterwert, mit der Aufteilung Alltag / Ausrüstung.
 class _StatRow extends StatelessWidget {
   const _StatRow({required this.stat, required this.stats});
 

@@ -15,6 +15,14 @@ analyzer:
     # Ausgabe, nicht ein vergessener Debug-Aufruf -- dieselbe Ausnahme,
     # die die Beispiele in den Packages ohnehin haben.
     avoid_print: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   # The lint rules applied to this project can be customized in the

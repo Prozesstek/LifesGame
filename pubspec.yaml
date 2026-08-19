@@ -35,6 +35,11 @@ dependencies:
   gear:
     path: packages/gear
 
+  # Name und verdiente Titel. Reines Dart, damit sich die
+  # Titelbedingungen ohne laufende App pruefen lassen (ADR-0013).
+  identity:
+    path: packages/identity
+
   # State Management (ADR-0001).
   flutter_riverpod: ^3.0.1
 

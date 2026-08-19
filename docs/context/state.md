@@ -4,7 +4,7 @@
 > Am Ende jeder Arbeitssitzung aktualisieren. Alte Einträge unter „Verlauf"
 > zusammenfassen, nicht löschen.
 
-**Zuletzt aktualisiert:** 18.08.2026 · Frederik
+**Zuletzt aktualisiert:** 19.08.2026 · AktivesBrett
 
 ---
 
@@ -63,6 +63,19 @@ flutter run -d chrome
     gespeicherter Kontostand, deshalb auch kein Verkauf
   - `catalog_test.dart` prüft den Inhalt des Ladens wie `content_test.dart`
     die Lektionen
+- **`packages/identity`** — Name und verdiente Titel, 28 Tests grün
+  ([ADR-0014](../decisions/0014-titelkatalog-aus-drei-quellen.md)):
+  - **Sieben Titel aus drei Quellen**: Streak-Tage, bestandene Lektionen,
+    gesetzte Häkchen. Drei Spieler auf demselben Level können drei
+    verschiedene Titel tragen — das ist der Zweck
+  - Der Name wird **eingegeben**, der Titel nur **ausgewählt** aus dem,
+    was verdient ist (ADR-0013)
+  - Bedingung hängt an `longestStreak`, nicht an der laufenden Kette:
+    ein verdienter Titel überlebt einen verpassten Tag
+  - Der gespeicherte Titel ist eine Wahl, kein Nachweis — geprüft wird bei
+    jeder Anzeige neu
+  - `title_catalog_test.dart` prüft den Inhalt wie `catalog_test.dart` den
+    Laden
 - **Persistenz** ([ADR-0010](../decisions/0010-persistenz-hinter-einem-anschluss.md)):
   - `SaveStore` als Anschluss, `shared_preferences` als erste
     Implementierung, Drift passt später dahinter
@@ -71,15 +84,16 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 77 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 90 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen, keiner mehr gesperrt
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
   - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
   - **Laden**: sechs Plätze, Preis, Wirkung, Begründung — und bei zu wenig
     Gold, wie viele Tage noch fehlen
-  - **Charakter**: jeder Wert mit Herkunft („18 Angriff, davon 3 aus
-    Ausrüstung"), sechs Plätze zum Umrüsten
+  - **Charakter**: Name und verdienter Titel im Kopf, jeder Wert mit
+    Herkunft („18 Angriff, davon 3 aus Ausrüstung"), sechs Plätze zum
+    Umrüsten
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
@@ -169,14 +183,14 @@ Körper. Der Ausbau von Körper repariert deshalb nicht nur den Baum.
 
 ## Als Nächstes
 
-Reihenfolge offen — der Charakter ist konzeptionell fertig, gebaut ist davon
-nichts.
+Reihenfolge offen. Vom Charakter-Konzept ist **Name und Titel gebaut**
+(ADR-0014), der Rest steht noch aus.
 
-1. **Charakter umsetzen** (ADR-0012, ADR-0013): Baumstruktur in
+1. **Charakter weiterbauen** (ADR-0012, ADR-0013): Baumstruktur in
    `packages/theory` auf Knoten mit Kindern umbauen, Punkteökonomie,
-   Fähigkeitsslots, Name und Titel, der Bildschirm selbst. Der sichtbarste
-   Teil ist die Baumdarstellung — `skill_tree_screen.dart` zeigt heute eine
-   Liste, ein Baum braucht etwas anderes.
+   Fähigkeitsslots. Der sichtbarste Teil ist die Baumdarstellung —
+   `skill_tree_screen.dart` zeigt heute eine Liste, ein Baum braucht etwas
+   anderes. Name und Titel sind aus dieser Liste heraus.
 2. **Die zwanzig Fähigkeiten festlegen** — Wirkung, Energiekosten,
    Aufwertungspfad, Zuordnung zu Waffen. Ohne sie sind die Slots leer.
 3. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
@@ -222,6 +236,13 @@ Darstellung, Inhalte, Ökonomie.
 
 ## Verlauf
 
+- **19.08.2026** — Name und Titel gebaut, das erste Stück aus dem
+  Charakter-Konzept (ADR-0014). Sechstes Package `identity`: sieben Titel
+  aus drei Quellen, verdient statt gewählt. Dabei `longestStreak` in
+  `habits` ergänzt — die Bedingung an die laufende Kette zu hängen hätte
+  einen verdienten Titel bei einem verpassten Tag gelöscht und damit
+  `konzept.md` 3.7 verletzt. Zweiter Rechner im Team eingerichtet
+  (Flutter 3.47.0 / Dart 3.13.0).
 - **18.08.2026** — Konzeptrunde Charakter, kein Code. Theoriebaum wird ein
   echter Baum mit Punkten statt Levelsperren (ADR-0012, löst ADR-0007 ab),
   Charakter wird Kommandozentrale mit vier Fähigkeitsslots und ohne
