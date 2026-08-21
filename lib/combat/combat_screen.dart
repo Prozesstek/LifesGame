@@ -11,7 +11,12 @@ import 'widgets/fighter_status.dart';
 import 'widgets/timing_bar.dart';
 
 /// Was der Bildschirm gerade vom Spieler erwartet.
-enum _Phase { chooseMove, timing, finished }
+///
+/// [animating] ist keine Eingabephase, sondern eine Sperre: Solange die
+/// Runde noch abgespielt wird, nimmt der Bildschirm nichts an. Ohne sie
+/// könnte man drei Runden in eine Sekunde drücken, und die Pfeile aus
+/// Runde eins schlügen während Runde drei ein.
+enum _Phase { chooseMove, timing, animating, finished }
 
 class CombatScreen extends ConsumerStatefulWidget {
   const CombatScreen({super.key});
@@ -49,12 +54,23 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     final controller = ref.read(combatControllerProvider.notifier);
     final events = controller.playRound(move, timedHit);
 
-    _game.playEvents(events);
     controller.appendLog(events.map(describeEvent).whereType<String>());
+
+    // Die Runde ist bereits ausgerechnet — das Abspielen holt sie nur ein.
+    // Freigegeben wird erst, wenn die letzte Bewegung durch ist.
+    _game.playEvents(events, onDone: _onAnimationDone);
+
+    setState(() {
+      _pendingMove = null;
+      _phase = _Phase.animating;
+    });
+  }
+
+  void _onAnimationDone() {
+    if (!mounted) return;
 
     final isOver = ref.read(combatControllerProvider).state.isOver;
     setState(() {
-      _pendingMove = null;
       _phase = isOver ? _Phase.finished : _Phase.chooseMove;
     });
   }
@@ -157,7 +173,10 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // Zellenhoehe an die Fensterbreite, wodurch auf breiten Fenstern die
       // zweite Reihe aus dem Sichtbereich rutscht und gar nicht erst
       // gebaut wird. Feste Reihen sind bei jeder Breite verlaesslich.
-      _Phase.chooseMove => SizedBox(
+      // Während der Animation bleiben dieselben Knöpfe stehen, nur
+      // ausgegraut. Sie zu entfernen würde die Leiste springen lassen —
+      // und der Sprung fiele stärker auf als der Kampf.
+      _Phase.chooseMove || _Phase.animating => SizedBox(
         height: 96,
         child: Column(
           children: <Widget>[
@@ -173,6 +192,8 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   /// Eine Reihe mit zwei Move-Buttons, beginnend bei [start].
   Widget _moveRow(CombatState state, int start) {
     final loadout = Moves.defaultLoadout;
+    final accepting = _phase == _Phase.chooseMove;
+
     return Row(
       children: <Widget>[
         for (
@@ -184,7 +205,8 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
           Expanded(
             child: _MoveButton(
               move: loadout[i],
-              affordable: loadout[i].isAffordableBy(state.player.energy),
+              affordable:
+                  accepting && loadout[i].isAffordableBy(state.player.energy),
               onTap: () => _onMoveSelected(loadout[i]),
             ),
           ),

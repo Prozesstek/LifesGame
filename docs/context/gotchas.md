@@ -3,6 +3,84 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Widget, das sich über `kIsWeb` abschaltet, ist im Test unsichtbar
+
+`PhoneFrame` zeigt die App im Browser in Handygröße und gab dafür bei
+`!kIsWeb` einfach sein Kind zurück. In Widget-Tests ist `kIsWeb` **immer
+falsch** — das Widget hat sich dort also selbst wegoptimiert. Ergebnis: Es
+war vollständig ungetestet, obwohl es in einer Testdatei vorkam.
+
+Aufgefallen ist es erst auf einem Screenshot: ein Überlauf von 5990 Pixeln
+quer über den Bildschirm. Ursache war ein `Text` **oberhalb** von
+`MaterialApp`, wo es weder `Directionality` noch einen Standard-Textstil
+gibt. Alle 103 Tests waren dabei grün.
+
+**Regel:** Plattformabfragen wie `kIsWeb` gehören in einen **Parameter mit
+Standardwert**, nicht in eine feste Abfrage:
+
+```dart
+const PhoneFrame({required this.child, this.enabled = kIsWeb});
+```
+
+Dann prüft der Test `enabled: true`, und die App verhält sich unverändert.
+Dieselbe Überlegung gilt für `Platform.isAndroid` und Freunde.
+
+**Zweite Regel aus demselben Fall:** Was oberhalb von `MaterialApp` sitzt,
+hat keine der Selbstverständlichkeiten darunter. `Text`, `Icon` und alles mit
+Textrichtung brauchen dort ein eigenes `Directionality`.
+
+## Netstat spricht Deutsch, `findstr "LISTENING"` nicht
+
+`start-app.bat` sucht einen freien Port, um nicht auf einem belegten
+abzustürzen. Die erste Fassung filterte die `netstat`-Ausgabe nach
+`LISTENING`. Auf einem deutschen Windows steht dort **`ABHÖREN`**.
+
+Der Filter fand deshalb nie etwas, hielt jeden Port für frei und wäre
+zielsicher wieder auf dem belegten gelandet — mit demselben Absturz, den er
+verhindern sollte.
+
+**Regel:** In Skripten nicht auf übersetzte Ausgaben filtern. Die Adresse
+steht in jeder Sprache gleich da:
+
+```bat
+netstat -ano | findstr ":%%P " >nul 2>nul
+```
+
+Gilt genauso für `tasklist`, `sc query` und `systeminfo`. Wo es geht,
+lieber PowerShell mit Objekten (`Get-NetTCPConnection`) statt Text.
+
+## Grüne Tests sagen nichts darüber, ob die App überhaupt startet
+
+Alle 103 Tests waren grün, während die App im Browser eine schwarze Seite
+zeigte. Kein Widerspruch, sondern eine Lücke: **Kein Test ruft `main()` auf.**
+Die Widget-Tests pumpen `LifesGameApp` direkt, `main.dart` bleibt außen vor.
+
+Alles, was vor `runApp` steht — Speicher öffnen, Orientierung festlegen,
+irgendeine Initialisierung — ist damit ungeprüft. Genau dort hing die App:
+`await SystemChrome.setPreferredOrientations(...)` kehrte im Desktop-Browser
+nie zurück, weil es dort keine Bildschirmorientierung zu sperren gibt.
+`runApp` wurde nie erreicht.
+
+**Das Tückische war die Stille.** Kein Absturz, keine Ausnahme, nichts in der
+Konsole — nur die Ladeskripte. Verraten hat es erst ein Blick ins DOM:
+
+```js
+document.querySelector('flutter-view, flt-glass-pane')  // null
+document.querySelectorAll('canvas').length              // 0
+```
+
+Ist beides leer, obwohl die Seite fertig geladen ist, dann läuft nicht die
+App falsch — dann läuft sie gar nicht.
+
+**Zwei Regeln daraus:**
+
+1. Vor `runApp` gehört nur, was nicht scheitern kann. Alles andere braucht
+   `try`/`catch` oder gehört dahinter. `_openStore()` macht es richtig vor
+   (ADR-0010), `_lockPortrait()` musste nachziehen.
+2. Plattformaufrufe (`SystemChrome`, `path_provider`, Kanäle jeder Art) mit
+   `kIsWeb` abschirmen, wenn sie im Browser sinnlos sind. „Wirkungslos" und
+   „blockiert" sind im Web nicht dasselbe.
+
 ## Der Web-Server antwortet, lange bevor die App fertig gebaut ist
 
 `flutter run -d web-server` liefert sofort eine Seite aus — HTTP 200, Titel
@@ -20,16 +98,26 @@ because its MIME type ('text/html') is not executable
 Der Server schickt für `main.dart.js` die `index.html` zurück, weil das Bundle
 noch nicht existiert. Kein Fehler, nur ein Zwischenzustand.
 
-**Regel:** Auf das Bundle prüfen, nicht auf die Wurzel.
+**Regel:** Auf das Bundle prüfen, nicht auf die Wurzel — und dabei **kein
+`curl -I`** benutzen.
 
 ```bash
-curl -s -I http://localhost:8080/main.dart.js | grep -i "content-type"
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/main.dart.js
 ```
 
-Steht dort `javascript`, ist der Build durch. Im Terminal ist das Äquivalent
-die Zeile mit `is being served at` — solange dort `Waiting for connection from
-debug service` steht, läuft er noch. Der erste Build braucht ein bis zwei
-Minuten, jeder weitere ist deutlich schneller.
+Kommt `200`, ist der Build durch; vorher `404` oder die `index.html`.
+
+Der Zusatz mit `-I` ist wichtig und hat beim zweiten Mal wieder Zeit gekostet:
+Der Entwicklungsserver ist ein `package:shelf` und beantwortet **HEAD-Anfragen
+falsch**. `curl -I` auf die Wurzel liefert 404, obwohl `curl` mit GET dieselbe
+Adresse mit 200 und der richtigen `index.html` beantwortet — und für
+`main.dart.js` meldet HEAD `text/plain`, GET dagegen `application/javascript`.
+Wer den Content-Type über HEAD prüft, hält einen fertigen Build für kaputt.
+
+Im Terminal ist das verlässlichste Signal ohnehin die Zeile
+`is being served at`. Solange dort `Waiting for connection from debug service`
+steht, läuft der Build noch. Der erste braucht ein bis zwei Minuten, jeder
+weitere ist deutlich schneller.
 
 ## Heilung als Anteil der maximalen HP macht Kämpfe unendlich
 

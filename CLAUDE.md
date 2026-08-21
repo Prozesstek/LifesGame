@@ -74,6 +74,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/character/character_screen.dart` | Name, Titel, Werte mit Herkunft, sechs Ausrüstungsplätze | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
+| `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
+| `lib/combat/battle/fighter.dart` | die beiden gezeichneten Kämpfer | Flutter |
+| `lib/combat/battle/projectile.dart` | fliegende Geschosse, z. B. der Pfeil | Flutter |
+| `lib/combat/battle/move_animation.dart` | wie ein Move **aussieht** (nicht was er tut) | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/enemy_picker_screen.dart` | Gegnerwahl mit Einschätzung vor dem Kampf | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
@@ -96,7 +100,7 @@ wird, gehört sie in eines der sechs Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 90 Tests
+flutter test             # 107 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

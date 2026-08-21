@@ -244,6 +244,20 @@ ohne dass damit über Umfang oder Zeitpunkt entschieden wäre.
 
 ## 5. Tech-Stack
 
+**Zielgerät: Handy im Hochformat.** Das ist keine Vorliebe, sondern folgt
+aus dem Kern-Loop: Ein Häkchen wird im Vorbeigehen gesetzt, mit einer Hand,
+mehrmals am Tag. Was man dafür erst aufklappen muss, wird nicht benutzt.
+
+Querformat ist deshalb ausdrücklich **kein** Ziel — es wäre kein zweites
+Layout, sondern ein zweites Produkt: Der Kampfbildschirm stapelt Gegner,
+Log und vier Knöpfe untereinander, die Tagesliste lebt vom Scrollen. Die
+App legt sich beim Start auf Hochformat fest (`lib/main.dart`).
+
+Entwickelt wird trotzdem gegen **Chrome**, weil Android auf keinem der
+beiden Rechner eingerichtet ist. Damit man das Zielformat dabei sieht,
+zeigt `lib/ui/phone_frame.dart` die App im Browser in Handygröße, und
+`test/phone_layout_test.dart` prüft jeden Bildschirm bei 390x844.
+
 - **Flutter / Dart** — App-Shell, alle Tracker-Screens
 - **Flame** — nur der Kampfbildschirm, als eingebettetes Widget
 - **Drift (SQLite)** — lokale Daten, offline-first

@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home/home_screen.dart';
@@ -7,6 +9,7 @@ import 'save/save_providers.dart';
 import 'save/save_store.dart';
 import 'save/save_watcher.dart';
 import 'ui/palette.dart';
+import 'ui/phone_frame.dart';
 
 /// Startet die App, nachdem der Spielstand gelesen ist.
 ///
@@ -18,6 +21,8 @@ import 'ui/palette.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await _lockPortrait();
+
   final store = await _openStore();
   final saved = await store.read();
 
@@ -27,9 +32,40 @@ Future<void> main() async {
         saveStoreProvider.overrideWithValue(store),
         savedGameProvider.overrideWithValue(saved),
       ],
-      child: const SaveWatcher(child: LifesGameApp()),
+      child: const PhoneFrame(child: SaveWatcher(child: LifesGameApp())),
     ),
   );
+}
+
+/// Legt die App auf Hochformat fest.
+///
+/// **Das Ziel ist ein Handy, das man mit einer Hand hält** (`konzept.md`
+/// Abschnitt 5). Querformat wäre kein zweites Layout, sondern ein zweites
+/// Produkt: Der Kampfbildschirm stapelt Gegner, Log und vier Knöpfe
+/// untereinander, und die Tagesliste lebt vom Scrollen. Beides ergibt quer
+/// keinen Sinn.
+///
+/// **Im Web wird gar nicht erst gefragt**, und das ist keine Sparmaßnahme:
+/// Ein Desktop-Browser hat keine Orientierung, die sich sperren ließe. Der
+/// Aufruf lief dort ins Leere und hat — weil er vor `runApp` stand — den
+/// Start der App verhindert. Ergebnis war eine schwarze Seite ohne jede
+/// Fehlermeldung. Details in `docs/context/gotchas.md`.
+///
+/// Für die Form beim Entwickeln ist [PhoneFrame] zuständig, nicht diese
+/// Funktion.
+Future<void> _lockPortrait() async {
+  if (kIsWeb) return;
+
+  try {
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  } on PlatformException catch (error) {
+    // Eine App, die nicht startet, weil sich der Bildschirm nicht drehen
+    // lässt, ist schlimmer als eine, die sich drehen lässt.
+    debugPrint('Hochformat konnte nicht festgelegt werden: $error');
+  }
 }
 
 /// Öffnet den Speicher — oder weicht auf einen aus, der nichts behält.
