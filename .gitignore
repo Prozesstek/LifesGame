@@ -44,6 +44,10 @@ Thumbs.db
 
 # ---- Claude Code: persoenlich, NICHT teilen ----
 .claude/settings.local.json
+# Enthaelt den absoluten Pfad zum lokalen Flutter-SDK und ist auf einem
+# anderen Rechner wertlos -- gleiche Begruendung wie bei
+# .flutter-plugins-dependencies.
+.claude/launch.json
 
 # ---- Secrets ----
 .env

@@ -6,7 +6,10 @@ Was du im echten Leben tust, bestimmt, wie stark dein Charakter ist.
 **Status:** Der MVP steht bis auf den Dungeon und ist spielbar — Lektion lesen,
 Gewohnheit freischalten, täglich abhaken, Werte steigen, Gold sammeln,
 Ausrüstung kaufen, nächsten Gegner schlagen. Der Fortschritt überlebt einen
-Neustart. Es fehlt der Dungeon (und mit ihm Tränke und Drops).
+Neustart. Der Charakter hat seit dem 19.08. einen Namen und einen
+verdienten Titel (ADR-0014), und der Kampf zeigt seit dem 21.08. zwei
+gezeichnete Kämpfer mit einer echten Abfolge statt zweier Rechtecke
+(ADR-0015). Es fehlt der Dungeon (und mit ihm Tränke und Drops).
 Details in [`docs/context/state.md`](docs/context/state.md).
 
 ## Für Mitentwickler: erste Schritte
@@ -17,8 +20,8 @@ cd LifesGame
 
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
-flutter run -d chrome
-flutter test                       # 77 Tests
+flutter run -d chrome              # oder einfach start-app.bat doppelklicken
+flutter test                       # 107 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -32,11 +35,14 @@ dart run example/play.dart         # Kampf im Terminal spielen
 dart run example/balance_sim.dart  # prüft die Engine, nicht das Spiel
 
 cd packages/habits
-dart test                          # 63 Tests
+dart test                          # 67 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear
 dart test                          # 27 Tests, prüft auch die Preise
+
+cd packages/identity
+dart test                          # 28 Tests, prüft auch die Titel
 ```
 
 Windows-Desktop-Builds brauchen Visual Studio mit C++-Workload und sind hier nicht
@@ -61,14 +67,15 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/combat` | Kampfregeln und drei Gegner, reines Dart ohne Flame | 27 |
 | `packages/theory` | 17 Lektionen in 5 Zweigen, 51 Fragen, Lernfortschritt | 50 |
 | `packages/progression` | Levelkurve | 11 |
-| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 63 |
+| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 67 |
 | `packages/gear` | 9 Ausrüstungsstücke auf 6 Plätzen, Preise, Inventar | 27 |
+| `packages/identity` | 7 verdiente Titel aus drei Quellen, Name | 28 |
 | `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 77 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 107 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl
-berechnet, gehört sie in eines der fünf Packages — Begründung in
+berechnet, gehört sie in eines der sechs Packages — Begründung in
 [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md) und
 [ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md).
 

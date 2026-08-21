@@ -127,7 +127,7 @@ Move? _askMove(CombatState state) {
 
     final move = loadout[choice - 1];
     if (!move.isAffordableBy(state.player.energy)) {
-      stdout.writeln('  Dafuer fehlt Energie. Schlag erzeugt welche.');
+      stdout.writeln('  Dafuer fehlt Energie. Der Bogenschuss erzeugt welche.');
       continue;
     }
     return move;

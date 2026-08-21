@@ -1,0 +1,19 @@
+name: identity
+description: >-
+  Name und verdiente Titel fuer Lifes Game. Reines Dart, damit sich die
+  Titelbedingungen gegen den Fortschritt durchrechnen lassen, ohne die App
+  zu starten (siehe ADR-0013).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Bewusst leer, wie bei den anderen fuenf Packages. Ein Titelkatalog
+# braucht keine Infrastruktur -- und ein leerer Block macht die
+# Schichtregel aus CLAUDE.md erzwingbar statt nur vereinbart (ADR-0003).
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0

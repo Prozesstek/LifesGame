@@ -62,9 +62,13 @@ class Move {
 /// Vier Slots, feste Rollen: erzeugen, verbrauchen, schwaechen, stuetzen.
 abstract final class Moves {
   /// Slot 1 — erzeugt Energie, das Rueckgrat jeder Runde.
+  ///
+  /// Der Name ist Anzeigetext, die Id ist es nicht: Die Darstellung haengt
+  /// an `basic_attack` (siehe `lib/combat/battle/move_animation.dart`), nie
+  /// am Wortlaut. Umbenennen aendert deshalb nichts an Balance oder Bild.
   static const Move basicAttack = Move(
     id: 'basic_attack',
-    name: 'Schlag',
+    name: 'Bogenschuss',
     power: 1.0,
     energyDelta: 3,
   );

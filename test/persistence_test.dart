@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:identity/identity.dart';
+import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/main.dart';
@@ -37,6 +39,18 @@ void main() {
     );
     addTearDown(container.dispose);
     return container;
+  }
+
+  /// Ein Stand mit [tage] Tagen ununterbrochener Kette — genug, um den
+  /// ersten Titel zu verdienen.
+  SaveData mitStreak(int tage) {
+    var tracker = const HabitTracker.empty().activate(habitId);
+    var day = tag;
+    for (var i = 0; i < tage; i++) {
+      tracker = tracker.check(habitId, day).tracker;
+      day = day.next;
+    }
+    return SaveData(habits: tracker);
   }
 
   group('Ein Neustart behält den Fortschritt', () {
@@ -79,6 +93,45 @@ void main() {
       expect(zweite.read(loadoutProvider).isOwned(itemId), isTrue);
       expect(zweite.read(totalXpProvider), xpVorher);
       expect(zweite.read(goldProvider), goldVorher);
+    });
+
+    test('Name und Titel kommen wieder', () {
+      final store = InMemorySaveStore();
+      final erste = containerMit(mitStreak(3), store);
+
+      erste.read(identityProvider.notifier).setName('Frederik');
+      erste.read(identityProvider.notifier).chooseTitle('entschlossen');
+
+      final stand = SaveData(
+        habits: erste.read(habitTrackerProvider),
+        identity: erste.read(identityProvider),
+      );
+
+      final zweite = containerMit(SaveData.decode(stand.encode()), store);
+      final identity = zweite.read(identityProvider);
+
+      expect(identity.name, 'Frederik');
+      expect(identity.chosenTitleId, 'entschlossen');
+      expect(
+        identity.displayLine(zweite.read(titleStatsProvider)),
+        'Frederik, der Entschlossene',
+      );
+    });
+
+    test('ein unverdienter Titel im Stand wird nicht getragen', () {
+      // Der Stand ist nur eine Wahl, kein Nachweis: Ein von Hand
+      // bearbeiteter Spielstand bringt keinen Titel ein (ADR-0013).
+      final container = containerMit(
+        const SaveData(identity: Identity(chosenTitleId: 'unbeirrbar')),
+        InMemorySaveStore(),
+      );
+
+      final identity = container.read(identityProvider);
+      final stats = container.read(titleStatsProvider);
+
+      expect(identity.chosenTitleId, 'unbeirrbar');
+      expect(identity.titleFor(stats), isNull);
+      expect(identity.displayLine(stats), 'Namenlos');
     });
 
     test('ohne Stand startet alles bei null', () {

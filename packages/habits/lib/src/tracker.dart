@@ -313,6 +313,30 @@ class HabitTracker {
     return HabitRewards.multiplierFor(currentStreak(habitId, today) + 1);
   }
 
+  /// Die längste Kette, die je gelaufen ist — über alle Gewohnheiten.
+  ///
+  /// **Bewusst nicht die laufende Streak.** An dieser Zahl hängen die
+  /// Titel (ADR-0013), und dort gilt „einmal verdient heißt behalten".
+  /// Eine gerissene Kette einen Titel wieder wegnehmen zu lassen wäre
+  /// genau die Bestrafung fürs Verpassen, die das Konzept ausschließt
+  /// (3.7) und wegen der der Multiplikator bei x2 gedeckelt wurde
+  /// (ADR-0008).
+  int get longestStreak {
+    var best = 0;
+    for (final days in _checks.values) {
+      final sorted = days.toList()..sort();
+      var streak = 0;
+      Day? previous;
+      for (final day in sorted) {
+        streak =
+            previous != null && previous.daysUntil(day) == 1 ? streak + 1 : 1;
+        if (streak > best) best = streak;
+        previous = day;
+      }
+    }
+    return best;
+  }
+
   // --- Ertrag ---
 
   /// Gesamte Erfahrung aus allen Häkchen, mit dem Multiplikator, der am

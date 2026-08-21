@@ -3,6 +3,18 @@
 Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
 Vollständiges Produktkonzept: [`konzept.md`](konzept.md)
 
+## Immer mitlesen
+
+Diese Dateien werden bei jedem Sitzungsstart automatisch mitgeladen — nicht als
+Link, sondern als Inhalt:
+
+@docs/context/state.md
+@docs/context/gotchas.md
+
+`konzept.md`, `README.md` und die ADRs unter `docs/decisions/` bleiben bewusst
+Links: zu groß und zu selten geändert, um sie in jede Sitzung zu ziehen. Sie
+werden gelesen, wenn die Arbeit sie berührt.
+
 ## Team
 
 Zwei Entwickler, geteiltes Repo: **@Prozesstek** (Frederik) und
@@ -40,12 +52,14 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | welche Zweige es gibt und ab welchem Level | nur Dart-SDK |
 | `packages/progression/` | Levelkurve, reines Dart, 11 Tests | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 63 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 67 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
+| `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
+| `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm, Weg zu allen Bereichen | Flutter |
@@ -57,8 +71,13 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, freigeschaltete Vorlagen | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
-| `lib/character/character_screen.dart` | Werte mit Herkunft, sechs Ausrüstungsplätze | Flutter |
+| `lib/character/character_screen.dart` | Name, Titel, Werte mit Herkunft, sechs Ausrüstungsplätze | Flutter |
+| `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
+| `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
+| `lib/combat/battle/fighter.dart` | die beiden gezeichneten Kämpfer | Flutter |
+| `lib/combat/battle/projectile.dart` | fliegende Geschosse, z. B. der Pfeil | Flutter |
+| `lib/combat/battle/move_animation.dart` | wie ein Move **aussieht** (nicht was er tut) | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/enemy_picker_screen.dart` | Gegnerwahl mit Einschätzung vor dem Kampf | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
@@ -72,15 +91,16 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 **Schichtregel:** Kampfregeln und Gegnerwerte nur in `packages/combat`,
 Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
-Preise und Ausrüstungsboni nur in `packages/gear`. Die Controller reichen
-durch und halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl
-berechnet wird, gehört sie in eines der fünf Packages.
+Preise und Ausrüstungsboni nur in `packages/gear`, Titel und ihre
+Bedingungen nur in `packages/identity`. Die Controller reichen durch und
+halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl berechnet
+wird, gehört sie in eines der sechs Packages.
 
 ```bash
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 77 Tests
+flutter test             # 107 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -94,13 +114,14 @@ dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 63 Tests
+dart test                              # 67 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 50 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 11 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
+cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
@@ -154,13 +175,15 @@ in zwei Tagen komplett, oder der Laden ist leer gekauft, bevor er interessant
 wird. `flutter test test/progression_test.dart` spielt alles durch und meldet
 genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 
-**Der Kern-Loop verbindet alle fünf Packages.** Lektion (`theory`) schaltet
+**Der Kern-Loop verbindet alle sechs Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), Werte plus
-Ausrüstung gehen in den Kampf (`combat`). Es gibt genau drei Stellen, an
-denen etwas zusammenläuft: `totalXpProvider` für Erfahrung, `goldProvider`
-für Gold, `equippedStatsProvider` für die Kampfwerte. In den Kampf gehen sie
-ausschließlich über `_freshFight()` in `combat_controller.dart`.
+Ausrüstung gehen in den Kampf (`combat`), Streaks und Lektionen verdienen
+Titel (`identity`). Es gibt genau vier Stellen, an denen etwas zusammenläuft:
+`totalXpProvider` für Erfahrung, `goldProvider` für Gold,
+`equippedStatsProvider` für die Kampfwerte und `titleStatsProvider` für die
+Titelbedingungen. In den Kampf gehen sie ausschließlich über `_freshFight()`
+in `combat_controller.dart`.
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen

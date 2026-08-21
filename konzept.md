@@ -69,7 +69,8 @@ weitere 25 mehr als die vorige. Bewusst nicht exponentiell: Fortschritt
 kommt aus echten Gewohnheiten und lässt sich nicht grinden, deshalb dürfen
 späte Stufen nicht unerreichbar werden
 ([ADR-0006](docs/decisions/0006-levelkurve-als-eigenes-package.md)).
-Das Level öffnet die Zweige des Skilltrees (3.3).
+Jeder Aufstieg gibt einen Theoriepunkt, jeder dritte zusätzlich einen
+Fähigkeitspunkt (3.3).
 
 **Empfehlung:** Ausrüstung sollte Ressourcen beeinflussen, nicht nur
 Zahlen erhöhen. Ein Ring, der Energie schneller füllt, erzeugt eine
@@ -106,9 +107,9 @@ Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 | 4 | Utility (Heilung, Schild) | mittel |
 
 ### 3.3 Theorie / Skilltree
-Text plus Multiple-Choice-Fragen, mehrere Zweige, verknüpft mit
-Habit-Vorlagen. Ein Zweig ist eine geordnete Folge von Lektionen;
-Lektion n+1 öffnet sich mit bestandener Lektion n.
+Text plus Multiple-Choice-Fragen, verknüpft mit Habit-Vorlagen. Innerhalb
+eines Knotens ist die Reihenfolge der Lektionen verbindlich: Lektion n+1
+öffnet sich mit bestandener Lektion n.
 
 **Der Baum ist ein echter Baum** mit zwei Wurzeln und beliebiger Tiefe. Er
 wird nach unten hin immer spezieller. Knoten öffnen sich über
@@ -242,6 +243,20 @@ ohne dass damit über Umfang oder Zeitpunkt entschieden wäre.
 ---
 
 ## 5. Tech-Stack
+
+**Zielgerät: Handy im Hochformat.** Das ist keine Vorliebe, sondern folgt
+aus dem Kern-Loop: Ein Häkchen wird im Vorbeigehen gesetzt, mit einer Hand,
+mehrmals am Tag. Was man dafür erst aufklappen muss, wird nicht benutzt.
+
+Querformat ist deshalb ausdrücklich **kein** Ziel — es wäre kein zweites
+Layout, sondern ein zweites Produkt: Der Kampfbildschirm stapelt Gegner,
+Log und vier Knöpfe untereinander, die Tagesliste lebt vom Scrollen. Die
+App legt sich beim Start auf Hochformat fest (`lib/main.dart`).
+
+Entwickelt wird trotzdem gegen **Chrome**, weil Android auf keinem der
+beiden Rechner eingerichtet ist. Damit man das Zielformat dabei sieht,
+zeigt `lib/ui/phone_frame.dart` die App im Browser in Handygröße, und
+`test/phone_layout_test.dart` prüft jeden Bildschirm bei 390x844.
 
 - **Flutter / Dart** — App-Shell, alle Tracker-Screens
 - **Flame** — nur der Kampfbildschirm, als eingebettetes Widget
