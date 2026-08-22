@@ -294,4 +294,69 @@ void _goldZuflussPasstZuDenPreisen() {
       );
     });
   });
+
+  group('Das Handbuch öffnet genau den zweiten Slot', () {
+    // **Der Zusammenhang, auf dem ADR-0018 steht.** Der Kampf ist
+    // gesperrt, bis der freie Zweig durch ist -- und das ist nur
+    // deshalb die richtige Bedingung, weil derselbe Zweig genug
+    // Erfahrung für Level 3 gibt. Auf Level 3 geht der zweite
+    // Fähigkeitsslot auf, und erst mit zwei Moves ist der erste Kampf
+    // überhaupt zu gewinnen (0 % gegen 100 % in der Simulation).
+    //
+    // Das ist gemessen, nicht entworfen: Wer an TheoryRewards, an der
+    // Levelkurve oder an der Länge des Zweigs dreht, kann den
+    // Zusammenhang zerstören, ohne es zu merken. Deshalb steht er hier
+    // und nicht als Kommentar.
+
+    TheoryProgress durchgearbeitet(TheoryBranch branch) {
+      var progress = const TheoryProgress.empty();
+      for (final lesson in branch.lessons) {
+        progress = progress.submit(lesson, _perfect(lesson)).progress;
+      }
+      return progress;
+    }
+
+    final handbuch = theoryTree.branches.firstWhere(
+      (b) => b.id == handbookBranchId,
+    );
+
+    test('das durchgearbeitete Handbuch reicht für Level 3', () {
+      final xp = durchgearbeitet(handbuch).totalXp;
+      final level = LevelCurve.levelFor(xp).level;
+
+      expect(
+        level,
+        greaterThanOrEqualTo(AbilitySlots.levelForSlot(2)!),
+        reason:
+            'Das Handbuch gibt $xp Erfahrung und damit nur Level $level. '
+            'Der zweite Fähigkeitsslot braucht Level ${AbilitySlots.levelForSlot(2)} '
+            '-- ohne ihn ist der erste Kampf nicht zu gewinnen (ADR-0018).',
+      );
+    });
+
+    test('ohne die letzte Lektion reicht es nicht', () {
+      // Die Probe aufs Exempel: Die Bedingung ist der *abgeschlossene*
+      // Zweig, nicht ein Teil davon. Wäre schon die Hälfte genug,
+      // stünde die Sperre an der falschen Stelle.
+      var progress = const TheoryProgress.empty();
+      for (final lesson in handbuch.lessons.take(handbuch.lessons.length - 1)) {
+        progress = progress.submit(lesson, _perfect(lesson)).progress;
+      }
+
+      expect(
+        LevelCurve.levelFor(progress.totalXp).level,
+        lessThan(AbilitySlots.levelForSlot(2)!),
+        reason:
+            'Wenn schon vier Lektionen für Level 3 reichen, ist die '
+            'Sperre auf den ganzen Zweig unnötig streng.',
+      );
+    });
+
+    test('das Handbuch kostet keinen Theoriepunkt', () {
+      // ADR-0012: Der Zweig erklärt, wie die App funktioniert -- das
+      // Handbuch gehört nicht hinter eine Sperre. Seit ADR-0018 hängt
+      // zusätzlich der Zugang zum Kampf daran, also erst recht nicht.
+      expect(handbuch.unlockLevel, LevelCurve.minLevel);
+    });
+  });
 }

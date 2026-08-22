@@ -107,7 +107,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 143 Tests
+flutter test             # 149 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -174,6 +174,18 @@ Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
 mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
 muss auch besser sein.
+
+**Der Kampf hängt am Handbuch, und das ist eine gemessene Zahl.**
+Die Kampf-Kachel ist gesperrt, bis der freie Zweig „Gewohnheiten"
+durch ist ([ADR-0018](docs/decisions/0018-kampf-hinter-dem-handbuch.md)).
+Der Grund ist keine Erziehung, sondern Arithmetik: Die fünf Lektionen
+geben 275 Erfahrung und damit Level 3 — die Stufe, auf der der zweite
+Fähigkeitsslot aufgeht. Mit nur einem Move ist der erste Gegner
+unschlagbar (0 % in der Simulation), mit zweien sicher (100 %). Vier
+Lektionen reichen **nicht** (220 XP). Wer an `TheoryRewards`, der
+Levelkurve oder der Länge des Zweigs dreht, lässt
+`flutter test test/progression_test.dart` laufen — dort steht der
+Zusammenhang in beide Richtungen.
 
 **Vier Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
 Häkchen-Ertrag (`habits/rewards.dart`), Level

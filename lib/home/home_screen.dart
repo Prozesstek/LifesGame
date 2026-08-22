@@ -39,6 +39,8 @@ class HomeScreen extends ConsumerWidget {
     final activeHabits = tracker.activeTemplates;
     final enemy = ref.watch(selectedEnemyProvider);
     final equippedCount = ref.watch(loadoutProvider).equippedCount;
+    final handbookDone = ref.watch(handbookDoneProvider);
+    final handbookLeft = ref.watch(handbookRemainingProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -76,9 +78,15 @@ class HomeScreen extends ConsumerWidget {
                 HubTile(
                   icon: Icons.sports_martial_arts,
                   title: 'Kampf',
-                  subtitle: 'Drei Gegner — Dungeon kommt später',
-                  status: enemy.name,
-                  onTap: () => _open(context, const EnemyPickerScreen()),
+                  subtitle: _combatSubtitle(handbookLeft),
+                  status: handbookDone ? enemy.name : null,
+                  // Gesperrt, bis das Handbuch durch ist (ADR-0018). Mit
+                  // nur einem Move ist der erste Kampf nicht knapp,
+                  // sondern unmöglich — und der Zweig gibt genau die
+                  // Erfahrung, die den zweiten Slot öffnet.
+                  onTap: handbookDone
+                      ? () => _open(context, const EnemyPickerScreen())
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 HubTile(
@@ -106,6 +114,21 @@ class HomeScreen extends ConsumerWidget {
 
   void _open(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+  }
+
+  /// Solange das Handbuch offen ist, steht hier der Weg dorthin —
+  /// nicht die Absage.
+  ///
+  /// **Warum der Kampf überhaupt wartet** (ADR-0018): Auf Level 1 ist
+  /// nur der Waffenslot offen, und mit einem Move ist der erste Gegner
+  /// nicht knapp, sondern unschlagbar. Der Zweig gibt genau so viel
+  /// Erfahrung, dass der zweite Slot aufgeht.
+  static String _combatSubtitle(int remaining) {
+    if (remaining <= 0) return 'Drei Gegner — Dungeon kommt später';
+    if (remaining == 1) {
+      return 'Noch eine Lektion in Gewohnheiten, dann geht es los';
+    }
+    return 'Erst das Handbuch: noch $remaining Lektionen in Gewohnheiten';
   }
 
   /// Ohne freigeschaltete Vorlage steht hier der Weg dorthin, nicht das
