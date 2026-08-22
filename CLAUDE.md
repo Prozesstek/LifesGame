@@ -51,8 +51,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/theory/` | Skillbaum, Inhalte, Lernfortschritt, reines Dart, 50 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | welche Zweige es gibt und ab welchem Level | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, reines Dart, 11 Tests | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 67 Tests | nur Dart-SDK |
+| `packages/progression/` | Levelkurve und Fähigkeitsslots, reines Dart, 23 Tests | nur Dart-SDK |
+| `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 71 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
@@ -71,7 +72,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, freigeschaltete Vorlagen | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
-| `lib/character/character_screen.dart` | Name, Titel, Werte mit Herkunft, sechs Ausrüstungsplätze | Flutter |
+| `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
+| `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
+| `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, offen oder gesperrt | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
@@ -100,7 +103,7 @@ wird, gehört sie in eines der sechs Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 107 Tests
+flutter test             # 125 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -114,12 +117,12 @@ dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 67 Tests
+dart test                              # 71 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 50 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 11 Tests
+cd packages/progression ; dart test    # 23 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
