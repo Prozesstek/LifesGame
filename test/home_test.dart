@@ -5,6 +5,10 @@ import 'package:lifes_game/combat/enemy_picker_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/home/widgets/hub_tile.dart';
+import 'package:lifes_game/save/save_data.dart';
+import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:theory/theory.dart';
 import 'package:lifes_game/main.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 
@@ -28,22 +32,56 @@ void main() {
       }
     });
 
-    testWidgets('alle fünf Bereiche sind offen', (tester) async {
-      // Der Startbildschirm hatte lange gesperrte Kacheln, damit sichtbar
-      // blieb, wohin es geht. Mit Laden und Charakter ist der MVP-Schnitt
-      // bis auf den Dungeon vollständig — hier steht jetzt, dass keine
-      // Kachel mehr ins Leere zeigt.
+    testWidgets('nur der Kampf ist zu Beginn gesperrt', (tester) async {
+      // Der Startbildschirm hatte lange gesperrte Kacheln, damit
+      // sichtbar blieb, wohin es geht. Seit ADR-0018 ist genau eine
+      // wieder zu: Mit nur einem Move ist der erste Kampf nicht knapp,
+      // sondern unmöglich.
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
       final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
-      final locked = tiles.where((t) => t.onTap == null).map((t) => t.title);
+      final locked = tiles
+          .where((t) => t.onTap == null)
+          .map((t) => t.title)
+          .toList();
 
       expect(tiles, hasLength(5));
-      expect(locked, isEmpty);
+      expect(locked, <String>['Kampf']);
     });
 
+    testWidgets('die gesperrte Kachel nennt den Weg, nicht die Absage', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      expect(find.textContaining('Erst das Handbuch'), findsOneWidget);
+    });
+
+    testWidgets('mit durchgearbeitetem Handbuch geht der Kampf auf', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(
+              SaveData(theory: _mitHandbuch()),
+            ),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
+
+      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
+      final locked = tiles.where((t) => t.onTap == null);
+
+      expect(locked, isEmpty);
+    });
     testWidgets('Gewohnheiten führt zum Tracker', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
@@ -66,7 +104,32 @@ void main() {
       expect(find.byType(SkillTreeScreen), findsOneWidget);
     });
 
-    testWidgets('Kampf führt zur Gegnerwahl', (tester) async {
+    testWidgets('Kampf führt zur Gegnerwahl, sobald er offen ist', (
+      tester,
+    ) async {
+      // Braucht seit ADR-0018 das durchgearbeitete Handbuch. Ohne
+      // Vorbedingung wäre die Kachel gesperrt und der Tipp ginge ins
+      // Leere.
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(
+              SaveData(theory: _mitHandbuch()),
+            ),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Kampf'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EnemyPickerScreen), findsOneWidget);
+    });
+
+    testWidgets('ein gesperrter Kampf führt nirgendwohin', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
@@ -74,7 +137,7 @@ void main() {
       await tester.tap(find.text('Kampf'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(EnemyPickerScreen), findsOneWidget);
+      expect(find.byType(EnemyPickerScreen), findsNothing);
     });
 
     testWidgets('Laden führt zum Shop', (tester) async {
@@ -112,4 +175,24 @@ void main() {
       expect(find.text('0 Gold'), findsNWidgets(2));
     });
   });
+}
+
+/// Ein Theoriestand, in dem das Handbuch durchgearbeitet ist.
+///
+/// **Die Zahl dahinter ist der Grund für ADR-0018:** Die fünf Lektionen
+/// geben zusammen 275 Erfahrung und damit Level 3 — genau die Stufe, auf
+/// der der zweite Fähigkeitsslot aufgeht. Vier Lektionen wären 220 und
+/// damit fünf Punkte zu wenig.
+TheoryProgress _mitHandbuch() {
+  final branch = theoryTree.branches.firstWhere(
+    (b) => b.id == handbookBranchId,
+  );
+
+  var progress = const TheoryProgress.empty();
+  for (final lesson in branch.lessons) {
+    progress = progress.submit(lesson, <int?>[
+      for (final question in lesson.questions) question.correctIndex,
+    ]).progress;
+  }
+  return progress;
 }

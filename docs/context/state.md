@@ -84,8 +84,9 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 143 Tests grün, Web-Build läuft:
-  - **Startbildschirm** mit allen fünf Bereichen, keiner mehr gesperrt
+- **Flutter-App** (`lib/`) — 149 Tests grün, Web-Build läuft:
+  - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
+    bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
   - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
@@ -131,6 +132,38 @@ die Vorlage.
 **Was am Charakter noch fehlt, ist nur noch der große Block:** die
 Fähigkeitsslots und die zwanzig Fähigkeiten dahinter — und die sind nicht
 entschieden.
+
+## Der Kampf wartet jetzt auf das Handbuch — 22.08.2026
+
+Die Antwort auf den Befund von unten ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)):
+Die Kampf-Kachel ist gesperrt, bis jede Lektion des freien Zweigs
+„Gewohnheiten" bestanden ist.
+
+**Warum das die richtige Bedingung ist, und nicht irgendeine:** Das
+Handbuch ist exakt so lang, dass es den zweiten Fähigkeitsslot öffnet.
+
+| Lektionen | XP | Level |
+|---|---|---|
+| 4 | 220 | 2 |
+| **5 (der ganze Zweig)** | **275** | **3** |
+
+Level 3 braucht 225 XP. Vier Lektionen liegen fünf Punkte darunter.
+Die Sperre fällt also genau in dem Moment, in dem der Spieler seinen
+zweiten Move bekommt — und erst mit zwei Moves ist der erste Kampf
+zu gewinnen.
+
+**Das ist gemessen, nicht entworfen.** Wer an `TheoryRewards`, an der
+Levelkurve oder an der Länge des Zweigs dreht, kann den Zusammenhang
+zerstören, ohne es zu merken. `test/progression_test.dart` hält ihn
+deshalb fest — in beide Richtungen: dass fünf Lektionen reichen **und**
+dass vier es nicht tun.
+
+- Die Kachel bleibt sichtbar und nennt den Weg („Erst das Handbuch:
+  noch 3 Lektionen in Gewohnheiten"), statt zu verschwinden. Hausregel
+  des Startbildschirms, zum dritten Mal angewandt.
+- `handbookDoneProvider` und `handbookRemainingProvider` in
+  `theory_controller.dart`. Die Zweig-Id steht als
+  `handbookBranchId` an einer Stelle.
 
 ## Fähigkeiten lassen sich wählen — der Kreis ist geschlossen — 22.08.2026
 
@@ -376,10 +409,7 @@ Reihenfolge offen. Vom Charakter-Konzept ist **Name und Titel gebaut**
    Mechaniken (anteilige Heilung, eigene Schwächungen entfernen,
    Gift zünden). Die neun engine-freien stehen.
 
-   **Vorher zu entscheiden, beides gemessen und offen:**
-   - **Ein Move reicht nicht.** Entweder öffnet Slot 2 früher als
-     Level 3, oder der Weg in den Kampf führt sichtbar über den
-     freien Theoriezweig, oder der erste Gegner wird schwächer.
+   **Vorher zu entscheiden:**
    - **Der Laden braucht drei Waffen mehr**, und damit eine
      Entscheidung: Sind die fünf Waffen *Alternativen* zum
      ähnlichen Preis (ADR-0017: je ein Rhythmus) oder eine Leiter?
