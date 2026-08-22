@@ -6,9 +6,12 @@ import 'package:identity/identity.dart';
 
 import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
+import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../ui/palette.dart';
 import 'identity_controller.dart';
+import 'widgets/ability_slots_row.dart';
+import 'widgets/consistency_card.dart';
 import 'widgets/equipment_slot_tile.dart';
 import 'widgets/identity_card.dart';
 import 'widgets/name_dialog.dart';
@@ -26,6 +29,11 @@ class CharacterScreen extends ConsumerWidget {
 
   static const double _maxWidth = 560;
 
+  /// Drei Spalten, zwei Reihen. Sechs Plätze gehen auch als 2x3 auf, aber
+  /// drei nebeneinander passen auf 390 Pixel Breite, ohne dass die Namen
+  /// abgeschnitten werden.
+  static const int _gearColumns = 3;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(equippedStatsProvider);
@@ -34,6 +42,8 @@ class CharacterScreen extends ConsumerWidget {
     final gold = ref.watch(goldProvider);
     final identity = ref.watch(identityProvider);
     final titleStats = ref.watch(titleStatsProvider);
+    final habits = ref.watch(habitTrackerProvider);
+    final today = ref.watch(todayProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,11 +60,19 @@ class CharacterScreen extends ConsumerWidget {
                 IdentityCard(
                   identity: identity,
                   stats: titleStats,
-                  level: level.level,
+                  level: level,
                   gold: gold,
                   onEditName: () => _editName(context, ref, identity),
                   onChooseTitle: () =>
                       _chooseTitle(context, ref, identity, titleStats),
+                ),
+                const SizedBox(height: 20),
+                const _SectionTitle('Beständigkeit'),
+                const SizedBox(height: 10),
+                ConsistencyCard(
+                  currentStreak: habits.currentBestStreak(today),
+                  longestStreak: habits.longestStreak,
+                  totalChecks: habits.totalChecks,
                 ),
                 const SizedBox(height: 20),
                 const _SectionTitle('Werte im Kampf'),
@@ -64,6 +82,13 @@ class CharacterScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                 ],
                 const SizedBox(height: 14),
+                const _SectionTitle('Fähigkeiten'),
+                const SizedBox(height: 10),
+                AbilitySlotsRow(
+                  level: level.level,
+                  weapon: loadout.equippedIn(GearSlot.waffe),
+                ),
+                const SizedBox(height: 18),
                 const _SectionTitle('Ausrüstung'),
                 const SizedBox(height: 6),
                 Text(
@@ -75,20 +100,31 @@ class CharacterScreen extends ConsumerWidget {
                   style: const TextStyle(fontSize: 13, color: Palette.textDim),
                 ),
                 const SizedBox(height: 10),
-                for (final slot in GearSlot.values) ...<Widget>[
-                  EquipmentSlotTile(
-                    slot: slot,
-                    equipped: loadout.equippedIn(slot),
-                    owned: loadout.owned
-                        .where((item) => item.slot == slot)
-                        .toList(),
-                    onEquip: (itemId) =>
-                        ref.read(loadoutProvider.notifier).equip(itemId),
-                    onUnequip: () =>
-                        ref.read(loadoutProvider.notifier).unequip(slot),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                GridView.count(
+                  // Das Raster sitzt in einer ListView: eigene Höhe, kein
+                  // eigenes Scrollen. Sonst scrollten zwei Flächen
+                  // ineinander.
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: _gearColumns,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.92,
+                  children: <Widget>[
+                    for (final slot in GearSlot.values)
+                      EquipmentSlotTile(
+                        slot: slot,
+                        equipped: loadout.equippedIn(slot),
+                        owned: loadout.owned
+                            .where((item) => item.slot == slot)
+                            .toList(),
+                        onEquip: (itemId) =>
+                            ref.read(loadoutProvider.notifier).equip(itemId),
+                        onUnequip: () =>
+                            ref.read(loadoutProvider.notifier).unequip(slot),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(

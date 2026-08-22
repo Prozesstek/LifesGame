@@ -313,6 +313,25 @@ class HabitTracker {
     return HabitRewards.multiplierFor(currentStreak(habitId, today) + 1);
   }
 
+  /// Die längste Kette, die **gerade** läuft — über alle Gewohnheiten.
+  ///
+  /// Das Gegenstück zu [longestStreak]: Diese Zahl darf fallen, und das
+  /// ist ihr Zweck. Der Charakterbildschirm zeigt beide nebeneinander —
+  /// „16 Tage am Stück, Bestwert 23" sagt etwas, das keine der beiden
+  /// Zahlen allein sagt.
+  ///
+  /// Rechnet bewusst über [currentStreak] statt über die Tage selbst:
+  /// Wann eine Kette als lebend gilt, ist eine Regel, und sie steht dort
+  /// schon. Zweimal formuliert wäre sie zweimal zu pflegen.
+  int currentBestStreak(Day today) {
+    var best = 0;
+    for (final habitId in _checks.keys) {
+      final streak = currentStreak(habitId, today);
+      if (streak > best) best = streak;
+    }
+    return best;
+  }
+
   /// Die längste Kette, die je gelaufen ist — über alle Gewohnheiten.
   ///
   /// **Bewusst nicht die laufende Streak.** An dieser Zahl hängen die

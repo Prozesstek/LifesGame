@@ -233,6 +233,40 @@ void main() {
       expect(_withActive(<String>[staerke.id]).longestStreak, 0);
     });
 
+    test('currentBestStreak nimmt die längste laufende Kette', () {
+      var tracker = _withActive(<String>[staerke.id, ausdauer.id]);
+      tracker = _streak(tracker, staerke.id, 2);
+      tracker = _streak(tracker, ausdauer.id, 4);
+
+      // Ausdauer läuft seit Tag 1 durch, Stärke endete an Tag 2.
+      final heute = _tag1.next.next.next;
+      expect(tracker.currentBestStreak(heute), 4);
+    });
+
+    test('currentBestStreak zählt nur, was noch läuft', () {
+      // Der Unterschied zu longestStreak, und der ganze Grund für die
+      // zweite Zahl: Eine gerissene Kette ist ein Bestwert, keine
+      // laufende Beständigkeit.
+      final tracker = _streak(_withActive(<String>[staerke.id]), staerke.id, 5);
+      final langeDanach = _tag1.next.next.next.next.next.next.next.next;
+
+      expect(tracker.currentBestStreak(langeDanach), 0);
+      expect(tracker.longestStreak, 5);
+    });
+
+    test('currentBestStreak überlebt den heutigen Tag bis Mitternacht', () {
+      // Dieselbe Nachsicht wie currentStreak: Eine Kette stirbt erst,
+      // wenn der Tag vorbei ist, nicht beim Aufwachen.
+      final tracker = _streak(_withActive(<String>[staerke.id]), staerke.id, 3);
+      final heute = _tag3.next;
+
+      expect(tracker.currentBestStreak(heute), 3);
+    });
+
+    test('ohne Häkchen ist currentBestStreak null', () {
+      expect(_withActive(<String>[staerke.id]).currentBestStreak(_tag1), 0);
+    });
+
     test('Streaks laufen je Gewohnheit getrennt', () {
       var tracker = _withActive(<String>[staerke.id, ausdauer.id]);
       tracker = _streak(tracker, staerke.id, 3);

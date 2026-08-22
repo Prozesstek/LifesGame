@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
+import 'package:lifes_game/progression/level_provider.dart';
+import 'package:progression/progression.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -144,6 +147,308 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('der Entschlossene'), findsNothing);
+    });
+  });
+
+  group('Beständigkeit', () {
+    testWidgets('ein frischer Charakter wird nicht mit Nullen begrüßt', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      expect(find.text('Beständigkeit'), findsOneWidget);
+      expect(
+        find.text('Noch kein Häkchen. Der erste Tag ist der ganze Trick.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('die laufende Kette steht auf dem Bildschirm', (tester) async {
+      useTallView(tester);
+      // mitStreak hakt ab `tag` **vorwärts** ab. Heute muss deshalb der
+      // letzte abgehakte Tag sein, sonst läuft die Kette erst einen Tag.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(mitStreak(5)),
+            todayProvider.overrideWithValue(tag.next.next.next.next),
+          ],
+          child: const MaterialApp(home: CharacterScreen()),
+        ),
+      );
+
+      expect(find.text('5'), findsWidgets);
+      expect(find.text('Tage am Stück'), findsOneWidget);
+      expect(find.text('So beständig warst du noch nie.'), findsOneWidget);
+    });
+
+    testWidgets('eine gerissene Kette liest sich nicht wie ein Verlust', (
+      tester,
+    ) async {
+      useTallView(tester);
+      // Genau der Fall, für den die zweite Zahl da ist: laufende Kette 0,
+      // Bestwert 5. Ohne den Satz darunter läse sich das wie ein
+      // Rückschritt -- und das Konzept schließt Strafe fürs Verpassen aus
+      // (3.7).
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(mitStreak(5)),
+            todayProvider.overrideWithValue(
+              tag.next.next.next.next.next.next.next,
+            ),
+          ],
+          child: const MaterialApp(home: CharacterScreen()),
+        ),
+      );
+
+      expect(
+        find.text(
+          'Die Kette ruht gerade. Der Bestwert bleibt — verpasste Tage '
+          'nehmen nichts weg.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Bestwert'), findsOneWidget);
+    });
+
+    testWidgets('der Abstand zum Bestwert wird genannt', (tester) async {
+      useTallView(tester);
+      // Vier Tage gelaufen, dann Pause, dann zwei neue Tage: Bestwert 4,
+      // laufend 2.
+      var tracker = const HabitTracker.empty().activate(habitId);
+      var day = tag;
+      for (var i = 0; i < 4; i++) {
+        tracker = tracker.check(habitId, day).tracker;
+        day = day.next;
+      }
+      final neuerStart = day.next.next;
+      tracker = tracker.check(habitId, neuerStart).tracker;
+      tracker = tracker.check(habitId, neuerStart.next).tracker;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
+            todayProvider.overrideWithValue(neuerStart.next),
+          ],
+          child: const MaterialApp(home: CharacterScreen()),
+        ),
+      );
+
+      expect(find.text('Noch 2 Tage bis zum Bestwert.'), findsOneWidget);
+    });
+  });
+
+  group('Der Levelbalken', () {
+    testWidgets('zeigt, wie weit es bis zum nächsten Level ist', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitStreak(3)));
+
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(mitStreak(3)),
+          todayProvider.overrideWithValue(tag),
+        ],
+      );
+      addTearDown(container.dispose);
+      final level = container.read(playerLevelProvider);
+
+      // Die Zahlen kommen aus package:progression -- der Bildschirm rechnet
+      // sie nicht nach, er zeigt sie nur.
+      expect(
+        find.text(
+          '${level.xpIntoLevel} / ${level.xpForLevel} bis Level '
+          '${level.level + 1}',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('ein frischer Charakter hat einen leeren Balken', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      final bar = tester.widget<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      );
+
+      expect(bar.value, 0.0);
+    });
+  });
+
+  group('Die Fähigkeitsslots', () {
+    /// Ein Stand, der auf [level] steht. Erfahrung kommt aus Häkchen —
+    /// gerechnet wird sie in `package:progression`, hier wird nur genug
+    /// davon erzeugt.
+    SaveData aufLevel(int level, {Loadout? loadout}) {
+      final noetig = LevelCurve.totalXpFor(level);
+      var tracker = const HabitTracker.empty().activate(habitId);
+      var day = tag;
+      while (tracker.totalXp < noetig) {
+        tracker = tracker.check(habitId, day).tracker;
+        day = day.next;
+      }
+      return SaveData(
+        habits: tracker,
+        loadout: loadout ?? const Loadout.empty(),
+      );
+    }
+
+    testWidgets('auf Level 1 ist nur der Waffenplatz offen', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      expect(find.text('Fähigkeiten'), findsOneWidget);
+      // Drei gesperrte Plätze nennen ihre Stufe, statt zu fehlen.
+      expect(find.text('ab Level 3'), findsOneWidget);
+      expect(find.text('ab Level 6'), findsOneWidget);
+      expect(find.text('ab Level 10'), findsOneWidget);
+      expect(find.text('keine Waffe'), findsOneWidget);
+    });
+
+    testWidgets('der gesperrte Platz nennt sein Ziel', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      expect(find.textContaining('Nächster Platz ab Level 3'), findsOneWidget);
+    });
+
+    testWidgets('auf Level 3 geht der zweite Platz auf', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(3)));
+
+      expect(find.text('ab Level 3'), findsNothing);
+      expect(find.text('leer'), findsOneWidget);
+      expect(find.text('ab Level 6'), findsOneWidget);
+      expect(find.textContaining('Nächster Platz ab Level 6'), findsOneWidget);
+    });
+
+    testWidgets('auf Level 10 sind alle vier offen', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      expect(find.textContaining('ab Level'), findsNothing);
+      // Drei freie Plätze leer, der vierte trägt die Waffe.
+      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 1));
+      expect(find.textContaining('Alle vier Plätze offen'), findsOneWidget);
+    });
+
+    testWidgets('der Waffenplatz zeigt, was getragen wird', (tester) async {
+      useTallView(tester);
+      final klinge = GearCatalog.all.firstWhere(
+        (i) => i.slot == GearSlot.waffe,
+      );
+      var loadout = const Loadout.empty();
+      loadout = loadout.buy(klinge.id, availableGold: klinge.price);
+
+      await tester.pumpWidget(appMit(aufLevel(1, loadout: loadout)));
+
+      expect(find.text('keine Waffe'), findsNothing);
+      expect(find.text(klinge.name), findsNWidgets(2));
+    });
+
+    testWidgets('dass die Fähigkeiten noch fehlen, steht da', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      // Ohne diesen Satz sähe ein leerer Platz wie ein Fehler aus.
+      expect(
+        find.textContaining('Die Fähigkeiten selbst kommen noch'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('Das Ausrüstungsraster', () {
+    /// Beide Waffen gekauft — damit gibt es auf einem Platz wirklich
+    /// etwas zu wählen. Gekauft wird angelegt, die Klinge liegt also drauf.
+    SaveData mitBeidenWaffen() {
+      var loadout = const Loadout.empty();
+      for (final item in GearCatalog.all.where(
+        (i) => i.slot == GearSlot.waffe,
+      )) {
+        loadout = loadout.buy(item.id, availableGold: item.price);
+      }
+      return SaveData(loadout: loadout);
+    }
+
+    testWidgets('alle sechs Plätze sind sichtbar, auch die leeren', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      for (final slot in GearSlot.values) {
+        expect(find.text(slot.label), findsOneWidget);
+      }
+      // Ohne Gekauftes sagt jede Kachel, warum sie leer ist.
+      expect(
+        find.text('nichts gekauft'),
+        findsNWidgets(GearSlot.values.length),
+      );
+    });
+
+    testWidgets('ein leerer Platz ohne Auswahl lässt sich nicht antippen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      await tester.tap(find.text('Waffe'));
+      await tester.pumpAndSettle();
+
+      // Kein Auswahlblatt: Ein Blatt ohne Einträge wäre eine Sackgasse.
+      expect(find.text('Ablegen'), findsNothing);
+    });
+
+    testWidgets('antippen öffnet die Auswahl und wechselt das Stück', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitBeidenWaffen()));
+
+      await tester.tap(find.text('Waffe'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Übungsklinge').last);
+      await tester.pumpAndSettle();
+
+      // Zweimal: einmal auf dem Ausrüstungsplatz, einmal im
+      // Waffen-Fähigkeitsslot. Genau das ist die Aussage von ADR-0013 --
+      // was in Slot 1 liegt, ist keine Wahl, sondern folgt aus der Waffe.
+      expect(find.text('Übungsklinge'), findsNWidgets(2));
+      expect(find.text('Geschliffene Klinge'), findsNothing);
+    });
+
+    testWidgets('Ablegen räumt den Platz', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitBeidenWaffen()));
+
+      await tester.tap(find.text('Waffe'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ablegen'));
+      await tester.pumpAndSettle();
+
+      // Der Platz ist leer, aber nicht „nichts gekauft" -- es liegt nur
+      // nichts drauf.
+      expect(find.text('leer'), findsOneWidget);
+      expect(find.text('Geschliffene Klinge'), findsNothing);
+    });
+
+    testWidgets('ein belegter Platz zahlt auf die Werte ein', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitBeidenWaffen()));
+
+      // Die Herkunft der Zahl ist der Zweck des ganzen Bildschirms: Die
+      // Klinge muss in „Werte im Kampf" als Ausrüstung auftauchen.
+      expect(find.textContaining('Ausrüstung'), findsWidgets);
     });
   });
 

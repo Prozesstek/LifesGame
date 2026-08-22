@@ -186,7 +186,14 @@ void main() {
       for (final slot in GearSlot.values) {
         expect(find.text(slot.label), findsOneWidget, reason: slot.label);
       }
-      expect(find.text('leer'), findsNWidgets(GearSlot.values.length));
+      // Ohne einen einzigen Kauf sagt jede Kachel, *warum* sie leer ist.
+      // „leer" heißt gekauft, aber nicht angelegt -- das ist ein anderer
+      // Zustand und steht seit dem Umbau aufs Raster auch anders da.
+      expect(
+        find.text('nichts gekauft'),
+        findsNWidgets(GearSlot.values.length),
+      );
+      expect(find.text('leer'), findsNothing);
     });
 
     testWidgets('trennt Alltag von Ausrüstung', (tester) async {

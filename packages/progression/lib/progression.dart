@@ -4,4 +4,5 @@
 /// durchrechnen, ohne die App zu starten (ADR-0006).
 library;
 
+export 'src/ability_slots.dart';
 export 'src/level_curve.dart';
