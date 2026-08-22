@@ -134,7 +134,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             Expanded(flex: 2, child: _LogPanel(lines: session.log)),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: _buildControls(state),
+              child: _buildControls(state, session.moves),
             ),
           ],
         ),
@@ -142,7 +142,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     );
   }
 
-  Widget _buildControls(CombatState state) {
+  Widget _buildControls(CombatState state, List<Move> loadout) {
     return switch (_phase) {
       _Phase.timing => SizedBox(
         height: 96,
@@ -176,22 +176,27 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // Während der Animation bleiben dieselben Knöpfe stehen, nur
       // ausgegraut. Sie zu entfernen würde die Leiste springen lassen —
       // und der Sprung fiele stärker auf als der Kampf.
+      // Die Hoehe haengt an der Zahl der Knoepfe, nicht an einer festen
+      // Zahl: Seit ADR-0017 hat ein frischer Charakter genau einen Move
+      // (nur der Waffenslot ist offen), und eine leere zweite Reihe waere
+      // ein Loch, das nach einem Fehler aussieht.
       _Phase.chooseMove || _Phase.animating => SizedBox(
-        height: 96,
+        height: loadout.length > 2 ? 96 : 44,
         child: Column(
           children: <Widget>[
-            Expanded(child: _moveRow(state, 0)),
-            const SizedBox(height: 8),
-            Expanded(child: _moveRow(state, 2)),
+            Expanded(child: _moveRow(loadout, state, 0)),
+            if (loadout.length > 2) ...<Widget>[
+              const SizedBox(height: 8),
+              Expanded(child: _moveRow(loadout, state, 2)),
+            ],
           ],
         ),
       ),
     };
   }
 
-  /// Eine Reihe mit zwei Move-Buttons, beginnend bei [start].
-  Widget _moveRow(CombatState state, int start) {
-    final loadout = Moves.defaultLoadout;
+  /// Eine Reihe mit bis zu zwei Move-Buttons, beginnend bei [start].
+  Widget _moveRow(List<Move> loadout, CombatState state, int start) {
     final accepting = _phase == _Phase.chooseMove;
 
     return Row(

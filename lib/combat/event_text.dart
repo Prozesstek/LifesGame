@@ -33,12 +33,12 @@ String? describeEvent(CombatEvent event) {
   };
 }
 
-String moveName(String id) {
-  for (final move in Moves.defaultLoadout) {
-    if (move.id == id) return move.name;
-  }
-  return id;
-}
+/// Der Anzeigename eines Moves.
+///
+/// Sucht ueber `Moves.all`, nicht ueber das Standard-Set: Seit ADR-0017
+/// bringt der Spieler sein eigenes Set mit, und ein Move ausserhalb der
+/// vier alten haette sonst seine rohe Id im Log stehen.
+String moveName(String id) => Moves.byId(id)?.name ?? id;
 
 String statusName(String id) => switch (id) {
   'poison' => 'Gift',

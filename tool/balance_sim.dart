@@ -16,8 +16,10 @@
 
 import 'dart:math';
 
+import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:habits/habits.dart';
+import 'package:progression/progression.dart';
 
 /// Spieler und Gegner nutzen dieselbe Policy — sie beschreibt nur
 /// „wähle einen Move“ und ist nicht gegnerspezifisch.
@@ -54,6 +56,7 @@ void _siegquoten(int fights) {
       final ergebnis = _run(
         fights: fights,
         stats: _statsNach(tag),
+        loadout: _loadoutNach(tag),
         gegner: gegner,
         timingSkill: 0.5,
       );
@@ -68,7 +71,9 @@ void _siegquoten(int fights) {
     print(
       '    Tag ${tag.toString().padLeft(2)}: '
       'ATK ${stats.attack}  HP ${stats.maxHp}  '
-      'DEF ${stats.defense}  EN ${stats.maxEnergy}',
+      'DEF ${stats.defense}  EN ${stats.maxEnergy}  '
+      'Lv ${_levelNach(tag)}  '
+      '${_loadoutNach(tag).length} Moves',
     );
   }
 }
@@ -84,6 +89,7 @@ void _rundenzahlen(int fights) {
       final ergebnis = _run(
         fights: fights,
         stats: _statsNach(tag),
+        loadout: _loadoutNach(tag),
         gegner: gegner,
         timingSkill: 0.5,
       );
@@ -107,17 +113,20 @@ void _timingSpanne(int fights) {
   for (final gegner in Enemies.all) {
     final felder = _tage.map((tag) {
       final stats = _statsNach(tag);
+      final loadout = _loadoutNach(tag);
       final ohne = _run(
         fights: fights,
         stats: stats,
         gegner: gegner,
         timingSkill: 0.0,
+        loadout: loadout,
       ).winRate;
       final perfekt = _run(
         fights: fights,
         stats: stats,
         gegner: gegner,
         timingSkill: 1.0,
+        loadout: loadout,
       ).winRate;
       return ((perfekt - ohne) * 100).round().toString().padLeft(8);
     }).join();
@@ -131,7 +140,7 @@ void _timingSpanne(int fights) {
 /// Nutzt denselben Aufbau wie `packages/habits/example/curve_sim.dart`: die
 /// ersten fünf Vorlagen des Katalogs. Damit sind beide Simulationen
 /// vergleichbar.
-CharacterStats _statsNach(int tage) {
+HabitTracker _trackerNach(int tage) {
   final gewaehlt = HabitCatalog.all
       .take(HabitRewards.maxActiveHabits)
       .map((t) => t.id)
@@ -150,7 +159,51 @@ CharacterStats _statsNach(int tage) {
     tag = tag.next;
   }
 
-  return tracker.stats;
+  return tracker;
+}
+
+CharacterStats _statsNach(int tage) => _trackerNach(tage).stats;
+
+/// Das Level, das ein Charakter nach [tage] Tagen erreicht hat.
+///
+/// **Bewusst nur aus Gewohnheiten.** In der App speist auch die Theorie
+/// die Erfahrung (`totalXpProvider`). Das Level faellt hier also eher zu
+/// niedrig aus als zu hoch -- die Simulation ist an dieser Stelle
+/// pessimistisch, nicht schoenrechnend.
+int _levelNach(int tage) {
+  return LevelCurve.levelFor(_trackerNach(tage).totalXp).level;
+}
+
+/// Die Moves, die an Tag [tage] tatsaechlich zur Verfuegung stehen.
+///
+/// **Seit ADR-0016/0017 haengt das Moveset am Level.** Auf Level 1 ist nur
+/// der Waffenslot offen, die drei freien kommen auf 3, 6 und 10. Vier
+/// Moves anzunehmen -- wie diese Simulation es bis dahin tat -- schrieb
+/// dem Spieler an Tag 0 drei Knoepfe zu, die er nicht hat.
+///
+/// Gefuellt wird in Katalogreihenfolge: Der Spieler nimmt, was da ist.
+/// Eine klug gewaehlte Zusammenstellung waere eine Annahme ueber sein
+/// Verhalten; diese hier ist die anspruchsloseste.
+///
+/// **Ohne Waffe:** Der Spieler kaempft mit dem Rueckfall aus
+/// `AbilityCatalog`, also dem Kurzbogen. Eine gekaufte Waffe wuerde den
+/// Rhythmus aendern -- das zu simulieren braucht erst die drei fehlenden
+/// Waffen im Laden.
+List<Move> _loadoutNach(int tage) {
+  final offen = AbilitySlots.openAt(_levelNach(tage));
+  final moves = <Move>[
+    Moves.byId(AbilityCatalog.fallbackMoveId) ?? Moves.basicAttack,
+  ];
+
+  for (final ability in AbilityCatalog.unlockedBy(
+    const AbilityProgress.empty(),
+  )) {
+    if (moves.length >= offen) break;
+    final move = Moves.byId(ability.moveId);
+    if (move != null) moves.add(move);
+  }
+
+  return moves;
 }
 
 class _Ergebnis {
@@ -169,6 +222,7 @@ _Ergebnis _run({
   required CharacterStats stats,
   required EnemyBlueprint gegner,
   required double timingSkill,
+  required List<Move> loadout,
 }) {
   // Zwei getrennte Generatoren, und das ist keine Kosmetik: Mit einem
   // einzigen verschiebt die Timing-Spalte alle folgenden Kampf-Seeds, weil
@@ -198,7 +252,7 @@ _Ergebnis _run({
       final move = _policy.chooseMove(
         self: state.player,
         opponent: state.enemy,
-        loadout: Moves.defaultLoadout,
+        loadout: loadout,
       );
       state = engine
           .resolveRound(

@@ -1,10 +1,15 @@
+import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
+import 'package:habits/habits.dart';
+import 'package:progression/progression.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/enemy_picker_screen.dart';
+import 'package:lifes_game/save/save_data.dart';
+import 'package:lifes_game/save/save_providers.dart';
 
 void main() {
   group('CombatController', () {
@@ -66,25 +71,48 @@ void main() {
   });
 
   group('CombatScreen', () {
-    Future<void> pumpScreen(WidgetTester tester) async {
+    Future<void> pumpScreen(WidgetTester tester, {SaveData? saved}) async {
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: CombatScreen())),
+        ProviderScope(
+          overrides: [
+            if (saved != null) savedGameProvider.overrideWithValue(saved),
+          ],
+          child: const MaterialApp(home: CombatScreen()),
+        ),
       );
       await tester.pump();
     }
 
-    testWidgets('zeigt die vier Move-Slots', (tester) async {
+    testWidgets('ein frischer Charakter hat genau den Waffen-Move', (
+      tester,
+    ) async {
+      // Seit ADR-0016/0017 ist auf Level 1 nur Slot 1 offen, und der
+      // gehoert der Waffe. Vier Knoepfe waeren eine Behauptung, die der
+      // Charakterbildschirm nicht deckt.
       await pumpScreen(tester);
 
-      for (final move in Moves.defaultLoadout) {
-        expect(find.text(move.name), findsOneWidget);
-      }
+      expect(find.text(Moves.basicAttack.name), findsOneWidget);
+      expect(find.text(Moves.heavyAttack.name), findsNothing);
+      expect(find.text(Moves.mend.name), findsNothing);
+    });
+
+    testWidgets('ohne Waffe greift der Rueckfall', (tester) async {
+      // Slot 1 darf nie leer sein -- sonst haette ein frischer Charakter
+      // keinen einzigen Knopf.
+      await pumpScreen(tester, saved: const SaveData.empty());
+
+      expect(
+        find.text(Moves.byId(AbilityCatalog.fallbackMoveId)!.name),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Moves ohne genug Energie sind deaktiviert', (tester) async {
-      await pumpScreen(tester);
+      // Ein Charakter mit offenem zweitem Slot und einem teuren Move
+      // darauf: Zu Beginn hat er 0 Energie, also ist nur der Waffen-Move
+      // bezahlbar.
+      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
 
-      // Zu Beginn hat der Spieler 0 Energie: nur Schlag ist bezahlbar.
       final heavy = tester.widget<FilledButton>(
         find.ancestor(
           of: find.text(Moves.heavyAttack.name),
@@ -100,6 +128,15 @@ void main() {
         ),
       );
       expect(basic.onPressed, isNotNull);
+    });
+
+    testWidgets('eine nicht gewaehlte Faehigkeit taucht nicht auf', (
+      tester,
+    ) async {
+      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
+
+      expect(find.text(Moves.heavyAttack.name), findsOneWidget);
+      expect(find.text(Moves.mend.name), findsNothing);
     });
   });
 
@@ -160,4 +197,27 @@ void main() {
       expect(find.text('vermutlich noch zu stark'), findsNWidgets(2));
     });
   });
+}
+
+/// Ein Stand, der Level 3 erreicht hat (zweiter Slot offen) und [moveId]
+/// darauf gelegt hat.
+///
+/// Erfahrung kommt aus Haekchen -- gerechnet wird sie in
+/// `package:progression`, hier wird nur genug davon erzeugt.
+SaveData _mitSlot2(String moveId) {
+  const habitId = 'habit-drei-aufgaben';
+  const start = Day(2026, 8, 17);
+  final noetig = LevelCurve.totalXpFor(3);
+
+  var tracker = const HabitTracker.empty().activate(habitId);
+  var day = start;
+  while (tracker.totalXp < noetig) {
+    tracker = tracker.check(habitId, day).tracker;
+    day = day.next;
+  }
+
+  return SaveData(
+    habits: tracker,
+    abilities: const ChosenAbilities.empty().withAt(0, moveId),
+  );
 }

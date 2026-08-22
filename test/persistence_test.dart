@@ -1,8 +1,11 @@
+import 'package:abilities/abilities.dart';
+import 'package:combat/combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
+import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
@@ -52,6 +55,95 @@ void main() {
     }
     return SaveData(habits: tracker);
   }
+
+  group('Die gewählten Fähigkeiten überleben einen Neustart', () {
+    testWidgets('was gewählt wurde, landet im Speicher', (tester) async {
+      useTallView(tester);
+      final store = InMemorySaveStore();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            saveStoreProvider.overrideWithValue(store),
+            todayProvider.overrideWithValue(tag),
+          ],
+          child: const SaveWatcher(child: LifesGameApp()),
+        ),
+      );
+      await tester.pump();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(LifesGameApp)),
+      );
+      container
+          .read(chosenAbilitiesProvider.notifier)
+          .choose(0, Moves.heavyAttack.id);
+      await tester.pump();
+
+      // Der eigentliche Test: SaveWatcher hat den fünften Bereich
+      // eingetragen. Ohne ihn funktionierte alles, nur gespeichert würde
+      // nichts.
+      final gespeichert = await store.read();
+      expect(gespeichert.abilities.moveIds, <String>[Moves.heavyAttack.id]);
+    });
+
+    testWidgets('ein geräumter Platz bleibt geräumt', (tester) async {
+      useTallView(tester);
+      final store = InMemorySaveStore();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            saveStoreProvider.overrideWithValue(store),
+            todayProvider.overrideWithValue(tag),
+          ],
+          child: const SaveWatcher(child: LifesGameApp()),
+        ),
+      );
+      await tester.pump();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(LifesGameApp)),
+      );
+      final notifier = container.read(chosenAbilitiesProvider.notifier);
+      notifier.choose(0, Moves.mend.id);
+      await tester.pump();
+      notifier.clear(0);
+      await tester.pump();
+
+      final gespeichert = await store.read();
+      expect(gespeichert.abilities.isEmpty, isTrue);
+    });
+
+    test('ein Stand aus der Zeit vor ADR-0017 lädt trotzdem', () {
+      // Ein alter Spielstand hat den Abschnitt nicht. Er darf deswegen
+      // nicht verloren gehen (ADR-0010).
+      final alt = SaveData.fromJson(<String, Object?>{
+        'habits': const HabitTracker.empty().activate(habitId).toJson(),
+      });
+
+      expect(alt.abilities.isEmpty, isTrue);
+      expect(alt.habits.isActive(habitId), isTrue);
+    });
+
+    test('der Waffenslot überlebt als Ableitung, nicht als Wert', () {
+      // Slot 1 steht bewusst nicht im Spielstand: Er folgt aus der
+      // getragenen Waffe (ADR-0017). Nach einem Neustart muss er trotzdem
+      // dastehen.
+      final container = containerMit(
+        const SaveData.empty(),
+        InMemorySaveStore(),
+      );
+
+      final move = container.read(weaponMoveProvider);
+
+      expect(move.id, AbilityCatalog.fallbackMoveId);
+      expect(
+        container.read(chosenAbilitiesProvider).contains(move.id),
+        isFalse,
+      );
+    });
+  });
 
   group('Ein Neustart behält den Fortschritt', () {
     test('Häkchen, Lektionen und Ausrüstung kommen wieder', () {
