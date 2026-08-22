@@ -84,7 +84,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 125 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 143 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen, keiner mehr gesperrt
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
@@ -94,8 +94,8 @@ flutter run -d chrome
   - **Charakter**: Name, verdienter Titel und Levelbalken im Kopf,
     **Beständigkeit** (laufende Kette, Bestwert, Häkchen), jeder Wert mit
     Herkunft („18 Angriff, davon 3 aus Ausrüstung"), **vier
-    Fähigkeitsslots** (offen bzw. „ab Level 6"), Ausrüstung als
-    6er-Raster
+    Fähigkeitsslots** — Slot 1 trägt die Waffenfähigkeit,
+    die freien lassen sich belegen, Ausrüstung als 6er-Raster
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
@@ -131,6 +131,75 @@ die Vorlage.
 **Was am Charakter noch fehlt, ist nur noch der große Block:** die
 Fähigkeitsslots und die zwanzig Fähigkeiten dahinter — und die sind nicht
 entschieden.
+
+## Fähigkeiten lassen sich wählen — der Kreis ist geschlossen — 22.08.2026
+
+`packages/abilities` steht, und der Weg **Fähigkeit wählen → gespeichert
+→ im Kampf spürbar** funktioniert
+([ADR-0017](../decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
+
+Gebaut sind die **neun** Fähigkeiten, für die die Engine schon reicht —
+fünf Waffen plus Kraftschlag, Zehrung, Sammeln, Atemzug. `packages/combat`
+hat dafür fünf neue Moves und eine Suche (`Moves.byId`) bekommen, aber
+keine neue Mechanik.
+
+- **`packages/abilities`** kennt weder `combat` noch `gear` noch `habits` —
+  es hält Ids und Bedingungen. 26 Tests.
+- **`test/abilities_seam_test.dart`** prüft die Naht, die kein Package
+  allein prüfen kann: dass jede Move-Id in `combat` ankommt, jede
+  Waffen-Id im Laden existiert, **jede Waffe im Laden eine Fähigkeit
+  mitbringt** und jeder Waffenmove Energie erzeugt statt kostet.
+- **Slot 1 ist nie leer.** Ohne Waffe greift der Kurzbogen. Auf Level 1
+  ist er der einzige offene Platz — wäre er leer, hätte ein frischer
+  Charakter keinen einzigen Knopf im Kampf.
+- **Das Moveset friert beim Kampfstart ein.** Wer mitten im Kampf die
+  Waffe wechselt, würde sonst die Knöpfe unter dem eigenen Finger
+  austauschen.
+- **Der Waffenslot steht nicht im Spielstand** — er folgt aus der
+  Ausrüstung.
+
+## Der Befund aus der Simulation: ein Move reicht nicht — 22.08.2026
+
+`tool/balance_sim.dart` spielt jetzt das **gesperrte** Moveset statt vier
+fester Moves. Das Ergebnis ist der eigentliche Ertrag dieser Sitzung.
+
+**Mit Tag-0-Werten (ATK 13, HP 160, DEF 8, EN 8) gegen den Wegelagerer:**
+
+| Moves | Siegquote |
+|---|---|
+| 1 (nur Waffe) | **0 %** |
+| 2 | 100 % |
+| 3 | 57 % |
+| 4 | 57 % |
+
+**Ein Move ist nicht knapp, sondern unmöglich.** Der Bogen allein
+(power 1,0) richtet rund 10,6 Schaden je Runde an, der Wegelagerer 15,3 —
+das Rennen ist nicht zu gewinnen, egal wie lange es dauert. Ohne einen
+Move, der Energie *ausgibt*, fehlt der Auszahlungsmoment.
+
+**Das trifft aber nur, wer noch gar nichts getan hat.** Der freie Zweig
+„Gewohnheiten" — das Handbuch der App, kostet keinen Theoriepunkt
+(ADR-0012) — gibt allein **275 XP und damit Level 3**, also den zweiten
+Slot. Wer das Handbuch liest, bevor er kämpft, hat zwei Moves und
+gewinnt. Die Reihenfolge „erst lesen, dann kämpfen" ergibt sich damit
+von selbst — **aber sie ist nirgends entschieden und nirgends gesagt.**
+Ein Spieler, der sofort auf „Kampf" tippt, läuft in einen unschlagbaren
+Gegner.
+
+**Zwei Zahlen aus derselben Tabelle, die stutzig machen sollten:** Drei
+Moves sind *schlechter* als zwei (57 % gegen 100 %). Das liegt an der
+Simulation, nicht am Spiel: Sie steuert den Spieler mit
+`SimpleEnemyPolicy`, also einem Bot, und der wählt mit mehr
+Möglichkeiten schlechter. Ein Mensch entscheidet besser. **Die Werte
+für drei und vier Moves sind deshalb pessimistisch** — die für einen
+Move nicht, dort gibt es nichts zu entscheiden.
+
+**Nebenbefund, gemessen:** Die Giftklingen-Teilung aus ADR-0017 hat den
+Wegelagerer an Tag 0 von 61 % auf 45 % gedrückt (bei noch vier festen
+Moves), den Bergwächter an Tag 30 von 34 % auf 39 % gehoben. Beide
+Seiten haben die Schwächung verloren; früh trifft es den Spieler härter,
+spät den Gegner. Sie kommt mit *Blöße finden* zurück, wenn die elf
+übrigen Fähigkeiten gebaut sind.
 
 ## Die Fähigkeitsslots stehen — ohne Fähigkeiten — 22.08.2026
 
@@ -301,8 +370,21 @@ Reihenfolge offen. Vom Charakter-Konzept ist **Name und Titel gebaut**
    Was am Bildschirm danach noch offen bleibt, ist klein und hängt an
    nichts: Errungenschaften und Streaks als eigene Knöpfe. **Freunde**
    braucht als Einziges einen Server.
-2. **Die zwanzig Fähigkeiten festlegen** — Wirkung, Energiekosten,
-   Aufwertungspfad, Zuordnung zu Waffen. Ohne sie sind die Slots leer.
+2. **Die elf übrigen Fähigkeiten** (ADR-0017). Sie brauchen zuerst
+   Arbeit in `packages/combat`: einen verallgemeinerten
+   `StatModifier`, in dem `DefenseDown` aufgeht, plus drei neue
+   Mechaniken (anteilige Heilung, eigene Schwächungen entfernen,
+   Gift zünden). Die neun engine-freien stehen.
+
+   **Vorher zu entscheiden, beides gemessen und offen:**
+   - **Ein Move reicht nicht.** Entweder öffnet Slot 2 früher als
+     Level 3, oder der Weg in den Kampf führt sichtbar über den
+     freien Theoriezweig, oder der erste Gegner wird schwächer.
+   - **Der Laden braucht drei Waffen mehr**, und damit eine
+     Entscheidung: Sind die fünf Waffen *Alternativen* zum
+     ähnlichen Preis (ADR-0017: je ein Rhythmus) oder eine Leiter?
+     Heute erzwingt `catalog_test.dart` eine Leiter — teurer muss
+     besser sein. Beides zugleich geht nicht.
 3. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
    das im MVP-Schnitt noch fehlt. Offen bleibt die Niederlagen-Regel
    (`konzept.md` Punkt 3): verfallener Eintritt plus Neustart bestraft

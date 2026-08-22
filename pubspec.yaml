@@ -22,6 +22,8 @@ dependencies:
     path: packages/theory
 
   # Levelkurve. Entscheidet, welche Theoriezweige offen sind (ADR-0006).
+  abilities:
+    path: packages/abilities
   progression:
     path: packages/progression
 

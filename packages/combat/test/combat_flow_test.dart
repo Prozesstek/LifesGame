@@ -21,7 +21,10 @@ class FixedMovePolicy implements EnemyPolicy {
 
 void main() {
   group('Statuseffekte', () {
-    test('Giftklinge vergiftet und senkt die Verteidigung', () {
+    test('Zehrung vergiftet, mehr nicht', () {
+      // Bis ADR-0017 machte dieser Move beides. Die Schwaechung gehoert
+      // seither zum Wuchtstoss -- getrennt, weil zusammen zwei der elf
+      // Theorieplaetze ihre Aufgabe verloren haetten.
       final engine = engineWith();
       final step = engine.resolveRound(
         CombatState.start(player: hero(energy: 3), enemy: dummy(defense: 100)),
@@ -30,7 +33,42 @@ void main() {
 
       final applied =
           step.eventsOfType<StatusApplied>().map((e) => e.statusId).toList();
-      expect(applied, containsAll(<String>['poison', 'defense_down']));
+      expect(applied, contains('poison'));
+      expect(applied, isNot(contains('defense_down')));
+    });
+
+    test('Wuchtstoss senkt die Verteidigung und kostet nichts', () {
+      // Die andere Haelfte der geteilten Giftklinge. Sie sitzt jetzt auf
+      // einer Waffe und *erzeugt* Energie -- Waffenmoves muessen auf
+      // Level 1 allein tragen (ADR-0016, ADR-0017).
+      final engine = engineWith();
+      final step = engine.resolveRound(
+        CombatState.start(player: hero(energy: 0), enemy: dummy(defense: 100)),
+        const PlayerAction(move: Moves.maceBash),
+      );
+
+      final applied =
+          step.eventsOfType<StatusApplied>().map((e) => e.statusId).toList();
+      expect(applied, contains('defense_down'));
+      expect(Moves.maceBash.energyCost, 0);
+    });
+
+    test('jeder Waffenmove erzeugt Energie, keiner kostet welche', () {
+      // Die Regel, an der ADR-0017 haengt: Auf Level 1 ist nur der
+      // Waffenslot offen. Ein Waffenmove, der Energie kostet, waere dort
+      // unbezahlbar.
+      const weaponMoves = <Move>[
+        Moves.basicAttack,
+        Moves.swordStrike,
+        Moves.daggerDouble,
+        Moves.maceBash,
+        Moves.staffGather,
+      ];
+
+      for (final move in weaponMoves) {
+        expect(move.energyDelta, greaterThan(0), reason: move.id);
+        expect(move.energyCost, 0, reason: move.id);
+      }
     });
 
     test('Gift wirkt am Rundenende und laeuft nach drei Runden aus', () {

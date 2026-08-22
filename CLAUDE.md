@@ -59,6 +59,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 26 Tests | nur Dart-SDK |
+| `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
@@ -74,7 +76,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
-| `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, offen oder gesperrt | Flutter |
+| `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
+| `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
@@ -95,15 +98,16 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
 Preise und Ausrüstungsboni nur in `packages/gear`, Titel und ihre
-Bedingungen nur in `packages/identity`. Die Controller reichen durch und
-halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl berechnet
-wird, gehört sie in eines der sechs Packages.
+Bedingungen nur in `packages/identity`, Freischaltbedingungen für
+Fähigkeiten nur in `packages/abilities`. Die Controller reichen durch
+und halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl
+berechnet wird, gehört sie in eines der sieben Packages.
 
 ```bash
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 125 Tests
+flutter test             # 143 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -124,6 +128,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 cd packages/theory      ; dart test    # 50 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 23 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
+cd packages/abilities   ; dart test    # 26 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
@@ -187,6 +192,15 @@ Titel (`identity`). Es gibt genau vier Stellen, an denen etwas zusammenläuft:
 `equippedStatsProvider` für die Kampfwerte und `titleStatsProvider` für die
 Titelbedingungen. In den Kampf gehen sie ausschließlich über `_freshFight()`
 in `combat_controller.dart`.
+
+**Fähigkeiten hängen an Ids, und Ids können ins Leere zeigen.**
+`packages/abilities` kennt weder `combat` noch `gear` — es hält nur
+Move-Ids und Waffen-Ids. Was daraus wird, prüft
+`test/abilities_seam_test.dart` in der App: jede Move-Id kommt in
+`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, und jeder
+Waffenmove **erzeugt** Energie. Der letzte Punkt ist keine Kosmetik:
+Auf Level 1 ist nur der Waffenslot offen
+([ADR-0017](docs/decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen

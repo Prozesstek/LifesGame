@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:abilities/abilities.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
@@ -22,6 +23,7 @@ class SaveData {
     this.habits = const HabitTracker.empty(),
     this.loadout = const Loadout.empty(),
     this.identity = const Identity.empty(),
+    this.abilities = const ChosenAbilities.empty(),
   });
 
   const SaveData.empty() : this();
@@ -43,12 +45,17 @@ class SaveData {
   /// sondern ergibt sich aus dem Fortschritt (ADR-0013).
   final Identity identity;
 
+  /// Was auf den freien Fähigkeitsslots liegt. Slot 1 steht nicht hier —
+  /// der folgt aus der getragenen Waffe (ADR-0017).
+  final ChosenAbilities abilities;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
         habits.activeIds.isEmpty &&
         loadout.owned.isEmpty &&
-        !identity.hasName;
+        !identity.hasName &&
+        abilities.isEmpty;
   }
 
   Map<String, Object?> toJson() {
@@ -58,6 +65,7 @@ class SaveData {
       'habits': habits.toJson(),
       'gear': loadout.toJson(),
       'identity': identity.toJson(),
+      'abilities': abilities.toJson(),
     };
   }
 
@@ -71,6 +79,7 @@ class SaveData {
     final habits = json['habits'];
     final gear = json['gear'];
     final identity = json['identity'];
+    final abilities = json['abilities'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -85,6 +94,9 @@ class SaveData {
       identity: identity is Map<String, Object?>
           ? Identity.fromJson(identity)
           : const Identity.empty(),
+      abilities: abilities is Map<String, Object?>
+          ? ChosenAbilities.fromJson(abilities)
+          : const ChosenAbilities.empty(),
     );
   }
 
@@ -109,12 +121,14 @@ class SaveData {
     HabitTracker? habits,
     Loadout? loadout,
     Identity? identity,
+    ChosenAbilities? abilities,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
       habits: habits ?? this.habits,
       loadout: loadout ?? this.loadout,
       identity: identity ?? this.identity,
+      abilities: abilities ?? this.abilities,
     );
   }
 }

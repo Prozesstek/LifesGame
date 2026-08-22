@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:abilities/abilities.dart';
+import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
@@ -287,7 +290,11 @@ void main() {
     /// Ein Stand, der auf [level] steht. Erfahrung kommt aus Häkchen —
     /// gerechnet wird sie in `package:progression`, hier wird nur genug
     /// davon erzeugt.
-    SaveData aufLevel(int level, {Loadout? loadout}) {
+    SaveData aufLevel(
+      int level, {
+      Loadout? loadout,
+      ChosenAbilities? abilities,
+    }) {
       final noetig = LevelCurve.totalXpFor(level);
       var tracker = const HabitTracker.empty().activate(habitId);
       var day = tag;
@@ -298,6 +305,7 @@ void main() {
       return SaveData(
         habits: tracker,
         loadout: loadout ?? const Loadout.empty(),
+        abilities: abilities ?? const ChosenAbilities.empty(),
       );
     }
 
@@ -310,14 +318,37 @@ void main() {
       expect(find.text('ab Level 3'), findsOneWidget);
       expect(find.text('ab Level 6'), findsOneWidget);
       expect(find.text('ab Level 10'), findsOneWidget);
-      expect(find.text('keine Waffe'), findsOneWidget);
     });
 
-    testWidgets('der gesperrte Platz nennt sein Ziel', (tester) async {
+    testWidgets('ohne Waffe trägt Slot 1 trotzdem etwas', (tester) async {
+      // Der wichtigste Fall: Auf Level 1 ist Slot 1 der einzige offene.
+      // Wäre er leer, hätte ein frischer Charakter keinen einzigen Move.
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      expect(find.textContaining('Nächster Platz ab Level 3'), findsOneWidget);
+      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      expect(find.text(rueckfall.name), findsOneWidget);
+    });
+
+    testWidgets('Slot 1 zeigt die Fähigkeit der Waffe, nicht die Waffe', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final klinge = GearCatalog.all.firstWhere(
+        (i) => i.slot == GearSlot.waffe,
+      );
+      final loadout = const Loadout.empty().buy(
+        klinge.id,
+        availableGold: klinge.price,
+      );
+
+      await tester.pumpWidget(appMit(aufLevel(1, loadout: loadout)));
+
+      final move = Moves.byId(AbilityCatalog.weaponMoves[klinge.id]!)!;
+      // Der Waffenname steht auf dem Ausrüstungsplatz, der Move-Name im
+      // Fähigkeitsslot — zwei verschiedene Dinge.
+      expect(find.text(move.name), findsOneWidget);
+      expect(find.text(klinge.name), findsOneWidget);
     });
 
     testWidgets('auf Level 3 geht der zweite Platz auf', (tester) async {
@@ -325,9 +356,9 @@ void main() {
       await tester.pumpWidget(appMit(aufLevel(3)));
 
       expect(find.text('ab Level 3'), findsNothing);
-      expect(find.text('leer'), findsOneWidget);
       expect(find.text('ab Level 6'), findsOneWidget);
-      expect(find.textContaining('Nächster Platz ab Level 6'), findsOneWidget);
+      expect(find.text('leer'), findsOneWidget);
+      expect(find.textContaining('Ein Platz ist noch frei'), findsOneWidget);
     });
 
     testWidgets('auf Level 10 sind alle vier offen', (tester) async {
@@ -337,32 +368,95 @@ void main() {
       expect(find.textContaining('ab Level'), findsNothing);
       // Drei freie Plätze leer, der vierte trägt die Waffe.
       expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 1));
-      expect(find.textContaining('Alle vier Plätze offen'), findsOneWidget);
+      expect(find.textContaining('3 Plätze sind noch frei'), findsOneWidget);
     });
 
-    testWidgets('der Waffenplatz zeigt, was getragen wird', (tester) async {
-      useTallView(tester);
-      final klinge = GearCatalog.all.firstWhere(
-        (i) => i.slot == GearSlot.waffe,
-      );
-      var loadout = const Loadout.empty();
-      loadout = loadout.buy(klinge.id, availableGold: klinge.price);
-
-      await tester.pumpWidget(appMit(aufLevel(1, loadout: loadout)));
-
-      expect(find.text('keine Waffe'), findsNothing);
-      expect(find.text(klinge.name), findsNWidgets(2));
-    });
-
-    testWidgets('dass die Fähigkeiten noch fehlen, steht da', (tester) async {
+    testWidgets('ein gesperrter Platz lässt sich nicht antippen', (
+      tester,
+    ) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      // Ohne diesen Satz sähe ein leerer Platz wie ein Fehler aus.
-      expect(
-        find.textContaining('Die Fähigkeiten selbst kommen noch'),
-        findsOneWidget,
+      await tester.tap(find.text('ab Level 3'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fähigkeit wählen'), findsNothing);
+    });
+
+    testWidgets('der Waffenplatz lässt sich nicht antippen', (tester) async {
+      // Slot 1 folgt aus der Ausrüstung, er ist keine Wahl (ADR-0013).
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      await tester.tap(find.text(rueckfall.name));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fähigkeit wählen'), findsNothing);
+    });
+
+    testWidgets('einen freien Platz belegen und der Slot zeigt es', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(3)));
+
+      await tester.tap(find.text('leer'));
+      await tester.pumpAndSettle();
+      expect(find.text('Fähigkeit wählen'), findsOneWidget);
+
+      await tester.tap(find.text(Moves.heavyAttack.name).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text(Moves.heavyAttack.name), findsOneWidget);
+      expect(find.text('leer'), findsNothing);
+    });
+
+    testWidgets('einen Platz räumen macht ihn wieder leer', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(
+          aufLevel(
+            3,
+            abilities: const ChosenAbilities.empty().withAt(0, Moves.mend.id),
+          ),
+        ),
       );
+
+      expect(find.text(Moves.mend.name), findsOneWidget);
+
+      await tester.tap(find.text(Moves.mend.name));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Platz räumen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('leer'), findsOneWidget);
+    });
+
+    testWidgets('nur die offenen Plätze gehen in den Kampf', (tester) async {
+      // Der eigentliche Zweck der Verkabelung: Was gewählt ist, wirkt sich
+      // aus — aber nur so weit, wie Plätze offen sind (ADR-0016).
+      useTallView(tester);
+      final saved = aufLevel(
+        3,
+        abilities: const ChosenAbilities.empty()
+            .withAt(0, Moves.heavyAttack.id)
+            .withAt(1, Moves.mend.id),
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(saved),
+          todayProvider.overrideWithValue(tag),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final moves = container.read(activeMovesProvider);
+
+      // Level 3: Waffenslot plus genau ein freier Platz.
+      expect(moves, hasLength(2));
+      expect(moves.last.id, Moves.heavyAttack.id);
     });
   });
 
@@ -420,10 +514,9 @@ void main() {
       await tester.tap(find.text('Übungsklinge').last);
       await tester.pumpAndSettle();
 
-      // Zweimal: einmal auf dem Ausrüstungsplatz, einmal im
-      // Waffen-Fähigkeitsslot. Genau das ist die Aussage von ADR-0013 --
-      // was in Slot 1 liegt, ist keine Wahl, sondern folgt aus der Waffe.
-      expect(find.text('Übungsklinge'), findsNWidgets(2));
+      // Einmal: auf dem Ausrüstungsplatz. Im Fähigkeitsslot steht seit
+      // ADR-0017 der Name der *Fähigkeit*, nicht der der Waffe.
+      expect(find.text('Übungsklinge'), findsOneWidget);
       expect(find.text('Geschliffene Klinge'), findsNothing);
     });
 

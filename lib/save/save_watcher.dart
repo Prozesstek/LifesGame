@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../character/abilities_controller.dart';
 import '../character/identity_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
@@ -28,12 +29,13 @@ class SaveWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Vier Bereiche, vier Zeilen. Kommt ein fünfter dazu, gehört er hier
+    // Fünf Bereiche, fünf Zeilen. Kommt ein sechster dazu, gehört er hier
     // dazu — sonst überlebt er keinen Neustart.
     ref.listen(theoryProgressProvider, (_, _) => _save(ref));
     ref.listen(habitTrackerProvider, (_, _) => _save(ref));
     ref.listen(loadoutProvider, (_, _) => _save(ref));
     ref.listen(identityProvider, (_, _) => _save(ref));
+    ref.listen(chosenAbilitiesProvider, (_, _) => _save(ref));
 
     return child;
   }
@@ -44,6 +46,7 @@ class SaveWatcher extends ConsumerWidget {
       habits: ref.read(habitTrackerProvider),
       loadout: ref.read(loadoutProvider),
       identity: ref.read(identityProvider),
+      abilities: ref.read(chosenAbilitiesProvider),
     );
 
     // Bewusst nicht abgewartet: Ein Häkchen soll sofort sichtbar sein und

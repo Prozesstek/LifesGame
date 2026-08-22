@@ -9,6 +9,7 @@ import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../ui/palette.dart';
+import 'abilities_controller.dart';
 import 'identity_controller.dart';
 import 'widgets/ability_slots_row.dart';
 import 'widgets/consistency_card.dart';
@@ -86,7 +87,14 @@ class CharacterScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 AbilitySlotsRow(
                   level: level.level,
-                  weapon: loadout.equippedIn(GearSlot.waffe),
+                  weaponMove: ref.watch(weaponMoveProvider),
+                  chosen: ref.watch(chosenAbilitiesProvider),
+                  unlocked: ref.watch(unlockedAbilitiesProvider),
+                  onChoose: (index, moveId) => ref
+                      .read(chosenAbilitiesProvider.notifier)
+                      .choose(index, moveId),
+                  onClear: (index) =>
+                      ref.read(chosenAbilitiesProvider.notifier).clear(index),
                 ),
                 const SizedBox(height: 18),
                 const _SectionTitle('Ausrüstung'),

@@ -1,6 +1,7 @@
 import 'package:combat/combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../character/abilities_controller.dart';
 import '../gear/gear_controller.dart';
 
 /// Gegen wen der nächste Kampf geht.
@@ -24,15 +25,35 @@ final selectedEnemyProvider =
 
 /// Was der Bildschirm über einen laufenden Kampf wissen muss.
 class CombatSession {
-  const CombatSession({required this.state, required this.log});
+  const CombatSession({
+    required this.state,
+    required this.log,
+    this.moves = const <Move>[],
+  });
 
   final CombatState state;
 
   /// Lesbare Zeilen der letzten Runden, neueste zuletzt.
   final List<String> log;
 
-  CombatSession copyWith({CombatState? state, List<String>? log}) {
-    return CombatSession(state: state ?? this.state, log: log ?? this.log);
+  /// Die Knöpfe dieses Kampfes — eingefroren beim Start.
+  ///
+  /// **Warum eingefroren und nicht laufend gelesen.** Wer mitten im Kampf
+  /// die Waffe wechselt, würde sonst die Knöpfe unter dem eigenen Finger
+  /// austauschen. Dieselbe Begründung wie bei den Werten in
+  /// [CombatController._freshFight]: Neues gilt ab dem nächsten Kampf.
+  final List<Move> moves;
+
+  CombatSession copyWith({
+    CombatState? state,
+    List<String>? log,
+    List<Move>? moves,
+  }) {
+    return CombatSession(
+      state: state ?? this.state,
+      log: log ?? this.log,
+      moves: moves ?? this.moves,
+    );
   }
 }
 
@@ -47,7 +68,13 @@ class CombatController extends Notifier<CombatSession> {
   );
 
   @override
-  CombatSession build() => CombatSession(state: _freshFight(), log: const []);
+  CombatSession build() {
+    return CombatSession(
+      state: _freshFight(),
+      log: const <String>[],
+      moves: ref.read(activeMovesProvider),
+    );
+  }
 
   /// Die Werte des Spielers kommen aus seinen Gewohnheiten (ADR-0008) und
   /// seiner Ausrüstung (ADR-0011), der Gegner aus `package:combat`.
@@ -80,7 +107,11 @@ class CombatController extends Notifier<CombatSession> {
       state.state,
       PlayerAction(move: move, timedHit: timedHit),
     );
-    state = CombatSession(state: step.state, log: <String>[...state.log]);
+    state = CombatSession(
+      state: step.state,
+      log: <String>[...state.log],
+      moves: state.moves,
+    );
     return step.events;
   }
 
