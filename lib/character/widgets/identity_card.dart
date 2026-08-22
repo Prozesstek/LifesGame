@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identity/identity.dart';
+import 'package:progression/progression.dart';
 
 import '../../ui/palette.dart';
 
@@ -22,7 +23,11 @@ class IdentityCard extends StatelessWidget {
 
   final Identity identity;
   final TitleStats stats;
-  final int level;
+
+  /// Das ganze Level, nicht nur die Zahl: Der Balken braucht auch, wie
+  /// weit es bis zum nächsten ist. Gerechnet wird das in
+  /// `package:progression`, hier wird nur angezeigt.
+  final PlayerLevel level;
   final int gold;
   final VoidCallback onEditName;
   final VoidCallback onChooseTitle;
@@ -59,8 +64,8 @@ class IdentityCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       title == null
-                          ? 'Level $level'
-                          : '${title.label} · Level $level',
+                          ? 'Level ${level.level}'
+                          : '${title.label} · Level ${level.level}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: Palette.textDim,
@@ -84,7 +89,9 @@ class IdentityCard extends StatelessWidget {
             'Alles hier kommt aus dem, was du getan hast.',
             style: TextStyle(fontSize: 12, color: Palette.muted),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+          _LevelBar(level: level),
+          const SizedBox(height: 12),
           Row(
             children: <Widget>[
               Expanded(
@@ -106,6 +113,55 @@ class IdentityCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Wie weit es bis zum nächsten Level ist.
+///
+/// **Warum der Balken hier oben steht und nicht bei den Werten.** Er ist
+/// der einzige Fortschritt auf diesem Bildschirm, der sich täglich bewegt;
+/// die vier Kampfwerte stehen nach etwa 35 Tagen still (ADR-0013). Ohne
+/// ihn zeigt der Kopf eine Zahl, die sich alle paar Tage einmal ändert.
+class _LevelBar extends StatelessWidget {
+  const _LevelBar({required this.level});
+
+  final PlayerLevel level;
+
+  @override
+  Widget build(BuildContext context) {
+    if (level.isMaxLevel) {
+      return const Text(
+        'Höchste Stufe erreicht.',
+        style: TextStyle(fontSize: 12, color: Palette.gold),
+      );
+    }
+
+    // Ein frisches Level steht bei 0 — der Balken muss das aushalten,
+    // ohne durch null zu teilen.
+    final anteil = level.xpForLevel <= 0
+        ? 0.0
+        : (level.xpIntoLevel / level.xpForLevel).clamp(0.0, 1.0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: anteil,
+            minHeight: 7,
+            backgroundColor: Palette.surface,
+            valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          '${level.xpIntoLevel} / ${level.xpForLevel} bis Level '
+          '${level.level + 1}',
+          style: const TextStyle(fontSize: 11, color: Palette.textDim),
+        ),
+      ],
     );
   }
 }

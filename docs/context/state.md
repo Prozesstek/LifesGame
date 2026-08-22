@@ -4,7 +4,7 @@
 > Am Ende jeder Arbeitssitzung aktualisieren. Alte Einträge unter „Verlauf"
 > zusammenfassen, nicht löschen.
 
-**Zuletzt aktualisiert:** 21.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 22.08.2026 · Frederik
 
 ---
 
@@ -84,19 +84,83 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 107 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 125 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen, keiner mehr gesperrt
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
   - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
   - **Laden**: sechs Plätze, Preis, Wirkung, Begründung — und bei zu wenig
     Gold, wie viele Tage noch fehlen
-  - **Charakter**: Name und verdienter Titel im Kopf, jeder Wert mit
-    Herkunft („18 Angriff, davon 3 aus Ausrüstung"), sechs Plätze zum
-    Umrüsten
+  - **Charakter**: Name, verdienter Titel und Levelbalken im Kopf,
+    **Beständigkeit** (laufende Kette, Bestwert, Häkchen), jeder Wert mit
+    Herkunft („18 Angriff, davon 3 aus Ausrüstung"), **vier
+    Fähigkeitsslots** (offen bzw. „ab Level 6"), Ausrüstung als
+    6er-Raster
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
+
+## Der Charakterbildschirm ist vollständig — bis auf die Fähigkeiten — 22.08.2026
+
+Die drei kleinen Löcher aus ADR-0013 sind zu. **Kein neuer ADR**: Hier wurde
+nichts entschieden, was nicht schon in ADR-0013 stand — die Skizze dort war
+die Vorlage.
+
+- **Die Streak steht endlich auf dem Charakterbildschirm.** Das war Loch 5
+  von fünf und das letzte offene. Drei Zahlen statt einer: laufende Kette,
+  Bestwert, Häkchen gesamt.
+- **`HabitTracker.currentBestStreak(today)`** ist neu in `packages/habits`
+  — die längste **laufende** Kette über alle Gewohnheiten. Das Gegenstück
+  zu `longestStreak`: Diese Zahl **darf** fallen, und das ist ihr Zweck.
+  Gerechnet wird sie über `currentStreak`, damit die Regel „wann lebt eine
+  Kette" nur an einer Stelle steht.
+- **Der Satz unter den Zahlen trägt die Aussage.** Bei gerissener Kette
+  steht dort „Der Bestwert bleibt — verpasste Tage nehmen nichts weg".
+  Ohne ihn läse sich eine 0 wie ein Rückschritt, und das Konzept schließt
+  Strafe fürs Verpassen aus (3.7, ADR-0008).
+- **Levelbalken im Kopf**, wie in der ADR-0013-Skizze. Die Zahlen lagen
+  fertig in `PlayerLevel` — es wurde nichts nachgerechnet.
+- **Ausrüstung als 6er-Raster** statt sechs Zeilen. Das Ablegen ist dabei
+  ins Auswahlblatt gewandert; im Raster ist kein Platz für einen zweiten
+  Knopf. Eine Kachel unterscheidet jetzt „leer" (gekauft, nicht angelegt)
+  von „nichts gekauft".
+- `test/phone_layout_test.dart` prüft den Charakterbildschirm jetzt mit
+  **voller Ausrüstung** — leere Kacheln haben keine Namen, die überlaufen
+  könnten.
+
+**Was am Charakter noch fehlt, ist nur noch der große Block:** die
+Fähigkeitsslots und die zwanzig Fähigkeiten dahinter — und die sind nicht
+entschieden.
+
+## Die Fähigkeitsslots stehen — ohne Fähigkeiten — 22.08.2026
+
+Vier Plätze auf dem Charakterbildschirm, die mit dem Level nach und nach
+aufgehen ([ADR-0016](../decisions/0016-faehigkeitsslots-vor-den-faehigkeiten.md)).
+
+- **`AbilitySlots` in `packages/progression`** — Slot 1 ab Level 1, die
+  drei freien auf 3 / 6 / 10. Die Zahl liegt bei der Levelkurve, weil ein
+  Slot das ist, was ein *Levelaufstieg gibt* (ADR-0012), nicht was eine
+  Fähigkeit mitbringt. 23 Tests.
+- **Slot 1 zeigt die getragene Waffe.** Was dort landet, ist laut ADR-0013
+  keine Wahl, sondern folgt aus der Ausrüstung — und das lässt sich
+  zeigen, bevor eine einzige Fähigkeit existiert.
+- **Gesperrte Slots nennen ihre Stufe** („ab Level 6") statt zu fehlen.
+  Hausregel aus ADR-0013.
+- **Der Satz darunter ist Absicht:** „Die Fähigkeiten selbst kommen noch —
+  die Plätze stehen schon." Ohne ihn sähe ein leerer Slot wie ein Fehler
+  aus.
+- **Nichts davon wird gespeichert** — der Zustand ergibt sich aus Level und
+  angelegter Waffe.
+
+**`test/phone_layout_test.dart` scrollt jetzt jeden Bildschirm durch.**
+Vorher prüfte er nur, was über der Falz liegt: Was in einer `ListView`
+darunter steht, wird nicht gebaut — und was nicht gebaut wird, kann nicht
+überlaufen. Der Test hat damit den größeren Teil jedes Bildschirms nie
+angesehen. Nachgeholt hat er nichts gefunden, alle Bildschirme waren auch
+unten sauber.
+
+**Was am Charakter jetzt noch fehlt, ist nur der Inhalt der Slots** — die
+zwanzig Fähigkeiten. Die sind weiterhin nicht entschieden.
 
 ## Der Kampf sieht jetzt aus wie ein Kampf — 21.08.2026
 
@@ -229,7 +293,14 @@ Reihenfolge offen. Vom Charakter-Konzept ist **Name und Titel gebaut**
    `packages/theory` auf Knoten mit Kindern umbauen, Punkteökonomie,
    Fähigkeitsslots. Der sichtbarste Teil ist die Baumdarstellung —
    `skill_tree_screen.dart` zeigt heute eine Liste, ein Baum braucht etwas
-   anderes. Name und Titel sind aus dieser Liste heraus.
+   anderes. **Vom Bildschirm selbst fehlen nur noch die Fähigkeitsslots**
+   — Name, Titel, Levelbalken, Beständigkeit und das Ausrüstungsraster
+   stehen. Die Punkteökonomie ist die Voraussetzung: Ohne Fähigkeitspunkte
+   haben die Slots nichts zu verteilen.
+
+   Was am Bildschirm danach noch offen bleibt, ist klein und hängt an
+   nichts: Errungenschaften und Streaks als eigene Knöpfe. **Freunde**
+   braucht als Einziges einen Server.
 2. **Die zwanzig Fähigkeiten festlegen** — Wirkung, Energiekosten,
    Aufwertungspfad, Zuordnung zu Waffen. Ohne sie sind die Slots leer.
 3. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
