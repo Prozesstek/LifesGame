@@ -15,7 +15,10 @@ freischalten → täglich abhaken → Werte steigen → Gold sammeln → Ausrüs
 kaufen → nächsten Gegner schlagen. Alles davon überlebt jetzt einen
 Neustart.
 
-Auf dem Startbildschirm ist **keine Kachel mehr gesperrt**.
+Seit dem 22.08. gibt es **eine** Sperre wieder, und sie ist gewollt:
+Der **Kampf** wartet, bis das Handbuch durch ist
+([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)). Mit nur
+einem Fähigkeitsslot wäre der erste Gegner unschlagbar.
 
 ```bash
 flutter run -d chrome
@@ -101,42 +104,77 @@ flutter run -d chrome
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
 
-## Der Charakterbildschirm ist vollständig — bis auf die Fähigkeiten — 22.08.2026
+## Sitzung 22.08.2026: der Charakter ist fertig, und der Kern-Loop
+schließt sich
 
-Die drei kleinen Löcher aus ADR-0013 sind zu. **Kein neuer ADR**: Hier wurde
-nichts entschieden, was nicht schon in ADR-0013 stand — die Skizze dort war
-die Vorlage.
+Vier Pull Requests, alle auf `main` (#9, #10, #13, #12). Drei Blöcke,
+in dieser Reihenfolge gebaut — und ein Befund am Ende, der die
+Richtung für morgen bestimmt.
 
-- **Die Streak steht endlich auf dem Charakterbildschirm.** Das war Loch 5
-  von fünf und das letzte offene. Drei Zahlen statt einer: laufende Kette,
-  Bestwert, Häkchen gesamt.
-- **`HabitTracker.currentBestStreak(today)`** ist neu in `packages/habits`
-  — die längste **laufende** Kette über alle Gewohnheiten. Das Gegenstück
-  zu `longestStreak`: Diese Zahl **darf** fallen, und das ist ihr Zweck.
-  Gerechnet wird sie über `currentStreak`, damit die Regel „wann lebt eine
-  Kette" nur an einer Stelle steht.
-- **Der Satz unter den Zahlen trägt die Aussage.** Bei gerissener Kette
-  steht dort „Der Bestwert bleibt — verpasste Tage nehmen nichts weg".
-  Ohne ihn läse sich eine 0 wie ein Rückschritt, und das Konzept schließt
-  Strafe fürs Verpassen aus (3.7, ADR-0008).
-- **Levelbalken im Kopf**, wie in der ADR-0013-Skizze. Die Zahlen lagen
-  fertig in `PlayerLevel` — es wurde nichts nachgerechnet.
-- **Ausrüstung als 6er-Raster** statt sechs Zeilen. Das Ablegen ist dabei
-  ins Auswahlblatt gewandert; im Raster ist kein Platz für einen zweiten
-  Knopf. Eine Kachel unterscheidet jetzt „leer" (gekauft, nicht angelegt)
-  von „nichts gekauft".
-- `test/phone_layout_test.dart` prüft den Charakterbildschirm jetzt mit
-  **voller Ausrüstung** — leere Kacheln haben keine Namen, die überlaufen
-  könnten.
+### 1. Der Charakterbildschirm ist vollständig (#9)
 
-**Was am Charakter noch fehlt, ist nur noch der große Block:** die
-Fähigkeitsslots und die zwanzig Fähigkeiten dahinter — und die sind nicht
-entschieden.
+Die drei kleinen Löcher aus ADR-0013 sind zu, plus die Slots aus
+[ADR-0016](../decisions/0016-faehigkeitsslots-vor-den-faehigkeiten.md).
 
-## Der Kampf wartet jetzt auf das Handbuch — 22.08.2026
+- **Die Streak steht endlich auf dem Charakterbildschirm.** Das war
+  Loch 5 von fünf und das letzte offene. Drei Zahlen statt einer:
+  laufende Kette, Bestwert, Häkchen gesamt.
+- **`HabitTracker.currentBestStreak(today)`** ist neu — die
+  längste **laufende** Kette über alle Gewohnheiten. Das Gegenstück
+  zu `longestStreak`: Diese Zahl **darf** fallen, und das ist ihr
+  Zweck. Gerechnet wird sie über `currentStreak`, damit die Regel
+  „wann lebt eine Kette" nur an einer Stelle steht.
+- **Der Satz unter den Zahlen trägt die Aussage.** Bei gerissener
+  Kette steht dort „Der Bestwert bleibt — verpasste Tage nehmen nichts
+  weg". Ohne ihn läse sich eine 0 wie ein Rückschritt, und das
+  Konzept schließt Strafe fürs Verpassen aus (3.7, ADR-0008).
+- **Levelbalken im Kopf**, wie in der ADR-0013-Skizze. Die Zahlen
+  lagen fertig in `PlayerLevel` — es wurde nichts nachgerechnet.
+- **Ausrüstung als 6er-Raster.** Das Ablegen ist ins Auswahlblatt
+  gewandert; im Raster ist kein Platz für einen zweiten Knopf. Eine
+  Kachel unterscheidet jetzt „leer" (gekauft, nicht angelegt) von
+  „nichts gekauft".
+- **`AbilitySlots` in `packages/progression`** — Slot 1 ab Level 1, die
+  drei freien auf 3 / 6 / 10. Die Zahl liegt bei der Levelkurve, weil
+  ein Slot das ist, was ein *Levelaufstieg gibt* (ADR-0012), nicht was
+  eine Fähigkeit mitbringt.
 
-Die Antwort auf den Befund von unten ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)):
-Die Kampf-Kachel ist gesperrt, bis jede Lektion des freien Zweigs
+**`test/phone_layout_test.dart` scrollt seither jeden Bildschirm
+durch.** Vorher prüfte er nur, was über der Falz liegt: Was in einer
+`ListView` darunter steht, wird nicht gebaut — und was nicht gebaut
+wird, kann nicht überlaufen. Der Test hat damit den größeren Teil
+jedes Bildschirms nie angesehen. Nachgeholt hat er nichts gefunden.
+
+### 2. Fähigkeiten lassen sich wählen (#10, #13)
+
+[ADR-0017](../decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)
+legt zwanzig Fähigkeiten aus drei Quellen fest. Gebaut sind die
+**neun**, für die die Engine schon reicht — fünf Waffen plus
+Kraftschlag, Zehrung, Sammeln, Atemzug. Der Weg **wählen → gespeichert
+→ im Kampf spürbar** funktioniert.
+
+- **`packages/abilities`** (siebtes Package) kennt weder `combat` noch
+  `gear` noch `habits` — es hält Ids und Bedingungen. 26 Tests.
+- **`test/abilities_seam_test.dart`** prüft die Naht, die kein Package
+  allein prüfen kann: jede Move-Id kommt in `combat` an, jede
+  Waffen-Id existiert im Laden, **jede Waffe im Laden bringt eine
+  Fähigkeit mit**, und **jeder Waffenmove erzeugt Energie statt sie zu
+  kosten**.
+- **Slot 1 ist nie leer.** Ohne Waffe greift der Kurzbogen. Auf Level 1
+  ist er der einzige offene Platz.
+- **Das Moveset friert beim Kampfstart ein.** Wer mitten im Kampf die
+  Waffe wechselt, würde sonst die Knöpfe unter dem eigenen Finger
+  austauschen.
+- **Der Waffenslot steht nicht im Spielstand** — er folgt aus der
+  Ausrüstung.
+- `packages/combat` bekam fünf neue Moves und `Moves.byId`, aber
+  **keine neue Mechanik**.
+
+### 3. Der Kampf wartet auf das Handbuch (#12)
+
+Die Antwort auf den Befund unten
+([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)): Die
+Kampf-Kachel ist gesperrt, bis jede Lektion des freien Zweigs
 „Gewohnheiten" bestanden ist.
 
 **Warum das die richtige Bedingung ist, und nicht irgendeine:** Das
@@ -149,54 +187,22 @@ Handbuch ist exakt so lang, dass es den zweiten Fähigkeitsslot öffnet.
 
 Level 3 braucht 225 XP. Vier Lektionen liegen fünf Punkte darunter.
 Die Sperre fällt also genau in dem Moment, in dem der Spieler seinen
-zweiten Move bekommt — und erst mit zwei Moves ist der erste Kampf
-zu gewinnen.
+zweiten Move bekommt.
 
 **Das ist gemessen, nicht entworfen.** Wer an `TheoryRewards`, an der
 Levelkurve oder an der Länge des Zweigs dreht, kann den Zusammenhang
 zerstören, ohne es zu merken. `test/progression_test.dart` hält ihn
-deshalb fest — in beide Richtungen: dass fünf Lektionen reichen **und**
-dass vier es nicht tun.
+deshalb fest — in beide Richtungen: dass fünf Lektionen reichen
+**und** dass vier es nicht tun.
 
-- Die Kachel bleibt sichtbar und nennt den Weg („Erst das Handbuch:
-  noch 3 Lektionen in Gewohnheiten"), statt zu verschwinden. Hausregel
-  des Startbildschirms, zum dritten Mal angewandt.
-- `handbookDoneProvider` und `handbookRemainingProvider` in
-  `theory_controller.dart`. Die Zweig-Id steht als
-  `handbookBranchId` an einer Stelle.
+Die Kachel bleibt sichtbar und nennt den Weg („Erst das Handbuch:
+noch 3 Lektionen in Gewohnheiten"), statt zu verschwinden.
 
-## Fähigkeiten lassen sich wählen — der Kreis ist geschlossen — 22.08.2026
+### Der Befund, der die Sperre ausgelöst hat
 
-`packages/abilities` steht, und der Weg **Fähigkeit wählen → gespeichert
-→ im Kampf spürbar** funktioniert
-([ADR-0017](../decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
-
-Gebaut sind die **neun** Fähigkeiten, für die die Engine schon reicht —
-fünf Waffen plus Kraftschlag, Zehrung, Sammeln, Atemzug. `packages/combat`
-hat dafür fünf neue Moves und eine Suche (`Moves.byId`) bekommen, aber
-keine neue Mechanik.
-
-- **`packages/abilities`** kennt weder `combat` noch `gear` noch `habits` —
-  es hält Ids und Bedingungen. 26 Tests.
-- **`test/abilities_seam_test.dart`** prüft die Naht, die kein Package
-  allein prüfen kann: dass jede Move-Id in `combat` ankommt, jede
-  Waffen-Id im Laden existiert, **jede Waffe im Laden eine Fähigkeit
-  mitbringt** und jeder Waffenmove Energie erzeugt statt kostet.
-- **Slot 1 ist nie leer.** Ohne Waffe greift der Kurzbogen. Auf Level 1
-  ist er der einzige offene Platz — wäre er leer, hätte ein frischer
-  Charakter keinen einzigen Knopf im Kampf.
-- **Das Moveset friert beim Kampfstart ein.** Wer mitten im Kampf die
-  Waffe wechselt, würde sonst die Knöpfe unter dem eigenen Finger
-  austauschen.
-- **Der Waffenslot steht nicht im Spielstand** — er folgt aus der
-  Ausrüstung.
-
-## Der Befund aus der Simulation: ein Move reicht nicht — 22.08.2026
-
-`tool/balance_sim.dart` spielt jetzt das **gesperrte** Moveset statt vier
-fester Moves. Das Ergebnis ist der eigentliche Ertrag dieser Sitzung.
-
-**Mit Tag-0-Werten (ATK 13, HP 160, DEF 8, EN 8) gegen den Wegelagerer:**
+`tool/balance_sim.dart` spielt jetzt das **gesperrte** Moveset statt
+vier fester Moves. Mit Tag-0-Werten (ATK 13, HP 160, DEF 8, EN 8)
+gegen den Wegelagerer:
 
 | Moves | Siegquote |
 |---|---|
@@ -206,63 +212,24 @@ fester Moves. Das Ergebnis ist der eigentliche Ertrag dieser Sitzung.
 | 4 | 57 % |
 
 **Ein Move ist nicht knapp, sondern unmöglich.** Der Bogen allein
-(power 1,0) richtet rund 10,6 Schaden je Runde an, der Wegelagerer 15,3 —
-das Rennen ist nicht zu gewinnen, egal wie lange es dauert. Ohne einen
+richtet rund 10,6 Schaden je Runde an, der Wegelagerer 15,3 — das
+Rennen ist nicht zu gewinnen, egal wie lange es dauert. Ohne einen
 Move, der Energie *ausgibt*, fehlt der Auszahlungsmoment.
 
-**Das trifft aber nur, wer noch gar nichts getan hat.** Der freie Zweig
-„Gewohnheiten" — das Handbuch der App, kostet keinen Theoriepunkt
-(ADR-0012) — gibt allein **275 XP und damit Level 3**, also den zweiten
-Slot. Wer das Handbuch liest, bevor er kämpft, hat zwei Moves und
-gewinnt. Die Reihenfolge „erst lesen, dann kämpfen" ergibt sich damit
-von selbst — **aber sie ist nirgends entschieden und nirgends gesagt.**
-Ein Spieler, der sofort auf „Kampf" tippt, läuft in einen unschlagbaren
-Gegner.
+**Zwei Zahlen aus derselben Tabelle, die stutzig machen sollten:**
+Drei Moves sind *schlechter* als zwei. Das liegt an der Simulation,
+nicht am Spiel: Sie steuert den Spieler mit `SimpleEnemyPolicy`, also
+einem Bot, und der wählt mit mehr Möglichkeiten schlechter. Ein Mensch
+entscheidet besser. **Die Werte für drei und vier Moves sind deshalb
+pessimistisch** — die für einen Move nicht, dort gibt es nichts zu
+entscheiden.
 
-**Zwei Zahlen aus derselben Tabelle, die stutzig machen sollten:** Drei
-Moves sind *schlechter* als zwei (57 % gegen 100 %). Das liegt an der
-Simulation, nicht am Spiel: Sie steuert den Spieler mit
-`SimpleEnemyPolicy`, also einem Bot, und der wählt mit mehr
-Möglichkeiten schlechter. Ein Mensch entscheidet besser. **Die Werte
-für drei und vier Moves sind deshalb pessimistisch** — die für einen
-Move nicht, dort gibt es nichts zu entscheiden.
-
-**Nebenbefund, gemessen:** Die Giftklingen-Teilung aus ADR-0017 hat den
-Wegelagerer an Tag 0 von 61 % auf 45 % gedrückt (bei noch vier festen
-Moves), den Bergwächter an Tag 30 von 34 % auf 39 % gehoben. Beide
-Seiten haben die Schwächung verloren; früh trifft es den Spieler härter,
-spät den Gegner. Sie kommt mit *Blöße finden* zurück, wenn die elf
-übrigen Fähigkeiten gebaut sind.
-
-## Die Fähigkeitsslots stehen — ohne Fähigkeiten — 22.08.2026
-
-Vier Plätze auf dem Charakterbildschirm, die mit dem Level nach und nach
-aufgehen ([ADR-0016](../decisions/0016-faehigkeitsslots-vor-den-faehigkeiten.md)).
-
-- **`AbilitySlots` in `packages/progression`** — Slot 1 ab Level 1, die
-  drei freien auf 3 / 6 / 10. Die Zahl liegt bei der Levelkurve, weil ein
-  Slot das ist, was ein *Levelaufstieg gibt* (ADR-0012), nicht was eine
-  Fähigkeit mitbringt. 23 Tests.
-- **Slot 1 zeigt die getragene Waffe.** Was dort landet, ist laut ADR-0013
-  keine Wahl, sondern folgt aus der Ausrüstung — und das lässt sich
-  zeigen, bevor eine einzige Fähigkeit existiert.
-- **Gesperrte Slots nennen ihre Stufe** („ab Level 6") statt zu fehlen.
-  Hausregel aus ADR-0013.
-- **Der Satz darunter ist Absicht:** „Die Fähigkeiten selbst kommen noch —
-  die Plätze stehen schon." Ohne ihn sähe ein leerer Slot wie ein Fehler
-  aus.
-- **Nichts davon wird gespeichert** — der Zustand ergibt sich aus Level und
-  angelegter Waffe.
-
-**`test/phone_layout_test.dart` scrollt jetzt jeden Bildschirm durch.**
-Vorher prüfte er nur, was über der Falz liegt: Was in einer `ListView`
-darunter steht, wird nicht gebaut — und was nicht gebaut wird, kann nicht
-überlaufen. Der Test hat damit den größeren Teil jedes Bildschirms nie
-angesehen. Nachgeholt hat er nichts gefunden, alle Bildschirme waren auch
-unten sauber.
-
-**Was am Charakter jetzt noch fehlt, ist nur der Inhalt der Slots** — die
-zwanzig Fähigkeiten. Die sind weiterhin nicht entschieden.
+**Nebenbefund, gemessen:** Die Giftklingen-Teilung aus ADR-0017 hat
+den Wegelagerer an Tag 0 von 61 % auf 45 % gedrückt (bei noch vier
+festen Moves), den Bergwächter an Tag 30 von 34 % auf 39 % gehoben.
+Beide Seiten haben die Schwächung verloren; früh trifft es den Spieler
+härter, spät den Gegner. Sie kommt mit *Blöße finden* zurück, wenn die
+elf übrigen Fähigkeiten gebaut sind.
 
 ## Der Kampf sieht jetzt aus wie ein Kampf — 21.08.2026
 
@@ -388,56 +355,87 @@ Körper. Der Ausbau von Körper repariert deshalb nicht nur den Baum.
 
 ## Als Nächstes
 
-Reihenfolge offen. Vom Charakter-Konzept ist **Name und Titel gebaut**
-(ADR-0014), der Rest steht noch aus.
+**Der Charakterbildschirm ist fertig.** Von ADR-0013 fehlt nichts mehr
+außer den Fähigkeitspunkten und den Knöpfen für Errungenschaften,
+Streaks und Freunde. Der Kern-Loop schließt sich: Lektion — Vorlage —
+Häkchen — Erfahrung — Gold — Ausrüstung — Fähigkeit — Kampf.
 
-1. **Charakter weiterbauen** (ADR-0012, ADR-0013): Baumstruktur in
-   `packages/theory` auf Knoten mit Kindern umbauen, Punkteökonomie,
-   Fähigkeitsslots. Der sichtbarste Teil ist die Baumdarstellung —
-   `skill_tree_screen.dart` zeigt heute eine Liste, ein Baum braucht etwas
-   anderes. **Vom Bildschirm selbst fehlen nur noch die Fähigkeitsslots**
-   — Name, Titel, Levelbalken, Beständigkeit und das Ausrüstungsraster
-   stehen. Die Punkteökonomie ist die Voraussetzung: Ohne Fähigkeitspunkte
-   haben die Slots nichts zu verteilen.
+**1. Drei Waffen in den Laden — und dafür `catalog_test.dart`
+umbauen.**
 
-   Was am Bildschirm danach noch offen bleibt, ist klein und hängt an
-   nichts: Errungenschaften und Streaks als eigene Knöpfe. **Freunde**
-   braucht als Einziges einen Server.
-2. **Die elf übrigen Fähigkeiten** (ADR-0017). Sie brauchen zuerst
-   Arbeit in `packages/combat`: einen verallgemeinerten
-   `StatModifier`, in dem `DefenseDown` aufgeht, plus drei neue
-   Mechaniken (anteilige Heilung, eigene Schwächungen entfernen,
-   Gift zünden). Die neun engine-freien stehen.
+Entschieden am 22.08.: Die fünf Waffen sind **Alternativen zum
+ähnlichen Preis**, keine Leiter. Man kauft die zweite Waffe für einen
+anderen Rhythmus, nicht für mehr Zahlen — so wollte es ADR-0017
+(„je ein Rhythmus").
 
-   **Vorher zu entscheiden:**
-   - **Der Laden braucht drei Waffen mehr**, und damit eine
-     Entscheidung: Sind die fünf Waffen *Alternativen* zum
-     ähnlichen Preis (ADR-0017: je ein Rhythmus) oder eine Leiter?
-     Heute erzwingt `catalog_test.dart` eine Leiter — teurer muss
-     besser sein. Beides zugleich geht nicht.
-3. **Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das Stück,
-   das im MVP-Schnitt noch fehlt. Offen bleibt die Niederlagen-Regel
-   (`konzept.md` Punkt 3): verfallener Eintritt plus Neustart bestraft
-   doppelt.
-4. **Tränke und Wiederbelebung** — bewusst mit dem Dungeon zusammen.
-5. **Kampfsystem-Umbau** — es liegt eine Design-Notiz von Frederik vor
-   (`Kampfsystem.docx`, noch nicht im Repo): Initiative über ein Minispiel
-   mit drei Situationen, Attacken in Angriff und Ausweichen geteilt,
-   Kontern, dazu ein Sparring-Tutorial beim Lieutenant, das in die
-   Bibliothek und damit in die Theorie überleitet. **Weiterhin nicht
-   entschieden** — ADR-0015 hat nur das Bild angefasst, nicht die Regeln.
-6. **Tageswechsel bei laufender App** — `todayProvider` rechnet sich nicht
-   von selbst neu. Wer die App über Mitternacht offen lässt, sieht bis zum
-   Neustart den gestrigen Tag. Ein Wecker auf Mitternacht behebt das.
-7. **Lebensbalken an die Zeitachse hängen** — sie springen heute sofort,
-   während das Geschoss noch fliegt (ADR-0015). Der sichtbarste Rest der
-   Kampfdarstellung.
-8. **Rive-Animationen** statt der gezeichneten Figuren in
-   `lib/combat/battle/fighter.dart`. Die Schnittstelle steht dafür bereit.
+**Das kollidiert mit einer bestehenden Regel.** `catalog_test.dart`
+erzwingt heute „teurer muss auch besser sein" (ADR-0011). Für
+Sidegrades gilt das nicht mehr. Der Test muss die Regel innerhalb
+einer Preisstufe lockern, ohne sie zwischen den Stufen aufzugeben —
+sonst ist der Laden wieder beliebig. Dafür braucht es einen ADR, weil
+es eine Entscheidung von ADR-0011 zurücknimmt.
 
-**Balance ist bewusst zurückgestellt.** Erst fertig bauen, dann tarieren.
-Mit drei aus zwanzig Fähigkeiten plus Waffe wird sie ohnehin eine
-Stichprobe statt einer Rechnung.
+Erst danach ist ADR-0017s Kernaussage überhaupt überprüfbar: Heute
+geben **beide** Klingen im Laden dieselbe Fähigkeit, die Waffe
+bestimmt also nichts.
+
+**2. Die elf übrigen Fähigkeiten** (ADR-0017). Sie brauchen zuerst
+Arbeit in `packages/combat`: einen verallgemeinerten `StatModifier`,
+in dem `DefenseDown` aufgeht, plus drei neue Mechaniken (anteilige
+Heilung, eigene Schwächungen entfernen, Gift zünden).
+
+Mit ihnen kommt auch *Blöße finden* zurück — die Schwächung, die
+`Zehrung` bei der Teilung verloren hat.
+
+**Und dann ist ADR-0018 neu zu prüfen:** Sobald eine Waffe mit anderem
+Rhythmus den ersten Kampf allein tragen kann, wird aus der Sperre vor
+dem Kampf Bevormundung statt Hilfe.
+
+**3. Punkteökonomie und Baumumbau** (ADR-0012, ADR-0013): Baumstruktur
+in `packages/theory` auf Knoten mit Kindern, Theoriepunkt je Stufe,
+Fähigkeitspunkt auf jeder dritten. `AbilitySlots` ist der vorgesehene
+Platz dafür und im Code als unvollständig markiert.
+
+Der sichtbarste Teil ist die Baumdarstellung — `skill_tree_screen.dart`
+zeigt heute eine Liste, ein Baum braucht etwas anderes. Und erst mit
+echten Knoten bekommen die vier `FromStart`-Fähigkeiten ihre
+Bedingung; heute sind sie von Anfang an offen, weil ihre Knoten
+(Sport, Ernährung, Schlaf, Erholung) noch nicht existieren.
+
+**4. Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das
+Stück, das im MVP-Schnitt noch fehlt. Offen bleibt die
+Niederlagen-Regel (`konzept.md` Punkt 3): verfallener Eintritt plus
+Neustart bestraft doppelt.
+
+**5. Tränke und Wiederbelebung** — bewusst mit dem Dungeon zusammen.
+
+**6. Kampfsystem-Umbau** — es liegt eine Design-Notiz von Frederik vor
+(`Kampfsystem.docx`, **noch nicht im Repo** und am 22.08. auch nicht
+auffindbar): Initiative über ein Minispiel mit drei Situationen,
+Attacken in Angriff und Ausweichen geteilt, Kontern, dazu ein
+Sparring-Tutorial beim Lieutenant, das in die Bibliothek und damit in
+die Theorie überleitet. **Weiterhin nicht entschieden** — ADR-0015 hat
+nur das Bild angefasst, ADR-0017 hat bewusst nichts davon
+vorweggenommen.
+
+**7. Lebensbalken an die Zeitachse hängen** — sie springen heute
+sofort, während das Geschoss noch fliegt (ADR-0015).
+
+**8. Tageswechsel bei laufender App** — `todayProvider` rechnet
+sich nicht von selbst neu. Wer die App über Mitternacht offen lässt,
+sieht bis zum Neustart den gestrigen Tag.
+
+**9. Große Schrift bricht das Layout** — bei `textScaler` 2,0
+läuft der Gewohnheiten-Bildschirm um 149 Pixel über, das
+Ausrüstungsraster um 8,5. Projektweite Lücke, es gibt nirgends einen
+Test dafür.
+
+**10. Rive-Animationen** statt der gezeichneten Figuren in
+`lib/combat/battle/fighter.dart`. Die Schnittstelle steht bereit.
+
+**Balance ist bewusst zurückgestellt.** Erst fertig bauen, dann
+tarieren. Mit drei aus fünfzehn plus Waffe wird sie ohnehin eine
+Stichprobe statt einer Rechnung (ADR-0013).
 
 ## Signale, an denen Entscheidungen neu anstehen
 
@@ -453,10 +451,24 @@ Beides ist heute richtig und wird es nicht bleiben:
 
 ## Aufgabenteilung
 
-Es gibt jetzt fünf saubere Nähte: `packages/combat` gibt `CombatEvent`s aus,
-die Flame abspielt — `packages/theory` liefert Inhalte — `packages/progression`
-die Levelkurve — `packages/habits` Streaks und Charakterwerte —
-`packages/gear` Preise und Boni. Dazu der Speicher-Anschluss in `lib/save/`.
+Es gibt jetzt **sieben** saubere Nähte, und keine kennt die andere:
+
+| Package | liefert |
+|---|---|
+| `combat` | `CombatEvent`s, die Flame abspielt |
+| `theory` | Inhalte und Lernfortschritt |
+| `progression` | Levelkurve und Fähigkeitsslots |
+| `habits` | Streaks und Charakterwerte |
+| `gear` | Preise und Boni |
+| `identity` | Name und verdiente Titel |
+| `abilities` | woher eine Fähigkeit kommt |
+
+Dazu der Speicher-Anschluss in `lib/save/`.
+
+**Wo sie sich treffen, steht ein Test in der App**, weil kein Package
+es allein prüfen kann: `habits_theory_test.dart`,
+`abilities_seam_test.dart` und `progression_test.dart`. Wer eine Naht
+anfasst, lässt sie laufen.
 
 Damit lässt sich parallel arbeiten, ohne sich zu blockieren: Logik/Balance,
 Darstellung, Inhalte, Ökonomie.

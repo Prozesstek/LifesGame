@@ -195,15 +195,29 @@ in zwei Tagen komplett, oder der Laden ist leer gekauft, bevor er interessant
 wird. `flutter test test/progression_test.dart` spielt alles durch und meldet
 genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 
-**Der Kern-Loop verbindet alle sechs Packages.** Lektion (`theory`) schaltet
+**Der Kern-Loop verbindet alle sieben Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
-Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), Werte plus
-Ausrüstung gehen in den Kampf (`combat`), Streaks und Lektionen verdienen
-Titel (`identity`). Es gibt genau vier Stellen, an denen etwas zusammenläuft:
-`totalXpProvider` für Erfahrung, `goldProvider` für Gold,
-`equippedStatsProvider` für die Kampfwerte und `titleStatsProvider` für die
-Titelbedingungen. In den Kampf gehen sie ausschließlich über `_freshFight()`
-in `combat_controller.dart`.
+Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
+eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
+gehen in den Kampf (`combat`), Streaks und Lektionen verdienen Titel
+(`identity`).
+
+Es gibt genau **sechs** Stellen, an denen etwas zusammenläuft:
+
+| Provider | führt zusammen |
+|---|---|
+| `totalXpProvider` | Erfahrung aus Theorie und Gewohnheiten |
+| `goldProvider` | Gold aus allen Quellen |
+| `equippedStatsProvider` | Kampfwerte aus Gewohnheiten und Ausrüstung |
+| `titleStatsProvider` | die drei Zahlen hinter den Titeln |
+| `abilityProgressProvider` | Waffe, Streak und Theorie für die Freischaltung |
+| `activeMovesProvider` | das Moveset, mit dem gekämpft wird |
+
+`activeMovesProvider` ist die einzige Stelle, an der die Freischaltbedingung
+für Fähigkeiten **gilt** — der Spielstand hält eine Wahl, geprüft wird
+beim Zusammenstellen. In den Kampf gehen sie ausschließlich über
+`_freshFight()` in `combat_controller.dart`, und das Moveset friert dort
+beim Start ein.
 
 **Fähigkeiten hängen an Ids, und Ids können ins Leere zeigen.**
 `packages/abilities` kennt weder `combat` noch `gear` — es hält nur
