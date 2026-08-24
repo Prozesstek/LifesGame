@@ -1,7 +1,15 @@
 # ADR-0018: Der Kampf öffnet sich erst nach dem Handbuch
 
 **Datum:** 22.08.2026
-**Status:** Aktiv
+**Status:** Ergänzt durch ADR-0020
+
+> **Was ADR-0020 ändert:** Die Sperre hängt nicht mehr am Handbuch allein,
+> sondern zusätzlich an der Zahl der Moves. Der Grund ist ADR-0019 — seit
+> die vier wählbaren Fähigkeiten an Theorieknoten hängen, kann der zweite
+> Slot aufgehen und leer bleiben.
+> **Was hier gültig bleibt:** die Begründung und die Arithmetik. Fünf
+> Lektionen geben Level 3, vier nicht, und mit einem Move steht der erste
+> Gegner bei 0 %.
 **Entschieden von:** Frederik
 
 ## Kontext

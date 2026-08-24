@@ -11,6 +11,10 @@ import 'ability.dart';
 /// Sammeln und Atemzug. Die übrigen elf brauchen einen verallgemeinerten
 /// Statuseffekt und drei neue Mechaniken in `package:combat`; sie kommen
 /// als Einträge dazu, ohne dass hier etwas umgebaut werden müsste.
+///
+/// **Seit ADR-0019 hängen die vier wählbaren an Knoten** statt offen zu
+/// sein. Alle vier liegen unter *Körper* — das ist Absicht: Es sind die
+/// Themen, aus denen im Spiel Angriff und Trefferpunkte werden.
 abstract final class AbilityCatalog {
   /// Was Slot 1 trägt, wenn keine Waffe angelegt ist.
   ///
@@ -44,19 +48,23 @@ abstract final class AbilityCatalog {
   static const List<Ability> choosable = <Ability>[
     Ability(
       moveId: 'heavy_attack',
-      source: FromStart(),
-      requirement: 'Von Anfang an',
+      source: FromTheory('koerper-bewegung'),
+      requirement: 'Körper: „Die kleinste Dosis, die wirkt" bestehen',
     ),
     Ability(
       moveId: 'poison_strike',
-      source: FromStart(),
-      requirement: 'Von Anfang an',
+      source: FromTheory('koerper-erholung'),
+      requirement: 'Körper: „Erholung ist Teil der Arbeit" bestehen',
     ),
-    Ability(moveId: 'mend', source: FromStart(), requirement: 'Von Anfang an'),
+    Ability(
+      moveId: 'mend',
+      source: FromTheory('koerper-ernaehrung'),
+      requirement: 'Körper: „Essen ist ein Umgebungsproblem" bestehen',
+    ),
     Ability(
       moveId: 'breath',
-      source: FromStart(),
-      requirement: 'Von Anfang an',
+      source: FromTheory('koerper-schlaf'),
+      requirement: 'Körper: „Schlaf ist keine verlorene Zeit" bestehen',
     ),
   ];
 

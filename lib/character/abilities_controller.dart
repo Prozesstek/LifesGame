@@ -3,7 +3,6 @@ import 'package:combat/combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
-import 'package:theory/theory.dart';
 
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
@@ -58,12 +57,13 @@ final abilityProgressProvider = Provider<AbilityProgress>((ref) {
   return AbilityProgress(
     equippedWeaponId: loadout.equippedIn(GearSlot.waffe)?.id,
     longestStreak: habits.longestStreak,
-    // **Abschliessen, nicht öffnen.** ADR-0013 nennt das den einzigen
-    // Anreiz im ganzen Spiel, ein Thema fertig zu machen. Die Regel dafür
-    // steht in `package:theory` und wird hier nur benutzt.
-    completedBranchIds: <String>{
-      for (final branch in theoryTree.branches)
-        if (theory.isBranchComplete(branch)) branch.id,
+    // **Bestanden, nicht bezahlt.** Einen Knoten zu öffnen kostet einen
+    // Theoriepunkt; die Fähigkeit gibt es erst, wenn seine Seite sitzt
+    // (ADR-0013, ADR-0019). Die Regel steht in `package:theory` und wird
+    // hier nur benutzt.
+    passedNodeIds: <String>{
+      for (final node in ref.watch(theoryGraphProvider).nodes)
+        if (theory.isPassed(node.lesson.id)) node.id,
     },
   );
 });

@@ -3,6 +3,7 @@ import 'package:combat/combat.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
+import 'package:theory/theory.dart';
 
 /// Die Nähte zwischen `package:abilities`, `package:combat` und
 /// `package:gear`.
@@ -114,22 +115,69 @@ void main() {
       );
     });
 
-    test('ein frischer Charakter kann jeden Platz belegen, den er hat', () {
-      // Auf Level 1 gibt es keinen freien Platz — und ab Level 3 muss
-      // etwas da sein, das hineinpasst, sonst öffnet sich ein leeres
-      // Versprechen.
-      final offenOhneFortschritt = AbilityCatalog.unlockedBy(
-        const AbilityProgress.empty(),
-      );
+    test('jede Theoriefähigkeit zeigt auf einen Knoten, den es gibt', () {
+      for (final ability in AbilityCatalog.choosable) {
+        if (ability.source case FromTheory(:final nodeId)) {
+          expect(
+            theoryGraph.nodeById(nodeId),
+            isNotNull,
+            reason: '${ability.moveId} hängt an „$nodeId", den es nicht gibt.',
+          );
+        }
+      }
+    });
+
+    test('jeder Knoten mit Fähigkeit hat auch eine im Katalog', () {
+      // Die Naht geht in beide Richtungen: `unlocksAbility` am Knoten
+      // und `FromTheory` an der Fähigkeit müssen dasselbe Paar bilden.
+      for (final node in theoryGraph.nodes) {
+        if (node.unlocksAbility case final String moveId) {
+          final passend = AbilityCatalog.choosable.where(
+            (a) => a.source is FromTheory && a.moveId == moveId,
+          );
+
+          expect(
+            passend.length,
+            1,
+            reason: 'Knoten ${node.id} verspricht $moveId.',
+          );
+        }
+      }
+    });
+
+    test('wenn der zweite Platz aufgeht, ist eine Fähigkeit erreichbar', () {
+      // **Diese Prüfung hat die alte ersetzt.** Bis ADR-0019 stand hier,
+      // dass ohne jeden Fortschritt etwas Wählbares da sein muss —
+      // damals waren vier Fähigkeiten von Anfang an offen.
+      //
+      // Seit die vier an Knoten hängen, wandert die Zusage: Nicht
+      // *vorhanden* muss etwas sein, sondern **erreichbar**. Auf der
+      // Stufe, auf der der zweite Platz aufgeht, muss es einen Knoten
+      // geben, der eine Fähigkeit bringt, an einer kostenlosen Wurzel
+      // hängt und mit den Punkten dieser Stufe bezahlbar ist.
+      final level = AbilitySlots.levelForSlot(2)!;
+      final punkte = TheoryPoints.earnedAt(level);
+
+      final erreichbar = AbilityCatalog.choosable.where((ability) {
+        if (ability.source case FromTheory(:final nodeId)) {
+          final node = theoryGraph.nodeById(nodeId);
+          if (node == null) return false;
+
+          final elternteilOffen = node.parentIds.any(
+            (id) => theoryGraph.nodeById(id)?.isFree ?? false,
+          );
+          return elternteilOffen && node.cost <= punkte;
+        }
+        return false;
+      });
 
       expect(
-        offenOhneFortschritt.length,
-        greaterThanOrEqualTo(AbilitySlots.total - 1),
+        erreichbar,
+        isNotEmpty,
         reason:
-            'Ab Level ${AbilitySlots.levelForSlot(AbilitySlots.total)} sind '
-            '${AbilitySlots.total - 1} Plätze offen, aber nur '
-            '${offenOhneFortschritt.length} Fähigkeiten ohne Fortschritt '
-            'verfügbar.',
+            'Auf Level $level gibt es $punkte Theoriepunkte, aber keinen '
+            'erreichbaren Knoten mit Fähigkeit. Der zweite Platz ginge '
+            'auf ein leeres Versprechen auf.',
       );
     });
   });

@@ -1,8 +1,15 @@
 # ADR-0012: Der Theoriebaum wird ein echter Baum und öffnet sich über Theoriepunkte
 
 **Datum:** 18.08.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch ADR-0019
 **Entschieden von:** Frederik
+
+> **Was ADR-0019 ändert:** vier Wurzeln statt zwei, zwei Theoriepunkte je
+> Level statt einem, ein Knoten ist eine Seite mit drei Fragen statt eines
+> Themas mit Lektionen, vier Fähigkeiten aus dem Baum statt acht.
+> **Was hier gültig bleibt:** beliebige Tiefe, Punkte statt Levelsperren,
+> ein Punkt je Knoten unabhängig von der Tiefe, das freie Handbuch, keine
+> Klassenwahl.
 
 ## Kontext
 

@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import 'package:progression/progression.dart';
+
+import '../progression/level_provider.dart';
 import '../save/save_providers.dart';
 
 /// Bindeglied zwischen den Theorie-Inhalten und der Oberfläche.
@@ -21,6 +24,25 @@ class TheoryController extends Notifier<TheoryProgress> {
     final result = state.submit(lesson, answers);
     state = result.progress;
     return result;
+  }
+
+  /// Öffnet einen Knoten im Theoriegraphen und zahlt den Punkt.
+  ///
+  /// **[availablePoints] kommt von außen, und das ist kein Schönheits-
+  /// fehler.** Der Punktestand hängt über das Level am Theoriefortschritt
+  /// — also am eigenen Zustand. Würde dieser Notifier ihn selbst lesen,
+  /// entstünde genau der `CircularDependencyError` aus `gotchas.md`.
+  ///
+  /// Gibt zurück, ob geöffnet wurde. Die Bedingung selbst steht in
+  /// `package:theory`, nicht hier.
+  bool openNode(String nodeId, {required int availablePoints}) {
+    final graph = ref.read(theoryGraphProvider);
+    if (!state.canOpenNode(nodeId, graph, availablePoints: availablePoints)) {
+      return false;
+    }
+
+    state = state.openNode(nodeId);
+    return true;
   }
 }
 
@@ -60,4 +82,55 @@ final handbookRemainingProvider = Provider<int>((ref) {
   final progress = ref.watch(theoryProgressProvider);
 
   return branch.lessons.length - progress.passedCount(branch);
+});
+
+/// Der Theoriegraph aus ADR-0019 — vier Wurzeln, zwanzig Unterknoten.
+///
+/// Als Provider und nicht als Konstante, damit Tests einen kleineren
+/// Graphen unterschieben können.
+final theoryGraphProvider = Provider<TheoryGraph>((ref) => theoryGraph);
+
+/// Wie viele Theoriepunkte schon in Knoten stecken.
+///
+/// Abgeleitet aus dem Graphen, nicht gespeichert — wie das Gold.
+final spentTheoryPointsProvider = Provider<int>((ref) {
+  return ref
+      .watch(theoryProgressProvider)
+      .spentPointsIn(ref.watch(theoryGraphProvider));
+});
+
+/// Wie viele Theoriepunkte noch frei sind.
+///
+/// **Die einzige Stelle, an der Level und Baum zusammenkommen.** Zwei
+/// Punkte je Aufstieg stehen in `package:progression`, die Kosten am
+/// Knoten in `package:theory` — hier treffen sie sich.
+final availableTheoryPointsProvider = Provider<int>((ref) {
+  return TheoryPoints.availableAt(
+    level: ref.watch(playerLevelProvider).level,
+    spent: ref.watch(spentTheoryPointsProvider),
+  );
+});
+
+/// Bestandene Seiten insgesamt — Handbuch **und** Graph.
+///
+/// **Warum es diesen Provider gibt.** Bis ADR-0019 lagen alle Lektionen
+/// in `theoryTree`, und `passedCountIn(theoryTree)` war die ganze
+/// Wahrheit. Seither liegen zwölf der neunundzwanzig Seiten nur im
+/// Graphen — wer weiter die Zweige zählt, unterschlägt sie. Genau das
+/// war nach dem Umbau kurzzeitig der Fall, beim Titelfortschritt und auf
+/// dem Startbildschirm.
+final passedPagesProvider = Provider<int>((ref) {
+  final progress = ref.watch(theoryProgressProvider);
+
+  return progress.passedCount(ref.watch(handbookProvider)) +
+      progress.passedNodeCount(ref.watch(theoryGraphProvider));
+});
+
+/// Wie viele Seiten es insgesamt gibt.
+///
+/// Handbuch und Graph überschneiden sich nicht — das prüft
+/// `graph_content_test.dart`, damit hier nichts doppelt gezählt wird.
+final totalPagesProvider = Provider<int>((ref) {
+  return ref.watch(handbookProvider).lessonCount +
+      ref.watch(theoryGraphProvider).nodeCount;
 });

@@ -79,14 +79,30 @@ void main() {
   });
 
   group('Was wann offen ist', () {
-    test('Grundfähigkeiten sind ohne Fortschritt da', () {
-      // Sonst hätte ein frischer Charakter drei offene Slots und nichts,
-      // was hineinpasst.
+    test('ohne Fortschritt ist nichts Wählbares offen', () {
+      // **Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Knoten.**
+      // Vorher waren vier von Anfang an da, weil es keine Knoten gab.
+      //
+      // Das ist kein Loch, sondern verschiebt eine Zusage: Auf Level 1
+      // ist ohnehin nur Slot 1 offen (ADR-0016), und der trägt die
+      // Waffe. Dass niemand mit offenen Slots und leerer Auswahl
+      // dasteht, sichert die App über den Zugang zum Kampf.
       final offen = AbilityCatalog.unlockedBy(const AbilityProgress.empty());
 
-      expect(offen, isNotEmpty);
-      for (final ability in offen) {
-        expect(ability.source, isA<FromStart>(), reason: ability.moveId);
+      expect(offen, isEmpty);
+    });
+
+    test('ein bestandener Knoten öffnet genau seine Fähigkeit', () {
+      final offen = AbilityCatalog.unlockedBy(
+        const AbilityProgress(passedNodeIds: <String>{'koerper-bewegung'}),
+      );
+
+      expect(offen.map((a) => a.moveId), <String>['heavy_attack']);
+    });
+
+    test('alle vier wählbaren hängen an einem Theorieknoten', () {
+      for (final ability in AbilityCatalog.choosable) {
+        expect(ability.source, isA<FromTheory>(), reason: ability.moveId);
       }
     });
 
@@ -124,11 +140,11 @@ void main() {
       );
     });
 
-    test('eine Theoriefähigkeit braucht den abgeschlossenen Zweig', () {
+    test('eine Theoriefähigkeit braucht den bestandenen Knoten', () {
       const ability = Ability(
         moveId: 'test',
-        source: FromTheory('koerper'),
-        requirement: 'Körper abschliessen',
+        source: FromTheory('koerper-schlaf'),
+        requirement: 'Schlaf bestehen',
       );
 
       expect(
@@ -137,7 +153,7 @@ void main() {
       );
       expect(
         ability.isUnlockedBy(
-          const AbilityProgress(completedBranchIds: <String>{'koerper'}),
+          const AbilityProgress(passedNodeIds: <String>{'koerper-schlaf'}),
         ),
         isTrue,
       );
@@ -173,7 +189,10 @@ void main() {
         final offen = AbilityCatalog.unlockedBy(
           AbilityProgress(
             longestStreak: streak,
-            completedBranchIds: const <String>{'koerper', 'geist'},
+            passedNodeIds: const <String>{
+              'koerper-bewegung',
+              'koerper-schlaf',
+            },
           ),
         );
 

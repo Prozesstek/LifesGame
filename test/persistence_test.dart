@@ -187,6 +187,30 @@ void main() {
       expect(zweite.read(goldProvider), goldVorher);
     });
 
+    test('geöffnete Theorieknoten überleben den Neustart (ADR-0019)', () {
+      final store = InMemorySaveStore();
+      final erste = containerMit(const SaveData(), store);
+
+      // Level 2 heißt zwei Theoriepunkte — genug für einen Knoten.
+      const knoten = 'koerper-schlaf';
+      final geoeffnet = erste
+          .read(theoryProgressProvider.notifier)
+          .openNode(knoten, availablePoints: 2);
+
+      expect(geoeffnet, isTrue);
+
+      final stand = SaveData(theory: erste.read(theoryProgressProvider));
+
+      final zweite = containerMit(SaveData.decode(stand.encode()), store);
+      final graph = zweite.read(theoryGraphProvider);
+
+      expect(
+        zweite.read(theoryProgressProvider).isNodeOpened(knoten, graph),
+        isTrue,
+      );
+      expect(zweite.read(spentTheoryPointsProvider), 1);
+    });
+
     test('Name und Titel kommen wieder', () {
       final store = InMemorySaveStore();
       final erste = containerMit(mitStreak(3), store);

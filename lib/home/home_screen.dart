@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
-import 'package:theory/theory.dart';
 
 import '../character/character_screen.dart';
 import '../combat/combat_controller.dart';
@@ -28,10 +27,10 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progress = ref.watch(theoryProgressProvider);
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
-    final passed = progress.passedCountIn(theoryTree);
+    final passed = ref.watch(passedPagesProvider);
+    final totalPages = ref.watch(totalPagesProvider);
 
     final tracker = ref.watch(habitTrackerProvider);
     final unlockedHabits = ref.watch(unlockedHabitsProvider);
@@ -39,8 +38,8 @@ class HomeScreen extends ConsumerWidget {
     final activeHabits = tracker.activeTemplates;
     final enemy = ref.watch(selectedEnemyProvider);
     final equippedCount = ref.watch(loadoutProvider).equippedCount;
-    final handbookDone = ref.watch(handbookDoneProvider);
-    final handbookLeft = ref.watch(handbookRemainingProvider);
+    final combatOpen = ref.watch(combatUnlockedProvider);
+    final combatBlock = ref.watch(combatBlockReasonProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -69,22 +68,22 @@ class HomeScreen extends ConsumerWidget {
                   icon: Icons.account_tree_outlined,
                   title: 'Theorie',
                   subtitle:
-                      '${theoryTree.branchCount} Zweige, '
+                      'Vier Gebiete und das Handbuch, '
                       'Level ${level.level}',
-                  status: '$passed / ${theoryTree.lessonCount}',
+                  status: '$passed / $totalPages',
                   onTap: () => _open(context, const SkillTreeScreen()),
                 ),
                 const SizedBox(height: 10),
                 HubTile(
                   icon: Icons.sports_martial_arts,
                   title: 'Kampf',
-                  subtitle: _combatSubtitle(handbookLeft),
-                  status: handbookDone ? enemy.name : null,
+                  subtitle: combatBlock ?? 'Drei Gegner — Dungeon kommt später',
+                  status: combatOpen ? enemy.name : null,
                   // Gesperrt, bis das Handbuch durch ist (ADR-0018). Mit
                   // nur einem Move ist der erste Kampf nicht knapp,
                   // sondern unmöglich — und der Zweig gibt genau die
                   // Erfahrung, die den zweiten Slot öffnet.
-                  onTap: handbookDone
+                  onTap: combatOpen
                       ? () => _open(context, const EnemyPickerScreen())
                       : null,
                 ),
@@ -114,21 +113,6 @@ class HomeScreen extends ConsumerWidget {
 
   void _open(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
-  }
-
-  /// Solange das Handbuch offen ist, steht hier der Weg dorthin —
-  /// nicht die Absage.
-  ///
-  /// **Warum der Kampf überhaupt wartet** (ADR-0018): Auf Level 1 ist
-  /// nur der Waffenslot offen, und mit einem Move ist der erste Gegner
-  /// nicht knapp, sondern unschlagbar. Der Zweig gibt genau so viel
-  /// Erfahrung, dass der zweite Slot aufgeht.
-  static String _combatSubtitle(int remaining) {
-    if (remaining <= 0) return 'Drei Gegner — Dungeon kommt später';
-    if (remaining == 1) {
-      return 'Noch eine Lektion in Gewohnheiten, dann geht es los';
-    }
-    return 'Erst das Handbuch: noch $remaining Lektionen in Gewohnheiten';
   }
 
   /// Ohne freigeschaltete Vorlage steht hier der Weg dorthin, nicht das

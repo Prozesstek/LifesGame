@@ -9,7 +9,12 @@ Diese Dateien werden bei jedem Sitzungsstart automatisch mitgeladen — nicht al
 Link, sondern als Inhalt:
 
 @docs/context/state.md
+@docs/context/ziele.md
 @docs/context/gotchas.md
+
+`ziele.md` steht hier, weil eine Sitzung ohne Ziel in die falsche Richtung
+arbeiten kann, ohne dass es jemandem auffällt — und weil dort steht, was
+gerade **nicht** angefasst wird.
 
 `konzept.md`, `README.md` und die ADRs unter `docs/decisions/` bleiben bewusst
 Links: zu groß und zu selten geändert, um sie in jede Sitzung zu ziehen. Sie
@@ -237,21 +242,30 @@ nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decis
 
 ## Gedächtnis-Protokoll
 
-Diese vier Dateien sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
+Diese fünf Dateien sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
 nicht Nacharbeit:
 
 | Datei | Enthält | Wann aktualisieren |
 |---|---|---|
 | `konzept.md` | Produktvision, Systeme, MVP-Schnitt | wenn sich das Produkt ändert |
 | `docs/context/state.md` | Was fertig ist, woran gerade gearbeitet wird, was als Nächstes kommt | am Ende jeder Arbeitssitzung |
+| `docs/context/ziele.md` | **Wohin** es geht: Ziellinie, SMART-Ziele mit Termin, und was ausdrücklich *nicht* dazugehört | freitags die Ist-Spalten; bei Zielwechsel sofort |
 | `docs/decisions/NNNN-*.md` | **Warum** eine Entscheidung so fiel | sobald eine Entscheidung fällt, die man in drei Monaten hinterfragen würde |
 | `docs/context/gotchas.md` | Fallstricke, die Zeit gekostet haben | sobald etwas unerwartet war |
+
+`state.md` und `ziele.md` sind ein Paar und dürfen sich nie widersprechen:
+Was in `ziele.md` als erreicht gilt, steht in `state.md` unter „Fertig". Die
+Reihenfolge unter „Als Nächstes" folgt den Zielen, nicht umgekehrt.
 
 **Für Claude:** Am Ende jeder Sitzung, in der etwas Substanzielles passiert ist:
 `docs/context/state.md` aktualisieren. Bei einer Richtungsentscheidung zusätzlich
 einen ADR anlegen (Vorlage: `docs/decisions/TEMPLATE.md`, fortlaufend nummeriert).
 Niemals ADRs nachträglich umschreiben — überholte Entscheidungen bekommen den
 Status `Abgelöst durch ADR-NNNN`.
+
+Wird eine Aufgabe angefangen, die in `ziele.md` unter „Was **nicht** im MVP
+ist" steht, ist das ein Grund nachzufragen — nicht, sie stillschweigend zu
+erledigen.
 
 **Nicht ins Repo gehört:** persönliche Permissions (`.claude/settings.local.json`,
 ist gitignored), lokale Claude-Memory-Dateien unter `~/.claude/projects/`, IDE-Kram.

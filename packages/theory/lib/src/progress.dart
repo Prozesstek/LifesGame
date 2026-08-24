@@ -1,5 +1,6 @@
 import 'branch.dart';
 import 'lesson.dart';
+import 'node_graph.dart';
 import 'rewards.dart';
 import 'skill_tree.dart';
 
@@ -96,9 +97,11 @@ class LessonResult {
 /// Unveränderlich: [submit] gibt einen neuen Fortschritt zurück, statt
 /// diesen zu verändern.
 class TheoryProgress {
-  const TheoryProgress(this._records);
+  const TheoryProgress(this._records, [this._openedNodeIds = const <String>{}]);
 
-  const TheoryProgress.empty() : _records = const <String, LessonRecord>{};
+  const TheoryProgress.empty()
+      : _records = const <String, LessonRecord>{},
+        _openedNodeIds = const <String>{};
 
   /// Liest einen gespeicherten Fortschritt.
   ///
@@ -118,17 +121,99 @@ class TheoryProgress {
         if (record != null) records[lessonId] = record;
       }
     }
-    return TheoryProgress(records);
+
+    final opened = <String>{};
+    final rawNodes = json['openedNodes'];
+    if (rawNodes is List) {
+      for (final id in rawNodes) {
+        if (id is String) opened.add(id);
+      }
+    }
+
+    return TheoryProgress(records, opened);
   }
 
   final Map<String, LessonRecord> _records;
+
+  /// Knoten, für die ein Theoriepunkt bezahlt wurde (ADR-0019).
+  ///
+  /// **Kostenlose Knoten stehen hier nicht drin.** Wurzeln und das
+  /// Handbuch sind von selbst offen — sie kosten weder einen Punkt noch
+  /// einen Klick, also auch keinen Platz im Spielstand.
+  final Set<String> _openedNodeIds;
+
+  Set<String> get openedNodeIds => Set<String>.unmodifiable(_openedNodeIds);
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'records': <String, Object?>{
         for (final entry in _records.entries) entry.key: entry.value.toJson(),
       },
+      'openedNodes': _openedNodeIds.toList(),
     };
+  }
+
+  /// Öffnet einen Knoten. Gibt einen neuen Fortschritt zurück.
+  ///
+  /// Prüft **nicht**, ob die Punkte reichen oder ein Elternknoten offen
+  /// ist — das eine weiß `TheoryPoints`, das andere `TheoryGraph`. Hier
+  /// steht nur, was der Spielstand hält.
+  TheoryProgress openNode(String nodeId) {
+    if (_openedNodeIds.contains(nodeId)) return this;
+    return TheoryProgress(_records, <String>{..._openedNodeIds, nodeId});
+  }
+
+  /// Ob der Knoten offen ist — bezahlt oder von Haus aus kostenlos.
+  bool isNodeOpened(String nodeId, TheoryGraph graph) {
+    final node = graph.nodeById(nodeId);
+    if (node == null) return false;
+    return node.isFree || _openedNodeIds.contains(nodeId);
+  }
+
+  /// Alle offenen Knoten — bezahlte **und** kostenlose.
+  ///
+  /// Das ist die Menge, die `TheoryGraph.canOpen` erwartet. Ohne die
+  /// kostenlosen wäre kein einziger Unterknoten erreichbar, weil die
+  /// Wurzeln nie im Spielstand stehen.
+  Set<String> openIdsIn(TheoryGraph graph) {
+    return <String>{
+      ..._openedNodeIds,
+      for (final node in graph.nodes)
+        if (node.isFree) node.id,
+    };
+  }
+
+  /// Ob [nodeId] jetzt geöffnet werden könnte — Struktur **und** Preis.
+  ///
+  /// Der Punktestand kommt von außen herein, weil er über das Level am
+  /// Theoriefortschritt hängt. Ihn hier selbst zu holen wäre der Kreis
+  /// aus `gotchas.md`.
+  bool canOpenNode(
+    String nodeId,
+    TheoryGraph graph, {
+    required int availablePoints,
+  }) {
+    final node = graph.nodeById(nodeId);
+    if (node == null) return false;
+    if (isNodeOpened(nodeId, graph)) return false;
+    if (node.cost > availablePoints) return false;
+
+    return graph.canOpen(nodeId, openIdsIn(graph));
+  }
+
+  /// Wie viele Theoriepunkte ausgegeben sind.
+  ///
+  /// **Abgeleitet, nicht gezählt** — dieselbe Regel wie beim Gold
+  /// (ADR-0011). Die Kosten stehen am Knoten, nicht im Spielstand. Ein
+  /// Knoten, den es nicht mehr gibt, kostet deshalb auch nichts mehr:
+  /// Der Punkt kommt zurück, statt den Stand unlesbar zu machen
+  /// (ADR-0010).
+  int spentPointsIn(TheoryGraph graph) {
+    var spent = 0;
+    for (final id in _openedNodeIds) {
+      spent += graph.nodeById(id)?.cost ?? 0;
+    }
+    return spent;
   }
 
   LessonRecord? recordFor(String lessonId) => _records[lessonId];
@@ -160,6 +245,16 @@ class TheoryProgress {
   /// Bestandene Lektionen über den ganzen Baum.
   int passedCountIn(SkillTree tree) {
     return tree.branches.fold(0, (sum, b) => sum + passedCount(b));
+  }
+
+  /// Bestandene Knotenseiten im Graphen.
+  ///
+  /// **Das Gegenstück zu [passedCountIn] für den Baum aus ADR-0019.**
+  /// Seit der Umstellung liegt der größere Teil der Seiten im Graphen und
+  /// nicht mehr in `theoryTree` — wer nur die Zweige zählt, übersieht
+  /// zwölf von neunundzwanzig.
+  int passedNodeCount(TheoryGraph graph) {
+    return graph.nodes.where((n) => isPassed(n.lesson.id)).length;
   }
 
   /// Ob ein Zweig komplett durch ist.

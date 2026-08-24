@@ -31,29 +31,18 @@ final class FromStreak extends AbilitySource {
 
 /// Kommt von einem abgeschlossenen Theorieknoten.
 ///
-/// **Knoten gibt es noch nicht** — der Baum wird erst mit ADR-0012 zu
-/// einem. Bis dahin steht hier die Id eines Zweigs. Beim Umbau wandert
-/// die Bedingung mit, die Fähigkeit bleibt. Gleiche Übergangslösung wie
-/// beim Titel „der Wissbegierige" (ADR-0014).
+/// **Abschliessen, nicht öffnen.** Einen Knoten zu öffnen kostet einen
+/// Theoriepunkt; die Fähigkeit gibt es erst, wenn seine Seite auch
+/// bestanden ist. ADR-0013 nennt das den einzigen Anreiz im ganzen
+/// Spiel, ein Thema wirklich fertig zu machen.
+///
+/// Seit ADR-0019 ist das eine **Knoten**-Id, keine Zweig-Id mehr — der
+/// Baum ist jetzt ein Graph aus einzelnen Seiten. Dass jede Id drüben
+/// existiert, prüft `test/abilities_seam_test.dart` in der App.
 final class FromTheory extends AbilitySource {
-  const FromTheory(this.branchId);
+  const FromTheory(this.nodeId);
 
-  final String branchId;
-}
-
-/// Von Anfang an da.
-///
-/// **Ein Übergang, kein Entwurf.** ADR-0017 ordnet Kraftschlag, Zehrung,
-/// Sammeln und Atemzug den Knoten Sport, Ernährung, Schlaf und Erholung
-/// zu — die alle vier unter *Körper* liegen und die es als eigene Knoten
-/// erst mit ADR-0012 gibt. Sie hier hinter den Zweig „Körper" zu sperren
-/// hiesse, vier Fähigkeiten an eine Bedingung zu hängen, die sie
-/// gleichzeitig freigäbe: keine Entscheidung, nur eine Wartezeit.
-///
-/// Solange der Baum kein Baum ist, sind sie offen. Sobald er einer ist,
-/// bekommt jede ihren Knoten.
-final class FromStart extends AbilitySource {
-  const FromStart();
+  final String nodeId;
 }
 
 /// Eine Fähigkeit: welcher Move, und woher man ihn bekommt.
@@ -91,11 +80,9 @@ class Ability {
 
   bool isUnlockedBy(AbilityProgress progress) {
     return switch (source) {
-      FromStart() => true,
       FromWeapon(:final weaponId) => progress.equippedWeaponId == weaponId,
       FromStreak(:final days) => progress.longestStreak >= days,
-      FromTheory(:final branchId) =>
-        progress.completedBranchIds.contains(branchId),
+      FromTheory(:final nodeId) => progress.passedNodeIds.contains(nodeId),
     };
   }
 }
@@ -111,7 +98,7 @@ class AbilityProgress {
   const AbilityProgress({
     this.equippedWeaponId,
     this.longestStreak = 0,
-    this.completedBranchIds = const <String>{},
+    this.passedNodeIds = const <String>{},
   });
 
   const AbilityProgress.empty() : this();
@@ -124,9 +111,10 @@ class AbilityProgress {
   /// (ADR-0013, `konzept.md` 3.7).
   final int longestStreak;
 
-  /// Zweige, in denen jede Lektion bestanden ist.
+  /// Theorieknoten, deren Seite bestanden ist.
   ///
-  /// **Abschliessen, nicht öffnen** — ADR-0013 nennt das den einzigen
-  /// Anreiz im ganzen Spiel, ein Thema fertig zu machen.
-  final Set<String> completedBranchIds;
+  /// **Bestanden, nicht bezahlt.** Ein geöffneter Knoten hat nur einen
+  /// Punkt gekostet; gelernt ist er erst, wenn die drei Fragen sitzen
+  /// (ADR-0013, ADR-0019).
+  final Set<String> passedNodeIds;
 }

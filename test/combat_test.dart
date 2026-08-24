@@ -2,6 +2,7 @@ import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:habits/habits.dart';
 import 'package:progression/progression.dart';
+import 'package:theory/theory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -207,7 +208,17 @@ void main() {
 SaveData _mitSlot2(String moveId) {
   const habitId = 'habit-drei-aufgaben';
   const start = Day(2026, 8, 17);
-  final noetig = LevelCurve.totalXpFor(3);
+
+  // **Seit ADR-0019 haengt jede waehlbare Faehigkeit an einem Knoten.**
+  // Ein Move im Slot allein reicht nicht mehr -- er wird beim
+  // Zusammenstellen geprueft, und ohne bestandene Seite faellt er
+  // heraus. Deshalb steht hier auch der Theoriefortschritt.
+  final node = theoryGraph.nodes.firstWhere((n) => n.unlocksAbility == moveId);
+  final theory = const TheoryProgress.empty().submit(node.lesson, <int?>[
+    for (final q in node.lesson.questions) q.correctIndex,
+  ]).progress;
+
+  final noetig = LevelCurve.totalXpFor(3) - theory.totalXp;
 
   var tracker = const HabitTracker.empty().activate(habitId);
   var day = start;
@@ -217,6 +228,7 @@ SaveData _mitSlot2(String moveId) {
   }
 
   return SaveData(
+    theory: theory,
     habits: tracker,
     abilities: const ChosenAbilities.empty().withAt(0, moveId),
   );

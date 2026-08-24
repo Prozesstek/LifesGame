@@ -8,6 +8,7 @@ import 'package:lifes_game/home/widgets/hub_tile.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:abilities/abilities.dart';
 import 'package:theory/theory.dart';
 import 'package:lifes_game/main.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
@@ -67,11 +68,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            savedGameProvider.overrideWithValue(
-              SaveData(theory: _mitHandbuch()),
-            ),
-          ],
+          overrides: [savedGameProvider.overrideWithValue(_kampfbereit())],
           child: const LifesGameApp(),
         ),
       );
@@ -113,6 +110,30 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [savedGameProvider.overrideWithValue(_kampfbereit())],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Kampf'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EnemyPickerScreen), findsOneWidget);
+    });
+
+    testWidgets('das Handbuch allein reicht seit ADR-0020 nicht', (
+      tester,
+    ) async {
+      // **Der Grund für diesen Test.** Bis ADR-0019 waren vier
+      // Fähigkeiten von Anfang an offen — das Handbuch öffnete den
+      // zweiten Platz, und es passte immer etwas hinein. Seit sie an
+      // Knoten hängen, kann der Platz aufgehen und leer bleiben. Dann
+      // stünde der Spieler mit einem Move vor einem Gegner, den die
+      // Simulation bei 0 % ausweist (ADR-0018).
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
           overrides: [
             savedGameProvider.overrideWithValue(
               SaveData(theory: _mitHandbuch()),
@@ -123,10 +144,41 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Kampf'));
-      await tester.pumpAndSettle();
+      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
+      final locked = tiles
+          .where((t) => t.onTap == null)
+          .map((t) => t.title)
+          .toList();
 
-      expect(find.byType(EnemyPickerScreen), findsOneWidget);
+      expect(locked, <String>['Kampf']);
+      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
+    });
+
+    testWidgets('gelernt, aber nicht angelegt nennt den anderen Weg', (
+      tester,
+    ) async {
+      // Wer die Fähigkeit hat, sie aber auf keinem Platz liegen hat,
+      // darf nicht in die Theorie zurückgeschickt werden — dort ist
+      // nichts mehr zu tun.
+      useTallView(tester);
+
+      var progress = _mitHandbuch();
+      final lesson = _ersterFaehigkeitsknoten.lesson;
+      progress = progress.submit(lesson, <int?>[
+        for (final question in lesson.questions) question.correctIndex,
+      ]).progress;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(SaveData(theory: progress)),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.textContaining('Leg eine Fähigkeit'), findsOneWidget);
     });
 
     testWidgets('ein gesperrter Kampf führt nirgendwohin', (tester) async {
@@ -196,3 +248,33 @@ TheoryProgress _mitHandbuch() {
   }
   return progress;
 }
+
+/// Der Knoten, der die erste Fähigkeit bringt.
+final TheoryNode _ersterFaehigkeitsknoten = theoryGraph.nodes.firstWhere(
+  (n) => n.unlocksAbility != null,
+);
+
+/// Ein Stand, der den Kampf tatsächlich öffnet.
+///
+/// **Seit ADR-0020 sind es drei Schritte, nicht einer.** Das Handbuch
+/// öffnet den zweiten Platz, ein Theorieknoten liefert die Fähigkeit,
+/// und gelegt werden muss sie auch noch. Vorher genügte das Handbuch,
+/// weil vier Fähigkeiten von Anfang an offen waren.
+SaveData _kampfbereit() {
+  var progress = _mitHandbuch();
+  final lesson = _ersterFaehigkeitsknoten.lesson;
+  progress = progress.submit(lesson, <int?>[
+    for (final question in lesson.questions) question.correctIndex,
+  ]).progress;
+
+  return SaveData(
+    theory: progress,
+    abilities: const ChosenAbilities.empty().withAt(
+      0,
+      _ersterFaehigkeitsknotenMoveId,
+    ),
+  );
+}
+
+final String _ersterFaehigkeitsknotenMoveId =
+    _ersterFaehigkeitsknoten.unlocksAbility!;
