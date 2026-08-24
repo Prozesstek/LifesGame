@@ -49,22 +49,25 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 27 Tests | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 29 Tests | nur Dart-SDK |
 | `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
-| `packages/theory/` | Skillbaum, Inhalte, Lernfortschritt, reines Dart, 50 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 109 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
-| `packages/theory/lib/src/skill_tree.dart` | welche Zweige es gibt und ab welchem Level | nur Dart-SDK |
-| `packages/progression/` | Levelkurve und Fähigkeitsslots, reines Dart, 23 Tests | nur Dart-SDK |
+| `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
+| `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
+| `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
+| `packages/progression/lib/src/theory_points.dart` | zwei Theoriepunkte je Aufstieg | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 71 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
-| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 26 Tests | nur Dart-SDK |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
@@ -95,8 +98,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Move-Buttons, Log | Flutter |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/theory/skill_tree_screen.dart` | der Baum: alle Zweige und ihre Levelsperren | Flutter |
-| `lib/theory/branch_screen.dart` | Zweig-Übersicht mit Fortschritt und Lektionssperren | Flutter |
+| `lib/theory/skill_tree_screen.dart` | der **gezeichnete** Baum: Knoten, Linien, Punkte | Flutter |
+| `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
+| `lib/theory/widgets/tree_painter.dart` | die Verbindungslinien | Flutter |
+| `lib/theory/branch_screen.dart` | nur noch das Handbuch: Reihenfolge statt Graph | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
 
 **Schichtregel:** Kampfregeln und Gegnerwerte nur in `packages/combat`,
@@ -112,7 +117,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 149 Tests
+flutter test             # 177 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -120,7 +125,7 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 27 Tests
+dart test                              # 29 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
@@ -130,10 +135,10 @@ dart test                              # 71 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 50 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 23 Tests
+cd packages/theory      ; dart test    # 109 Tests, prüft auch den Inhalt
+cd packages/progression ; dart test    # 33 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
-cd packages/abilities   ; dart test    # 26 Tests
+cd packages/abilities   ; dart test    # 28 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
@@ -157,13 +162,18 @@ Heilung als Anteil der maximalen HP wuchs mit dem HP-Pool mit, während der
 Schaden gleich blieb — ab einer bestimmten Größe endete kein Kampf mehr.
 Details in `docs/context/gotchas.md`.
 
-**Theorie schreiben heißt testen lassen.** Neue Lektionen kommen nach
-`packages/theory/lib/src/content/`, ein neuer Zweig zusätzlich in
-`theoryTree` (`skill_tree.dart`) — danach `dart test`. Die Tests laufen über
-den ganzen Baum und prüfen den Inhalt mit: eindeutige Ids, gültige
-`correctIndex`, keine doppelten Antworten. Was eine Lektion einbringt, steht
-ausschließlich in `rewards.dart`, ab welchem Level ein Zweig offen ist am
-Zweig selbst (`unlockLevel`).
+**Theorie schreiben heißt testen lassen.** Eine neue Seite kommt nach
+`packages/theory/lib/src/content/`, ein neuer Knoten zusätzlich in
+`theoryGraph` (`theory_graph_content.dart`) — danach `dart test`.
+`graph_content_test.dart` läuft über den ganzen Graphen und prüft den Inhalt
+mit: eindeutige Ids, genau drei Fragen, gültige `correctIndex`, keine
+doppelten Antworten. Und die Struktur: keine Eltern-Id ins Leere,
+**kreisfrei**, jede Wurzel mit mindestens fünf Kindern.
+
+Was eine Seite einbringt, steht ausschließlich in `rewards.dart`. **Zweige
+haben keine Levelsperren mehr** — geöffnet wird über Theoriepunkte
+([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)). Ein Knoten
+kostet einen Punkt, die vier Wurzeln kosten nichts.
 
 **Gewohnheiten ändern heißt ebenfalls simulieren.** Alle Zahlen —
 Erfahrung je Häkchen, Streak-Meilensteine, Deckel, Stat-Kurve — stehen in
@@ -180,17 +190,28 @@ kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
 mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
 muss auch besser sein.
 
-**Der Kampf hängt am Handbuch, und das ist eine gemessene Zahl.**
-Die Kampf-Kachel ist gesperrt, bis der freie Zweig „Gewohnheiten"
-durch ist ([ADR-0018](docs/decisions/0018-kampf-hinter-dem-handbuch.md)).
-Der Grund ist keine Erziehung, sondern Arithmetik: Die fünf Lektionen
-geben 275 Erfahrung und damit Level 3 — die Stufe, auf der der zweite
-Fähigkeitsslot aufgeht. Mit nur einem Move ist der erste Gegner
-unschlagbar (0 % in der Simulation), mit zweien sicher (100 %). Vier
-Lektionen reichen **nicht** (220 XP). Wer an `TheoryRewards`, der
-Levelkurve oder der Länge des Zweigs dreht, lässt
-`flutter test test/progression_test.dart` laufen — dort steht der
-Zusammenhang in beide Richtungen.
+**Der Kampf hängt am Moveset, und das ist eine gemessene Zahl.**
+Mit nur einem Move ist der erste Gegner unschlagbar (0 % in der
+Simulation), mit zweien sicher (100 %). Deshalb öffnet sich die
+Kampf-Kachel erst, wenn **zwei Bedingungen** erfüllt sind
+([ADR-0020](docs/decisions/0020-kampf-haengt-am-moveset.md)):
+das Handbuch ist durch, **und** das Moveset hat mindestens zwei Moves.
+
+Bis ADR-0019 genügte das Handbuch allein, und das war kein Zufall: Die
+fünf Lektionen geben 275 Erfahrung und damit Level 3 — die Stufe, auf
+der der zweite Fähigkeitsslot aufgeht (vier Lektionen reichen **nicht**,
+220 XP). In den Slot passte immer etwas, weil vier Fähigkeiten von
+Anfang an offen waren. Seit sie an Theorieknoten hängen, kann der Slot
+aufgehen und leer bleiben — das Handbuch war nur ein Stellvertreter,
+und er stimmt nicht mehr.
+
+Die Arithmetik gilt weiter und wird weiter geprüft: Wer an
+`TheoryRewards`, der Levelkurve oder der Länge des Zweigs dreht, lässt
+`flutter test test/progression_test.dart` laufen. Wer an den
+Fähigkeitsquellen oder den Theoriepunkten dreht, zusätzlich
+`flutter test test/abilities_seam_test.dart` — dort steht, dass auf der
+Stufe, auf der der zweite Platz aufgeht, ein Knoten mit Fähigkeit
+erreichbar und bezahlbar sein muss.
 
 **Vier Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
 Häkchen-Ertrag (`habits/rewards.dart`), Level
@@ -207,7 +228,7 @@ eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
 gehen in den Kampf (`combat`), Streaks und Lektionen verdienen Titel
 (`identity`).
 
-Es gibt genau **sechs** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **neun** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -217,6 +238,14 @@ Es gibt genau **sechs** Stellen, an denen etwas zusammenläuft:
 | `titleStatsProvider` | die drei Zahlen hinter den Titeln |
 | `abilityProgressProvider` | Waffe, Streak und Theorie für die Freischaltung |
 | `activeMovesProvider` | das Moveset, mit dem gekämpft wird |
+| `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
+| `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
+| `combatUnlockedProvider` | ob der Kampf offensteht (ADR-0020) |
+
+**`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
+ADR-0019 zu wenig zählt** — zwölf von neunundzwanzig Seiten liegen nur
+im Graphen. Wer bestandene Seiten braucht, nimmt diesen Provider und
+nicht den Baum.
 
 `activeMovesProvider` ist die einzige Stelle, an der die Freischaltbedingung
 für Fähigkeiten **gilt** — der Spielstand hält eine Wahl, geprüft wird
