@@ -11,6 +11,7 @@ import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:progression/progression.dart';
+import 'package:theory/theory.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -290,12 +291,34 @@ void main() {
     /// Ein Stand, der auf [level] steht. Erfahrung kommt aus Häkchen —
     /// gerechnet wird sie in `package:progression`, hier wird nur genug
     /// davon erzeugt.
+    /// Ein Fortschritt, in dem die vier Körperknoten bestanden sind.
+    ///
+    /// **Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Knoten.**
+    /// Ohne Theoriefortschritt gäbe es nichts, was in einen freien Platz
+    /// passt — diese Tests wollen aber die Plätze prüfen, nicht das
+    /// Freischalten.
+    TheoryProgress mitKnoten() {
+      var progress = const TheoryProgress.empty();
+      for (final ability in AbilityCatalog.choosable) {
+        if (ability.source case FromTheory(:final nodeId)) {
+          final lesson = theoryGraph.nodeById(nodeId)!.lesson;
+          progress = progress.submit(lesson, <int?>[
+            for (final q in lesson.questions) q.correctIndex,
+          ]).progress;
+        }
+      }
+      return progress;
+    }
+
     SaveData aufLevel(
       int level, {
       Loadout? loadout,
       ChosenAbilities? abilities,
     }) {
-      final noetig = LevelCurve.totalXpFor(level);
+      final theory = mitKnoten();
+      // Bestandene Seiten bringen selbst Erfahrung mit — sonst läge das
+      // Level über dem gewünschten und es wären mehr Plätze offen.
+      final noetig = LevelCurve.totalXpFor(level) - theory.totalXp;
       var tracker = const HabitTracker.empty().activate(habitId);
       var day = tag;
       while (tracker.totalXp < noetig) {
@@ -303,6 +326,7 @@ void main() {
         day = day.next;
       }
       return SaveData(
+        theory: theory,
         habits: tracker,
         loadout: loadout ?? const Loadout.empty(),
         abilities: abilities ?? const ChosenAbilities.empty(),

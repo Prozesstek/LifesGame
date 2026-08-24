@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:identity/identity.dart';
-import 'package:theory/theory.dart';
 
 import '../habits/habits_controller.dart';
 import '../save/save_providers.dart';
@@ -45,11 +44,10 @@ final identityProvider = NotifierProvider<IdentityController, Identity>(
 /// Streak nicht verschwinden (ADR-0013, `konzept.md` 3.7).
 final titleStatsProvider = Provider<TitleStats>((ref) {
   final habits = ref.watch(habitTrackerProvider);
-  final theory = ref.watch(theoryProgressProvider);
 
   return TitleStats(
     longestStreak: habits.longestStreak,
-    passedLessons: theory.passedCountIn(theoryTree),
+    passedLessons: ref.watch(passedPagesProvider),
     totalChecks: habits.totalChecks,
   );
 });

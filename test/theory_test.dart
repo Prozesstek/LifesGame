@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/progression/level_provider.dart';
+import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/theory/branch_screen.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
-import 'package:lifes_game/theory/widgets/branch_card.dart';
+import 'package:lifes_game/theory/widgets/node_bubble.dart';
+import 'package:lifes_game/theory/widgets/node_card.dart';
+import 'package:lifes_game/theory/widgets/node_sheet.dart';
 import 'package:lifes_game/theory/widgets/lesson_tile.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -59,7 +62,7 @@ void main() {
     });
   });
 
-  group('SkillTreeScreen', () {
+  group('SkillTreeScreen — der Graph (ADR-0019)', () {
     Future<void> pump(WidgetTester tester, ProviderContainer container) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -70,123 +73,223 @@ void main() {
       await tester.pump();
     }
 
-    testWidgets('zeigt alle Zweige, auch die gesperrten', (tester) async {
+    testWidgets('zeigt das Handbuch und die vier Wurzeln', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
       await pump(tester, container);
 
-      for (final branch in theoryTree.branches) {
-        expect(find.text(branch.name), findsOneWidget, reason: branch.id);
+      expect(find.text('Das Handbuch'), findsOneWidget);
+      for (final rootId in theoryRootIds) {
+        final root = theoryGraph.nodeById(rootId);
+        expect(find.text(root!.name), findsOneWidget, reason: rootId);
       }
-      expect(
-        tester.widgetList<BranchCard>(find.byType(BranchCard)).length,
-        theoryTree.branchCount,
-      );
     });
 
-    testWidgets('auf Level 1 ist nur der Wurzelzweig offen', (tester) async {
+    testWidgets('nennt keine Levelsperre mehr — Punkte statt Stufen', (
+      tester,
+    ) async {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
       await pump(tester, container);
 
-      final cards = tester.widgetList<BranchCard>(find.byType(BranchCard));
-      final open = cards.where((c) => c.isUnlocked).toList();
-
-      expect(open.length, 1);
-      expect(open.first.branch.id, habitsBranch.id);
+      expect(find.textContaining('ab Level'), findsNothing);
     });
 
-    testWidgets('gesperrte Zweige nennen ihre Stufe', (tester) async {
+    testWidgets('auf Level 1 gibt es null Punkte', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
+      expect(container.read(availableTheoryPointsProvider), 0);
+
       await pump(tester, container);
 
-      expect(
-        find.text('ab Level ${koerperBranch.unlockLevel}'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('ab Level ${gesellschaftBranch.unlockLevel}'),
-        findsOneWidget,
-      );
+      expect(find.text('0'), findsWidgets);
     });
 
-    testWidgets('der nächste Zweig wird als Ziel genannt', (tester) async {
+    testWidgets('jeder Aufstieg gibt zwei Punkte', (tester) async {
+      final container = _containerAtLevel(4);
+      addTearDown(container.dispose);
+
+      expect(container.read(availableTheoryPointsProvider), 6);
+    });
+
+    testWidgets('eine Wurzel hat fünf Kinder im Bild', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(1);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
       await pump(tester, container);
 
-      expect(
-        find.text(
-          '„${koerperBranch.name}" öffnet sich auf Level '
-          '${koerperBranch.unlockLevel}.',
-        ),
-        findsOneWidget,
-      );
+      final kinder = theoryGraph.childrenOf('koerper');
+      expect(kinder.length, 5);
+      for (final kind in kinder) {
+        expect(find.text(kind.name), findsOneWidget, reason: kind.id);
+      }
     });
 
-    testWidgets('ab Level 2 ist Körper offen', (tester) async {
+    testWidgets('eine Wurzel antippen zeigt ihre Einführung', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
       await pump(tester, container);
-
-      final cards = tester.widgetList<BranchCard>(find.byType(BranchCard));
-      final koerper = cards.firstWhere((c) => c.branch.id == 'koerper');
-
-      expect(koerper.isUnlocked, isTrue);
-      expect(
-        cards.firstWhere((c) => c.branch.id == 'geist').isUnlocked,
-        isFalse,
-      );
-    });
-
-    testWidgets('auf hohem Level ist der ganze Baum offen', (tester) async {
-      useTallView(tester);
-      final container = _containerAtLevel(9);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-
-      final cards = tester.widgetList<BranchCard>(find.byType(BranchCard));
-      expect(cards.every((c) => c.isUnlocked), isTrue);
-    });
-
-    testWidgets('ein gesperrter Zweig lässt sich nicht öffnen', (tester) async {
-      useTallView(tester);
-      final container = _containerAtLevel(1);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-
-      await tester.tap(find.text(koerperBranch.name));
+      await tester.tap(find.text('Körper'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(BranchScreen), findsNothing);
-      expect(find.byType(SkillTreeScreen), findsOneWidget);
+      expect(find.byType(NodeSheet), findsOneWidget);
+      expect(find.text('Seite lesen'), findsOneWidget);
     });
 
-    testWidgets('ein offener Zweig führt zur Lektionsliste', (tester) async {
+    testWidgets('das Handbuch führt weiter zur Lektionsliste (ADR-0018)', (
+      tester,
+    ) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
       await pump(tester, container);
-
-      await tester.tap(find.text(koerperBranch.name));
+      await tester.tap(find.text('Das Handbuch'));
       await tester.pumpAndSettle();
 
       expect(find.byType(BranchScreen), findsOneWidget);
-      expect(find.text(koerperBranch.lessons.first.title), findsOneWidget);
+    });
+  });
+
+  group('Der gezeichnete Baum — Knoten öffnen', () {
+    Future<void> pump(WidgetTester tester, ProviderContainer container) async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: SkillTreeScreen()),
+        ),
+      );
+      await tester.pump();
+    }
+
+    // Band 1 (Körper) liegt sicher im Sichtbereich; tiefere Bänder
+    // erreicht man nur durch Verschieben, was ein Widget-Test nicht
+    // sinnvoll nachstellt.
+    final schlaf = theoryGraph.nodeById('koerper-schlaf')!;
+
+    testWidgets('alle 24 Knoten werden gezeichnet', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+
+      expect(find.byType(NodeBubble), findsNWidgets(24));
+    });
+
+    testWidgets('die Wurzeln sind offen, die Kinder nicht', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+
+      final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
+      final wurzeln = bubbles.where((b) => b.node.isRoot);
+
+      expect(wurzeln.length, 4);
+      expect(wurzeln.every((b) => b.state == NodeState.open), isTrue);
+    });
+
+    testWidgets('ohne Punkte ist kein Kind kaufbar', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+
+      final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
+      final kinder = bubbles.where((b) => !b.node.isRoot);
+
+      expect(kinder.every((b) => b.state == NodeState.tooExpensive), isTrue);
+    });
+
+    testWidgets('mit Punkten sind die Kinder kaufbar', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(2);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+
+      final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
+      final kinder = bubbles.where((b) => !b.node.isRoot);
+
+      expect(kinder.every((b) => b.state == NodeState.affordable), isTrue);
+    });
+
+    testWidgets('antippen öffnet das Detailblatt', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(2);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NodeSheet), findsOneWidget);
+      expect(find.text('Für einen Punkt öffnen'), findsOneWidget);
+    });
+
+    testWidgets('öffnen zieht den Punkt ab', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(2);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+      expect(container.read(availableTheoryPointsProvider), 2);
+
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Für einen Punkt öffnen'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(spentTheoryPointsProvider), 1);
+      expect(container.read(availableTheoryPointsProvider), 1);
+      expect(
+        container
+            .read(theoryProgressProvider)
+            .isNodeOpened(schlaf.id, theoryGraph),
+        isTrue,
+      );
+    });
+
+    testWidgets('das Blatt schließen kostet nichts', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(2);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+
+      Navigator.of(tester.element(find.byType(NodeSheet))).pop();
+      await tester.pumpAndSettle();
+
+      expect(container.read(spentTheoryPointsProvider), 0);
+    });
+
+    testWidgets('ein zu teurer Knoten nennt den Grund statt eines Knopfes', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+
+      await pump(tester, container);
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Du brauchst einen Punkt'), findsOneWidget);
+      expect(find.text('Für einen Punkt öffnen'), findsNothing);
     });
   });
 
@@ -393,6 +496,56 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Frage 1 von ${_first.questionCount}'), findsOneWidget);
+    });
+  });
+
+  group('Zählen über Handbuch und Graph', () {
+    // Der Umbau auf den Graphen (ADR-0019) hat zwölf von neunundzwanzig
+    // Seiten aus `theoryTree` herausgenommen. Wer weiter nur die Zweige
+    // zählt, unterschlägt sie — genau das war nach dem Umbau kurz der
+    // Fall, bei den Titeln und auf dem Startbildschirm.
+    test('die Gesamtzahl umfasst Handbuch und Graph', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(totalPagesProvider), 29);
+      expect(
+        container.read(totalPagesProvider),
+        greaterThan(theoryTree.lessonCount),
+        reason: 'Sonst zählt jemand wieder nur die alten Zweige.',
+      );
+    });
+
+    test('eine bestandene Knotenseite zählt mit', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final knoten = theoryGraph.nodes.firstWhere(
+        (n) => !theoryTree.branches.any((b) => b.indexOf(n.lesson.id) >= 0),
+      );
+
+      expect(container.read(passedPagesProvider), 0);
+
+      container.read(theoryProgressProvider.notifier).submit(knoten.lesson, [
+        for (final q in knoten.lesson.questions) q.correctIndex,
+      ]);
+
+      expect(container.read(passedPagesProvider), 1);
+    });
+
+    test('sie zählt auch für die Titel', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final knoten = theoryGraph.nodes.firstWhere(
+        (n) => !theoryTree.branches.any((b) => b.indexOf(n.lesson.id) >= 0),
+      );
+
+      container.read(theoryProgressProvider.notifier).submit(knoten.lesson, [
+        for (final q in knoten.lesson.questions) q.correctIndex,
+      ]);
+
+      expect(container.read(titleStatsProvider).passedLessons, 1);
     });
   });
 }

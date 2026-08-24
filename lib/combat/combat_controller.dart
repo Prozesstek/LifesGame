@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../character/abilities_controller.dart';
 import '../gear/gear_controller.dart';
+import '../theory/theory_controller.dart';
 
 /// Gegen wen der nächste Kampf geht.
 ///
@@ -133,3 +134,52 @@ class CombatController extends Notifier<CombatSession> {
 
 final combatControllerProvider =
     NotifierProvider<CombatController, CombatSession>(CombatController.new);
+
+/// Wie viele Moves ein Kampf mindestens braucht.
+///
+/// **Gemessen, nicht gesetzt** (ADR-0018): Mit einem einzigen Move
+/// richtet der Kurzbogen rund 10,6 Schaden je Runde an, der Wegelagerer
+/// 15,3. Das Rennen ist nicht zu gewinnen, egal wie lange es dauert —
+/// die Simulation zeigt 0 % gegen 100 % mit zweien.
+const int minMovesForCombat = 2;
+
+/// Ob der Kampf offensteht.
+///
+/// **Zwei Bedingungen, und die zweite ist seit ADR-0020 nötig.** Bis
+/// dahin genügte das Handbuch: Es gab genau so viel Erfahrung, dass der
+/// zweite Slot aufging, und in den Slot passte immer etwas, weil vier
+/// Fähigkeiten von Anfang an offen waren.
+///
+/// Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Theorieknoten.
+/// Damit kann der Slot aufgehen und leer bleiben — und das Handbuch
+/// allein wäre wieder die Zusage eines unmöglichen Kampfes.
+final combatUnlockedProvider = Provider<bool>((ref) {
+  return ref.watch(handbookDoneProvider) &&
+      ref.watch(activeMovesProvider).length >= minMovesForCombat;
+});
+
+/// Warum der Kampf zu ist — oder null, wenn er offen ist.
+///
+/// Steht als Satz da und nicht als Fehlerzustand: Eine Kachel, die den
+/// Weg nennt, ist besser als eine, die verschwindet (ADR-0018).
+final combatBlockReasonProvider = Provider<String?>((ref) {
+  final fehlend = ref.watch(handbookRemainingProvider);
+  if (fehlend > 0) {
+    return fehlend == 1
+        ? 'Noch eine Lektion in Gewohnheiten, dann geht es los'
+        : 'Erst das Handbuch: noch $fehlend Lektionen in Gewohnheiten';
+  }
+
+  if (ref.watch(activeMovesProvider).length >= minMovesForCombat) return null;
+
+  // **Gelernt und angelegt sind zwei verschiedene Dinge.** Wer eine
+  // Fähigkeit hat, sie aber auf keinem Platz liegen hat, braucht einen
+  // anderen Hinweis als jemand, der noch keine besitzt — sonst schickt
+  // die Kachel ihn zurück in die Theorie, wo er nichts mehr zu tun hat.
+  final gelernt = ref.watch(unlockedAbilitiesProvider);
+  if (gelernt.isEmpty) {
+    return 'Erst eine Fähigkeit lernen — ein Knoten unter „Körper"';
+  }
+
+  return 'Leg eine Fähigkeit auf einen freien Platz (Charakter)';
+});
