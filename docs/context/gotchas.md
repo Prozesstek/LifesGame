@@ -3,6 +3,42 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Im Widget-Test ist jede Glyphe quadratisch — Texte sind dort breiter
+
+`phone_layout_test.dart` meldete 218 Pixel Überlauf in einer Zeile aus zwei
+kurzen Texten mit `Spacer` dazwischen. Nachgerechnet passten die Sätze
+bequem: rund 280 Pixel bei 358 verfügbaren.
+
+Der Grund ist die Testschrift. Flutter rendert in Widget-Tests mit einer
+Ersatzschrift, in der **jedes Zeichen so breit ist wie hoch**. Bei
+`fontSize: 12` heißt das 12 Pixel je Buchstabe — „Aufstieg gibt 2 Punkte"
+wird 264 statt 130 Pixel breit. Zwei solche Texte sprengen jede Zeile.
+
+**Das ist kein falscher Alarm.** Dieselbe Zeile bricht auf einem echten
+Gerät, sobald jemand die Schrift vergrößert — der Test nimmt das nur
+vorweg. Die Lehre ist deshalb nicht „Test ignorieren", sondern:
+
+```dart
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Flexible(child: Text(links, overflow: TextOverflow.ellipsis)),
+    const SizedBox(width: 8),
+    Flexible(child: Text(rechts, overflow: TextOverflow.ellipsis)),
+  ],
+)
+```
+
+**Regel:** Zwei Texte nebeneinander in einer `Row` brauchen beide
+`Flexible` und `overflow`. `Spacer` hilft dabei nicht — er verteilt nur,
+was übrig ist, und schrumpft nichts.
+
+Nebenbei: Die Fehlermeldung nennt den Überlauf, aber nicht das Widget. Der
+`debugCreator` steht im `informationCollector` der `FlutterErrorDetails` —
+mit `FlutterError.onError` einsammeln, dann steht die ganze Kette da
+(`Row ← Column ← Padding ← _Header ← …`). Ohne das sucht man im falschen
+Bildschirmteil.
+
 ## Ein Widget, das sich über `kIsWeb` abschaltet, ist im Test unsichtbar
 
 `PhoneFrame` zeigt die App im Browser in Handygröße und gab dafür bei

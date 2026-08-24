@@ -3,8 +3,11 @@
 > Diese Datei ist die Antwort auf „Wo stehen wir gerade?".
 > Am Ende jeder Arbeitssitzung aktualisieren. Alte Einträge unter „Verlauf"
 > zusammenfassen, nicht löschen.
+>
+> Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
+> Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 22.08.2026 · Frederik
+**Zuletzt aktualisiert:** 24.08.2026 · Frederik
 
 ---
 
@@ -353,12 +356,242 @@ Die elf Habit-Vorlagen verteilen sich auf die vier Werte als 4 Klarheit,
 direktesten entscheiden, haben die wenigsten Quellen — und beide hängen an
 Körper. Der Ausbau von Körper repariert deshalb nicht nur den Baum.
 
+## Sitzung 24.08.2026: Ziele, ADR-0019, und der Graph steht
+
+**SMART-Ziele eingeführt** ([`ziele.md`](ziele.md)). Ziellinie ist nicht
+mehr „MVP", sondern nachprüfbar: beide spielen 30 Tage täglich, ohne
+abzubrechen. Sieben Ziele mit Terminen, dazu eine bindende Liste dessen,
+was bis dahin **nicht** angefasst wird.
+
+**Drei Issues vom selben Nachmittag haben die Ziele sofort umgeworfen** —
+und das ist der eigentliche Befund des Tages: `state.md` allein reicht
+nicht als Gedächtnis, wenn parallel Issues entstehen. Mittags stand der
+Baumumbau noch auf der Sperrliste; abends ist er Ziel 2 mit Termin.
+
+**[ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)** hält
+fest, was Issue #16 gegenüber ADR-0012 ändert: vier Wurzeln statt zwei,
+zwei Theoriepunkte je Level statt einem, **ein Knoten ist eine Seite mit
+drei Fragen** statt eines Themas mit Lektionen. ADR-0012 steht auf
+`Teilweise abgelöst`.
+
+**Die Zahl, die den Termin 31.08. erst möglich macht:** Mit einem Knoten
+= einer Seite kostet der Startbaum aus 20 Unterknoten **8 neue Seiten**,
+nicht 60. Zwölf Knoten (Körper, Geist, Wissenschaft, Gesellschaft mit je
+drei Lektionen) sind bereits geschrieben und wandern nur.
+
+**Die Zahl, die dabei unangenehm ist:** 2 Punkte je Level ergeben über
+`maxLevel` 50 insgesamt **98 Theoriepunkte** für 20 Knoten. Der Baum
+steht ab Level 11 komplett offen — die Knappheit, die ADR-0012 wollte,
+ist damit weg. Bewusst in Kauf genommen, mit Auslöser zum Nachjustieren
+(ab 40 Knoten neu prüfen).
+
+**Gebaut ist der Graph** in `packages/theory`, 17 neue Tests (jetzt 67):
+
+- `TheoryNode` — Seite, Icon-Id, Eltern-Ids, Kosten, optionale Fähigkeit.
+  Name und Zusammenfassung kommen von der Lektion, nicht doppelt
+- `TheoryGraph` — Wurzeln, Kinder, Eltern, `canOpen`
+- **Ein offener Elternknoten genügt** (ADR-0019), auch bei zwei Eltern
+- `isHealthy` prüft vier Dinge: eindeutige Ids, keine Eltern-Id ins
+  Leere, **kreisfrei**, mindestens eine Wurzel. Die Kreisprüfung ist der
+  Preis dafür, dass die Struktur ein Graph ist und kein Baum
+
+Das war der Zwischenstand am Nachmittag; Inhalte, Punkte, Persistenz
+und Bildschirm kamen am selben Abend dazu — siehe unten.
+
+### Der Skillbaum aus Issue #16 ist gebaut
+
+**Ziel 2 ist bis auf einen Punkt erreicht** — sieben Tage vor dem
+Termin. Der Baum aus [ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)
+steht im Spiel.
+
+| | vorher | jetzt |
+|---|---|---|
+| Struktur | 5 flache Zweige, Levelsperren | **4 Wurzeln, Graph, Punkte** |
+| Knoten | 17 Lektionen | **24** (4 Wurzeln + 20 Unterknoten) |
+| Seiten geschrieben | 17 | **29** (12 neue) |
+| Tests `theory` | 50 | **109** |
+| Tests `progression` | 23 | **33** |
+| Tests App | 149 | **177** |
+
+**Was neu ist:**
+
+- `TheoryNode` / `TheoryGraph` in `packages/theory` — Eltern-Ids statt
+  Listen, `canOpen`, und `isHealthy` mit vier Prüfungen: eindeutige Ids,
+  keine Eltern-Id ins Leere, **kreisfrei**, mindestens eine Wurzel
+- `TheoryPoints` in `packages/progression`, neben der Levelkurve —
+  zwei Punkte je Aufstieg, `lifetimeTotal` 98
+- **Zwölf neue Seiten**: vier Wurzel-Einführungen plus je zwei
+  Unterknoten für Körper (Erholung, Stress), Geist (Motivation,
+  Wiederholung), Wissenschaft (Stichprobe, Studien lesen) und
+  Gesellschaft (Vergleich, Um Hilfe bitten)
+- `skill_tree_screen.dart` neu: Handbuch plus vier Gebietskacheln;
+  `root_screen.dart` zeigt die fünf Knoten eines Gebiets mit Punktepreis
+- Geöffnete Knoten überleben den Neustart (`persistence_test.dart`)
+
+**Drei Entscheidungen, die beim Bauen fielen:**
+
+1. **Kostenlose Knoten gelten automatisch als offen.** Wurzeln und
+   Handbuch kosten damit weder einen Punkt noch einen Klick und stehen
+   nie im Spielstand. `openIdsIn()` fügt sie beim Prüfen dazu.
+2. **Ausgegebene Punkte werden abgeleitet, nicht gezählt** — die Kosten
+   stehen am Knoten. Ein entfernter Knoten gibt seinen Punkt zurück,
+   statt den Stand unlesbar zu machen (wie beim Gold, ADR-0011).
+3. **`availablePoints` wird in `openNode()` hineingereicht.** Der
+   Punktestand hängt über das Level am Theoriefortschritt — also am
+   eigenen Zustand des Notifiers. Ihn dort zu lesen wäre exakt der
+   `CircularDependencyError` aus `gotchas.md`.
+
+**Sechs alte Tests wurden ersetzt, nicht repariert.** Sie prüften
+Levelsperren an Zweigen — genau das Verhalten, das ADR-0019 abschafft.
+An ihrer Stelle stehen elf Tests für Graph, Punkte und Öffnen.
+
+**Das Handbuch blieb unangetastet**, und damit auch ADR-0018: Es ist
+weiter ein `TheoryBranch` mit verbindlicher Reihenfolge, steht außerhalb
+des Graphen und öffnet den Kampf wie bisher.
+
+### Der Baum wird gezeichnet, nicht aufgelistet
+
+**Der erste Anlauf war falsch, und das Vorbild hat es gezeigt.** Gebaut
+war zuerst eine Liste von Gebietskacheln, die in eine Liste von
+Knotenkarten führte — funktional vollständig, aber kein Baum. Der Issue
+verlangt einen „richtigen Skill-Tree" und hängt als Vorbild einen
+Graphen mit Verbindungslinien an. Eine Liste kann die entscheidende
+Aussage nicht treffen: dass *Stress* an Körper **und** Geist hängt.
+
+Jetzt ist es eine Zeichenfläche:
+
+- **`tree_layout.dart`** rechnet die Plätze aus — reine Funktion, kein
+  Widget. Ein Band je Gebiet, die Wurzel oben mittig, die fünf Kinder
+  darunter in einem flachen Bogen. **Von oben nach unten statt radial
+  wie das Vorbild**, weil ein Handy im Hochformat Breite nicht hat und
+  Höhe beliebig.
+- **`tree_painter.dart`** zieht die Linien: durchgezogen zur eigenen
+  Wurzel, **gestrichelt** quer ins andere Gebiet. Der Unterschied trägt
+  die Aussage, sonst sähe eine Querverbindung aus wie eine normale.
+- **`node_bubble.dart`** ist der Knoten als Kreis, Name darunter. Der
+  ganze Knoten ist antippbar, nicht nur der Kreis — 52 Pixel sind auf
+  einem Handy zu wenig.
+- **`node_sheet.dart`** ist das Detailblatt an der Stelle des Panels aus
+  dem Vorbild: Name, Zusammenfassung, Kosten, **eine** Handlung.
+- `InteractiveViewer` mit Verschieben und Zoomen (0,4× bis 2,5×).
+- `root_screen.dart` ist entfallen — es gibt jetzt einen Weg statt zwei.
+
+**`test/tree_layout_test.dart`** prüft die Anordnung mit 13 Tests: jeder
+Knoten hat genau einen Platz, keine zwei überlappen, nichts ragt heraus,
+die Bänder folgen aufeinander. Das ist der Teil, der auf einem
+Screenshot erst auffällt, wenn man an die richtige Stelle scrollt.
+
+**Ein verbindender Knoten wird nur einmal platziert**, im Band seiner
+ersten Wurzel. Die zweite Wurzel verbindet sich nach oben dorthin. Zwei
+Positionen hätten bedeutet, dass eine der beiden Linien im Nichts endet.
+
+### Ein Zählfehler, der beim Nachprüfen auffiel
+
+`passedCountIn(theoryTree)` lief nur über die alten Zweige — nach dem
+Umbau lagen aber **zwölf von neunundzwanzig** Seiten nur noch im
+Graphen. Erfahrung und Gold stimmten (die hängen am einzelnen Ergebnis),
+aber die **Titel** zählten zu wenig und der Startbildschirm zeigte
+weiter „x / 17".
+
+Behoben über `passedPagesProvider` und `totalPagesProvider`, die
+Handbuch und Graph zusammenzählen. Drei Tests halten es fest. Dass sich
+die beiden nicht überschneiden, prüft `graph_content_test.dart` — sonst
+zählte etwas doppelt.
+
+### Was der Layout-Test dabei gefunden hat
+
+`phone_layout_test.dart` meldete 218 Pixel Überlauf im Kopf des
+Bildschirms. Ursache war nicht der Baum, sondern eine Zeile aus zwei
+Texten mit `Spacer` dazwischen: **Im Widget-Test ist jede Glyphe
+quadratisch**, dadurch werden Texte dort deutlich breiter als real.
+Beide Hälften dürfen jetzt schrumpfen (`Flexible` mit `ellipsis`) — was
+auch bei großer Schrift auf einem echten Gerät richtig ist.
+
+### Die Fähigkeiten hängen jetzt wirklich am Baum
+
+`FromTheory` trägt seit heute eine **Knoten**-Id statt einer Zweig-Id,
+und `FromStart` ist **ersatzlos entfallen** — sein eigener Kommentar
+nannte ihn „ein Übergang, kein Entwurf". Die vier wählbaren Fähigkeiten
+hängen an Schlaf, Bewegung, Ernährung und Erholung, alle vier unter
+*Körper*. Bedingung ist **bestanden**, nicht bezahlt: Ein geöffneter
+Knoten hat nur einen Punkt gekostet.
+
+**Das riss eine Lücke, und sie ist geschlossen.** Fünf Tests fielen
+sofort um, darunter einer im Naht-Test mit genau der richtigen
+Begründung: „Sonst hätte ein frischer Charakter drei offene Slots und
+nichts, was hineinpasst." Nach dem Handbuch ging der zweite Slot auf und
+blieb leer — ein Move, und der Wegelagerer steht bei 0 %.
+
+[ADR-0020](../decisions/0020-kampf-haengt-am-moveset.md) hängt die Sperre
+deshalb ans **Moveset** statt ans Handbuch allein. Das Handbuch war nie
+der Grund, nur ein Stellvertreter; seit ADR-0019 stimmt er nicht mehr.
+Die Kachel unterscheidet drei Fälle:
+
+| Zustand | Text |
+|---|---|
+| Handbuch offen | „Erst das Handbuch: noch N Lektionen" |
+| keine Fähigkeit gelernt | „Erst eine Fähigkeit lernen — ein Knoten unter „Körper"" |
+| gelernt, nicht angelegt | „Leg eine Fähigkeit auf einen freien Platz" |
+
+Der dritte Fall ist kein Detail: Ohne ihn schickt die Kachel jemanden in
+die Theorie zurück, wo er nichts mehr zu tun hat.
+
+**Der Naht-Test hat eine neue Zusage.** Statt „ohne Fortschritt muss
+etwas Wählbares da sein" prüft er jetzt: Auf der Stufe, auf der der
+zweite Platz aufgeht, muss ein Knoten mit Fähigkeit **erreichbar und
+bezahlbar** sein. Auf Level 3 sind das vier Punkte für einen Knoten, der
+direkt an einer kostenlosen Wurzel hängt — der Weg ist offen in dem
+Moment, in dem der Slot es ist.
+
+### Offen aus dieser Sitzung
+
+**Der Weg zum ersten Kampf ist länger geworden** — Handbuch, Knoten
+öffnen und bestehen, Fähigkeit anlegen. Ob das zu lang ist, zeigt der
+30-Tage-Lauf, nicht eine Vermutung.
+
+**Die Balance ist nicht nachgerechnet.** `dart run tool/balance_sim.dart`
+lief für diesen Umbau bewusst nicht — das war so abgesprochen. Wer das
+nachholt, prüft vor allem, ob zwei Moves am Tag des ersten Kampfes noch
+die 100 % aus ADR-0018 liefern.
+
+
+**Issue #15 ist ungeklärt und blockiert AktivesBrett.** Die erste
+Vermutung (er lief in die Handbuch-Sperre aus ADR-0018) ist widerlegt —
+er hatte die Lektionen gemacht. Geprüft und in Ordnung: Branch-Id
+`habits`, fünf Lektionen, Ids konsistent, `lessonCount ==
+lessons.length`, 149 Tests grün. Offene Spuren: **Flutter 3.47.0 / Dart
+3.13.0** auf seinem Rechner gegen 3.44.9 / 3.12.2 hier, und ob „Fragen
+gemacht" auch „mit ≥ 60 % bestanden" heißt.
+
 ## Als Nächstes
 
 **Der Charakterbildschirm ist fertig.** Von ADR-0013 fehlt nichts mehr
 außer den Fähigkeitspunkten und den Knöpfen für Errungenschaften,
 Streaks und Freunde. Der Kern-Loop schließt sich: Lektion — Vorlage —
 Häkchen — Erfahrung — Gold — Ausrüstung — Fähigkeit — Kampf.
+
+**Seit dem 24.08. ist diese Liste terminiert.** Welcher Punkt bis wann
+fertig sein soll und woran das gemessen wird, steht in
+[`ziele.md`](ziele.md). Die Zuordnung:
+
+| Punkt hier | Ziel | Termin |
+|---|---|---|
+| — (Issue #15, Kampf startet nicht) | Ziel 1 | **26.08.2026** |
+| 3 — Punkteökonomie und Baumumbau (Issue #16) | Ziel 2 | **31.08.2026** |
+| 1 — Waffen als Sidegrades | Ziel 3 | 06.09.2026 |
+| 8 — Tageswechsel | Ziel 4 | 06.09.2026 |
+| 2 — Fähigkeiten (Issue #17 erweitert) | Ziel 5 | 13.09.2026 |
+| 4 + 5 — Dungeon, Tränke | Ziel 6 | 20.09.2026 |
+| 6, 7, 9, 10 | **zurückgestellt** | nach dem 30-Tage-Lauf |
+
+**Punkt 3 ist am 24.08. von „zurückgestellt" nach vorne gerückt** — Issue
+#16 hat ihm ein Datum gegeben, und [ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)
+macht ihn deutlich kleiner als ADR-0012 ihn geplant hatte: Ein Knoten ist
+jetzt **eine Seite**, nicht ein Thema mit drei Lektionen. Es fehlen dadurch
+**acht** neue Seiten statt gut hundert.
+
+Die Reihenfolge unten bleibt stehen, weil die Begründungen dort
+ausführlicher sind als in `ziele.md`.
 
 **1. Drei Waffen in den Laden — und dafür `catalog_test.dart`
 umbauen.**
