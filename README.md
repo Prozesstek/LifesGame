@@ -3,14 +3,21 @@
 Ein Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.
 Was du im echten Leben tust, bestimmt, wie stark dein Charakter ist.
 
-**Status:** Der MVP steht bis auf den Dungeon und ist spielbar — Lektion lesen,
+**Status:** Der Kern-Loop läuft und ist spielbar — Knoten öffnen, Seite lesen,
 Gewohnheit freischalten, täglich abhaken, Werte steigen, Gold sammeln,
-Ausrüstung kaufen, nächsten Gegner schlagen. Der Fortschritt überlebt einen
-Neustart. Der Charakter hat seit dem 19.08. einen Namen und einen
-verdienten Titel (ADR-0014), und der Kampf zeigt seit dem 21.08. zwei
-gezeichnete Kämpfer mit einer echten Abfolge statt zweier Rechtecke
-(ADR-0015). Es fehlt der Dungeon (und mit ihm Tränke und Drops).
-Details in [`docs/context/state.md`](docs/context/state.md).
+Ausrüstung kaufen, Fähigkeit lernen, nächsten Gegner schlagen. Der
+Fortschritt überlebt einen Neustart.
+
+Seit dem 24.08. ist die Theorie ein **gezeichneter Skillbaum**: vier Wurzeln
+mit je fünf Knoten, geöffnet über Theoriepunkte statt über Levelsperren
+([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)). Vier
+Fähigkeiten hängen daran.
+
+**Was als Nächstes ansteht, steht nicht mehr hier**, sondern in
+[`docs/context/ziele.md`](docs/context/ziele.md) — mit Terminen und mit der
+Liste dessen, was bis zum MVP ausdrücklich *nicht* angefasst wird. Kurz: die
+Waffen als Alternativen, die elf übrigen Fähigkeiten, dann der Dungeon.
+Wo wir stehen: [`docs/context/state.md`](docs/context/state.md).
 
 ## Für Mitentwickler: erste Schritte
 
@@ -21,7 +28,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 107 Tests
+flutter test                       # 177 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -30,16 +37,19 @@ dart run tool/balance_sim.dart
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/combat
-dart test                          # 27 Tests
+dart test                          # 29 Tests
 dart run example/play.dart         # Kampf im Terminal spielen
 dart run example/balance_sim.dart  # prüft die Engine, nicht das Spiel
 
 cd packages/habits
-dart test                          # 67 Tests
+dart test                          # 71 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear
 dart test                          # 27 Tests, prüft auch die Preise
+
+cd packages/theory
+dart test                          # 109 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 28 Tests, prüft auch die Titel
@@ -64,18 +74,19 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/combat` | Kampfregeln und drei Gegner, reines Dart ohne Flame | 27 |
-| `packages/theory` | 17 Lektionen in 5 Zweigen, 51 Fragen, Lernfortschritt | 50 |
-| `packages/progression` | Levelkurve | 11 |
-| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 67 |
+| `packages/combat` | Kampfregeln und drei Gegner, reines Dart ohne Flame | 29 |
+| `packages/theory` | Skillbaum-Graph: 29 Seiten, 87 Fragen, Lernfortschritt | 109 |
+| `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
+| `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 71 |
 | `packages/gear` | 9 Ausrüstungsstücke auf 6 Plätzen, Preise, Inventar | 27 |
+| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 28 |
 | `packages/identity` | 7 verdiente Titel aus drei Quellen, Name | 28 |
 | `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 107 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 177 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl
-berechnet, gehört sie in eines der sechs Packages — Begründung in
+berechnet, gehört sie in eines der sieben Packages — Begründung in
 [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md) und
 [ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md).
 
@@ -108,10 +119,13 @@ Kontext **im Repo** und wandert über Git mit:
 | `CLAUDE.md` | Wird von Claude Code automatisch geladen. Stack, Regeln, Konventionen. |
 | `konzept.md` | Was bauen wir? |
 | `docs/context/state.md` | Wo stehen wir? |
+| `docs/context/ziele.md` | Wo wollen wir hin, bis wann — und was bleibt liegen? |
 | `docs/decisions/NNNN-*.md` | Warum ist das so? |
 | `docs/context/gotchas.md` | Worüber bin ich schon gestolpert? |
 
-**Die Regel:** Wer arbeitet, aktualisiert am Ende `state.md`. Wer eine Entscheidung
+**Die Regel:** Wer arbeitet, aktualisiert am Ende `state.md`. Freitags werden
+in `ziele.md` die Ist-Spalten nachgetragen — eine Zahl, die sich eine Woche
+nicht bewegt hat, ist das Signal. Wer eine Entscheidung
 trifft, die man in drei Monaten hinterfragen würde, schreibt einen ADR
 (Vorlage in `docs/decisions/TEMPLATE.md`). Alles andere veraltet von selbst.
 
