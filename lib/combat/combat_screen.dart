@@ -27,6 +27,10 @@ class CombatScreen extends ConsumerStatefulWidget {
 
 class _CombatScreenState extends ConsumerState<CombatScreen> {
   final BattleGame _game = BattleGame();
+
+  /// Zugriff auf die Leiste, damit ein Tipp irgendwo im Kampfbereich sie
+  /// auslösen kann.
+  final GlobalKey<TimingBarState> _timingKey = GlobalKey<TimingBarState>();
   _Phase _phase = _Phase.chooseMove;
   Move? _pendingMove;
 
@@ -94,51 +98,71 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
         title: const Text('Kampf'),
         backgroundColor: Palette.background,
       ),
+      // **Die Tippfläche liegt über dem Körper, nicht über der AppBar.**
+      // Während des Zeitfensters zählt jeder Tipp — auf die Kämpfer, auf
+      // den Log, auf die Leiste. Nur der Zurück-Pfeil bleibt erreichbar,
+      // weil er außerhalb von `body` sitzt. Ohne diese Trennung könnte man
+      // den Kampf nicht mehr verlassen, ohne vorher zu tippen.
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: FighterStatus(
-                      combatant: state.player,
-                      accent: Palette.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 28),
-                  Expanded(
-                    child: FighterStatus(
-                      combatant: state.enemy,
-                      accent: Palette.enemy,
-                      alignEnd: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Palette.surface,
-                  borderRadius: BorderRadius.circular(10),
+            _buildBody(session, state),
+            if (_phase == _Phase.timing)
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _timingKey.currentState?.lockIn(),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: GameWidget<BattleGame>(game: _game),
               ),
-            ),
-            Expanded(flex: 2, child: _LogPanel(lines: session.log)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: _buildControls(state, session.moves),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBody(CombatSession session, CombatState state) {
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: FighterStatus(
+                  combatant: state.player,
+                  accent: Palette.accent,
+                ),
+              ),
+              const SizedBox(width: 28),
+              Expanded(
+                child: FighterStatus(
+                  combatant: state.enemy,
+                  accent: Palette.enemy,
+                  alignEnd: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Palette.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: GameWidget<BattleGame>(game: _game),
+          ),
+        ),
+        Expanded(flex: 2, child: _LogPanel(lines: session.log)),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: _buildControls(state, session.moves),
+        ),
+      ],
     );
   }
 
@@ -146,7 +170,9 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     return switch (_phase) {
       _Phase.timing => SizedBox(
         height: 96,
-        child: Center(child: TimingBar(onResult: _onTimingResult)),
+        child: Center(
+          child: TimingBar(key: _timingKey, onResult: _onTimingResult),
+        ),
       ),
       _Phase.finished => SizedBox(
         height: 96,

@@ -126,9 +126,26 @@ class CombatController extends Notifier<CombatSession> {
     state = state.copyWith(log: trimmed);
   }
 
+  /// Setzt den Kampf auf Anfang — mit frischem Gegner **und** frischem
+  /// Moveset.
+  ///
+  /// **Das Moveset muss hier mit.** `CombatSession.moves` hat einen leeren
+  /// Standardwert; wer ihn beim Neubauen vergisst, bekommt einen Kampf ohne
+  /// einen einzigen Knopf. Genau das ist passiert, als `moves` zu
+  /// [CombatSession] dazukam: [build] bekam es, `restart` nicht — und weil
+  /// die Gegnerwahl `restart` aufruft, war jeder über den Startbildschirm
+  /// begonnene Kampf unbedienbar.
+  ///
+  /// Neu eingelesen statt übernommen ist dabei Absicht: Ein neuer Kampf
+  /// soll die Ausrüstung und die Fähigkeiten von *jetzt* verwenden. Nur
+  /// innerhalb eines laufenden Kampfes friert das Moveset ein (ADR-0017).
   void restart() {
     _engine = CombatEngine(seed: DateTime.now().millisecondsSinceEpoch);
-    state = CombatSession(state: _freshFight(), log: const <String>[]);
+    state = CombatSession(
+      state: _freshFight(),
+      log: const <String>[],
+      moves: ref.read(activeMovesProvider),
+    );
   }
 }
 

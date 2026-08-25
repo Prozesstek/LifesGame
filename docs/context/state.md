@@ -90,7 +90,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 189 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 199 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
@@ -107,7 +107,45 @@ flutter run -d chrome
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
 
-## Sitzung 25.08.2026: Entwicklermodus
+## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
+
+### Die Timing-Leiste wartet jetzt
+
+Der Marker lief einmal durch und meldete dann „daneben" — der Zug war
+entschieden, ohne dass der Spieler etwas getan hätte. Jetzt läuft er hin
+und her, bis getippt wird (`repeat(reverse: true)`).
+
+**Es gibt bewusst keine Frist.** Wer wartet, verliert nichts als Zeit. Ein
+Zeitlimit hätte den Zug mit dem schlechtestmöglichen Ergebnis entschieden,
+und das ist dieselbe Sorte Bestrafung fürs Zögern, die das Konzept bei den
+Gewohnheiten ausschließt.
+
+**Getippt wird überall.** Eine 34 Pixel hohe Leiste trifft man auf einem
+Handy im Eifer nicht zuverlässig; die Tippfläche liegt deshalb über dem
+ganzen Kampfbereich — aber **nicht** über der AppBar. Läge sie darüber,
+wäre ein begonnener Zug eine Falle: Der Zurück-Pfeil sitzt dort, und man
+käme aus dem Kampf nicht mehr heraus, ohne vorher zu tippen.
+
+Vier Tests in `timing_bar_test.dart`, drei weitere in `combat_test.dart`. Einer davon prüft nicht nur, dass
+nichts gemeldet wird, sondern auch, dass sich der Marker **noch bewegt**
+(`hasScheduledFrame`) — sonst wäre er auch grün, wenn die Leiste stumm am
+Rand stehen bliebe.
+
+### Der Kampf war unbedienbar — behoben
+
+`restart()` baute die Sitzung neu, ohne das Moveset zu setzen. Weil
+`CombatSession.moves` einen leeren Standardwert hat, schwieg der Compiler —
+und weil die **Gegnerwahl** `restart()` aufruft, hatte jeder über den
+Startbildschirm begonnene Kampf **keinen einzigen Move-Knopf**. Der Weg
+„Nochmal" nach einem Kampf ebenso.
+
+Der Fehler kam mit dem Feld `moves` (Sitzung 22.08., „Fähigkeiten lassen
+sich wählen"): `build()` bekam es, `restart()` wurde übersehen. Er lag
+seither still da — gefunden hat ihn ein Screenshot, nicht die Testsuite.
+
+Drei Tests halten es jetzt fest; zwei davon fallen ohne die Korrektur um.
+Der Fallstrick dahinter steht in `gotchas.md`: Ein Standardwert im
+Konstruktor macht ein vergessenes Feld unsichtbar.
 
 Ein Werkzeug, das Erfahrung, Gold, Punkte, Fähigkeiten und Ausrüstung per
 Knopfdruck vergibt ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)).

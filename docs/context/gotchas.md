@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Standardwert im Konstruktor versteckt ein vergessenes Feld
+
+`CombatSession.moves` hat einen leeren Standardwert:
+
+```dart
+const CombatSession({
+  required this.state,
+  required this.log,
+  this.moves = const <Move>[],   // <-- hier
+});
+```
+
+Als das Feld dazukam, bekam `build()` es mit — `restart()` nicht. Der
+Compiler schwieg, weil der Standardwert einspringt. Ergebnis: Jeder Kampf,
+der über die Gegnerwahl startete (die ruft `restart()`), hatte **keinen
+einzigen Move-Knopf**. Keine Ausnahme, keine Meldung, nur eine leere Leiste.
+
+Gefunden wurde es auf einem Screenshot, nicht von 189 grünen Tests.
+
+**Regel:** Ein Feld, das zum Zustand gehört, gehört als `required` in den
+Konstruktor — oder jede Konstruktionsstelle muss beim Hinzufügen
+durchgegangen werden. Ein Standardwert ist bequem und macht genau diese
+Sorte Auslassung unsichtbar.
+
+Praktischer Test dafür: Nach jeder Zustandsänderung, die einen neuen
+Zustand *baut* statt ihn zu kopieren, prüfen, ob `copyWith` nicht die
+bessere Wahl gewesen wäre. `copyWith` kann ein Feld nicht vergessen.
+
 ## Zwei Dart-Versionen formatieren denselben Code verschieden
 
 `dart format .` hat auf diesem Rechner (Dart 3.13) drei unveränderte
