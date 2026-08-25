@@ -9,11 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
+import 'package:lifes_game/combat/widgets/timing_bar.dart';
 import 'package:lifes_game/combat/enemy_picker_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 void main() {
+  _tippflaeche();
+
   group('CombatController', () {
     test('startet mit vollem Leben und leerem Log', () {
       final container = ProviderContainer();
@@ -276,4 +279,62 @@ SaveData _mitSlot2(String moveId) {
     habits: tracker,
     abilities: const ChosenAbilities.empty().withAt(0, moveId),
   );
+}
+
+/// Der Tipp im Zeitfenster zählt überall im Kampfbereich.
+///
+/// Auf einem Handy trifft man eine 34 Pixel hohe Leiste im Eifer nicht
+/// zuverlässig. Die Fläche liegt deshalb über dem ganzen Körper — aber
+/// **nicht** über der AppBar, sonst käme man aus dem Kampf nicht mehr
+/// heraus, ohne vorher zu tippen.
+void _tippflaeche() {
+  group('Tippen im Zeitfenster', () {
+    Future<void> starteZeitfenster(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: CombatScreen())),
+      );
+      await tester.pump();
+
+      // Der Waffenmove richtet Schaden an und öffnet damit das Fenster.
+      await tester.tap(find.text(Moves.basicAttack.name));
+      await tester.pump();
+    }
+
+    testWidgets('ein Tipp auf die Kämpfer löst aus', (tester) async {
+      await starteZeitfenster(tester);
+      expect(find.byType(TimingBar), findsOneWidget);
+
+      // Weit weg von der Leiste: oben im Bild, wo die Figuren stehen.
+      await tester.tapAt(const Offset(200, 260));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+
+      // Fenster zu, es wurde eine Runde gespielt.
+      expect(find.byType(TimingBar), findsNothing);
+    });
+
+    testWidgets('ein Tipp auf die Leiste löst weiterhin aus', (tester) async {
+      await starteZeitfenster(tester);
+
+      await tester.tap(find.byType(TimingBar));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.byType(TimingBar), findsNothing);
+    });
+
+    testWidgets('die AppBar bleibt frei', (tester) async {
+      // Die Fläche darf die AppBar nicht verdecken. Läge sie darüber, wäre
+      // ein begonnener Zug eine Falle: Der Zurück-Pfeil sitzt dort, und man
+      // käme aus dem Kampf nicht mehr heraus, ohne vorher zu tippen.
+      await starteZeitfenster(tester);
+
+      await tester.tapAt(tester.getCenter(find.byType(AppBar)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Nichts ausgelöst — das Zeitfenster läuft weiter.
+      expect(find.byType(TimingBar), findsOneWidget);
+    });
+  });
 }

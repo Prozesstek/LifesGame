@@ -90,7 +90,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 196 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 199 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
@@ -120,7 +120,13 @@ Zeitlimit hätte den Zug mit dem schlechtestmöglichen Ergebnis entschieden,
 und das ist dieselbe Sorte Bestrafung fürs Zögern, die das Konzept bei den
 Gewohnheiten ausschließt.
 
-Vier Tests in `timing_bar_test.dart`. Einer davon prüft nicht nur, dass
+**Getippt wird überall.** Eine 34 Pixel hohe Leiste trifft man auf einem
+Handy im Eifer nicht zuverlässig; die Tippfläche liegt deshalb über dem
+ganzen Kampfbereich — aber **nicht** über der AppBar. Läge sie darüber,
+wäre ein begonnener Zug eine Falle: Der Zurück-Pfeil sitzt dort, und man
+käme aus dem Kampf nicht mehr heraus, ohne vorher zu tippen.
+
+Vier Tests in `timing_bar_test.dart`, drei weitere in `combat_test.dart`. Einer davon prüft nicht nur, dass
 nichts gemeldet wird, sondern auch, dass sich der Marker **noch bewegt**
 (`hasScheduledFrame`) — sonst wäre er auch grün, wenn die Leiste stumm am
 Rand stehen bliebe.

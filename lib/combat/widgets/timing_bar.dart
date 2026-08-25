@@ -16,10 +16,17 @@ class TimingBar extends StatefulWidget {
   static const double goodZone = 0.17;
 
   @override
-  State<TimingBar> createState() => _TimingBarState();
+  TimingBarState createState() => TimingBarState();
 }
 
-class _TimingBarState extends State<TimingBar>
+/// Der Zustand ist **öffentlich**, damit der Kampfbildschirm ihn über
+/// einen `GlobalKey` auslösen kann.
+///
+/// Grund: Getippt werden soll überall, nicht nur auf der Leiste. Die
+/// Bewertung muss aber genau in dem Moment passieren, in dem der Tipp
+/// kommt — der Marker steht ja nie still. Die Position nach außen zu
+/// reichen hieße, sie einen Frame zu früh oder zu spät zu lesen.
+class TimingBarState extends State<TimingBar>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   bool _locked = false;
@@ -45,7 +52,7 @@ class _TimingBarState extends State<TimingBar>
   /// wird. Ein Zeitlimit hätte den Zug für den Spieler entschieden — und
   /// zwar mit dem schlechtestmöglichen Ergebnis, ohne dass er etwas getan
   /// hätte. Wer wartet, verliert hier nichts als Zeit.
-  void _lockIn() {
+  void lockIn() {
     if (_locked) return;
     _locked = true;
     _controller.stop();
@@ -64,7 +71,7 @@ class _TimingBarState extends State<TimingBar>
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _lockIn,
+      onTap: lockIn,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
