@@ -90,7 +90,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 189 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 192 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
@@ -107,7 +107,23 @@ flutter run -d chrome
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
 
-## Sitzung 25.08.2026: Entwicklermodus
+## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
+
+### Der Kampf war unbedienbar — behoben
+
+`restart()` baute die Sitzung neu, ohne das Moveset zu setzen. Weil
+`CombatSession.moves` einen leeren Standardwert hat, schwieg der Compiler —
+und weil die **Gegnerwahl** `restart()` aufruft, hatte jeder über den
+Startbildschirm begonnene Kampf **keinen einzigen Move-Knopf**. Der Weg
+„Nochmal" nach einem Kampf ebenso.
+
+Der Fehler kam mit dem Feld `moves` (Sitzung 22.08., „Fähigkeiten lassen
+sich wählen"): `build()` bekam es, `restart()` wurde übersehen. Er lag
+seither still da — gefunden hat ihn ein Screenshot, nicht die Testsuite.
+
+Drei Tests halten es jetzt fest; zwei davon fallen ohne die Korrektur um.
+Der Fallstrick dahinter steht in `gotchas.md`: Ein Standardwert im
+Konstruktor macht ein vergessenes Feld unsichtbar.
 
 Ein Werkzeug, das Erfahrung, Gold, Punkte, Fähigkeiten und Ausrüstung per
 Knopfdruck vergibt ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)).

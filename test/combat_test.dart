@@ -6,6 +6,7 @@ import 'package:theory/theory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/enemy_picker_screen.dart';
@@ -22,6 +23,49 @@ void main() {
       expect(session.state.player.hp, session.state.player.maxHp);
       expect(session.state.isOver, isFalse);
       expect(session.log, isEmpty);
+    });
+
+    test('ein Kampf hat immer mindestens den Waffenmove', () {
+      // Slot 1 gehört der Waffe und ist nie leer (ADR-0017). Ohne diesen
+      // Test bleibt ein leeres Moveset unbemerkt: Der Bildschirm zeigt
+      // dann einfach keine Knöpfe, ohne Fehlermeldung.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(combatControllerProvider).moves, isNotEmpty);
+    });
+
+    test('restart behält das Moveset — der Kampf bleibt bedienbar', () {
+      // Der Fehler, den dieser Test verhindert: `CombatSession.moves` hat
+      // einen leeren Standardwert. `restart()` baute die Sitzung neu, ohne
+      // ihn zu setzen — und weil die Gegnerwahl `restart()` aufruft, war
+      // jeder über den Startbildschirm begonnene Kampf ohne einen einzigen
+      // Knopf. Sichtbar war das nur im Bild, nicht als Fehler.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final controller = container.read(combatControllerProvider.notifier);
+
+      controller.restart();
+
+      final session = container.read(combatControllerProvider);
+      expect(session.moves, isNotEmpty);
+      expect(session.moves, container.read(activeMovesProvider));
+    });
+
+    test('restart liest das Moveset neu ein', () {
+      // Innerhalb eines Kampfes friert das Moveset ein, zwischen zwei
+      // Kämpfen nicht: Ein neuer Kampf soll die Fähigkeiten von jetzt
+      // verwenden (ADR-0017).
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final controller = container.read(combatControllerProvider.notifier);
+
+      controller.restart();
+
+      expect(
+        container.read(combatControllerProvider).moves,
+        container.read(activeMovesProvider),
+      );
     });
 
     test('eine Runde verändert den Zustand und liefert Events', () {
