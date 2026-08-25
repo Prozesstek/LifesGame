@@ -30,11 +30,7 @@ class _TimingBarState extends State<TimingBar>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1150),
-    )..forward();
-    _controller.addStatusListener((status) {
-      // Nicht getippt heißt danebengegriffen.
-      if (status == AnimationStatus.completed) _lockIn(force: TimedHit.none);
-    });
+    )..repeat(reverse: true);
   }
 
   @override
@@ -43,13 +39,18 @@ class _TimingBarState extends State<TimingBar>
     super.dispose();
   }
 
-  void _lockIn({TimedHit? force}) {
+  /// Nimmt den Tipp entgegen und wertet die Position aus.
+  ///
+  /// **Es gibt keine Frist.** Der Marker läuft hin und her, bis getippt
+  /// wird. Ein Zeitlimit hätte den Zug für den Spieler entschieden — und
+  /// zwar mit dem schlechtestmöglichen Ergebnis, ohne dass er etwas getan
+  /// hätte. Wer wartet, verliert hier nichts als Zeit.
+  void _lockIn() {
     if (_locked) return;
     _locked = true;
     _controller.stop();
 
-    final result = force ?? _judge(_controller.value);
-    widget.onResult(result);
+    widget.onResult(_judge(_controller.value));
   }
 
   TimedHit _judge(double position) {

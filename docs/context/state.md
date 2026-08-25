@@ -90,7 +90,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 192 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 196 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
@@ -108,6 +108,22 @@ flutter run -d chrome
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
 
 ## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
+
+### Die Timing-Leiste wartet jetzt
+
+Der Marker lief einmal durch und meldete dann „daneben" — der Zug war
+entschieden, ohne dass der Spieler etwas getan hätte. Jetzt läuft er hin
+und her, bis getippt wird (`repeat(reverse: true)`).
+
+**Es gibt bewusst keine Frist.** Wer wartet, verliert nichts als Zeit. Ein
+Zeitlimit hätte den Zug mit dem schlechtestmöglichen Ergebnis entschieden,
+und das ist dieselbe Sorte Bestrafung fürs Zögern, die das Konzept bei den
+Gewohnheiten ausschließt.
+
+Vier Tests in `timing_bar_test.dart`. Einer davon prüft nicht nur, dass
+nichts gemeldet wird, sondern auch, dass sich der Marker **noch bewegt**
+(`hasScheduledFrame`) — sonst wäre er auch grün, wenn die Leiste stumm am
+Rand stehen bliebe.
 
 ### Der Kampf war unbedienbar — behoben
 
