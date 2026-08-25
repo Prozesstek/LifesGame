@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
 
+import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
@@ -69,8 +70,26 @@ final abilityProgressProvider = Provider<AbilityProgress>((ref) {
 });
 
 /// Alle wählbaren Fähigkeiten, die der Spieler freigeschaltet hat.
+///
+/// Der Entwicklermodus kann welche dazulegen, ohne ihre Bedingung zu
+/// erfüllen. Der Zuschlag steht bewusst **hier** und nicht in
+/// [abilityProgressProvider]: Dort stünde er als erfundene Streak oder
+/// erfundene Seite und wäre nicht mehr als Geschenk erkennbar (ADR-0021).
+/// Ohne Entwicklermodus ist die Menge leer.
 final unlockedAbilitiesProvider = Provider<List<Ability>>((ref) {
-  return AbilityCatalog.unlockedBy(ref.watch(abilityProgressProvider));
+  final verdient = AbilityCatalog.unlockedBy(
+    ref.watch(abilityProgressProvider),
+  );
+  final geschenkt = ref.watch(grantedAbilityIdsProvider);
+  if (geschenkt.isEmpty) return verdient;
+
+  final ids = <String>{for (final a in verdient) a.moveId};
+  return List<Ability>.unmodifiable(<Ability>[
+    ...verdient,
+    for (final ability in AbilityCatalog.choosable)
+      if (geschenkt.contains(ability.moveId) && !ids.contains(ability.moveId))
+        ability,
+  ]);
 });
 
 /// Was in Slot 1 liegt — die Fähigkeit der getragenen Waffe.

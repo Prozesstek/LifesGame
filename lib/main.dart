@@ -2,7 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dev/dev_controller.dart';
+import 'dev/dev_screen.dart';
+import 'dev/save_slot.dart';
 import 'home/home_screen.dart';
 import 'save/save_data.dart';
 import 'save/save_providers.dart';
@@ -23,7 +27,10 @@ Future<void> main() async {
 
   await _lockPortrait();
 
-  final store = await _openStore();
+  final prefs = await _openPrefs();
+  final slot = prefs == null ? SaveSlot.real : await SaveSlotStore.read(prefs);
+
+  final store = await _openStore(prefs, slot);
   final saved = await store.read();
 
   runApp(
@@ -31,6 +38,17 @@ Future<void> main() async {
       overrides: [
         saveStoreProvider.overrideWithValue(store),
         savedGameProvider.overrideWithValue(saved),
+        activeSlotProvider.overrideWithValue(slot),
+        // Ohne Typangabe: Riverpod 3 exportiert `Override` nicht
+        // (`gotchas.md`). Der Typ wird korrekt abgeleitet.
+        if (prefs != null) ...[
+          slotSwitcherProvider.overrideWithValue(
+            (SaveSlot ziel) => SaveSlotStore.write(prefs, ziel),
+          ),
+          devSaveEraserProvider.overrideWithValue(
+            () => prefs.remove(SaveSlot.dev.storageKey),
+          ),
+        ],
       ],
       child: const PhoneFrame(child: SaveWatcher(child: LifesGameApp())),
     ),
@@ -68,18 +86,29 @@ Future<void> _lockPortrait() async {
   }
 }
 
-/// Öffnet den Speicher — oder weicht auf einen aus, der nichts behält.
+/// Öffnet den Speicher — oder gibt null zurück, wenn er klemmt.
 ///
 /// Eine App, die nicht startet, weil der Speicher klemmt, ist schlimmer als
 /// eine, die diese eine Sitzung nichts behält. Der Fehler wird gemeldet,
 /// nicht verschluckt.
-Future<SaveStore> _openStore() async {
+Future<SharedPreferences?> _openPrefs() async {
   try {
-    return await SharedPreferencesSaveStore.open();
+    return await SharedPreferences.getInstance();
   } on Exception catch (error) {
     debugPrint('Speicher nicht verfügbar, laufe ohne Persistenz: $error');
-    return InMemorySaveStore(const SaveData.empty());
+    return null;
   }
+}
+
+/// Der Stand, der zum gewählten Slot gehört.
+///
+/// **Der Slot bestimmt den Schlüssel, sonst nichts.** Ist der
+/// Entwicklermodus auf `dev` geschaltet, fasst die App den echten Stand für
+/// die ganze Sitzung nicht an — das ist die Sperre, die den 30-Tage-
+/// Nachweis aus `ziele.md` schützt (ADR-0021).
+Future<SaveStore> _openStore(SharedPreferences? prefs, SaveSlot slot) async {
+  if (prefs == null) return InMemorySaveStore(const SaveData.empty());
+  return SharedPreferencesSaveStore(prefs, key: slot.storageKey);
 }
 
 class LifesGameApp extends StatelessWidget {

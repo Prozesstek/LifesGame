@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../character/character_screen.dart';
+import '../dev/dev_controller.dart';
+import '../dev/dev_screen.dart';
 import '../combat/combat_controller.dart';
 import '../combat/enemy_picker_screen.dart';
 import '../gear/gear_controller.dart';
@@ -103,6 +105,19 @@ class HomeScreen extends ConsumerWidget {
                   status: '$equippedCount / ${GearSlot.values.length}',
                   onTap: () => _open(context, const CharacterScreen()),
                 ),
+
+                // Nur im Debug-Build. Im Release ist der Zweig samt
+                // Bildschirm gar nicht erst im Bündel (ADR-0021).
+                if (devModeAvailable) ...<Widget>[
+                  const SizedBox(height: 10),
+                  HubTile(
+                    icon: Icons.science_outlined,
+                    title: 'Entwicklermodus',
+                    subtitle: 'Werte schenken, alles freischalten',
+                    status: ref.watch(activeSlotProvider).label,
+                    onTap: () => _open(context, const DevScreen()),
+                  ),
+                ],
               ],
             ),
           ),

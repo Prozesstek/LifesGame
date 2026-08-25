@@ -4,6 +4,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
+import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
@@ -67,6 +68,13 @@ class CharacterScreen extends ConsumerWidget {
                   onChooseTitle: () =>
                       _chooseTitle(context, ref, identity, titleStats),
                 ),
+                // Nur sichtbar, wenn wirklich etwas geschenkt wurde. Sonst
+                // stünde auf jedem Charakterbildschirm eine leere Karte
+                // über eine Funktion, die niemand benutzt hat.
+                if (ref.watch(devGrantsProvider).isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 16),
+                  const _DevGrantsCard(),
+                ],
                 const SizedBox(height: 20),
                 const _SectionTitle('Beständigkeit'),
                 const SizedBox(height: 10),
@@ -269,6 +277,90 @@ class _SectionTitle extends StatelessWidget {
         fontSize: 15,
         fontWeight: FontWeight.bold,
         color: Colors.white,
+      ),
+    );
+  }
+}
+
+/// Was der Entwicklermodus zu den Zahlen beigetragen hat.
+///
+/// **Der Charakterbildschirm lebt von Zurechenbarkeit** — „18 Angriff,
+/// davon 3 aus Ausrüstung". Ein geschenkter Wert, der dort stillschweigend
+/// mitzählte, wäre der eine Posten ohne Herkunft. Deshalb steht er hier,
+/// benannt und mit einem Hinweis, dass er nicht verdient ist (ADR-0021).
+class _DevGrantsCard extends ConsumerWidget {
+  const _DevGrantsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final grants = ref.watch(devGrantsProvider);
+    final zeilen = <String, int>{
+      'Erfahrung': grants.bonusXp,
+      'Gold': grants.bonusGold,
+      'Theoriepunkte': grants.bonusTheoryPoints,
+      'Fähigkeitspunkte': grants.bonusAbilityPoints,
+      'Fähigkeiten': grants.unlockedAbilityIds.length,
+    }..removeWhere((_, wert) => wert == 0);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2413),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Palette.gold.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Icon(Icons.science_outlined, size: 18, color: Palette.gold),
+              const SizedBox(width: 8),
+              const Text(
+                'Aus dem Entwicklermodus',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.gold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          for (final zeile in zeilen.entries)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Flexible(
+                    child: Text(
+                      zeile.key,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Palette.textDim,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '+${zeile.value}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 6),
+          const Text(
+            'Nicht verdient — geschenkt. Im Dev-Modus zurücksetzbar.',
+            style: TextStyle(fontSize: 11, color: Palette.muted),
+          ),
+        ],
       ),
     );
   }

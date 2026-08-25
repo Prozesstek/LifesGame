@@ -6,6 +6,8 @@ import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 import 'package:theory/theory.dart';
 
+import '../dev/debug_grants.dart';
+
 /// Der komplette Spielstand als ein Wert.
 ///
 /// **Was hier steht und was nicht.** Gespeichert wird ausschließlich, was
@@ -24,6 +26,7 @@ class SaveData {
     this.loadout = const Loadout.empty(),
     this.identity = const Identity.empty(),
     this.abilities = const ChosenAbilities.empty(),
+    this.grants = const DebugGrants.none(),
   });
 
   const SaveData.empty() : this();
@@ -49,6 +52,10 @@ class SaveData {
   /// der folgt aus der getragenen Waffe (ADR-0017).
   final ChosenAbilities abilities;
 
+  /// Was der Entwicklermodus verschenkt hat. Im echten Stand immer leer —
+  /// der Modus arbeitet auf einem eigenen Schlüssel (ADR-0021).
+  final DebugGrants grants;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
@@ -66,6 +73,7 @@ class SaveData {
       'gear': loadout.toJson(),
       'identity': identity.toJson(),
       'abilities': abilities.toJson(),
+      'grants': grants.toJson(),
     };
   }
 
@@ -80,6 +88,7 @@ class SaveData {
     final gear = json['gear'];
     final identity = json['identity'];
     final abilities = json['abilities'];
+    final grants = json['grants'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -97,6 +106,9 @@ class SaveData {
       abilities: abilities is Map<String, Object?>
           ? ChosenAbilities.fromJson(abilities)
           : const ChosenAbilities.empty(),
+      grants: grants is Map<String, Object?>
+          ? DebugGrants.fromJson(grants)
+          : const DebugGrants.none(),
     );
   }
 
@@ -122,6 +134,7 @@ class SaveData {
     Loadout? loadout,
     Identity? identity,
     ChosenAbilities? abilities,
+    DebugGrants? grants,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
@@ -129,6 +142,7 @@ class SaveData {
       loadout: loadout ?? this.loadout,
       identity: identity ?? this.identity,
       abilities: abilities ?? this.abilities,
+      grants: grants ?? this.grants,
     );
   }
 }

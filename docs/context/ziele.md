@@ -52,6 +52,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Android, Store, Icons der App** | Der Web-Build reicht für zwei Leute. Die Android-Kette ist auf diesem Rechner nicht einsatzfähig. |
 | **Verkauf im Laden, Entprellen der Persistenz** | Beides sind Signale für später, kein Mangel heute. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
+| **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
 
 **Diese Liste ist bindend.** Wer sie ändern will, ändert sie hier — sichtbar
 für den anderen, statt still nebenbei.

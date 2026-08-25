@@ -22,25 +22,38 @@ abstract interface class SaveStore {
 /// derselbe Code auf Web, Android und Desktop. Für drei Objekte ist das die
 /// passende Größe.
 class SharedPreferencesSaveStore implements SaveStore {
-  const SharedPreferencesSaveStore(this._prefs);
+  const SharedPreferencesSaveStore(this._prefs, {required this.key});
 
   /// Die Instanz wird beim Start geladen und hereingegeben, nicht hier
   /// geholt: So bleibt [read] synchron schnell und `main.dart` hat einen
   /// klaren Ort, an dem das Warten stattfindet.
   final SharedPreferences _prefs;
 
-  /// Der Schlüssel. Ändern heißt: alle bestehenden Stände sind weg.
-  static const String _key = 'lifes_game.save.v1';
+  /// Unter welchem Schlüssel dieser Stand liegt. Ändern heißt: der Stand
+  /// unter dem alten Schlüssel ist unerreichbar.
+  ///
+  /// **Ein Parameter statt einer Konstante**, weil der Entwicklermodus auf
+  /// einem zweiten Stand arbeitet (`lib/dev/save_slot.dart`). Der echte
+  /// Fortschritt wird dadurch nicht bloß gemieden, sondern liegt hinter
+  /// einem Schlüssel, den die App währenddessen gar nicht anfasst.
+  final String key;
 
-  static Future<SharedPreferencesSaveStore> open() async {
-    return SharedPreferencesSaveStore(await SharedPreferences.getInstance());
+  static Future<SharedPreferencesSaveStore> open({required String key}) async {
+    return SharedPreferencesSaveStore(
+      await SharedPreferences.getInstance(),
+      key: key,
+    );
   }
 
   @override
-  Future<SaveData> read() async => SaveData.decode(_prefs.getString(_key));
+  Future<SaveData> read() async => SaveData.decode(_prefs.getString(key));
 
   @override
-  Future<void> write(SaveData data) => _prefs.setString(_key, data.encode());
+  Future<void> write(SaveData data) => _prefs.setString(key, data.encode());
+
+  /// Löscht diesen Stand vollständig. Nur der Entwicklermodus benutzt das,
+  /// und nur auf seinem eigenen Schlüssel.
+  Future<void> erase() => _prefs.remove(key);
 }
 
 /// Speichert nichts und liest nichts.
