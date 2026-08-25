@@ -26,13 +26,29 @@ class GearController extends Notifier<Loadout> {
   /// der eigene Stand direkt abgezogen. Das Ergebnis ist dasselbe, nur
   /// ohne Kreis.
   PurchaseBlock? buy(String itemId) {
-    final available = ref.read(goldEarnedProvider) - state.spentGold;
+    final available = ref.read(spendableIncomeProvider) - state.spentGold;
     final block = state.blockFor(itemId, availableGold: available);
     if (block != null) return block;
 
     state = state.buy(itemId, availableGold: available);
     return null;
   }
+
+  /// Legt ein Stück ins Inventar, ohne auf den Kontostand zu sehen.
+  ///
+  /// **Nur für den Entwicklermodus** (ADR-0021). Der Preis wird trotzdem
+  /// gebucht — `spentGold` bleibt die Wahrheit über den Besitz. Dass sich
+  /// das Geschenk nicht als Minus auswirkt, regelt der Dev-Modus, indem er
+  /// den Preis als Zuschlag dazugibt. So bleibt der Goldstand eine
+  /// Rechnung und wird nicht zur Ausnahme (ADR-0011).
+  void grant(String itemId) {
+    if (state.isOwned(itemId)) return;
+    state = state.buy(itemId, availableGold: _unlimitedGold);
+  }
+
+  /// Genug, um jedes Stück im Katalog zu decken. Steht hier und nicht in
+  /// `package:gear`: Es ist kein Preis, sondern das Abschalten der Prüfung.
+  static const int _unlimitedGold = 1 << 30;
 
   void equip(String itemId) {
     state = state.equip(itemId);

@@ -4,6 +4,7 @@ import 'package:theory/theory.dart';
 import 'package:progression/progression.dart';
 
 import '../progression/level_provider.dart';
+import '../dev/dev_controller.dart';
 import '../save/save_providers.dart';
 
 /// Bindeglied zwischen den Theorie-Inhalten und der Oberfläche.
@@ -43,6 +44,37 @@ class TheoryController extends Notifier<TheoryProgress> {
 
     state = state.openNode(nodeId);
     return true;
+  }
+
+  /// Öffnet jeden Knoten und besteht jede Seite — Handbuch wie Graph.
+  ///
+  /// **Nur für den Entwicklermodus** (ADR-0021), und bewusst über
+  /// [TheoryProgress.submit] statt über einen Abkürzungspfad: So gelten
+  /// dieselben Regeln wie beim echten Beantworten, und Erfahrung und Gold
+  /// entstehen auf demselben Weg. Ein eigener „alles bestanden"-Schalter
+  /// im Package wäre eine zweite Wahrheit über den Fortschritt.
+  ///
+  /// Die Punkte für die Knoten werden **nicht** hier verrechnet — der
+  /// Dev-Modus schenkt sie getrennt dazu.
+  void unlockEverything() {
+    var next = state;
+
+    List<int?> allCorrect(Lesson lesson) => <int?>[
+      for (final question in lesson.questions) question.correctIndex,
+    ];
+
+    for (final branch in theoryTree.branches) {
+      for (final lesson in branch.lessons) {
+        next = next.submit(lesson, allCorrect(lesson)).progress;
+      }
+    }
+
+    for (final node in ref.read(theoryGraphProvider).nodes) {
+      next = next.submit(node.lesson, allCorrect(node.lesson)).progress;
+      next = next.openNode(node.id);
+    }
+
+    state = next;
   }
 }
 
@@ -105,10 +137,14 @@ final spentTheoryPointsProvider = Provider<int>((ref) {
 /// Punkte je Aufstieg stehen in `package:progression`, die Kosten am
 /// Knoten in `package:theory` — hier treffen sie sich.
 final availableTheoryPointsProvider = Provider<int>((ref) {
-  return TheoryPoints.availableAt(
+  final verdient = TheoryPoints.availableAt(
     level: ref.watch(playerLevelProvider).level,
     spent: ref.watch(spentTheoryPointsProvider),
   );
+
+  // Ohne Entwicklermodus ist der Zuschlag 0 (ADR-0021).
+  final int geschenkt = ref.watch(grantedTheoryPointsProvider);
+  return verdient + geschenkt;
 });
 
 /// Bestandene Seiten insgesamt — Handbuch **und** Graph.

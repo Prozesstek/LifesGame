@@ -87,6 +87,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
 | `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
+| `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
+| `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/battle/fighter.dart` | die beiden gezeichneten Kämpfer | Flutter |
@@ -117,7 +120,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 177 Tests
+flutter test             # 189 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -261,6 +264,13 @@ Move-Ids und Waffen-Ids. Was daraus wird, prüft
 Waffenmove **erzeugt** Energie. Der letzte Punkt ist keine Kosmetik:
 Auf Level 1 ist nur der Waffenslot offen
 ([ADR-0017](docs/decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
+
+**Der Entwicklermodus ist nur im Debug-Build vorhanden** und arbeitet auf
+einem **eigenen Spielstand** ([ADR-0021](docs/decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)).
+Er schenkt Zuschläge als benannten Summanden, statt Lektionen oder Häkchen
+zu erfinden. Wer an einer abgeleiteten Zahl dreht, lässt
+`flutter test test/dev_mode_test.dart` laufen — dort steht die Zusage, dass
+**ohne** Zuschläge jede Formel unverändert ist.
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen

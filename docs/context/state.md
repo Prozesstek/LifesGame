@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 24.08.2026 · Frederik
+**Zuletzt aktualisiert:** 25.08.2026 · AktivesBrett
 
 ---
 
@@ -90,7 +90,7 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 149 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 189 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
@@ -106,6 +106,57 @@ flutter run -d chrome
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
+
+## Sitzung 25.08.2026: Entwicklermodus
+
+Ein Werkzeug, das Erfahrung, Gold, Punkte, Fähigkeiten und Ausrüstung per
+Knopfdruck vergibt ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)).
+189 Tests grün (vorher 177).
+
+**Zwei bestehende Entscheidungen standen im Weg, beide zu Recht:**
+
+1. **Es gibt keinen Ort für „+500 XP".** Erfahrung, Level, Gold und
+   Theoriepunkte sind alle abgeleitet (ADR-0008, ADR-0011).
+2. **Ziel 7 verbietet das Werkzeug** für den 30-Tage-Nachweis: „Kein
+   Sonderrecht, keine Testdaten, keine Abkürzung über den Debugger."
+
+**Die Lösung für beides:**
+
+- **Zuschläge statt gefälschter Vergangenheit.** `DebugGrants` ist ein
+  eigener, benannter Summand. Die Alternative — Lektionen als bestanden
+  markieren, bis die Zahl stimmt — hätte den Stand lügen lassen und über
+  erfundene Streaks auch Titel und Multiplikatoren verfälscht.
+- **Ein eigener Spielstand** (`lifes_game.save.dev.v1`). Der echte Stand
+  ist nicht bloß gemieden, sondern liegt hinter einem Schlüssel, den die
+  App währenddessen gar nicht anfasst. Der Wechsel braucht einen Neustart.
+- **Nur im Debug-Build.** Im Release ist weder Kachel noch Bildschirm im
+  Bündel.
+- **Die Herkunft bleibt sichtbar**: eine Karte „Aus dem Entwicklermodus"
+  auf dem Charakterbildschirm, sobald etwas geschenkt wurde.
+
+**Was der Modus kann:** Level (+1/+5), XP, Gold, Theorie- und
+Fähigkeitspunkte — je mit festen Stufen und Freifeld. Einzelne oder alle
+Items, einzelne oder alle Fähigkeiten. „Alles freischalten", „Zuschläge
+zurücksetzen", „Dev-Stand komplett löschen".
+
+**Drei Dinge, die beim Bauen auffielen:**
+
+- **„+1 Level" gibt es nicht als gesetzten Wert.** Es schenkt genau die
+  Erfahrung, die bis zur nächsten Stufe fehlt — der einzige Weg, der die
+  Kurve nicht umgeht.
+- **Ein geschenktes Item würde Gold *wegnehmen*.** `spentGold` steigt mit
+  dem Besitz (ADR-0011); der Preis wird deshalb als Zuschlag mitgegeben.
+- **Charakterwerte werden nicht geschenkt.** Sie hängen an Häkchen je Stat;
+  sie zu schenken hieße, Streaks zu erfinden.
+
+**Ein Importkreis hat Zeit gekostet:** `level_provider` rechnet die
+Zuschläge ein, `gear_controller` braucht das verfügbare Gold — beide über
+`lib/dev/` zu verbinden ließ die Typinferenz auf `num` zurückfallen, mit
+vier Fehlern, die nach einem Tippfehler aussahen. Gelöst über
+`spendableIncomeProvider`.
+
+**Offen:** Fähigkeitspunkte werden gespeichert und angezeigt, wirken aber
+nicht — das Feature aus ADR-0013 ist nicht gebaut.
 
 ## Sitzung 22.08.2026: der Charakter ist fertig, und der Kern-Loop
 schließt sich

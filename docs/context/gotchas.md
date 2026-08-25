@@ -3,6 +3,39 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Zwei Dart-Versionen formatieren denselben Code verschieden
+
+`dart format .` hat auf diesem Rechner (Dart 3.13) drei unveränderte
+Theorie-Dateien umgebrochen, die unter Dart 3.12 anders aussahen. Der
+neuere Formatter setzt lange Zeichenkettenketten anders um:
+
+```dart
+// Dart 3.12
+body:
+    'Konzentration, Geduld und Selbstbeherrschung ...'
+
+// Dart 3.13
+body: 'Konzentration, Geduld und Selbstbeherrschung ...'
+```
+
+Beides ist „richtig formatiert". Die Folge ist trotzdem unangenehm: Wer
+`dart format .` laufen lässt, bekommt fremde Dateien in seinen Commit — und
+beim nächsten Mal formatiert der andere sie zurück. Das Repo pendelt.
+
+**Regel bis zur Vereinheitlichung:** Nur die eigenen Dateien formatieren,
+nicht den ganzen Baum:
+
+```bash
+dart format lib/dev test/dev_mode_test.dart
+```
+
+Und vor dem Commit `git diff --cached --stat` ansehen. Tauchen Dateien auf,
+die man nicht angefasst hat, gehören sie mit `git restore --staged
+--worktree <pfad>` wieder heraus.
+
+**Dauerhafte Lösung:** dieselbe Flutter-Version auf beiden Rechnern. Frederik
+hat 3.44.9 (Dart 3.12.2), hier läuft 3.47.0 (Dart 3.13.0).
+
 ## Im Widget-Test ist jede Glyphe quadratisch — Texte sind dort breiter
 
 `phone_layout_test.dart` meldete 218 Pixel Überlauf in einer Zeile aus zwei

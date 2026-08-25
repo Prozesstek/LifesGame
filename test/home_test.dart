@@ -42,7 +42,13 @@ void main() {
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
+      // Tests laufen im Debug-Build, deshalb ist die Dev-Kachel hier
+      // sichtbar (ADR-0021). Sie gehört nicht zum Spiel und wird für die
+      // Zählung herausgenommen — im Release-Build gibt es sie nicht.
+      final tiles = tester
+          .widgetList<HubTile>(find.byType(HubTile))
+          .where((t) => t.title != 'Entwicklermodus')
+          .toList();
       final locked = tiles
           .where((t) => t.onTap == null)
           .map((t) => t.title)
