@@ -7,6 +7,7 @@ import '../ui/palette.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
+import 'widgets/environment_banner.dart';
 import 'widgets/fighter_status.dart';
 import 'widgets/timing_bar.dart';
 
@@ -152,6 +153,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             ],
           ),
         ),
+        EnvironmentBanner(environment: state.environment),
         Expanded(
           flex: 3,
           child: Container(
