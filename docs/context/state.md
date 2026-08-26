@@ -295,6 +295,31 @@ getestet; wie es auf einem Handy **aussieht** — Größe, Versatz bei
 Klingenwirbels vier Treffern, Lesbarkeit der Funken — muss jemand
 ansehen.
 
+### Langes Drücken erklärt einen Zug
+
+Jeder Move-Knopf im Kampf trägt einen Tooltip: was der Zug tut, und was
+ein perfekter Treffer daran ändert. Ausgelöst durch langes Drücken —
+auf einem Handy gibt es kein Mausschweben, und ein „i" auf dem Knopf
+nähme den Platz, den Name und Energiekosten schon brauchen. Der leere
+Log nennt den Weg („Lange drücken erklärt ihn"), sonst fände ihn
+niemand.
+
+**Die Formulierungen kommen aus der Vorlage, die Zahlen nicht.**
+`move_help.dart` setzt ein, was der Zug bei *diesem* Angriffswert
+anrichtet: Donnerkeil sagt bei Angriff 13 etwas anderes als bei 20. Bei
+genau 16 trifft er die Zahlen der Vorlage — ein Test hält das fest, und
+damit auch die Umrechnung aus ADR-0022.
+
+**Alle Zahlen sind flach**, also ohne Verteidigung, Streuung und Timing.
+Deshalb steht überall „etwa". Gerechnet wird in `package:combat`
+(`Move.flatDamage`, `flatFromFactor`), nicht im Bildschirm.
+
+**Was abgelesen werden kann, wird abgelesen.** Steinhauts „−40 %" kommt
+aus `ReduceIncoming(factor: 0.6)`, die Umgebungssätze bauen sich
+vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
+den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
+geschrieben.
+
 ### Offen
 
 **Der andere Fall ist weiter unsichtbar.** Eine Fähigkeit, die es im

@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'ability_moves.dart';
+import 'balance.dart';
 import 'environment.dart';
 import 'timing_spec.dart';
 
@@ -251,6 +254,38 @@ class Move {
   int get energyCost => energyDelta < 0 ? -energyDelta : 0;
 
   bool isAffordableBy(int energy) => energy >= energyCost;
+
+  /// Was dieser Zug bei [attack] Angriff anrichtet, **wenn nichts dagegen
+  /// steht** -- keine Verteidigung, keine Streuung, kein Timing-Bonus.
+  ///
+  /// **Eine Zahl fuer Anzeigen, keine Kampfzahl.** Der Kampf rechnet in
+  /// `_rawDamage` mit der Verteidigung des Ziels und einer Streuung
+  /// weiter; was hier herauskommt, ist die obere Schranke davon. Sie steht
+  /// trotzdem hier und nicht im Bildschirm: Sobald `power` sich aendert,
+  /// aendert sich beides zusammen (Schichtregel in `CLAUDE.md`).
+  int flatDamage(int attack) => flatFromFactor(power, attack);
+
+  /// Dasselbe bei perfektem Timing.
+  ///
+  /// Faehigkeiten bringen ihren eigenen Faktor mit; Basisangriff und
+  /// Waffenmoves bleiben beim Deckel aus [Balance] (ADR-0022).
+  int flatPerfectDamage(int attack, {Balance balance = const Balance()}) {
+    return flatFromFactor(
+      power * (perfectFactor ?? balance.timedHitPerfect),
+      attack,
+    );
+  }
+}
+
+/// Ein Vielfaches des Angriffswerts als glatte Zahl.
+///
+/// Dauerschaden, Heilung und Umgebungen sind im Spiel durchweg Faktoren
+/// auf den Angriffswert, nie feste HP (ADR-0022). Wer eine davon anzeigen
+/// will, braucht dieselbe Rechnung -- und sie steht deshalb einmal hier
+/// statt in jedem Bildschirm neu.
+int flatFromFactor(double factorOfAttack, int attack) {
+  if (factorOfAttack <= 0) return 0;
+  return max(1, (factorOfAttack * attack).round());
 }
 
 /// Standard-Moveset gemaess Konzept, Abschnitt 3.2.

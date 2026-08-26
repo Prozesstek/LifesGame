@@ -167,8 +167,8 @@ abstract final class DamageColors {
   /// Schaden über Zeit — je Quelle eine eigene Farbe, damit am
   /// Rundenende ablesbar ist, *woher* der Verlust kommt.
   static const Map<String, Color> _overTime = <String, Color>{
-    'poison': Color(0xFFB77BE8), // Gift: lila
-    'poison_bog': Color(0xFF8E5CD9), // Giftboden: dunkleres Lila
+    'poison': Color(0xFFC42BFF), // Gift: kräftiges Lila
+    'poison_bog': Color(0xFF9500E8), // Giftboden: tieferes, sattes Lila
     'burn': Color(0xFFFF9A4D), // Brand: orange
     'frost': Color(0xFF7FD4F5), // Eisfeld: hellblau
     'sandstorm': Color(0xFFE8C55A), // Sandsturm: sandgelb
