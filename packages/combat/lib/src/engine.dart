@@ -126,6 +126,7 @@ class CombatEngine {
     }
 
     round.damageThisAction = 0;
+    final environmentBefore = round.environment;
     round.emit(MoveUsed(side: side, moveId: move.id));
     _applyEnergy(round, side, move.energyDelta + discount);
     if (discount > 0) {
@@ -155,6 +156,29 @@ class CombatEngine {
         _applyEffect(round, side, effect);
       }
     }
+
+    _announceEnvironment(round, environmentBefore);
+  }
+
+  /// Meldet eine neu gelegte Umgebung -- **einmal je Handlung**, mit ihrer
+  /// endgueltigen Dauer.
+  ///
+  /// Der Grund steht in den Faehigkeiten: Ein perfekt gelegter Frostnebel
+  /// legt ihn zweimal, einmal aus der Grundwirkung und einmal aus der
+  /// Perfect-Wirkung mit einer Runde mehr. Meldete jede fuer sich, staenden
+  /// zwei Zeilen im Log, die sich widersprechen -- "drei Runden" und
+  /// gleich darauf "vier Runden".
+  void _announceEnvironment(_Round round, Environment? before) {
+    final now = round.environment;
+    if (now == null || identical(now, before)) return;
+
+    round.emit(
+      EnvironmentSet(
+        environmentId: now.id,
+        owner: now.owner,
+        turns: now.remainingTurns,
+      ),
+    );
   }
 
   /// Der beste Tipp einer Runde. Perfect schlaegt Good schlaegt None.
@@ -443,17 +467,13 @@ class CombatEngine {
       case HealSelfBy(:final factor):
         _healBy(round, side, (round.of(side).attack * factor).round());
 
-      case SetEnvironment(:final environmentId):
+      case SetEnvironment(:final environmentId, :final extraTurns):
         final template = Environments.byId(environmentId);
         if (template == null) break;
-        round.environment = template.copyWith(owner: side);
-        round.emit(
-          EnvironmentSet(
-            environmentId: template.id,
-            owner: side,
-            turns: template.remainingTurns,
-          ),
-        );
+        // Gemeldet wird am Ende der Handlung, nicht hier -- siehe
+        // [_announceEnvironment].
+        round.environment =
+            template.copyWith(owner: side).withExtraTurns(extraTurns);
 
       case GainEnergy(:final amount):
         _applyEnergy(round, side, amount);
@@ -493,11 +513,7 @@ class CombatEngine {
     final environment = round.environment;
     if (environment == null) return;
 
-    final elapsed = environment.elapsedOf(
-      Environments.byId(environment.id)?.remainingTurns ??
-          environment.remainingTurns,
-    );
-    final factor = environment.dotFactorInTurn(elapsed);
+    final factor = environment.dotFactorInTurn(environment.elapsed);
     final victim = environment.victim;
 
     if (factor > 0) {

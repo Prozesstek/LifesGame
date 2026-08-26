@@ -128,10 +128,16 @@ final class HealSelfBy extends MoveEffect {
 }
 
 /// Legt eine Umgebung. Die Id zeigt in [Environments].
+///
+/// [extraTurns] haengt Runden an die Katalogdauer an. Genau so bekommen
+/// die vier Faehigkeiten, fuer die die Vorlage keine Perfect-Wirkung nennt,
+/// trotzdem eine: Ein perfekter Treffer legt dieselbe Umgebung eine Runde
+/// laenger. Ein Tipp ohne jede Auszahlung waere sonst reine Reibung.
 final class SetEnvironment extends MoveEffect {
-  const SetEnvironment(this.environmentId);
+  const SetEnvironment(this.environmentId, {this.extraTurns = 0});
 
   final String environmentId;
+  final int extraTurns;
 }
 
 /// Gibt dem Anwender Energie, zusaetzlich zu [Move.energyDelta].
