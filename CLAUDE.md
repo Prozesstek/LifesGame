@@ -51,6 +51,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 |---|---|---|
 | `packages/combat/` | Kampflogik, reines Dart, 29 Tests | nur Dart-SDK |
 | `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
+| `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
+| `packages/combat/lib/src/environment.dart` | die vier Umgebungen | nur Dart-SDK |
+| `packages/combat/lib/src/timing_rules.dart` | welche Timing-Werte gerade gelten | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
 | `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 109 Tests | nur Dart-SDK |
@@ -120,7 +123,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 199 Tests
+flutter test             # 205 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -128,7 +131,7 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 29 Tests
+dart test                              # 49 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
@@ -141,7 +144,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 cd packages/theory      ; dart test    # 109 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
-cd packages/abilities   ; dart test    # 28 Tests
+cd packages/abilities   ; dart test    # 31 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
@@ -192,6 +195,19 @@ Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
 mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
 muss auch besser sein.
+
+**Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Engine.**
+Alle fünfzehn stehen in `packages/combat/lib/src/ability_moves.dart`, ihre
+Bedingungen in `packages/abilities` ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
+Feste Zahlen aus einer Vorlage werden mit `power = Wert / 16` umgerechnet —
+sonst hängt die Fähigkeit nicht mehr am Angriffswert und damit nicht mehr
+an den Gewohnheiten. Dauerschaden ist immer ein Vielfaches des
+Angriffswerts, nie eine feste HP-Zahl.
+
+**Der eigene Perfect-Faktor gilt nur für Fähigkeiten.** Basisangriff und
+Waffenmoves lassen `perfectFactor` auf `null` und bleiben beim Deckel aus
+`balance.dart` — dort galt die Messung aus ADR-0009. Wer das ändert, lässt
+`cd packages/combat ; dart test` laufen; ein Test hält es fest.
 
 **Der Kampf hängt am Moveset, und das ist eine gemessene Zahl.**
 Mit nur einem Move ist der erste Gegner unschlagbar (0 % in der

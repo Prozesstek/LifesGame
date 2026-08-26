@@ -17,13 +17,17 @@
 /// ```
 library;
 
+export 'src/ability_moves.dart';
 export 'src/balance.dart';
 export 'src/combatant.dart';
 export 'src/enemy.dart';
 export 'src/enemy_policy.dart';
+export 'src/environment.dart';
 export 'src/engine.dart';
 export 'src/events.dart';
 export 'src/move.dart';
 export 'src/state.dart';
 export 'src/status.dart';
 export 'src/timed_hit.dart';
+export 'src/timing_rules.dart';
+export 'src/timing_spec.dart';

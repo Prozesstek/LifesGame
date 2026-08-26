@@ -5,15 +5,28 @@ import 'package:flutter/material.dart';
 /// tippt möglichst mittig.
 ///
 /// Diese Leiste **misst** nur. Was der Treffer wert ist, entscheidet die
-/// Kampflogik anhand von [TimedHit] (ADR-0002).
+/// Kampflogik anhand von [TimedHit] (ADR-0002) — und wie schwer er zu
+/// treffen ist, steht in [spec], das aus `package:combat` kommt. Hier
+/// werden weder Zonen noch Geschwindigkeiten festgelegt.
 class TimingBar extends StatefulWidget {
-  const TimingBar({required this.onResult, super.key});
+  const TimingBar({
+    required this.onResult,
+    this.spec = TimingSpec.standard,
+    this.hits = 1,
+    super.key,
+  });
 
-  final ValueChanged<TimedHit> onResult;
+  /// Wird aufgerufen, wenn **alle** Tipps abgegeben sind.
+  final ValueChanged<List<TimedHit>> onResult;
 
-  /// Halbe Breite der Zonen, gemessen als Abstand von der Mitte (0..0.5).
-  static const double perfectZone = 0.06;
-  static const double goodZone = 0.17;
+  /// Geschwindigkeit und Fensterbreite dieses Zuges.
+  final TimingSpec spec;
+
+  /// Wie oft getippt werden muss. Klingenwirbel hat drei.
+  final int hits;
+
+  /// Dauer eines Durchlaufs bei Geschwindigkeit 1,0.
+  static const Duration baseSweep = Duration(milliseconds: 1150);
 
   @override
   TimingBarState createState() => TimingBarState();
@@ -29,15 +42,23 @@ class TimingBar extends StatefulWidget {
 class TimingBarState extends State<TimingBar>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  bool _locked = false;
+
+  /// Die bisher abgegebenen Tipps. Bei [TimingBar.hits] ist Schluss.
+  final List<TimedHit> _results = <TimedHit>[];
+
+  bool _done = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1150),
-    )..repeat(reverse: true);
+    _controller = AnimationController(vsync: this, duration: _sweepDuration)
+      ..repeat(reverse: true);
+  }
+
+  /// Ein schnellerer Marker heißt: dieselbe Strecke in kürzerer Zeit.
+  Duration get _sweepDuration {
+    final ms = TimingBar.baseSweep.inMilliseconds / widget.spec.speed;
+    return Duration(milliseconds: ms.round());
   }
 
   @override
@@ -46,38 +67,57 @@ class TimingBarState extends State<TimingBar>
     super.dispose();
   }
 
-  /// Nimmt den Tipp entgegen und wertet die Position aus.
+  /// Nimmt einen Tipp entgegen und wertet die Position aus.
   ///
   /// **Es gibt keine Frist.** Der Marker läuft hin und her, bis getippt
   /// wird. Ein Zeitlimit hätte den Zug für den Spieler entschieden — und
   /// zwar mit dem schlechtestmöglichen Ergebnis, ohne dass er etwas getan
   /// hätte. Wer wartet, verliert hier nichts als Zeit.
   void lockIn() {
-    if (_locked) return;
-    _locked = true;
-    _controller.stop();
+    if (_done) return;
 
-    widget.onResult(_judge(_controller.value));
+    _results.add(_judge(_controller.value));
+
+    if (_results.length < widget.hits) {
+      // Nächster Tipp: Der Marker springt an den Anfang zurück, damit
+      // jeder Treffer dieselbe Ausgangslage hat. Ohne den Sprung wäre der
+      // zweite Tipp reine Glückssache — der Marker stünde da, wo der
+      // erste ihn erwischt hat.
+      setState(() {
+        _controller
+          ..reset()
+          ..repeat(reverse: true);
+      });
+      return;
+    }
+
+    _done = true;
+    _controller.stop();
+    widget.onResult(List<TimedHit>.unmodifiable(_results));
   }
 
   TimedHit _judge(double position) {
+    // Die Fenster der Vorlage sind über die **ganze** Breite gemessen,
+    // die Entfernung hier ab der Mitte — deshalb die Halbierung.
     final distance = (position - 0.5).abs();
-    if (distance <= TimingBar.perfectZone) return TimedHit.perfect;
-    if (distance <= TimingBar.goodZone) return TimedHit.good;
+    if (distance <= widget.spec.perfectWindow / 2) return TimedHit.perfect;
+    if (distance <= widget.spec.goodWindow / 2) return TimedHit.good;
     return TimedHit.none;
   }
 
   @override
   Widget build(BuildContext context) {
+    final remaining = widget.hits - _results.length;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: lockIn,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const Text(
-            'JETZT TIPPEN',
-            style: TextStyle(
+          Text(
+            widget.hits > 1 ? 'TIPPEN — NOCH $remaining' : 'JETZT TIPPEN',
+            style: const TextStyle(
               letterSpacing: 3,
               fontWeight: FontWeight.bold,
               color: Color(0xFFFFD166),
@@ -90,7 +130,10 @@ class TimingBarState extends State<TimingBar>
               animation: _controller,
               builder: (context, _) {
                 return CustomPaint(
-                  painter: _TimingPainter(_controller.value),
+                  painter: _TimingPainter(
+                    position: _controller.value,
+                    spec: widget.spec,
+                  ),
                   size: Size.infinite,
                 );
               },
@@ -103,9 +146,10 @@ class TimingBarState extends State<TimingBar>
 }
 
 class _TimingPainter extends CustomPainter {
-  const _TimingPainter(this.position);
+  const _TimingPainter({required this.position, required this.spec});
 
   final double position;
+  final TimingSpec spec;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -115,18 +159,20 @@ class _TimingPainter extends CustomPainter {
     );
     canvas.drawRRect(track, Paint()..color = const Color(0xFF232838));
 
-    void zone(double halfWidth, Color color) {
+    /// [width] ist die Breite der Zone über die ganze Leiste.
+    void zone(double width, Color color) {
+      final half = width / 2;
       final rect = Rect.fromLTRB(
-        size.width * (0.5 - halfWidth),
+        size.width * (0.5 - half),
         0,
-        size.width * (0.5 + halfWidth),
+        size.width * (0.5 + half),
         size.height,
       );
       canvas.drawRect(rect, Paint()..color = color);
     }
 
-    zone(TimingBar.goodZone, const Color(0xFF35506B));
-    zone(TimingBar.perfectZone, const Color(0xFF4E8C5A));
+    zone(spec.goodWindow, const Color(0xFF35506B));
+    zone(spec.perfectWindow, const Color(0xFF4E8C5A));
 
     final x = size.width * position;
     canvas.drawRect(
@@ -137,5 +183,5 @@ class _TimingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TimingPainter oldDelegate) =>
-      oldDelegate.position != position;
+      oldDelegate.position != position || oldDelegate.spec != spec;
 }

@@ -73,7 +73,7 @@ void main() {
     });
 
     test('byMoveId findet, was es gibt, und sonst nichts', () {
-      expect(AbilityCatalog.byMoveId('mend'), isNotNull);
+      expect(AbilityCatalog.byMoveId('funkenstoss'), isNotNull);
       expect(AbilityCatalog.byMoveId('gibt-es-nicht'), isNull);
     });
   });
@@ -97,13 +97,48 @@ void main() {
         const AbilityProgress(passedNodeIds: <String>{'koerper-bewegung'}),
       );
 
-      expect(offen.map((a) => a.moveId), <String>['heavy_attack']);
+      expect(offen.map((a) => a.moveId), <String>['funkenstoss']);
     });
 
-    test('alle vier wählbaren hängen an einem Theorieknoten', () {
+    test('jede wählbare hängt am Baum oder an einer Streak-Marke', () {
+      // Seit ADR-0022 gibt es beide Wege. Was es **nicht** gibt: eine
+      // wählbare Fähigkeit, die an einer Waffe hängt — die sitzen in
+      // Slot 1 und werden nicht gewählt (ADR-0013).
       for (final ability in AbilityCatalog.choosable) {
-        expect(ability.source, isA<FromTheory>(), reason: ability.moveId);
+        expect(
+          ability.source,
+          isNot(isA<FromWeapon>()),
+          reason: ability.moveId,
+        );
       }
+    });
+
+    test('nur Sternenfall ist legendär, und er kommt aus einer Streak', () {
+      final legendaer = AbilityCatalog.choosable
+          .where((a) => a.rarity == Rarity.legendary)
+          .toList();
+
+      expect(legendaer, hasLength(1));
+      expect(legendaer.single.moveId, 'sternenfall');
+      expect(legendaer.single.source, isA<FromStreak>());
+    });
+
+    test('kein legendärer Eintrag hängt am Baum', () {
+      // Ausdrückliche Vorgabe: Legendary kommt nur über Durchhalten.
+      for (final ability in AbilityCatalog.choosable) {
+        if (ability.source is! FromTheory) continue;
+        expect(
+          ability.rarity,
+          isNot(Rarity.legendary),
+          reason: ability.moveId,
+        );
+      }
+    });
+
+    test('jede Seltenheitsstufe kommt vor', () {
+      final stufen = AbilityCatalog.choosable.map((a) => a.rarity).toSet();
+
+      expect(stufen, hasLength(Rarity.values.length));
     });
 
     test('eine Streak-Fähigkeit braucht ihre Marke', () {

@@ -76,7 +76,9 @@ void main() {
       addTearDown(container.dispose);
       final controller = container.read(combatControllerProvider.notifier);
 
-      final events = controller.playRound(Moves.basicAttack, TimedHit.perfect);
+      final events = controller.playRound(Moves.basicAttack, const <TimedHit>[
+        TimedHit.perfect,
+      ]);
 
       expect(events, isNotEmpty);
       expect(events.whereType<DamageDealt>(), isNotEmpty);
@@ -92,7 +94,7 @@ void main() {
       final controller = container.read(combatControllerProvider.notifier);
 
       controller
-        ..playRound(Moves.basicAttack, TimedHit.none)
+        ..playRound(Moves.basicAttack, const <TimedHit>[TimedHit.none])
         ..appendLog(<String>['irgendwas'])
         ..restart();
 
@@ -110,11 +112,18 @@ void main() {
       // Lange genug prügeln, bis eine Seite fällt.
       for (var i = 0; i < 200; i++) {
         if (container.read(combatControllerProvider).state.isOver) break;
-        controller.playRound(Moves.basicAttack, TimedHit.perfect);
+        controller.playRound(Moves.basicAttack, const <TimedHit>[
+          TimedHit.perfect,
+        ]);
       }
 
       expect(container.read(combatControllerProvider).state.isOver, isTrue);
-      expect(controller.playRound(Moves.basicAttack, TimedHit.none), isEmpty);
+      expect(
+        controller.playRound(Moves.basicAttack, const <TimedHit>[
+          TimedHit.none,
+        ]),
+        isEmpty,
+      );
     });
   });
 
@@ -140,8 +149,8 @@ void main() {
       await pumpScreen(tester);
 
       expect(find.text(Moves.basicAttack.name), findsOneWidget);
-      expect(find.text(Moves.heavyAttack.name), findsNothing);
-      expect(find.text(Moves.mend.name), findsNothing);
+      expect(find.text(AbilityMoves.funkenstoss.name), findsNothing);
+      expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
 
     testWidgets('ohne Waffe greift der Rueckfall', (tester) async {
@@ -159,11 +168,11 @@ void main() {
       // Ein Charakter mit offenem zweitem Slot und einem teuren Move
       // darauf: Zu Beginn hat er 0 Energie, also ist nur der Waffen-Move
       // bezahlbar.
-      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
       final heavy = tester.widget<FilledButton>(
         find.ancestor(
-          of: find.text(Moves.heavyAttack.name),
+          of: find.text(AbilityMoves.funkenstoss.name),
           matching: find.byType(FilledButton),
         ),
       );
@@ -181,10 +190,10 @@ void main() {
     testWidgets('eine nicht gewaehlte Faehigkeit taucht nicht auf', (
       tester,
     ) async {
-      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
-      expect(find.text(Moves.heavyAttack.name), findsOneWidget);
-      expect(find.text(Moves.mend.name), findsNothing);
+      expect(find.text(AbilityMoves.funkenstoss.name), findsOneWidget);
+      expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
   });
 

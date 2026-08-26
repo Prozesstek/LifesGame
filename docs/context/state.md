@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 25.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
 
 ---
 
@@ -106,6 +106,72 @@ flutter run -d chrome
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
+
+## Sitzung 26.08.2026: Das Fähigkeiten-Set
+
+Fünfzehn Fähigkeiten aus einer Vorlage, in drei Schritten gebaut
+([ADR-0022](../decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
+Ziel 5 ist damit erfüllt. 205 App-Tests, combat 49, abilities 31.
+
+### Was gebaut ist
+
+- **Engine-Mechaniken**: `TimingSpec`, `Environment` mit vier Umgebungen,
+  sieben neue Statuseffekte, dreizehn neue Wirkungen, `perfectEffects`,
+  `perfectFactor`/`missFactor` je Move, Mehrfachtreffer
+- **Der Katalog**: fünfzehn Fähigkeiten in `ability_moves.dart`, elf am
+  Baum, vier an Streak-Marken. Sternenfall nur über sechzig Tage Kette
+- **Die Timing-Leiste** liest ihre Werte aus der Fähigkeit; Klingenwirbel
+  fragt dreimal
+- **Die Gegner** benutzen sie mit: Wegelagerer Commons, Söldner bis
+  Uncommon, Bergwächter bis Rare
+
+### Drei Entscheidungen, die begründet gehören
+
+**Feste Zahlen wurden in Multiplikatoren umgerechnet** (`power = Wert /
+16`). Feste Zahlen hätten die Kopplung an die Gewohnheiten gekappt — genau
+die Aussage, auf der das Produkt steht.
+
+**Jede Fähigkeit hat einen eigenen Perfect-Faktor**, Basis- und
+Waffenmoves nicht. ADR-0009 maß einen *pauschalen* Faktor auf jeden
+Treffer; dieser hier kostet Energie und hängt an einem engen Fenster. Ein
+Test hält fest, dass der Move, den man jede Runde drückt, bei +20 % bleibt.
+
+**Timing ist eine Kampfregel**, keine Darstellung. `timing_rules.dart`
+verrechnet Fähigkeit, Statuseffekte und Umgebung multiplikativ.
+
+### Der Befund, der als Nächstes dran ist
+
+**Der Bergwächter ist unschlagbar geworden.** Die Simulation:
+
+| Gegner | Tag 0 | Tag 7 | Tag 14 | Tag 21 | Tag 30 | Tag 60 |
+|---|---|---|---|---|---|---|
+| Wegelagerer | 0 % | 94 % | 100 % | 100 % | 100 % | 100 % |
+| Söldner | 0 % | 0 % | 0 % | 38 % | 100 % | 100 % |
+| **Bergwächter** | 0 % | 0 % | 0 % | 0 % | **0 %** | **0 %** |
+
+In ADR-0009 stand er bei 36 % an Tag 30 und 100 % an Tag 60.
+
+Die Ursache ist benannt: Er trägt jetzt Donnerkeil (`power` 2,125), während
+die frühen Spielerfähigkeiten **schwächer sind als der Basisangriff** —
+Funkenstoß hat 0,75 gegen 1,0 beim Bogenschuss und kostet zusätzlich
+Energie. Das ist die Vorlage, ehrlich umgerechnet: Ihre Commons sind
+Werkzeuge mit Perfect-Effekten, keine Schadensquellen.
+
+**Balancing war ausdrücklich zurückgestellt.** Drei Hebel stehen bereit:
+die Gegner-Sets, die `power`-Werte der Commons, oder der Nenner 16.
+
+### Die Simulation hat vorher nichts gemessen
+
+`_loadoutNach` fragte mit `AbilityProgress.empty()` — seit ADR-0019
+schaltet ein leerer Fortschritt nichts frei, der simulierte Spieler kämpfte
+an jedem Tag mit **einem** Move. Sie nimmt jetzt an, dass die Kette nie
+reißt und jeder Theoriepunkt in einen Knoten mit Fähigkeit geht; beides
+steht im Code und macht das Ergebnis zur oberen Schranke.
+
+### Offen
+
+**Die Umgebungen haben kein Bild.** Beim Setzen leuchten beide Kämpfer
+kurz auf; Lava, Sandschleier und Nebel fehlen.
 
 ## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
 

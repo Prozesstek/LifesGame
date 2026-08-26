@@ -40,31 +40,123 @@ abstract final class AbilityCatalog {
     'gear-geschliffene-klinge': 'sword_strike',
   };
 
-  /// Die Fähigkeiten, die der Spieler auf die freien Slots legen kann.
+  /// Die fünfzehn Fähigkeiten, die der Spieler auf die freien Slots legen
+  /// kann (ADR-0022).
   ///
   /// Waffenfähigkeiten stehen **nicht** hier: Sie werden nicht gewählt,
   /// sondern folgen aus der Ausrüstung (ADR-0013). [weaponMoves] regelt
   /// das.
+  ///
+  /// **Elf hängen am Baum, vier an Streak-Marken.** Beide Quellen aus
+  /// ADR-0013 werden benutzt, und die Aufteilung sagt etwas aus: Lesen
+  /// gibt die Werkzeuge, Durchhalten gibt die Wucht. Sternenfall — die
+  /// einzige legendäre — kommt ausschließlich über sechzig Tage Kette.
+  ///
+  /// **Warum nach Gebiet und nicht nach Tiefe.** Der Baum ist genau eine
+  /// Ebene tief: Alle zwanzig Unterknoten hängen direkt an den vier
+  /// Wurzeln und kosten je einen Punkt (ADR-0019). Eine Staffelung nach
+  /// Tiefe gibt es also nicht zu holen. Was die frühen von den späten
+  /// Fähigkeiten trennt, ist die **Energie**: Vulkanbruch kostet 8,
+  /// Sternenfall 10 — und das Maximum kommt aus Klarheit, also aus
+  /// Häkchen.
   static const List<Ability> choosable = <Ability>[
+    // --- Körper: der Einstieg ---
     Ability(
-      moveId: 'heavy_attack',
+      moveId: 'funkenstoss',
       source: FromTheory('koerper-bewegung'),
       requirement: 'Körper: „Die kleinste Dosis, die wirkt" bestehen',
+      rarity: Rarity.common,
     ),
     Ability(
-      moveId: 'poison_strike',
-      source: FromTheory('koerper-erholung'),
-      requirement: 'Körper: „Erholung ist Teil der Arbeit" bestehen',
+      moveId: 'steinhaut',
+      source: FromTheory('koerper-stress'),
+      requirement: 'Körper: „Stress" bestehen',
+      rarity: Rarity.common,
     ),
     Ability(
-      moveId: 'mend',
+      moveId: 'wurzelgriff',
       source: FromTheory('koerper-ernaehrung'),
       requirement: 'Körper: „Essen ist ein Umgebungsproblem" bestehen',
+      rarity: Rarity.common,
     ),
     Ability(
-      moveId: 'breath',
+      moveId: 'aurastrom',
       source: FromTheory('koerper-schlaf'),
       requirement: 'Körper: „Schlaf ist keine verlorene Zeit" bestehen',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'bluetentau',
+      source: FromTheory('koerper-erholung'),
+      requirement: 'Körper: „Erholung" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+
+    // --- Geist: Technik und Kontrolle ---
+    Ability(
+      moveId: 'klingenwirbel',
+      source: FromTheory('geist-wiederholung'),
+      requirement: 'Geist: „Wiederholung" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'frostnebel',
+      source: FromTheory('geist-gedanken'),
+      requirement: 'Geist: „Gedanken sind keine Tatsachen" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'prisma_barriere',
+      source: FromTheory('geist-unbehagen'),
+      requirement: 'Geist: „Unbehagen aushalten" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'giftmoor',
+      source: FromTheory('geist-motivation'),
+      requirement: 'Geist: „Motivation" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'zeitdehnung',
+      source: FromTheory('geist-aufmerksamkeit'),
+      requirement:
+          'Geist: „Aufmerksamkeit ist die eigentliche Währung" bestehen',
+      rarity: Rarity.epic,
+    ),
+
+    // --- Wissenschaft ---
+    Ability(
+      moveId: 'vulkanbruch',
+      source: FromTheory('wissenschaft-ursache'),
+      requirement: 'Wissenschaft: „Zusammenhang ist keine Ursache" bestehen',
+      rarity: Rarity.epic,
+    ),
+
+    // --- Streak-Marken: was Durchhalten gibt ---
+    Ability(
+      moveId: 'donnerkeil',
+      source: FromStreak(7),
+      requirement: '7 Tage Kette',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'sandsturm',
+      source: FromStreak(14),
+      requirement: '14 Tage Kette',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'seelenraub',
+      source: FromStreak(30),
+      requirement: '30 Tage Kette',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'sternenfall',
+      source: FromStreak(60),
+      requirement: '60 Tage Kette',
+      rarity: Rarity.legendary,
     ),
   ];
 

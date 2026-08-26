@@ -95,12 +95,23 @@ class BattleGame extends FlameGame {
           _at(0.1, () => _fighterFor(side).fall());
           _advance(0.5);
 
+        // Eine neue Umgebung ist ein sichtbarer Einschnitt: kurzes
+        // Aufleuchten auf beiden Seiten, damit der Wechsel auffällt. Das
+        // eigentliche Bild -- Lava, Sandschleier, Nebel -- fehlt noch.
+        case EnvironmentSet():
+          _at(0, () {
+            _hero.glow(const Color(0xFFB88CFF));
+            _enemy.glow(const Color(0xFFB88CFF));
+          });
+          _advance(0.25);
+
         case RoundStarted():
         case MoveFailed():
         case ShieldBroke():
         case StatusApplied():
         case StatusExpired():
         case EnergyChanged():
+        case EnvironmentEnded():
         case CombatEnded():
           break;
       }

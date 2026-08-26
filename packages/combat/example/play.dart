@@ -162,6 +162,10 @@ String? _describe(CombatEvent event) {
   return switch (event) {
     RoundStarted() => null,
     EnergyChanged() => null,
+    EnvironmentSet(:final environmentId, :final turns) =>
+      'Umgebung: ${_environmentName(environmentId)} fuer $turns Runden.',
+    EnvironmentEnded(:final environmentId) =>
+      '${_environmentName(environmentId)} klingt aus.',
     MoveUsed(:final side, :final moveId) =>
       '${_who(side)} nutzt ${_moveName(moveId)}.',
     MoveFailed(:final side) =>
@@ -224,4 +228,9 @@ void _printOutcome(CombatState state) {
     ..writeln('Hat sich das gut angefuehlt? Genau das ist die Frage, die das')
     ..writeln('MVP beantworten soll. Balance-Schrauben: lib/src/balance.dart')
     ..writeln('');
+}
+
+/// Wortlaut einer Umgebung fuer den Log.
+String _environmentName(String id) {
+  return Environments.byId(id)?.name ?? id;
 }

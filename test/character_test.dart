@@ -429,10 +429,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Fähigkeit wählen'), findsOneWidget);
 
-      await tester.tap(find.text(Moves.heavyAttack.name).last);
+      await tester.tap(find.text(AbilityMoves.funkenstoss.name).last);
       await tester.pumpAndSettle();
 
-      expect(find.text(Moves.heavyAttack.name), findsOneWidget);
+      expect(find.text(AbilityMoves.funkenstoss.name), findsOneWidget);
       expect(find.text('leer'), findsNothing);
     });
 
@@ -442,14 +442,17 @@ void main() {
         appMit(
           aufLevel(
             3,
-            abilities: const ChosenAbilities.empty().withAt(0, Moves.mend.id),
+            abilities: const ChosenAbilities.empty().withAt(
+              0,
+              AbilityMoves.bluetentau.id,
+            ),
           ),
         ),
       );
 
-      expect(find.text(Moves.mend.name), findsOneWidget);
+      expect(find.text(AbilityMoves.bluetentau.name), findsOneWidget);
 
-      await tester.tap(find.text(Moves.mend.name));
+      await tester.tap(find.text(AbilityMoves.bluetentau.name));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Platz räumen'));
       await tester.pumpAndSettle();
@@ -464,8 +467,8 @@ void main() {
       final saved = aufLevel(
         3,
         abilities: const ChosenAbilities.empty()
-            .withAt(0, Moves.heavyAttack.id)
-            .withAt(1, Moves.mend.id),
+            .withAt(0, AbilityMoves.funkenstoss.id)
+            .withAt(1, AbilityMoves.bluetentau.id),
       );
 
       final container = ProviderContainer(
@@ -480,7 +483,7 @@ void main() {
 
       // Level 3: Waffenslot plus genau ein freier Platz.
       expect(moves, hasLength(2));
-      expect(moves.last.id, Moves.heavyAttack.id);
+      expect(moves.last.id, AbilityMoves.funkenstoss.id);
     });
   });
 

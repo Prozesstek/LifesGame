@@ -101,12 +101,18 @@ class CombatController extends Notifier<CombatSession> {
 
   /// Spielt eine Runde und gibt die entstandenen Events zurück, damit die
   /// Darstellungsschicht sie abspielen kann.
-  List<CombatEvent> playRound(Move move, TimedHit timedHit) {
+  /// [hits] enthaelt einen Eintrag je Tipp. Bei den meisten Faehigkeiten
+  /// ist das genau einer; Klingenwirbel hat drei.
+  List<CombatEvent> playRound(Move move, List<TimedHit> hits) {
     if (state.state.isOver) return const <CombatEvent>[];
 
     final step = _engine.resolveRound(
       state.state,
-      PlayerAction(move: move, timedHit: timedHit),
+      PlayerAction(
+        move: move,
+        timedHit: hits.isEmpty ? TimedHit.none : hits.first,
+        extraHits: hits.length > 1 ? hits.sublist(1) : const <TimedHit>[],
+      ),
     );
     state = CombatSession(
       state: step.state,

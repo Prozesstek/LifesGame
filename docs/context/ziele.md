@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 24.08.2026 · Frederik
+**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
 
 ---
 
@@ -35,7 +35,7 @@ Instanz, die zählt.
 | 2 | Skillbaum mit vier Wurzeln | Issue #16 | **31.08.** |
 | 3 | Der Laden trifft eine Entscheidung | `state.md` Punkt 1 | 06.09. |
 | 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | 06.09. |
-| 5 | Fähigkeiten mit Art und Seltenheit | Issue #17 | 13.09. |
+| 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
 | 6 | Der Dungeon schließt den MVP-Schnitt | `state.md` Punkt 4+5 | 20.09. |
 | 7 | Der Nachweis | diese Datei | 20.10. |
 
@@ -250,16 +250,30 @@ entfernen und Gift zünden.
 
 ### Messbar
 
-| Kriterium | Ist | Soll |
+| Kriterium | Ist (26.08., Abschluss) | Soll |
 |---|---|---|
-| Fähigkeiten gesamt | 9 | ~20 |
-| davon **wählbar** (Slots 2–4) | **4** | ≥ 15 |
-| Auswahl auf Level 10 | 3 aus 4 | 3 aus ≥ 15 |
-| Arten (Kampf / Support) | — | beide belegt |
-| Seltenheitsstufen | — | im Katalog, nicht im UI verstreut |
+| Fähigkeiten gesamt | **20** ✓ | ~20 |
+| davon **wählbar** (Slots 2–4) | **15** ✓ | ≥ 15 |
+| Auswahl auf Level 10 | **3 aus 15** ✓ | 3 aus ≥ 15 |
+| Arten (Kampf / Support) | **beide** ✓ | beide belegt |
+| Seltenheitsstufen | **5, im Katalog** ✓ | im Katalog, nicht im UI verstreut |
+| Eigenes Timing je Fähigkeit | **ja** ✓ | — |
+| Umgebungen | **4** ✓ | — |
+| Icons | **nein** | Beiwerk, siehe Schnittreihenfolge |
+
+**Ziel 5 ist erfüllt** — achtzehn Tage vor dem Termin
+([ADR-0022](../decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
+Icons fehlen als Einziges; sie standen ohnehin als erstes auf der
+Schnittliste.
+
+**Was dabei aufgebrochen ist:** Die Balance stimmt nicht mehr. Der
+Bergwächter ist unschlagbar geworden, weil er Rare-Fähigkeiten trägt,
+während die frühen Spielerfähigkeiten schwächer sind als der Basisangriff.
+Zahlen und Hebel stehen in `state.md`. Balancing war ausdrücklich
+zurückgestellt — aber es ist jetzt ein offener Punkt mit Nachweis.
 
 ```bash
-cd packages/combat    ; dart test    # alle 27 alten weiter grün
+cd packages/combat    ; dart test    # 49, alle 29 alten weiter grün
 cd packages/abilities ; dart test
 flutter test test/abilities_seam_test.dart
 dart run tool/balance_sim.dart

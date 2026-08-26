@@ -3,6 +3,7 @@ import 'dart:math';
 import 'balance.dart';
 import 'combatant.dart';
 import 'enemy_policy.dart';
+import 'environment.dart';
 import 'events.dart';
 import 'move.dart';
 import 'state.dart';
@@ -43,16 +44,17 @@ class CombatEngine {
       );
     }
 
-    final round = _Round(state.player, state.enemy)
+    final round = _Round(state.player, state.enemy, state.environment)
       ..emit(RoundStarted(state.round));
 
-    _act(round, Side.player, action.move, action.timedHit);
+    _act(round, Side.player, action.move, action.hitsFor(action.move));
     if (!_settleDeaths(round)) {
       _actEnemy(round);
     }
     if (!_settleDeaths(round)) {
       _tickStatuses(round, Side.player);
       _tickStatuses(round, Side.enemy);
+      _tickEnvironment(round);
       _settleDeaths(round);
     }
 
@@ -62,6 +64,8 @@ class CombatEngine {
         enemy: round.enemy,
         round: state.round + 1,
         outcome: round.outcome,
+        environment: round.environment,
+        clearEnvironment: round.environment == null,
       ),
       events: round.events,
     );
@@ -73,13 +77,14 @@ class CombatEngine {
       opponent: round.player,
       loadout: enemyLoadout,
     );
-    _act(round, Side.enemy, move, TimedHit.none);
+    _act(round, Side.enemy, move, <TimedHit>[TimedHit.none]);
   }
 
   /// Fuehrt einen Move aus: Kosten, Schaden, Zusatzwirkungen.
-  void _act(_Round round, Side side, Move move, TimedHit timedHit) {
+  void _act(_Round round, Side side, Move move, List<TimedHit> hits) {
     final actor = round.of(side);
-    if (!move.isAffordableBy(actor.energy)) {
+    final discount = _costDiscount(actor);
+    if (actor.energy < move.energyCost - discount) {
       round.emit(
         MoveFailed(
           side: side,
@@ -90,15 +95,51 @@ class CombatEngine {
       return;
     }
 
+    round.damageThisAction = 0;
     round.emit(MoveUsed(side: side, moveId: move.id));
-    _applyEnergy(round, side, move.energyDelta);
+    _applyEnergy(round, side, move.energyDelta + discount);
+    if (discount > 0) {
+      round.set(side, round.of(side).withoutStatus('cost_reduction'));
+    }
+
+    // Der beste Tipp entscheidet ueber die Perfect-Wirkungen. Bei einem
+    // einzelnen Treffer ist das schlicht der eine.
+    final best = _bestHit(hits);
 
     if (move.dealsDamage) {
-      _applyDamage(round, side, move, timedHit);
+      for (final hit in hits) {
+        _applyDamage(round, side, move, hit);
+        if (round.of(_opposite(side)).isDefeated) break;
+      }
+      // Alle Tipps perfekt gibt den Bonustreffer (Klingenwirbel).
+      if (move.isMultiHit && hits.every((h) => h == TimedHit.perfect)) {
+        _applyDamage(round, side, move, TimedHit.perfect);
+      }
     }
+
     for (final effect in move.effects) {
       _applyEffect(round, side, effect);
     }
+    if (best == TimedHit.perfect) {
+      for (final effect in move.perfectEffects) {
+        _applyEffect(round, side, effect);
+      }
+    }
+  }
+
+  /// Der beste Tipp einer Runde. Perfect schlaegt Good schlaegt None.
+  TimedHit _bestHit(List<TimedHit> hits) {
+    if (hits.contains(TimedHit.perfect)) return TimedHit.perfect;
+    if (hits.contains(TimedHit.good)) return TimedHit.good;
+    return TimedHit.none;
+  }
+
+  /// Rabatt aus [CostReduction], falls einer anliegt.
+  int _costDiscount(Combatant actor) {
+    for (final status in actor.statuses) {
+      if (status is CostReduction) return status.amount;
+    }
+    return 0;
   }
 
   void _applyEnergy(_Round round, Side side, int delta) {
@@ -117,9 +158,49 @@ class CombatEngine {
 
   void _applyDamage(_Round round, Side side, Move move, TimedHit timedHit) {
     final target = _opposite(side);
-    final factor = timedHit.factor(balance);
-    final raw = _rawDamage(round.of(side), round.of(target), move, factor);
-    _dealDamage(round, target, raw, factor);
+    final factor = _timingFactor(round, side, move, timedHit);
+    final environment = round.environment;
+    final fromField = environment?.damageFactorFor(side) ?? 1.0;
+    final raw = _rawDamage(
+      round.of(side),
+      round.of(target),
+      move,
+      factor * fromField,
+    );
+
+    // Schutz ignorieren steht bei Sternenfall in den Perfect-Wirkungen --
+    // es gilt also nur, wenn perfekt getroffen wurde.
+    final ignores = move.effects.any((e) => e is IgnoreProtection) ||
+        (timedHit == TimedHit.perfect &&
+            move.perfectEffects.any((e) => e is IgnoreProtection));
+
+    _dealDamage(round, side, target, move, raw, factor, ignores);
+  }
+
+  /// Was das Timing bei **dieser** Faehigkeit wert ist.
+  ///
+  /// Die Reihenfolge ist Absicht: Erst der eigene Faktor der Faehigkeit,
+  /// dann Zeitdehnung obendrauf, und ganz zuletzt die Sperre -- wer keinen
+  /// Timing-Bonus bekommen darf, bekommt auch keinen aus einem Buff.
+  double _timingFactor(_Round round, Side side, Move move, TimedHit hit) {
+    if (_hasStatus<TimingLocked>(round.of(side))) return balance.timedHitNone;
+
+    final base = switch (hit) {
+      TimedHit.perfect => move.perfectFactor ?? balance.timedHitPerfect,
+      TimedHit.good => balance.timedHitGood,
+      TimedHit.none => move.missFactor ?? balance.timedHitNone,
+    };
+
+    if (hit != TimedHit.perfect) return base;
+
+    for (final status in round.of(side).statuses) {
+      if (status is TimeDilation) return base + status.perfectBonus;
+    }
+    return base;
+  }
+
+  bool _hasStatus<T extends StatusEffect>(Combatant who) {
+    return who.statuses.any((s) => s is T);
   }
 
   int _rawDamage(
@@ -137,10 +218,34 @@ class CombatEngine {
     return max(balance.minimumDamage, total.round());
   }
 
-  /// Zieht Schaden ab, nachdem ein eventueller Schild ihn gemindert hat.
-  void _dealDamage(_Round round, Side target, int amount, double factor) {
+  /// Zieht Schaden ab, nachdem Schutzwirkungen ihn gemindert haben.
+  ///
+  /// Reihenfolge: Schadensminderung, dann Schild, dann HP. Reflexion geht
+  /// vom **tatsaechlich erlittenen** Schaden aus -- was der Schild
+  /// schluckt, wird nicht zurueckgeworfen.
+  void _dealDamage(
+    _Round round,
+    Side attacker,
+    Side target,
+    Move move,
+    int amount,
+    double factor,
+    bool ignoresProtection,
+  ) {
     var remaining = amount;
-    final shield = round.of(target).activeShield;
+
+    if (!ignoresProtection) {
+      for (final status in round.of(target).statuses) {
+        if (status is DamageReduction) {
+          remaining = max(
+            balance.minimumDamage,
+            (remaining * status.factor).round(),
+          );
+        }
+      }
+    }
+
+    final shield = ignoresProtection ? null : round.of(target).activeShield;
 
     if (shield != null) {
       final absorbed = min(shield.absorb, remaining);
@@ -158,13 +263,31 @@ class CombatEngine {
 
     if (remaining <= 0) return;
     round.set(target, round.of(target).withHpDelta(-remaining));
+    round.damageThisAction += remaining;
     round.emit(
-      DamageDealt(
-        target: target,
-        amount: remaining,
-        timedHitFactor: factor,
-      ),
+      DamageDealt(target: target, amount: remaining, timedHitFactor: factor),
     );
+
+    if (!ignoresProtection) _reflect(round, attacker, target, remaining);
+  }
+
+  /// Wirft einen Teil des Schadens auf den Angreifer zurueck.
+  void _reflect(_Round round, Side attacker, Side target, int taken) {
+    for (final status in round.of(target).statuses) {
+      if (status is! Reflect) continue;
+
+      final back = (taken * status.share).round() + status.flatBonus;
+      if (back <= 0) continue;
+
+      round.set(attacker, round.of(attacker).withHpDelta(-back));
+      round.emit(
+        DamageDealt(
+          target: attacker,
+          amount: back,
+          timedHitFactor: balance.timedHitNone,
+        ),
+      );
+    }
   }
 
   void _applyEffect(_Round round, Side side, MoveEffect effect) {
@@ -204,18 +327,178 @@ class CombatEngine {
             remainingTurns: balance.shieldDurationTurns,
           ),
         );
+
+      // --- Wirkungen des Faehigkeiten-Sets ---
+
+      case ApplyBurn(:final chance, :final damageFactor, :final turns):
+        if (_random.nextDouble() > chance) break;
+        _addStatus(
+          round,
+          _opposite(side),
+          Burn(
+            damagePerTurn:
+                max(1, (round.of(side).attack * damageFactor).round()),
+            remainingTurns: turns,
+          ),
+        );
+
+      case ReduceIncoming(:final factor, :final turns):
+        _addStatus(
+          round,
+          side,
+          DamageReduction(factor: factor, remainingTurns: turns),
+        );
+
+      case ReflectIncoming(:final share, :final turns, :final flatBonus):
+        _addStatus(
+          round,
+          side,
+          Reflect(share: share, flatBonus: flatBonus, remainingTurns: turns),
+        );
+
+      case ShrinkEnemyWindow(:final factor, :final turns):
+        _addStatus(
+          round,
+          _opposite(side),
+          WindowShrink(factor: factor, remainingTurns: turns),
+        );
+
+      case DilateTime(:final speedFactor, :final perfectBonus, :final turns):
+        _addStatus(
+          round,
+          side,
+          TimeDilation(
+            speedFactor: speedFactor,
+            perfectBonus: perfectBonus,
+            remainingTurns: turns,
+          ),
+        );
+
+      case LockEnemyTiming(:final turns):
+        _addStatus(
+          round,
+          _opposite(side),
+          TimingLocked(remainingTurns: turns),
+        );
+
+      case CheapenNext(:final amount, :final turns):
+        _addStatus(
+          round,
+          side,
+          CostReduction(amount: amount, remainingTurns: turns),
+        );
+
+      case LifeSteal(:final share):
+        // Bezieht sich auf den Schaden **dieser** Handlung. Deshalb zaehlt
+        // `_Round` ihn mit, statt dass der Effekt ihn neu ausrechnet --
+        // eine zweite Rechnung waere eine zweite Wahrheit.
+        final gained = (round.damageThisAction * share).round();
+        if (gained > 0) _healBy(round, side, gained);
+
+      case StealEnergy(:final amount):
+        final victim = _opposite(side);
+        final available = min(amount, round.of(victim).energy);
+        if (available <= 0) break;
+        _applyEnergy(round, victim, -available);
+        _applyEnergy(round, side, available);
+
+      case CleanseSelf():
+        final harmful = round.of(side).statuses.where(_isHarmful).toList();
+        if (harmful.isEmpty) break;
+        round.set(side, round.of(side).withoutStatus(harmful.first.id));
+        round.emit(
+          StatusExpired(target: side, statusId: harmful.first.id),
+        );
+
+      case HealSelfBy(:final factor):
+        _healBy(round, side, (round.of(side).attack * factor).round());
+
+      case SetEnvironment(:final environmentId):
+        final template = Environments.byId(environmentId);
+        if (template == null) break;
+        round.environment = template.copyWith(owner: side);
+        round.emit(
+          EnvironmentSet(
+            environmentId: template.id,
+            owner: side,
+            turns: template.remainingTurns,
+          ),
+        );
+
+      case GainEnergy(:final amount):
+        _applyEnergy(round, side, amount);
+
+      case IgnoreProtection():
+        // Wirkt im Schadensweg, nicht als Statuseffekt.
+        break;
+    }
+  }
+
+  /// Welche Statuseffekte als „negativ" gelten und von Bluetentau
+  /// entfernt werden koennen.
+  bool _isHarmful(StatusEffect status) {
+    return status is Poison ||
+        status is Burn ||
+        status is DefenseDown ||
+        status is WindowShrink ||
+        status is TimingLocked;
+  }
+
+  /// Heilt um einen festen Betrag, gemindert durch die Umgebung.
+  void _healBy(_Round round, Side side, int amount) {
+    final environment = round.environment;
+    final factor = environment?.healFactorFor(side) ?? 1.0;
+    final wanted = (amount * factor).round();
+    if (wanted <= 0) return;
+
+    final actor = round.of(side);
+    final healed = actor.withHpDelta(wanted);
+    final actual = healed.hp - actor.hp;
+    round.set(side, healed);
+    if (actual > 0) round.emit(Healed(target: side, amount: actual));
+  }
+
+  /// Laesst die Umgebung wirken und altern.
+  void _tickEnvironment(_Round round) {
+    final environment = round.environment;
+    if (environment == null) return;
+
+    final elapsed = environment.elapsedOf(
+      Environments.byId(environment.id)?.remainingTurns ??
+          environment.remainingTurns,
+    );
+    final factor = environment.dotFactorInTurn(elapsed);
+    final victim = environment.victim;
+
+    if (factor > 0) {
+      final damage = max(
+        1,
+        (round.of(environment.owner).attack * factor).round(),
+      );
+      round.set(victim, round.of(victim).withHpDelta(-damage));
+      round.emit(
+        StatusTicked(
+          target: victim,
+          statusId: environment.id,
+          damage: damage,
+        ),
+      );
+    }
+
+    if (environment.energyPenaltyOnEnemy > 0) {
+      _applyEnergy(round, victim, -environment.energyPenaltyOnEnemy);
+    }
+
+    final next = environment.ticked();
+    round.environment = next;
+    if (next == null) {
+      round.emit(EnvironmentEnded(environment.id));
     }
   }
 
   void _heal(_Round round, Side side) {
     final actor = round.of(side);
-    final wanted = (actor.attack * balance.healFactorOfAttack).round();
-    final healed = actor.withHpDelta(wanted);
-    final actual = healed.hp - actor.hp;
-    round.set(side, healed);
-    if (actual > 0) {
-      round.emit(Healed(target: side, amount: actual));
-    }
+    _healBy(round, side, (actor.attack * balance.healFactorOfAttack).round());
   }
 
   void _addStatus(_Round round, Side side, StatusEffect effect) {
@@ -229,6 +512,16 @@ class CombatEngine {
     );
   }
 
+  /// Schaden ueber Zeit eines Effekts. 0, wenn er keinen anrichtet.
+  ///
+  /// Gift und Brand sind zwei Arten mit derselben Wirkung -- getrennt,
+  /// damit Bluetentau gezielt eine davon entfernen kann.
+  int _dotDamageOf(StatusEffect status) {
+    if (status is Poison) return status.damagePerTurn;
+    if (status is Burn) return status.damagePerTurn;
+    return 0;
+  }
+
   /// Laesst Statuseffekte wirken und altern.
   void _tickStatuses(_Round round, Side side) {
     final current = round.of(side).statuses;
@@ -236,14 +529,11 @@ class CombatEngine {
 
     final survivors = <StatusEffect>[];
     for (final status in current) {
-      if (status is Poison) {
-        round.set(side, round.of(side).withHpDelta(-status.damagePerTurn));
+      final dot = _dotDamageOf(status);
+      if (dot > 0) {
+        round.set(side, round.of(side).withHpDelta(-dot));
         round.emit(
-          StatusTicked(
-            target: side,
-            statusId: status.id,
-            damage: status.damagePerTurn,
-          ),
+          StatusTicked(target: side, statusId: status.id, damage: dot),
         );
       }
       final next = status.ticked();
@@ -285,11 +575,23 @@ class CombatEngine {
 /// diesen Sammler muesste jede Teilberechnung Zustand und Eventliste
 /// durchreichen, was die Engine deutlich schwerer lesbar machen wuerde.
 class _Round {
-  _Round(this.player, this.enemy);
+  _Round(this.player, this.enemy, this.environment);
 
   Combatant player;
   Combatant enemy;
   CombatOutcome? outcome;
+
+  /// Die Umgebung, die gerade liegt. Veraenderbar, weil eine Faehigkeit
+  /// sie mitten in der Runde ersetzen kann.
+  Environment? environment;
+
+  /// Schaden, den die laufende Handlung angerichtet hat.
+  ///
+  /// Lebensraub braucht ihn, und er soll ihn **nicht** neu ausrechnen:
+  /// Eine zweite Rechnung ueber denselben Treffer waere eine zweite
+  /// Wahrheit, die von der ersten abweichen kann.
+  int damageThisAction = 0;
+
   final List<CombatEvent> events = <CombatEvent>[];
 
   Combatant of(Side side) => side == Side.player ? player : enemy;

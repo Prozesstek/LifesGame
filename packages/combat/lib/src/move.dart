@@ -1,3 +1,7 @@
+import 'ability_moves.dart';
+import 'environment.dart';
+import 'timing_spec.dart';
+
 /// Zusatzwirkung eines Moves, unabhaengig vom Schaden.
 sealed class MoveEffect {
   const MoveEffect();
@@ -19,6 +23,132 @@ final class ShieldSelf extends MoveEffect {
   const ShieldSelf();
 }
 
+// --- Wirkungen des Faehigkeiten-Sets ---
+
+/// Entzuendet den Gegner. [chance] 1.0 heisst immer.
+final class ApplyBurn extends MoveEffect {
+  const ApplyBurn({
+    this.chance = 1.0,
+    this.damageFactor = 3 / Environments.referenceAttack,
+    this.turns = 2,
+  });
+
+  final double chance;
+
+  /// Schaden je Runde als Vielfaches des eigenen Angriffswerts.
+  final double damageFactor;
+  final int turns;
+}
+
+/// Senkt eingehenden Schaden des Anwenders.
+final class ReduceIncoming extends MoveEffect {
+  const ReduceIncoming({required this.factor, this.turns = 1});
+
+  final double factor;
+  final int turns;
+}
+
+/// Wirft einen Teil des erlittenen Schadens zurueck.
+final class ReflectIncoming extends MoveEffect {
+  const ReflectIncoming({
+    required this.share,
+    this.turns = 2,
+    this.flatBonus = 0,
+  });
+
+  final double share;
+  final int turns;
+  final int flatBonus;
+}
+
+/// Verkleinert das Perfect-Fenster des Gegners.
+final class ShrinkEnemyWindow extends MoveEffect {
+  const ShrinkEnemyWindow({required this.factor, required this.turns});
+
+  final double factor;
+  final int turns;
+}
+
+/// Verlangsamt die eigene Leiste und belohnt Perfect zusaetzlich.
+final class DilateTime extends MoveEffect {
+  const DilateTime({
+    this.speedFactor = 0.5,
+    this.perfectBonus = 0.15,
+    this.turns = 2,
+  });
+
+  final double speedFactor;
+  final double perfectBonus;
+  final int turns;
+}
+
+/// Nimmt dem Gegner den Timing-Bonus der naechsten Runde.
+final class LockEnemyTiming extends MoveEffect {
+  const LockEnemyTiming({this.turns = 1});
+
+  final int turns;
+}
+
+/// Die naechste Faehigkeit des Anwenders kostet weniger.
+final class CheapenNext extends MoveEffect {
+  const CheapenNext({this.amount = 1, this.turns = 2});
+
+  final int amount;
+  final int turns;
+}
+
+/// Heilt den Anwender um einen Anteil des zugefuegten Schadens.
+final class LifeSteal extends MoveEffect {
+  const LifeSteal({required this.share});
+
+  /// 1.0 = 100 % des Schadens.
+  final double share;
+}
+
+/// Stiehlt dem Gegner Energie und gibt sie dem Anwender.
+final class StealEnergy extends MoveEffect {
+  const StealEnergy({required this.amount});
+
+  final int amount;
+}
+
+/// Entfernt einen negativen Statuseffekt vom Anwender.
+final class CleanseSelf extends MoveEffect {
+  const CleanseSelf();
+}
+
+/// Heilt den Anwender um ein Vielfaches seines Angriffswerts.
+///
+/// Eigener Effekt neben [HealSelf], weil dieser eine Zahl mitbringt --
+/// [HealSelf] nimmt die aus [Balance].
+final class HealSelfBy extends MoveEffect {
+  const HealSelfBy({required this.factor});
+
+  final double factor;
+}
+
+/// Legt eine Umgebung. Die Id zeigt in [Environments].
+final class SetEnvironment extends MoveEffect {
+  const SetEnvironment(this.environmentId);
+
+  final String environmentId;
+}
+
+/// Gibt dem Anwender Energie, zusaetzlich zu [Move.energyDelta].
+///
+/// Eigener Effekt, weil Aurastrom bei perfektem Timing **mehr** gibt als
+/// im Grundfall -- und `energyDelta` steht am Move, nicht an der Wirkung.
+final class GainEnergy extends MoveEffect {
+  const GainEnergy({required this.amount});
+
+  final int amount;
+}
+
+/// Ignoriert Schild, Schadensminderung und Reflexion.
+final class IgnoreProtection extends MoveEffect {
+  const IgnoreProtection();
+}
+
 /// Ein Move belegt einen der vier Slots.
 ///
 /// Keine Typen-Effektivitaet (bewusste Konzeptentscheidung). Die einzige
@@ -30,6 +160,11 @@ class Move {
     required this.power,
     required this.energyDelta,
     this.effects = const <MoveEffect>[],
+    this.perfectEffects = const <MoveEffect>[],
+    this.timing = TimingSpec.standard,
+    this.perfectFactor,
+    this.missFactor,
+    this.hits = 1,
   });
 
   /// Stabiler Bezeichner fuer Events, Speicherstaende und UI.
@@ -48,6 +183,41 @@ class Move {
   /// [HealSelf] und [ShieldSelf] wirken auf den Anwender, alle uebrigen
   /// auf den Gegner. Damit gibt es keine zweite Quelle der Wahrheit.
   final List<MoveEffect> effects;
+
+  /// Wirkungen, die **nur** bei perfektem Timing eintreten.
+  ///
+  /// Die Vorlage trennt beides sauber: Funkenstoss macht immer Schaden,
+  /// entzuendet aber nur bei Perfect. Zwei Listen sind ehrlicher als ein
+  /// Effekt, der intern nachfragt, wie gut getroffen wurde.
+  final List<MoveEffect> perfectEffects;
+
+  /// Wie schwer der perfekte Treffer ist.
+  final TimingSpec timing;
+
+  /// Eigener Schadensfaktor bei perfektem Timing.
+  ///
+  /// **Warum das hier steht und nicht in [Balance].** ADR-0009 hat den
+  /// pauschalen Deckel von +20 % gemessen und begruendet: Ein Faktor, der
+  /// auf *jeden* Treffer wirkt, entscheidet den Kampf allein. Dieser Wert
+  /// ist etwas anderes -- er gilt nur fuer eine einzelne Faehigkeit, die
+  /// Energie kostet und ein enges Fenster hat. Der Bonus ist verdient,
+  /// nicht geschenkt.
+  ///
+  /// `null` bedeutet: Es gilt der Deckel aus [Balance]. Basisangriff und
+  /// alle Waffenmoves lassen das bewusst so -- sie werden jede Runde
+  /// gedrueckt, und genau dort galt die Messung.
+  final double? perfectFactor;
+
+  /// Eigener Schadensfaktor, wenn das Fenster verfehlt wurde.
+  ///
+  /// `null` heisst: kein Abzug, wie ueberall sonst. Nur Sternenfall setzt
+  /// das -- Verfehlen kostet dort mehr als den entgangenen Bonus.
+  final double? missFactor;
+
+  /// Wie oft getippt und getroffen wird. Klingenwirbel hat drei.
+  final int hits;
+
+  bool get isMultiHit => hits > 1;
 
   bool get dealsDamage => power > 0;
 
@@ -190,11 +360,15 @@ abstract final class Moves {
   /// Gibt bewusst null zurueck statt zu werfen: Eine Id kann aus einem
   /// alten Spielstand kommen, und ein Kampf ohne Knoepfe waere die
   /// schlechtere Antwort darauf (ADR-0010).
+  /// Sucht erst unter den Grundmoves, dann im Faehigkeiten-Set.
+  ///
+  /// Ein Aufrufer soll nicht wissen muessen, aus welchem der beiden
+  /// Kataloge eine Id stammt -- fuer ihn ist es einfach ein Move.
   static Move? byId(String id) {
     for (final move in all) {
       if (move.id == id) return move;
     }
-    return null;
+    return AbilityMoves.byId(id);
   }
 
   /// Das Moveset der **Gegner** — und der Rueckfall, solange ein Spieler

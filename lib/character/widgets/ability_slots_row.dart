@@ -237,6 +237,21 @@ String _effectLabel(MoveEffect effect) => switch (effect) {
   ApplyDefenseDown() => 'senkt Verteidigung',
   HealSelf() => 'heilt',
   ShieldSelf() => 'schützt',
+  HealSelfBy() => 'heilt',
+  ApplyBurn() => 'entzündet',
+  ReduceIncoming() => 'mindert Schaden',
+  ReflectIncoming() => 'wirft Schaden zurück',
+  ShrinkEnemyWindow() => 'verengt gegnerisches Timing',
+  DilateTime() => 'dehnt die Zeit',
+  LockEnemyTiming() => 'sperrt gegnerisches Timing',
+  CheapenNext() => 'verbilligt den nächsten Zug',
+  LifeSteal() => 'saugt Leben',
+  StealEnergy() => 'stiehlt Energie',
+  CleanseSelf() => 'reinigt',
+  SetEnvironment(:final environmentId) =>
+    Environments.byId(environmentId)?.name ?? 'verändert das Feld',
+  GainEnergy() => 'gibt Energie',
+  IgnoreProtection() => 'ignoriert Schutz',
 };
 
 /// Was das Auswahlblatt zurückgibt. Eigener Typ, weil Abbrechen (null vom
