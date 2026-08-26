@@ -189,7 +189,22 @@ class DevScreen extends ConsumerWidget {
       ),
     );
 
-    if (yes ?? false) onYes();
+    if (!(yes ?? false)) return;
+
+    // **Erst nach dem Frame handeln, nicht sofort.**
+    //
+    // `showDialog` kehrt zurück, sobald `Navigator.pop` gerufen wurde --
+    // der Dialog wird zu dem Zeitpunkt aber noch abgebaut. „Alles
+    // freischalten" ändert rund 25 Provider-Zustände auf einen Schlag
+    // (Theorie, neun Ausrüstungsstücke, Fähigkeiten, Punkte). Fällt das
+    // in den Abbau, versucht Riverpod die Scope neu zu bauen, während
+    // `PhoneFrame`s `LayoutBuilder` noch rechnet:
+    //
+    //     setState() or markNeedsBuild() called during build
+    //
+    // Ein Bildaufbau später ist alles ruhig, und dieselben Änderungen
+    // laufen durch einen normalen Rebuild.
+    WidgetsBinding.instance.addPostFrameCallback((_) => onYes());
   }
 
   Future<void> _eraseDevSave(BuildContext context, WidgetRef ref) async {

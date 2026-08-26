@@ -3,6 +3,37 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Widget-Test reproduziert das Timing des Browsers nicht
+
+„Alles freischalten" im Entwicklermodus brach in Chrome mit einer
+Riverpod-Ausnahme ab:
+
+```
+setState() or markNeedsBuild() called during build
+  ← LayoutBuilder._rebuildWithConstraints   (PhoneFrame)
+  ← Consumer._updateTickerMode              (Dialog verschwindet)
+  ← scheduleProviderRefresh
+```
+
+Ursache: `showDialog` kehrt zurück, sobald `Navigator.pop` gerufen wurde —
+der Dialog wird zu dem Zeitpunkt noch abgebaut. „Alles freischalten" ändert
+rund 25 Provider-Zustände auf einen Schlag; fällt das in den Abbau, will
+Riverpod die Scope neu bauen, während der `LayoutBuilder` von `PhoneFrame`
+noch rechnet.
+
+Behoben mit `addPostFrameCallback` — einen Bildaufbau später ist alles ruhig.
+
+**Der unangenehme Teil:** Ein Widget-Test, der genau diesen Weg geht —
+scrollen, Knopf, Dialog, „Ja", Rahmen inklusive — ist auch **ohne** den Fix
+grün. `pumpAndSettle` arbeitet Frames der Reihe nach ab; die Verschränkung
+aus Route-Übergang, Ticker-Wechsel und Layout-Callback, die den Fehler
+auslöst, entsteht dort nicht.
+
+**Regel:** Bei „called during build" ist der Widget-Test kein Nachweis. Der
+Fix bleibt richtig — Zustandsänderungen nach einem Dialog gehören hinter
+den Frame —, aber bestätigen lässt er sich nur im Browser. Solche Fälle
+gehören notiert, statt sich auf ein grünes Testfeld zu verlassen.
+
 ## Zwei Stellen, die dieselbe Frage beantworten, driften auseinander
 
 „Ist diese Fähigkeit freigeschaltet?" wurde an **zwei** Orten beantwortet:
