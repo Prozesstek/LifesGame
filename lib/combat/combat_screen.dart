@@ -37,8 +37,15 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   void _onMoveSelected(Move move) {
     if (_phase != _Phase.chooseMove) return;
 
-    // Nur Angriffe haben ein Zeitfenster. Utility löst sofort aus.
-    if (!move.dealsDamage) {
+    // Ob getippt wird, entscheidet der Move — nicht der Bildschirm.
+    //
+    // Hier stand bis heute `!move.dealsDamage`, eine Regel aus der Zeit
+    // der vier Moves: Damals hatte nur ein Angriff etwas zu gewinnen. Von
+    // den fünfzehn Fähigkeiten haben acht `power` 0 und trotzdem eigene
+    // Timing-Werte — Steinhaut, Aurastrom, Blütentau und Prisma-Barriere
+    // werden bei Perfect deutlich stärker, ohne je Schaden zu machen.
+    // Ihre Perfect-Wirkungen waren dadurch unerreichbar.
+    if (!move.hasTimingWindow) {
       _resolve(move, const <TimedHit>[TimedHit.none]);
       return;
     }

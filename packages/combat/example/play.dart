@@ -48,7 +48,7 @@ void main() {
       return;
     }
 
-    final timing = move.dealsDamage ? _askTiming() : TimedHit.none;
+    final timing = move.hasTimingWindow ? _askTiming() : TimedHit.none;
     final step = engine.resolveRound(
       state,
       PlayerAction(move: move, timedHit: timing),
