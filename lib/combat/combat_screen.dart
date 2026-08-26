@@ -39,7 +39,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
 
     // Nur Angriffe haben ein Zeitfenster. Utility löst sofort aus.
     if (!move.dealsDamage) {
-      _resolve(move, TimedHit.none);
+      _resolve(move, const <TimedHit>[TimedHit.none]);
       return;
     }
     setState(() {
@@ -48,15 +48,15 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     });
   }
 
-  void _onTimingResult(TimedHit timedHit) {
+  void _onTimingResult(List<TimedHit> hits) {
     final move = _pendingMove;
     if (move == null) return;
-    _resolve(move, timedHit);
+    _resolve(move, hits);
   }
 
-  void _resolve(Move move, TimedHit timedHit) {
+  void _resolve(Move move, List<TimedHit> hits) {
     final controller = ref.read(combatControllerProvider.notifier);
-    final events = controller.playRound(move, timedHit);
+    final events = controller.playRound(move, hits);
 
     controller.appendLog(events.map(describeEvent).whereType<String>());
 
@@ -166,12 +166,31 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     );
   }
 
+  /// Welche Timing-Werte für den gewählten Zug gelten.
+  ///
+  /// Fällt auf den Standard zurück, solange nichts gewählt ist — die
+  /// Leiste steht dann ohnehin nicht im Bild.
+  TimingSpec _timingFor(CombatState state) {
+    final move = _pendingMove;
+    if (move == null) return TimingSpec.standard;
+
+    return timingForSide(state, Side.player, move);
+  }
+
   Widget _buildControls(CombatState state, List<Move> loadout) {
     return switch (_phase) {
+      // Geschwindigkeit und Fenster kommen aus `package:combat` — sie
+      // hängen an der Fähigkeit, an Statuseffekten und an der Umgebung.
+      // Der Bildschirm rechnet daran nichts, er reicht durch (ADR-0002).
       _Phase.timing => SizedBox(
         height: 96,
         child: Center(
-          child: TimingBar(key: _timingKey, onResult: _onTimingResult),
+          child: TimingBar(
+            key: _timingKey,
+            spec: _timingFor(state),
+            hits: _pendingMove?.hits ?? 1,
+            onResult: _onTimingResult,
+          ),
         ),
       ),
       _Phase.finished => SizedBox(

@@ -29,4 +29,5 @@ export 'src/move.dart';
 export 'src/state.dart';
 export 'src/status.dart';
 export 'src/timed_hit.dart';
+export 'src/timing_rules.dart';
 export 'src/timing_spec.dart';

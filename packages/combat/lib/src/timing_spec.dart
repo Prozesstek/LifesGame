@@ -39,6 +39,20 @@ class TimingSpec {
   static const double maxSpeed = 4.0;
   static const double minWindow = 0.03;
 
+  /// Ein Wertobjekt: Zwei Angaben mit denselben Zahlen sind dasselbe.
+  ///
+  /// Noetig, weil die Darstellung daran entscheidet, ob sie neu zeichnen
+  /// muss -- ohne Vergleich waere jede frisch gerechnete Angabe „anders".
+  @override
+  bool operator ==(Object other) {
+    return other is TimingSpec &&
+        other.speed == speed &&
+        other.perfectWindow == perfectWindow;
+  }
+
+  @override
+  int get hashCode => Object.hash(speed, perfectWindow);
+
   /// Wendet Faktoren aus Umgebung und Statuseffekten an.
   ///
   /// Multiplikativ, wie es die Vorlage vorgibt: Zwei Effekte, die das

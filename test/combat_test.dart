@@ -76,7 +76,9 @@ void main() {
       addTearDown(container.dispose);
       final controller = container.read(combatControllerProvider.notifier);
 
-      final events = controller.playRound(Moves.basicAttack, TimedHit.perfect);
+      final events = controller.playRound(Moves.basicAttack, const <TimedHit>[
+        TimedHit.perfect,
+      ]);
 
       expect(events, isNotEmpty);
       expect(events.whereType<DamageDealt>(), isNotEmpty);
@@ -92,7 +94,7 @@ void main() {
       final controller = container.read(combatControllerProvider.notifier);
 
       controller
-        ..playRound(Moves.basicAttack, TimedHit.none)
+        ..playRound(Moves.basicAttack, const <TimedHit>[TimedHit.none])
         ..appendLog(<String>['irgendwas'])
         ..restart();
 
@@ -110,11 +112,18 @@ void main() {
       // Lange genug prügeln, bis eine Seite fällt.
       for (var i = 0; i < 200; i++) {
         if (container.read(combatControllerProvider).state.isOver) break;
-        controller.playRound(Moves.basicAttack, TimedHit.perfect);
+        controller.playRound(Moves.basicAttack, const <TimedHit>[
+          TimedHit.perfect,
+        ]);
       }
 
       expect(container.read(combatControllerProvider).state.isOver, isTrue);
-      expect(controller.playRound(Moves.basicAttack, TimedHit.none), isEmpty);
+      expect(
+        controller.playRound(Moves.basicAttack, const <TimedHit>[
+          TimedHit.none,
+        ]),
+        isEmpty,
+      );
     });
   });
 
