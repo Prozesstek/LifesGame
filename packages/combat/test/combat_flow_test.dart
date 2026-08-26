@@ -198,6 +198,52 @@ void main() {
       expect(step.state.player.hp, 100);
     });
 
+    test('ein ganz geschluckter Schlag meldet sich als vollstaendig', () {
+      // Die Darstellung schreibt „Geblockt" nur, wenn nichts durchkam.
+      // Sie soll das nicht aus der Eventliste erraten muessen -- das
+      // Event sagt es.
+      final engine = engineWith(
+        policy: const FixedMovePolicy(Moves.basicAttack),
+      );
+      final shielded = hero(hp: 100, energy: 4).withStatus(
+        const Shield(absorb: 1000, remainingTurns: 5),
+      );
+
+      final step = engine.resolveRound(
+        CombatState.start(player: shielded, enemy: dummy(attack: 30)),
+        const PlayerAction(move: Moves.basicAttack),
+      );
+
+      final geschluckt = step.eventsOfType<DamageAbsorbed>().first;
+      expect(geschluckt.complete, isTrue);
+      expect(
+        step.eventsOfType<DamageDealt>().where((e) => e.target == Side.player),
+        isEmpty,
+      );
+    });
+
+    test('ein teilweise geschluckter Schlag meldet sich als unvollstaendig',
+        () {
+      final engine = engineWith(
+        policy: const FixedMovePolicy(Moves.basicAttack),
+      );
+      final shielded = hero(hp: 100).withStatus(
+        const Shield(absorb: 1, remainingTurns: 5),
+      );
+
+      final step = engine.resolveRound(
+        CombatState.start(player: shielded, enemy: dummy(attack: 50)),
+        const PlayerAction(move: Moves.basicAttack),
+      );
+
+      final geschluckt = step.eventsOfType<DamageAbsorbed>().first;
+      expect(geschluckt.complete, isFalse);
+      expect(
+        step.eventsOfType<DamageDealt>().where((e) => e.target == Side.player),
+        isNotEmpty,
+      );
+    });
+
     test('Schild bricht, wenn er aufgebraucht ist', () {
       final engine =
           engineWith(policy: const FixedMovePolicy(Moves.basicAttack));

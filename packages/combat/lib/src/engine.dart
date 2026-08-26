@@ -313,7 +313,13 @@ class CombatEngine {
     if (shield != null) {
       final absorbed = min(shield.absorb, remaining);
       remaining -= absorbed;
-      round.emit(DamageAbsorbed(target: target, amount: absorbed));
+      round.emit(
+        DamageAbsorbed(
+          target: target,
+          amount: absorbed,
+          complete: remaining <= 0,
+        ),
+      );
 
       final next = shield.afterAbsorbing(absorbed);
       if (next == null) {

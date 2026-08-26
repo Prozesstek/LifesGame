@@ -268,6 +268,33 @@ Fall repariert sich beim nächsten Start von selbst.
 Beispiel-Ids und bewies damit, dass abgelöste Ids das Laden überstehen.
 Sie nehmen ihre Beispiele jetzt aus dem Katalog.
 
+### Schadenszahlen über den Kämpfern
+
+Treffer stehen rot über dem Kopf, Heilung grün mit Plus, ein ganz
+geschluckter Schlag als „Geblockt". Schaden über Zeit trägt die Farbe
+seiner Quelle: Gift lila, Giftboden dunkleres Lila, Brand orange, Eisfeld
+hellblau, Sandsturm sandgelb, Lavafeld rot mit Funken um die Zahl.
+
+**Zwei Entscheidungen, die nicht offensichtlich sind:**
+
+Bei einem **teilweise** geblockten Schlag steht nur die Zahl da, die
+durchkommt — „Geblockt" heißt dann auch wirklich geblockt. Ob der Block
+vollständig war, sagt seit heute das Event (`DamageAbsorbed.complete`).
+Die Darstellung soll das nicht aus der Eventliste erraten müssen; sie
+müsste dafür vorausschauen und `ShieldBroke` überspringen.
+
+**Was angezeigt wird, entscheidet eine reine Funktion**
+(`damageReadoutFor` in `floating_text.dart`), nicht die Ereignisschleife
+in Flame. Dieselbe Trennung wie bei `MoveAnimation`. Der Grund ist
+praktisch: Im Flame-Code erreicht kein Test die Entscheidung, ohne ein
+Spiel zu starten — als Funktion sind es zehn Zeilen Test.
+
+**Nicht am Bild geprüft.** Der Browser ließ sich in der Sitzung nicht
+anzeigen, ein Screenshot war nicht möglich. Was *angezeigt wird*, ist
+getestet; wie es auf einem Handy **aussieht** — Größe, Versatz bei
+Klingenwirbels vier Treffern, Lesbarkeit der Funken — muss jemand
+ansehen.
+
 ### Offen
 
 **Der andere Fall ist weiter unsichtbar.** Eine Fähigkeit, die es im
