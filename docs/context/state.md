@@ -246,7 +246,36 @@ Punkte beim Wegelagerer an Tag 0, 46 beim Söldner an Tag 30, 33 beim
 Bergwächter an Tag 60. Vorher stand dort fast überall 0 — das ist die
 Aussage aus ADR-0009, wieder messbar.
 
+### Nachgemeldet: ein Platz war belegt und kam nicht im Kampf an
+
+Gemeldet mit Screenshot — vier Fähigkeiten angelegt, drei Knöpfe im
+Kampf. Es fehlte *Kraftschlag*.
+
+**Ursache: ADR-0022 hat ihn aus dem Katalog geworfen.** Die vier aus
+ADR-0017 (Kraftschlag, Zehrung, Sammeln, Atemzug) sind nicht mehr
+wählbar; in `package:combat` gibt es sie weiter. Ein Spielstand, der einen
+davon hielt, zeigte ihn auf seinem Platz — `ability_slots_row.dart` fragt
+`Moves.byId`, nicht den Katalog — und der Kampf ließ ihn weg. Der Platz
+war dauerhaft blockiert, ohne Meldung.
+
+Behoben über
+[ADR-0024](../decisions/0024-abgeloeste-faehigkeiten-fallen-beim-laden-heraus.md):
+`ChosenAbilities.fromJson` streicht Ids, die der Katalog nicht kennt. Der
+Fall repariert sich beim nächsten Start von selbst.
+
+**Die Tests haben es nicht gefunden, weil sie selbst veraltet waren:**
+`chosen_abilities_test.dart` benutzte `mend` und `breath` als
+Beispiel-Ids und bewies damit, dass abgelöste Ids das Laden überstehen.
+Sie nehmen ihre Beispiele jetzt aus dem Katalog.
+
 ### Offen
+
+**Der andere Fall ist weiter unsichtbar.** Eine Fähigkeit, die es im
+Katalog gibt, deren Bedingung gerade aber nicht erfüllt ist, liegt
+sichtbar auf ihrem Platz und fällt im Kampf heraus. Erreichbar über den
+Entwicklermodus: schenken, anlegen, Zuschläge zurücksetzen. Das ist
+Absicht aus ADR-0014 — ob der Charakterbildschirm es kenntlich machen
+sollte, ist offen.
 
 **Der Bergwächter erreicht auch an Tag 60 nur 40 %.** ADR-0009 wollte dort
 100 %. Er ist jetzt der Gegner, der nie verlässlich fällt — vorher war er

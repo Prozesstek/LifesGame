@@ -3,6 +3,41 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Einen Katalogeintrag zu streichen ändert fremde Spielstände
+
+ADR-0022 hat `AbilityCatalog.choosable` ausgetauscht: die fünfzehn aus der
+Vorlage rein, die vier aus ADR-0017 raus — Kraftschlag, Zehrung, Sammeln,
+Atemzug. In `package:combat` gibt es sie weiter, nur wählbar sind sie
+nicht mehr.
+
+Wer einen davon auf einem Platz liegen hatte, behielt ihn im Spielstand.
+Und dann antworteten zwei Stellen verschieden:
+
+```dart
+// lib/character/widgets/ability_slots_row.dart
+Moves.byId('heavy_attack')          // Kraftschlag -- wird angezeigt
+
+// lib/character/abilities_controller.dart
+AbilityCatalog.byMoveId(...)        // null -- faellt aus dem Kampf
+```
+
+Sichtbar war: vier Plätze belegt, „Alle vier Plätze offen und belegt",
+drei Knöpfe im Kampf. Keine Meldung. Gefunden hat es ein Spieler mit
+einem Screenshot, nicht die Testsuite — die Tests im Package benutzten
+ausgerechnet `mend` und `breath` als Beispiel-Ids und bewiesen damit
+fröhlich, dass abgelöste Ids das Laden überstehen.
+
+**Regel:** Ein Katalog, dessen Ids in Spielständen landen, ist eine
+Schnittstelle nach außen. Etwas daraus zu streichen ist eine Änderung an
+fremden Daten und braucht eine Entscheidung, was mit den Resten passiert
+([ADR-0024](../decisions/0024-abgeloeste-faehigkeiten-fallen-beim-laden-heraus.md):
+Sie fallen beim Laden heraus).
+
+**Zweite Regel:** In Tests keine Ids als Beispiel benutzen, die zufällig
+gerade existieren. Wenn der Test „irgendeine gültige Id" meint, soll er
+sie aus dem Katalog nehmen — sonst dokumentiert er irgendwann das
+Gegenteil dessen, was gelten soll.
+
 ## Ein Feld, das nur geschrieben und nie gelesen wird, meldet sich nie
 
 `EnemyBlueprint.loadout` stand seit ADR-0017 in `enemy.dart`, sorgfältig

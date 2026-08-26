@@ -71,7 +71,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
-| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 28 Tests | nur Dart-SDK |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 35 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
@@ -146,7 +146,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 cd packages/theory      ; dart test    # 109 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
-cd packages/abilities   ; dart test    # 31 Tests
+cd packages/abilities   ; dart test    # 35 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 

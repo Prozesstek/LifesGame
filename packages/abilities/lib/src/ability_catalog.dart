@@ -5,16 +5,20 @@ import 'ability.dart';
 /// Gleiche Regel wie bei Preisen, Belohnungen und Titeln: Steht eine
 /// dieser Bedingungen irgendwo anders im Code, ist das ein Bug.
 ///
-/// **Der Stand ist Zwischenstand, und das mit Ansage.** ADR-0017 legt
-/// zwanzig Fähigkeiten fest. Hier stehen die **neun**, für die die Engine
-/// heute schon reicht — die fünf Waffen plus Kraftschlag, Zehrung,
-/// Sammeln und Atemzug. Die übrigen elf brauchen einen verallgemeinerten
-/// Statuseffekt und drei neue Mechaniken in `package:combat`; sie kommen
-/// als Einträge dazu, ohne dass hier etwas umgebaut werden müsste.
+/// **[choosable] ist der Stand von ADR-0022:** die fünfzehn Fähigkeiten
+/// aus der Vorlage, elf an Theorieknoten, vier an Streak-Marken. Der
+/// Zwischenstand aus ADR-0017 — Kraftschlag, Zehrung, Sammeln, Atemzug —
+/// ist damit **abgelöst**. Die vier existieren in `package:combat` weiter
+/// (Gegner benutzen sie), sind aber nicht mehr wählbar.
 ///
-/// **Seit ADR-0019 hängen die vier wählbaren an Knoten** statt offen zu
-/// sein. Alle vier liegen unter *Körper* — das ist Absicht: Es sind die
-/// Themen, aus denen im Spiel Angriff und Trefferpunkte werden.
+/// **Wer hier etwas herausnimmt, macht Spielstände ungültig.** Eine Id,
+/// die ein Spieler auf einem Platz liegen hat und die hier verschwindet,
+/// blockiert diesen Platz — sichtbar belegt, im Kampf wirkungslos. Genau
+/// das ist bei ADR-0022 passiert. Seit ADR-0024 räumt
+/// [ChosenAbilities.fromJson] solche Reste beim Laden weg; das ändert
+/// nichts daran, dass eine Streichung hier eine Entscheidung ist.
+///
+/// **Seit ADR-0019 hängen die wählbaren an Knoten** statt offen zu sein.
 abstract final class AbilityCatalog {
   /// Was Slot 1 trägt, wenn keine Waffe angelegt ist.
   ///

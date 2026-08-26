@@ -77,14 +77,16 @@ void main() {
       );
       container
           .read(chosenAbilitiesProvider.notifier)
-          .choose(0, Moves.heavyAttack.id);
+          .choose(0, AbilityMoves.steinhaut.id);
       await tester.pump();
 
       // Der eigentliche Test: SaveWatcher hat den fünften Bereich
       // eingetragen. Ohne ihn funktionierte alles, nur gespeichert würde
       // nichts.
       final gespeichert = await store.read();
-      expect(gespeichert.abilities.moveIds, <String>[Moves.heavyAttack.id]);
+      expect(gespeichert.abilities.moveIds, <String>[
+        AbilityMoves.steinhaut.id,
+      ]);
     });
 
     testWidgets('ein geräumter Platz bleibt geräumt', (tester) async {
@@ -106,7 +108,7 @@ void main() {
         tester.element(find.byType(LifesGameApp)),
       );
       final notifier = container.read(chosenAbilitiesProvider.notifier);
-      notifier.choose(0, Moves.mend.id);
+      notifier.choose(0, AbilityMoves.funkenstoss.id);
       await tester.pump();
       notifier.clear(0);
       await tester.pump();
@@ -124,6 +126,27 @@ void main() {
 
       expect(alt.abilities.isEmpty, isTrue);
       expect(alt.habits.isActive(habitId), isTrue);
+    });
+
+    test('ein Stand mit einer abgelösten Fähigkeit lädt sie nicht mit', () {
+      // Der gemeldete Fehler, auf dem echten Ladeweg (ADR-0024): Ein
+      // Spielstand aus der Zeit vor ADR-0022 hält *Kraftschlag* auf einem
+      // freien Platz. Der Charakterbildschirm zeigte ihn, der Kampf nahm
+      // ihn nicht an — vier Plätze belegt, drei Knöpfe.
+      final alt = SaveData.fromJson(<String, Object?>{
+        'abilities': <String, Object?>{
+          'moves': <Object?>[
+            'heavy_attack',
+            AbilityMoves.steinhaut.id,
+            AbilityMoves.sandsturm.id,
+          ],
+        },
+      });
+
+      expect(alt.abilities.moveIds, <String>[
+        AbilityMoves.steinhaut.id,
+        AbilityMoves.sandsturm.id,
+      ]);
     });
 
     test('der Waffenslot überlebt als Ableitung, nicht als Wert', () {
