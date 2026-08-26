@@ -204,6 +204,13 @@ sonst hängt die Fähigkeit nicht mehr am Angriffswert und damit nicht mehr
 an den Gewohnheiten. Dauerschaden ist immer ein Vielfaches des
 Angriffswerts, nie eine feste HP-Zahl.
 
+Die Vorlage selbst liegt seit dem 26.08. im Repo:
+[`docs/vorlagen/faehigkeiten.md`](docs/vorlagen/faehigkeiten.md). Sie sagt,
+was eine Fähigkeit **sein soll** — Wirkung, Timing, Icon, Animation. Sie ist
+nicht die Quelle der Wahrheit für die Zahlen (das ist der Katalog), aber sie
+hält fest, was davon noch fehlt und warum drei Umrechnungen dazwischen
+liegen.
+
 **Der eigene Perfect-Faktor gilt nur für Fähigkeiten.** Basisangriff und
 Waffenmoves lassen `perfectFactor` auf `null` und bleiben beim Deckel aus
 `balance.dart` — dort galt die Messung aus ADR-0009. Wer das ändert, lässt
@@ -297,7 +304,7 @@ nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decis
 
 ## Gedächtnis-Protokoll
 
-Diese fünf Dateien sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
+Diese sechs Orte sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
 nicht Nacharbeit:
 
 | Datei | Enthält | Wann aktualisieren |
@@ -307,6 +314,14 @@ nicht Nacharbeit:
 | `docs/context/ziele.md` | **Wohin** es geht: Ziellinie, SMART-Ziele mit Termin, und was ausdrücklich *nicht* dazugehört | freitags die Ist-Spalten; bei Zielwechsel sofort |
 | `docs/decisions/NNNN-*.md` | **Warum** eine Entscheidung so fiel | sobald eine Entscheidung fällt, die man in drei Monaten hinterfragen würde |
 | `docs/context/gotchas.md` | Fallstricke, die Zeit gekostet haben | sobald etwas unerwartet war |
+| `docs/vorlagen/` | Entwürfe, aus denen gebaut wird — Fähigkeiten, später das Kampfsystem | sobald eine Vorlage entsteht, **bevor** danach gebaut wird |
+
+**Eine Vorlage, die nur auf einem Rechner liegt, existiert für den anderen
+nicht.** Genau das ist bei `Kampfsystem.docx` passiert: In `state.md` steht
+seit dem 22.08., dass sie „noch nicht im Repo" und nicht auffindbar ist —
+und deshalb ist der Kampfsystem-Umbau bis heute unentschieden. Dem
+Fähigkeiten-Set ist es beinahe genauso ergangen. Deshalb gilt: Wer nach
+einem Dokument baut, legt das Dokument zuerst hierher.
 
 `state.md` und `ziele.md` sind ein Paar und dürfen sich nie widersprechen:
 Was in `ziele.md` als erreicht gilt, steht in `state.md` unter „Fertig". Die

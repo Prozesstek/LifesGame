@@ -168,10 +168,40 @@ an jedem Tag mit **einem** Move. Sie nimmt jetzt an, dass die Kette nie
 reißt und jeder Theoriepunkt in einen Knoten mit Fähigkeit geht; beides
 steht im Code und macht das Ergebnis zur oberen Schranke.
 
+### Die Vorlage liegt jetzt im Repo
+
+[`docs/vorlagen/faehigkeiten.md`](../vorlagen/faehigkeiten.md) — bis dahin
+lag sie nur in einem Downloads-Ordner und existierte für den anderen
+damit nicht, dasselbe Muster wie bei `Kampfsystem.docx`. Sie enthält die
+fünfzehn Fähigkeiten samt Icon- und Animationsideen, die Timing-Referenz
+und die Umgebungsregeln — dazu einen nachgeprüften Soll-Ist-Teil: welche
+Zahlen ankommen (alle), welche drei Umrechnungen dazwischenliegen, und
+fünf Stellen, an denen die Vorlage noch auf Antwort wartet.
+
+`docs/vorlagen/` ist ab jetzt der Platz für solche Dokumente und steht im
+Gedächtnis-Protokoll in `CLAUDE.md`.
+
 ### Offen
 
+**Acht Fähigkeiten bekommen keine Timing-Leiste.** `combat_screen.dart`
+öffnet das Zeitfenster nur bei `power > 0` — eine Regel aus der Zeit, als
+es vier Moves gab. Steinhaut, Aurastrom, Blütentau, Prisma-Barriere,
+Frostnebel, Sandsturm, Giftmoor und Zeitdehnung lösen sofort aus, und
+vier Perfect-Wirkungen sind dadurch unerreichbar. **Die Engine kann es
+bereits** — `_act` wertet `perfectEffects` unabhängig vom Schaden aus, es
+fehlt allein die Eingabe. Dieselbe Bedingung steht ein zweites Mal in
+`packages/combat/example/play.dart` (Zeile 46); sie gehört als
+Eigenschaft an `Move`, weil Timing nach ADR-0022 eine Kampfregel ist.
+
+Zwei Entscheidungen hängen daran und sind **noch nicht getroffen**: was
+Perfect bei den vier Fähigkeiten ohne Perfect-Wirkung bewirkt, und ob
+*Sammeln* und *Atemzug* — ebenfalls `power: 0` — eine Leiste bekommen.
+
 **Die Umgebungen haben kein Bild.** Beim Setzen leuchten beide Kämpfer
-kurz auf; Lava, Sandschleier und Nebel fehlen.
+kurz auf; Lava, Sandschleier und Nebel fehlen. Dazu fällt
+`move_animation.dart` für **alle** fünfzehn auf `melee` zurück — bei
+Steinhaut und Blütentau macht die Figur dadurch einen Ausfallschritt auf
+den Gegner zu.
 
 ## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
 
