@@ -49,7 +49,8 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Rive-Animationen** | Die gezeichneten Figuren spielen. Die Schnittstelle steht und wartet. |
 | **Lebensbalken an der Zeitachse** | Kosmetisch. Die Zahlen stimmen, nur die Reihenfolge nicht. |
 | **Kampfsystem-Umbau** (Initiative, Kontern) | Nicht entschieden, kein Dokument im Repo. Ein unentschiedener Umbau gehört nicht in einen terminierten Plan. |
-| **Android, Store, Icons der App** | Der Web-Build reicht für zwei Leute. Die Android-Kette ist auf diesem Rechner nicht einsatzfähig. |
+| ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
+| **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
 | **Verkauf im Laden, Entprellen der Persistenz** | Beides sind Signale für später, kein Mangel heute. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |

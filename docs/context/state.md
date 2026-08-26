@@ -320,6 +320,42 @@ vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
 den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
 geschrieben.
 
+### Die App soll aufs Handy — Android wird eingerichtet
+
+Entschieden am 26.08. von AktivesBrett: „Im Browser ist ja nur zum
+Testen, aber es soll auf dem Handy laufen." Damit fällt **Android** von
+der Sperrliste in `ziele.md`. Die Begründung trägt: Ziel 7 verlangt
+30 Tage tägliches Spielen, und ein Browser-Tab wird seltener angetippt
+als ein Symbol auf dem Startbildschirm.
+
+**Der `android/`-Teil des Projekts ist vollständig** und war es schon:
+`applicationId` `dev.prozesstek.lifes_game`, Gradle-Kotlin-DSL, und der
+Release-Build signiert mit dem Debug-Schlüssel — ein APK zum Selbst-
+Installieren braucht also **keinen** Keystore.
+
+Zwei Kleinigkeiten sind nachgezogen: Die App heißt auf dem Startbildschirm
+jetzt **„Lifes Game"** statt `lifes_game`, und das Hochformat steht auch
+im Manifest. `main.dart` sperrt es zwar schon, aber erst wenn Flutter
+läuft — ohne die Manifest-Zeile dreht sich der Startbildschirm kurz mit.
+
+**Was auf diesem Rechner fehlt** (Stand `flutter doctor`):
+
+| | Zustand |
+|---|---|
+| Android SDK | **fehlt ganz** („Unable to locate Android SDK") |
+| Android Studio | nicht installiert |
+| JDK 17 | fehlt — im PATH steht Java 1.8, zu alt für `sourceCompatibility 17` |
+| `JAVA_HOME`, `ANDROID_HOME` | nicht gesetzt |
+
+`CLAUDE.md` beschrieb bisher frekks Rechner („Android Studio da, aber
+cmdline-tools fehlen"). Hier ist es weniger.
+
+**Drei Schritte kann nur ein Mensch machen:** Android Studio installieren
+(winget verlangt eine interaktive Zustimmung zu den Quellbedingungen),
+die SDK-Lizenzen akzeptieren, und auf dem Handy die Installation aus
+unbekannten Quellen erlauben. Danach ist `flutter build apk --release`
+ein einzelner Befehl.
+
 ### Offen
 
 **Der andere Fall ist weiter unsichtbar.** Eine Fähigkeit, die es im
