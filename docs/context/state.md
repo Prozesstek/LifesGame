@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
 
 ---
 
@@ -151,6 +151,14 @@ verrechnet Fähigkeit, Statuseffekte und Umgebung multiplikativ.
 
 In ADR-0009 stand er bei 36 % an Tag 30 und 100 % an Tag 60.
 
+> **Nachtrag 26.08., abends: die hier genannte Ursache war falsch.** Der
+> Bergwächter trug Donnerkeil nicht — `EnemyBlueprint.loadout` wurde
+> nirgends gelesen, er kämpfte mit dem Standard-Moveset und damit mit
+> Kraftschlag (`power` 2,2). Die zweite Hälfte der Erklärung stimmt und
+> war die eigentliche Ursache. Der Absatz bleibt stehen, weil die falsche
+> Diagnose lehrreich ist; Details in `gotchas.md` und
+> [ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md).
+
 Die Ursache ist benannt: Er trägt jetzt Donnerkeil (`power` 2,125), während
 die frühen Spielerfähigkeiten **schwächer sind als der Basisangriff** —
 Funkenstoß hat 0,75 gegen 1,0 beim Bogenschuss und kostet zusätzlich
@@ -181,27 +189,86 @@ fünf Stellen, an denen die Vorlage noch auf Antwort wartet.
 `docs/vorlagen/` ist ab jetzt der Platz für solche Dokumente und steht im
 Gedächtnis-Protokoll in `CLAUDE.md`.
 
+### Der Gegner spielt jetzt nach denselben Regeln
+
+Gemeldet war eine fehlende Timing-Leiste bei Frostnebel, Sandsturm und
+Giftmoor. Die Ursache war klein; beim Nachprüfen kamen **vier weitere**
+Befunde mit derselben Wurzel dazu
+([ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md)).
+Sechs Commits, 222 App-Tests (vorher 213), combat 78 (vorher 49).
+
+| Befund | Wirkung, bevor er behoben war |
+|---|---|
+| Leiste nur bei `power > 0` | acht Fähigkeiten ohne Zeitfenster, vier Perfect-Wirkungen unerreichbar |
+| Gegner bekam immer `TimedHit.none` | Wurzelgriff, Sandsturm und Donnerkeils Perfect-Wirkung gegen ihn **wirkungslos** |
+| Gegner erhielt nur einen Tipp | sein Klingenwirbel traf einmal statt dreimal |
+| Policy übersprang alles ohne Schaden | drei von sechs Zügen des Bergwächters tot |
+| **`EnemyBlueprint.loadout` wurde nirgends gelesen** | *jeder* Gegner kämpfte mit dem Standard-Moveset |
+
+**Der letzte wiegt am schwersten.** ADR-0022 Punkt 8 stand geschrieben und
+galt im Code nicht — keine der fünfzehn Fähigkeiten wurde je von einem
+Gegner gespielt. Der Fallstrick dazu steht in `gotchas.md`.
+
+**Damit war die hier dokumentierte Ursache des Bergwächter-Befunds
+falsch.** Weiter unten stand: „Er trägt jetzt Donnerkeil." Er trug ihn
+nie. Die Erklärung klang plausibel, passte zu den Zahlen und war falsch.
+
+### Was jetzt gilt
+
+- **Ob getippt wird, entscheidet der Move** (`Move.hasTimingWindow`):
+  Ändert Perfect etwas? Abgeleitet, nicht als Flag gesetzt.
+- **Der Gegner würfelt eine Stelle auf der Leiste**, gewertet mit
+  denselben Fenstern (`TimingSpec.judgeAt`). Ohne eine einzige neue Zahl.
+- **Er greift manchmal zu Utility**: Wegelagerer 10 %, Söldner 20 %,
+  Bergwächter 30 %. Mit vier Sperren gegen sichtbar verschwendete Runden.
+- **Perfekt gelegt hält eine Umgebung eine Runde länger** — auch bei
+  Vulkanbruch. Dafür kennt eine Umgebung jetzt ihre `totalTurns`; sonst
+  liefe Giftmoors Steigerung rückwärts los.
+- **Die liegende Umgebung steht im HUD**, mit Restrunden und Farbe für den
+  Besitzer.
+- **`Sammeln` und `Atemzug` bekommen keine Leiste** — sie haben keine
+  Perfect-Wirkung, und ein Tipp ohne Auszahlung ist Reibung.
+
+### Die neue Balance-Tabelle
+
+| Gegner | Tag 0 | Tag 7 | Tag 14 | Tag 21 | Tag 30 | Tag 60 |
+|---|---|---|---|---|---|---|
+| Wegelagerer | 0 → **74 %** | 94 → **100 %** | 100 % | 100 % | 100 % | 100 % |
+| Söldner | 0 % | 0 % | 0 % | 38 → **11 %** | 100 → **90 %** | 100 → **99 %** |
+| Bergwächter | 0 % | 0 % | 0 % | 0 → **5 %** | 0 → **22 %** | 0 → **40 %** |
+
+**Der Bergwächter ist nicht länger unschlagbar**, obwohl er jetzt
+Donnerkeil trägt: Er steckt 30 % seiner Züge in Utility, und Donnerkeil
+kostet 5 Energie — Kraftschlag konnte er öfter spielen.
+
+**Die Spannweite zwischen perfektem und keinem Timing ist zurück:** 35
+Punkte beim Wegelagerer an Tag 0, 46 beim Söldner an Tag 30, 33 beim
+Bergwächter an Tag 60. Vorher stand dort fast überall 0 — das ist die
+Aussage aus ADR-0009, wieder messbar.
+
 ### Offen
 
-**Acht Fähigkeiten bekommen keine Timing-Leiste.** `combat_screen.dart`
-öffnet das Zeitfenster nur bei `power > 0` — eine Regel aus der Zeit, als
-es vier Moves gab. Steinhaut, Aurastrom, Blütentau, Prisma-Barriere,
-Frostnebel, Sandsturm, Giftmoor und Zeitdehnung lösen sofort aus, und
-vier Perfect-Wirkungen sind dadurch unerreichbar. **Die Engine kann es
-bereits** — `_act` wertet `perfectEffects` unabhängig vom Schaden aus, es
-fehlt allein die Eingabe. Dieselbe Bedingung steht ein zweites Mal in
-`packages/combat/example/play.dart` (Zeile 46); sie gehört als
-Eigenschaft an `Move`, weil Timing nach ADR-0022 eine Kampfregel ist.
+**Der Bergwächter erreicht auch an Tag 60 nur 40 %.** ADR-0009 wollte dort
+100 %. Er ist jetzt der Gegner, der nie verlässlich fällt — vorher war er
+der, der nie fiel. Besser, aber nicht fertig. Balancing bleibt
+zurückgestellt; gemessen und gemeldet ist es.
 
-Zwei Entscheidungen hängen daran und sind **noch nicht getroffen**: was
-Perfect bei den vier Fähigkeiten ohne Perfect-Wirkung bewirkt, und ob
-*Sammeln* und *Atemzug* — ebenfalls `power: 0` — eine Leiste bekommen.
+**Alle Zahlen aus ADR-0009 und ADR-0022 sind neu zu messen.** Sie stammen
+aus Kämpfen, in denen der Gegner nie zielte und immer dasselbe Moveset
+hatte.
 
-**Die Umgebungen haben kein Bild.** Beim Setzen leuchten beide Kämpfer
-kurz auf; Lava, Sandschleier und Nebel fehlen. Dazu fällt
-`move_animation.dart` für **alle** fünfzehn auf `melee` zurück — bei
-Steinhaut und Blütentau macht die Figur dadurch einen Ausfallschritt auf
-den Gegner zu.
+**Der simulierte Spieler benutzt weiter keine Utility.**
+`tool/balance_sim.dart` steuert ihn mit derselben Policy, aber mit
+`utilityChance` 0. Die Tabelle ist damit eine **untere** Schranke für den
+Spieler und eine ehrliche für den Gegner.
+
+**Die Umgebungen haben kein Bild.** Sie stehen jetzt im HUD, aber Lava,
+Sandschleier und Nebel fehlen weiter. Dazu fällt `move_animation.dart` für
+**alle** fünfzehn auf `melee` zurück — bei Steinhaut und Blütentau macht
+die Figur dadurch einen Ausfallschritt auf den Gegner zu.
+
+**Sternenfalls Marker springt nicht zurück.** Die Vorlage nennt das als
+Teil seines Timings; `TimingSpec` kennt nur Geschwindigkeit und Fenster.
 
 ## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
 

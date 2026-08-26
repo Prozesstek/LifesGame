@@ -3,6 +3,38 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Feld, das nur geschrieben und nie gelesen wird, meldet sich nie
+
+`EnemyBlueprint.loadout` stand seit ADR-0017 in `enemy.dart`, sorgfältig
+gepflegt, mit Kommentaren zur Staffelung („Nur Commons", „Bis Rare"). Die
+Engine hat es **nie bekommen**: Weder `combat_controller.dart` noch eine
+der beiden Simulationen gab `enemyLoadout` weiter, also griff der
+Standardwert. Jeder Gegner kämpfte mit denselben vier Moves.
+
+Nichts hat sich beschwert. Kein Compilerfehler — das Feld *wurde* ja
+gesetzt. Kein Analyzer-Hinweis — es ist öffentlich, also könnte es jemand
+von außen lesen. Kein Test — die Package-Tests prüften den Katalog, die
+App-Tests den Bildschirm, und niemand den Weg dazwischen.
+
+**Und der Fehler hat eine falsche Diagnose erzeugt.** In `state.md` und
+ADR-0022 stand als Ursache des unschlagbaren Bergwächters: „Er trägt jetzt
+Donnerkeil." Er trug ihn nicht. Die Erklärung klang plausibel, passte zu
+den Zahlen und war falsch — teurer als der Fehler selbst, weil sie
+schriftlich festgehalten wurde.
+
+**Regel:** Wenn ein Katalog ein Feld bekommt, das Verhalten steuern soll,
+gehört im selben Zug ein Test dazu, der das **Verhalten** prüft — nicht
+den Katalogeintrag. „Der Wegelagerer spielt nur Züge, die er besitzt"
+fällt um; „der Wegelagerer hat fünf Moves im Bauplan" nicht.
+
+Praktischer Test dafür:
+
+```bash
+grep -rn "\.feldname" --include=*.dart .
+```
+
+Steht das Feld nur an der Stelle, die es setzt, liest es niemand.
+
 ## Ein Widget-Test reproduziert das Timing des Browsers nicht
 
 „Alles freischalten" im Entwicklermodus brach in Chrome mit einer

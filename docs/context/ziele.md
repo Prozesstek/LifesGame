@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
 
 ---
 
@@ -272,8 +272,21 @@ während die frühen Spielerfähigkeiten schwächer sind als der Basisangriff.
 Zahlen und Hebel stehen in `state.md`. Balancing war ausdrücklich
 zurückgestellt — aber es ist jetzt ein offener Punkt mit Nachweis.
 
+> **Nachtrag 26.08., abends.** Die Erklärung im Absatz darüber war falsch:
+> Der Bergwächter trug seine Rare-Fähigkeiten gar nicht, weil
+> `EnemyBlueprint.loadout` nirgends gelesen wurde. Seit das behoben ist —
+> und seit die Gegner zielen und Utility benutzen
+> ([ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md))
+> — steht er bei 22 % an Tag 30 und 40 % an Tag 60 statt bei 0 %.
+> Schlagbar, aber noch weit von den 100 % aus ADR-0009. Balancing bleibt
+> zurückgestellt.
+>
+> Nebenbei sind dabei drei Fähigkeiten überhaupt erst wirksam geworden:
+> Wurzelgriff, Sandsturm und Donnerkeils Perfect-Wirkung greifen alle am
+> gegnerischen Zeitfenster an — und das wurde nie ausgerechnet.
+
 ```bash
-cd packages/combat    ; dart test    # 49, alle 29 alten weiter grün
+cd packages/combat    ; dart test    # 78
 cd packages/abilities ; dart test
 flutter test test/abilities_seam_test.dart
 dart run tool/balance_sim.dart

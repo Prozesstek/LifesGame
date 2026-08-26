@@ -49,11 +49,12 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 29 Tests | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 78 Tests | nur Dart-SDK |
 | `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
 | `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
 | `packages/combat/lib/src/environment.dart` | die vier Umgebungen | nur Dart-SDK |
 | `packages/combat/lib/src/timing_rules.dart` | welche Timing-Werte gerade gelten | nur Dart-SDK |
+| `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
 | `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 109 Tests | nur Dart-SDK |
@@ -103,6 +104,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Move-Buttons, Log | Flutter |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
+| `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | der **gezeichnete** Baum: Knoten, Linien, Punkte | Flutter |
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
@@ -123,7 +125,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 213 Tests
+flutter test             # 222 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -131,7 +133,7 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 49 Tests
+dart test                              # 78 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
@@ -215,6 +217,28 @@ liegen.
 Waffenmoves lassen `perfectFactor` auf `null` und bleiben beim Deckel aus
 `balance.dart` — dort galt die Messung aus ADR-0009. Wer das ändert, lässt
 `cd packages/combat ; dart test` laufen; ein Test hält es fest.
+
+**Der Gegner spielt nach denselben Regeln wie der Spieler**
+([ADR-0023](docs/decisions/0023-der-gegner-spielt-nach-denselben-regeln.md)).
+Er tippt (eine zufällige Stelle, gewertet mit denselben Fenstern), er kann
+perfekt treffen, und er greift manchmal zu Schutz oder Umgebung — mit einer
+Quote je Gegner in `enemy.dart`. Zwei Regeln stehen deshalb an genau einer
+Stelle, und dort müssen sie bleiben:
+
+| Frage | Antwortet |
+|---|---|
+| Wird bei diesem Zug getippt? | `Move.hasTimingWindow` |
+| Was ist eine Stelle auf der Leiste wert? | `TimingSpec.judgeAt` |
+
+`hasTimingWindow` ist **abgeleitet**, nicht gesetzt: Wer einer Fähigkeit
+eine Perfect-Wirkung gibt, gibt ihr damit auch die Leiste. Wer eine ohne
+Perfect-Wirkung baut, bekommt bewusst keine — *Sammeln* und *Atemzug* sind
+genau dieser Fall.
+
+**Ein Feld am Gegner, das Verhalten steuern soll, braucht einen Test auf
+das Verhalten.** `EnemyBlueprint.loadout` wurde jahrelang gepflegt und
+nirgends gelesen; jeder Gegner kämpfte mit dem Standard-Moveset, und die
+Staffelung aus ADR-0022 galt im Code nicht. Details in `gotchas.md`.
 
 **Der Kampf hängt am Moveset, und das ist eine gemessene Zahl.**
 Mit nur einem Move ist der erste Gegner unschlagbar (0 % in der

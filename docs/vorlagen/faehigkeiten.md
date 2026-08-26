@@ -85,42 +85,58 @@ Drei Umrechnungen liegen zwischen Vorlage und Code, alle drei in
 Die Skala der Vorlage (HP ~100) passt ebenfalls nicht: Im Spiel sind es
 160–224 beim Spieler und 120–230 bei den Gegnern.
 
-### Fünf Stellen, an denen die Vorlage noch auf Antwort wartet
+### Erledigt am Abend des 26.08.
 
-**1. Acht Fähigkeiten bekommen keine Timing-Leiste.** `combat_screen.dart`
-öffnet das Zeitfenster nur bei `power > 0`. Steinhaut, Aurastrom,
-Blütentau, Prisma-Barriere, Frostnebel, Sandsturm, Giftmoor und
-Zeitdehnung lösen sofort aus. Vier Perfect-Wirkungen aus der Vorlage sind
-dadurch unerreichbar (Steinhaut −60 %, Aurastrom +5, Blütentau 28 plus
-Cleanse, Prisma-Barriere 50 %). **Die Engine kann es bereits** — sie wertet
-`perfectEffects` unabhängig vom Schaden aus. Es fehlt allein die Eingabe.
+**Alle fünfzehn haben jetzt eine Timing-Leiste.** Der Bildschirm öffnete
+das Zeitfenster nur bei `power > 0`; acht Fähigkeiten lösten sofort aus,
+und vier Perfect-Wirkungen waren unerreichbar. Die Bedingung fragt jetzt
+`Move.hasTimingWindow` — ändert Perfect an diesem Zug etwas?
 
-**2. Die Icon-Ideen sind nicht gebaut.** Keine der fünfzehn hat ein Icon;
+**Die vier ohne Perfect-Wirkung haben eine bekommen.** Frostnebel,
+Sandsturm, Giftmoor und Zeitdehnung halten bei perfektem Treffer eine
+Runde länger; Vulkanbruch folgt derselben Regel. Das ist eine Ergänzung
+über die Vorlage hinaus, begründet in
+[ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md).
+
+**Die Gegner benutzen die Fähigkeiten wirklich.** Bis dahin wurde
+`EnemyBlueprint.loadout` nirgends gelesen — Punkt 8 aus ADR-0022 stand
+geschrieben und galt nicht. Sie tippen jetzt auch: eine zufällige Stelle
+auf der Leiste, gewertet mit denselben Fenstern. Erst dadurch wirken
+Wurzelgriff und Sandsturm überhaupt, denn beide verengen das gegnerische
+Fenster.
+
+**Die liegende Umgebung steht im HUD**, mit Name und Restrunden.
+
+### Was weiterhin auf Antwort wartet
+
+**1. Die Icon-Ideen sind nicht gebaut.** Keine der fünfzehn hat ein Icon;
 in `ziele.md` stand das von vornherein auf der Schnittliste.
 
-**3. Die Animationsideen sind nicht gebaut.** `move_animation.dart` kennt
+**2. Die Animationsideen sind nicht gebaut.** `move_animation.dart` kennt
 vier Ids (`basic_attack`, `heavy_attack`, `poison_strike`, `mend`) und
 fällt für **alle** fünfzehn auf `melee` zurück. Sichtbare Folge: Bei
 Steinhaut und Blütentau macht die Figur einen Ausfallschritt auf den
 Gegner zu. Die Umgebungen lassen beim Setzen nur beide Kämpfer kurz
 aufleuchten — Lava, Sandschleier und Nebel fehlen.
 
-**4. Sternenfalls Marker springt nicht zurück.** Die Vorlage nennt das als
+**3. Sternenfalls Marker springt nicht zurück.** Die Vorlage nennt das als
 Teil seines Timings; `TimingSpec` kennt nur Geschwindigkeit und Fenster.
-
-**5. Vier Fähigkeiten haben in der Vorlage keine Perfect-Wirkung** —
-Frostnebel, Sandsturm, Giftmoor und Zeitdehnung. Sobald sie eine Leiste
-bekommen (Punkt 1), muss entschieden werden, was ein perfekter Treffer
-dort bewirkt: nichts, eine Runde mehr, oder etwas anderes. **Offen, noch
-nicht entschieden.**
 
 ### Und ein Befund, den die Vorlage ausgelöst hat
 
-Der **Bergwächter ist unschlagbar geworden** — 0 % Siegquote an jedem Tag,
-auch Tag 60. Er trägt seit dem Set Donnerkeil (`power` 2,125), während die
-frühen Spielerfähigkeiten schwächer sind als der Basisangriff: Funkenstoß
-hat 0,75 gegen 1,0 beim Bogenschuss und kostet zusätzlich Energie.
+Der **Bergwächter war unschlagbar** — 0 % Siegquote an jedem Tag, auch Tag
+60. Am Abend des 26.08. stellte sich heraus, dass die naheliegende
+Erklärung falsch war: Er trug Donnerkeil gar nicht, weil das Moveset der
+Gegner die Engine nie erreichte.
 
-Das ist die Vorlage, ehrlich umgerechnet — ihre Commons sind Werkzeuge mit
-Perfect-Effekten, keine Schadensquellen. Zahlen und Hebel stehen in
-`docs/context/state.md`.
+Nachdem es ankommt und die Gegner auch zielen, steht er bei 22 % an Tag 30
+und 40 % an Tag 60. Damit ist er schlagbar, aber noch weit von den 100 %
+aus ADR-0009 entfernt. Die aktuelle Tabelle steht in
+`docs/context/state.md`, die Begründung in
+[ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md).
+
+Der zweite Teil der alten Erklärung gilt weiter und ist der eigentliche
+Hebel: Die **frühen Spielerfähigkeiten sind schwächer als der
+Basisangriff** — Funkenstoß hat 0,75 gegen 1,0 beim Bogenschuss und kostet
+zusätzlich Energie. Das ist die Vorlage, ehrlich umgerechnet: Ihre Commons
+sind Werkzeuge mit Perfect-Effekten, keine Schadensquellen.
