@@ -10,8 +10,13 @@ Fortschritt überlebt einen Neustart.
 
 Seit dem 24.08. ist die Theorie ein **gezeichneter Skillbaum**: vier Wurzeln
 mit je fünf Knoten, geöffnet über Theoriepunkte statt über Levelsperren
-([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)). Vier
-Fähigkeiten hängen daran.
+([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)).
+
+Seit dem 26.08. gibt es **fünfzehn Fähigkeiten** mit eigenem Timing, vier
+Umgebungen und Seltenheitsstufen ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
+Elf hängen am Baum, vier an Streak-Marken. **Die Balance ist dafür noch
+nicht nachgezogen** — der Bergwächter ist derzeit unschlagbar, Zahlen in
+`docs/context/state.md`.
 
 **Was als Nächstes ansteht, steht nicht mehr hier**, sondern in
 [`docs/context/ziele.md`](docs/context/ziele.md) — mit Terminen und mit der
@@ -28,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 199 Tests
+flutter test                       # 205 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -74,15 +79,15 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/combat` | Kampfregeln und drei Gegner, reines Dart ohne Flame | 29 |
+| `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, drei Gegner | 49 |
 | `packages/theory` | Skillbaum-Graph: 29 Seiten, 87 Fragen, Lernfortschritt | 109 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
 | `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 71 |
 | `packages/gear` | 9 Ausrüstungsstücke auf 6 Plätzen, Preise, Inventar | 27 |
-| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 28 |
+| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 31 |
 | `packages/identity` | 7 verdiente Titel aus drei Quellen, Name | 28 |
 | `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 199 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 205 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

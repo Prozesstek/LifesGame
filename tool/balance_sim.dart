@@ -195,15 +195,46 @@ List<Move> _loadoutNach(int tage) {
     Moves.byId(AbilityCatalog.fallbackMoveId) ?? Moves.basicAttack,
   ];
 
-  for (final ability in AbilityCatalog.unlockedBy(
-    const AbilityProgress.empty(),
-  )) {
+  for (final ability in AbilityCatalog.unlockedBy(_fortschrittNach(tage))) {
     if (moves.length >= offen) break;
     final move = Moves.byId(ability.moveId);
     if (move != null) moves.add(move);
   }
 
   return moves;
+}
+
+/// Was ein Spieler nach [tage] Tagen freigeschaltet haette.
+///
+/// **Hier stecken zwei Annahmen, und sie stehen bewusst offen da.**
+///
+/// 1. *Die Kette reisst nie.* Die Simulation spielt einen Spieler, der
+///    jeden Tag abhakt -- so entstehen auch die Charakterwerte weiter
+///    oben. Streak-Faehigkeiten fallen ihm damit frueher zu als einem
+///    Spieler mit Luecken.
+/// 2. *Jeder Theoriepunkt landet in einem Knoten mit Faehigkeit.* Zwei
+///    Punkte je Aufstieg (ADR-0019), und alle gehen in Kampfnutzen. Wer
+///    stattdessen liest, was ihn interessiert, steht schlechter da.
+///
+/// Beides macht das Ergebnis zur **oberen** Schranke: So gut wird es
+/// hoechstens. Das ist die richtige Richtung fuer eine Balance-Frage --
+/// wenn schon der bestmoegliche Pfad an einem Gegner scheitert, scheitert
+/// jeder.
+///
+/// Vorher stand hier `AbilityProgress.empty()`. Seit ADR-0019 haengt aber
+/// jede waehlbare Faehigkeit an einem Knoten, und ein leerer Fortschritt
+/// schaltet nichts frei -- die Simulation spielte damit an jedem Tag mit
+/// einem einzigen Move und meldete entsprechend 0 %.
+AbilityProgress _fortschrittNach(int tage) {
+  final punkte = TheoryPoints.earnedAt(_levelNach(tage));
+
+  final knoten = <String>{};
+  for (final ability in AbilityCatalog.choosable) {
+    if (knoten.length >= punkte) break;
+    if (ability.source case FromTheory(:final nodeId)) knoten.add(nodeId);
+  }
+
+  return AbilityProgress(longestStreak: tage, passedNodeIds: knoten);
 }
 
 class _Ergebnis {
