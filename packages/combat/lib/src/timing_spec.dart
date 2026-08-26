@@ -1,3 +1,5 @@
+import 'timed_hit.dart';
+
 /// Wie schwer eine Faehigkeit zu treffen ist.
 ///
 /// **Das ist eine Kampfregel, keine Darstellung.** Wie schnell der Marker
@@ -38,6 +40,25 @@ class TimingSpec {
   static const double minSpeed = 0.4;
   static const double maxSpeed = 4.0;
   static const double minWindow = 0.03;
+
+  /// Wie ein Tipp an [position] zu werten ist. 0 ist der linke Rand der
+  /// Leiste, 1 der rechte, 0.5 die Mitte.
+  ///
+  /// **Die Regel steht hier und nicht in der Leiste**, weil sie fuer beide
+  /// Seiten gilt: Der Spieler tippt, der Gegner wuerfelt eine Stelle --
+  /// gewertet wird mit denselben Fenstern. Stuende sie in der Darstellung,
+  /// koennte die Engine den Gegner gar nicht nach denselben Regeln
+  /// behandeln, und ein verengtes Fenster (Wurzelgriff, Sandsturm) bliebe
+  /// gegen ihn wirkungslos.
+  ///
+  /// Die Fenster sind ueber die **ganze** Breite gemessen, der Abstand hier
+  /// ab der Mitte -- daher die Halbierung.
+  TimedHit judgeAt(double position) {
+    final distance = (position - 0.5).abs();
+    if (distance <= perfectWindow / 2) return TimedHit.perfect;
+    if (distance <= goodWindow / 2) return TimedHit.good;
+    return TimedHit.none;
+  }
 
   /// Ein Wertobjekt: Zwei Angaben mit denselben Zahlen sind dasselbe.
   ///

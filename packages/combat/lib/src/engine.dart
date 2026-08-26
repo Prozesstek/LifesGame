@@ -9,6 +9,8 @@ import 'move.dart';
 import 'state.dart';
 import 'status.dart';
 import 'timed_hit.dart';
+import 'timing_rules.dart';
+import 'timing_spec.dart';
 
 /// Fuehrt Kampfrunden aus. Kennt keine Darstellung, keine Zeit, kein Flame.
 ///
@@ -77,7 +79,35 @@ class CombatEngine {
       opponent: round.player,
       loadout: enemyLoadout,
     );
-    _act(round, Side.enemy, move, <TimedHit>[TimedHit.none]);
+    _act(round, Side.enemy, move, _rollHits(round, Side.enemy, move));
+  }
+
+  /// Die Tipps des Gegners. Er zielt nicht -- er trifft die Leiste an einer
+  /// zufaelligen Stelle, gewertet mit denselben Fenstern wie beim Spieler.
+  ///
+  /// **Ohne neue Zahl.** Ein Zug mit 24 % Fenster wird dadurch in etwa 24 %
+  /// der Faelle perfekt, einer mit 4 % fast nie -- die Staffelung steckt
+  /// schon in [TimingSpec]. Und erst dadurch wirken die Faehigkeiten, die
+  /// das gegnerische Fenster verengen: Wurzelgriff und Sandsturm hatten
+  /// gegen einen Gegner, der immer [TimedHit.none] bekam, keinerlei
+  /// Wirkung.
+  ///
+  /// Ein Zug ohne Zeitfenster wuerfelt gar nicht erst -- sonst verbrauchte
+  /// er Zufallszahlen, ohne dass etwas davon abhinge.
+  List<TimedHit> _rollHits(_Round round, Side side, Move move) {
+    if (!move.hasTimingWindow) {
+      return List<TimedHit>.filled(move.hits, TimedHit.none);
+    }
+
+    final spec = effectiveTiming(
+      move: move,
+      actor: round.of(side),
+      side: side,
+      environment: round.environment,
+    );
+    return <TimedHit>[
+      for (var i = 0; i < move.hits; i++) spec.judgeAt(_random.nextDouble()),
+    ];
   }
 
   /// Fuehrt einen Move aus: Kosten, Schaden, Zusatzwirkungen.

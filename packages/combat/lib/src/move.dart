@@ -221,6 +221,26 @@ class Move {
 
   bool get dealsDamage => power > 0;
 
+  /// Ob dieser Zug ein Zeitfenster hat -- ob also getippt wird.
+  ///
+  /// **Nicht dasselbe wie [dealsDamage], auch wenn es lange so aussah.**
+  /// Bis zum Faehigkeiten-Set gab es vier Moves, und nur die schadenden
+  /// hatten eine Wertung; die Leiste hing deshalb an `power > 0`. Von den
+  /// fuenfzehn Faehigkeiten haben acht `power` 0 und trotzdem eigene
+  /// Timing-Werte -- Steinhaut wird bei Perfect deutlich staerker, ohne
+  /// jemals Schaden zu machen.
+  ///
+  /// Die Bedingung lautet deshalb: **Aendert Perfect an diesem Zug etwas?**
+  /// Sie wird aus dem Move abgeleitet statt als Flag gesetzt, damit sie
+  /// nicht vergessen werden kann -- wer einer Faehigkeit eine
+  /// Perfect-Wirkung gibt, gibt ihr damit auch die Leiste.
+  ///
+  /// Folge fuer *Sammeln* und *Atemzug*: Sie haben keine Perfect-Wirkung
+  /// und bekommen darum keine Leiste. Ein Pflichttipp ohne jede Auszahlung
+  /// waere reine Reibung.
+  bool get hasTimingWindow =>
+      dealsDamage || perfectFactor != null || perfectEffects.isNotEmpty;
+
   /// Energie, die vorhanden sein muss. Erzeugende Moves fordern nichts.
   int get energyCost => energyDelta < 0 ? -energyDelta : 0;
 
