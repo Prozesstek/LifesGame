@@ -69,10 +69,21 @@ void main() {
   });
 
   group('Fähigkeiten am Baum', () {
-    test('genau vier Knoten bringen eine Fähigkeit mit', () {
+    test('elf Knoten bringen eine Fähigkeit mit', () {
+      // Seit ADR-0022 hängen elf der fünfzehn wählbaren Fähigkeiten am
+      // Baum; die vier stärksten kommen über Streak-Marken. Die Zahl
+      // steht hier, damit ein versehentlich entfernter Eintrag auffällt.
       final mitFaehigkeit = nodes.where((n) => n.unlocksAbility != null);
 
-      expect(mitFaehigkeit.length, 4);
+      expect(mitFaehigkeit.length, 11);
+    });
+
+    test('keine Wurzel bringt eine Fähigkeit mit', () {
+      // Wurzeln kosten nichts (ADR-0019). Eine Fähigkeit dort wäre
+      // geschenkt, noch bevor jemand einen Punkt ausgegeben hat.
+      for (final node in nodes.where((n) => n.isRoot)) {
+        expect(node.unlocksAbility, isNull, reason: node.id);
+      }
     });
 
     test('keine Fähigkeit hängt an zwei Knoten', () {

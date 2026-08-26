@@ -140,8 +140,8 @@ void main() {
       await pumpScreen(tester);
 
       expect(find.text(Moves.basicAttack.name), findsOneWidget);
-      expect(find.text(Moves.heavyAttack.name), findsNothing);
-      expect(find.text(Moves.mend.name), findsNothing);
+      expect(find.text(AbilityMoves.funkenstoss.name), findsNothing);
+      expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
 
     testWidgets('ohne Waffe greift der Rueckfall', (tester) async {
@@ -159,11 +159,11 @@ void main() {
       // Ein Charakter mit offenem zweitem Slot und einem teuren Move
       // darauf: Zu Beginn hat er 0 Energie, also ist nur der Waffen-Move
       // bezahlbar.
-      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
       final heavy = tester.widget<FilledButton>(
         find.ancestor(
-          of: find.text(Moves.heavyAttack.name),
+          of: find.text(AbilityMoves.funkenstoss.name),
           matching: find.byType(FilledButton),
         ),
       );
@@ -181,10 +181,10 @@ void main() {
     testWidgets('eine nicht gewaehlte Faehigkeit taucht nicht auf', (
       tester,
     ) async {
-      await pumpScreen(tester, saved: _mitSlot2(Moves.heavyAttack.id));
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
-      expect(find.text(Moves.heavyAttack.name), findsOneWidget);
-      expect(find.text(Moves.mend.name), findsNothing);
+      expect(find.text(AbilityMoves.funkenstoss.name), findsOneWidget);
+      expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
   });
 

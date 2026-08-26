@@ -53,11 +53,31 @@ final class FromTheory extends AbilitySource {
 /// als ein Wort ist diese Verbindung nicht. Genau deshalb prüft ein
 /// eigener Test in der App, dass jede Id drüben ankommt (gleiche Naht wie
 /// `Lesson.unlocksHabit` ↔ `HabitTemplate.name`).
+
+/// Wie selten — und damit wie stark — eine Fähigkeit ist.
+///
+/// **Ein Etikett, keine Mechanik.** Die Seltenheit schaltet nichts frei
+/// und rechnet nichts aus; woran eine Fähigkeit hängt, steht in
+/// [AbilitySource]. Sie ordnet die Auswahl und sagt dem Spieler, was er
+/// vor sich hat (ADR-0022).
+enum Rarity {
+  common('Gewöhnlich'),
+  uncommon('Ungewöhnlich'),
+  rare('Selten'),
+  epic('Episch'),
+  legendary('Legendär');
+
+  const Rarity(this.label);
+
+  final String label;
+}
+
 class Ability {
   const Ability({
     required this.moveId,
     required this.source,
     required this.requirement,
+    this.rarity = Rarity.common,
   });
 
   /// Naht zu `package:combat`. Kein Name, keine Zahlen — die stehen dort.
@@ -71,6 +91,10 @@ class Ability {
   /// Laden und der Titelkatalog machen es genauso, und eine Bedingung
   /// muss lesbar sein, nicht nur korrekt.
   final String requirement;
+
+  /// Wie stark diese Fähigkeit ist. Ordnet die Auswahl, schaltet nichts
+  /// frei (ADR-0022).
+  final Rarity rarity;
 
   /// Ob diese Fähigkeit frei wählbar ist.
   ///

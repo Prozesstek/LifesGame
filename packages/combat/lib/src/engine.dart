@@ -425,6 +425,9 @@ class CombatEngine {
           ),
         );
 
+      case GainEnergy(:final amount):
+        _applyEnergy(round, side, amount);
+
       case IgnoreProtection():
         // Wirkt im Schadensweg, nicht als Statuseffekt.
         break;

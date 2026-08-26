@@ -250,6 +250,7 @@ String _effectLabel(MoveEffect effect) => switch (effect) {
   CleanseSelf() => 'reinigt',
   SetEnvironment(:final environmentId) =>
     Environments.byId(environmentId)?.name ?? 'verändert das Feld',
+  GainEnergy() => 'gibt Energie',
   IgnoreProtection() => 'ignoriert Schutz',
 };
 

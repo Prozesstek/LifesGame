@@ -1,3 +1,4 @@
+import 'ability_moves.dart';
 import 'combatant.dart';
 import 'move.dart';
 
@@ -70,6 +71,15 @@ abstract final class Enemies {
     attack: 18,
     defense: 10,
     maxEnergy: 10,
+    // Nur Commons. Wer am Tag eins hier steht, soll gegen nichts
+    // antreten, das er selbst noch nicht kennt.
+    loadout: <Move>[
+      Moves.basicAttack,
+      AbilityMoves.funkenstoss,
+      AbilityMoves.steinhaut,
+      AbilityMoves.wurzelgriff,
+      AbilityMoves.aurastrom,
+    ],
   );
 
   /// Knapp nach etwa zwei Wochen Gewohnheiten.
@@ -80,6 +90,16 @@ abstract final class Enemies {
     attack: 18,
     defense: 12,
     maxEnergy: 10,
+    // Commons plus Uncommons: Der Soeldner kann heilen und spiegeln,
+    // damit ein reiner Schlagabtausch hier nicht mehr reicht.
+    loadout: <Move>[
+      Moves.basicAttack,
+      AbilityMoves.funkenstoss,
+      AbilityMoves.klingenwirbel,
+      AbilityMoves.bluetentau,
+      AbilityMoves.prismaBarriere,
+      AbilityMoves.frostnebel,
+    ],
   );
 
   /// Knapp nach etwa einem Monat -- und erst mit Ausruestung verlaesslich.
@@ -91,6 +111,16 @@ abstract final class Enemies {
     attack: 20,
     defense: 13,
     maxEnergy: 10,
+    // Bis Rare. Epic und Legendary bleiben dem Spieler vorbehalten --
+    // sie sind der Lohn fuer tiefen Fortschritt, kein Gegnerwerkzeug.
+    loadout: <Move>[
+      Moves.basicAttack,
+      AbilityMoves.donnerkeil,
+      AbilityMoves.seelenraub,
+      AbilityMoves.sandsturm,
+      AbilityMoves.giftmoor,
+      AbilityMoves.steinhaut,
+    ],
   );
 
   /// Alle Gegner in aufsteigender Schwierigkeit.

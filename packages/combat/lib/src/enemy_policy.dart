@@ -53,7 +53,10 @@ class SimpleEnemyPolicy implements EnemyPolicy {
 
     final inTrouble = self.hp / self.maxHp < healBelowHpRatio;
     if (inTrouble && self.activeShield == null) {
-      final heal = _firstWithEffect<HealSelf>(affordable);
+      // Beide Heilarten zaehlen: HealSelf nimmt seine Zahl aus Balance,
+      // HealSelfBy bringt eine eigene mit (Bluetentau).
+      final heal = _firstWithEffect<HealSelf>(affordable) ??
+          _firstWithEffect<HealSelfBy>(affordable);
       if (heal != null) return heal;
     }
 

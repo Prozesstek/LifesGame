@@ -1,3 +1,4 @@
+import 'ability_moves.dart';
 import 'environment.dart';
 import 'timing_spec.dart';
 
@@ -131,6 +132,16 @@ final class SetEnvironment extends MoveEffect {
   const SetEnvironment(this.environmentId);
 
   final String environmentId;
+}
+
+/// Gibt dem Anwender Energie, zusaetzlich zu [Move.energyDelta].
+///
+/// Eigener Effekt, weil Aurastrom bei perfektem Timing **mehr** gibt als
+/// im Grundfall -- und `energyDelta` steht am Move, nicht an der Wirkung.
+final class GainEnergy extends MoveEffect {
+  const GainEnergy({required this.amount});
+
+  final int amount;
 }
 
 /// Ignoriert Schild, Schadensminderung und Reflexion.
@@ -349,11 +360,15 @@ abstract final class Moves {
   /// Gibt bewusst null zurueck statt zu werfen: Eine Id kann aus einem
   /// alten Spielstand kommen, und ein Kampf ohne Knoepfe waere die
   /// schlechtere Antwort darauf (ADR-0010).
+  /// Sucht erst unter den Grundmoves, dann im Faehigkeiten-Set.
+  ///
+  /// Ein Aufrufer soll nicht wissen muessen, aus welchem der beiden
+  /// Kataloge eine Id stammt -- fuer ihn ist es einfach ein Move.
   static Move? byId(String id) {
     for (final move in all) {
       if (move.id == id) return move;
     }
-    return null;
+    return AbilityMoves.byId(id);
   }
 
   /// Das Moveset der **Gegner** — und der Rueckfall, solange ein Spieler

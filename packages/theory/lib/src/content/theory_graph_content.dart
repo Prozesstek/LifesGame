@@ -69,34 +69,35 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: koerperBranch.lessons[0],
     iconId: 'sleep',
     parentIds: const <String>['koerper'],
-    unlocksAbility: 'breath',
+    unlocksAbility: 'aurastrom',
   ),
   TheoryNode(
     id: 'koerper-bewegung',
     lesson: koerperBranch.lessons[1],
     iconId: 'run',
     parentIds: const <String>['koerper'],
-    unlocksAbility: 'heavy_attack',
+    unlocksAbility: 'funkenstoss',
   ),
   TheoryNode(
     id: 'koerper-ernaehrung',
     lesson: koerperBranch.lessons[2],
     iconId: 'food',
     parentIds: const <String>['koerper'],
-    unlocksAbility: 'mend',
+    unlocksAbility: 'wurzelgriff',
   ),
   const TheoryNode(
     id: 'koerper-erholung',
     lesson: erholungPage,
     iconId: 'pause',
     parentIds: <String>['koerper'],
-    unlocksAbility: 'poison_strike',
+    unlocksAbility: 'bluetentau',
   ),
   const TheoryNode(
     id: 'koerper-stress',
     lesson: stressPage,
     iconId: 'storm',
     parentIds: <String>['koerper', 'geist'],
+    unlocksAbility: 'steinhaut',
   ),
 
   // ------------------------------------------------------------------
@@ -107,30 +108,35 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: geistBranch.lessons[0],
     iconId: 'focus',
     parentIds: const <String>['geist'],
+    unlocksAbility: 'zeitdehnung',
   ),
   TheoryNode(
     id: 'geist-gedanken',
     lesson: geistBranch.lessons[1],
     iconId: 'thought',
     parentIds: const <String>['geist'],
+    unlocksAbility: 'frostnebel',
   ),
   TheoryNode(
     id: 'geist-unbehagen',
     lesson: geistBranch.lessons[2],
     iconId: 'endure',
     parentIds: const <String>['geist'],
+    unlocksAbility: 'prisma_barriere',
   ),
   const TheoryNode(
     id: 'geist-motivation',
     lesson: motivationPage,
     iconId: 'spark',
     parentIds: <String>['geist'],
+    unlocksAbility: 'giftmoor',
   ),
   const TheoryNode(
     id: 'geist-wiederholung',
     lesson: wiederholungPage,
     iconId: 'repeat',
     parentIds: <String>['geist'],
+    unlocksAbility: 'klingenwirbel',
   ),
 
   // ------------------------------------------------------------------
@@ -147,6 +153,7 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: wissenschaftBranch.lessons[1],
     iconId: 'link',
     parentIds: const <String>['wissenschaft'],
+    unlocksAbility: 'vulkanbruch',
   ),
   TheoryNode(
     id: 'wissenschaft-selbsttest',

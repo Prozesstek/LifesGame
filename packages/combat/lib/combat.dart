@@ -17,6 +17,7 @@
 /// ```
 library;
 
+export 'src/ability_moves.dart';
 export 'src/balance.dart';
 export 'src/combatant.dart';
 export 'src/enemy.dart';
