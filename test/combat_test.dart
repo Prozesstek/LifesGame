@@ -55,6 +55,37 @@ void main() {
       expect(session.moves, container.read(activeMovesProvider));
     });
 
+    test('der Gegner kämpft mit seinem eigenen Moveset', () {
+      // Der Fehler, den dieser Test verhindert: `EnemyBlueprint.loadout`
+      // wurde gesetzt und nirgends gelesen. Die Engine bekam damit ihren
+      // Standardwert, und **jeder** Gegner kämpfte mit Bogenschuss,
+      // Kraftschlag, Zehrung und Sammeln — die Staffelung aus ADR-0022
+      // („Wegelagerer nur Commons, Bergwächter bis Rare") stand im Code
+      // und galt nicht.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final controller = container.read(combatControllerProvider.notifier);
+
+      final erlaubt = Enemies.wegelagerer.loadout.map((m) => m.id).toSet();
+      final gespielt = <String>{};
+
+      for (var runde = 0; runde < 12; runde++) {
+        if (container.read(combatControllerProvider).state.isOver) break;
+        final events = controller.playRound(
+          container.read(combatControllerProvider).moves.first,
+          const <TimedHit>[TimedHit.none],
+        );
+        for (final event in events) {
+          if (event is MoveUsed && event.side == Side.enemy) {
+            gespielt.add(event.moveId);
+          }
+        }
+      }
+
+      expect(gespielt, isNotEmpty);
+      expect(gespielt, everyElement(isIn(erlaubt)));
+    });
+
     test('restart liest das Moveset neu ein', () {
       // Innerhalb eines Kampfes friert das Moveset ein, zwischen zwei
       // Kämpfen nicht: Ein neuer Kampf soll die Fähigkeiten von jetzt

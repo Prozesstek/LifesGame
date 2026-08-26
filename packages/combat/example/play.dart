@@ -19,7 +19,12 @@ const int _goodWindowMs = 550;
 void main() {
   _printIntro();
 
-  final engine = CombatEngine(seed: DateTime.now().millisecondsSinceEpoch);
+  const gegner = Enemies.wegelagerer;
+  final engine = CombatEngine(
+    seed: DateTime.now().millisecondsSinceEpoch,
+    enemyLoadout: gegner.loadout,
+    enemyUtilityChance: gegner.utilityChance,
+  );
 
   // Werte eines Charakters, der etwa eine Woche Gewohnheiten hinter sich
   // hat. Die echten Werte liefert `package:habits`, das dieses Package
@@ -32,7 +37,7 @@ void main() {
       defense: 10,
       maxEnergy: 10,
     ),
-    enemy: Enemies.wegelagerer.spawn(),
+    enemy: gegner.spawn(),
   );
 
   while (!state.isOver) {

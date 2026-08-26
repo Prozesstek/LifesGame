@@ -64,6 +64,9 @@ class CombatSession {
 /// `package:combat`. Dieser Controller hält nur fest, welcher Kampf gerade
 /// läuft, und reicht Züge weiter (ADR-0002).
 class CombatController extends Notifier<CombatSession> {
+  /// Wird von [_freshFight] sofort ersetzt — dort kommt der Gegner dazu.
+  /// Ein Startwert steht hier trotzdem, damit das Feld nicht `late` sein
+  /// muss.
   CombatEngine _engine = CombatEngine(
     seed: DateTime.now().millisecondsSinceEpoch,
   );
@@ -77,15 +80,29 @@ class CombatController extends Notifier<CombatSession> {
     );
   }
 
+  /// Setzt einen neuen Kampf auf — Werte, Gegner **und** die Engine, die zu
+  /// diesem Gegner gehört.
+  ///
   /// Die Werte des Spielers kommen aus seinen Gewohnheiten (ADR-0008) und
   /// seiner Ausrüstung (ADR-0011), der Gegner aus `package:combat`.
   ///
   /// Bewusst `read` statt `watch`: Ein Häkchen oder ein Ausrüstungswechsel
   /// während eines laufenden Kampfes soll den Kampf nicht neu aufsetzen.
   /// Neue Werte gelten ab dem nächsten Kampf.
+  ///
+  /// **Die Engine entsteht hier mit**, weil sie den Gegner kennen muss:
+  /// Sein Moveset und sein Rhythmus stehen an seinem Bauplan. Sie an zwei
+  /// Stellen zu bauen war genau der Fehler, an dem `restart()` schon einmal
+  /// ein Feld vergessen hat (siehe `docs/context/gotchas.md`).
   CombatState _freshFight() {
     final stats = ref.read(equippedStatsProvider);
     final enemy = ref.read(selectedEnemyProvider);
+
+    _engine = CombatEngine(
+      seed: DateTime.now().millisecondsSinceEpoch,
+      enemyLoadout: enemy.loadout,
+      enemyUtilityChance: enemy.utilityChance,
+    );
 
     return CombatState.start(
       player: Combatant.fresh(
@@ -146,7 +163,6 @@ class CombatController extends Notifier<CombatSession> {
   /// soll die Ausrüstung und die Fähigkeiten von *jetzt* verwenden. Nur
   /// innerhalb eines laufenden Kampfes friert das Moveset ein (ADR-0017).
   void restart() {
-    _engine = CombatEngine(seed: DateTime.now().millisecondsSinceEpoch);
     state = CombatSession(
       state: _freshFight(),
       log: const <String>[],
