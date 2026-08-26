@@ -8,6 +8,10 @@ String? describeEvent(CombatEvent event) {
   return switch (event) {
     RoundStarted() => null,
     EnergyChanged() => null,
+    EnvironmentSet(:final environmentId, :final turns) =>
+      '${_environmentName(environmentId)} — $turns Runden.',
+    EnvironmentEnded(:final environmentId) =>
+      '${_environmentName(environmentId)} klingt aus.',
     MoveUsed(:final side, :final moveId) =>
       '${_who(side)} nutzt ${moveName(moveId)}.',
     MoveFailed(:final side) =>
@@ -56,3 +60,9 @@ String _verb(Side side, String zweitePerson, String drittePerson) =>
 String _possessive(Side side) => side == Side.player ? 'Dein' : 'Gegnerisches';
 
 String _dative(Side side) => side == Side.player ? 'dir' : 'Gegner';
+
+/// Der Wortlaut einer Umgebung. Die Namen stehen in `package:combat` —
+/// hier wird nur nachgeschlagen, nicht benannt.
+String _environmentName(String id) {
+  return Environments.byId(id)?.name ?? id;
+}

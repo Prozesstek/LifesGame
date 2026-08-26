@@ -118,3 +118,26 @@ final class CombatEnded extends CombatEvent {
   const CombatEnded(this.outcome);
   final CombatOutcome outcome;
 }
+
+/// Eine Umgebung wurde gelegt. Loest die vorherige ab.
+final class EnvironmentSet extends CombatEvent {
+  const EnvironmentSet({
+    required this.environmentId,
+    required this.owner,
+    required this.turns,
+  });
+
+  final String environmentId;
+
+  /// Wer sie gelegt hat -- er profitiert, der andere leidet.
+  final Side owner;
+
+  final int turns;
+}
+
+/// Eine Umgebung ist ausgeklungen.
+final class EnvironmentEnded extends CombatEvent {
+  const EnvironmentEnded(this.environmentId);
+
+  final String environmentId;
+}
