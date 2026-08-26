@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:combat/combat.dart';
 import 'package:test/test.dart';
 
@@ -15,6 +17,10 @@ class FixedMovePolicy implements EnemyPolicy {
     required Combatant self,
     required Combatant opponent,
     required List<Move> loadout,
+    Side side = Side.enemy,
+    Environment? environment,
+    Random? random,
+    double utilityChance = 0,
   }) =>
       move;
 }

@@ -23,11 +23,17 @@ class CombatEngine {
     this.balance = const Balance(),
     this.enemyPolicy = const SimpleEnemyPolicy(),
     this.enemyLoadout = Moves.defaultLoadout,
+    this.enemyUtilityChance = 0,
   }) : _random = Random(seed);
 
   final Balance balance;
   final EnemyPolicy enemyPolicy;
   final List<Move> enemyLoadout;
+
+  /// Wie oft dieser Gegner etwas anderes tut als zuzuschlagen. Kommt aus
+  /// [EnemyBlueprint.utilityChance] und ist damit eine Gegnerzahl, keine
+  /// Eigenschaft der Policy -- die bleibt zustandslos und teilbar.
+  final double enemyUtilityChance;
   final Random _random;
 
   /// Eine vollstaendige Runde: Spieler handelt, dann der Gegner, danach
@@ -78,6 +84,9 @@ class CombatEngine {
       self: round.enemy,
       opponent: round.player,
       loadout: enemyLoadout,
+      environment: round.environment,
+      random: _random,
+      utilityChance: enemyUtilityChance,
     );
     _act(round, Side.enemy, move, _rollHits(round, Side.enemy, move));
   }

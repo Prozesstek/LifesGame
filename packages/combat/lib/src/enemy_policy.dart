@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'combatant.dart';
+import 'environment.dart';
 import 'move.dart';
 import 'status.dart';
 
@@ -7,11 +10,33 @@ import 'status.dart';
 /// Als Interface ausgelegt, damit Tests eine feste Wahl vorgeben koennen und
 /// Gegnertypen sich spaeter im Verhalten unterscheiden, ohne die Engine
 /// anzufassen.
+///
+/// Die vier zusaetzlichen Angaben sind alle optional, damit ein Test eine
+/// Policy mit drei Zeilen bauen kann. Wer sie weglaesst, bekommt das alte
+/// Verhalten: immer der staerkste bezahlbare Angriff.
 abstract interface class EnemyPolicy {
   Move chooseMove({
     required Combatant self,
     required Combatant opponent,
     required List<Move> loadout,
+
+    /// Auf welcher Seite die Policy gerade steuert.
+    ///
+    /// Standard ist [Side.enemy], weil das ihr Zweck ist. Die
+    /// Balance-Simulation leiht sie sich fuer den Spieler und gibt die
+    /// Seite dann ausdruecklich an -- ohne sie liesse sich nicht
+    /// unterscheiden, ob eine liegende Umgebung die eigene ist.
+    Side side,
+
+    /// Die Umgebung, die gerade liegt.
+    Environment? environment,
+
+    /// Der Zufallsgeber der Engine. Nur ueber ihn bleibt ein Kampf bei
+    /// gleichem Seed reproduzierbar.
+    Random? random,
+
+    /// Wie oft dieser Gegner etwas anderes tut als zuzuschlagen.
+    double utilityChance,
   });
 }
 
@@ -39,11 +64,23 @@ class SimpleEnemyPolicy implements EnemyPolicy {
   /// etwas merken muss.
   final double healBelowHpRatio;
 
+  /// Ab diesem HP-Anteil ist Heilen als *Utility-Zug* verschwendet.
+  ///
+  /// Die Notheilung oben hat ihre eigene, viel tiefere Schwelle. Hier geht
+  /// es nur darum, dass der Gegner nicht bei fast vollen Lebenspunkten eine
+  /// Runde ans Heilen verliert -- das liest sich wie ein Fehler, nicht wie
+  /// Charakter.
+  static const double _healUtilityBelow = 0.8;
+
   @override
   Move chooseMove({
     required Combatant self,
     required Combatant opponent,
     required List<Move> loadout,
+    Side side = Side.enemy,
+    Environment? environment,
+    Random? random,
+    double utilityChance = 0,
   }) {
     final affordable =
         loadout.where((m) => m.isAffordableBy(self.energy)).toList();
@@ -60,6 +97,26 @@ class SimpleEnemyPolicy implements EnemyPolicy {
       if (heal != null) return heal;
     }
 
+    // Manchmal etwas anderes als zuschlagen: eine Umgebung legen, sich
+    // abschirmen, dem Gegner das Fenster verengen.
+    //
+    // **Gewuerfelt, nicht gerechnet.** Eine Policy, die den besten
+    // Utility-Zug ausrechnet, wuerde die Gegner berechenbar machen -- und
+    // interessante Gegner entstehen im Konzept ueber Werte und Move-Sets,
+    // nicht ueber schlaue Suche. Herausgefiltert wird nur, was offensichtlich
+    // verschwendet waere; das liest sich sonst als Fehler.
+    if (random != null && utilityChance > 0) {
+      if (random.nextDouble() < utilityChance) {
+        final sinnvoll = affordable
+            .where((m) => !m.dealsDamage)
+            .where((m) => _isWorthwhile(m, self, opponent, side, environment))
+            .toList();
+        if (sinnvoll.isNotEmpty) {
+          return sinnvoll[random.nextInt(sinnvoll.length)];
+        }
+      }
+    }
+
     final heavy = _strongestDamaging(affordable);
     if (heavy != null && heavy.power >= 2.0) return heavy;
 
@@ -69,6 +126,46 @@ class SimpleEnemyPolicy implements EnemyPolicy {
     }
 
     return _strongestDamaging(affordable) ?? _generatingMove(loadout);
+  }
+
+  /// Ob dieser Utility-Zug jetzt ueberhaupt etwas bringt.
+  ///
+  /// Jede Bedingung steht fuer eine Runde, die sonst sichtbar verschwendet
+  /// waere: heilen bei fast vollen HP, dieselbe eigene Umgebung noch einmal
+  /// legen, einen Schutz stapeln, der schon steht.
+  bool _isWorthwhile(
+    Move move,
+    Combatant self,
+    Combatant opponent,
+    Side side,
+    Environment? environment,
+  ) {
+    for (final effect in move.effects) {
+      final verschwendet = switch (effect) {
+        HealSelf() || HealSelfBy() => self.hp >= self.maxHp * _healUtilityBelow,
+        ShieldSelf() => self.activeShield != null,
+        ReduceIncoming() => _hasStatus(self, 'damage_reduction'),
+        ReflectIncoming() => _hasStatus(self, 'reflect'),
+        DilateTime() => _hasStatus(self, 'time_dilation'),
+        CheapenNext() => _hasStatus(self, 'cost_reduction'),
+        ShrinkEnemyWindow() => _hasStatus(opponent, 'window_shrink'),
+        LockEnemyTiming() => _hasStatus(opponent, 'timing_locked'),
+
+        // Die eigene Umgebung nachzulegen frischt sie zwar auf, kostet aber
+        // eine volle Runde fuer wenig. Die des Gegners zu ueberschreiben ist
+        // dagegen immer richtig -- sie dreht sich damit zu seinen Ungunsten.
+        SetEnvironment(:final environmentId) => environment != null &&
+            environment.id == environmentId &&
+            environment.owner == side,
+        _ => false,
+      };
+      if (verschwendet) return false;
+    }
+
+    // Ein Zug, der nur Energie bringt, ist bei vollem Balken sinnlos.
+    if (move.energyDelta > 0 && self.energy >= self.maxEnergy) return false;
+
+    return true;
   }
 
   /// Fallback, wenn nichts bezahlbar ist: der Move, der Energie aufbaut.
