@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:abilities/abilities.dart';
+import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/dev/debug_grants.dart';
 import 'package:lifes_game/dev/dev_controller.dart';
 import 'package:lifes_game/dev/save_slot.dart';
@@ -16,6 +18,8 @@ import 'package:progression/progression.dart';
 /// **exakt** wie vorher. Ein Dev-Modus, der die normalen Zahlen verschiebt,
 /// wäre schlimmer als keiner.
 void main() {
+  _geschenkteFaehigkeitImKampf();
+
   ProviderContainer containerMit(SaveData saved) {
     final container = ProviderContainer(
       overrides: [savedGameProvider.overrideWithValue(saved)],
@@ -176,6 +180,88 @@ void main() {
           level: container.read(playerLevelProvider).level,
           spent: container.read(spentTheoryPointsProvider),
         ),
+      );
+    });
+  });
+}
+
+/// Der Weg vom Zuschlag bis in den Kampf.
+///
+/// **Der Fehler, den diese Gruppe verhindert:** `unlockedAbilitiesProvider`
+/// rechnete die Zuschläge ein, `activeMovesProvider` fragte aber
+/// `AbilityCatalog.isUnlocked` noch einmal direkt — und das kennt keine
+/// Zuschläge. Eine geschenkte Fähigkeit ließ sich anlegen, wurde
+/// gespeichert und fiel auf dem Weg in den Kampf still heraus. Sichtbar
+/// war das nur als fehlender Knopf.
+void _geschenkteFaehigkeitImKampf() {
+  group('Geschenkte Fähigkeiten kommen im Kampf an', () {
+    /// Ein hoher Stand, damit alle Slots offen sind.
+    ProviderContainer mitZuschlag(String moveId) {
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(
+            SaveData(
+              grants: DebugGrants(
+                bonusXp: 100000,
+                unlockedAbilityIds: <String>{moveId},
+              ),
+              abilities: const ChosenAbilities.empty().withAt(0, moveId),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test('eine geschenkte Streak-Fähigkeit steht zur Auswahl', () {
+      final container = mitZuschlag('sandsturm');
+
+      expect(
+        container.read(unlockedAbilitiesProvider).map((a) => a.moveId),
+        contains('sandsturm'),
+      );
+    });
+
+    test('sie landet auch im Moveset des Kampfes', () {
+      // Ohne den Fix scheitert genau das: In der Auswahl steht sie, im
+      // Kampf fehlt sie.
+      final container = mitZuschlag('sandsturm');
+
+      expect(
+        container.read(activeMovesProvider).map((m) => m.id),
+        contains('sandsturm'),
+      );
+    });
+
+    test('das gilt auch für die legendäre', () {
+      final container = mitZuschlag('sternenfall');
+
+      expect(
+        container.read(activeMovesProvider).map((m) => m.id),
+        contains('sternenfall'),
+      );
+    });
+
+    test('ohne Zuschlag bleibt sie draußen', () {
+      // Die Gegenprobe: Der Fix darf nicht einfach jede Id durchlassen.
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(
+            const SaveData(
+              grants: DebugGrants(bonusXp: 100000),
+              abilities: ChosenAbilities.empty(),
+            ).copyWith(
+              abilities: const ChosenAbilities.empty().withAt(0, 'sandsturm'),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        container.read(activeMovesProvider).map((m) => m.id),
+        isNot(contains('sandsturm')),
       );
     });
   });

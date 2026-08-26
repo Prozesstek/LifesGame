@@ -111,7 +111,7 @@ flutter run -d chrome
 
 Fünfzehn Fähigkeiten aus einer Vorlage, in drei Schritten gebaut
 ([ADR-0022](../decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
-Ziel 5 ist damit erfüllt. 205 App-Tests, combat 49, abilities 31.
+Ziel 5 ist damit erfüllt. 209 App-Tests, combat 49, abilities 31.
 
 ### Was gebaut ist
 

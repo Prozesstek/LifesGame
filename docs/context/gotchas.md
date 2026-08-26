@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Zwei Stellen, die dieselbe Frage beantworten, driften auseinander
+
+„Ist diese Fähigkeit freigeschaltet?" wurde an **zwei** Orten beantwortet:
+
+```dart
+// lib/character/abilities_controller.dart
+unlockedAbilitiesProvider   // Katalog + Zuschläge aus dem Dev-Modus
+activeMovesProvider         // AbilityCatalog.isUnlocked(...) — ohne Zuschläge
+```
+
+Solange es keine Zuschläge gab, waren beide gleich. Mit ADR-0021 kam eine
+Quelle dazu, und nur die eine Stelle lernte davon. Die Folge im Spiel: Eine
+geschenkte Fähigkeit stand in der Auswahl, ließ sich anlegen, wurde
+gespeichert — und **fehlte im Kampf**. Kein Fehler, keine Meldung, nur ein
+Knopf weniger.
+
+Gefunden hat es ein Spieler, nicht die 205 grünen Tests. Jede Seite war für
+sich geprüft; den Weg von der Auswahl bis in den Kampf prüfte keiner.
+
+**Regel:** Eine Frage, eine Stelle. Wenn ein zweiter Ort dieselbe Bedingung
+auswertet, ist das kein Zufall, sondern ein Fehler mit Verzögerung — er
+schlägt zu, sobald jemand eine dritte Quelle ergänzt.
+
+Praktischer Test dafür: Nach jeder neuen Quelle für eine Bedingung
+(`grep` nach der alten Prüfung) suchen, ob es noch einen zweiten Aufrufer
+gibt. Und einen Test schreiben, der den **ganzen Weg** geht statt beide
+Enden getrennt zu prüfen.
+
 ## Ein Standardwert im Konstruktor versteckt ein vergessenes Feld
 
 `CombatSession.moves` hat einen leeren Standardwert:
