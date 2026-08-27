@@ -106,7 +106,6 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Kachelleiste, Timing | Flutter |
 | `lib/combat/move_help.dart` | was ein Zug tut, in Worten und echten Zahlen | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einem Zug gehoert | Flutter |
-| `assets/abilities/` | die Bilder selbst — Dateiname = Move-Id | — |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
 | `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
 | `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Kampfes | Flutter |
@@ -130,7 +129,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 276 Tests
+flutter test             # 273 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

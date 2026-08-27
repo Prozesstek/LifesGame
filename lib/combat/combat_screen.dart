@@ -317,6 +317,11 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
           loadout.length,
         );
 
+        // Die Namenszeile gilt fuer die ganze Reihe: Sobald ein Zug ein
+        // Bild hat, bekommen alle den Platz dafuer, damit die Kacheln
+        // buendig stehen. Hat keiner eins, entfaellt sie.
+        final mitNamen = loadout.any((m) => MoveIcons.forMoveId(m.id) != null);
+
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -327,6 +332,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
                 child: _MoveTile(
                   move: loadout[i],
                   side: seite,
+                  showLabel: mitNamen,
                   affordable:
                       accepting &&
                       loadout[i].isAffordableBy(state.player.energy),
@@ -353,6 +359,7 @@ class _MoveTile extends StatelessWidget {
   const _MoveTile({
     required this.move,
     required this.side,
+    required this.showLabel,
     required this.affordable,
     required this.attack,
     required this.onTap,
@@ -362,6 +369,10 @@ class _MoveTile extends StatelessWidget {
 
   /// Kantenlaenge der Kachel. Kommt aus der verfuegbaren Breite.
   final double side;
+
+  /// Ob ueber der Kachel eine Namenszeile steht. Gilt fuer die ganze
+  /// Reihe gemeinsam, damit die Flaechen buendig bleiben.
+  final bool showLabel;
 
   final bool affordable;
 
@@ -392,25 +403,30 @@ class _MoveTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // Die Zeile wird auch ohne Bild freigehalten, damit die
-          // Kachelflächen einer Reihe auf gleicher Höhe liegen.
-          SizedBox(
-            height: MoveIcons.labelHeight,
-            child: bild == null
-                ? null
-                : Text(
-                    move.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: affordable ? Colors.white : Palette.muted,
+          // Die Zeile steht nur, wenn in dieser Reihe überhaupt ein Bild
+          // vorkommt — dann wird sie auch bei den Kacheln **ohne** Bild
+          // freigehalten, damit die Flächen auf gleicher Höhe liegen.
+          // Hat kein einziger Zug ein Bild, wäre sie über jeder Kachel ein
+          // leerer Streifen; dann entfällt sie ganz.
+          if (showLabel) ...<Widget>[
+            SizedBox(
+              height: MoveIcons.labelHeight,
+              child: bild == null
+                  ? null
+                  : Text(
+                      move.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: affordable ? Colors.white : Palette.muted,
+                      ),
                     ),
-                  ),
-          ),
-          const SizedBox(height: 4),
+            ),
+            const SizedBox(height: 4),
+          ],
           _Kachel(
             move: move,
             side: side,

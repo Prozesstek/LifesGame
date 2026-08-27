@@ -1,26 +1,32 @@
-/// Welches Bild zu einem Zug gehört.
+/// Welches Bild zu einem Zug gehört — und wie groß seine Kachel wird.
 ///
 /// **Reine Darstellung.** Was ein Zug tut, steht in `package:combat`; hier
 /// steht nur, wie er aussieht — dieselbe Trennung wie bei
 /// `MoveAnimation` und `moveHelpFor`.
 ///
-/// **Nicht jeder Zug hat eins**, und das ist gewollt: Bisher gibt es die
-/// vier Umgebungen als Bild. Wer keins hat, bekommt keinen Platzhalter —
-/// sechzehn leere Kästchen sähen aus, als wäre etwas nicht geladen.
+/// **Derzeit hat kein Zug ein Bild.** Die vier Umgebungen hatten eines und
+/// sind am 27.08. wieder herausgenommen worden; das Kachelformat ist
+/// geblieben. Ohne Bild trägt die Kachel ihren Namen — genau so, wie es
+/// die Waffenzüge von Anfang an getan haben.
+///
+/// **Ein Bild kommt in drei Schritten zurück:**
+///
+/// 1. Datei nach `assets/abilities/` legen, benannt wie die Move-Id, in
+///    [assetSize] Pixel Kantenlänge.
+/// 2. In `pubspec.yaml` den Ordner unter `assets:` eintragen — dort steht
+///    die Zeile auskommentiert bereit.
+/// 3. Eine Zeile in [_dateien] ergänzen.
+///
+/// `test/move_icon_test.dart` prüft danach von selbst mit, dass die Id in
+/// `package:combat` existiert und die Datei wirklich geladen werden kann.
 abstract final class MoveIcons {
   static const String _ordner = 'assets/abilities';
 
-  /// Move-Id → Dateiname.
+  /// Move-Id → Dateiname. Leer, solange es keine Bilder gibt.
   ///
-  /// **Die Datei heißt wie die Id.** Ein neues Bild ist damit eine Datei
-  /// im Ordner und eine Zeile hier; dass die Id wirklich existiert, prüft
-  /// `test/move_icon_test.dart` gegen `package:combat`.
-  static const Map<String, String> _dateien = <String, String>{
-    'frostnebel': 'frostnebel.png',
-    'sandsturm': 'sandsturm.png',
-    'giftmoor': 'giftmoor.png',
-    'vulkanbruch': 'vulkanbruch.png',
-  };
+  /// **Die Datei heißt wie die Id.** Damit kann die Zuordnung nicht
+  /// auseinanderlaufen.
+  static const Map<String, String> _dateien = <String, String>{};
 
   /// Der Pfad zum Bild, oder `null` wenn es für diesen Zug keins gibt.
   static String? forMoveId(String moveId) {

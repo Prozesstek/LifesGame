@@ -320,18 +320,33 @@ vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
 den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
 geschrieben.
 
-### Das Bild ist der Knopf
+### Die Kachel ist der Knopf
 
-Frostnebel, Sandsturm, Giftmoor und Vulkanbruch haben ein Pixel-Bild von
-AktivesBrett (1024×1024 JPG, aus `Desktop\Lifes Game Mockup\`). Im Kampf
-ist dieses Bild die **Kachel, die man drückt** — quadratisch, Name
-darüber, Energiekosten unten rechts in der Ecke. **Alle Züge stehen in
-einer Reihe**, höchstens 88 Pixel je Kachel.
+Jeder Zug ist eine **quadratische Kachel, die man drückt** — alle in
+einer Reihe, höchstens 88 Pixel, Energiekosten unten rechts in der Ecke.
+Ohne Bild trägt die Kachel ihren Namen.
+
+**Bilder gab es zwischendurch und gibt es gerade nicht.** Vier
+Pixelgrafiken für Frostnebel, Sandsturm, Giftmoor und Vulkanbruch waren
+eingebaut und sind am 27.08. auf Wunsch wieder heraus — das Format ist
+geblieben. Die Vorlagen liegen weiter unter
+`Desktop\Lifes Game Mockup\Fähigkeiten\`, nicht im Repo.
+
+Der Weg zurück steht in `move_icon.dart` und ist drei Schritte lang:
+Datei nach `assets/abilities/` (benannt wie die Move-Id, 384 Pixel), den
+Ordner in `pubspec.yaml` eintragen — die Zeile steht dort auskommentiert
+bereit — und eine Zeile in `MoveIcons`. Die Prüfungen in
+`move_icon_test.dart` laufen heute über eine leere Menge und greifen ab
+der ersten Zeile wieder.
 
 **Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer festen
-Zahl.** Nur so ist die Kachel wirklich quadratisch und das Bild
-vollständig zu sehen: Eine Zwischenfassung war 175 breit und 128 hoch und
-schnitt die quadratische Vorlage oben und unten an.
+Zahl.** Nur so ist die Kachel wirklich quadratisch. Eine Zwischenfassung
+war 175 breit und 128 hoch und schnitt die quadratischen Vorlagen oben
+und unten an.
+
+**Die Namenszeile über der Kachel erscheint nur, wenn in der Reihe
+überhaupt ein Bild vorkommt.** Sonst stünde über jeder Kachel ein leerer
+Streifen — der Name steht ja schon darin.
 
 **Die Obergrenze ist zugleich die Stellschraube für die Arena.** Die
 Kachel ist quadratisch, ihre Breite ist also auch ihre Höhe — und was sie

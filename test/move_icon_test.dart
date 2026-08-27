@@ -53,43 +53,20 @@ void main() {
     });
   });
 
-  group('Die vier Umgebungen haben ihr Bild', () {
-    test('Frostnebel, Sandsturm, Giftmoor und Vulkanbruch', () {
-      for (final move in <Move>[
-        AbilityMoves.frostnebel,
-        AbilityMoves.sandsturm,
-        AbilityMoves.giftmoor,
-        AbilityMoves.vulkanbruch,
-      ]) {
+  group('Derzeit gibt es keine Bilder', () {
+    // Die vier Umgebungen hatten am 27.08. eines und haben es wieder
+    // verloren; das Kachelformat ist geblieben. Die Prüfungen oben laufen
+    // dadurch über eine leere Menge — sie greifen wieder, sobald jemand
+    // eine Zeile in `MoveIcons` ergänzt, und genau dafür bleiben sie
+    // stehen.
+    test('kein einziger Zug trägt eins', () {
+      for (final move in <Move>[...Moves.all, ...AbilityMoves.all]) {
         expect(
           MoveIcons.forMoveId(move.id),
-          isNotNull,
-          reason: '${move.name} hat kein Bild bekommen.',
+          isNull,
+          reason: '${move.name} hat ein Bild, aber keins ist abgelegt.',
         );
       }
-    });
-
-    test('jede Fähigkeit, die eine Umgebung legt, hat auch eins', () {
-      // Die eigentliche Aussage: Es sind genau die Umgebungsleger. Kommt
-      // eine fuenfte Umgebung dazu, faellt das hier auf.
-      final leger = <Move>[
-        for (final move in AbilityMoves.all)
-          if (move.effects.any((e) => e is SetEnvironment)) move,
-      ];
-
-      expect(leger, hasLength(4));
-      for (final move in leger) {
-        expect(MoveIcons.forMoveId(move.id), isNotNull);
-      }
-    });
-  });
-
-  group('Wer kein Bild hat, bekommt keins', () {
-    test('die Waffen und die übrigen Fähigkeiten bleiben ohne', () {
-      expect(MoveIcons.forMoveId(Moves.basicAttack.id), isNull);
-      expect(MoveIcons.forMoveId(Moves.swordStrike.id), isNull);
-      expect(MoveIcons.forMoveId(AbilityMoves.donnerkeil.id), isNull);
-      expect(MoveIcons.forMoveId(AbilityMoves.steinhaut.id), isNull);
     });
 
     test('eine unbekannte Id ebenfalls nicht', () {

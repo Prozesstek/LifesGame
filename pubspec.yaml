@@ -67,8 +67,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Die Bilder der Faehigkeiten. Der Dateiname ist die Move-Id aus
-  # `package:combat` -- so kann die Zuordnung nicht auseinanderlaufen, und
-  # ein neues Bild ist eine Datei plus eine Zeile in `move_icon.dart`.
-  assets:
-    - assets/abilities/
+  # Derzeit gibt es keine Bilder. Sobald wieder welche dazukommen, muss
+  # hier der Ordner stehen -- siehe `lib/combat/move_icon.dart`:
+  #
+  #   assets:
+  #     - assets/abilities/

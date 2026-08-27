@@ -214,36 +214,22 @@ void main() {
       expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
 
-    testWidgets('eine Fähigkeit mit Bild zeigt es auf ihrem Knopf', (
+    testWidgets('jeder Zug ist eine antippbare Kachel mit seinem Namen', (
       tester,
     ) async {
+      // Solange es keine Bilder gibt, trägt jede Kachel ihren Namen — so,
+      // wie es der Waffenzug von Anfang an getan hat. Er ist der Zug, den
+      // man jede Runde drückt; ohne Kachel ließe sich nicht kämpfen.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
 
-      // Der Name bleibt stehen — das Bild kommt dazu, es ersetzt ihn nicht.
-      expect(find.text(AbilityMoves.frostnebel.name), findsOneWidget);
-      expect(
-        find.descendant(
-          of: _kachelVon(AbilityMoves.frostnebel),
-          matching: find.byType(Image),
-        ),
-        findsOneWidget,
-      );
-    });
+      for (final move in <Move>[Moves.basicAttack, AbilityMoves.frostnebel]) {
+        expect(find.text(move.name), findsOneWidget);
+        expect(
+          find.descendant(of: _kachelVon(move), matching: find.byType(Image)),
+          findsNothing,
+        );
+      }
 
-    testWidgets('eine ohne Bild trägt ihren Namen in der Kachel', (
-      tester,
-    ) async {
-      // Der Waffenzug hat kein Bild — und ist der Zug, den man jede Runde
-      // drückt. Er muss trotzdem eine antippbare Kachel haben.
-      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
-
-      expect(
-        find.descendant(
-          of: _kachelVon(Moves.basicAttack),
-          matching: find.byType(Image),
-        ),
-        findsNothing,
-      );
       expect(_tippflaecheVon(tester, Moves.basicAttack).onTap, isNotNull);
     });
 
