@@ -324,16 +324,21 @@ geschrieben.
 
 Frostnebel, Sandsturm, Giftmoor und Vulkanbruch haben ein Pixel-Bild von
 AktivesBrett (1024×1024 JPG, aus `Desktop\Lifes Game Mockup\`). Im Kampf
-ist dieses Bild die **Kachel, die man drückt** — quadratisch und so groß,
-wie die Breite hergibt (auf einem Handy rund 174 Pixel), Name darüber,
-Energiekosten unten rechts in der Ecke.
+ist dieses Bild die **Kachel, die man drückt** — quadratisch, Name
+darüber, Energiekosten unten rechts in der Ecke. **Alle Züge stehen in
+einer Reihe**, höchstens 88 Pixel je Kachel.
 
 **Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer festen
 Zahl.** Nur so ist die Kachel wirklich quadratisch und das Bild
-vollständig zu sehen: Die erste Fassung war 175 breit und 128 hoch und
-schnitt die quadratische Vorlage oben und unten an. Nach oben gibt es
-einen Deckel (`maxTileSide`), sonst wüchsen die Kacheln in einem breiten
-Browserfenster mit der Fensterbreite mit und liefen in der Höhe über.
+vollständig zu sehen: Eine Zwischenfassung war 175 breit und 128 hoch und
+schnitt die quadratische Vorlage oben und unten an.
+
+**Die Obergrenze ist zugleich die Stellschraube für die Arena.** Die
+Kachel ist quadratisch, ihre Breite ist also auch ihre Höhe — und was sie
+nicht braucht, bleibt den beiden Kämpfern. Bei 88 passen alle vier Züge
+nebeneinander; die zweite Reihe entfällt, und das sind rund 190 Pixel,
+die das Kampffeld zurückbekommt. Wer die Kacheln größer will, nimmt sie
+der Arena weg — beides steht in `move_icon.dart`.
 
 Der erste Anlauf war ein kleines 28-Pixel-Icon *im* Textknopf. Ein
 Entwurf von AktivesBrett hat gezeigt, dass etwas anderes gemeint war.

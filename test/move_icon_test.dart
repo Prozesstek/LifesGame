@@ -97,28 +97,43 @@ void main() {
     });
   });
 
-  group('Die Kachel ist quadratisch und teilt sich die Breite', () {
-    test('zwei Kacheln plus Abstand füllen die Reihe', () {
-      const breite = 358.0; // 390 minus 16 Rand je Seite
+  group('Die Kacheln teilen sich eine Reihe', () {
+    // 390 Pixel Bildschirm minus 16 Rand je Seite.
+    const breite = 358.0;
 
-      final seite = MoveIcons.tileSideFor(breite);
+    test('alle vier passen nebeneinander', () {
+      final seite = MoveIcons.tileSideFor(breite, 4);
 
-      expect(seite * 2 + MoveIcons.gap, closeTo(breite, 0.01));
+      expect(seite * 4 + MoveIcons.gap * 3, lessThanOrEqualTo(breite));
+      expect(seite, greaterThan(70));
     });
 
-    test('auf einem Handy greift die Obergrenze nicht', () {
-      expect(MoveIcons.tileSideFor(358), lessThan(MoveIcons.maxTileSide));
+    test('vier Kacheln füllen die Breite ganz aus', () {
+      final seite = MoveIcons.tileSideFor(breite, 4);
+
+      expect(seite * 4 + MoveIcons.gap * 3, closeTo(breite, 0.01));
     });
 
-    test('in einem breiten Fenster schon', () {
+    test('bei weniger Zügen greift die Obergrenze', () {
+      // Sonst würden zwei Kacheln je 174 Pixel breit — und damit auch 174
+      // hoch. Genau diese Höhe soll der Arena bleiben.
+      expect(MoveIcons.tileSideFor(breite, 1), MoveIcons.maxTileSide);
+      expect(MoveIcons.tileSideFor(breite, 2), MoveIcons.maxTileSide);
+    });
+
+    test('in einem breiten Fenster ebenfalls', () {
       // Ohne Deckel wüchsen die Kacheln mit der Fensterbreite mit und
       // liefen in der Höhe über — die Kachel ist quadratisch, ihre Breite
       // bestimmt also ihre Höhe.
-      expect(MoveIcons.tileSideFor(1200), MoveIcons.maxTileSide);
+      expect(MoveIcons.tileSideFor(1200, 4), MoveIcons.maxTileSide);
     });
 
-    test('und auf einem sehr schmalen Gerät bleibt sie bedienbar', () {
-      expect(MoveIcons.tileSideFor(60), greaterThanOrEqualTo(48));
+    test('auf einem sehr schmalen Gerät bleibt sie bedienbar', () {
+      expect(MoveIcons.tileSideFor(120, 4), greaterThanOrEqualTo(40));
+    });
+
+    test('ohne Züge gibt es nichts zu rechnen', () {
+      expect(MoveIcons.tileSideFor(breite, 0), 0);
     });
   });
 }

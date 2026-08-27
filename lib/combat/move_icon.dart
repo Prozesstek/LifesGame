@@ -36,21 +36,28 @@ abstract final class MoveIcons {
 
   /// Obergrenze für die Kantenlänge einer Kachel.
   ///
-  /// **Nötig, weil die Kachel quadratisch ist und ihre Breite bestimmt.**
-  /// Auf einem Handy greift die Grenze nie — dort bleiben je Kachel rund
-  /// 174 Pixel. In einem breiten Browserfenster ohne Handyrahmen würden
-  /// die Kacheln sonst mit der Fensterbreite mitwachsen und in der Höhe
-  /// überlaufen.
-  static const double maxTileSide = 176;
+  /// **Sie bestimmt zugleich, wie viel Platz die Arena bekommt.** Die
+  /// Kachel ist quadratisch, ihre Breite ist also auch ihre Höhe — und was
+  /// sie nicht braucht, bleibt den beiden Kämpfern. Bei 88 passen alle
+  /// vier Züge in **eine** Reihe; die zweite Reihe entfällt, und das sind
+  /// rund 190 Pixel, die das Kampffeld zurückbekommt.
+  static const double maxTileSide = 88;
 
-  /// Wie breit eine Kachel in einer [rowWidth] Pixel breiten Reihe wird.
+  /// Wie breit jede von [count] Kacheln in einer [rowWidth] Pixel breiten
+  /// Reihe wird.
   ///
   /// Quadratisch, damit das **ganze** Bild zu sehen ist: Die Vorlagen sind
   /// quadratisch, und eine breitere als hohe Kachel schnitte sie oben und
   /// unten an.
-  static double tileSideFor(double rowWidth) {
-    final proSpalte = (rowWidth - gap) / 2;
-    return proSpalte.clamp(48.0, maxTileSide);
+  ///
+  /// Alle Züge stehen in einer Reihe. Passt es nicht, werden die Kacheln
+  /// schmaler statt umzubrechen — eine zweite Reihe kostet mehr Höhe, als
+  /// vier kleinere Kacheln an Lesbarkeit einbringen.
+  static double tileSideFor(double rowWidth, int count) {
+    if (count <= 0) return 0;
+
+    final proSpalte = (rowWidth - gap * (count - 1)) / count;
+    return proSpalte.clamp(40.0, maxTileSide);
   }
 
   /// Höhe der Namenszeile über einer Bildkachel.

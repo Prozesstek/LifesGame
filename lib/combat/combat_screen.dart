@@ -286,21 +286,11 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // Zahl: Seit ADR-0017 hat ein frischer Charakter genau einen Move
       // (nur der Waffenslot ist offen), und eine leere zweite Reihe waere
       // ein Loch, das nach einem Fehler aussieht.
-      // Die Höhe ergibt sich aus den Kacheln selbst: Sie sind quadratisch,
-      // ihre Breite bestimmt also ihre Höhe. Eine zweite Reihe gibt es nur,
-      // wenn es mehr als zwei Züge gibt — ein frischer Charakter hat genau
-      // einen (nur der Waffenslot ist offen, ADR-0017), und eine leere
-      // Reihe wäre ein Loch, das nach einem Fehler aussieht.
-      _Phase.chooseMove || _Phase.animating => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _moveRow(loadout, state, 0),
-          if (loadout.length > 2) ...<Widget>[
-            const SizedBox(height: MoveIcons.gap),
-            _moveRow(loadout, state, 2),
-          ],
-        ],
-      ),
+      // **Alle Züge in einer Reihe.** Die Höhe ergibt sich aus den Kacheln
+      // selbst: Sie sind quadratisch, ihre Breite bestimmt also ihre Höhe.
+      // Was sie nicht brauchen, bleibt der Arena — und eine zweite Reihe
+      // hätte davon rund 190 Pixel genommen.
+      _Phase.chooseMove || _Phase.animating => _moveRow(loadout, state),
     };
   }
 
@@ -314,7 +304,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   ///
   /// Während der Animation bleiben dieselben Kacheln stehen, nur
   /// ausgegraut — sie zu entfernen würde die Leiste springen lassen.
-  Widget _moveRow(List<Move> loadout, CombatState state, int start) {
+  Widget _moveRow(List<Move> loadout, CombatState state) {
     final accepting = _phase == _Phase.chooseMove;
 
     // Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer
@@ -322,17 +312,16 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     // Bild vollständig zu sehen.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final seite = MoveIcons.tileSideFor(constraints.maxWidth);
+        final seite = MoveIcons.tileSideFor(
+          constraints.maxWidth,
+          loadout.length,
+        );
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            for (
-              var i = start;
-              i < start + 2 && i < loadout.length;
-              i++
-            ) ...<Widget>[
-              if (i > start) const SizedBox(width: MoveIcons.gap),
+            for (var i = 0; i < loadout.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(width: MoveIcons.gap),
               SizedBox(
                 width: seite,
                 child: _MoveTile(
