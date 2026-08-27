@@ -324,8 +324,16 @@ geschrieben.
 
 Frostnebel, Sandsturm, Giftmoor und Vulkanbruch haben ein Pixel-Bild von
 AktivesBrett (1024×1024 JPG, aus `Desktop\Lifes Game Mockup\`). Im Kampf
-ist dieses Bild die **Kachel, die man drückt** — 128 Pixel im Quadrat,
-Name darüber, Energiekosten unten rechts in der Ecke.
+ist dieses Bild die **Kachel, die man drückt** — quadratisch und so groß,
+wie die Breite hergibt (auf einem Handy rund 174 Pixel), Name darüber,
+Energiekosten unten rechts in der Ecke.
+
+**Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer festen
+Zahl.** Nur so ist die Kachel wirklich quadratisch und das Bild
+vollständig zu sehen: Die erste Fassung war 175 breit und 128 hoch und
+schnitt die quadratische Vorlage oben und unten an. Nach oben gibt es
+einen Deckel (`maxTileSide`), sonst wüchsen die Kacheln in einem breiten
+Browserfenster mit der Fensterbreite mit und liefen in der Höhe über.
 
 Der erste Anlauf war ein kleines 28-Pixel-Icon *im* Textknopf. Ein
 Entwurf von AktivesBrett hat gezeigt, dass etwas anderes gemeint war.
@@ -354,6 +362,28 @@ plus eine Zeile in `move_icon.dart`. `test/move_icon_test.dart` prüft
 beide Nähte: dass die Id in `package:combat` ankommt, und dass die Datei
 da **und in `pubspec.yaml` angemeldet** ist — Letzteres über
 `rootBundle.load`, das nur findet, was angemeldet ist.
+
+### Der Kampf endet mit einem Blatt — und ohne Belohnung
+
+Am Ende steht jetzt ein Dialog: gewonnen oder verloren, gegen wen, nach
+wie vielen Runden, und ein OK-Knopf.
+
+**Die Frage dahinter war „gibt es eine Belohnung?" — und die Antwort ist
+nein, mit Absicht.** Erfahrung und Gold kommen ausschließlich aus
+Gewohnheiten und Theorie (`totalXpProvider`); der Kampf gibt nichts.
+Das ist der Kern-Loop aus `konzept.md` Abschnitt 2: Der Kampf ist die
+Stelle, an der sich Fortschritt **auszahlt**, nicht die, an der er
+entsteht. Gäbe es XP fürs Gewinnen, könnte man Kämpfe grinden statt
+Häkchen zu setzen — und die Aussage des Produkts wäre widerlegt. Beute
+gehört laut Abschnitt 4 in den Dungeon (Ziel 6).
+
+Das Blatt sagt das auch: „Erfahrung und Gold gibt es dafür nicht — sie
+kommen aus deinen Gewohnheiten." Damit bleibt die Frage nicht offen.
+
+**Ein Test hält es fest.** `result_dialog_test.dart` prüft, dass im Blatt
+kein „+N" steht. Stünde dort eines Tages eine Belohnung, wäre das eine
+Richtungsentscheidung und kein Textdetail — der Test zwingt sie ans
+Licht.
 
 ### Was mit dem Log verloren ging
 

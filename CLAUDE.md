@@ -109,6 +109,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `assets/abilities/` | die Bilder selbst — Dateiname = Move-Id | — |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
 | `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
+| `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Kampfes | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | der **gezeichnete** Baum: Knoten, Linien, Punkte | Flutter |
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
@@ -129,7 +130,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 264 Tests
+flutter test             # 274 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

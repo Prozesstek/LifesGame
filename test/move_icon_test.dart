@@ -96,4 +96,29 @@ void main() {
       expect(MoveIcons.forMoveId('gibt-es-nicht'), isNull);
     });
   });
+
+  group('Die Kachel ist quadratisch und teilt sich die Breite', () {
+    test('zwei Kacheln plus Abstand füllen die Reihe', () {
+      const breite = 358.0; // 390 minus 16 Rand je Seite
+
+      final seite = MoveIcons.tileSideFor(breite);
+
+      expect(seite * 2 + MoveIcons.gap, closeTo(breite, 0.01));
+    });
+
+    test('auf einem Handy greift die Obergrenze nicht', () {
+      expect(MoveIcons.tileSideFor(358), lessThan(MoveIcons.maxTileSide));
+    });
+
+    test('in einem breiten Fenster schon', () {
+      // Ohne Deckel wüchsen die Kacheln mit der Fensterbreite mit und
+      // liefen in der Höhe über — die Kachel ist quadratisch, ihre Breite
+      // bestimmt also ihre Höhe.
+      expect(MoveIcons.tileSideFor(1200), MoveIcons.maxTileSide);
+    });
+
+    test('und auf einem sehr schmalen Gerät bleibt sie bedienbar', () {
+      expect(MoveIcons.tileSideFor(60), greaterThanOrEqualTo(48));
+    });
+  });
 }

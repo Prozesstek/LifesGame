@@ -11,6 +11,7 @@ import 'move_help.dart';
 import 'move_icon.dart';
 import 'widgets/environment_banner.dart';
 import 'widgets/fighter_status.dart';
+import 'widgets/result_dialog.dart';
 import 'widgets/timing_bar.dart';
 
 /// Was der Bildschirm gerade vom Spieler erwartet.
@@ -36,6 +37,12 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   final GlobalKey<TimingBarState> _timingKey = GlobalKey<TimingBarState>();
   _Phase _phase = _Phase.chooseMove;
   Move? _pendingMove;
+
+  /// Ob das Ergebnisblatt für diesen Kampf schon offen war.
+  ///
+  /// Ohne die Sperre könnte es zweimal aufgehen: Der Kampf endet einmal,
+  /// aber das Abspielen meldet sich für jede Runde.
+  bool _resultShown = false;
 
   void _onMoveSelected(Move move) {
     if (_phase != _Phase.chooseMove) return;
@@ -87,6 +94,41 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     setState(() {
       _phase = isOver ? _Phase.finished : _Phase.chooseMove;
     });
+
+    if (isOver && !_resultShown) {
+      _resultShown = true;
+      // **Erst nach dem Bild.** Diese Methode läuft aus der Flame-Schleife
+      // heraus, also mitten in einem Frame; `showDialog` von dort aus
+      // öffnet eine Route, während noch gezeichnet wird. Derselbe
+      // Fallstrick wie bei „Alles freischalten" im Entwicklermodus
+      // (`docs/context/gotchas.md`).
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showResult());
+    }
+  }
+
+  /// Das Ergebnis als Blatt, das man wegtippen muss.
+  ///
+  /// **Es steht bewusst keine Belohnung darin, denn es gibt keine.**
+  /// Erfahrung und Gold kommen aus Gewohnheiten und Theorie, nie aus
+  /// einem Kampf (`konzept.md` Abschnitt 2). Der Kampf ist die Stelle, an
+  /// der sich der Fortschritt auszahlt — gäbe es dort XP, könnte man ihn
+  /// erkämpfen statt erarbeiten, und die Aussage des Produkts wäre hin.
+  /// Der Satz am Ende sagt das, damit die Frage nicht offen bleibt.
+  Future<void> _showResult() async {
+    if (!mounted) return;
+
+    final state = ref.read(combatControllerProvider).state;
+    final gewonnen = state.outcome == CombatOutcome.victory;
+    final runden = state.round - 1;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => CombatResultDialog(
+        won: gewonnen,
+        rounds: runden,
+        enemyName: state.enemy.name,
+      ),
+    );
   }
 
   void _restart() {
@@ -95,6 +137,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     setState(() {
       _pendingMove = null;
       _phase = _Phase.chooseMove;
+      _resultShown = false;
     });
   }
 
@@ -243,30 +286,22 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // Zahl: Seit ADR-0017 hat ein frischer Charakter genau einen Move
       // (nur der Waffenslot ist offen), und eine leere zweite Reihe waere
       // ein Loch, das nach einem Fehler aussieht.
-      _Phase.chooseMove || _Phase.animating => SizedBox(
-        height: _controlsHeight(loadout.length),
-        child: Column(
-          children: <Widget>[
-            _moveRow(loadout, state, 0),
-            if (loadout.length > 2) ...<Widget>[
-              const SizedBox(height: 10),
-              _moveRow(loadout, state, 2),
-            ],
+      // Die Höhe ergibt sich aus den Kacheln selbst: Sie sind quadratisch,
+      // ihre Breite bestimmt also ihre Höhe. Eine zweite Reihe gibt es nur,
+      // wenn es mehr als zwei Züge gibt — ein frischer Charakter hat genau
+      // einen (nur der Waffenslot ist offen, ADR-0017), und eine leere
+      // Reihe wäre ein Loch, das nach einem Fehler aussieht.
+      _Phase.chooseMove || _Phase.animating => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _moveRow(loadout, state, 0),
+          if (loadout.length > 2) ...<Widget>[
+            const SizedBox(height: MoveIcons.gap),
+            _moveRow(loadout, state, 2),
           ],
-        ),
+        ],
       ),
     };
-  }
-
-  /// Wie hoch die Kachelleiste baut.
-  ///
-  /// Die Höhe hängt an der Zahl der Kacheln, nicht an einer festen Zahl:
-  /// Ein frischer Charakter hat genau einen Move (nur der Waffenslot ist
-  /// offen, ADR-0017), und eine leere zweite Reihe wäre ein Loch, das nach
-  /// einem Fehler aussieht.
-  double _controlsHeight(int moves) {
-    const einzeln = MoveIcons.labelHeight + 4 + MoveIcons.tileSize;
-    return moves > 2 ? einzeln * 2 + 10 : einzeln;
   }
 
   /// Eine Reihe mit bis zu zwei Kacheln, beginnend bei [start].
@@ -282,29 +317,38 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   Widget _moveRow(List<Move> loadout, CombatState state, int start) {
     final accepting = _phase == _Phase.chooseMove;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        for (
-          var i = start;
-          i < start + 2 && i < loadout.length;
-          i++
-        ) ...<Widget>[
-          if (i > start) const SizedBox(width: 10),
-          Expanded(
-            child: _MoveTile(
-              move: loadout[i],
-              affordable:
-                  accepting && loadout[i].isAffordableBy(state.player.energy),
-              attack: state.player.attack,
-              onTap: () => _onMoveSelected(loadout[i]),
-            ),
-          ),
-        ],
-        // Eine einzelne Kachel in einer Reihe bleibt links stehen, statt
-        // sich auf die ganze Breite zu ziehen.
-        if (start + 1 >= loadout.length) const Spacer(),
-      ],
+    // Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer
+    // festen Zahl — nur so ist die Kachel wirklich quadratisch und das
+    // Bild vollständig zu sehen.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final seite = MoveIcons.tileSideFor(constraints.maxWidth);
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            for (
+              var i = start;
+              i < start + 2 && i < loadout.length;
+              i++
+            ) ...<Widget>[
+              if (i > start) const SizedBox(width: MoveIcons.gap),
+              SizedBox(
+                width: seite,
+                child: _MoveTile(
+                  move: loadout[i],
+                  side: seite,
+                  affordable:
+                      accepting &&
+                      loadout[i].isAffordableBy(state.player.energy),
+                  attack: state.player.attack,
+                  onTap: () => _onMoveSelected(loadout[i]),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -319,12 +363,17 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
 class _MoveTile extends StatelessWidget {
   const _MoveTile({
     required this.move,
+    required this.side,
     required this.affordable,
     required this.attack,
     required this.onTap,
   });
 
   final Move move;
+
+  /// Kantenlaenge der Kachel. Kommt aus der verfuegbaren Breite.
+  final double side;
+
   final bool affordable;
 
   /// Der Angriffswert des Spielers — die Erklärung nennt echte Zahlen,
@@ -373,7 +422,13 @@ class _MoveTile extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 4),
-          _Kachel(move: move, bild: bild, affordable: affordable, onTap: onTap),
+          _Kachel(
+            move: move,
+            side: side,
+            bild: bild,
+            affordable: affordable,
+            onTap: onTap,
+          ),
         ],
       ),
     );
@@ -421,12 +476,14 @@ class _MoveTile extends StatelessWidget {
 class _Kachel extends StatelessWidget {
   const _Kachel({
     required this.move,
+    required this.side,
     required this.bild,
     required this.affordable,
     required this.onTap,
   });
 
   final Move move;
+  final double side;
   final String? bild;
   final bool affordable;
   final VoidCallback onTap;
@@ -438,7 +495,7 @@ class _Kachel extends StatelessWidget {
         : '${move.energyDelta}';
 
     return SizedBox(
-      height: MoveIcons.tileSize,
+      height: side,
       child: Material(
         color: Palette.surfaceRaised,
         borderRadius: BorderRadius.circular(10),

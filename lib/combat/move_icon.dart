@@ -31,13 +31,27 @@ abstract final class MoveIcons {
   /// Alle Move-Ids, für die es ein Bild gibt.
   static Iterable<String> get moveIds => _dateien.keys;
 
-  /// Kantenlänge der Kachel im Kampf — das Bild **ist** der Knopf.
+  /// Abstand zwischen zwei Kacheln.
+  static const double gap = 10;
+
+  /// Obergrenze für die Kantenlänge einer Kachel.
   ///
-  /// Zwei Kacheln nebeneinander passen bei 390 Pixeln Breite bequem
-  /// (175 je Kachel). Begrenzt wird die Größe von der **Höhe**: Arena und
-  /// zwei Kachelreihen teilen sich rund 660 Pixel, und zwei Reihen kosten
-  /// hier zusammen etwa 300.
-  static const double tileSize = 128;
+  /// **Nötig, weil die Kachel quadratisch ist und ihre Breite bestimmt.**
+  /// Auf einem Handy greift die Grenze nie — dort bleiben je Kachel rund
+  /// 174 Pixel. In einem breiten Browserfenster ohne Handyrahmen würden
+  /// die Kacheln sonst mit der Fensterbreite mitwachsen und in der Höhe
+  /// überlaufen.
+  static const double maxTileSide = 176;
+
+  /// Wie breit eine Kachel in einer [rowWidth] Pixel breiten Reihe wird.
+  ///
+  /// Quadratisch, damit das **ganze** Bild zu sehen ist: Die Vorlagen sind
+  /// quadratisch, und eine breitere als hohe Kachel schnitte sie oben und
+  /// unten an.
+  static double tileSideFor(double rowWidth) {
+    final proSpalte = (rowWidth - gap) / 2;
+    return proSpalte.clamp(48.0, maxTileSide);
+  }
 
   /// Höhe der Namenszeile über einer Bildkachel.
   ///
