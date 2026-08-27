@@ -1,12 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Hochformat steht auch hier, nicht nur in `main.dart`: Die Sperre
+         dort greift erst, wenn Flutter laeuft. Ohne das Attribut dreht
+         sich der Startbildschirm kurz mit (konzept.md Abschnitt 5). -->
     <application
-        android:label="lifes_game"
+        android:label="Lifes Game"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

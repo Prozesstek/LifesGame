@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:combat/combat.dart';
 
 /// Balance ohne Zufallsstreuung. Fuer Tests, die exakte Zahlen pruefen.
@@ -50,6 +52,10 @@ class PassiveEnemyPolicy implements EnemyPolicy {
     required Combatant self,
     required Combatant opponent,
     required List<Move> loadout,
+    Side side = Side.enemy,
+    Environment? environment,
+    Random? random,
+    double utilityChance = 0,
   }) {
     return const Move(
       id: 'idle',

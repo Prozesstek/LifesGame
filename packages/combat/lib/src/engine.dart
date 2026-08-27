@@ -9,6 +9,8 @@ import 'move.dart';
 import 'state.dart';
 import 'status.dart';
 import 'timed_hit.dart';
+import 'timing_rules.dart';
+import 'timing_spec.dart';
 
 /// Fuehrt Kampfrunden aus. Kennt keine Darstellung, keine Zeit, kein Flame.
 ///
@@ -21,11 +23,17 @@ class CombatEngine {
     this.balance = const Balance(),
     this.enemyPolicy = const SimpleEnemyPolicy(),
     this.enemyLoadout = Moves.defaultLoadout,
+    this.enemyUtilityChance = 0,
   }) : _random = Random(seed);
 
   final Balance balance;
   final EnemyPolicy enemyPolicy;
   final List<Move> enemyLoadout;
+
+  /// Wie oft dieser Gegner etwas anderes tut als zuzuschlagen. Kommt aus
+  /// [EnemyBlueprint.utilityChance] und ist damit eine Gegnerzahl, keine
+  /// Eigenschaft der Policy -- die bleibt zustandslos und teilbar.
+  final double enemyUtilityChance;
   final Random _random;
 
   /// Eine vollstaendige Runde: Spieler handelt, dann der Gegner, danach
@@ -76,8 +84,39 @@ class CombatEngine {
       self: round.enemy,
       opponent: round.player,
       loadout: enemyLoadout,
+      environment: round.environment,
+      random: _random,
+      utilityChance: enemyUtilityChance,
     );
-    _act(round, Side.enemy, move, <TimedHit>[TimedHit.none]);
+    _act(round, Side.enemy, move, _rollHits(round, Side.enemy, move));
+  }
+
+  /// Die Tipps des Gegners. Er zielt nicht -- er trifft die Leiste an einer
+  /// zufaelligen Stelle, gewertet mit denselben Fenstern wie beim Spieler.
+  ///
+  /// **Ohne neue Zahl.** Ein Zug mit 24 % Fenster wird dadurch in etwa 24 %
+  /// der Faelle perfekt, einer mit 4 % fast nie -- die Staffelung steckt
+  /// schon in [TimingSpec]. Und erst dadurch wirken die Faehigkeiten, die
+  /// das gegnerische Fenster verengen: Wurzelgriff und Sandsturm hatten
+  /// gegen einen Gegner, der immer [TimedHit.none] bekam, keinerlei
+  /// Wirkung.
+  ///
+  /// Ein Zug ohne Zeitfenster wuerfelt gar nicht erst -- sonst verbrauchte
+  /// er Zufallszahlen, ohne dass etwas davon abhinge.
+  List<TimedHit> _rollHits(_Round round, Side side, Move move) {
+    if (!move.hasTimingWindow) {
+      return List<TimedHit>.filled(move.hits, TimedHit.none);
+    }
+
+    final spec = effectiveTiming(
+      move: move,
+      actor: round.of(side),
+      side: side,
+      environment: round.environment,
+    );
+    return <TimedHit>[
+      for (var i = 0; i < move.hits; i++) spec.judgeAt(_random.nextDouble()),
+    ];
   }
 
   /// Fuehrt einen Move aus: Kosten, Schaden, Zusatzwirkungen.
@@ -96,6 +135,7 @@ class CombatEngine {
     }
 
     round.damageThisAction = 0;
+    final environmentBefore = round.environment;
     round.emit(MoveUsed(side: side, moveId: move.id));
     _applyEnergy(round, side, move.energyDelta + discount);
     if (discount > 0) {
@@ -125,6 +165,29 @@ class CombatEngine {
         _applyEffect(round, side, effect);
       }
     }
+
+    _announceEnvironment(round, environmentBefore);
+  }
+
+  /// Meldet eine neu gelegte Umgebung -- **einmal je Handlung**, mit ihrer
+  /// endgueltigen Dauer.
+  ///
+  /// Der Grund steht in den Faehigkeiten: Ein perfekt gelegter Frostnebel
+  /// legt ihn zweimal, einmal aus der Grundwirkung und einmal aus der
+  /// Perfect-Wirkung mit einer Runde mehr. Meldete jede fuer sich, staenden
+  /// zwei Zeilen im Log, die sich widersprechen -- "drei Runden" und
+  /// gleich darauf "vier Runden".
+  void _announceEnvironment(_Round round, Environment? before) {
+    final now = round.environment;
+    if (now == null || identical(now, before)) return;
+
+    round.emit(
+      EnvironmentSet(
+        environmentId: now.id,
+        owner: now.owner,
+        turns: now.remainingTurns,
+      ),
+    );
   }
 
   /// Der beste Tipp einer Runde. Perfect schlaegt Good schlaegt None.
@@ -250,7 +313,13 @@ class CombatEngine {
     if (shield != null) {
       final absorbed = min(shield.absorb, remaining);
       remaining -= absorbed;
-      round.emit(DamageAbsorbed(target: target, amount: absorbed));
+      round.emit(
+        DamageAbsorbed(
+          target: target,
+          amount: absorbed,
+          complete: remaining <= 0,
+        ),
+      );
 
       final next = shield.afterAbsorbing(absorbed);
       if (next == null) {
@@ -413,17 +482,13 @@ class CombatEngine {
       case HealSelfBy(:final factor):
         _healBy(round, side, (round.of(side).attack * factor).round());
 
-      case SetEnvironment(:final environmentId):
+      case SetEnvironment(:final environmentId, :final extraTurns):
         final template = Environments.byId(environmentId);
         if (template == null) break;
-        round.environment = template.copyWith(owner: side);
-        round.emit(
-          EnvironmentSet(
-            environmentId: template.id,
-            owner: side,
-            turns: template.remainingTurns,
-          ),
-        );
+        // Gemeldet wird am Ende der Handlung, nicht hier -- siehe
+        // [_announceEnvironment].
+        round.environment =
+            template.copyWith(owner: side).withExtraTurns(extraTurns);
 
       case GainEnergy(:final amount):
         _applyEnergy(round, side, amount);
@@ -463,11 +528,7 @@ class CombatEngine {
     final environment = round.environment;
     if (environment == null) return;
 
-    final elapsed = environment.elapsedOf(
-      Environments.byId(environment.id)?.remainingTurns ??
-          environment.remainingTurns,
-    );
-    final factor = environment.dotFactorInTurn(elapsed);
+    final factor = environment.dotFactorInTurn(environment.elapsed);
     final victim = environment.victim;
 
     if (factor > 0) {

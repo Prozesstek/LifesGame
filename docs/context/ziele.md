@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
 
 ---
 
@@ -49,7 +49,8 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Rive-Animationen** | Die gezeichneten Figuren spielen. Die Schnittstelle steht und wartet. |
 | **Lebensbalken an der Zeitachse** | Kosmetisch. Die Zahlen stimmen, nur die Reihenfolge nicht. |
 | **Kampfsystem-Umbau** (Initiative, Kontern) | Nicht entschieden, kein Dokument im Repo. Ein unentschiedener Umbau gehört nicht in einen terminierten Plan. |
-| **Android, Store, Icons der App** | Der Web-Build reicht für zwei Leute. Die Android-Kette ist auf diesem Rechner nicht einsatzfähig. |
+| ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
+| **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
 | **Verkauf im Laden, Entprellen der Persistenz** | Beides sind Signale für später, kein Mangel heute. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
@@ -272,8 +273,21 @@ während die frühen Spielerfähigkeiten schwächer sind als der Basisangriff.
 Zahlen und Hebel stehen in `state.md`. Balancing war ausdrücklich
 zurückgestellt — aber es ist jetzt ein offener Punkt mit Nachweis.
 
+> **Nachtrag 26.08., abends.** Die Erklärung im Absatz darüber war falsch:
+> Der Bergwächter trug seine Rare-Fähigkeiten gar nicht, weil
+> `EnemyBlueprint.loadout` nirgends gelesen wurde. Seit das behoben ist —
+> und seit die Gegner zielen und Utility benutzen
+> ([ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md))
+> — steht er bei 22 % an Tag 30 und 40 % an Tag 60 statt bei 0 %.
+> Schlagbar, aber noch weit von den 100 % aus ADR-0009. Balancing bleibt
+> zurückgestellt.
+>
+> Nebenbei sind dabei drei Fähigkeiten überhaupt erst wirksam geworden:
+> Wurzelgriff, Sandsturm und Donnerkeils Perfect-Wirkung greifen alle am
+> gegnerischen Zeitfenster an — und das wurde nie ausgerechnet.
+
 ```bash
-cd packages/combat    ; dart test    # 49, alle 29 alten weiter grün
+cd packages/combat    ; dart test    # 78
 cd packages/abilities ; dart test
 flutter test test/abilities_seam_test.dart
 dart run tool/balance_sim.dart

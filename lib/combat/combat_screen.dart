@@ -7,6 +7,8 @@ import '../ui/palette.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
+import 'move_help.dart';
+import 'widgets/environment_banner.dart';
 import 'widgets/fighter_status.dart';
 import 'widgets/timing_bar.dart';
 
@@ -37,8 +39,15 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   void _onMoveSelected(Move move) {
     if (_phase != _Phase.chooseMove) return;
 
-    // Nur Angriffe haben ein Zeitfenster. Utility löst sofort aus.
-    if (!move.dealsDamage) {
+    // Ob getippt wird, entscheidet der Move — nicht der Bildschirm.
+    //
+    // Hier stand bis heute `!move.dealsDamage`, eine Regel aus der Zeit
+    // der vier Moves: Damals hatte nur ein Angriff etwas zu gewinnen. Von
+    // den fünfzehn Fähigkeiten haben acht `power` 0 und trotzdem eigene
+    // Timing-Werte — Steinhaut, Aurastrom, Blütentau und Prisma-Barriere
+    // werden bei Perfect deutlich stärker, ohne je Schaden zu machen.
+    // Ihre Perfect-Wirkungen waren dadurch unerreichbar.
+    if (!move.hasTimingWindow) {
       _resolve(move, const <TimedHit>[TimedHit.none]);
       return;
     }
@@ -145,6 +154,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             ],
           ),
         ),
+        EnvironmentBanner(environment: state.environment),
         Expanded(
           flex: 3,
           child: Container(
@@ -257,6 +267,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
               move: loadout[i],
               affordable:
                   accepting && loadout[i].isAffordableBy(state.player.energy),
+              attack: state.player.attack,
               onTap: () => _onMoveSelected(loadout[i]),
             ),
           ),
@@ -270,11 +281,17 @@ class _MoveButton extends StatelessWidget {
   const _MoveButton({
     required this.move,
     required this.affordable,
+    required this.attack,
     required this.onTap,
   });
 
   final Move move;
   final bool affordable;
+
+  /// Der Angriffswert des Spielers — die Erklärung nennt echte Zahlen,
+  /// keine Multiplikatoren.
+  final int attack;
+
   final VoidCallback onTap;
 
   @override
@@ -283,6 +300,66 @@ class _MoveButton extends StatelessWidget {
         ? '+${move.energyDelta} EN'
         : '${move.energyDelta} EN';
 
+    // **Langes Drücken erklärt den Zug.** Auf einem Handy gibt es kein
+    // Mausschweben, und ein zusätzliches „i" auf dem Knopf nähme Platz,
+    // den Name und Energiekosten schon brauchen.
+    //
+    // Der Tooltip liegt **außen**: So funktioniert er auch, wenn der
+    // Knopf gerade nicht bezahlbar oder gesperrt ist — gerade dann will
+    // man wissen, worauf man spart.
+    return Tooltip(
+      richMessage: _erklaerung(),
+      triggerMode: TooltipTriggerMode.longPress,
+      showDuration: const Duration(seconds: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Palette.surfaceRaised,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Palette.accent.withValues(alpha: 0.4)),
+      ),
+      child: _button(cost),
+    );
+  }
+
+  /// Name, Wirkung und Perfect-Wirkung als ein Textblock.
+  TextSpan _erklaerung() {
+    final hilfe = moveHelpFor(move, attack);
+    final perfekt = hilfe.perfect;
+
+    return TextSpan(
+      children: <InlineSpan>[
+        TextSpan(
+          text: '${move.name}\n',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            height: 1.5,
+          ),
+        ),
+        TextSpan(
+          text: hilfe.effect,
+          style: const TextStyle(color: Palette.textDim, height: 1.35),
+        ),
+        if (perfekt != null) ...<InlineSpan>[
+          const TextSpan(
+            text: '\n\nPerfekt: ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFFFD166),
+              height: 1.35,
+            ),
+          ),
+          TextSpan(
+            text: perfekt,
+            style: const TextStyle(color: Palette.textDim, height: 1.35),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _button(String cost) {
     return FilledButton.tonal(
       onPressed: affordable ? onTap : null,
       style: FilledButton.styleFrom(
@@ -314,7 +391,14 @@ class _LogPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (lines.isEmpty) {
       return const Center(
-        child: Text('Wähle einen Zug.', style: TextStyle(color: Palette.muted)),
+        // Der Hinweis steht hier, weil langes Drücken sonst niemand
+        // findet — und der leere Log ist die einzige Stelle, an der Platz
+        // dafür ist, ohne dass etwas Neues dazukommt.
+        child: Text(
+          'Wähle einen Zug.\nLange drücken erklärt ihn.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Palette.muted, height: 1.6),
+        ),
       );
     }
 

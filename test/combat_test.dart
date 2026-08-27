@@ -55,6 +55,37 @@ void main() {
       expect(session.moves, container.read(activeMovesProvider));
     });
 
+    test('der Gegner kämpft mit seinem eigenen Moveset', () {
+      // Der Fehler, den dieser Test verhindert: `EnemyBlueprint.loadout`
+      // wurde gesetzt und nirgends gelesen. Die Engine bekam damit ihren
+      // Standardwert, und **jeder** Gegner kämpfte mit Bogenschuss,
+      // Kraftschlag, Zehrung und Sammeln — die Staffelung aus ADR-0022
+      // („Wegelagerer nur Commons, Bergwächter bis Rare") stand im Code
+      // und galt nicht.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final controller = container.read(combatControllerProvider.notifier);
+
+      final erlaubt = Enemies.wegelagerer.loadout.map((m) => m.id).toSet();
+      final gespielt = <String>{};
+
+      for (var runde = 0; runde < 12; runde++) {
+        if (container.read(combatControllerProvider).state.isOver) break;
+        final events = controller.playRound(
+          container.read(combatControllerProvider).moves.first,
+          const <TimedHit>[TimedHit.none],
+        );
+        for (final event in events) {
+          if (event is MoveUsed && event.side == Side.enemy) {
+            gespielt.add(event.moveId);
+          }
+        }
+      }
+
+      expect(gespielt, isNotEmpty);
+      expect(gespielt, everyElement(isIn(erlaubt)));
+    });
+
     test('restart liest das Moveset neu ein', () {
       // Innerhalb eines Kampfes friert das Moveset ein, zwischen zwei
       // Kämpfen nicht: Ein neuer Kampf soll die Fähigkeiten von jetzt
@@ -194,6 +225,39 @@ void main() {
 
       expect(find.text(AbilityMoves.funkenstoss.name), findsOneWidget);
       expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
+    });
+
+    testWidgets('eine Fähigkeit ohne Schaden öffnet die Leiste', (
+      tester,
+    ) async {
+      // Der Fehler, den dieser Test verhindert: Der Bildschirm öffnete das
+      // Zeitfenster nur bei `power > 0`. Acht der fünfzehn Fähigkeiten
+      // haben power 0 und lösten deshalb sofort aus — vier Perfect-
+      // Wirkungen aus der Vorlage waren dadurch unerreichbar.
+      //
+      // Aurastrom ist der Fall zum Anfassen: Er erzeugt Energie, ist also
+      // auf Level 1 bezahlbar, und bei Perfect gibt er 5 statt 3 plus
+      // einen Rabatt auf den nächsten Zug.
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.aurastrom.id));
+
+      expect(find.byType(TimingBar), findsNothing);
+      await tester.tap(find.text(AbilityMoves.aurastrom.name));
+      await tester.pump();
+
+      expect(find.byType(TimingBar), findsOneWidget);
+    });
+
+    testWidgets('und sie bekommt ihre eigenen Timing-Werte', (tester) async {
+      // Die Leiste hängt an der Fähigkeit, nicht am Standard: Aurastrom
+      // läuft mit 1.3x und hat ein Fenster von 18 %.
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.aurastrom.id));
+
+      await tester.tap(find.text(AbilityMoves.aurastrom.name));
+      await tester.pump();
+
+      final bar = tester.widget<TimingBar>(find.byType(TimingBar));
+      expect(bar.spec, AbilityMoves.aurastrom.timing);
+      expect(bar.spec, isNot(TimingSpec.standard));
     });
   });
 

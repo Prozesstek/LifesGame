@@ -3,6 +3,132 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Einen Katalogeintrag zu streichen ändert fremde Spielstände
+
+ADR-0022 hat `AbilityCatalog.choosable` ausgetauscht: die fünfzehn aus der
+Vorlage rein, die vier aus ADR-0017 raus — Kraftschlag, Zehrung, Sammeln,
+Atemzug. In `package:combat` gibt es sie weiter, nur wählbar sind sie
+nicht mehr.
+
+Wer einen davon auf einem Platz liegen hatte, behielt ihn im Spielstand.
+Und dann antworteten zwei Stellen verschieden:
+
+```dart
+// lib/character/widgets/ability_slots_row.dart
+Moves.byId('heavy_attack')          // Kraftschlag -- wird angezeigt
+
+// lib/character/abilities_controller.dart
+AbilityCatalog.byMoveId(...)        // null -- faellt aus dem Kampf
+```
+
+Sichtbar war: vier Plätze belegt, „Alle vier Plätze offen und belegt",
+drei Knöpfe im Kampf. Keine Meldung. Gefunden hat es ein Spieler mit
+einem Screenshot, nicht die Testsuite — die Tests im Package benutzten
+ausgerechnet `mend` und `breath` als Beispiel-Ids und bewiesen damit
+fröhlich, dass abgelöste Ids das Laden überstehen.
+
+**Regel:** Ein Katalog, dessen Ids in Spielständen landen, ist eine
+Schnittstelle nach außen. Etwas daraus zu streichen ist eine Änderung an
+fremden Daten und braucht eine Entscheidung, was mit den Resten passiert
+([ADR-0024](../decisions/0024-abgeloeste-faehigkeiten-fallen-beim-laden-heraus.md):
+Sie fallen beim Laden heraus).
+
+**Zweite Regel:** In Tests keine Ids als Beispiel benutzen, die zufällig
+gerade existieren. Wenn der Test „irgendeine gültige Id" meint, soll er
+sie aus dem Katalog nehmen — sonst dokumentiert er irgendwann das
+Gegenteil dessen, was gelten soll.
+
+## Ein Feld, das nur geschrieben und nie gelesen wird, meldet sich nie
+
+`EnemyBlueprint.loadout` stand seit ADR-0017 in `enemy.dart`, sorgfältig
+gepflegt, mit Kommentaren zur Staffelung („Nur Commons", „Bis Rare"). Die
+Engine hat es **nie bekommen**: Weder `combat_controller.dart` noch eine
+der beiden Simulationen gab `enemyLoadout` weiter, also griff der
+Standardwert. Jeder Gegner kämpfte mit denselben vier Moves.
+
+Nichts hat sich beschwert. Kein Compilerfehler — das Feld *wurde* ja
+gesetzt. Kein Analyzer-Hinweis — es ist öffentlich, also könnte es jemand
+von außen lesen. Kein Test — die Package-Tests prüften den Katalog, die
+App-Tests den Bildschirm, und niemand den Weg dazwischen.
+
+**Und der Fehler hat eine falsche Diagnose erzeugt.** In `state.md` und
+ADR-0022 stand als Ursache des unschlagbaren Bergwächters: „Er trägt jetzt
+Donnerkeil." Er trug ihn nicht. Die Erklärung klang plausibel, passte zu
+den Zahlen und war falsch — teurer als der Fehler selbst, weil sie
+schriftlich festgehalten wurde.
+
+**Regel:** Wenn ein Katalog ein Feld bekommt, das Verhalten steuern soll,
+gehört im selben Zug ein Test dazu, der das **Verhalten** prüft — nicht
+den Katalogeintrag. „Der Wegelagerer spielt nur Züge, die er besitzt"
+fällt um; „der Wegelagerer hat fünf Moves im Bauplan" nicht.
+
+Praktischer Test dafür:
+
+```bash
+grep -rn "\.feldname" --include=*.dart .
+```
+
+Steht das Feld nur an der Stelle, die es setzt, liest es niemand.
+
+## Ein Widget-Test reproduziert das Timing des Browsers nicht
+
+„Alles freischalten" im Entwicklermodus brach in Chrome mit einer
+Riverpod-Ausnahme ab:
+
+```
+setState() or markNeedsBuild() called during build
+  ← LayoutBuilder._rebuildWithConstraints   (PhoneFrame)
+  ← Consumer._updateTickerMode              (Dialog verschwindet)
+  ← scheduleProviderRefresh
+```
+
+Ursache: `showDialog` kehrt zurück, sobald `Navigator.pop` gerufen wurde —
+der Dialog wird zu dem Zeitpunkt noch abgebaut. „Alles freischalten" ändert
+rund 25 Provider-Zustände auf einen Schlag; fällt das in den Abbau, will
+Riverpod die Scope neu bauen, während der `LayoutBuilder` von `PhoneFrame`
+noch rechnet.
+
+Behoben mit `addPostFrameCallback` — einen Bildaufbau später ist alles ruhig.
+
+**Der unangenehme Teil:** Ein Widget-Test, der genau diesen Weg geht —
+scrollen, Knopf, Dialog, „Ja", Rahmen inklusive — ist auch **ohne** den Fix
+grün. `pumpAndSettle` arbeitet Frames der Reihe nach ab; die Verschränkung
+aus Route-Übergang, Ticker-Wechsel und Layout-Callback, die den Fehler
+auslöst, entsteht dort nicht.
+
+**Regel:** Bei „called during build" ist der Widget-Test kein Nachweis. Der
+Fix bleibt richtig — Zustandsänderungen nach einem Dialog gehören hinter
+den Frame —, aber bestätigen lässt er sich nur im Browser. Solche Fälle
+gehören notiert, statt sich auf ein grünes Testfeld zu verlassen.
+
+## Zwei Stellen, die dieselbe Frage beantworten, driften auseinander
+
+„Ist diese Fähigkeit freigeschaltet?" wurde an **zwei** Orten beantwortet:
+
+```dart
+// lib/character/abilities_controller.dart
+unlockedAbilitiesProvider   // Katalog + Zuschläge aus dem Dev-Modus
+activeMovesProvider         // AbilityCatalog.isUnlocked(...) — ohne Zuschläge
+```
+
+Solange es keine Zuschläge gab, waren beide gleich. Mit ADR-0021 kam eine
+Quelle dazu, und nur die eine Stelle lernte davon. Die Folge im Spiel: Eine
+geschenkte Fähigkeit stand in der Auswahl, ließ sich anlegen, wurde
+gespeichert — und **fehlte im Kampf**. Kein Fehler, keine Meldung, nur ein
+Knopf weniger.
+
+Gefunden hat es ein Spieler, nicht die 205 grünen Tests. Jede Seite war für
+sich geprüft; den Weg von der Auswahl bis in den Kampf prüfte keiner.
+
+**Regel:** Eine Frage, eine Stelle. Wenn ein zweiter Ort dieselbe Bedingung
+auswertet, ist das kein Zufall, sondern ein Fehler mit Verzögerung — er
+schlägt zu, sobald jemand eine dritte Quelle ergänzt.
+
+Praktischer Test dafür: Nach jeder neuen Quelle für eine Bedingung
+(`grep` nach der alten Prüfung) suchen, ob es noch einen zweiten Aufrufer
+gibt. Und einen Test schreiben, der den **ganzen Weg** geht statt beide
+Enden getrennt zu prüfen.
+
 ## Ein Standardwert im Konstruktor versteckt ein vergessenes Feld
 
 `CombatSession.moves` hat einen leeren Standardwert:

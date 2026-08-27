@@ -1,3 +1,5 @@
+import 'ability_catalog.dart';
+
 /// Was der Spieler auf die freien Slots gelegt hat.
 ///
 /// **Nur die freien.** Slot 1 steht nicht hier: Er trägt, was die Waffe
@@ -10,12 +12,17 @@
 /// Levels ist (ADR-0016). Hier steht eine Liste; wie lang sie sein darf,
 /// entscheidet die Oberfläche.
 ///
-/// **Ob das Gewählte verdient ist, wird hier ebenfalls nicht geprüft.**
+/// **Ob das Gewählte verdient ist, wird hier nicht geprüft.**
 /// Gleiche Trennung wie beim Titel: Der Spielstand hält eine Wahl, die
 /// Bedingung gilt genau einmal — beim Zusammenstellen des Kampfes
 /// (ADR-0014). Ein von Hand bearbeiteter Spielstand bringt so keine
 /// unverdiente Fähigkeit ein, und umgekehrt bleibt eine Wahl erhalten,
 /// statt beim Laden still gelöscht zu werden.
+///
+/// **Eine einzige Ausnahme davon steht in [ChosenAbilities.fromJson]:**
+/// Eine Id, die der Katalog gar nicht kennt, fällt beim Laden heraus
+/// (ADR-0024). Sie ist keine Wahl, die zurückkommen kann — sie ist ein
+/// Rest aus einer früheren Fassung des Spiels.
 class ChosenAbilities {
   ChosenAbilities({List<String> moveIds = const <String>[]})
       : _moveIds = List<String>.unmodifiable(moveIds);
@@ -100,6 +107,26 @@ class ChosenAbilities {
 
   /// Liest die Wahl. Was nicht lesbar ist, fehlt einfach — dieselbe
   /// Nachsicht wie im übrigen Spielstand (ADR-0010).
+  ///
+  /// **Ids, die es im Katalog nicht mehr gibt, fallen hier heraus**
+  /// (ADR-0024). Das ist die eine Prüfung, die beim Laden stattfindet, und
+  /// sie ist von der anderen sauber zu trennen:
+  ///
+  /// | Frage | Hängt ab von | Geprüft |
+  /// |---|---|---|
+  /// | Gibt es diese Fähigkeit überhaupt? | nur vom Katalog | **hier, beim Laden** |
+  /// | Ist sie verdient? | vom Fortschritt | beim Zusammenstellen des Kampfes |
+  ///
+  /// Die zweite bleibt unangetastet: Eine Fähigkeit, deren Bedingung
+  /// gerade nicht erfüllt ist, bleibt in der Wahl stehen und kann
+  /// zurückkommen. Die erste kann das nicht — ein Move, den der Katalog
+  /// nicht kennt, wird nie wieder wählbar, und ein Platz, der ihn hält,
+  /// ist dauerhaft blockiert, ohne dass es jemand sieht.
+  ///
+  /// Genau das ist passiert: Nach ADR-0022 fielen Kraftschlag, Zehrung,
+  /// Sammeln und Atemzug aus dem Katalog. Wer einen davon liegen hatte,
+  /// sah ihn weiter auf seinem Platz — und ging mit einem Move weniger in
+  /// den Kampf.
   factory ChosenAbilities.fromJson(Map<String, Object?> json) {
     final raw = json['moves'];
     if (raw is! List) return const ChosenAbilities.empty();
@@ -108,7 +135,11 @@ class ChosenAbilities {
     return ChosenAbilities(
       moveIds: <String>[
         for (final entry in raw)
-          if (entry is String && entry.isNotEmpty && seen.add(entry)) entry,
+          if (entry is String &&
+              entry.isNotEmpty &&
+              AbilityCatalog.byMoveId(entry) != null &&
+              seen.add(entry))
+            entry,
       ],
     );
   }

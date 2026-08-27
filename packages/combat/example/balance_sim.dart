@@ -109,7 +109,11 @@ _Result _run({
   var longest = 0;
 
   for (var i = 0; i < fights; i++) {
-    final engine = CombatEngine(seed: seeds.nextInt(1 << 30));
+    final engine = CombatEngine(
+      seed: seeds.nextInt(1 << 30),
+      enemyLoadout: gegner.loadout,
+      enemyUtilityChance: gegner.utilityChance,
+    );
     var state = CombatState.start(
       player: Combatant.fresh(
         name: 'Held',

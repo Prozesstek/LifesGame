@@ -16,6 +16,7 @@ class EnemyBlueprint {
     required this.defense,
     required this.maxEnergy,
     this.loadout = Moves.defaultLoadout,
+    this.utilityChance = 0,
   });
 
   /// Stabiler Bezeichner fuer Speicherstaende, Events und Tests.
@@ -31,6 +32,15 @@ class EnemyBlueprint {
   /// unterscheiden sich Gegner im Verhalten, ohne dass die Engine oder die
   /// Policy etwas davon wissen muessen.
   final List<Move> loadout;
+
+  /// Wie oft dieser Gegner etwas anderes tut als zuzuschlagen -- eine
+  /// Umgebung legen, sich abschirmen, das Fenster verengen.
+  ///
+  /// **Nach Haerte gestaffelt**, aus demselben Grund wie die Reihe selbst
+  /// (ADR-0009): Der letzte Gegner soll sich *anders* anfuehlen, nicht nur
+  /// haerter zuschlagen. Der Wegelagerer bleibt fast durchgehend ein
+  /// Angreifer, der Bergwaechter baut sich das Feld zurecht.
+  final double utilityChance;
 
   /// Frischer Kaempfer aus diesem Bauplan.
   Combatant spawn() {
@@ -80,6 +90,9 @@ abstract final class Enemies {
       AbilityMoves.wurzelgriff,
       AbilityMoves.aurastrom,
     ],
+    // Fast durchgehend ein Angreifer. Wer am Tag eins hier steht, soll den
+    // Kampf verstehen koennen, ohne ein Feld lesen zu muessen.
+    utilityChance: 0.1,
   );
 
   /// Knapp nach etwa zwei Wochen Gewohnheiten.
@@ -100,6 +113,7 @@ abstract final class Enemies {
       AbilityMoves.prismaBarriere,
       AbilityMoves.frostnebel,
     ],
+    utilityChance: 0.2,
   );
 
   /// Knapp nach etwa einem Monat -- und erst mit Ausruestung verlaesslich.
@@ -121,6 +135,9 @@ abstract final class Enemies {
       AbilityMoves.giftmoor,
       AbilityMoves.steinhaut,
     ],
+    // Er baut sich das Feld zurecht. Fast jede dritte Runde geht in
+    // Sandsturm, Giftmoor oder Steinhaut statt in einen Schlag.
+    utilityChance: 0.3,
   );
 
   /// Alle Gegner in aufsteigender Schwierigkeit.

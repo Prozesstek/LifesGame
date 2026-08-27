@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.08.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
 
 ---
 
@@ -111,7 +111,7 @@ flutter run -d chrome
 
 Fünfzehn Fähigkeiten aus einer Vorlage, in drei Schritten gebaut
 ([ADR-0022](../decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
-Ziel 5 ist damit erfüllt. 205 App-Tests, combat 49, abilities 31.
+Ziel 5 ist damit erfüllt. 209 App-Tests, combat 49, abilities 31.
 
 ### Was gebaut ist
 
@@ -151,6 +151,14 @@ verrechnet Fähigkeit, Statuseffekte und Umgebung multiplikativ.
 
 In ADR-0009 stand er bei 36 % an Tag 30 und 100 % an Tag 60.
 
+> **Nachtrag 26.08., abends: die hier genannte Ursache war falsch.** Der
+> Bergwächter trug Donnerkeil nicht — `EnemyBlueprint.loadout` wurde
+> nirgends gelesen, er kämpfte mit dem Standard-Moveset und damit mit
+> Kraftschlag (`power` 2,2). Die zweite Hälfte der Erklärung stimmt und
+> war die eigentliche Ursache. Der Absatz bleibt stehen, weil die falsche
+> Diagnose lehrreich ist; Details in `gotchas.md` und
+> [ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md).
+
 Die Ursache ist benannt: Er trägt jetzt Donnerkeil (`power` 2,125), während
 die frühen Spielerfähigkeiten **schwächer sind als der Basisangriff** —
 Funkenstoß hat 0,75 gegen 1,0 beim Bogenschuss und kostet zusätzlich
@@ -168,10 +176,216 @@ an jedem Tag mit **einem** Move. Sie nimmt jetzt an, dass die Kette nie
 reißt und jeder Theoriepunkt in einen Knoten mit Fähigkeit geht; beides
 steht im Code und macht das Ergebnis zur oberen Schranke.
 
+### Die Vorlage liegt jetzt im Repo
+
+[`docs/vorlagen/faehigkeiten.md`](../vorlagen/faehigkeiten.md) — bis dahin
+lag sie nur in einem Downloads-Ordner und existierte für den anderen
+damit nicht, dasselbe Muster wie bei `Kampfsystem.docx`. Sie enthält die
+fünfzehn Fähigkeiten samt Icon- und Animationsideen, die Timing-Referenz
+und die Umgebungsregeln — dazu einen nachgeprüften Soll-Ist-Teil: welche
+Zahlen ankommen (alle), welche drei Umrechnungen dazwischenliegen, und
+fünf Stellen, an denen die Vorlage noch auf Antwort wartet.
+
+`docs/vorlagen/` ist ab jetzt der Platz für solche Dokumente und steht im
+Gedächtnis-Protokoll in `CLAUDE.md`.
+
+### Der Gegner spielt jetzt nach denselben Regeln
+
+Gemeldet war eine fehlende Timing-Leiste bei Frostnebel, Sandsturm und
+Giftmoor. Die Ursache war klein; beim Nachprüfen kamen **vier weitere**
+Befunde mit derselben Wurzel dazu
+([ADR-0023](../decisions/0023-der-gegner-spielt-nach-denselben-regeln.md)).
+Sechs Commits, 222 App-Tests (vorher 213), combat 78 (vorher 49).
+
+| Befund | Wirkung, bevor er behoben war |
+|---|---|
+| Leiste nur bei `power > 0` | acht Fähigkeiten ohne Zeitfenster, vier Perfect-Wirkungen unerreichbar |
+| Gegner bekam immer `TimedHit.none` | Wurzelgriff, Sandsturm und Donnerkeils Perfect-Wirkung gegen ihn **wirkungslos** |
+| Gegner erhielt nur einen Tipp | sein Klingenwirbel traf einmal statt dreimal |
+| Policy übersprang alles ohne Schaden | drei von sechs Zügen des Bergwächters tot |
+| **`EnemyBlueprint.loadout` wurde nirgends gelesen** | *jeder* Gegner kämpfte mit dem Standard-Moveset |
+
+**Der letzte wiegt am schwersten.** ADR-0022 Punkt 8 stand geschrieben und
+galt im Code nicht — keine der fünfzehn Fähigkeiten wurde je von einem
+Gegner gespielt. Der Fallstrick dazu steht in `gotchas.md`.
+
+**Damit war die hier dokumentierte Ursache des Bergwächter-Befunds
+falsch.** Weiter unten stand: „Er trägt jetzt Donnerkeil." Er trug ihn
+nie. Die Erklärung klang plausibel, passte zu den Zahlen und war falsch.
+
+### Was jetzt gilt
+
+- **Ob getippt wird, entscheidet der Move** (`Move.hasTimingWindow`):
+  Ändert Perfect etwas? Abgeleitet, nicht als Flag gesetzt.
+- **Der Gegner würfelt eine Stelle auf der Leiste**, gewertet mit
+  denselben Fenstern (`TimingSpec.judgeAt`). Ohne eine einzige neue Zahl.
+- **Er greift manchmal zu Utility**: Wegelagerer 10 %, Söldner 20 %,
+  Bergwächter 30 %. Mit vier Sperren gegen sichtbar verschwendete Runden.
+- **Perfekt gelegt hält eine Umgebung eine Runde länger** — auch bei
+  Vulkanbruch. Dafür kennt eine Umgebung jetzt ihre `totalTurns`; sonst
+  liefe Giftmoors Steigerung rückwärts los.
+- **Die liegende Umgebung steht im HUD**, mit Restrunden und Farbe für den
+  Besitzer.
+- **`Sammeln` und `Atemzug` bekommen keine Leiste** — sie haben keine
+  Perfect-Wirkung, und ein Tipp ohne Auszahlung ist Reibung.
+
+### Die neue Balance-Tabelle
+
+| Gegner | Tag 0 | Tag 7 | Tag 14 | Tag 21 | Tag 30 | Tag 60 |
+|---|---|---|---|---|---|---|
+| Wegelagerer | 0 → **74 %** | 94 → **100 %** | 100 % | 100 % | 100 % | 100 % |
+| Söldner | 0 % | 0 % | 0 % | 38 → **11 %** | 100 → **90 %** | 100 → **99 %** |
+| Bergwächter | 0 % | 0 % | 0 % | 0 → **5 %** | 0 → **22 %** | 0 → **40 %** |
+
+**Der Bergwächter ist nicht länger unschlagbar**, obwohl er jetzt
+Donnerkeil trägt: Er steckt 30 % seiner Züge in Utility, und Donnerkeil
+kostet 5 Energie — Kraftschlag konnte er öfter spielen.
+
+**Die Spannweite zwischen perfektem und keinem Timing ist zurück:** 35
+Punkte beim Wegelagerer an Tag 0, 46 beim Söldner an Tag 30, 33 beim
+Bergwächter an Tag 60. Vorher stand dort fast überall 0 — das ist die
+Aussage aus ADR-0009, wieder messbar.
+
+### Nachgemeldet: ein Platz war belegt und kam nicht im Kampf an
+
+Gemeldet mit Screenshot — vier Fähigkeiten angelegt, drei Knöpfe im
+Kampf. Es fehlte *Kraftschlag*.
+
+**Ursache: ADR-0022 hat ihn aus dem Katalog geworfen.** Die vier aus
+ADR-0017 (Kraftschlag, Zehrung, Sammeln, Atemzug) sind nicht mehr
+wählbar; in `package:combat` gibt es sie weiter. Ein Spielstand, der einen
+davon hielt, zeigte ihn auf seinem Platz — `ability_slots_row.dart` fragt
+`Moves.byId`, nicht den Katalog — und der Kampf ließ ihn weg. Der Platz
+war dauerhaft blockiert, ohne Meldung.
+
+Behoben über
+[ADR-0024](../decisions/0024-abgeloeste-faehigkeiten-fallen-beim-laden-heraus.md):
+`ChosenAbilities.fromJson` streicht Ids, die der Katalog nicht kennt. Der
+Fall repariert sich beim nächsten Start von selbst.
+
+**Die Tests haben es nicht gefunden, weil sie selbst veraltet waren:**
+`chosen_abilities_test.dart` benutzte `mend` und `breath` als
+Beispiel-Ids und bewies damit, dass abgelöste Ids das Laden überstehen.
+Sie nehmen ihre Beispiele jetzt aus dem Katalog.
+
+### Schadenszahlen über den Kämpfern
+
+Treffer stehen rot über dem Kopf, Heilung grün mit Plus, ein ganz
+geschluckter Schlag als „Geblockt". Schaden über Zeit trägt die Farbe
+seiner Quelle: Gift lila, Giftboden dunkleres Lila, Brand orange, Eisfeld
+hellblau, Sandsturm sandgelb, Lavafeld rot mit Funken um die Zahl.
+
+**Zwei Entscheidungen, die nicht offensichtlich sind:**
+
+Bei einem **teilweise** geblockten Schlag steht nur die Zahl da, die
+durchkommt — „Geblockt" heißt dann auch wirklich geblockt. Ob der Block
+vollständig war, sagt seit heute das Event (`DamageAbsorbed.complete`).
+Die Darstellung soll das nicht aus der Eventliste erraten müssen; sie
+müsste dafür vorausschauen und `ShieldBroke` überspringen.
+
+**Was angezeigt wird, entscheidet eine reine Funktion**
+(`damageReadoutFor` in `floating_text.dart`), nicht die Ereignisschleife
+in Flame. Dieselbe Trennung wie bei `MoveAnimation`. Der Grund ist
+praktisch: Im Flame-Code erreicht kein Test die Entscheidung, ohne ein
+Spiel zu starten — als Funktion sind es zehn Zeilen Test.
+
+**Nicht am Bild geprüft.** Der Browser ließ sich in der Sitzung nicht
+anzeigen, ein Screenshot war nicht möglich. Was *angezeigt wird*, ist
+getestet; wie es auf einem Handy **aussieht** — Größe, Versatz bei
+Klingenwirbels vier Treffern, Lesbarkeit der Funken — muss jemand
+ansehen.
+
+### Langes Drücken erklärt einen Zug
+
+Jeder Move-Knopf im Kampf trägt einen Tooltip: was der Zug tut, und was
+ein perfekter Treffer daran ändert. Ausgelöst durch langes Drücken —
+auf einem Handy gibt es kein Mausschweben, und ein „i" auf dem Knopf
+nähme den Platz, den Name und Energiekosten schon brauchen. Der leere
+Log nennt den Weg („Lange drücken erklärt ihn"), sonst fände ihn
+niemand.
+
+**Die Formulierungen kommen aus der Vorlage, die Zahlen nicht.**
+`move_help.dart` setzt ein, was der Zug bei *diesem* Angriffswert
+anrichtet: Donnerkeil sagt bei Angriff 13 etwas anderes als bei 20. Bei
+genau 16 trifft er die Zahlen der Vorlage — ein Test hält das fest, und
+damit auch die Umrechnung aus ADR-0022.
+
+**Alle Zahlen sind flach**, also ohne Verteidigung, Streuung und Timing.
+Deshalb steht überall „etwa". Gerechnet wird in `package:combat`
+(`Move.flatDamage`, `flatFromFactor`), nicht im Bildschirm.
+
+**Was abgelesen werden kann, wird abgelesen.** Steinhauts „−40 %" kommt
+aus `ReduceIncoming(factor: 0.6)`, die Umgebungssätze bauen sich
+vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
+den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
+geschrieben.
+
+### Die App soll aufs Handy — Android wird eingerichtet
+
+Entschieden am 26.08. von AktivesBrett: „Im Browser ist ja nur zum
+Testen, aber es soll auf dem Handy laufen." Damit fällt **Android** von
+der Sperrliste in `ziele.md`. Die Begründung trägt: Ziel 7 verlangt
+30 Tage tägliches Spielen, und ein Browser-Tab wird seltener angetippt
+als ein Symbol auf dem Startbildschirm.
+
+**Der `android/`-Teil des Projekts ist vollständig** und war es schon:
+`applicationId` `dev.prozesstek.lifes_game`, Gradle-Kotlin-DSL, und der
+Release-Build signiert mit dem Debug-Schlüssel — ein APK zum Selbst-
+Installieren braucht also **keinen** Keystore.
+
+Zwei Kleinigkeiten sind nachgezogen: Die App heißt auf dem Startbildschirm
+jetzt **„Lifes Game"** statt `lifes_game`, und das Hochformat steht auch
+im Manifest. `main.dart` sperrt es zwar schon, aber erst wenn Flutter
+läuft — ohne die Manifest-Zeile dreht sich der Startbildschirm kurz mit.
+
+**Was auf diesem Rechner fehlt** (Stand `flutter doctor`):
+
+| | Zustand |
+|---|---|
+| Android SDK | **fehlt ganz** („Unable to locate Android SDK") |
+| Android Studio | nicht installiert |
+| JDK 17 | fehlt — im PATH steht Java 1.8, zu alt für `sourceCompatibility 17` |
+| `JAVA_HOME`, `ANDROID_HOME` | nicht gesetzt |
+
+`CLAUDE.md` beschrieb bisher frekks Rechner („Android Studio da, aber
+cmdline-tools fehlen"). Hier ist es weniger.
+
+**Drei Schritte kann nur ein Mensch machen:** Android Studio installieren
+(winget verlangt eine interaktive Zustimmung zu den Quellbedingungen),
+die SDK-Lizenzen akzeptieren, und auf dem Handy die Installation aus
+unbekannten Quellen erlauben. Danach ist `flutter build apk --release`
+ein einzelner Befehl.
+
 ### Offen
 
-**Die Umgebungen haben kein Bild.** Beim Setzen leuchten beide Kämpfer
-kurz auf; Lava, Sandschleier und Nebel fehlen.
+**Der andere Fall ist weiter unsichtbar.** Eine Fähigkeit, die es im
+Katalog gibt, deren Bedingung gerade aber nicht erfüllt ist, liegt
+sichtbar auf ihrem Platz und fällt im Kampf heraus. Erreichbar über den
+Entwicklermodus: schenken, anlegen, Zuschläge zurücksetzen. Das ist
+Absicht aus ADR-0014 — ob der Charakterbildschirm es kenntlich machen
+sollte, ist offen.
+
+**Der Bergwächter erreicht auch an Tag 60 nur 40 %.** ADR-0009 wollte dort
+100 %. Er ist jetzt der Gegner, der nie verlässlich fällt — vorher war er
+der, der nie fiel. Besser, aber nicht fertig. Balancing bleibt
+zurückgestellt; gemessen und gemeldet ist es.
+
+**Alle Zahlen aus ADR-0009 und ADR-0022 sind neu zu messen.** Sie stammen
+aus Kämpfen, in denen der Gegner nie zielte und immer dasselbe Moveset
+hatte.
+
+**Der simulierte Spieler benutzt weiter keine Utility.**
+`tool/balance_sim.dart` steuert ihn mit derselben Policy, aber mit
+`utilityChance` 0. Die Tabelle ist damit eine **untere** Schranke für den
+Spieler und eine ehrliche für den Gegner.
+
+**Die Umgebungen haben kein Bild.** Sie stehen jetzt im HUD, aber Lava,
+Sandschleier und Nebel fehlen weiter. Dazu fällt `move_animation.dart` für
+**alle** fünfzehn auf `melee` zurück — bei Steinhaut und Blütentau macht
+die Figur dadurch einen Ausfallschritt auf den Gegner zu.
+
+**Sternenfalls Marker springt nicht zurück.** Die Vorlage nennt das als
+Teil seines Timings; `TimingSpec` kennt nur Geschwindigkeit und Fenster.
 
 ## Sitzung 25.08.2026: Entwicklermodus und ein stiller Kampf-Fehler
 

@@ -115,6 +115,13 @@ class Fighter extends PositionComponent {
   /// Wo ein Geschoss einschlägt — Brustmitte.
   Vector2 get chestAnchor => _worldPointOf(Vector2(size.x * 0.5, 44));
 
+  /// Wo Schadens- und Heilungszahlen erscheinen — über dem Kopf.
+  ///
+  /// Bewusst mittig statt an der Trefferstelle: Die Zahl gehört zur
+  /// Figur, nicht zur Wunde, und über dem Kopf steht sie bei jeder
+  /// Blickrichtung an derselben Stelle.
+  Vector2 get headAnchor => _worldPointOf(Vector2(size.x * 0.5, -10));
+
   Vector2 _worldPointOf(Vector2 local) {
     final x = facesRight ? local.x : size.x - local.x;
     return Vector2(position.x - size.x / 2 + x, position.y - size.y + local.y);

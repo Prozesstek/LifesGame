@@ -125,6 +125,7 @@ abstract final class AbilityMoves {
     energyDelta: -4,
     timing: TimingSpec(speed: 0.9, perfectWindow: 0.22),
     effects: <MoveEffect>[SetEnvironment('frost')],
+    perfectEffects: <MoveEffect>[SetEnvironment('frost', extraTurns: 1)],
   );
 
   /// Wirft 30 % des erlittenen Schadens zurueck. Perfect: 50 %.
@@ -161,6 +162,7 @@ abstract final class AbilityMoves {
     energyDelta: -5,
     timing: TimingSpec(speed: 1.5, perfectWindow: 0.15),
     effects: <MoveEffect>[SetEnvironment('sandstorm')],
+    perfectEffects: <MoveEffect>[SetEnvironment('sandstorm', extraTurns: 1)],
   );
 
   /// 18 Schaden, heilt in voller Hoehe mit. Perfect: 150 % und 2 Energie.
@@ -185,6 +187,7 @@ abstract final class AbilityMoves {
     energyDelta: -6,
     timing: TimingSpec(speed: 1.4, perfectWindow: 0.14),
     effects: <MoveEffect>[SetEnvironment('poison_bog')],
+    perfectEffects: <MoveEffect>[SetEnvironment('poison_bog', extraTurns: 1)],
   );
 
   // --- Epic ---
@@ -200,6 +203,9 @@ abstract final class AbilityMoves {
     effects: <MoveEffect>[
       DilateTime(speedFactor: 0.5, perfectBonus: 0.15, turns: 2),
     ],
+    perfectEffects: <MoveEffect>[
+      DilateTime(speedFactor: 0.5, perfectBonus: 0.15, turns: 3),
+    ],
   );
 
   /// 38 Schaden und das Lavafeld obendrauf.
@@ -210,6 +216,7 @@ abstract final class AbilityMoves {
     energyDelta: -8,
     timing: TimingSpec(speed: 2.2, perfectWindow: 0.07),
     effects: <MoveEffect>[SetEnvironment('lava')],
+    perfectEffects: <MoveEffect>[SetEnvironment('lava', extraTurns: 1)],
   );
 
   // --- Legendary ---

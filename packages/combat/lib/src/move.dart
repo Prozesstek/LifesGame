@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'ability_moves.dart';
+import 'balance.dart';
 import 'environment.dart';
 import 'timing_spec.dart';
 
@@ -128,10 +131,16 @@ final class HealSelfBy extends MoveEffect {
 }
 
 /// Legt eine Umgebung. Die Id zeigt in [Environments].
+///
+/// [extraTurns] haengt Runden an die Katalogdauer an. Genau so bekommen
+/// die vier Faehigkeiten, fuer die die Vorlage keine Perfect-Wirkung nennt,
+/// trotzdem eine: Ein perfekter Treffer legt dieselbe Umgebung eine Runde
+/// laenger. Ein Tipp ohne jede Auszahlung waere sonst reine Reibung.
 final class SetEnvironment extends MoveEffect {
-  const SetEnvironment(this.environmentId);
+  const SetEnvironment(this.environmentId, {this.extraTurns = 0});
 
   final String environmentId;
+  final int extraTurns;
 }
 
 /// Gibt dem Anwender Energie, zusaetzlich zu [Move.energyDelta].
@@ -221,10 +230,62 @@ class Move {
 
   bool get dealsDamage => power > 0;
 
+  /// Ob dieser Zug ein Zeitfenster hat -- ob also getippt wird.
+  ///
+  /// **Nicht dasselbe wie [dealsDamage], auch wenn es lange so aussah.**
+  /// Bis zum Faehigkeiten-Set gab es vier Moves, und nur die schadenden
+  /// hatten eine Wertung; die Leiste hing deshalb an `power > 0`. Von den
+  /// fuenfzehn Faehigkeiten haben acht `power` 0 und trotzdem eigene
+  /// Timing-Werte -- Steinhaut wird bei Perfect deutlich staerker, ohne
+  /// jemals Schaden zu machen.
+  ///
+  /// Die Bedingung lautet deshalb: **Aendert Perfect an diesem Zug etwas?**
+  /// Sie wird aus dem Move abgeleitet statt als Flag gesetzt, damit sie
+  /// nicht vergessen werden kann -- wer einer Faehigkeit eine
+  /// Perfect-Wirkung gibt, gibt ihr damit auch die Leiste.
+  ///
+  /// Folge fuer *Sammeln* und *Atemzug*: Sie haben keine Perfect-Wirkung
+  /// und bekommen darum keine Leiste. Ein Pflichttipp ohne jede Auszahlung
+  /// waere reine Reibung.
+  bool get hasTimingWindow =>
+      dealsDamage || perfectFactor != null || perfectEffects.isNotEmpty;
+
   /// Energie, die vorhanden sein muss. Erzeugende Moves fordern nichts.
   int get energyCost => energyDelta < 0 ? -energyDelta : 0;
 
   bool isAffordableBy(int energy) => energy >= energyCost;
+
+  /// Was dieser Zug bei [attack] Angriff anrichtet, **wenn nichts dagegen
+  /// steht** -- keine Verteidigung, keine Streuung, kein Timing-Bonus.
+  ///
+  /// **Eine Zahl fuer Anzeigen, keine Kampfzahl.** Der Kampf rechnet in
+  /// `_rawDamage` mit der Verteidigung des Ziels und einer Streuung
+  /// weiter; was hier herauskommt, ist die obere Schranke davon. Sie steht
+  /// trotzdem hier und nicht im Bildschirm: Sobald `power` sich aendert,
+  /// aendert sich beides zusammen (Schichtregel in `CLAUDE.md`).
+  int flatDamage(int attack) => flatFromFactor(power, attack);
+
+  /// Dasselbe bei perfektem Timing.
+  ///
+  /// Faehigkeiten bringen ihren eigenen Faktor mit; Basisangriff und
+  /// Waffenmoves bleiben beim Deckel aus [Balance] (ADR-0022).
+  int flatPerfectDamage(int attack, {Balance balance = const Balance()}) {
+    return flatFromFactor(
+      power * (perfectFactor ?? balance.timedHitPerfect),
+      attack,
+    );
+  }
+}
+
+/// Ein Vielfaches des Angriffswerts als glatte Zahl.
+///
+/// Dauerschaden, Heilung und Umgebungen sind im Spiel durchweg Faktoren
+/// auf den Angriffswert, nie feste HP (ADR-0022). Wer eine davon anzeigen
+/// will, braucht dieselbe Rechnung -- und sie steht deshalb einmal hier
+/// statt in jedem Bildschirm neu.
+int flatFromFactor(double factorOfAttack, int attack) {
+  if (factorOfAttack <= 0) return 0;
+  return max(1, (factorOfAttack * attack).round());
 }
 
 /// Standard-Moveset gemaess Konzept, Abschnitt 3.2.

@@ -8,6 +8,11 @@ import 'package:flutter/material.dart';
 /// Kampflogik anhand von [TimedHit] (ADR-0002) — und wie schwer er zu
 /// treffen ist, steht in [spec], das aus `package:combat` kommt. Hier
 /// werden weder Zonen noch Geschwindigkeiten festgelegt.
+///
+/// Auch die **Wertung** liegt dort: `TimingSpec.judgeAt` entscheidet, ob
+/// eine Stelle perfekt, gut oder daneben ist. Sie stand bis heute hier —
+/// und damit an einem Ort, an den die Engine nicht herankommt, obwohl der
+/// Gegner nach denselben Fenstern gewertet werden muss.
 class TimingBar extends StatefulWidget {
   const TimingBar({
     required this.onResult,
@@ -76,7 +81,7 @@ class TimingBarState extends State<TimingBar>
   void lockIn() {
     if (_done) return;
 
-    _results.add(_judge(_controller.value));
+    _results.add(widget.spec.judgeAt(_controller.value));
 
     if (_results.length < widget.hits) {
       // Nächster Tipp: Der Marker springt an den Anfang zurück, damit
@@ -94,15 +99,6 @@ class TimingBarState extends State<TimingBar>
     _done = true;
     _controller.stop();
     widget.onResult(List<TimedHit>.unmodifiable(_results));
-  }
-
-  TimedHit _judge(double position) {
-    // Die Fenster der Vorlage sind über die **ganze** Breite gemessen,
-    // die Entfernung hier ab der Mitte — deshalb die Halbierung.
-    final distance = (position - 0.5).abs();
-    if (distance <= widget.spec.perfectWindow / 2) return TimedHit.perfect;
-    if (distance <= widget.spec.goodWindow / 2) return TimedHit.good;
-    return TimedHit.none;
   }
 
   @override

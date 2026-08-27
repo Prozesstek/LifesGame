@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import 'battle/fighter.dart';
+import 'battle/floating_text.dart';
 import 'battle/move_animation.dart';
 import 'battle/projectile.dart';
 
@@ -32,6 +33,9 @@ class BattleGame extends FlameGame {
 
   /// Wohin die nächste Einplanung fällt.
   double _cursor = 0;
+
+  /// Wie viele Zahlen bisher gesetzt wurden. Steuert nur den Versatz.
+  int _textCount = 0;
 
   @override
   Future<void> onLoad() async {
@@ -75,20 +79,39 @@ class BattleGame extends FlameGame {
         case MoveUsed(:final side, :final moveId):
           _playMove(side, MoveAnimation.forId(moveId));
 
+        // Was über dem Kopf erscheint, entscheidet [damageReadoutFor] —
+        // hier steht nur noch, wann es erscheint und was die Figur dabei
+        // tut. Die Zweige sehen sich deshalb alle gleich.
         case DamageDealt(:final target, :final timedHitFactor):
-          _at(0, () => _fighterFor(target).takeHit(strong: timedHitFactor > 1));
+          final readout = damageReadoutFor(event);
+          _at(0, () {
+            _fighterFor(target).takeHit(strong: timedHitFactor > 1);
+            _show(readout);
+          });
           _advance(0.18);
 
         case DamageAbsorbed(:final target):
-          _at(0, () => _fighterFor(target).pulseShield());
+          final readout = damageReadoutFor(event);
+          _at(0, () {
+            _fighterFor(target).pulseShield();
+            _show(readout);
+          });
           _advance(0.18);
 
         case Healed(:final target):
-          _at(0, () => _fighterFor(target).glow(const Color(0xFF6FD68B)));
+          final readout = damageReadoutFor(event);
+          _at(0, () {
+            _fighterFor(target).glow(DamageColors.heal);
+            _show(readout);
+          });
           _advance(0.2);
 
-        case StatusTicked(:final target):
-          _at(0, () => _fighterFor(target).glow(const Color(0xFF9BE05B)));
+        case StatusTicked(:final target, :final statusId):
+          final readout = damageReadoutFor(event);
+          _at(0, () {
+            _fighterFor(target).glow(DamageColors.forSource(statusId));
+            _show(readout);
+          });
           _advance(0.2);
 
         case CombatantDefeated(:final side):
@@ -118,6 +141,29 @@ class BattleGame extends FlameGame {
     }
 
     if (onDone != null) _at(0.05, onDone);
+  }
+
+  /// Setzt eine Zahl über den Kopf eines Kämpfers. `null` heisst: nichts.
+  ///
+  /// **Versetzt, weil mehrere gleichzeitig stehen können.** Klingenwirbel
+  /// liefert drei bis vier Treffer im Abstand von 0,18 Sekunden, und eine
+  /// Zahl bleibt fast eine Sekunde stehen — ohne Versatz lägen sie
+  /// übereinander und wären als Stapel unlesbar.
+  void _show(DamageReadout? readout) {
+    if (readout == null) return;
+
+    final schritt = _textCount++ % 3;
+    final anchor = _fighterFor(readout.target).headAnchor;
+
+    add(
+      FloatingText(
+        text: readout.text,
+        color: readout.color,
+        fontSize: readout.fontSize,
+        sparkle: readout.sparkle,
+        at: Vector2(anchor.x + (schritt - 1) * 21, anchor.y - schritt * 7),
+      ),
+    );
   }
 
   /// Die Ausholbewegung — und beim Bogen der Pfeil, der daraus entsteht.
@@ -167,10 +213,16 @@ class BattleGame extends FlameGame {
   void reset() {
     _beats.clear();
     _cursor = _now;
+    _textCount = 0;
     _hero.reset();
     _enemy.reset();
     for (final shot in children.whereType<Projectile>().toList()) {
       shot.removeFromParent();
+    }
+    // Auch die Zahlen: Ein „Nochmal" soll nicht mit dem letzten Treffer
+    // des verlorenen Kampfes über dem Kopf beginnen.
+    for (final text in children.whereType<FloatingText>().toList()) {
+      text.removeFromParent();
     }
   }
 

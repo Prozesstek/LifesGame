@@ -54,9 +54,24 @@ final class DamageDealt extends CombatEvent {
 }
 
 final class DamageAbsorbed extends CombatEvent {
-  const DamageAbsorbed({required this.target, required this.amount});
+  const DamageAbsorbed({
+    required this.target,
+    required this.amount,
+    required this.complete,
+  });
+
   final Side target;
   final int amount;
+
+  /// Ob der Schild den Schlag **ganz** geschluckt hat.
+  ///
+  /// Steht hier, weil die Engine es an dieser Stelle ohnehin ausrechnet --
+  /// und weil die Darstellung es sonst raten muesste. Auf einen
+  /// teilweise geschluckten Schlag folgt ein [DamageDealt], auf einen
+  /// ganz geschluckten nicht; wer das aus der Eventliste ablesen will,
+  /// muss vorausschauen und dabei [ShieldBroke] ueberspringen. Eine
+  /// Tatsache, die schon feststeht, gehoert ins Event (ADR-0002).
+  final bool complete;
 }
 
 final class ShieldBroke extends CombatEvent {

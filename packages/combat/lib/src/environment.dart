@@ -17,6 +17,7 @@ class Environment {
     required this.name,
     required this.owner,
     required this.remainingTurns,
+    int? totalTurns,
     this.dotFactorOnEnemy = 0,
     this.dotGrowthPerTurn = 0,
     this.speedFactorBoth = 1.0,
@@ -26,7 +27,7 @@ class Environment {
     this.healFactorOnEnemy = 1.0,
     this.healFactorBoth = 1.0,
     this.energyPenaltyOnEnemy = 0,
-  });
+  }) : totalTurns = totalTurns ?? remainingTurns;
 
   /// Stabiler Bezeichner fuer Events und Darstellung.
   final String id;
@@ -39,6 +40,17 @@ class Environment {
   final Side owner;
 
   final int remainingTurns;
+
+  /// Wie lange sie gedacht war, als sie gelegt wurde.
+  ///
+  /// **Sie muss das selbst wissen.** Vorher las die Engine die Gesamtdauer
+  /// aus dem Katalog nach, um auszurechnen, wie lange eine Umgebung schon
+  /// liegt -- zwei Wahrheiten ueber dieselbe Sache. Sobald ein perfekter
+  /// Treffer eine Runde dazugibt, gehen sie auseinander: Bei fuenf
+  /// Restrunden gegen vier im Katalog kaeme rechnerisch minus eine
+  /// verstrichene Runde heraus, und Giftmoors steigender Schaden faenge
+  /// unterhalb seines Anfangswerts an.
+  final int totalTurns;
 
   /// Schaden je Runde an den Gegner des Erstellers, als Vielfaches von
   /// dessen Angriffswert.
@@ -91,14 +103,26 @@ class Environment {
   }
 
   /// Wie viele Runden sie schon liegt. Grundlage fuer [dotFactorInTurn].
-  int elapsedOf(int totalTurns) => totalTurns - remainingTurns;
+  int get elapsed => totalTurns - remainingTurns;
 
-  Environment copyWith({Side? owner, int? remainingTurns}) {
+  /// Dieselbe Umgebung, nur laenger. Ein perfekt gelegter Zug gibt eine
+  /// Runde dazu -- und weil [totalTurns] mitwaechst, haengt die Bonusrunde
+  /// hinten an, statt die Steigerung des Giftmoors nach vorn zu ziehen.
+  Environment withExtraTurns(int extra) {
+    if (extra <= 0) return this;
+    return copyWith(
+      remainingTurns: remainingTurns + extra,
+      totalTurns: totalTurns + extra,
+    );
+  }
+
+  Environment copyWith({Side? owner, int? remainingTurns, int? totalTurns}) {
     return Environment(
       id: id,
       name: name,
       owner: owner ?? this.owner,
       remainingTurns: remainingTurns ?? this.remainingTurns,
+      totalTurns: totalTurns ?? this.totalTurns,
       dotFactorOnEnemy: dotFactorOnEnemy,
       dotGrowthPerTurn: dotGrowthPerTurn,
       speedFactorBoth: speedFactorBoth,

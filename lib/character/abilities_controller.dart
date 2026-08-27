@@ -114,9 +114,20 @@ final weaponMoveProvider = Provider<Move>((ref) {
 /// 3. Was es als Move nicht gibt, kommt nicht mit. Eine Id kann veralten;
 ///    ein Kampf ohne Knöpfe wäre die schlechtere Antwort darauf.
 final activeMovesProvider = Provider<List<Move>>((ref) {
-  final progress = ref.watch(abilityProgressProvider);
   final chosen = ref.watch(chosenAbilitiesProvider);
   final level = ref.watch(playerLevelProvider);
+
+  // **Gefragt wird [unlockedAbilitiesProvider], nicht der Katalog direkt.**
+  // Vorher stand hier `AbilityCatalog.isUnlocked(...)` — eine zweite
+  // Wahrheit über dieselbe Frage. Sie kannte die Zuschläge des
+  // Entwicklermodus nicht (ADR-0021): Eine geschenkte Fähigkeit stand in
+  // der Auswahl, ließ sich anlegen, wurde gespeichert — und fiel hier
+  // still heraus. Im Kampf fehlte einfach ein Knopf, ohne Meldung.
+  //
+  // Jetzt entscheidet genau eine Stelle, was offen ist.
+  final unlocked = <String>{
+    for (final ability in ref.watch(unlockedAbilitiesProvider)) ability.moveId,
+  };
 
   // Slot 1 gehört der Waffe, die übrigen sind gewählt.
   final freeSlots = AbilitySlots.openAt(level.level) - 1;
@@ -124,7 +135,7 @@ final activeMovesProvider = Provider<List<Move>>((ref) {
   final moves = <Move>[ref.watch(weaponMoveProvider)];
   for (final moveId in chosen.moveIds) {
     if (moves.length > freeSlots) break;
-    if (!AbilityCatalog.isUnlocked(moveId, progress)) continue;
+    if (!unlocked.contains(moveId)) continue;
 
     final move = Moves.byId(moveId);
     if (move != null) moves.add(move);

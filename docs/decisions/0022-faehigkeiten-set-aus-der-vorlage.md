@@ -11,6 +11,10 @@ Timing, Energiekosten und Seltenheit, dazu vier Umgebungen und deren
 Regeln. Sie füllt Ziel 5 aus `ziele.md` (Issue #17) und löst den
 Zwischenstand aus ADR-0017 ab, der neun von zwanzig Fähigkeiten hatte.
 
+*Nachgetragen am 26.08.2026: Die Vorlage liegt jetzt im Repo —
+[`docs/vorlagen/faehigkeiten.md`](../vorlagen/faehigkeiten.md). Nur der
+Verweis kam dazu, die Entscheidung darunter ist unverändert.*
+
 **Die Vorlage trifft an drei Stellen auf gemessene Entscheidungen:**
 
 1. **Sie nennt festen Schaden** (12, 34, 60). Die Engine rechnet
