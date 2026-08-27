@@ -168,7 +168,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             child: GameWidget<BattleGame>(game: _game),
           ),
         ),
-        Expanded(flex: 2, child: _LogPanel(lines: session.log)),
+        // **Hier stand der Log.** Er ist der Kachelleiste gewichen: Das
+        // Bild ist jetzt der Knopf, und zwei Reihen davon brauchen den
+        // Platz, den vorher die Zeilen hatten.
+        //
+        // Geführt wird er weiter (`CombatSession.log`), nur nicht mehr
+        // gezeigt — wer ihn zurückholen will, hängt eine Zeile in diese
+        // Spalte. Was dadurch fehlt, steht in `docs/context/state.md`.
+        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: _buildControls(state, session.moves),
@@ -237,13 +244,13 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // (nur der Waffenslot ist offen), und eine leere zweite Reihe waere
       // ein Loch, das nach einem Fehler aussieht.
       _Phase.chooseMove || _Phase.animating => SizedBox(
-        height: loadout.length > 2 ? 96 : 44,
+        height: _controlsHeight(loadout.length),
         child: Column(
           children: <Widget>[
-            Expanded(child: _moveRow(loadout, state, 0)),
+            _moveRow(loadout, state, 0),
             if (loadout.length > 2) ...<Widget>[
-              const SizedBox(height: 8),
-              Expanded(child: _moveRow(loadout, state, 2)),
+              const SizedBox(height: 10),
+              _moveRow(loadout, state, 2),
             ],
           ],
         ),
@@ -251,20 +258,41 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     };
   }
 
-  /// Eine Reihe mit bis zu zwei Move-Buttons, beginnend bei [start].
+  /// Wie hoch die Kachelleiste baut.
+  ///
+  /// Die Höhe hängt an der Zahl der Kacheln, nicht an einer festen Zahl:
+  /// Ein frischer Charakter hat genau einen Move (nur der Waffenslot ist
+  /// offen, ADR-0017), und eine leere zweite Reihe wäre ein Loch, das nach
+  /// einem Fehler aussieht.
+  double _controlsHeight(int moves) {
+    const einzeln = MoveIcons.labelHeight + 4 + MoveIcons.tileSize;
+    return moves > 2 ? einzeln * 2 + 10 : einzeln;
+  }
+
+  /// Eine Reihe mit bis zu zwei Kacheln, beginnend bei [start].
+  ///
+  /// Bewusst kein `GridView` mit `childAspectRatio`: Das koppelt die
+  /// Zellenhöhe an die Fensterbreite, wodurch auf breiten Fenstern die
+  /// zweite Reihe aus dem Sichtbereich rutscht und gar nicht erst gebaut
+  /// wird (`docs/context/gotchas.md`). Feste Reihen sind bei jeder Breite
+  /// verlässlich.
+  ///
+  /// Während der Animation bleiben dieselben Kacheln stehen, nur
+  /// ausgegraut — sie zu entfernen würde die Leiste springen lassen.
   Widget _moveRow(List<Move> loadout, CombatState state, int start) {
     final accepting = _phase == _Phase.chooseMove;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         for (
           var i = start;
           i < start + 2 && i < loadout.length;
           i++
         ) ...<Widget>[
-          if (i > start) const SizedBox(width: 8),
+          if (i > start) const SizedBox(width: 10),
           Expanded(
-            child: _MoveButton(
+            child: _MoveTile(
               move: loadout[i],
               affordable:
                   accepting && loadout[i].isAffordableBy(state.player.energy),
@@ -273,13 +301,23 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             ),
           ),
         ],
+        // Eine einzelne Kachel in einer Reihe bleibt links stehen, statt
+        // sich auf die ganze Breite zu ziehen.
+        if (start + 1 >= loadout.length) const Spacer(),
       ],
     );
   }
 }
 
-class _MoveButton extends StatelessWidget {
-  const _MoveButton({
+/// Eine Fähigkeit als Kachel — **das Bild ist der Knopf**.
+///
+/// Wer ein Bild hat, zeigt es groß und trägt den Namen darüber. Wer keins
+/// hat, bekommt eine gleich große Kachel im selben Rahmenstil mit dem
+/// Namen darin. Das ist kein Schönheitsdetail: Der Waffenzug hat kein
+/// Bild, und er ist der Zug, den man **jede Runde** drückt, um Energie
+/// aufzubauen. Ohne Knopf dort ließe sich nicht kämpfen.
+class _MoveTile extends StatelessWidget {
+  const _MoveTile({
     required this.move,
     required this.affordable,
     required this.attack,
@@ -297,17 +335,11 @@ class _MoveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cost = move.energyDelta >= 0
-        ? '+${move.energyDelta} EN'
-        : '${move.energyDelta} EN';
+    final bild = MoveIcons.forMoveId(move.id);
 
-    // **Langes Drücken erklärt den Zug.** Auf einem Handy gibt es kein
-    // Mausschweben, und ein zusätzliches „i" auf dem Knopf nähme Platz,
-    // den Name und Energiekosten schon brauchen.
-    //
-    // Der Tooltip liegt **außen**: So funktioniert er auch, wenn der
-    // Knopf gerade nicht bezahlbar oder gesperrt ist — gerade dann will
-    // man wissen, worauf man spart.
+    // **Langes Drücken erklärt den Zug.** Der Tooltip liegt außen, damit er
+    // auch bei einem unbezahlbaren Zug aufgeht — gerade dann will man
+    // wissen, worauf man spart.
     return Tooltip(
       richMessage: _erklaerung(),
       triggerMode: TooltipTriggerMode.longPress,
@@ -319,7 +351,31 @@ class _MoveButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Palette.accent.withValues(alpha: 0.4)),
       ),
-      child: _button(cost),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // Die Zeile wird auch ohne Bild freigehalten, damit die
+          // Kachelflächen einer Reihe auf gleicher Höhe liegen.
+          SizedBox(
+            height: MoveIcons.labelHeight,
+            child: bild == null
+                ? null
+                : Text(
+                    move.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: affordable ? Colors.white : Palette.muted,
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 4),
+          _Kachel(move: move, bild: bild, affordable: affordable, onTap: onTap),
+        ],
+      ),
     );
   }
 
@@ -359,107 +415,106 @@ class _MoveButton extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _button(String cost) {
-    final icon = MoveIcons.forMoveId(move.id);
+/// Die antippbare Fläche: Bild oder Name, dazu die Energiekosten.
+class _Kachel extends StatelessWidget {
+  const _Kachel({
+    required this.move,
+    required this.bild,
+    required this.affordable,
+    required this.onTap,
+  });
 
-    return FilledButton.tonal(
-      onPressed: affordable ? onTap : null,
-      style: FilledButton.styleFrom(
-        padding: EdgeInsets.only(left: icon == null ? 10 : 6, right: 10),
-      ),
-      child: Row(
-        children: <Widget>[
-          // Nicht jeder Zug hat ein Bild. Wer keins hat, bekommt auch
-          // keinen Platzhalter — der Name rückt einfach nach links.
-          if (icon != null) ...<Widget>[
-            _Icon(asset: icon, faded: !affordable),
-            const SizedBox(width: 7),
-          ],
-          // `Expanded` statt `Flexible`: Es schiebt die Energiekosten an
-          // den rechten Rand und lässt den Namen als Einziges schrumpfen.
-          // Bei zwei Knöpfen nebeneinander bleiben rund 155 Pixel Inhalt,
-          // und „Prisma-Barriere" allein braucht davon schon zwei Drittel.
-          Expanded(
-            child: Text(
-              move.name,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+  final Move move;
+  final String? bild;
+  final bool affordable;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final kosten = move.energyDelta >= 0
+        ? '+${move.energyDelta}'
+        : '${move.energyDelta}';
+
+    return SizedBox(
+      height: MoveIcons.tileSize,
+      child: Material(
+        color: Palette.surfaceRaised,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: affordable ? onTap : null,
+          child: Opacity(
+            opacity: affordable ? 1 : 0.42,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                if (bild != null)
+                  Image.asset(
+                    bild!,
+                    fit: BoxFit.cover,
+                    // Das Bild liegt in dreifacher Kachelgröße vor; ohne
+                    // Glättung fräst das Verkleinern die Pixelgrafik kaputt.
+                    filterQuality: FilterQuality.medium,
+                  )
+                else
+                  // Ohne Bild trägt die Kachel den Namen — sonst wäre der
+                  // Waffenzug ein leeres Kästchen.
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        move.name,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: 5,
+                  bottom: 5,
+                  child: _EnergieMarke(text: '$kosten EN'),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 6),
-          Text(cost, style: const TextStyle(fontSize: 11)),
-        ],
-      ),
-    );
-  }
-}
-
-/// Das Bild einer Fähigkeit auf ihrem Knopf.
-class _Icon extends StatelessWidget {
-  const _Icon({required this.asset, required this.faded});
-
-  final String asset;
-
-  /// Ein unbezahlbarer Zug ist ausgegraut — das Bild blasst mit, sonst
-  /// leuchtet es über einem toten Knopf.
-  final bool faded;
-
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: faded ? 0.38 : 1,
-      child: Image.asset(
-        asset,
-        width: MoveIcons.buttonSize,
-        height: MoveIcons.buttonSize,
-        // Das Bild wird von 128 auf 28 Punkte verkleinert; ohne Glättung
-        // fräst das die Pixelgrafik kaputt.
-        filterQuality: FilterQuality.medium,
-      ),
-    );
-  }
-}
-
-class _LogPanel extends StatelessWidget {
-  const _LogPanel({required this.lines});
-
-  final List<String> lines;
-
-  @override
-  Widget build(BuildContext context) {
-    if (lines.isEmpty) {
-      return const Center(
-        // Der Hinweis steht hier, weil langes Drücken sonst niemand
-        // findet — und der leere Log ist die einzige Stelle, an der Platz
-        // dafür ist, ohne dass etwas Neues dazukommt.
-        child: Text(
-          'Wähle einen Zug.\nLange drücken erklärt ihn.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Palette.muted, height: 1.6),
         ),
-      );
-    }
+      ),
+    );
+  }
+}
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-      reverse: true,
-      itemCount: lines.length,
-      itemBuilder: (context, index) {
-        final line = lines[lines.length - 1 - index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text(
-            line,
-            style: TextStyle(
-              fontSize: 13,
-              color: index == 0
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.55),
-            ),
-          ),
-        );
-      },
+/// Die Energiekosten in der Ecke der Kachel.
+///
+/// Auf dem Bild statt daneben: Die Kachel ist ohnehin quadratisch, und
+/// eine eigene Zeile hätte Höhe gekostet, die der Kampfbildschirm nicht
+/// mehr hat.
+class _EnergieMarke extends StatelessWidget {
+  const _EnergieMarke({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xCC0B0E15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }

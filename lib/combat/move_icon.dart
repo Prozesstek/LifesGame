@@ -31,10 +31,24 @@ abstract final class MoveIcons {
   /// Alle Move-Ids, für die es ein Bild gibt.
   static Iterable<String> get moveIds => _dateien.keys;
 
-  /// Kantenlänge auf dem Move-Knopf im Kampf.
+  /// Kantenlänge der Kachel im Kampf — das Bild **ist** der Knopf.
   ///
-  /// Bewusst klein: Zwei Knöpfe nebeneinander lassen bei 390 Pixeln
-  /// Breite rund 155 Pixel Inhalt je Knopf, und Name und Energiekosten
-  /// brauchen davon den größeren Teil.
-  static const double buttonSize = 28;
+  /// Zwei Kacheln nebeneinander passen bei 390 Pixeln Breite bequem
+  /// (175 je Kachel). Begrenzt wird die Größe von der **Höhe**: Arena und
+  /// zwei Kachelreihen teilen sich rund 660 Pixel, und zwei Reihen kosten
+  /// hier zusammen etwa 300.
+  static const double tileSize = 128;
+
+  /// Höhe der Namenszeile über einer Bildkachel.
+  ///
+  /// Sie wird auch bei Kacheln **ohne** Bild freigehalten, damit die
+  /// Bildflächen einer Reihe auf gleicher Höhe liegen.
+  static const double labelHeight = 17;
+
+  /// Die Auflösung der abgelegten Bilder.
+  ///
+  /// Dreifache Kachelgröße, damit sie auf einem Handy mit dreifacher
+  /// Pixeldichte nicht hochgerechnet werden müssen. Die Vorlagen sind
+  /// 1024 × 1024 — es wird also verkleinert, nie vergrößert.
+  static const int assetSize = 384;
 }

@@ -201,21 +201,8 @@ void main() {
       // bezahlbar.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
-      final heavy = tester.widget<FilledButton>(
-        find.ancestor(
-          of: find.text(AbilityMoves.funkenstoss.name),
-          matching: find.byType(FilledButton),
-        ),
-      );
-      expect(heavy.onPressed, isNull);
-
-      final basic = tester.widget<FilledButton>(
-        find.ancestor(
-          of: find.text(Moves.basicAttack.name),
-          matching: find.byType(FilledButton),
-        ),
-      );
-      expect(basic.onPressed, isNotNull);
+      expect(_tippflaecheVon(tester, AbilityMoves.funkenstoss).onTap, isNull);
+      expect(_tippflaecheVon(tester, Moves.basicAttack).onTap, isNotNull);
     });
 
     testWidgets('eine nicht gewaehlte Faehigkeit taucht nicht auf', (
@@ -232,31 +219,39 @@ void main() {
     ) async {
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
 
-      final knopf = find.ancestor(
-        of: find.text(AbilityMoves.frostnebel.name),
-        matching: find.byType(FilledButton),
-      );
-
       // Der Name bleibt stehen — das Bild kommt dazu, es ersetzt ihn nicht.
       expect(find.text(AbilityMoves.frostnebel.name), findsOneWidget);
       expect(
-        find.descendant(of: knopf, matching: find.byType(Image)),
+        find.descendant(
+          of: _kachelVon(AbilityMoves.frostnebel),
+          matching: find.byType(Image),
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('eine ohne Bild bekommt keinen Platzhalter', (tester) async {
+    testWidgets('eine ohne Bild trägt ihren Namen in der Kachel', (
+      tester,
+    ) async {
+      // Der Waffenzug hat kein Bild — und ist der Zug, den man jede Runde
+      // drückt. Er muss trotzdem eine antippbare Kachel haben.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
 
-      final knopf = find.ancestor(
-        of: find.text(AbilityMoves.funkenstoss.name),
-        matching: find.byType(FilledButton),
-      );
-
       expect(
-        find.descendant(of: knopf, matching: find.byType(Image)),
+        find.descendant(
+          of: _kachelVon(Moves.basicAttack),
+          matching: find.byType(Image),
+        ),
         findsNothing,
       );
+      expect(_tippflaecheVon(tester, Moves.basicAttack).onTap, isNotNull);
+    });
+
+    testWidgets('jede Kachel zeigt ihre Energiekosten', (tester) async {
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
+
+      expect(find.text('+3 EN'), findsOneWidget); // Bogenschuss
+      expect(find.text('-4 EN'), findsOneWidget); // Frostnebel
     });
 
     testWidgets('eine Fähigkeit ohne Schaden öffnet die Leiste', (
@@ -357,6 +352,25 @@ void main() {
 ///
 /// Erfahrung kommt aus Haekchen -- gerechnet wird sie in
 /// `package:progression`, hier wird nur genug davon erzeugt.
+/// Die Kachel eines Zuges.
+///
+/// Sie wird über den `Tooltip` gefunden, der die ganze Kachel umschließt —
+/// der Name steht bei Bildkacheln **über** der Tippfläche, nicht darin,
+/// und wäre über den Knopf allein nicht erreichbar.
+Finder _kachelVon(Move move) {
+  return find.ancestor(
+    of: find.text(move.name),
+    matching: find.byType(Tooltip),
+  );
+}
+
+/// Die antippbare Fläche einer Kachel.
+InkWell _tippflaecheVon(WidgetTester tester, Move move) {
+  return tester.widget<InkWell>(
+    find.descendant(of: _kachelVon(move), matching: find.byType(InkWell)),
+  );
+}
+
 SaveData _mitSlot2(String moveId) {
   const habitId = 'habit-drei-aufgaben';
   const start = Day(2026, 8, 17);

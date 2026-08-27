@@ -320,26 +320,59 @@ vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
 den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
 geschrieben.
 
-### Die vier Umgebungen haben ein Bild
+### Das Bild ist der Knopf
 
-Frostnebel, Sandsturm, Giftmoor und Vulkanbruch tragen im Kampf ein
-Pixel-Icon links neben ihrem Namen. Die Bilder kommen von AktivesBrett
-(1024×1024 JPG); im Repo liegen sie als 128×128-PNG in
-`assets/abilities/`, freigestellt und verkleinert — die Vorlagen haben
-rund 40 % dunklen Rand um den Rahmen, der auf einem 28-Pixel-Knopf nur
-Platz kostet.
+Frostnebel, Sandsturm, Giftmoor und Vulkanbruch haben ein Pixel-Bild von
+AktivesBrett (1024×1024 JPG, aus `Desktop\Lifes Game Mockup\`). Im Kampf
+ist dieses Bild die **Kachel, die man drückt** — 128 Pixel im Quadrat,
+Name darüber, Energiekosten unten rechts in der Ecke.
 
-**Der Dateiname ist die Move-Id.** Damit kann die Zuordnung nicht
-auseinanderlaufen, und ein neues Bild ist eine Datei plus eine Zeile in
-`move_icon.dart`. Dass jede eingetragene Id in `package:combat`
-existiert **und** die Datei wirklich da ist, prüft
-`test/move_icon_test.dart` — Letzteres über `rootBundle.load`, das nur
-findet, was auch in `pubspec.yaml` angemeldet ist.
+Der erste Anlauf war ein kleines 28-Pixel-Icon *im* Textknopf. Ein
+Entwurf von AktivesBrett hat gezeigt, dass etwas anderes gemeint war.
 
-**Wer kein Bild hat, bekommt keinen Platzhalter.** Sechzehn leere
-Kästchen sähen aus, als wäre etwas nicht geladen; stattdessen rückt der
-Name nach links. Wird es eng, kürzt der Name ab — Bild und Energiekosten
-bleiben lesbar, und der volle Name steht ohnehin im Tooltip.
+**Was dabei zu klären war, und wie:**
+
+| Frage | Antwort |
+|---|---|
+| Die sechzehn Züge ohne Bild? | Gleich große Kachel mit dem **Namen darin** |
+| Woher der Platz? | Der **Log ist entfallen** |
+| Energiekosten? | Klein auf dem Bild, unten rechts |
+
+**Der Waffenzug war der Grund für die erste Frage.** Er hat kein Bild und
+ist der Zug, den man *jede Runde* drückt, um Energie aufzubauen. Eine
+Kachelleiste, in der er ein leeres Feld wäre, hätte den Kampf
+unbedienbar gemacht.
+
+**Die Bilder liegen in dreifacher Kachelgröße** (384 × 384) in
+`assets/abilities/`, freigestellt aus der Vorlage — die hat rund 40 %
+dunklen Rand um den Rahmen. Dreifach, weil ein Handy mit dreifacher
+Pixeldichte 128 logische Punkte auf 384 echte rechnet; bei den zuerst
+abgelegten 128 × 128 wäre das Hochrechnen gewesen.
+
+**Der Dateiname ist die Move-Id.** Ein neues Bild ist damit eine Datei
+plus eine Zeile in `move_icon.dart`. `test/move_icon_test.dart` prüft
+beide Nähte: dass die Id in `package:combat` ankommt, und dass die Datei
+da **und in `pubspec.yaml` angemeldet** ist — Letzteres über
+`rootBundle.load`, das nur findet, was angemeldet ist.
+
+### Was mit dem Log verloren ging
+
+Zwei Dinge, beide bewusst in Kauf genommen:
+
+**Es steht nirgends mehr, *was* passiert ist.** „Geblockt", „Gift wirkt",
+„Eisfeld klingt aus" — die Zahlen über den Köpfen zeigen nur den Schaden,
+nicht die Ursache. `EnvironmentSet`, `StatusApplied` und `MoveFailed`
+haben jetzt gar keine Textform mehr im Bild.
+
+**Der Hinweis auf den Tooltip ist weg.** Er stand im leeren Log („Lange
+drücken erklärt ihn") und war die einzige Stelle, an der langes Drücken
+überhaupt erwähnt wurde. Der Tooltip funktioniert weiter — man muss nur
+wissen, dass es ihn gibt.
+
+Der Log wird weiter geführt (`CombatSession.log`, `appendLog`), nur nicht
+mehr gezeigt. Eine schmale Zeile mit dem jüngsten Ereignis wäre der
+naheliegende Kompromiss: rund 20 Pixel statt 200, und sie könnte beides
+tragen.
 
 **Nicht am Bild geprüft**, wie das Übrige aus dieser Sitzung.
 
