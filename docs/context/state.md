@@ -320,6 +320,29 @@ vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
 den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
 geschrieben.
 
+### Die vier Umgebungen haben ein Bild
+
+Frostnebel, Sandsturm, Giftmoor und Vulkanbruch tragen im Kampf ein
+Pixel-Icon links neben ihrem Namen. Die Bilder kommen von AktivesBrett
+(1024×1024 JPG); im Repo liegen sie als 128×128-PNG in
+`assets/abilities/`, freigestellt und verkleinert — die Vorlagen haben
+rund 40 % dunklen Rand um den Rahmen, der auf einem 28-Pixel-Knopf nur
+Platz kostet.
+
+**Der Dateiname ist die Move-Id.** Damit kann die Zuordnung nicht
+auseinanderlaufen, und ein neues Bild ist eine Datei plus eine Zeile in
+`move_icon.dart`. Dass jede eingetragene Id in `package:combat`
+existiert **und** die Datei wirklich da ist, prüft
+`test/move_icon_test.dart` — Letzteres über `rootBundle.load`, das nur
+findet, was auch in `pubspec.yaml` angemeldet ist.
+
+**Wer kein Bild hat, bekommt keinen Platzhalter.** Sechzehn leere
+Kästchen sähen aus, als wäre etwas nicht geladen; stattdessen rückt der
+Name nach links. Wird es eng, kürzt der Name ab — Bild und Energiekosten
+bleiben lesbar, und der volle Name steht ohnehin im Tooltip.
+
+**Nicht am Bild geprüft**, wie das Übrige aus dieser Sitzung.
+
 ### Die App soll aufs Handy — Android wird eingerichtet
 
 Entschieden am 26.08. von AktivesBrett: „Im Browser ist ja nur zum

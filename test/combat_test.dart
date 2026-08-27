@@ -227,6 +227,38 @@ void main() {
       expect(find.text(AbilityMoves.bluetentau.name), findsNothing);
     });
 
+    testWidgets('eine Fähigkeit mit Bild zeigt es auf ihrem Knopf', (
+      tester,
+    ) async {
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
+
+      final knopf = find.ancestor(
+        of: find.text(AbilityMoves.frostnebel.name),
+        matching: find.byType(FilledButton),
+      );
+
+      // Der Name bleibt stehen — das Bild kommt dazu, es ersetzt ihn nicht.
+      expect(find.text(AbilityMoves.frostnebel.name), findsOneWidget);
+      expect(
+        find.descendant(of: knopf, matching: find.byType(Image)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('eine ohne Bild bekommt keinen Platzhalter', (tester) async {
+      await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.funkenstoss.id));
+
+      final knopf = find.ancestor(
+        of: find.text(AbilityMoves.funkenstoss.name),
+        matching: find.byType(FilledButton),
+      );
+
+      expect(
+        find.descendant(of: knopf, matching: find.byType(Image)),
+        findsNothing,
+      );
+    });
+
     testWidgets('eine Fähigkeit ohne Schaden öffnet die Leiste', (
       tester,
     ) async {

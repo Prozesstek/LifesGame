@@ -8,6 +8,7 @@ import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
 import 'move_help.dart';
+import 'move_icon.dart';
 import 'widgets/environment_banner.dart';
 import 'widgets/fighter_status.dart';
 import 'widgets/timing_bar.dart';
@@ -360,23 +361,61 @@ class _MoveButton extends StatelessWidget {
   }
 
   Widget _button(String cost) {
+    final icon = MoveIcons.forMoveId(move.id);
+
     return FilledButton.tonal(
       onPressed: affordable ? onTap : null,
       style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: EdgeInsets.only(left: icon == null ? 10 : 6, right: 10),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Flexible(
+          // Nicht jeder Zug hat ein Bild. Wer keins hat, bekommt auch
+          // keinen Platzhalter — der Name rückt einfach nach links.
+          if (icon != null) ...<Widget>[
+            _Icon(asset: icon, faded: !affordable),
+            const SizedBox(width: 7),
+          ],
+          // `Expanded` statt `Flexible`: Es schiebt die Energiekosten an
+          // den rechten Rand und lässt den Namen als Einziges schrumpfen.
+          // Bei zwei Knöpfen nebeneinander bleiben rund 155 Pixel Inhalt,
+          // und „Prisma-Barriere" allein braucht davon schon zwei Drittel.
+          Expanded(
             child: Text(
               move.name,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
+          const SizedBox(width: 6),
           Text(cost, style: const TextStyle(fontSize: 11)),
         ],
+      ),
+    );
+  }
+}
+
+/// Das Bild einer Fähigkeit auf ihrem Knopf.
+class _Icon extends StatelessWidget {
+  const _Icon({required this.asset, required this.faded});
+
+  final String asset;
+
+  /// Ein unbezahlbarer Zug ist ausgegraut — das Bild blasst mit, sonst
+  /// leuchtet es über einem toten Knopf.
+  final bool faded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: faded ? 0.38 : 1,
+      child: Image.asset(
+        asset,
+        width: MoveIcons.buttonSize,
+        height: MoveIcons.buttonSize,
+        // Das Bild wird von 128 auf 28 Punkte verkleinert; ohne Glättung
+        // fräst das die Pixelgrafik kaputt.
+        filterQuality: FilterQuality.medium,
       ),
     );
   }
