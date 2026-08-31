@@ -41,19 +41,23 @@ const Lesson stichprobePage = Lesson(
     Question(
       prompt: 'Was passiert mit den Ergebnissen bei wenigen Fällen?',
       options: <String>[
+        'Sie werden mit jedem weiteren Fall deutlich genauer',
         'Sie schwanken stärker und sehen zufällig nach Mustern aus',
-        'Sie werden genauer',
-        'Sie werden unbrauchbar',
+        'Sie werden für jede Aussage vollständig unbrauchbar',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
           'Kleine Zahlen erzeugen Serien, die wie Regeln aussehen. Das ist '
           'kein Fehler der Messung, sondern des Blicks darauf.',
     ),
     Question(
       prompt: 'Wie groß ist die Stichprobe bei „bei mir hat es geholfen"?',
-      options: <String>['Groß genug', 'Kommt darauf an', 'Eins'],
-      correctIndex: 2,
+      options: <String>[
+        'Ein einziger Fall, nämlich der eigene',
+        'Groß genug für eine erste Einschätzung',
+        'Das kommt auf die Dauer des Versuchs an',
+      ],
+      correctIndex: 0,
       explanation:
           'Ein Einzelfall ist ein Hinweis, keine Aussage über andere. Der '
           'Unterschied ist der Kern dieses Knotens.',
@@ -61,11 +65,11 @@ const Lesson stichprobePage = Lesson(
     Question(
       prompt: 'Welche Frage sortiert am meisten aus?',
       options: <String>[
-        'Wer behauptet das?',
+        'Wer genau behauptet das, und seit wann wird es behauptet?',
+        'Ist das schon lange bekannt oder erst kürzlich aufgetaucht?',
         'Bei wie vielen wurde es geprüft, und wie verschieden waren die?',
-        'Ist das schon lange bekannt?',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Zahl und Vielfalt der Fälle entscheiden, ob ein Befund über die '
           'geprüfte Gruppe hinaus etwas bedeutet.',
@@ -107,11 +111,11 @@ const Lesson studieLesenPage = Lesson(
     Question(
       prompt: 'Warum wächst eine Aussage auf dem Weg zur Überschrift?',
       options: <String>[
-        'Weil Studien ungenau geschrieben sind',
+        'Weil Studien in aller Regel ungenau geschrieben sind',
+        'Weil die Übersetzungen auf dem Weg fehlerhaft werden',
         'Weil jede Station einen Anreiz hat, sie größer zu machen',
-        'Weil Übersetzungen fehlerhaft sind',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Hochschule, Agentur und Redaktion wollen alle Aufmerksamkeit. '
           'Der Effekt summiert sich über die Stationen.',
@@ -131,11 +135,11 @@ const Lesson studieLesenPage = Lesson(
     Question(
       prompt: 'Was ist der billigste wirksame Test?',
       options: <String>[
-        'Die Kommentare lesen',
-        'Eine zweite Quelle suchen',
+        'Die Kommentare unter dem Artikel vollständig durchlesen',
         'Die Zusammenfassung der Studie mit der Überschrift vergleichen',
+        'Eine zweite Quelle zu genau demselben Thema im Netz suchen',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Der Abstand zwischen beiden ist in wenigen Minuten sichtbar und '
           'überrascht regelmäßig.',
@@ -177,11 +181,11 @@ const Lesson vergleichPage = Lesson(
     Question(
       prompt: 'Was vergleicht man beim Blick auf andere tatsächlich?',
       options: <String>[
+        'Zwei Wege über ihren ganzen Verlauf',
+        'Zwei fertige Ergebnisse direkt miteinander',
         'Den eigenen Weg mit fremden Ergebnissen',
-        'Zwei Wege miteinander',
-        'Zwei Ergebnisse miteinander',
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
           'Der fremde Weg ist unsichtbar. Damit fehlt genau die Hälfte, die '
           'den Vergleich fair machen würde.',
@@ -189,9 +193,9 @@ const Lesson vergleichPage = Lesson(
     Question(
       prompt: 'Warum ist der sichtbare Durchschnitt zu hoch?',
       options: <String>[
-        'Weil Menschen übertreiben',
+        'Weil Menschen bei sich selbst regelmäßig übertreiben',
         'Weil Erfolge gezeigt und Rückschläge verschwiegen werden',
-        'Weil es zu viele Menschen gibt',
+        'Weil es dort insgesamt viel zu viele Menschen gibt',
       ],
       correctIndex: 1,
       explanation:
@@ -201,11 +205,11 @@ const Lesson vergleichPage = Lesson(
     Question(
       prompt: 'Welcher Vergleich hat eine verlässliche Grundlage?',
       options: <String>[
-        'Mit dem Durchschnitt',
-        'Mit den Besten des Fachs',
         'Mit dir selbst vor einem Monat',
+        'Mit dem Durchschnitt aller',
+        'Mit den Besten des ganzen Fachs',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Nur dort kennst du Ergebnis und Weg. Deshalb zeigt das Spiel '
           'eine Kette und einen Bestwert statt einer Rangliste.',
@@ -248,11 +252,11 @@ const Lesson hilfeBittenPage = Lesson(
     Question(
       prompt: 'Was schätzen die meisten Menschen beim Fragen falsch ein?',
       options: <String>[
-        'Wie lange es dauert',
-        'Wie oft sie abgelehnt werden',
+        'Wie lange es am Ende dauert',
         'Wie wichtig die Sache ist',
+        'Wie oft sie abgelehnt werden',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Zusagen kommen häufiger als erwartet. Die überschätzte Absage '
           'verhindert die Frage.',
@@ -261,8 +265,8 @@ const Lesson hilfeBittenPage = Lesson(
       prompt: 'Warum ist eine vage Bitte schwerer zu erfüllen?',
       options: <String>[
         'Weil der andere den Aufwand schätzen muss und hoch schätzt',
-        'Weil sie unhöflich wirkt',
-        'Weil sie zu lang ist',
+        'Weil sie auf den Gefragten ziemlich unhöflich wirkt',
+        'Weil sie in aller Regel deutlich zu lang formuliert ist',
       ],
       correctIndex: 0,
       explanation:
@@ -272,8 +276,8 @@ const Lesson hilfeBittenPage = Lesson(
     Question(
       prompt: 'Wie wirkt eine kleine Bitte auf die Beziehung?',
       options: <String>[
-        'Sie belastet sie',
-        'Sie verändert nichts',
+        'Sie belastet die Beziehung auf Dauer und schwächt sie ab',
+        'Sie verändert an der Beziehung im Grunde überhaupt nichts',
         'Sie wirkt als Vertrauensbeweis und erleichtert Gegenseitigkeit',
       ],
       correctIndex: 2,

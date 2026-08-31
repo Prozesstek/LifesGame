@@ -52,12 +52,12 @@ const Lesson _evidenz = Lesson(
     Question(
       prompt: 'Welche Form von Beleg kann eine Ursache zeigen?',
       options: <String>[
-        'Die Anekdote',
-        'Die Beobachtungsstudie',
+        'Die Anekdote einer einzelnen Person',
         'Das Experiment mit Kontrollgruppe',
-        'Alle drei gleichermaßen',
+        'Die Beobachtungsstudie ohne Eingriff',
+        'Alle drei Formen gleichermaßen',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Nur wer eingreift und mit einer Vergleichsgruppe misst, kann '
           'Ursache von Begleiterscheinung trennen.',
@@ -66,12 +66,12 @@ const Lesson _evidenz = Lesson(
       prompt: 'Ein Ergebnis stammt von zwanzig jungen Leistungssportlern. '
           'Was folgt daraus?',
       options: <String>[
-        'Es gilt für alle Menschen',
+        'Es gilt ohne Weiteres für alle Menschen',
+        'Es ist für den Alltag vollkommen wertlos',
+        'Es gilt besonders für untrainierte Menschen',
         'Es gilt zunächst nur für ähnliche Personen',
-        'Es ist wertlos',
-        'Es gilt besonders für Untrainierte',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
           'Ein Ergebnis gilt für die untersuchte Gruppe. Die Übertragung '
           'auf andere ist eine zusätzliche Annahme, die begründet werden '
@@ -129,10 +129,10 @@ const Lesson _korrelation = Lesson(
     Question(
       prompt: 'Was bedeutet es, wenn zwei Kurven ähnlich verlaufen?',
       options: <String>[
-        'Die eine verursacht die andere',
+        'Die eine Größe verursacht sicher die andere',
         'Es ist ein Anlass nachzusehen, kein Ergebnis',
-        'Der Zusammenhang ist bewiesen',
-        'Die Daten sind fehlerhaft',
+        'Der Zusammenhang ist damit schon bewiesen',
+        'Die Daten sind mit hoher Wahrscheinlichkeit falsch',
       ],
       correctIndex: 1,
       explanation:
@@ -144,24 +144,24 @@ const Lesson _korrelation = Lesson(
       prompt: 'Frühstücker sind im Schnitt schlanker. Was ist die '
           'wahrscheinlichste Erklärung?',
       options: <String>[
-        'Frühstück beschleunigt den Stoffwechsel',
-        'Schlanke Menschen haben mehr Hunger am Morgen',
         'Eine dritte Größe wie ein geregelter Tagesablauf erklärt beides',
-        'Der Zusammenhang ist reiner Zufall',
+        'Das Frühstück beschleunigt den Stoffwechsel für den ganzen Tag',
+        'Schlanke Menschen haben am Morgen einfach mehr Hunger als andere',
+        'Der beobachtete Zusammenhang ist am Ende reiner Zufall',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation: 'Wer regelmäßig frühstückt, hat meist auch sonst geregelte '
           'Abläufe. Diese dritte Größe erklärt beide Beobachtungen.',
     ),
     Question(
       prompt: 'Was klärt die Richtung eines Zusammenhangs?',
       options: <String>[
-        'Eine größere Stichprobe',
-        'Ein Eingriff mit Vergleichsgruppe',
+        'Eine deutlich größere Stichprobe',
         'Eine längere Beobachtungszeit',
-        'Eine bessere Statistik',
+        'Ein Eingriff mit Vergleichsgruppe',
+        'Eine deutlich bessere Statistik',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Nur wenn eine Gruppe etwas tut und eine vergleichbare nicht, '
           'lässt sich sagen, was woraus folgt.',
@@ -216,12 +216,12 @@ const Lesson _selbstversuch = Lesson(
     Question(
       prompt: 'Warum reicht der Vergleich mit der eigenen Erinnerung nicht?',
       options: <String>[
-        'Weil man Details vergisst',
+        'Weil man einzelne Details mit der Zeit vergisst',
+        'Weil Erinnerungen fast immer zu positiv sind',
+        'Weil man den betrachteten Zeitraum verwechselt',
         'Weil die Erinnerung sich an die Erwartung anpasst',
-        'Weil Erinnerungen zu positiv sind',
-        'Weil man den Zeitraum verwechselt',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Das Gedächtnis rückt das Vorher in die Richtung, die zur '
           'Erwartung passt. Ein notierter Ausgangswert tut das nicht.',
     ),

@@ -119,12 +119,12 @@ const Lesson _gedanken = Lesson(
     Question(
       prompt: 'Was ist die eigentliche Fähigkeit im Umgang mit Gedanken?',
       options: <String>[
-        'Negative Gedanken zu unterdrücken',
+        'Negative Gedanken zuverlässig zu unterdrücken',
+        'In jeder Lage möglichst positiv zu denken',
+        'Jeden Gedanken schriftlich zu widerlegen',
         'Vermutung von Beobachtung zu unterscheiden',
-        'Immer positiv zu denken',
-        'Gedanken schriftlich zu widerlegen',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Der Erzähler im Kopf liefert Deutungen, die sich wie '
           'Beobachtungen anfühlen. Den Unterschied zu bemerken, ist der '
           'entscheidende Schritt.',
@@ -133,12 +133,12 @@ const Lesson _gedanken = Lesson(
       prompt: 'Woran erkennt man Katastrophisieren und Alles-oder-nichts '
           'im Alltag?',
       options: <String>[
-        'An der Lautstärke der Gedanken',
+        'An der Lautstärke, mit der sie auftreten',
+        'Daran, dass sie fast nur abends auftreten',
         'An Wörtern wie „immer", „nie", „alles umsonst"',
-        'Daran, dass sie abends auftreten',
-        'Sie sind nicht erkennbar',
+        'Sie sind im Alltag überhaupt nicht erkennbar',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Beide Muster haben eine typische Sprache. Diese Wörter bei sich '
           'zu hören ist ein brauchbarer Anhaltspunkt.',
@@ -192,12 +192,12 @@ const Lesson _unbehagen = Lesson(
     Question(
       prompt: 'Wie verläuft ein Verlangen typischerweise?',
       options: <String>[
-        'Es wächst stetig, bis man nachgibt',
+        'Es wächst stetig weiter an, bis man endlich nachgibt',
+        'Es bleibt konstant, bis es einmal befriedigt wird',
+        'Es verschwindet sofort bei der ersten Ablenkung',
         'Es steigt an, erreicht einen Höhepunkt und fällt ab',
-        'Es bleibt konstant, bis es befriedigt wird',
-        'Es verschwindet sofort bei Ablenkung',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
           'Der Verlauf ist eine Welle, meist innerhalb weniger Minuten. Es '
           'fühlt sich nur an, als würde es endlos wachsen.',
@@ -205,12 +205,12 @@ const Lesson _unbehagen = Lesson(
     Question(
       prompt: 'Was lernt der Kopf, wenn man auf dem Höhepunkt nachgibt?',
       options: <String>[
-        'Dass der Drang harmlos ist',
         'Dass er nur stark genug werden muss',
-        'Dass Warten nichts bringt',
-        'Er lernt daraus nichts',
+        'Dass der Drang völlig harmlos ist',
+        'Dass Warten am Ende nichts bringt',
+        'Er lernt daraus überhaupt nichts',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Nachgeben bestätigt das Muster und macht den nächsten Drang '
           'nicht schwächer. Abwarten lehrt das Gegenteil.',
@@ -219,12 +219,12 @@ const Lesson _unbehagen = Lesson(
       prompt: 'Warum übt man still sitzen, wenn gar nichts auf dem Spiel '
           'steht?',
       options: <String>[
-        'Um Zeit zu sparen',
+        'Um im Alltag später etwas Zeit zu sparen',
+        'Weil es zuverlässig für Entspannung sorgt',
         'Weil es im Ernstfall zu spät zum Üben ist',
-        'Weil es entspannt',
-        'Um die Konzentration zu messen',
+        'Um die eigene Konzentration zu messen',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Die Fähigkeit, Unbehagen zu bemerken und nicht zu reagieren, '
           'lässt sich im Kleinen trainieren — dort, wo ein Fehler nichts '

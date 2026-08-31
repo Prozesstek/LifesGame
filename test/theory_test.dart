@@ -359,13 +359,27 @@ void main() {
       await tester.pump();
     }
 
+    /// Welche Frage gerade dasteht.
+    ///
+    /// Seit ADR-0027 wird die Reihenfolge beim Anzeigen gemischt — die
+    /// Position im Katalog sagt nichts mehr darueber aus, was auf dem
+    /// Bildschirm steht. Der Bildschirm ist die einzige Quelle dafuer.
+    Question shownQuestion() => _first.questions.firstWhere(
+      (q) => find.text(q.prompt).evaluate().isNotEmpty,
+    );
+
     /// Beantwortet alle Fragen und geht bis zum Ergebnis durch.
+    ///
+    /// Getippt wird ueber den **Text** der Antwort, nicht ueber ihre
+    /// Stelle. Damit prueft der Test zugleich die Rueckuebersetzung aus
+    /// `ShuffledLesson`: Waere sie falsch, kaeme hier „durchgefallen"
+    /// heraus, obwohl richtig getippt wurde.
     Future<void> answerAll(
       WidgetTester tester, {
       required bool correctly,
     }) async {
       for (var i = 0; i < _first.questionCount; i++) {
-        final question = _first.questions[i];
+        final question = shownQuestion();
         final option = correctly
             ? question.correctIndex
             : (question.correctIndex + 1) % question.options.length;
@@ -393,7 +407,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Frage 1 von ${_first.questionCount}'), findsOneWidget);
-      expect(find.text(_first.questions.first.prompt), findsOneWidget);
+
+      // Welche der Fragen zuerst kommt, entscheidet der Zufall — dass
+      // es genau eine ist, entscheidet er nicht.
+      final sichtbar = _first.questions.where(
+        (q) => find.text(q.prompt).evaluate().isNotEmpty,
+      );
+      expect(sichtbar, hasLength(1));
     });
 
     testWidgets('vor der Antwort geht es nicht weiter', (tester) async {
@@ -423,7 +443,7 @@ void main() {
       await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
       await tester.pumpAndSettle();
 
-      final question = _first.questions.first;
+      final question = shownQuestion();
       expect(find.text(question.explanation), findsNothing);
 
       await tester.tap(find.text(question.options[question.correctIndex]));

@@ -56,12 +56,12 @@ const Lesson _schlaf = Lesson(
       prompt: 'Was passiert, wenn jemand regelmäßig eine Stunde Schlaf '
           'streicht?',
       options: <String>[
-        'Er gewinnt eine Stunde nutzbare Zeit',
+        'Er gewinnt jeden Tag eine Stunde nutzbare Zeit',
+        'Der Körper gleicht den Ausfall vollständig aus',
+        'Es wirkt sich nur auf die Stimmung am Morgen aus',
         'Die Arbeit verschiebt sich in den nächsten Tag',
-        'Der Körper gleicht das vollständig aus',
-        'Es wirkt sich nur auf die Stimmung aus',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Die nächtliche Wartung fällt nicht weg, sie fehlt nur. Am '
           'Folgetag zeigt sie sich als Konzentrations- und Stimmungsloch.',
     ),
@@ -69,12 +69,12 @@ const Lesson _schlaf = Lesson(
       prompt: 'Was ist verlässlicher: acht Stunden zu wechselnden Zeiten '
           'oder sieben zur gleichen?',
       options: <String>[
-        'Acht Stunden, die Dauer zählt',
         'Sieben Stunden zur gleichen Zeit',
+        'Acht Stunden, die Dauer zählt',
         'Beides ist gleichwertig',
         'Das hängt allein vom Alter ab',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Ein fester Rhythmus lässt den Körper Einschlafen und Aufwachen '
           'vorbereiten. Wechselnde Zeiten zwingen ihn, jeden Abend neu zu '
@@ -84,11 +84,11 @@ const Lesson _schlaf = Lesson(
       prompt: 'Welcher Anker lässt sich willentlich einhalten?',
       options: <String>[
         'Die Einschlafzeit',
-        'Die Aufstehzeit',
         'Die Traumphase',
         'Die Schlafdauer',
+        'Die Aufstehzeit',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
           'Einschlafen kann man nicht erzwingen, Aufstehen schon. Deshalb '
           'ist die Aufstehzeit der praktikable Hebel — und deshalb ist sie '
@@ -133,11 +133,11 @@ const Lesson _bewegung = Lesson(
       prompt: 'Wo liegt der größte gesundheitliche Gewinn?',
       options: <String>[
         'Beim Sprung von viel auf sehr viel Bewegung',
-        'Beim Sprung von gar keiner auf etwas Bewegung',
         'Bei besonders intensiven Einheiten',
+        'Beim Sprung von gar keiner auf etwas Bewegung',
         'Bei Krafttraining gegenüber Ausdauer',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Der Weg von null auf ein wenig bringt den Löwenanteil. Danach '
           'wird jede zusätzliche Stunde weniger wert.',
@@ -146,12 +146,12 @@ const Lesson _bewegung = Lesson(
       prompt: 'Jemand trainiert dreimal wöchentlich und sitzt sonst den '
           'ganzen Tag. Was fehlt ihm?',
       options: <String>[
-        'Mehr Trainingsintensität',
-        'Bewegung über den Tag verteilt',
+        'Eine höhere Trainingsintensität',
         'Ein zusätzlicher Trainingstag',
-        'Eine bessere Sportart',
+        'Eine besser passende Sportart',
+        'Bewegung über den Tag verteilt',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
           'Alltagsbewegung summiert sich über sechzehn wache Stunden auf '
           'mehr als drei Einheiten. Das ist ein Bewegungs-, kein '
@@ -161,12 +161,12 @@ const Lesson _bewegung = Lesson(
       prompt: 'Warum ist täglich zehn Minuten oft besser als einmal '
           'wöchentlich eine Stunde?',
       options: <String>[
-        'Weil zehn Minuten anstrengender sind',
-        'Weil es insgesamt mehr Zeit ergibt',
         'Weil Häufigkeit zur Gewohnheit wird, Seltenheit zur Entscheidung',
-        'Weil kurze Einheiten mehr Kalorien verbrauchen',
+        'Weil zehn Minuten am Stück anstrengender sind als eine Stunde',
+        'Weil dabei über die Woche insgesamt mehr Zeit zusammenkommt',
+        'Weil kurze Einheiten mehr Kalorien verbrauchen als lange',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Was täglich passiert, muss nicht mehr entschieden werden. Was '
           'einmal die Woche ansteht, steht jedes Mal neu zur Debatte — '
@@ -210,12 +210,12 @@ const Lesson _umgebung = Lesson(
     Question(
       prompt: 'Wovon hängt die gegessene Menge stärker ab als vom Hunger?',
       options: <String>[
-        'Von der Tageszeit',
+        'Von der Tageszeit und dem Wochentag',
+        'Von der Stimmung an diesem Tag',
         'Von Sichtbarkeit und Portionsgröße',
-        'Von der Stimmung',
-        'Vom Preis der Lebensmittel',
+        'Vom Preis der eingekauften Ware',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Packungs- und Tellergröße sowie Sichtbarkeit steuern die Menge '
           'zuverlässiger als das Hungergefühl. Deshalb ist Essen zuerst ein '
@@ -224,24 +224,24 @@ const Lesson _umgebung = Lesson(
     Question(
       prompt: 'Warum ist der Einkauf der wirksamere Zeitpunkt?',
       options: <String>[
-        'Weil man dort mehr Zeit hat',
+        'Weil man dort deutlich mehr Zeit zum Nachdenken hat',
+        'Weil die Preise im Laden zum Sparen zwingen',
+        'Weil man beim Einkauf weniger hungrig ist',
         'Weil eine Entscheidung dort viele spätere ersetzt',
-        'Weil Preise zum Sparen zwingen',
-        'Weil man dort weniger hungrig ist',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Was nicht in der Wohnung ist, muss abends nicht abgelehnt '
           'werden. Eine Entscheidung im Laden ersetzt sieben zu Hause.',
     ),
     Question(
       prompt: 'Was funktioniert langfristig besser als ein Verbot?',
       options: <String>[
-        'Ein strengeres Verbot',
-        'Eine Belohnung für Verzicht',
+        'Ein strengeres Verbot mit klarer Regel',
         'Ein Austausch, der dieselbe Handlung erlaubt',
-        'Eine Liste erlaubter Lebensmittel',
+        'Eine Belohnung für jede Woche mit Verzicht',
+        'Eine feste Liste erlaubter Lebensmittel',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Verbote erzeugen Verlangen. Ein Austausch behält die Handlung '
           'bei und ändert nur das Ergebnis — er verlangt im Moment keinen '
