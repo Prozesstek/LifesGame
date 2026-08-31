@@ -38,7 +38,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 254 Tests
+flutter test                       # 273 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -92,7 +92,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 35 |
 | `packages/identity` | 7 verdiente Titel aus drei Quellen, Name | 28 |
 | `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 254 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 273 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

@@ -31,10 +31,21 @@ kommen ausschließlich aus Theorie und Gewohnheiten.
 
 **Die zweite Hälfte ist nie gebaut worden.** Ein gewonnener Kampf gibt heute
 weder Gold noch einen Gegenstand — er gibt gar nichts. Damit ist der Kampf
-weder Einnahme noch Ausgabe, sondern folgenlos, und die Prozentzahlen oben
-beschreiben keine gebaute Aufteilung. **Was ein Sieg einbringen soll, ist
-offen** (§6, Punkt 12) — und es ist die Frage, an der hängt, ob jemand
-freiwillig kämpft.
+weder Einnahme noch Ausgabe, und die Prozentzahlen oben beschreiben keine
+gebaute Aufteilung.
+
+**Bei Gold und Erfahrung ist das seit dem 31.08. eine Entscheidung und keine
+Lücke mehr: Ein Sieg gibt beides mit Absicht nicht.** Gäbe es Erfahrung fürs
+Gewinnen, könnte man Kämpfe grinden statt Häkchen zu setzen — und die Aussage
+des Produkts (Abschnitt 2: der Kampf ist die Stelle, an der sich Fortschritt
+**auszahlt**, nicht die, an der er entsteht) wäre widerlegt. Das Blatt am
+Kampfende sagt es dem Spieler auch: „Erfahrung und Gold gibt es dafür nicht —
+sie kommen aus deinen Gewohnheiten." `result_dialog_test.dart` prüft, dass
+dort kein „+N" steht; stünde eines Tages eine Belohnung darin, wäre das eine
+Richtungsentscheidung und kein Textdetail.
+
+**Offen bleibt die Beute** — sie gehört nach Abschnitt 4 in den Dungeon
+(§6, Punkt 12).
 
 ---
 
@@ -483,9 +494,12 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 
 **Neu aufgenommen beim Abgleich am 31.08.:**
 
-12. **Was ein gewonnener Kampf einbringt** — heute nichts (§1). Gold?
-    Drops? Nur der Zugang zum nächsten Gegner? Die Frage entscheidet, ob
-    jemand freiwillig kämpft, und sie blockiert Punkt 6
+12. **Was ein gewonnener Kampf einbringt** — zur Hälfte entschieden am
+    31.08.: **Gold und Erfahrung gibt es mit Absicht nicht** (§1, sonst
+    ließe sich der Habit-Teil weggrinden), festgehalten von
+    `result_dialog_test.dart`. Offen ist allein die **Beute**, und sie
+    gehört in den Dungeon (§4, Punkt 6). Bis dahin bleibt der Einzelkampf
+    folgenlos — ob das für 30 Tage trägt, zeigt Ziel 7
 13. **Fähigkeitspunkte bauen oder streichen** — sie stehen im Konzept, sind
     im Spielstand und wirken nicht (3.1)
 14. **Waffen als Sidegrades** — fünf Waffen, fünf Fähigkeiten, ähnlicher

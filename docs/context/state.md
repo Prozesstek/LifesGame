@@ -99,12 +99,13 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 254 Tests grün, Web-Build läuft:
+- **Flutter-App** (`lib/`) — 273 Tests grün, Web-Build läuft:
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet auf
     Handbuch **und** zwei Moves ([ADR-0020](../decisions/0020-kampf-haengt-am-moveset.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
-  - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
+  - **Kampf**: Flame-Darstellung, Statusleisten, Kachelleiste, Timing, und
+    ein Blatt am Ende. Der Log wird geführt, aber nicht mehr gezeigt
   - **Laden**: sechs Plätze, Preis, Wirkung, Begründung — und bei zu wenig
     Gold, wie viele Tage noch fehlen
   - **Charakter**: Name, verdienter Titel und Levelbalken im Kopf,
@@ -141,6 +142,14 @@ Keine der drei Testzahlen im Repo stimmte:
 Zusammen **638 Tests**, `flutter analyze` sauber. `CLAUDE.md` lag am
 nächsten dran, README am weitesten daneben.
 
+> **Nachtrag beim Zusammenführen, später am 31.08.:** Die App steht seit
+> PR #26 bei **273** statt 254 — `move_icon_test.dart` und
+> `result_dialog_test.dart` sind dazugekommen, `combat_test.dart`
+> gewachsen. Zusammen **657 Tests**, `flutter analyze` weiter sauber. Die
+> Tabelle oben bleibt stehen, wie sie gemessen wurde; sie beschreibt den
+> Stand vor dem Merge. Die sieben Package-Zahlen sind unverändert — PR #26
+> hat `packages/` nicht angefasst.
+
 ### Was im Konzept nicht mehr stimmte
 
 `konzept.md` trug noch das Datum 11.08. und beschrieb an sieben Stellen ein
@@ -172,8 +181,23 @@ Sie stehen jetzt als **ungebaut gekennzeichnet** im Konzept und in §6:
 3. **Von drei Ausrüstungsquellen existiert eine.** Drops und
    Theorie-Meilensteine sind Plan (`konzept.md` §4).
 
-**Es wurde nichts davon entschieden** — das braucht ADRs und gehört in eine
-eigene Sitzung.
+**Punkt 2 und 3 sind nicht entschieden** — das braucht ADRs und gehört in
+eine eigene Sitzung.
+
+> **Punkt 1 ist es inzwischen, und zwar als Nein.** AktivesBrett hat
+> dieselbe Frage am selben Tag aus der anderen Richtung getroffen — beim
+> Bauen des Blatts am Kampfende — und sie beantwortet: **Erfahrung und Gold
+> gibt es für einen Sieg mit Absicht nicht**, weil man Kämpfe sonst grinden
+> könnte statt Häkchen zu setzen. `result_dialog_test.dart` hält es fest,
+> indem er prüft, dass im Blatt kein „+N" steht. Begründung und Wortlaut
+> stehen unten unter „Der Kampf endet mit einem Blatt — und ohne
+> Belohnung".
+>
+> **Offen bleibt nur die Beute**, und sie ist verlagert statt ungeklärt: Sie
+> gehört laut `konzept.md` §4 in den Dungeon und damit in Ziel 6. Die
+> Sorge oben — der Einzelkampf ist folgenlos — bleibt als Beobachtung
+> richtig; ob sie für Ziel 7 trägt, zeigt der 30-Tage-Lauf und keine
+> Vermutung.
 
 ### Issue #21 war in keinem Dokument
 
