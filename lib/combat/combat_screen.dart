@@ -8,8 +8,10 @@ import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
 import 'move_help.dart';
+import 'move_icon.dart';
 import 'widgets/environment_banner.dart';
 import 'widgets/fighter_status.dart';
+import 'widgets/result_dialog.dart';
 import 'widgets/timing_bar.dart';
 
 /// Was der Bildschirm gerade vom Spieler erwartet.
@@ -35,6 +37,12 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   final GlobalKey<TimingBarState> _timingKey = GlobalKey<TimingBarState>();
   _Phase _phase = _Phase.chooseMove;
   Move? _pendingMove;
+
+  /// Ob das Ergebnisblatt für diesen Kampf schon offen war.
+  ///
+  /// Ohne die Sperre könnte es zweimal aufgehen: Der Kampf endet einmal,
+  /// aber das Abspielen meldet sich für jede Runde.
+  bool _resultShown = false;
 
   void _onMoveSelected(Move move) {
     if (_phase != _Phase.chooseMove) return;
@@ -86,6 +94,41 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     setState(() {
       _phase = isOver ? _Phase.finished : _Phase.chooseMove;
     });
+
+    if (isOver && !_resultShown) {
+      _resultShown = true;
+      // **Erst nach dem Bild.** Diese Methode läuft aus der Flame-Schleife
+      // heraus, also mitten in einem Frame; `showDialog` von dort aus
+      // öffnet eine Route, während noch gezeichnet wird. Derselbe
+      // Fallstrick wie bei „Alles freischalten" im Entwicklermodus
+      // (`docs/context/gotchas.md`).
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showResult());
+    }
+  }
+
+  /// Das Ergebnis als Blatt, das man wegtippen muss.
+  ///
+  /// **Es steht bewusst keine Belohnung darin, denn es gibt keine.**
+  /// Erfahrung und Gold kommen aus Gewohnheiten und Theorie, nie aus
+  /// einem Kampf (`konzept.md` Abschnitt 2). Der Kampf ist die Stelle, an
+  /// der sich der Fortschritt auszahlt — gäbe es dort XP, könnte man ihn
+  /// erkämpfen statt erarbeiten, und die Aussage des Produkts wäre hin.
+  /// Der Satz am Ende sagt das, damit die Frage nicht offen bleibt.
+  Future<void> _showResult() async {
+    if (!mounted) return;
+
+    final state = ref.read(combatControllerProvider).state;
+    final gewonnen = state.outcome == CombatOutcome.victory;
+    final runden = state.round - 1;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => CombatResultDialog(
+        won: gewonnen,
+        rounds: runden,
+        enemyName: state.enemy.name,
+      ),
+    );
   }
 
   void _restart() {
@@ -94,6 +137,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     setState(() {
       _pendingMove = null;
       _phase = _Phase.chooseMove;
+      _resultShown = false;
     });
   }
 
@@ -167,7 +211,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             child: GameWidget<BattleGame>(game: _game),
           ),
         ),
-        Expanded(flex: 2, child: _LogPanel(lines: session.log)),
+        // **Hier stand der Log.** Er ist der Kachelleiste gewichen: Das
+        // Bild ist jetzt der Knopf, und zwei Reihen davon brauchen den
+        // Platz, den vorher die Zeilen hatten.
+        //
+        // Geführt wird er weiter (`CombatSession.log`), nur nicht mehr
+        // gezeigt — wer ihn zurückholen will, hängt eine Zeile in diese
+        // Spalte. Was dadurch fehlt, steht in `docs/context/state.md`.
+        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: _buildControls(state, session.moves),
@@ -235,57 +286,94 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // Zahl: Seit ADR-0017 hat ein frischer Charakter genau einen Move
       // (nur der Waffenslot ist offen), und eine leere zweite Reihe waere
       // ein Loch, das nach einem Fehler aussieht.
-      _Phase.chooseMove || _Phase.animating => SizedBox(
-        height: loadout.length > 2 ? 96 : 44,
-        child: Column(
-          children: <Widget>[
-            Expanded(child: _moveRow(loadout, state, 0)),
-            if (loadout.length > 2) ...<Widget>[
-              const SizedBox(height: 8),
-              Expanded(child: _moveRow(loadout, state, 2)),
-            ],
-          ],
-        ),
-      ),
+      // **Alle Züge in einer Reihe.** Die Höhe ergibt sich aus den Kacheln
+      // selbst: Sie sind quadratisch, ihre Breite bestimmt also ihre Höhe.
+      // Was sie nicht brauchen, bleibt der Arena — und eine zweite Reihe
+      // hätte davon rund 190 Pixel genommen.
+      _Phase.chooseMove || _Phase.animating => _moveRow(loadout, state),
     };
   }
 
-  /// Eine Reihe mit bis zu zwei Move-Buttons, beginnend bei [start].
-  Widget _moveRow(List<Move> loadout, CombatState state, int start) {
+  /// Eine Reihe mit bis zu zwei Kacheln, beginnend bei [start].
+  ///
+  /// Bewusst kein `GridView` mit `childAspectRatio`: Das koppelt die
+  /// Zellenhöhe an die Fensterbreite, wodurch auf breiten Fenstern die
+  /// zweite Reihe aus dem Sichtbereich rutscht und gar nicht erst gebaut
+  /// wird (`docs/context/gotchas.md`). Feste Reihen sind bei jeder Breite
+  /// verlässlich.
+  ///
+  /// Während der Animation bleiben dieselben Kacheln stehen, nur
+  /// ausgegraut — sie zu entfernen würde die Leiste springen lassen.
+  Widget _moveRow(List<Move> loadout, CombatState state) {
     final accepting = _phase == _Phase.chooseMove;
 
-    return Row(
-      children: <Widget>[
-        for (
-          var i = start;
-          i < start + 2 && i < loadout.length;
-          i++
-        ) ...<Widget>[
-          if (i > start) const SizedBox(width: 8),
-          Expanded(
-            child: _MoveButton(
-              move: loadout[i],
-              affordable:
-                  accepting && loadout[i].isAffordableBy(state.player.energy),
-              attack: state.player.attack,
-              onTap: () => _onMoveSelected(loadout[i]),
-            ),
-          ),
-        ],
-      ],
+    // Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer
+    // festen Zahl — nur so ist die Kachel wirklich quadratisch und das
+    // Bild vollständig zu sehen.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final seite = MoveIcons.tileSideFor(
+          constraints.maxWidth,
+          loadout.length,
+        );
+
+        // Die Namenszeile gilt fuer die ganze Reihe: Sobald ein Zug ein
+        // Bild hat, bekommen alle den Platz dafuer, damit die Kacheln
+        // buendig stehen. Hat keiner eins, entfaellt sie.
+        final mitNamen = loadout.any((m) => MoveIcons.forMoveId(m.id) != null);
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            for (var i = 0; i < loadout.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(width: MoveIcons.gap),
+              SizedBox(
+                width: seite,
+                child: _MoveTile(
+                  move: loadout[i],
+                  side: seite,
+                  showLabel: mitNamen,
+                  affordable:
+                      accepting &&
+                      loadout[i].isAffordableBy(state.player.energy),
+                  attack: state.player.attack,
+                  onTap: () => _onMoveSelected(loadout[i]),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
 
-class _MoveButton extends StatelessWidget {
-  const _MoveButton({
+/// Eine Fähigkeit als Kachel — **das Bild ist der Knopf**.
+///
+/// Wer ein Bild hat, zeigt es groß und trägt den Namen darüber. Wer keins
+/// hat, bekommt eine gleich große Kachel im selben Rahmenstil mit dem
+/// Namen darin. Das ist kein Schönheitsdetail: Der Waffenzug hat kein
+/// Bild, und er ist der Zug, den man **jede Runde** drückt, um Energie
+/// aufzubauen. Ohne Knopf dort ließe sich nicht kämpfen.
+class _MoveTile extends StatelessWidget {
+  const _MoveTile({
     required this.move,
+    required this.side,
+    required this.showLabel,
     required this.affordable,
     required this.attack,
     required this.onTap,
   });
 
   final Move move;
+
+  /// Kantenlaenge der Kachel. Kommt aus der verfuegbaren Breite.
+  final double side;
+
+  /// Ob ueber der Kachel eine Namenszeile steht. Gilt fuer die ganze
+  /// Reihe gemeinsam, damit die Flaechen buendig bleiben.
+  final bool showLabel;
+
   final bool affordable;
 
   /// Der Angriffswert des Spielers — die Erklärung nennt echte Zahlen,
@@ -296,17 +384,11 @@ class _MoveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cost = move.energyDelta >= 0
-        ? '+${move.energyDelta} EN'
-        : '${move.energyDelta} EN';
+    final bild = MoveIcons.forMoveId(move.id);
 
-    // **Langes Drücken erklärt den Zug.** Auf einem Handy gibt es kein
-    // Mausschweben, und ein zusätzliches „i" auf dem Knopf nähme Platz,
-    // den Name und Energiekosten schon brauchen.
-    //
-    // Der Tooltip liegt **außen**: So funktioniert er auch, wenn der
-    // Knopf gerade nicht bezahlbar oder gesperrt ist — gerade dann will
-    // man wissen, worauf man spart.
+    // **Langes Drücken erklärt den Zug.** Der Tooltip liegt außen, damit er
+    // auch bei einem unbezahlbaren Zug aufgeht — gerade dann will man
+    // wissen, worauf man spart.
     return Tooltip(
       richMessage: _erklaerung(),
       triggerMode: TooltipTriggerMode.longPress,
@@ -318,7 +400,42 @@ class _MoveButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Palette.accent.withValues(alpha: 0.4)),
       ),
-      child: _button(cost),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // Die Zeile steht nur, wenn in dieser Reihe überhaupt ein Bild
+          // vorkommt — dann wird sie auch bei den Kacheln **ohne** Bild
+          // freigehalten, damit die Flächen auf gleicher Höhe liegen.
+          // Hat kein einziger Zug ein Bild, wäre sie über jeder Kachel ein
+          // leerer Streifen; dann entfällt sie ganz.
+          if (showLabel) ...<Widget>[
+            SizedBox(
+              height: MoveIcons.labelHeight,
+              child: bild == null
+                  ? null
+                  : Text(
+                      move.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: affordable ? Colors.white : Palette.muted,
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 4),
+          ],
+          _Kachel(
+            move: move,
+            side: side,
+            bild: bild,
+            affordable: affordable,
+            onTap: onTap,
+          ),
+        ],
+      ),
     );
   }
 
@@ -358,69 +475,108 @@ class _MoveButton extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _button(String cost) {
-    return FilledButton.tonal(
-      onPressed: affordable ? onTap : null,
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Flexible(
-            child: Text(
-              move.name,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+/// Die antippbare Fläche: Bild oder Name, dazu die Energiekosten.
+class _Kachel extends StatelessWidget {
+  const _Kachel({
+    required this.move,
+    required this.side,
+    required this.bild,
+    required this.affordable,
+    required this.onTap,
+  });
+
+  final Move move;
+  final double side;
+  final String? bild;
+  final bool affordable;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final kosten = move.energyDelta >= 0
+        ? '+${move.energyDelta}'
+        : '${move.energyDelta}';
+
+    return SizedBox(
+      height: side,
+      child: Material(
+        color: Palette.surfaceRaised,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: affordable ? onTap : null,
+          child: Opacity(
+            opacity: affordable ? 1 : 0.42,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                if (bild != null)
+                  Image.asset(
+                    bild!,
+                    fit: BoxFit.cover,
+                    // Das Bild liegt in dreifacher Kachelgröße vor; ohne
+                    // Glättung fräst das Verkleinern die Pixelgrafik kaputt.
+                    filterQuality: FilterQuality.medium,
+                  )
+                else
+                  // Ohne Bild trägt die Kachel den Namen — sonst wäre der
+                  // Waffenzug ein leeres Kästchen.
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        move.name,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: 5,
+                  bottom: 5,
+                  child: _EnergieMarke(text: '$kosten EN'),
+                ),
+              ],
             ),
           ),
-          Text(cost, style: const TextStyle(fontSize: 11)),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _LogPanel extends StatelessWidget {
-  const _LogPanel({required this.lines});
+/// Die Energiekosten in der Ecke der Kachel.
+///
+/// Auf dem Bild statt daneben: Die Kachel ist ohnehin quadratisch, und
+/// eine eigene Zeile hätte Höhe gekostet, die der Kampfbildschirm nicht
+/// mehr hat.
+class _EnergieMarke extends StatelessWidget {
+  const _EnergieMarke({required this.text});
 
-  final List<String> lines;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    if (lines.isEmpty) {
-      return const Center(
-        // Der Hinweis steht hier, weil langes Drücken sonst niemand
-        // findet — und der leere Log ist die einzige Stelle, an der Platz
-        // dafür ist, ohne dass etwas Neues dazukommt.
-        child: Text(
-          'Wähle einen Zug.\nLange drücken erklärt ihn.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Palette.muted, height: 1.6),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xCC0B0E15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-      reverse: true,
-      itemCount: lines.length,
-      itemBuilder: (context, index) {
-        final line = lines[lines.length - 1 - index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text(
-            line,
-            style: TextStyle(
-              fontSize: 13,
-              color: index == 0
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.55),
-            ),
-          ),
-        );
-      },
+      ),
     );
   }
 }

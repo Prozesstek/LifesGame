@@ -320,6 +320,112 @@ vollständig aus `environment.dart`. Wer eine Zahl im Katalog ändert, muss
 den Hilfetext nicht nachziehen — nur die Prosa drumherum ist
 geschrieben.
 
+### Die Kachel ist der Knopf
+
+Jeder Zug ist eine **quadratische Kachel, die man drückt** — alle in
+einer Reihe, höchstens 88 Pixel, Energiekosten unten rechts in der Ecke.
+Ohne Bild trägt die Kachel ihren Namen.
+
+**Bilder gab es zwischendurch und gibt es gerade nicht.** Vier
+Pixelgrafiken für Frostnebel, Sandsturm, Giftmoor und Vulkanbruch waren
+eingebaut und sind am 27.08. auf Wunsch wieder heraus — das Format ist
+geblieben. Die Vorlagen liegen weiter unter
+`Desktop\Lifes Game Mockup\Fähigkeiten\`, nicht im Repo.
+
+Der Weg zurück steht in `move_icon.dart` und ist drei Schritte lang:
+Datei nach `assets/abilities/` (benannt wie die Move-Id, 384 Pixel), den
+Ordner in `pubspec.yaml` eintragen — die Zeile steht dort auskommentiert
+bereit — und eine Zeile in `MoveIcons`. Die Prüfungen in
+`move_icon_test.dart` laufen heute über eine leere Menge und greifen ab
+der ersten Zeile wieder.
+
+**Die Kantenlänge kommt aus der verfügbaren Breite, nicht aus einer festen
+Zahl.** Nur so ist die Kachel wirklich quadratisch. Eine Zwischenfassung
+war 175 breit und 128 hoch und schnitt die quadratischen Vorlagen oben
+und unten an.
+
+**Die Namenszeile über der Kachel erscheint nur, wenn in der Reihe
+überhaupt ein Bild vorkommt.** Sonst stünde über jeder Kachel ein leerer
+Streifen — der Name steht ja schon darin.
+
+**Die Obergrenze ist zugleich die Stellschraube für die Arena.** Die
+Kachel ist quadratisch, ihre Breite ist also auch ihre Höhe — und was sie
+nicht braucht, bleibt den beiden Kämpfern. Bei 88 passen alle vier Züge
+nebeneinander; die zweite Reihe entfällt, und das sind rund 190 Pixel,
+die das Kampffeld zurückbekommt. Wer die Kacheln größer will, nimmt sie
+der Arena weg — beides steht in `move_icon.dart`.
+
+Der erste Anlauf war ein kleines 28-Pixel-Icon *im* Textknopf. Ein
+Entwurf von AktivesBrett hat gezeigt, dass etwas anderes gemeint war.
+
+**Was dabei zu klären war, und wie:**
+
+| Frage | Antwort |
+|---|---|
+| Die sechzehn Züge ohne Bild? | Gleich große Kachel mit dem **Namen darin** |
+| Woher der Platz? | Der **Log ist entfallen** |
+| Energiekosten? | Klein auf dem Bild, unten rechts |
+
+**Der Waffenzug war der Grund für die erste Frage.** Er hat kein Bild und
+ist der Zug, den man *jede Runde* drückt, um Energie aufzubauen. Eine
+Kachelleiste, in der er ein leeres Feld wäre, hätte den Kampf
+unbedienbar gemacht.
+
+**Die Bilder liegen in dreifacher Kachelgröße** (384 × 384) in
+`assets/abilities/`, freigestellt aus der Vorlage — die hat rund 40 %
+dunklen Rand um den Rahmen. Dreifach, weil ein Handy mit dreifacher
+Pixeldichte 128 logische Punkte auf 384 echte rechnet; bei den zuerst
+abgelegten 128 × 128 wäre das Hochrechnen gewesen.
+
+**Der Dateiname ist die Move-Id.** Ein neues Bild ist damit eine Datei
+plus eine Zeile in `move_icon.dart`. `test/move_icon_test.dart` prüft
+beide Nähte: dass die Id in `package:combat` ankommt, und dass die Datei
+da **und in `pubspec.yaml` angemeldet** ist — Letzteres über
+`rootBundle.load`, das nur findet, was angemeldet ist.
+
+### Der Kampf endet mit einem Blatt — und ohne Belohnung
+
+Am Ende steht jetzt ein Dialog: gewonnen oder verloren, gegen wen, nach
+wie vielen Runden, und ein OK-Knopf.
+
+**Die Frage dahinter war „gibt es eine Belohnung?" — und die Antwort ist
+nein, mit Absicht.** Erfahrung und Gold kommen ausschließlich aus
+Gewohnheiten und Theorie (`totalXpProvider`); der Kampf gibt nichts.
+Das ist der Kern-Loop aus `konzept.md` Abschnitt 2: Der Kampf ist die
+Stelle, an der sich Fortschritt **auszahlt**, nicht die, an der er
+entsteht. Gäbe es XP fürs Gewinnen, könnte man Kämpfe grinden statt
+Häkchen zu setzen — und die Aussage des Produkts wäre widerlegt. Beute
+gehört laut Abschnitt 4 in den Dungeon (Ziel 6).
+
+Das Blatt sagt das auch: „Erfahrung und Gold gibt es dafür nicht — sie
+kommen aus deinen Gewohnheiten." Damit bleibt die Frage nicht offen.
+
+**Ein Test hält es fest.** `result_dialog_test.dart` prüft, dass im Blatt
+kein „+N" steht. Stünde dort eines Tages eine Belohnung, wäre das eine
+Richtungsentscheidung und kein Textdetail — der Test zwingt sie ans
+Licht.
+
+### Was mit dem Log verloren ging
+
+Zwei Dinge, beide bewusst in Kauf genommen:
+
+**Es steht nirgends mehr, *was* passiert ist.** „Geblockt", „Gift wirkt",
+„Eisfeld klingt aus" — die Zahlen über den Köpfen zeigen nur den Schaden,
+nicht die Ursache. `EnvironmentSet`, `StatusApplied` und `MoveFailed`
+haben jetzt gar keine Textform mehr im Bild.
+
+**Der Hinweis auf den Tooltip ist weg.** Er stand im leeren Log („Lange
+drücken erklärt ihn") und war die einzige Stelle, an der langes Drücken
+überhaupt erwähnt wurde. Der Tooltip funktioniert weiter — man muss nur
+wissen, dass es ihn gibt.
+
+Der Log wird weiter geführt (`CombatSession.log`, `appendLog`), nur nicht
+mehr gezeigt. Eine schmale Zeile mit dem jüngsten Ereignis wäre der
+naheliegende Kompromiss: rund 20 Pixel statt 200, und sie könnte beides
+tragen.
+
+**Nicht am Bild geprüft**, wie das Übrige aus dieser Sitzung.
+
 ### Die App soll aufs Handy — Android wird eingerichtet
 
 Entschieden am 26.08. von AktivesBrett: „Im Browser ist ja nur zum

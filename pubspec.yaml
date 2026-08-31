@@ -66,3 +66,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Derzeit gibt es keine Bilder. Sobald wieder welche dazukommen, muss
+  # hier der Ordner stehen -- siehe `lib/combat/move_icon.dart`:
+  #
+  #   assets:
+  #     - assets/abilities/
