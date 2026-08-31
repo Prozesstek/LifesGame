@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
+**Zuletzt aktualisiert:** 31.08.2026 · Abgleich von Konzept und Gedächtnis
 
 ---
 
@@ -18,10 +18,17 @@ freischalten → täglich abhaken → Werte steigen → Gold sammeln → Ausrüs
 kaufen → nächsten Gegner schlagen. Alles davon überlebt jetzt einen
 Neustart.
 
-Seit dem 22.08. gibt es **eine** Sperre wieder, und sie ist gewollt:
-Der **Kampf** wartet, bis das Handbuch durch ist
-([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)). Mit nur
-einem Fähigkeitsslot wäre der erste Gegner unschlagbar.
+Es gibt **eine** Sperre, und sie ist gewollt: Der **Kampf** wartet, bis das
+Handbuch durch ist **und** mindestens zwei Moves im Set liegen
+([ADR-0020](../decisions/0020-kampf-haengt-am-moveset.md)). Mit einem
+einzigen Move ist der erste Gegner nicht knapp, sondern unschlagbar — 0 % in
+der Simulation.
+
+> Bis zum 24.08. hing die Sperre am Handbuch allein
+> ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md)). Das war ein
+> Stellvertreter, und er stimmte, solange vier Fähigkeiten von Anfang an
+> offen waren. Seit ADR-0019 hängen sie an Theorieknoten — der zweite Slot
+> kann aufgehen und leer bleiben.
 
 ```bash
 flutter run -d chrome
@@ -33,7 +40,7 @@ flutter run -d chrome
 - Tech-Stack ([ADR-0001](../decisions/0001-tech-stack.md))
 - Architekturregel Kampflogik/Flame ([ADR-0002](../decisions/0002-kampflogik-ohne-flame.md))
 - Kampflogik als eigenes Package ([ADR-0003](../decisions/0003-combat-als-eigenes-package.md))
-- **`packages/combat`** — reine Dart-Kampflogik, 27 Tests grün:
+- **`packages/combat`** — reine Dart-Kampflogik, 80 Tests grün:
   - 4 Move-Slots gemäß Konzept (erzeugen / verbrauchen / schwächen / stützen)
   - Timed Hits mit Deckel, Energie, Gift, Verteidigungssenkung, Heilung, Schild
   - **Drei Gegner** in `enemy.dart`, aufsteigend
@@ -42,17 +49,19 @@ flutter run -d chrome
   - Deterministisch per Seed → Balance-Simulation möglich
   - `termination_test.dart` sichert ab, dass Kämpfe **enden** — über
     Wertebereiche, die kein Beispielkampf abdeckt
-- **`packages/theory`** — Skillbaum, Inhalte, Lernfortschritt, 50 Tests grün
+- **`packages/theory`** — Skillbaum, Inhalte, Lernfortschritt, 110 Tests grün
   ([ADR-0004](../decisions/0004-theorie-als-eigenes-package.md)):
-  - **17 Lektionen in 5 Zweigen**, jede mit 3 Abschnitten und 3 Fragen
-    ([ADR-0007](../decisions/0007-theorie-als-skillbaum.md))
-  - Zweige öffnet das **Charakterlevel**, Lektionen die Reihenfolge im Zweig
-  - Bestehensgrenze 60 %; XP und Gold nur einmal je Lektion
-  - Elf Lektionen schalten je eine Habit-Vorlage frei
-  - `content_test.dart` prüft **Inhalt**, nicht Code
-- **`packages/progression`** — Levelkurve, 11 Tests grün
+  - **24 Knoten und 29 Seiten**: vier Wurzeln mit je fünf Unterknoten, dazu
+    das Handbuch mit fünf Lektionen außerhalb des Graphen
+    ([ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md))
+  - Knoten öffnen **Theoriepunkte**, nicht das Level. Zwei Knoten hängen an
+    zwei Wurzeln — ein offener Elternknoten genügt
+  - Bestehensgrenze 60 %; XP und Gold nur einmal je Seite
+  - Elf Seiten schalten je eine Habit-Vorlage frei
+  - `graph_content_test.dart` prüft **Inhalt und Struktur**, nicht Code
+- **`packages/progression`** — Levelkurve, 33 Tests grün
   ([ADR-0006](../decisions/0006-levelkurve-als-eigenes-package.md))
-- **`packages/habits`** — Gewohnheiten, Streaks, Charakterwerte, 63 Tests grün
+- **`packages/habits`** — Gewohnheiten, Streaks, Charakterwerte, 71 Tests grün
   ([ADR-0008](../decisions/0008-gewohnheiten-als-eigenes-package.md)):
   - **11 Vorlagen**, jede mit Charakterwert, Zweig und Begründung
   - Vier Werte: Stärke → Angriff, Ausdauer → HP, Disziplin → Verteidigung,
@@ -90,12 +99,13 @@ flutter run -d chrome
     (`SaveWatcher`)
   - Alle `fromJson` sind nachsichtig: Ein Formatfehler kostet nie den
     ganzen Stand
-- **Flutter-App** (`lib/`) — 199 Tests grün, Web-Build läuft:
-  - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
-    bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
+- **Flutter-App** (`lib/`) — 273 Tests grün, Web-Build läuft:
+  - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet auf
+    Handbuch **und** zwei Moves ([ADR-0020](../decisions/0020-kampf-haengt-am-moveset.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
   - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
-  - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
+  - **Kampf**: Flame-Darstellung, Statusleisten, Kachelleiste, Timing, und
+    ein Blatt am Ende. Der Log wird geführt, aber nicht mehr gezeigt
   - **Laden**: sechs Plätze, Preis, Wirkung, Begründung — und bei zu wenig
     Gold, wie viele Tage noch fehlen
   - **Charakter**: Name, verdienter Titel und Levelbalken im Kopf,
@@ -106,6 +116,121 @@ flutter run -d chrome
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
+
+## Sitzung 31.08.2026: Der Abgleich
+
+Kein Code. `konzept.md`, `state.md`, `ziele.md`, `README.md` und `CLAUDE.md`
+gegen den Code gehalten und auf einen Stand gebracht. Anlass war eine
+einfache Frage — „was steht eigentlich noch richtig drin?" — und die Antwort
+war unangenehmer als erwartet.
+
+### Die Zahlen sind gemessen, nicht abgeschrieben
+
+Keine der drei Testzahlen im Repo stimmte:
+
+| | README | state.md | CLAUDE.md | **gemessen** |
+|---|---|---|---|---|
+| App | 213 | 222 | 254 | **254** |
+| combat | 49 | 78 | 80 | **80** |
+| theory | 109 | 109 | 109 | **110** |
+| abilities | 29 | 31 | 35 | **35** |
+| progression | 33 | 33 | 33 | **33** |
+| habits | 71 | 71 | 71 | **71** |
+| gear | 27 | 27 | 27 | **27** |
+| identity | 28 | 28 | 28 | **28** |
+
+Zusammen **638 Tests**, `flutter analyze` sauber. `CLAUDE.md` lag am
+nächsten dran, README am weitesten daneben.
+
+> **Nachtrag beim Zusammenführen, später am 31.08.:** Die App steht seit
+> PR #26 bei **273** statt 254 — `move_icon_test.dart` und
+> `result_dialog_test.dart` sind dazugekommen, `combat_test.dart`
+> gewachsen. Zusammen **657 Tests**, `flutter analyze` weiter sauber. Die
+> Tabelle oben bleibt stehen, wie sie gemessen wurde; sie beschreibt den
+> Stand vor dem Merge. Die sieben Package-Zahlen sind unverändert — PR #26
+> hat `packages/` nicht angefasst.
+
+### Was im Konzept nicht mehr stimmte
+
+`konzept.md` trug noch das Datum 11.08. und beschrieb an sieben Stellen ein
+anderes Spiel:
+
+| Abschnitt | stand da | gilt |
+|---|---|---|
+| §3.3 | Baum mit **zwei** Wurzeln, Knoten = Thema mit Lektionen | vier Wurzeln, Knoten = eine Seite |
+| §3.3 | 1 Theoriepunkt je Aufstieg, 49 im Leben | **2** je Aufstieg, **98** im Leben |
+| §3.3 | „45 Knoten, ~150 Lektionen, heute 17" | 24 Knoten, 29 Seiten, Startbaum steht |
+| §3.2 | „4 Moves", Timing pauschal +20 % | 15 wählbare Fähigkeiten, eigener Perfect-Faktor |
+| §3.6 | Gegner „offen" | drei Gegner mit Loadout und Utility-Quote |
+| §5 | **Drift (SQLite)** als Persistenz | `SaveStore` + `shared_preferences` |
+| §5 | Android ausgeschlossen | seit 26.08. Ziel |
+
+### Drei Versprechen, die es im Code nicht gibt
+
+Sie stehen jetzt als **ungebaut gekennzeichnet** im Konzept und in §6:
+
+1. **Ein gewonnener Kampf gibt nichts.** Kein Gold, kein XP, kein Drop.
+   `konzept.md` §1 nannte „50 % Habits · 30 % Theorie · 20 % Kämpfe" und
+   empfahl daneben, Kämpfe zu Gold und Items statt Level zu machen. Die
+   erste Hälfte ist gebaut (`totalXpProvider` sagt es im Kommentar), die
+   zweite nie. Der Kampf ist damit weder Einnahme noch Ausgabe, sondern
+   folgenlos — und das ist die unangenehmste Lücke für Ziel 7.
+2. **Fähigkeitspunkte wirken nicht.** `packages/progression` kennt nur
+   `TheoryPoints` und `AbilitySlots`; eine Verdienstregel gibt es nirgends.
+   Der einzige Ort im Code ist `lib/dev/debug_grants.dart`.
+3. **Von drei Ausrüstungsquellen existiert eine.** Drops und
+   Theorie-Meilensteine sind Plan (`konzept.md` §4).
+
+**Punkt 2 und 3 sind nicht entschieden** — das braucht ADRs und gehört in
+eine eigene Sitzung.
+
+> **Punkt 1 ist es inzwischen, und zwar als Nein.** AktivesBrett hat
+> dieselbe Frage am selben Tag aus der anderen Richtung getroffen — beim
+> Bauen des Blatts am Kampfende — und sie beantwortet: **Erfahrung und Gold
+> gibt es für einen Sieg mit Absicht nicht**, weil man Kämpfe sonst grinden
+> könnte statt Häkchen zu setzen. `result_dialog_test.dart` hält es fest,
+> indem er prüft, dass im Blatt kein „+N" steht. Begründung und Wortlaut
+> stehen unten unter „Der Kampf endet mit einem Blatt — und ohne
+> Belohnung".
+>
+> **Offen bleibt nur die Beute**, und sie ist verlagert statt ungeklärt: Sie
+> gehört laut `konzept.md` §4 in den Dungeon und damit in Ziel 6. Die
+> Sorge oben — der Einzelkampf ist folgenlos — bleibt als Beobachtung
+> richtig; ob sie für Ziel 7 trägt, zeigt der 30-Tage-Lauf und keine
+> Vermutung.
+
+### Issue #21 war in keinem Dokument
+
+**[Issue #21](https://github.com/Prozesstek/LifesGame/issues/21) „Skill Tree
+Feedback"** liegt seit dem 25.08. offen und stand weder hier noch in
+`ziele.md`. Genau das Muster, das schon `Kampfsystem.docx` gekostet hat: Was
+nur im Issue-Tab steht, existiert für den anderen nicht.
+
+Acht Punkte, alle zum Skillbaum aus Issue #16:
+
+- Das **Handbuch** muss weg oder anders gemacht werden
+- **Layout** des Baums anpassen — ein Oberknoten, swipebar, Richtung Skyrim
+- **Reihenfolge der Fragen und Antworten randomisieren**
+- Letzte Frage anpassen (nicht themenrelevant)
+- **Meistens ist die längste Antwort die richtige** — fixen
+- Skillpunkte prominenter, mit Tooltip
+- Neu freigeschaltete Fähigkeiten brauchen einen **Freischaltungsscreen**
+- Nicht klar erkennbar machen, welche Knoten Fähigkeiten geben
+
+**Zwei davon sind mehr als Kosmetik.** „Die längste Antwort ist die richtige"
+ist ein Inhaltsfehler über neunundzwanzig Seiten — wer das Muster erkennt,
+besteht ohne zu lesen, und dann trägt die Theorie nichts mehr bei. Und „das
+Handbuch muss weg" berührt ADR-0018/0020, weil es die Kampfsperre trägt.
+
+**Noch nicht eingeordnet:** ob die acht Punkte in den MVP gehören oder
+dahinter. Das ist eine Entscheidung, kein Abgleich.
+
+### Nebenbefund
+
+Die drei uncommitteten Theorie-Dateien waren reine Formatter-Drift zwischen
+Dart 3.12 und 3.13 — 40 Zeilen rein, 80 raus, kein Inhalt. Mit
+`git restore` zurückgenommen statt mitzucommitten, sonst pendelt das Repo
+beim nächsten Mal zurück (`gotchas.md`).
 
 ## Sitzung 26.08.2026: Das Fähigkeiten-Set
 
@@ -1038,6 +1163,14 @@ lessons.length`, 149 Tests grün. Offene Spuren: **Flutter 3.47.0 / Dart
 3.13.0** auf seinem Rechner gegen 3.44.9 / 3.12.2 hier, und ob „Fragen
 gemacht" auch „mit ≥ 60 % bestanden" heißt.
 
+> **Nachtrag: erledigt am 25.08., Issue #15 ist geschlossen.** Keine der
+> beiden Spuren stimmte. Die Ursache war `restart()`, das das Moveset nicht
+> setzte — und weil `CombatSession.moves` einen leeren Standardwert hat,
+> schwieg der Compiler. Jeder über die Gegnerwahl begonnene Kampf hatte
+> deshalb **keinen einzigen Move-Knopf**. Der Fallstrick steht in
+> `gotchas.md` („Ein Standardwert im Konstruktor versteckt ein vergessenes
+> Feld"), drei Tests halten es fest. **Ziel 1 ist damit erfüllt.**
+
 ## Als Nächstes
 
 **Der Charakterbildschirm ist fertig.** Von ADR-0013 fehlt nichts mehr
@@ -1049,15 +1182,20 @@ Häkchen — Erfahrung — Gold — Ausrüstung — Fähigkeit — Kampf.
 fertig sein soll und woran das gemessen wird, steht in
 [`ziele.md`](ziele.md). Die Zuordnung:
 
-| Punkt hier | Ziel | Termin |
-|---|---|---|
-| — (Issue #15, Kampf startet nicht) | Ziel 1 | **26.08.2026** |
-| 3 — Punkteökonomie und Baumumbau (Issue #16) | Ziel 2 | **31.08.2026** |
-| 1 — Waffen als Sidegrades | Ziel 3 | 06.09.2026 |
-| 8 — Tageswechsel | Ziel 4 | 06.09.2026 |
-| 2 — Fähigkeiten (Issue #17 erweitert) | Ziel 5 | 13.09.2026 |
-| 4 + 5 — Dungeon, Tränke | Ziel 6 | 20.09.2026 |
-| 6, 7, 9, 10 | **zurückgestellt** | nach dem 30-Tage-Lauf |
+| Punkt hier | Ziel | Termin | Stand 31.08. |
+|---|---|---|---|
+| — (Issue #15, Kampf startet nicht) | Ziel 1 | 26.08.2026 | **erfüllt** (25.08.) |
+| 3 — Punkteökonomie und Baumumbau (Issue #16) | Ziel 2 | 31.08.2026 | **erfüllt** (24.08.) |
+| 2 — Fähigkeiten (Issue #17 erweitert) | Ziel 5 | 13.09.2026 | **erfüllt** (26.08.), Icons offen |
+| 1 — Waffen als Sidegrades | Ziel 3 | **06.09.2026** | als Nächstes |
+| 8 — Tageswechsel | Ziel 4 | **06.09.2026** | als Nächstes |
+| 4 + 5 — Dungeon, Tränke | Ziel 6 | 20.09.2026 | offen, ADR fehlt |
+| 6, 7, 9, 10 | **zurückgestellt** | nach dem 30-Tage-Lauf | — |
+| Issue #21 (acht Punkte Skillbaum) | **nicht eingeordnet** | — | offen |
+
+**Drei von sechs Bauzielen sind erfüllt, alle vor ihrem Termin.** Die
+nächsten beiden fallen auf denselben Tag, den 06.09.: Waffen als Sidegrades
+und der Tageswechsel.
 
 **Punkt 3 ist am 24.08. von „zurückgestellt" nach vorne gerückt** — Issue
 #16 hat ihm ein Datum gegeben, und [ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)
@@ -1087,28 +1225,36 @@ Erst danach ist ADR-0017s Kernaussage überhaupt überprüfbar: Heute
 geben **beide** Klingen im Laden dieselbe Fähigkeit, die Waffe
 bestimmt also nichts.
 
-**2. Die elf übrigen Fähigkeiten** (ADR-0017). Sie brauchen zuerst
-Arbeit in `packages/combat`: einen verallgemeinerten `StatModifier`,
-in dem `DefenseDown` aufgeht, plus drei neue Mechaniken (anteilige
-Heilung, eigene Schwächungen entfernen, Gift zünden).
+**2. ~~Die elf übrigen Fähigkeiten~~ — erledigt am 26.08.** Statt der elf
+aus ADR-0017 kamen die **fünfzehn aus der Vorlage**
+([ADR-0022](../decisions/0022-faehigkeiten-set-aus-der-vorlage.md)), und
+`AbilityCatalog.choosable` wurde dabei ausgetauscht. Die geplante
+Engine-Arbeit war größer als hier gedacht: `TimingSpec`, vier Umgebungen,
+sieben Statuseffekte, dreizehn Wirkungen, Mehrfachtreffer.
 
-Mit ihnen kommt auch *Blöße finden* zurück — die Schwächung, die
-`Zehrung` bei der Teilung verloren hat.
+*Blöße finden* ist damit **nicht** zurückgekommen — die Schwächung, die
+`Zehrung` bei der Teilung verloren hat, fehlt weiter.
 
-**Und dann ist ADR-0018 neu zu prüfen:** Sobald eine Waffe mit anderem
-Rhythmus den ersten Kampf allein tragen kann, wird aus der Sperre vor
-dem Kampf Bevormundung statt Hilfe.
+**ADR-0018 wurde neu geprüft, aber aus einem anderen Grund** als hier
+vermutet: nicht weil eine Waffe den Kampf allein trägt, sondern weil der
+zweite Slot seit ADR-0019 leer bleiben kann. Ergebnis ist
+[ADR-0020](../decisions/0020-kampf-haengt-am-moveset.md) — die Sperre hängt
+am Moveset. Die Frage, ob sie bei fünf Waffen zur Bevormundung wird, bleibt
+offen und gehört zu Punkt 1.
 
-**3. Punkteökonomie und Baumumbau** (ADR-0012, ADR-0013): Baumstruktur
-in `packages/theory` auf Knoten mit Kindern, Theoriepunkt je Stufe,
-Fähigkeitspunkt auf jeder dritten. `AbilitySlots` ist der vorgesehene
-Platz dafür und im Code als unvollständig markiert.
+**3. ~~Punkteökonomie und Baumumbau~~ — erledigt am 24.08.**
+([ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)) Vier Wurzeln,
+`TheoryNode`/`TheoryGraph`, **zwei** Theoriepunkte je Aufstieg, und der Baum
+wird gezeichnet statt aufgelistet — `tree_layout.dart` rechnet die Plätze,
+`tree_painter.dart` zieht die Linien.
 
-Der sichtbarste Teil ist die Baumdarstellung — `skill_tree_screen.dart`
-zeigt heute eine Liste, ein Baum braucht etwas anderes. Und erst mit
-echten Knoten bekommen die vier `FromStart`-Fähigkeiten ihre
-Bedingung; heute sind sie von Anfang an offen, weil ihre Knoten
-(Sport, Ernährung, Schlaf, Erholung) noch nicht existieren.
+**Der Fähigkeitspunkt auf jeder dritten Stufe ist als Einziges liegen
+geblieben.** Er steht im Spielstand, wird angezeigt und wirkt nicht;
+`packages/progression` kennt keine Verdienstregel dafür. Beim Abgleich am
+31.08. als offener Punkt aufgenommen (`konzept.md` §6, Punkt 13).
+
+Die vier `FromStart`-Fähigkeiten haben ihre Bedingung bekommen: `FromStart`
+ist ersatzlos entfallen, sie hängen jetzt an Knoten unter *Körper*.
 
 **4. Dungeon** — 4 Gegner plus Boss, HP heilt nicht dazwischen. Das
 Stück, das im MVP-Schnitt noch fehlt. Offen bleibt die

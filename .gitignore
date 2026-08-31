@@ -55,3 +55,15 @@ Thumbs.db
 !.env.example
 *.keystore
 *.jks
+
+# ---- Lose Bilder aus dem Arbeitsordner ----
+# Screenshots und Entwuerfe, die beim Arbeiten anfallen und niemandem
+# gehoeren. PR #26 hat die Bilder aus dem Kampf wieder herausgenommen
+# (revert 4dd3469), deshalb liegt hier gerade nichts, was ins Repo muss.
+/Icon.png
+/image.png
+# assets/ bleibt gesperrt -- aber nur der Inhalt, damit assets/abilities/
+# spaeter eingecheckt werden kann. Der Ordner steht schon als Kommentar in
+# pubspec.yaml und wird von lib/combat/move_icon.dart erwartet.
+/assets/*
+!/assets/abilities/

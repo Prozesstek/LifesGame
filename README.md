@@ -14,15 +14,20 @@ mit je fünf Knoten, geöffnet über Theoriepunkte statt über Levelsperren
 
 Seit dem 26.08. gibt es **fünfzehn Fähigkeiten** mit eigenem Timing, vier
 Umgebungen und Seltenheitsstufen ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
-Elf hängen am Baum, vier an Streak-Marken. **Die Balance ist dafür noch
-nicht nachgezogen** — der Bergwächter ist derzeit unschlagbar, Zahlen in
-`docs/context/state.md`.
+Elf hängen am Baum, vier an Streak-Marken. Seither spielt auch **der Gegner
+nach denselben Regeln** — er zielt, kann perfekt treffen und greift zu
+Umgebung und Schutz ([ADR-0023](docs/decisions/0023-der-gegner-spielt-nach-denselben-regeln.md)).
+
+**Die Balance ist noch nicht nachgezogen.** Der Bergwächter steht an Tag 60
+bei 40 % statt bei den 100 % aus ADR-0009 — schlagbar, aber nicht fertig.
+Zahlen in `docs/context/state.md`.
 
 **Was als Nächstes ansteht, steht nicht mehr hier**, sondern in
 [`docs/context/ziele.md`](docs/context/ziele.md) — mit Terminen und mit der
 Liste dessen, was bis zum MVP ausdrücklich *nicht* angefasst wird. Kurz: die
-Waffen als Alternativen, die elf übrigen Fähigkeiten, dann der Dungeon.
-Wo wir stehen: [`docs/context/state.md`](docs/context/state.md).
+Waffen als Alternativen (06.09.), der Tageswechsel (06.09.), dann der
+Dungeon (20.09.). Wo wir stehen:
+[`docs/context/state.md`](docs/context/state.md).
 
 ## Für Mitentwickler: erste Schritte
 
@@ -33,7 +38,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 213 Tests
+flutter test                       # 273 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -42,7 +47,7 @@ dart run tool/balance_sim.dart
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/combat
-dart test                          # 29 Tests
+dart test                          # 80 Tests
 dart run example/play.dart         # Kampf im Terminal spielen
 dart run example/balance_sim.dart  # prüft die Engine, nicht das Spiel
 
@@ -54,7 +59,7 @@ cd packages/gear
 dart test                          # 27 Tests, prüft auch die Preise
 
 cd packages/theory
-dart test                          # 109 Tests, prüft auch den Inhalt
+dart test                          # 110 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 28 Tests, prüft auch die Titel
@@ -79,15 +84,15 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, drei Gegner | 49 |
-| `packages/theory` | Skillbaum-Graph: 29 Seiten, 87 Fragen, Lernfortschritt | 109 |
+| `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, drei Gegner | 80 |
+| `packages/theory` | Skillbaum-Graph: 29 Seiten, 87 Fragen, Lernfortschritt | 110 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
 | `packages/habits` | 11 Gewohnheits-Vorlagen, Streaks, Charakterwerte | 71 |
 | `packages/gear` | 9 Ausrüstungsstücke auf 6 Plätzen, Preise, Inventar | 27 |
-| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 31 |
+| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 35 |
 | `packages/identity` | 7 verdiente Titel aus drei Quellen, Name | 28 |
 | `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 213 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter | 273 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

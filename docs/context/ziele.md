@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
+**Zuletzt aktualisiert:** 31.08.2026 · Abgleich von Konzept und Gedächtnis
 
 ---
 
@@ -29,15 +29,29 @@ Instanz, die zählt.
 
 ## Die Ziele auf einen Blick
 
-| # | Ziel | Quelle | Termin |
-|---|---|---|---|
-| 1 | Der Kampf lässt sich starten | Issue #15 | **26.08.** |
-| 2 | Skillbaum mit vier Wurzeln | Issue #16 | **31.08.** |
-| 3 | Der Laden trifft eine Entscheidung | `state.md` Punkt 1 | 06.09. |
-| 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | 06.09. |
-| 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
-| 6 | Der Dungeon schließt den MVP-Schnitt | `state.md` Punkt 4+5 | 20.09. |
-| 7 | Der Nachweis | diese Datei | 20.10. |
+| # | Ziel | Quelle | Termin | erfüllt |
+|---|---|---|---|---|
+| 1 | Der Kampf lässt sich starten ✓ | Issue #15 | ~~26.08.~~ | **25.08.** |
+| 2 | Skillbaum mit vier Wurzeln ✓ | Issue #16 | ~~31.08.~~ | **24.08.** |
+| 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ | **26.08.** |
+| 3 | Der Laden trifft eine Entscheidung | `state.md` Punkt 1 | **06.09.** | — |
+| 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | **06.09.** | — |
+| 6 | Der Dungeon schließt den MVP-Schnitt | `state.md` Punkt 4+5 | 20.09. | — |
+| 7 | Der Nachweis | diese Datei | 20.10. | — |
+
+**Drei von sechs Bauzielen sind erfüllt, jedes vor seinem Termin.** Die
+Reihenfolge oben ist danach sortiert, nicht mehr nach Nummer — die
+Nummerierung bleibt, damit Verweise aus `state.md` und den ADRs weiter
+stimmen.
+
+**Noch nicht eingeordnet:**
+[Issue #21](https://github.com/Prozesstek/LifesGame/issues/21) („Skill Tree
+Feedback", 25.08.) mit acht Punkten zum Skillbaum. Es stand bis zum 31.08. in
+keinem der beiden Dokumente. Zwei seiner Punkte sind mehr als Kosmetik: dass
+**meistens die längste Antwort die richtige** ist (ein Inhaltsfehler über 29
+Seiten — wer das Muster erkennt, besteht ohne zu lesen), und dass **das
+Handbuch weg soll** (es trägt die Kampfsperre aus ADR-0020). Die Punkte
+stehen in `state.md`, Sitzung 31.08. **Ob sie in den MVP gehören, ist offen.**
 
 ## Was **nicht** im MVP ist — und warum
 
@@ -62,7 +76,9 @@ für den anderen, statt still nebenbei.
 
 ## Ziel 1 — Der Kampf lässt sich starten
 
-**Termin: Mittwoch, 26.08.2026 · Issue [#15](https://github.com/Prozesstek/LifesGame/issues/15)**
+**Termin war Mittwoch, 26.08.2026 · Issue
+[#15](https://github.com/Prozesstek/LifesGame/issues/15) · erfüllt am
+25.08.2026, Issue geschlossen**
 
 ### Spezifisch
 
@@ -72,11 +88,11 @@ ist es kein Effekt der Sperre aus ADR-0018, sondern ein Fehler.
 
 ### Messbar
 
-| Kriterium | Soll |
-|---|---|
-| Ursache benannt | in `gotchas.md`, nicht nur behoben |
-| Reproduktion | ein Test, der ohne den Fix rot ist |
-| Auf **seinem** Rechner | Kampf startet, Fähigkeiten laden |
+| Kriterium | Soll | Ist |
+|---|---|---|
+| Ursache benannt | in `gotchas.md`, nicht nur behoben | **ja** — „Ein Standardwert im Konstruktor versteckt ein vergessenes Feld" |
+| Reproduktion | ein Test, der ohne den Fix rot ist | **drei**, zwei davon fallen ohne den Fix um |
+| Auf **seinem** Rechner | Kampf startet, Fähigkeiten laden | **ja**, Issue geschlossen 25.08. |
 
 ```bash
 flutter test
@@ -93,6 +109,16 @@ Die beiden offenen Spuren: Er läuft auf **Flutter 3.47.0 / Dart 3.13.0**, hier
 läuft 3.44.9 / 3.12.2. Und „Fragen gemacht" ist nicht dasselbe wie „mit ≥ 60 %
 bestanden". Beides klärt eine Rückfrage im Issue, kein Debugging.
 
+> **Keine der beiden Spuren stimmte.** Die Ursache war `restart()`, das das
+> Moveset nicht setzte — und weil `CombatSession.moves` einen leeren
+> Standardwert hat, schwieg der Compiler. Weil die **Gegnerwahl** `restart()`
+> aufruft, hatte jeder über den Startbildschirm begonnene Kampf **keinen
+> einzigen Move-Knopf**. Er war unbedienbar, nicht gesperrt.
+>
+> Der Fehler kam mit dem Feld `moves` am 22.08.: `build()` bekam es,
+> `restart()` wurde übersehen. Er lag drei Tage still da, und gefunden hat ihn
+> **ein Screenshot, nicht die Testsuite.**
+
 ### Relevant
 
 **Es ist das einzige Ziel, das jemanden vollständig blockiert.** Solange der
@@ -103,7 +129,7 @@ Spielern nicht möglich — und jedes Balance-Urteil beruht auf einer Person.
 
 ## Ziel 2 — Skillbaum mit vier Wurzeln
 
-**Termin: Sonntag, 31.08.2026 · Issue [#16](https://github.com/Prozesstek/LifesGame/issues/16) · [ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md)**
+**Termin war Sonntag, 31.08.2026 · Issue [#16](https://github.com/Prozesstek/LifesGame/issues/16) · [ADR-0019](../decisions/0019-skillbaum-mit-vier-wurzeln.md) · erfüllt am 24.08.2026, Issue geschlossen**
 
 ### Spezifisch
 
@@ -239,7 +265,7 @@ diesem Spiel der schlimmste denkbare Fehler (`konzept.md` 3.7).
 
 ## Ziel 5 — Fähigkeiten mit Art und Seltenheit
 
-**Termin: Sonntag, 13.09.2026 · Issue [#17](https://github.com/Prozesstek/LifesGame/issues/17)**
+**Termin war Sonntag, 13.09.2026 · Issue [#17](https://github.com/Prozesstek/LifesGame/issues/17) · erfüllt am 26.08.2026 — das Issue bleibt offen, weil die Icons fehlen**
 
 ### Spezifisch
 
@@ -386,13 +412,25 @@ nachtragen. Eine Zahl, die sich in einer Woche nicht bewegt hat, ist das
 Signal — nicht das Gefühl.
 
 Beim Verfehlen eines Termins gilt: **Der Umfang wandert, nicht die Ziellinie.**
-Der 20.09. steht, weil der 30-Tage-Lauf sonst in den November rutscht. Die
-Schnittreihenfolge ist festgelegt: **zuerst Ziel 5** (Seltenheit, Icons,
-Umgebungseffekte), **dann Ziel 2** (Unterknoten über das Minimum hinaus).
-Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
+Der 20.09. steht, weil der 30-Tage-Lauf sonst in den November rutscht.
+
+**Die alte Schnittreihenfolge ist verbraucht.** Sie lautete: zuerst Ziel 5,
+dann Ziel 2 — beide sind erfüllt, es gibt dort nichts mehr zu schneiden. Von
+den drei verbliebenen Bauzielen ist **Ziel 3 das einzig schneidbare**: Fünf
+Waffen mit fünf Fähigkeiten machen den Laden besser, aber der MVP steht auch
+mit zweien. **Ziel 4 und 6 sind nicht schneidbar** — ein Häkchen auf dem
+falschen Tag reißt eine Kette, und ohne Dungeon fehlt der MVP-Schnitt.
+
+Was danach als Erstes fällt, sind die **Icons** (Ziel 5, Issue #17) und
+alles aus **Issue #21**, das nicht die Fragen selbst betrifft.
 
 ## Verlauf
 
+- **31.08.2026** — Abgleich, keine neuen Ziele. Ziel 1 und 2 nachträglich
+  abgehakt: beide waren erfüllt, ohne dass es hier stand. Issue #21
+  aufgenommen, das bis dahin in keinem Dokument existierte. Die
+  Schnittreihenfolge neu gefasst, weil die alte auf zwei erledigte Ziele
+  zeigte. Details in `state.md`, Sitzung 31.08.
 - **24.08.2026, abends** — Nach drei Issues vom selben Nachmittag überarbeitet.
   #16 holt den Skillbaum in den MVP zurück (er stand mittags noch auf der
   Sperrliste) und setzt den 31.08.; ADR-0019 hält die Abweichungen von
