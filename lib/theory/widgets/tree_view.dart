@@ -28,9 +28,13 @@ class TreeView extends StatelessWidget {
     required this.progress,
     required this.availablePoints,
     required this.path,
+    required this.panelOpen,
+    required this.onTogglePanel,
     required this.onEnter,
     required this.onLeave,
     required this.onAction,
+    this.onPrevArea,
+    this.onNextArea,
     super.key,
   });
 
@@ -41,6 +45,17 @@ class TreeView extends StatelessWidget {
   /// Der Weg von der Wurzel bis zum Startknoten. Nie leer.
   final List<String> path;
 
+  /// Ob das Blatt über dem Startknoten aufgeklappt ist.
+  ///
+  /// **Geschlossen ist der Standard.** Wer ein Gebiet betritt, hat noch
+  /// nichts gewählt — ein Knopf über der Wurzel stünde dort jedes Mal,
+  /// ohne dass ihn jemand gerufen hätte. Wer dagegen ein Kind
+  /// hereinzieht, hat es damit gewählt; dann steht er da.
+  final bool panelOpen;
+
+  /// Auf- und zuklappen — ein Druck auf den Startknoten.
+  final VoidCallback onTogglePanel;
+
   /// Ein Kind hereinziehen — es wird der neue Startknoten.
   final ValueChanged<TheoryNode> onEnter;
 
@@ -48,6 +63,14 @@ class TreeView extends StatelessWidget {
   final VoidCallback onLeave;
 
   final void Function(TheoryNode node, NodeAction action) onAction;
+
+  /// Ins Gebiet links bzw. rechts wechseln. Null heisst: dort ist keins.
+  ///
+  /// **Neben dem Wischen, nicht statt dessen.** Eine Geste, die niemand
+  /// vermutet, existiert nicht -- die Punkte in der Kopfzeile sagen, dass
+  /// es vier Gebiete gibt, die Pfeile sagen, wie man hinkommt.
+  final VoidCallback? onPrevArea;
+  final VoidCallback? onNextArea;
 
   String get _focusId => path.last;
   String? get _parentId => path.length > 1 ? path[path.length - 2] : null;
@@ -120,40 +143,60 @@ class TreeView extends StatelessWidget {
         // Die Höhe ist gedeckelt, und das ist keine Kosmetik: Ohne den
         // Deckel wuchs er in die Kinderreihe hinein und schluckte deren
         // Drücke — sichtbar war nur, dass Antippen nichts tut.
-        Positioned(
-          left: 20,
-          right: 20,
-          bottom:
-              layout.size.height -
-              focusY +
-              TreeLayout.focusRadius +
-              TreeLayout.panelGap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: TreeLayout.panelMaxHeight,
-            ),
-            child: NodeActionPanel(
-              node: focus,
-              state: focusState,
-              availablePoints: availablePoints,
-              onAction: (action) => onAction(focus, action),
+        if (panelOpen)
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom:
+                layout.size.height -
+                focusY +
+                TreeLayout.focusRadius +
+                TreeLayout.panelGap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: TreeLayout.panelMaxHeight,
+              ),
+              child: NodeActionPanel(
+                node: focus,
+                state: focusState,
+                availablePoints: availablePoints,
+                onAction: (action) => onAction(focus, action),
+              ),
             ),
           ),
-        ),
         Positioned(
           left: layout[_focusId]!.dx - NodeBubble.focusLabelWidth / 2,
           top: focusY - TreeLayout.focusRadius,
           child: NodeBubble.focus(
             node: focus,
             state: focusState,
-            onTap: () => _tapFocus(focus, focusState),
+            onTap: onTogglePanel,
           ),
+        ),
+        // **Auf Hoehe des Startknotens, und das ist gerechnet.** Er ist
+        // nur `focusLabelWidth` breit und sitzt mittig; links und rechts
+        // von ihm ist die Flaeche frei. Auf Hoehe der Kinderreihen waere
+        // sie es nicht -- dort steht das aeusserste Kind bis an den Rand.
+        _AreaArrow(
+          icon: Icons.chevron_left_rounded,
+          onTap: onPrevArea,
+          left: 2,
+          top: focusY - _AreaArrow.size / 2,
+        ),
+        _AreaArrow(
+          icon: Icons.chevron_right_rounded,
+          onTap: onNextArea,
+          right: 2,
+          top: focusY - _AreaArrow.size / 2,
         ),
       ],
     );
   }
 
   /// Ein Kind antippen zieht es herein — **auch ein Blatt**.
+  ///
+  /// Und es klappt das Blatt darüber auf: Wer ein Kind antippt, hat es
+  /// damit gewählt. Nur der Einstieg in ein Gebiet ist ruhig.
   ///
   /// ADR-0026 wollte ein Blatt ursprünglich sofort öffnen lassen, weil es
   /// nichts hereinzuziehen hat. Gegen den echten Baum trägt das nicht:
@@ -166,27 +209,53 @@ class TreeView extends StatelessWidget {
   /// Ein Blatt zeigt danach eine leere Ebene über sich. Das ist keine
   /// Lücke, sondern die Auskunft: hier geht es nicht weiter.
   void _tapChild(TheoryNode node) => onEnter(node);
+}
 
-  /// Der zweite Weg zum Öffnen: noch einmal auf den unten sitzenden
-  /// Knoten drücken.
-  void _tapFocus(TheoryNode node, NodeState state) => _act(node, state);
+/// Ein Pfeil zum Gebietswechsel, neben dem Startknoten.
+///
+/// Am Rand der Reihe gibt es kein Gebiet mehr; dann steht der Pfeil
+/// blass da, statt zu verschwinden. Ein Knopf, der kommt und geht,
+/// laesst die Leiste zappeln -- und man sieht nicht mehr, wo man ist.
+class _AreaArrow extends StatelessWidget {
+  const _AreaArrow({
+    required this.icon,
+    required this.onTap,
+    required this.top,
+    this.left,
+    this.right,
+  });
 
-  void _act(TheoryNode node, [NodeState? known]) {
-    final state = known ?? nodeStateFor(node, graph, progress, availablePoints);
+  static const double size = 44;
 
-    switch (state) {
-      case NodeState.passed:
-      case NodeState.open:
-        onAction(node, NodeAction.read);
-      case NodeState.affordable:
-        onAction(node, NodeAction.open);
-      case NodeState.tooExpensive:
-      case NodeState.unreachable:
-        // Der Knopf über dem Startknoten nennt bereits den Grund. Hier
-        // noch eine Meldung zu zeigen hieße, dieselbe Absage zweimal zu
-        // geben.
-        break;
-    }
+  final IconData icon;
+  final VoidCallback? onTap;
+  final double top;
+  final double? left;
+  final double? right;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      right: right,
+      top: top,
+      child: Opacity(
+        opacity: onTap == null ? 0.25 : 1,
+        child: Material(
+          color: Palette.surface,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Icon(icon, size: 26, color: Palette.textDim),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:lifes_game/theory/branch_screen.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:lifes_game/theory/widgets/node_action_panel.dart';
 import 'package:lifes_game/theory/widgets/node_bubble.dart';
 import 'package:lifes_game/theory/widgets/node_state.dart';
 import 'package:lifes_game/theory/widgets/lesson_tile.dart';
@@ -376,9 +377,13 @@ void main() {
       );
     });
 
-    testWidgets('ein zweiter Druck auf den Startknoten öffnet ebenfalls', (
+    testWidgets('ein zweiter Druck auf den Startknoten klappt wieder zu', (
       tester,
     ) async {
+      // **Nicht mehr „er öffnet ebenfalls".** ADR-0026 gab dem zweiten
+      // Druck das Öffnen — damals stand das Blatt immer offen und die
+      // Geste war frei. Seit sie das Blatt auf- und zuklappt, wäre ein
+      // Doppeldruck ein verlorener Theoriepunkt.
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
@@ -387,10 +392,33 @@ void main() {
 
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
+      expect(find.text('Für einen Punkt öffnen'), findsOneWidget);
+
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
-      expect(container.read(spentTheoryPointsProvider), 1);
+      expect(find.text('Für einen Punkt öffnen'), findsNothing);
+      expect(container.read(spentTheoryPointsProvider), 0);
+    });
+
+    testWidgets('beim Reingehen steht nichts über dem Startknoten', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+
+      final wurzel = theoryGraph.nodeById(theoryRootIds.first)!;
+
+      expect(find.byType(NodeActionPanel), findsNothing);
+      expect(find.text('Seite lesen'), findsNothing);
+
+      await tester.tap(find.text(wurzel.name).last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NodeActionPanel), findsOneWidget);
     });
 
     testWidgets('der Elternknoten führt zurück', (tester) async {
@@ -463,12 +491,107 @@ void main() {
       expect(find.byIcon(Icons.auto_awesome), findsNothing);
     });
 
+    testWidgets('eine bestandene Seite bietet keinen Knopf mehr an', (
+      tester,
+    ) async {
+      // **Beim Öffnen eines Gebiets stand hier jedes Mal „Seite noch
+      // einmal lesen"** — unter dem Startknoten, den man längst gelesen
+      // hat. Ein Knopf verspricht eine Handlung; eine bestandene Seite
+      // hat keine offen.
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      _passHandbook(container);
+      final wurzel = theoryGraph.nodeById(theoryRootIds.first)!;
+      container.read(theoryProgressProvider.notifier).submit(
+        wurzel.lesson,
+        <int?>[for (final q in wurzel.lesson.questions) q.correctIndex],
+      );
+
+      await _pumpTree(tester, container);
+      await tester.tap(find.text(wurzel.name).last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NodeActionPanel), findsOneWidget);
+      expect(find.text('Seite noch einmal lesen'), findsNothing);
+      expect(find.text('Seite lesen'), findsNothing);
+      expect(find.textContaining('Bestanden'), findsOneWidget);
+    });
+
+    testWidgets('nachlesen geht weiter — über den Knoten selbst', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      _passHandbook(container);
+      final wurzel = theoryGraph.nodeById(theoryRootIds.first)!;
+      container.read(theoryProgressProvider.notifier).submit(
+        wurzel.lesson,
+        <int?>[for (final q in wurzel.lesson.questions) q.correctIndex],
+      );
+
+      await _pumpTree(tester, container);
+      await tester.tap(find.text(wurzel.name).last);
+      await tester.pumpAndSettle();
+
+      // Die Zeile ist selbst der Knopf — sonst gäbe es gar keinen Weg
+      // mehr zurück in eine bestandene Seite.
+      await tester.tap(find.textContaining('Bestanden'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LessonScreen), findsOneWidget);
+    });
+
+    testWidgets('Pfeile wechseln das Gebiet, nicht nur das Wischen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+
+      final zweitesGebiet = theoryGraph.nodeById(theoryRootIds[1])!;
+      expect(find.text(zweitesGebiet.name), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.chevron_right_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text(zweitesGebiet.name), findsWidgets);
+    });
+
+    testWidgets('am Rand der Reihe führt der Pfeil nirgendwohin', (
+      tester,
+    ) async {
+      // Er verschwindet nicht, er wird blass. Ein Knopf, der kommt und
+      // geht, lässt die Leiste zappeln.
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+
+      final erstes = theoryGraph.nodeById(theoryRootIds.first)!;
+      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text(erstes.name), findsWidgets);
+    });
+
     testWidgets('eine offene Wurzel führt zu ihrer Seite', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
       await pumpTree(tester, container);
+      await tester.tap(
+        find.text(theoryGraph.nodeById(theoryRootIds.first)!.name).last,
+      );
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('Seite lesen'));
       await tester.pumpAndSettle();
 

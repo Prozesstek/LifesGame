@@ -61,6 +61,43 @@ die Auskunft „hier geht es nicht weiter" — statt einer Falle.
 
 Die übrigen fünf Festlegungen bleiben unverändert.
 
+## Nachtrag 01.09.2026: das Blatt ist zu, bis jemand es ruft
+
+Punkt 4 setzte voraus, dass der Handlungsknopf immer dasteht — daher auch
+sein zweiter Satz: „Zweiter Weg: noch einmal auf den unten sitzenden Knoten
+drücken."
+
+Am Bild geprüft war das eine Zeile zu viel. Wer ein Gebiet betritt, landet auf
+dessen Wurzel; über ihr stand jedes Mal ein Knopf, ohne dass ihn jemand
+gerufen hätte — meist „Seite noch einmal lesen" für eine Seite, die längst
+sitzt.
+
+**Entschieden am 01.09.2026 von Frederik:**
+
+1. **Geschlossen ist der Standard.** Ein Gebiet zu betreten ist keine Wahl.
+2. **Ein Kind hereinzuziehen klappt das Blatt auf.** Wer ein Kind antippt, hat
+   es damit gewählt — Öffnen kostet weiterhin zwei Drücke.
+3. **Ein Druck auf den Startknoten klappt auf und zu.** Damit ist der zweite
+   Satz von Punkt 4 abgelöst: Der zweite Druck öffnet den Knoten nicht mehr,
+   er schliesst das Blatt. Wäre es anders, kostete ein Doppeldruck einen
+   Theoriepunkt.
+4. **Zurückgehen schliesst ebenfalls.** Der Knoten, auf dem man landet, war
+   eben noch der Weg dorthin.
+
+**Zwei Folgen, die mit entschieden sind:**
+
+Eine **bestandene** Seite bekommt gar keinen Knopf mehr, nur die Zeile
+„Bestanden — zum Nachlesen antippen". Ein Knopf verspricht eine Handlung; eine
+bestandene Seite hat keine offen.
+
+**Diese Zeile ist selbst der Knopf.** Sie muss es sein: Seit der Druck auf den
+Knoten nur noch klappt, wäre Nachlesen sonst gar nicht mehr erreichbar.
+
+**Pfeile links und rechts neben dem Startknoten** wechseln das Gebiet, neben
+dem Wischen aus Punkt 1. Sie sitzen auf seiner Höhe, weil er nur
+`focusLabelWidth` breit ist und die Fläche dort frei lässt; auf Höhe der
+Kinderreihen wäre sie es nicht.
+
 ## Begründung
 
 **Ein Handy hat Höhe, keine Breite.** Das stand schon in ADR-0019 als

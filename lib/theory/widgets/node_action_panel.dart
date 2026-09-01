@@ -74,11 +74,14 @@ class NodeActionPanel extends StatelessWidget {
   Widget _action() {
     switch (state) {
       case NodeState.passed:
-        return _button(
-          label: 'Seite noch einmal lesen',
-          icon: Icons.menu_book_outlined,
-          result: NodeAction.read,
-        );
+        // **Kein Knopf mehr.** Eine bestandene Seite hat nichts offen;
+        // ein Knopf dort verspricht eine Handlung, wo es keine gibt --
+        // und beim Oeffnen eines Gebiets steht er jedes Mal unter dem
+        // Startknoten, den man laengst gelesen hat.
+        //
+        // Nachlesen geht weiter: ein Druck auf den Knoten selbst. Der
+        // Satz sagt es, damit der Weg nicht verschwindet.
+        return _passed();
       case NodeState.open:
         return _button(
           label: 'Seite lesen',
@@ -104,6 +107,37 @@ class NodeActionPanel extends StatelessWidget {
           'dieser zwei Gebiete verbindet.',
         );
     }
+  }
+
+  /// **Die Zeile ist selbst der Knopf.**
+  ///
+  /// Sie muss es sein: Seit der Druck auf den Knoten das Blatt nur noch
+  /// auf- und zuklappt, gaebe es sonst gar keinen Weg mehr zurueck in
+  /// eine bestandene Seite. Ein Satz, der zum Antippen auffordert und
+  /// nicht antippbar ist, waere die schlechteste Fassung davon.
+  Widget _passed() {
+    return InkWell(
+      onTap: () => onAction(NodeAction.read),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Icon(Icons.check_circle, size: 15, color: Palette.success),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Bestanden — zum Nachlesen antippen',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Palette.muted, fontSize: 12.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _button({

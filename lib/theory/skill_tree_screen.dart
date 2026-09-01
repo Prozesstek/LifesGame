@@ -55,6 +55,14 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
     for (final id in theoryRootIds) id: <String>[id],
   };
 
+  /// Ob das Blatt über dem Startknoten offen ist, je Gebiet.
+  ///
+  /// **Startet geschlossen.** Ein Gebiet zu betreten ist keine Wahl —
+  /// erst ein Druck auf einen Knoten ist eine.
+  final Map<String, bool> _panelOpen = <String, bool>{
+    for (final id in theoryRootIds) id: false,
+  };
+
   int _current = 0;
 
   String get _areaId => theoryRootIds[_current];
@@ -118,9 +126,19 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                     progress: progress,
                     availablePoints: available,
                     path: _paths[id]!,
-                    onEnter: (node) => setState(() => _paths[id]!.add(node.id)),
+                    panelOpen: _panelOpen[id]!,
+                    onTogglePanel: () =>
+                        setState(() => _panelOpen[id] = !_panelOpen[id]!),
+                    onEnter: (node) => setState(() {
+                      _paths[id]!.add(node.id);
+                      _panelOpen[id] = true;
+                    }),
                     onLeave: _leave,
                     onAction: _act,
+                    onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
+                    onNextArea: i < theoryRootIds.length - 1
+                        ? () => _goToArea(i + 1)
+                        : null,
                   );
                 },
               ),
@@ -143,9 +161,28 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
         .length;
   }
 
+  /// Zum Gebiet [index] wechseln.
+  ///
+  /// Animiert und nicht gesprungen: Der Wisch bewegt die Seiten, und ein
+  /// Pfeil, der sie stattdessen austauschte, saehe aus wie ein anderer
+  /// Bildschirm statt wie dasselbe Regal einen Schritt weiter.
+  void _goToArea(int index) {
+    _pages.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   void _leave() {
     if (_path.length == 1) return;
-    setState(() => _paths[_areaId]!.removeLast());
+    setState(() {
+      _paths[_areaId]!.removeLast();
+      // Zurückgehen ist kein Wählen. Der Knoten, auf dem man landet,
+      // war eben noch der Weg dorthin -- er soll nicht so aussehen, als
+      // stünde jetzt eine Entscheidung an.
+      _panelOpen[_areaId] = false;
+    });
   }
 
   Future<void> _act(TheoryNode node, NodeAction action) async {
