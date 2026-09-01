@@ -42,6 +42,25 @@ die gemeinsame Fläche unübersichtlicher, nicht übersichtlicher.
 **`InteractiveViewer` entfällt.** Senkrecht wird gescrollt, waagerecht wird das
 Gebiet gewechselt.
 
+## Nachtrag 01.09.2026: ein Blatt öffnet doch nicht direkt
+
+Punkt 4 endete mit dem Satz: „Ein Knoten ohne Kinder zieht nichts herein und
+öffnet direkt." Beim Bauen hat sich gezeigt, dass dieser Satz gegen den echten
+Baum die Überschrift desselben Punktes aufhebt.
+
+**Zwanzig der vierundzwanzig Knoten sind Blätter.** Der Startbaum ist zwei
+Ebenen flach: vier Wurzeln, zwanzig Kinder, keine dritte Ebene. Wörtlich
+genommen hätte damit *jeder* Druck auf ein Kind sofort einen Theoriepunkt
+gekostet — genau das Versehen, gegen das „Antippen öffnet nicht" geschrieben
+wurde. Der Sonderfall war für einen tiefen Baum gedacht und traf einen flachen.
+
+**Entschieden am 01.09.2026 von Frederik: Ein Blatt wird wie jeder andere
+Knoten hereingezogen.** Es wandert nach unten, der Öffnen-Knopf erscheint
+darüber, die Ebene darüber bleibt leer. Das kostet einen zweiten Druck und ist
+die Auskunft „hier geht es nicht weiter" — statt einer Falle.
+
+Die übrigen fünf Festlegungen bleiben unverändert.
+
 ## Begründung
 
 **Ein Handy hat Höhe, keine Breite.** Das stand schon in ADR-0019 als

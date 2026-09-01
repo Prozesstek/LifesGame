@@ -84,6 +84,59 @@ void main() {
       );
     });
 
+    test('steigt zu allen Nachfahren ab', () {
+      expect(graph.descendantsOf('koerper').map((n) => n.id), <String>[
+        'schlaf',
+        'ernaehrung',
+      ]);
+    });
+
+    test('nimmt sich selbst dazu, wenn man es verlangt', () {
+      expect(
+        graph.descendantsOf('koerper', includeSelf: true).map((n) => n.id),
+        <String>['koerper', 'schlaf', 'ernaehrung'],
+      );
+    });
+
+    test('ein Blatt hat keine Nachfahren', () {
+      expect(graph.descendantsOf('ernaehrung'), isEmpty);
+    });
+
+    test('ein Knoten mit zwei Eltern zählt in beiden Gebieten', () {
+      // Keine Doppelzählung, sondern die Aussage des Graphen: Der
+      // Fortschritt beider Gebiete darf ihn für sich verbuchen
+      // (ADR-0026, Kopfzeile).
+      expect(
+        graph.descendantsOf('koerper').map((n) => n.id),
+        contains('ernaehrung'),
+      );
+      expect(
+        graph.descendantsOf('wissenschaft').map((n) => n.id),
+        contains('ernaehrung'),
+      );
+    });
+
+    test('zählt einen Knoten trotzdem nur einmal', () {
+      // Er hängt an zwei Eltern; über beide Wege gefunden, würde er
+      // ohne die Merkliste doppelt in derselben Antwort stehen.
+      final beide = TheoryGraph(<TheoryNode>[
+        _node('wurzel'),
+        _node('links', parents: <String>['wurzel']),
+        _node('rechts', parents: <String>['wurzel']),
+        _node('unten', parents: <String>['links', 'rechts']),
+      ]);
+
+      final ids = beide.descendantsOf('wurzel').map((n) => n.id).toList();
+
+      expect(ids.where((id) => id == 'unten').length, 1);
+      expect(ids.length, 3);
+    });
+
+    test('unbekannte Id gibt nichts zurück', () {
+      expect(graph.descendantsOf('gibtesnicht'), isEmpty);
+      expect(graph.descendantsOf('gibtesnicht', includeSelf: true), isEmpty);
+    });
+
     test('zählt seine Knoten', () {
       expect(graph.nodeCount, 4);
     });

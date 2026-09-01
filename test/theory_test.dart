@@ -8,8 +8,7 @@ import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/node_bubble.dart';
-import 'package:lifes_game/theory/widgets/node_card.dart';
-import 'package:lifes_game/theory/widgets/node_sheet.dart';
+import 'package:lifes_game/theory/widgets/node_state.dart';
 import 'package:lifes_game/theory/widgets/lesson_tile.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -31,6 +30,29 @@ ProviderContainer _containerAtLevel(int level) {
       ),
     ],
   );
+}
+
+/// Bringt das Handbuch hinter sich.
+///
+/// **Ohne das gibt es keinen Baum zu sehen** (ADR-0025): Solange das
+/// Handbuch offen ist, *ist* es der Theorie-Bildschirm.
+void _passHandbook(ProviderContainer container) {
+  final notifier = container.read(theoryProgressProvider.notifier);
+  for (final lesson in habitsBranch.lessons) {
+    notifier.submit(lesson, <int?>[
+      for (final question in lesson.questions) question.correctIndex,
+    ]);
+  }
+}
+
+Future<void> _pumpTree(WidgetTester tester, ProviderContainer container) async {
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: const MaterialApp(home: SkillTreeScreen()),
+    ),
+  );
+  await tester.pump();
 }
 
 void main() {
@@ -62,53 +84,158 @@ void main() {
     });
   });
 
-  group('SkillTreeScreen — der Graph (ADR-0019)', () {
-    Future<void> pump(WidgetTester tester, ProviderContainer container) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(home: SkillTreeScreen()),
-        ),
-      );
-      await tester.pump();
-    }
-
-    testWidgets('zeigt das Handbuch und die vier Wurzeln', (tester) async {
+  group('SkillTreeScreen — das Handbuch steht davor (ADR-0025)', () {
+    testWidgets('solange es offen ist, ist es der Bildschirm', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await _pumpTree(tester, container);
 
-      expect(find.text('Das Handbuch'), findsOneWidget);
-      for (final rootId in theoryRootIds) {
-        final root = theoryGraph.nodeById(rootId);
-        expect(find.text(root!.name), findsOneWidget, reason: rootId);
-      }
+      // Aus der schmalen Zeile über einem unbenutzbaren Baum ist der
+      // Bildschirm selbst geworden.
+      expect(find.byType(BranchScreen), findsOneWidget);
+      expect(find.byType(NodeBubble), findsNothing);
     });
 
-    testWidgets('nennt keine Levelsperre mehr — Punkte statt Stufen', (
+    testWidgets('danach steht der Baum da', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      expect(find.byType(BranchScreen), findsNothing);
+      expect(find.byType(NodeBubble), findsWidgets);
+    });
+
+    testWidgets('das Handbuch steht nicht mehr als Zeile über dem Baum', (
       tester,
     ) async {
       useTallView(tester);
-      final container = _containerAtLevel(1);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
+      _passHandbook(container);
 
-      await pump(tester, container);
+      await _pumpTree(tester, container);
+
+      expect(find.text('Das Handbuch'), findsNothing);
+    });
+  });
+
+  group('Der Baum — ein Bildschirm je Gebiet (ADR-0026)', () {
+    final kinder = theoryGraph.childrenOf('koerper');
+
+    testWidgets('zeigt ein Gebiet mit seinen fünf Kindern', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      expect(kinder.length, 5);
+      expect(find.text('Körper'), findsWidgets);
+      for (final kind in kinder) {
+        expect(find.text(kind.name), findsOneWidget, reason: kind.id);
+      }
+    });
+
+    testWidgets('die anderen Gebiete liegen nicht gleichzeitig im Bild', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      // Das ist der ganze Punkt der Entscheidung: nicht vier Bänder auf
+      // einer Fläche, sondern eines je Bildschirm.
+      final fremd = theoryGraph
+          .childrenOf('wissenschaft')
+          .where((n) => !n.parentIds.contains('koerper'));
+
+      for (final kind in fremd) {
+        expect(find.text(kind.name), findsNothing, reason: kind.id);
+      }
+    });
+
+    testWidgets('vier Gebiete stehen zum Wischen bereit', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      final pages = tester.widget<PageView>(find.byType(PageView));
+      expect(pages.childrenDelegate.estimatedChildCount, theoryRootIds.length);
+    });
+
+    testWidgets('der Startknoten sitzt unten, die Kinder darüber', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      final wurzel = tester.getCenter(find.text('Körper').last);
+      for (final kind in kinder) {
+        expect(
+          tester.getCenter(find.text(kind.name)).dy,
+          lessThan(wurzel.dy),
+          reason: kind.id,
+        );
+      }
+    });
+
+    testWidgets('kein Verschieben und Zoomen mehr', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      // Waagerecht kann nur eine Bedeutung haben — und die gehört dem
+      // Gebietswechsel.
+      expect(find.byType(InteractiveViewer), findsNothing);
+    });
+
+    testWidgets('nennt keine Levelsperre — Punkte statt Stufen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
 
       expect(find.textContaining('ab Level'), findsNothing);
     });
 
-    testWidgets('auf Level 1 gibt es null Punkte', (tester) async {
+    testWidgets('die Kopfzeile nennt Gebiets- und Gesamtfortschritt', (
+      tester,
+    ) async {
       useTallView(tester);
-      final container = _containerAtLevel(1);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
+      _passHandbook(container);
 
-      expect(container.read(availableTheoryPointsProvider), 0);
+      await _pumpTree(tester, container);
 
-      await pump(tester, container);
+      final gesamt = container.read(totalPagesProvider);
+      final bestanden = container.read(passedPagesProvider);
 
-      expect(find.text('0'), findsWidgets);
+      expect(find.text('0 von 6'), findsOneWidget);
+      expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
     });
 
     testWidgets('jeder Aufstieg gibt zwei Punkte', (tester) async {
@@ -117,87 +244,31 @@ void main() {
 
       expect(container.read(availableTheoryPointsProvider), 6);
     });
-
-    testWidgets('eine Wurzel hat fünf Kinder im Bild', (tester) async {
-      useTallView(tester);
-      final container = _containerAtLevel(3);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-
-      final kinder = theoryGraph.childrenOf('koerper');
-      expect(kinder.length, 5);
-      for (final kind in kinder) {
-        expect(find.text(kind.name), findsOneWidget, reason: kind.id);
-      }
-    });
-
-    testWidgets('eine Wurzel antippen zeigt ihre Einführung', (tester) async {
-      useTallView(tester);
-      final container = _containerAtLevel(3);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-      await tester.tap(find.text('Körper'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(NodeSheet), findsOneWidget);
-      expect(find.text('Seite lesen'), findsOneWidget);
-    });
-
-    testWidgets('das Handbuch führt weiter zur Lektionsliste (ADR-0018)', (
-      tester,
-    ) async {
-      useTallView(tester);
-      final container = _containerAtLevel(1);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-      await tester.tap(find.text('Das Handbuch'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(BranchScreen), findsOneWidget);
-    });
   });
 
-  group('Der gezeichnete Baum — Knoten öffnen', () {
-    Future<void> pump(WidgetTester tester, ProviderContainer container) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(home: SkillTreeScreen()),
-        ),
-      );
-      await tester.pump();
-    }
-
-    // Band 1 (Körper) liegt sicher im Sichtbereich; tiefere Bänder
-    // erreicht man nur durch Verschieben, was ein Widget-Test nicht
-    // sinnvoll nachstellt.
+  group('Ein Knoten wird hereingezogen, nicht geöffnet (ADR-0026)', () {
     final schlaf = theoryGraph.nodeById('koerper-schlaf')!;
 
-    testWidgets('alle 24 Knoten werden gezeichnet', (tester) async {
+    Future<void> pumpTree(
+      WidgetTester tester,
+      ProviderContainer container,
+    ) async {
+      _passHandbook(container);
+      await _pumpTree(tester, container);
+    }
+
+    testWidgets('die Wurzel ist offen, die Kinder nicht', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(1);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
-
-      expect(find.byType(NodeBubble), findsNWidgets(24));
-    });
-
-    testWidgets('die Wurzeln sind offen, die Kinder nicht', (tester) async {
-      useTallView(tester);
-      final container = _containerAtLevel(1);
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
+      await pumpTree(tester, container);
 
       final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
-      final wurzeln = bubbles.where((b) => b.node.isRoot);
+      final wurzel = bubbles.where((b) => b.node.isRoot);
 
-      expect(wurzeln.length, 4);
-      expect(wurzeln.every((b) => b.state == NodeState.open), isTrue);
+      expect(wurzel.length, 1);
+      expect(wurzel.single.state, NodeState.open);
     });
 
     testWidgets('ohne Punkte ist kein Kind kaufbar', (tester) async {
@@ -205,47 +276,90 @@ void main() {
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await pumpTree(tester, container);
 
       final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
       final kinder = bubbles.where((b) => !b.node.isRoot);
 
+      expect(kinder, isNotEmpty);
       expect(kinder.every((b) => b.state == NodeState.tooExpensive), isTrue);
     });
 
     testWidgets('mit Punkten sind die Kinder kaufbar', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await pumpTree(tester, container);
 
       final bubbles = tester.widgetList<NodeBubble>(find.byType(NodeBubble));
       final kinder = bubbles.where((b) => !b.node.isRoot);
 
+      expect(kinder, isNotEmpty);
       expect(kinder.every((b) => b.state == NodeState.affordable), isTrue);
     });
 
-    testWidgets('antippen öffnet das Detailblatt', (tester) async {
+    testWidgets('ein Kind antippen kostet noch keinen Punkt', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await pumpTree(tester, container);
+      final vorher = container.read(availableTheoryPointsProvider);
+
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
-      expect(find.byType(NodeSheet), findsOneWidget);
-      expect(find.text('Für einen Punkt öffnen'), findsOneWidget);
+      // Erkunden darf nichts kosten. Sonst gäbe man beim Umsehen Punkte
+      // aus — der Grund, warum Antippen und Öffnen getrennt sind.
+      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(availableTheoryPointsProvider), vorher);
     });
 
-    testWidgets('öffnen zieht den Punkt ab', (tester) async {
+    testWidgets('es wandert nach unten und bringt den Öffnen-Knopf mit', (
+      tester,
+    ) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
-      expect(container.read(availableTheoryPointsProvider), 2);
+      await pumpTree(tester, container);
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Für einen Punkt öffnen'), findsOneWidget);
+      expect(
+        tester.getCenter(find.text('Für einen Punkt öffnen')).dy,
+        lessThan(tester.getCenter(find.text(schlaf.name)).dy),
+        reason: 'Der Knopf steht über dem Knoten (ADR-0026, Punkt 4).',
+      );
+    });
+
+    testWidgets('ein Blatt zeigt eine leere Ebene statt sofort zu öffnen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+      expect(theoryGraph.childrenOf(schlaf.id), isEmpty);
+
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+
+      // Nur noch der Startknoten selbst — über ihm geht es nicht weiter.
+      expect(find.byType(NodeBubble), findsOneWidget);
+      expect(container.read(spentTheoryPointsProvider), 0);
+    });
+
+    testWidgets('der Knopf öffnet und zieht den Punkt ab', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+      final vorher = container.read(availableTheoryPointsProvider);
 
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
@@ -253,7 +367,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(spentTheoryPointsProvider), 1);
-      expect(container.read(availableTheoryPointsProvider), 1);
+      expect(container.read(availableTheoryPointsProvider), vorher - 1);
       expect(
         container
             .read(theoryProgressProvider)
@@ -262,19 +376,52 @@ void main() {
       );
     });
 
-    testWidgets('das Blatt schließen kostet nichts', (tester) async {
+    testWidgets('ein zweiter Druck auf den Startknoten öffnet ebenfalls', (
+      tester,
+    ) async {
       useTallView(tester);
-      final container = _containerAtLevel(2);
+      final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await pumpTree(tester, container);
+
+      await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
-      Navigator.of(tester.element(find.byType(NodeSheet))).pop();
+      expect(container.read(spentTheoryPointsProvider), 1);
+    });
+
+    testWidgets('der Elternknoten führt zurück', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+      await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(find.text('Zurück zu Körper'), findsOneWidget);
+
+      await tester.tap(find.text('Zurück zu Körper'));
+      await tester.pumpAndSettle();
+
+      // Alle fünf Kinder stehen wieder da.
+      for (final kind in theoryGraph.childrenOf('koerper')) {
+        expect(find.text(kind.name), findsOneWidget, reason: kind.id);
+      }
+      expect(find.text('Zurück zu Körper'), findsNothing);
+    });
+
+    testWidgets('an der Wurzel gibt es keinen Rückweg im Baum', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+
+      expect(find.textContaining('Zurück zu'), findsNothing);
     });
 
     testWidgets('ein zu teurer Knoten nennt den Grund statt eines Knopfes', (
@@ -284,12 +431,24 @@ void main() {
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
-      await pump(tester, container);
+      await pumpTree(tester, container);
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Du brauchst einen Punkt'), findsOneWidget);
       expect(find.text('Für einen Punkt öffnen'), findsNothing);
+    });
+
+    testWidgets('eine offene Wurzel führt zu ihrer Seite', (tester) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+      await tester.tap(find.text('Seite lesen'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LessonScreen), findsOneWidget);
     });
   });
 
