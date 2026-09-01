@@ -86,6 +86,39 @@ void main() {
       }
     });
 
+    test('jedes Gebiet bringt mindestens zwei mit', () {
+      // **Der Grund steht nicht im Issue.** Vorher trugen Körper und
+      // Geist je fünf Fähigkeitsknoten, Wissenschaft einen,
+      // Gesellschaft keinen. Sichtbar gemacht würde daraus „Körper und
+      // Geist sind das Spiel, der Rest ist Lesestoff" — und
+      // ausgerechnet Gesellschaft stützt die Habit-Vorlagen für Stärke
+      // und Ausdauer (Issue #21, Punkt 8).
+      for (final rootId in theoryRootIds) {
+        final imGebiet = theoryGraph
+            .descendantsOf(rootId)
+            .where((n) => n.unlocksAbility != null);
+
+        expect(
+          imGebiet.length,
+          greaterThanOrEqualTo(2),
+          reason: 'Gebiet "$rootId" bringt nur ${imGebiet.length} Fähigkeiten '
+              'mit. Kein Gebiet darf blosser Lesestoff sein.',
+        );
+      }
+    });
+
+    test('und keines mehr als drei', () {
+      // Die Gegenrichtung. Ohne sie wäre die Regel oben erfüllt, sobald
+      // jedes Gebiet zwei hat — auch wenn eines zehn trägt.
+      for (final rootId in theoryRootIds) {
+        final imGebiet = theoryGraph
+            .descendantsOf(rootId)
+            .where((n) => n.unlocksAbility != null);
+
+        expect(imGebiet.length, lessThanOrEqualTo(3), reason: rootId);
+      }
+    });
+
     test('keine Fähigkeit hängt an zwei Knoten', () {
       final ids = <String>[
         for (final node in nodes)

@@ -90,14 +90,12 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: erholungPage,
     iconId: 'pause',
     parentIds: <String>['koerper'],
-    unlocksAbility: 'bluetentau',
   ),
   const TheoryNode(
     id: 'koerper-stress',
     lesson: stressPage,
     iconId: 'storm',
     parentIds: <String>['koerper', 'geist'],
-    unlocksAbility: 'steinhaut',
   ),
 
   // ------------------------------------------------------------------
@@ -122,14 +120,12 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: geistBranch.lessons[2],
     iconId: 'endure',
     parentIds: const <String>['geist'],
-    unlocksAbility: 'prisma_barriere',
   ),
   const TheoryNode(
     id: 'geist-motivation',
     lesson: motivationPage,
     iconId: 'spark',
     parentIds: <String>['geist'],
-    unlocksAbility: 'giftmoor',
   ),
   const TheoryNode(
     id: 'geist-wiederholung',
@@ -147,6 +143,7 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: wissenschaftBranch.lessons[0],
     iconId: 'question',
     parentIds: const <String>['wissenschaft'],
+    unlocksAbility: 'prisma_barriere',
   ),
   TheoryNode(
     id: 'wissenschaft-ursache',
@@ -182,6 +179,7 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: gesellschaftBranch.lessons[0],
     iconId: 'people',
     parentIds: const <String>['gesellschaft'],
+    unlocksAbility: 'giftmoor',
   ),
   TheoryNode(
     id: 'gesellschaft-zugehoerigkeit',
@@ -194,6 +192,7 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: gesellschaftBranch.lessons[2],
     iconId: 'hand',
     parentIds: const <String>['gesellschaft'],
+    unlocksAbility: 'steinhaut',
   ),
   const TheoryNode(
     id: 'gesellschaft-vergleich',
@@ -206,6 +205,7 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     lesson: hilfeBittenPage,
     iconId: 'ask',
     parentIds: <String>['gesellschaft'],
+    unlocksAbility: 'bluetentau',
   ),
 ]);
 

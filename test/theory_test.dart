@@ -439,6 +439,30 @@ void main() {
       expect(find.text('Für einen Punkt öffnen'), findsNothing);
     });
 
+    testWidgets('ein Knoten verrät nicht, dass er eine Fähigkeit bringt', (
+      tester,
+    ) async {
+      // **Verstecken ist der Punkt** (Issue #21, Punkt 8). Würde die
+      // Blase es anzeigen, wäre der Baum eine Einkaufsliste: Man ginge
+      // die Fähigkeitsknoten ab und liesse den Rest liegen. Der Inhalt
+      // soll der Grund sein, nicht die Belohnung.
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+
+      await pumpTree(tester, container);
+
+      final mitFaehigkeit = theoryGraph
+          .childrenOf('koerper')
+          .firstWhere((n) => n.unlocksAbility != null);
+
+      await tester.tap(find.text(mitFaehigkeit.name));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Fähigkeit'), findsNothing);
+      expect(find.byIcon(Icons.auto_awesome), findsNothing);
+    });
+
     testWidgets('eine offene Wurzel führt zu ihrer Seite', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(3);
