@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../character/abilities_controller.dart';
+import '../character/show_ability_unlock.dart';
 import '../ui/palette.dart';
 import 'theory_controller.dart';
 import 'widgets/lesson_result_view.dart';
@@ -84,12 +87,23 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         ? _answers
         : gemischt.toLessonAnswers(_answers);
 
+    // **Vor dem Abgeben lesen.** Danach ist der Fortschritt drin und der
+    // Unterschied verschwunden — es gaebe nichts mehr zu feiern.
+    final vorher = ref.read(unlockedAbilitiesProvider);
+
     final result = ref
         .read(theoryProgressProvider.notifier)
         .submit(_lesson, inLektion);
     setState(() {
       _result = result;
       _stage = _Stage.result;
+    });
+
+    // Einen Bildaufbau spaeter: Erst steht das Ergebnis da, dann kommt
+    // die Feier darueber. Andersherum verdeckte sie, wofuer sie kommt.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(showAbilityUnlocks(context, ref, before: vorher));
     });
   }
 
