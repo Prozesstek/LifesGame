@@ -57,7 +57,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 109 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 129 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
@@ -91,6 +91,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
 | `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/character/ability_unlock.dart` | was neu ist und wohin es passt — reine Rechnung | Flutter |
+| `lib/character/show_ability_unlock.dart` | die Feier, aufgerufen an genau zwei Stellen | Flutter |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
@@ -110,9 +112,12 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
 | `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Kampfes | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/theory/skill_tree_screen.dart` | der **gezeichnete** Baum: Knoten, Linien, Punkte | Flutter |
+| `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile, Handbuch davor | Flutter |
+| `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
 | `lib/theory/widgets/tree_painter.dart` | die Verbindungslinien | Flutter |
+| `lib/theory/widgets/node_action_panel.dart` | der Knopf **über** dem Startknoten | Flutter |
+| `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/branch_screen.dart` | nur noch das Handbuch: Reihenfolge statt Graph | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
 
@@ -129,7 +134,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 273 Tests
+flutter test             # 311 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -147,7 +152,7 @@ dart test                              # 71 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 109 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 129 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
 cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
 cd packages/abilities   ; dart test    # 35 Tests
@@ -246,18 +251,22 @@ Staffelung aus ADR-0022 galt im Code nicht. Details in `gotchas.md`.
 
 **Der Kampf hängt am Moveset, und das ist eine gemessene Zahl.**
 Mit nur einem Move ist der erste Gegner unschlagbar (0 % in der
-Simulation), mit zweien sicher (100 %). Deshalb öffnet sich die
-Kampf-Kachel erst, wenn **zwei Bedingungen** erfüllt sind
-([ADR-0020](docs/decisions/0020-kampf-haengt-am-moveset.md)):
-das Handbuch ist durch, **und** das Moveset hat mindestens zwei Moves.
+Simulation), mit zweien sicher (100 %). Seit
+[ADR-0025](docs/decisions/0025-handbuch-sperrt-den-baum.md) ist das die
+**einzige** Bedingung: `combatUnlockedProvider` fragt nur noch das
+Moveset.
 
-Bis ADR-0019 genügte das Handbuch allein, und das war kein Zufall: Die
-fünf Lektionen geben 275 Erfahrung und damit Level 3 — die Stufe, auf
-der der zweite Fähigkeitsslot aufgeht (vier Lektionen reichen **nicht**,
-220 XP). In den Slot passte immer etwas, weil vier Fähigkeiten von
-Anfang an offen waren. Seit sie an Theorieknoten hängen, kann der Slot
-aufgehen und leer bleiben — das Handbuch war nur ein Stellvertreter,
-und er stimmt nicht mehr.
+**Das Handbuch sperrt dafür den Baum.** Solange es offen ist, *ist* es
+der Theorie-Bildschirm. Die Kette greift damit unverändert — ohne
+Handbuch kein Baum, ohne Baum keine zweite Fähigkeit, ohne zweite
+Fähigkeit kein Kampf. Sie steht nur nicht mehr an zwei Stellen.
+
+Das Handbuch war nie der Grund, immer ein Stellvertreter, und das war
+kein Zufall: Die fünf Lektionen geben 275 Erfahrung und damit Level 3 —
+die Stufe, auf der der zweite Fähigkeitsslot aufgeht (vier Lektionen
+reichen **nicht**, 220 XP). Bis ADR-0019 passte in den Slot immer etwas,
+weil vier Fähigkeiten von Anfang an offen waren; seit sie an
+Theorieknoten hängen, kann er aufgehen und leer bleiben.
 
 Die Arithmetik gilt weiter und wird weiter geprüft: Wer an
 `TheoryRewards`, der Levelkurve oder der Länge des Zweigs dreht, lässt
