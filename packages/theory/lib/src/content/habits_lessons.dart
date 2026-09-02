@@ -51,12 +51,12 @@ const Lesson _systemeSchlagenVorsaetze = Lesson(
     Question(
       prompt: 'Warum reicht ein klar formuliertes Ziel meist nicht aus?',
       options: <String>[
-        'Weil Ziele zu ehrgeizig gesteckt werden',
         'Weil ein Ziel nicht festlegt, was du heute konkret tust',
+        'Weil Ziele fast immer zu ehrgeizig gesteckt werden',
         'Weil Ziele schriftlich festgehalten werden müssen',
-        'Weil Ziele die Motivation senken',
+        'Weil Ziele mit der Zeit die Motivation eher senken',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Ein Ziel beschreibt ein Ergebnis. Die Lücke zwischen Ergebnis '
           'und heutigem Abend füllt es nicht — das macht erst ein System, '
@@ -66,12 +66,12 @@ const Lesson _systemeSchlagenVorsaetze = Lesson(
       prompt: 'Was ist der praktische Vorteil, Entscheidungen vorab zu '
           'treffen?',
       options: <String>[
-        'Man kann sie später besser begründen',
+        'Man kann sie später gegenüber anderen besser begründen',
+        'Man wird dadurch ganz von selbst deutlich motivierter',
+        'Man braucht danach im Alltag überhaupt keine Pausen',
         'Man spart Kraft, weil man im Moment nicht neu verhandelt',
-        'Man wird dadurch automatisch motivierter',
-        'Man braucht keine Pausen mehr',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Jede offene Entscheidung kostet Willenskraft, und die ist '
           'ausgerechnet dann knapp, wenn die Gewohnheit ansteht. Vorab '
           'festgelegt, entfällt die Verhandlung.',
@@ -79,12 +79,12 @@ const Lesson _systemeSchlagenVorsaetze = Lesson(
     Question(
       prompt: 'Woran misst jemand seinen Fortschritt, der in Systemen denkt?',
       options: <String>[
-        'Am erreichten Endergebnis',
-        'Am Vergleich mit anderen',
+        'Am erreichten Endergebnis nach einem ganzen Jahr',
         'Daran, ob er heute getan hat, was vorgesehen war',
-        'An der Höhe seiner Motivation',
+        'Am Vergleich mit den Ergebnissen der anderen',
+        'An der Höhe seiner Motivation an diesem Tag',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Die Wiederholung ist der Maßstab. Das Ergebnis folgt daraus, '
           'lässt sich aber tageweise nicht steuern — die Wiederholung schon.',
@@ -144,12 +144,12 @@ const Lesson _dieSchleife = Lesson(
       prompt: 'Warum lohnt es sich, am Auslöser anzusetzen statt an der '
           'Routine?',
       options: <String>[
+        'Weil die Routine für die ganze Gewohnheit unwichtig ist',
+        'Weil Auslöser deutlich mehr Belohnung mit sich bringen',
+        'Weil man eine feste Routine im Nachhinein nicht ändern kann',
         'Weil der Auslöser sich einmalig ändern lässt und danach wirkt',
-        'Weil die Routine unwichtig ist',
-        'Weil Auslöser mehr Belohnung bringen',
-        'Weil man Routinen nicht ändern kann',
       ],
-      correctIndex: 0,
+      correctIndex: 3,
       explanation:
           'Die Umgebung einmal umzustellen wirkt jeden Tag weiter. Sich '
           'jeden Tag zusammenzureißen wirkt nur an diesem einen Tag.',
@@ -158,12 +158,12 @@ const Lesson _dieSchleife = Lesson(
       prompt: 'Was macht „Nach dem Zähneputzen zehn Kniebeugen“ stabiler '
           'als „Morgens Sport machen“?',
       options: <String>[
-        'Es ist anstrengender und damit wirksamer',
-        'Es nennt eine Uhrzeit',
         'Es hängt an einer Handlung, die bereits fest sitzt',
-        'Es ist ein kleineres Ziel',
+        'Es ist anstrengender und damit deutlich wirksamer',
+        'Es nennt eine feste Uhrzeit am frühen Morgen',
+        'Es ist insgesamt das erheblich kleinere Ziel',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation: 'Die neue Gewohnheit koppelt an eine bestehende an und erbt '
           'deren Verlässlichkeit. „Morgens“ ist dagegen kein Auslöser, '
           'sondern ein Zeitraum.',
@@ -210,11 +210,11 @@ const Lesson _zweiMinuten = Lesson(
       prompt: 'Wo sitzt bei den meisten Gewohnheiten die eigentliche Hürde?',
       options: <String>[
         'In der Mitte, wenn es anstrengend wird',
+        'Am Ende, kurz vor dem letzten Abschluss',
         'Am Anfang, beim Einstieg in die Handlung',
-        'Am Ende, kurz vor dem Abschluss',
-        'Bei der Planung am Vortag',
+        'Bei der Planung am Abend des Vortags',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation: 'Wer angefangen hat, macht meist weiter. Deshalb zielt die '
           'Zwei-Minuten-Regel genau auf den Einstieg.',
     ),
@@ -236,12 +236,12 @@ const Lesson _zweiMinuten = Lesson(
     Question(
       prompt: 'Was kommt zuerst: Umfang oder Wiederholung?',
       options: <String>[
-        'Der Umfang — sonst bringt es nichts',
-        'Beides gleichzeitig, sonst dauert es zu lang',
+        'Der Umfang — sonst bringt die ganze Sache gar nichts',
         'Die Wiederholung — der Umfang lässt sich später erhöhen',
-        'Das hängt vom Ziel ab',
+        'Beides gleichzeitig, sonst dauert es viel zu lang',
+        'Das hängt allein vom jeweiligen Ziel und Umfang ab',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Eine etablierte Handlung lässt sich ausbauen. Eine Handlung, '
           'die nie stattgefunden hat, nicht.',
@@ -285,12 +285,12 @@ const Lesson _nieZweimal = Lesson(
     Question(
       prompt: 'Wie lautet die Regel für verpasste Tage?',
       options: <String>[
-        'Nie auslassen',
-        'Nie zweimal hintereinander auslassen',
+        'Nie einen einzigen Tag auslassen',
         'Verpasste Tage am Wochenende nachholen',
+        'Nie zweimal hintereinander auslassen',
         'Nach drei Ausfällen neu anfangen',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation: '„Nie auslassen“ hält niemand durch und macht den ersten '
           'Ausfall zur Niederlage. „Nie zweimal“ lässt Raum für schlechte '
           'Tage, ohne das Muster zu verlieren.',
@@ -299,24 +299,24 @@ const Lesson _nieZweimal = Lesson(
       prompt: 'Warum ist der zweite ausgelassene Tag gefährlicher als der '
           'erste?',
       options: <String>[
-        'Weil der Rückstand dann zu groß wird',
         'Weil aus der Ausnahme ein neues Muster wird',
-        'Weil die Belohnung dann ausbleibt',
-        'Weil man den Auslöser vergisst',
+        'Weil der Rückstand dann einfach zu groß wird',
+        'Weil die Belohnung dann endgültig ausbleibt',
+        'Weil man den Auslöser danach vergisst',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation: 'Einmal ist ein Unfall, zweimal ist der Anfang einer neuen '
           'Gewohnheit — nämlich der, es nicht zu tun.',
     ),
     Question(
       prompt: 'Was ist der eigentliche Schaden am Alles-oder-nichts-Denken?',
       options: <String>[
-        'Es macht die Gewohnheit anstrengender',
-        'Es verhindert, dass man Fortschritt messen kann',
+        'Es macht die ganze Gewohnheit auf Dauer viel anstrengender',
         'Es verwandelt einen verlorenen Tag in einen kompletten Abbruch',
-        'Es führt zu unrealistischen Zielen',
+        'Es verhindert, dass man den Fortschritt überhaupt misst',
+        'Es führt auf Dauer zu vollkommen unrealistischen Zielen',
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
           'Wer nach einem Ausfall ganz aufhört, bestraft sich für einen '
           'Tag mit allen folgenden. Der Wiedereinstieg zählt mehr als die '
@@ -365,12 +365,12 @@ const Lesson _identitaet = Lesson(
       prompt: 'Was unterscheidet „Ich versuche aufzuhören“ von „Ich bin '
           'kein Raucher“?',
       options: <String>[
-        'Der zweite Satz ist ein festeres Ziel',
+        'Der zweite Satz ist einfach das deutlich festere Ziel',
+        'Der erste Satz ist am Ende die ehrlichere Beschreibung',
+        'Zwischen beiden gibt es keinen praktischen Unterschied',
         'Der zweite Satz beschreibt eine Person statt eines Kampfs',
-        'Der erste Satz ist ehrlicher',
-        'Es gibt keinen praktischen Unterschied',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Im ersten Satz steht die Entscheidung jedes Mal neu zur '
           'Debatte. Im zweiten ist sie Teil der Person und stellt sich '
           'nicht mehr.',
@@ -379,12 +379,12 @@ const Lesson _identitaet = Lesson(
       prompt: 'Welche Rolle spielt die einzelne Wiederholung für die '
           'Identität?',
       options: <String>[
+        'Sie entscheidet ganz allein über den Erfolg',
+        'Sie ist am Ende nur eine symbolische Geste',
         'Sie ist ein Beleg, der sich mit anderen summiert',
-        'Sie entscheidet allein über den Erfolg',
-        'Sie ist nur symbolisch',
-        'Sie ersetzt das Ziel',
+        'Sie ersetzt das eigentliche Ziel vollständig',
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation: 'Kein einzelner Beleg überzeugt. Die Summe schon — deshalb '
           'zählt Häufigkeit mehr als Intensität.',
     ),
@@ -392,12 +392,12 @@ const Lesson _identitaet = Lesson(
       prompt: 'Welche Frage führt am direktesten zu einer konkreten '
           'Gewohnheit?',
       options: <String>[
-        'Was will ich in einem Jahr erreicht haben?',
-        'Was hat bei anderen funktioniert?',
         'Wer müsste ich sein — und was tut diese Person heute?',
-        'Wie viel Zeit habe ich übrig?',
+        'Was genau will ich in einem Jahr erreicht haben?',
+        'Was hat bei anderen Menschen bisher funktioniert?',
+        'Wie viel Zeit habe ich am Tag dafür überhaupt übrig?',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation: 'Die Frage nach der Person übersetzt sich direkt in eine '
           'Handlung für heute. Die Frage nach dem Ergebnis tut das nicht.',
     ),

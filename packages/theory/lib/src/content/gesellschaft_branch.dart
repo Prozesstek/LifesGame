@@ -50,11 +50,11 @@ const Lesson _umfeld = Lesson(
       prompt: 'Wie überträgt sich Verhalten in Gruppen hauptsächlich?',
       options: <String>[
         'Durch bewusste Überredung',
+        'Durch offenen Wettbewerb',
         'Darüber, was als normal gilt',
-        'Durch Wettbewerb',
-        'Durch klare Absprachen',
+        'Durch klare Absprachen vorab',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation: 'Was im Umfeld üblich ist, wird zum Maßstab für das eigene '
           'Normal. Überredung braucht es dafür nicht.',
     ),
@@ -62,12 +62,12 @@ const Lesson _umfeld = Lesson(
       prompt: 'Was prägt stärker: ein bewundertes Vorbild oder tägliche '
           'Kollegen?',
       options: <String>[
-        'Das Vorbild, weil es bewusst gewählt ist',
         'Die Kollegen, weil Nähe mehr zählt als Absicht',
-        'Beides gleich stark',
+        'Das Vorbild, weil es bewusst gewählt ist',
+        'Beides prägt am Ende ungefähr gleich stark',
         'Weder noch — nur die eigene Einstellung zählt',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Wer täglich anwesend ist, verschiebt den Maßstab. Ein Vorbild, '
           'das man nur liest, tut das kaum.',
@@ -75,12 +75,12 @@ const Lesson _umfeld = Lesson(
     Question(
       prompt: 'Warum ist das Umfeld ein Hebel und keine Ausrede?',
       options: <String>[
+        'Weil es sich im Alltag ohnehin nicht ändern lässt',
         'Weil man es sich zu einem großen Teil aussuchen kann',
-        'Weil es sich nicht ändern lässt',
-        'Weil Willenskraft stärker ist',
-        'Weil es nur Ausreden liefert',
+        'Weil Willenskraft am Ende stärker wirkt als es',
+        'Weil es am Ende nur bequeme Ausreden dafür liefert',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation: 'Eine geänderte Umgebung übernimmt einen Teil der Arbeit — '
           'dieselbe Logik wie beim Auslöser, nur eine Stufe größer.',
     ),
@@ -122,23 +122,23 @@ const Lesson _zugehoerigkeit = Lesson(
       prompt: 'Was hält eine Gewohnheit in der Gruppe zusätzlich am Leben?',
       options: <String>[
         'Der Wettbewerb um Bestleistungen',
+        'Die geteilten Kosten der Gruppe',
+        'Der feste Termin für sich allein',
         'Die Beziehung — jemand fragt nach',
-        'Die geteilten Kosten',
-        'Der feste Termin allein',
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation: 'Allein trägt nur die Motivation. In der Gruppe kommt eine '
           'Beziehung dazu, die auch dann trägt, wenn Motivation fehlt.',
     ),
     Question(
       prompt: 'Woran erkennt man eine nützliche Gruppe?',
       options: <String>[
-        'Das gewünschte Verhalten gilt dort als besondere Leistung',
         'Das gewünschte Verhalten ist dort selbstverständlich',
-        'Sie ist möglichst groß',
-        'Sie trifft sich möglichst oft',
+        'Das gewünschte Verhalten gilt dort als besondere Leistung',
+        'Sie ist möglichst groß und steht wirklich jedem offen',
+        'Sie trifft sich möglichst oft und regelmäßig',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Wird das Verhalten bewundert, bleibt es eine Anstrengung. Ist '
           'es normal, macht man es einfach mit.',
@@ -193,10 +193,10 @@ const Lesson _grenzen = Lesson(
     Question(
       prompt: 'Was ist die eigentliche Frage bei einer Anfrage?',
       options: <String>[
-        'Will ich das tun?',
+        'Will ich das überhaupt tun?',
         'Wovon nehme ich die Zeit?',
-        'Wer hat gefragt?',
-        'Wie lange dauert es?',
+        'Wer genau hat gefragt?',
+        'Wie lange dauert das wohl?',
       ],
       correctIndex: 1,
       explanation:
@@ -206,12 +206,12 @@ const Lesson _grenzen = Lesson(
     Question(
       prompt: 'Warum lädt eine ausführliche Begründung zum Verhandeln ein?',
       options: <String>[
-        'Weil sie unhöflich wirkt',
+        'Weil sie auf den anderen sehr unhöflich wirkt',
+        'Weil sie im Gespräch einfach zu lange dauert',
         'Weil jeder genannte Grund entkräftet werden kann',
-        'Weil sie zu lange dauert',
-        'Weil sie unglaubwürdig klingt',
+        'Weil sie für den anderen unglaubwürdig klingt',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Wer Gründe liefert, liefert Angriffsflächen. Ein kurzes Nein '
           'wirkt härter, führt aber seltener zu Streit.',
@@ -219,12 +219,12 @@ const Lesson _grenzen = Lesson(
     Question(
       prompt: 'Was passiert langfristig bei jemandem, der nie ablehnt?',
       options: <String>[
-        'Er gilt dauerhaft als verlässlich',
         'Er wird unzuverlässig, weil irgendwann etwas platzt',
-        'Er bekommt weniger Anfragen',
-        'Er lernt, schneller zu arbeiten',
+        'Er gilt auf Dauer als besonders verlässlicher Mensch',
+        'Er bekommt mit der Zeit deutlich weniger Anfragen',
+        'Er lernt mit der Zeit, schneller zu arbeiten',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation: 'Ein geplatzter Termin kostet mehr Vertrauen als ein '
           'rechtzeitiges Nein.',
     ),

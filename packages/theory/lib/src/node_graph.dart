@@ -48,6 +48,39 @@ class TheoryGraph {
     return List<TheoryNode>.unmodifiable(parents);
   }
 
+  /// Alle Knoten, die von [id] aus nach unten erreichbar sind.
+  ///
+  /// **Wofür.** Ein Gebiet ist eine Wurzel mit allem, was daran hängt —
+  /// und der Fortschritt eines Gebiets ist genau die Frage, wie viele
+  /// davon bestanden sind (ADR-0026).
+  ///
+  /// Ein Knoten mit zwei Eltern kommt in **beiden** Gebieten vor. Das ist
+  /// kein Fehler, sondern die Aussage: *Stress* gehört zu Körper und zu
+  /// Geist, und beide Seiten dürfen ihn zählen.
+  List<TheoryNode> descendantsOf(String id, {bool includeSelf = false}) {
+    final gefunden = <String>{};
+    final ergebnis = <TheoryNode>[];
+
+    void absteigen(String von) {
+      for (final kind in childrenOf(von)) {
+        if (!gefunden.add(kind.id)) continue;
+        ergebnis.add(kind);
+        absteigen(kind.id);
+      }
+    }
+
+    if (includeSelf) {
+      final selbst = nodeById(id);
+      if (selbst != null) {
+        gefunden.add(id);
+        ergebnis.add(selbst);
+      }
+    }
+    absteigen(id);
+
+    return List<TheoryNode>.unmodifiable(ergebnis);
+  }
+
   /// Ob [id] mit den bereits geöffneten Knoten geöffnet werden darf.
   ///
   /// Prüft **nicht**, ob genug Theoriepunkte da sind — das ist die Frage

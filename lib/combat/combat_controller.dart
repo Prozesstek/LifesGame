@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../character/abilities_controller.dart';
 import '../gear/gear_controller.dart';
-import '../theory/theory_controller.dart';
 
 /// Gegen wen der nächste Kampf geht.
 ///
@@ -184,17 +183,20 @@ const int minMovesForCombat = 2;
 
 /// Ob der Kampf offensteht.
 ///
-/// **Zwei Bedingungen, und die zweite ist seit ADR-0020 nötig.** Bis
-/// dahin genügte das Handbuch: Es gab genau so viel Erfahrung, dass der
-/// zweite Slot aufging, und in den Slot passte immer etwas, weil vier
-/// Fähigkeiten von Anfang an offen waren.
+/// **Eine Bedingung, seit ADR-0025: das Moveset.** Bis dahin stand das
+/// Handbuch davor — erst allein (ADR-0018), dann neben dem Moveset
+/// (ADR-0020). Es war nie der Grund, immer nur ein Stellvertreter: Seine
+/// fünf Lektionen gaben genau so viel Erfahrung, dass der zweite Slot
+/// aufging, und in den Slot passte immer etwas, weil vier Fähigkeiten von
+/// Anfang an offen waren.
 ///
-/// Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Theorieknoten.
-/// Damit kann der Slot aufgehen und leer bleiben — und das Handbuch
-/// allein wäre wieder die Zusage eines unmöglichen Kampfes.
+/// Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Theorieknoten,
+/// und seit ADR-0025 sperrt das Handbuch den **Baum**. Damit greift es
+/// hier weiter — nur nicht mehr als eigene Bedingung: Ohne Handbuch kein
+/// Baum, ohne Baum keine zweite Fähigkeit, ohne zweite Fähigkeit kein
+/// Kampf. Die Kette ist dieselbe, sie steht nur nicht mehr zweimal da.
 final combatUnlockedProvider = Provider<bool>((ref) {
-  return ref.watch(handbookDoneProvider) &&
-      ref.watch(activeMovesProvider).length >= minMovesForCombat;
+  return ref.watch(activeMovesProvider).length >= minMovesForCombat;
 });
 
 /// Warum der Kampf zu ist — oder null, wenn er offen ist.
@@ -202,22 +204,20 @@ final combatUnlockedProvider = Provider<bool>((ref) {
 /// Steht als Satz da und nicht als Fehlerzustand: Eine Kachel, die den
 /// Weg nennt, ist besser als eine, die verschwindet (ADR-0018).
 final combatBlockReasonProvider = Provider<String?>((ref) {
-  final fehlend = ref.watch(handbookRemainingProvider);
-  if (fehlend > 0) {
-    return fehlend == 1
-        ? 'Noch eine Lektion in Gewohnheiten, dann geht es los'
-        : 'Erst das Handbuch: noch $fehlend Lektionen in Gewohnheiten';
-  }
-
   if (ref.watch(activeMovesProvider).length >= minMovesForCombat) return null;
 
   // **Gelernt und angelegt sind zwei verschiedene Dinge.** Wer eine
   // Fähigkeit hat, sie aber auf keinem Platz liegen hat, braucht einen
   // anderen Hinweis als jemand, der noch keine besitzt — sonst schickt
   // die Kachel ihn zurück in die Theorie, wo er nichts mehr zu tun hat.
+  //
+  // Der Satz nennt die Theorie und **keinen bestimmten Knoten mehr**:
+  // Seit ADR-0025 steht das Handbuch vor dem Baum, ein frischer Charakter
+  // kommt an „Körper" also noch gar nicht heran. Ein Weg, der ins Leere
+  // zeigt, ist schlechter als einer, der eine Ebene höher anfängt.
   final gelernt = ref.watch(unlockedAbilitiesProvider);
   if (gelernt.isEmpty) {
-    return 'Erst eine Fähigkeit lernen — ein Knoten unter „Körper"';
+    return 'Erst eine Fähigkeit lernen — sie hängen in der Theorie';
   }
 
   return 'Leg eine Fähigkeit auf einen freien Platz (Charakter)';

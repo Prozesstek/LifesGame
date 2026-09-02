@@ -53,11 +53,11 @@ const Lesson erholungPage = Lesson(
     Question(
       prompt: 'Warum ist „streng dich mehr an" bei Erschöpfung falsch?',
       options: <String>[
+        'Weil Anstrengung gegen Müdigkeit grundsätzlich nie hilft',
+        'Weil man dann überhaupt keine Lust mehr hat',
         'Weil es die Ursache verstärkt statt sie zu beheben',
-        'Weil Anstrengung nie hilft',
-        'Weil man dann keine Lust mehr hat',
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
           'Erschöpfung sieht aus wie Faulheit. Wer sie mit mehr Belastung '
           'beantwortet, vertieft genau das Loch, aus dem er heraus will.',
@@ -65,11 +65,11 @@ const Lesson erholungPage = Lesson(
     Question(
       prompt: 'Was unterscheidet eine nützliche Pause von einem Einbruch?',
       options: <String>[
-        'Ihre Länge',
-        'Dass sie sich gut anfühlt',
         'Dass sie geplant war, bevor sie nötig wurde',
+        'Ihre Länge und die Tageszeit, zu der sie liegt',
+        'Dass sie sich schon im Moment gut anfühlt',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Geplante Pausen halten das System stabil. Ungeplante sind das '
           'Ergebnis davon, dass es das nicht mehr ist.',
@@ -111,11 +111,11 @@ const Lesson stressPage = Lesson(
     Question(
       prompt: 'Was stellt die Stressreaktion hintan?',
       options: <String>[
-        'Aufmerksamkeit und Energie',
+        'Aufmerksamkeit, Energie und schnelle Reaktion',
+        'Bewegung, Muskelkraft und Körperspannung',
         'Verdauung, Reparatur und langfristiges Denken',
-        'Bewegung und Muskelkraft',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Alles, was in einer akuten Gefahr warten kann, wird verschoben. '
           'Über Wochen bleibt es dann liegen.',
@@ -123,11 +123,11 @@ const Lesson stressPage = Lesson(
     Question(
       prompt: 'Warum ist Dauerstress etwas anderes als kurzer Stress?',
       options: <String>[
+        'Weil er im Augenblick deutlich stärker empfunden wird als sonst',
+        'Weil man sich mit der Zeit vollständig daran gewöhnen kann',
         'Weil das Verschobene nie nachgeholt wird und neuen Stress erzeugt',
-        'Weil er stärker ist',
-        'Weil man sich daran gewöhnt',
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
           'Die Reaktion selbst ist nicht das Problem — ihr Ausbleiben eines '
           'Endes ist es. Daraus wird eine Schleife.',
@@ -135,11 +135,11 @@ const Lesson stressPage = Lesson(
     Question(
       prompt: 'Was haben wirksame Gegenmittel gemeinsam?',
       options: <String>[
-        'Sie sind angenehm',
-        'Sie dauern lange',
         'Sie signalisieren dem Körper einen Abschluss',
+        'Sie fühlen sich schon im Moment angenehm an',
+        'Sie dauern mindestens eine halbe Stunde',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Nicht Entspannung ist der Wirkstoff, sondern das Signal, dass '
           'die Sache vorbei ist.',
@@ -181,11 +181,11 @@ const Lesson motivationPage = Lesson(
     Question(
       prompt: 'In welcher Reihenfolge treten Handlung und Lust meist auf?',
       options: <String>[
+        'Erst kommt die Lust, dann folgt die Handlung',
         'Die Lust kommt oft erst nach den ersten Minuten',
-        'Erst die Lust, dann die Handlung',
-        'Beide gleichzeitig',
+        'Beide treten in aller Regel gleichzeitig auf',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
           'Anfangen erzeugt die Lust häufiger, als die Lust das Anfangen '
           'erzeugt. Wer wartet, wartet auf sein eigenes Ergebnis.',
@@ -193,22 +193,22 @@ const Lesson motivationPage = Lesson(
     Question(
       prompt: 'Warum taugt Motivation nicht als Fundament?',
       options: <String>[
-        'Weil sie unehrlich ist',
+        'Weil sie sich am Ende als unehrlich erweist',
+        'Weil sie insgesamt zu selten auftritt',
         'Weil sie an Schlaf, Wetter und Zufall hängt',
-        'Weil sie zu selten auftritt',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Eine schwankende Größe trägt nichts. Ein fester Zeitpunkt tut es.',
     ),
     Question(
       prompt: 'Wofür sollte man gute Tage nutzen?',
       options: <String>[
-        'Für möglichst viel Leistung',
-        'Für eine Belohnung',
         'Um das System für schlechte Tage vorzubereiten',
+        'Für möglichst viel Leistung an diesem Tag',
+        'Für eine Belohnung, die man sich dann gönnt',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Einkaufen, vorbereiten, aufräumen: So arbeitet die gute Laune '
           'für den Tag, an dem keine da ist.',
@@ -250,9 +250,9 @@ const Lesson wiederholungPage = Lesson(
     Question(
       prompt: 'Warum täuscht wiederholtes Lesen?',
       options: <String>[
-        'Weil es zu lange dauert',
+        'Weil es dabei insgesamt zu lange dauert',
         'Weil Vertrautheit mit Können verwechselt wird',
-        'Weil man dabei einschläft',
+        'Weil man dabei fast immer irgendwann einschläft',
       ],
       correctIndex: 1,
       explanation:
@@ -262,11 +262,11 @@ const Lesson wiederholungPage = Lesson(
     Question(
       prompt: 'Welche Rolle spielt die Anstrengung beim Abrufen?',
       options: <String>[
+        'Sie ist ein unerwünschter Effekt',
+        'Sie zeigt zu wenig Vorbereitung',
         'Sie ist der Lernvorgang selbst',
-        'Sie ist ein unerwünschter Nebeneffekt',
-        'Sie zeigt, dass man zu wenig gelesen hat',
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
           'Mühsam Hervorgeholtes liegt danach näher an der Oberfläche. '
           'Leichtes Wiedererkennen bewirkt das nicht.',
@@ -274,11 +274,11 @@ const Lesson wiederholungPage = Lesson(
     Question(
       prompt: 'Wann bringt eine Wiederholung am meisten?',
       options: <String>[
-        'Sofort danach',
-        'Nach festen sieben Tagen',
         'Kurz bevor man es vergessen würde',
+        'Sofort im Anschluss an das Lesen',
+        'Nach festen sieben Tagen Pause',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Zu früh ist verschwendet, zu spät ist neu lernen. Deshalb werden '
           'die Abstände mit jedem Erfolg länger.',

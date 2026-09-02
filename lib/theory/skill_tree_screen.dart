@@ -6,37 +6,71 @@ import '../ui/palette.dart';
 import 'branch_screen.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
-import 'widgets/node_bubble.dart';
-import 'widgets/node_card.dart';
-import 'widgets/node_sheet.dart';
+import 'widgets/node_action_panel.dart';
 import 'widgets/points_chip.dart';
-import 'widgets/tree_layout.dart';
-import 'widgets/tree_painter.dart';
+import 'widgets/tree_view.dart';
 
-/// Der Skillbaum als gezeichneter Graph (Issue #16, ADR-0019).
+/// Der Skillbaum: ein Bildschirm je Gebiet, waagerecht zu wischen
+/// (ADR-0026).
 ///
-/// **Warum gezeichnet und nicht als Liste.** Der Issue verlangt einen
-/// „richtigen Skill-Tree" und zeigt als Vorbild einen Graphen mit
-/// Verbindungslinien. Eine Liste kann die entscheidende Aussage nicht
-/// treffen: dass *Stress* an Körper **und** Geist hängt. Die Linien sind
-/// der Inhalt, nicht die Verzierung.
+/// **Warum nicht mehr alles auf einer Fläche.** Bis dahin lagen die vier
+/// Gebiete als Bänder untereinander, verschiebbar und zoombar. Das war
+/// bei vierundzwanzig Knoten bereits eng, und jede weitere Ebene hätte es
+/// schlechter gemacht, nicht besser. Ein Handy hat Höhe, keine Breite —
+/// ein Gebiet je Bildschirm ist dieselbe Einsicht wie in ADR-0019, nur zu
+/// Ende geführt.
 ///
-/// Die Fläche ist breiter als ein Handy — deshalb `InteractiveViewer`
-/// mit Verschieben und Zoomen. Das Handbuch steht darüber und bleibt
-/// eine Liste: Es ist kein Graph, sondern eine Reihenfolge (ADR-0018).
-class SkillTreeScreen extends ConsumerStatefulWidget {
+/// **Vorher steht das Handbuch** (ADR-0025). Solange es offen ist, ist es
+/// dieser Bildschirm: Erst verstehen, wie das Spiel gemeint ist, dann den
+/// Stoff lernen. Aus der schmalen Textzeile über einem unbenutzbaren Baum
+/// wird damit der Bildschirm selbst.
+class SkillTreeScreen extends ConsumerWidget {
   const SkillTreeScreen({super.key});
 
   @override
-  ConsumerState<SkillTreeScreen> createState() => _SkillTreeScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(handbookDoneProvider)) {
+      return BranchScreen(branch: ref.watch(handbookProvider));
+    }
+    return const _AreaPager();
+  }
 }
 
-class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
-  final TransformationController _view = TransformationController();
+/// Die vier Gebiete nebeneinander.
+///
+/// **Der Weg je Gebiet liegt hier und nicht in [TreeView].** Zwei Gründe:
+/// Die Zurück-Geste des Geräts muss ihn kennen, und ein Gebietswechsel
+/// soll ihn nicht vergessen — wer in *Körper* drei Ebenen tief steht,
+/// nach *Geist* wischt und zurückkommt, steht wieder dort.
+class _AreaPager extends ConsumerStatefulWidget {
+  const _AreaPager();
+
+  @override
+  ConsumerState<_AreaPager> createState() => _AreaPagerState();
+}
+
+class _AreaPagerState extends ConsumerState<_AreaPager> {
+  final PageController _pages = PageController();
+  final Map<String, List<String>> _paths = <String, List<String>>{
+    for (final id in theoryRootIds) id: <String>[id],
+  };
+
+  /// Ob das Blatt über dem Startknoten offen ist, je Gebiet.
+  ///
+  /// **Startet geschlossen.** Ein Gebiet zu betreten ist keine Wahl —
+  /// erst ein Druck auf einen Knoten ist eine.
+  final Map<String, bool> _panelOpen = <String, bool>{
+    for (final id in theoryRootIds) id: false,
+  };
+
+  int _current = 0;
+
+  String get _areaId => theoryRootIds[_current];
+  List<String> get _path => _paths[_areaId]!;
 
   @override
   void dispose() {
-    _view.dispose();
+    _pages.dispose();
     super.dispose();
   }
 
@@ -45,128 +79,113 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
     final graph = ref.watch(theoryGraphProvider);
     final progress = ref.watch(theoryProgressProvider);
     final available = ref.watch(availableTheoryPointsProvider);
-    final handbook = ref.watch(handbookProvider);
     final passed = ref.watch(passedPagesProvider);
     final total = ref.watch(totalPagesProvider);
 
-    final layout = TreeLayout.of(graph, theoryRootIds);
-
-    return Scaffold(
-      backgroundColor: Palette.background,
-      appBar: AppBar(
-        title: const Text('Theorie'),
+    return PopScope(
+      // Steht der Spieler tief im Baum, geht die Zurück-Geste eine Ebene
+      // zurück statt aus der Theorie heraus. Sonst verlöre ein Druck den
+      // ganzen Weg — und der Weg ist hier die Navigation.
+      canPop: _path.length == 1,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leave();
+      },
+      child: Scaffold(
         backgroundColor: Palette.background,
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Center(child: PointsChip(points: available)),
-          ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          _Header(
-            passed: passed,
-            total: total,
-            available: available,
-            handbookDone: progress.isBranchComplete(handbook),
-            onHandbook: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => BranchScreen(branch: handbook),
+        appBar: AppBar(
+          title: const Text('Theorie'),
+          backgroundColor: Palette.background,
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Center(child: PointsChip(points: available)),
+            ),
+          ],
+        ),
+        body: Column(
+          children: <Widget>[
+            _Header(
+              area: graph.nodeById(_areaId),
+              areaPassed: _passedIn(graph, progress, _areaId),
+              areaTotal: graph.descendantsOf(_areaId, includeSelf: true).length,
+              passed: passed,
+              total: total,
+              areaIndex: _current,
+              areaCount: theoryRootIds.length,
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pages,
+                itemCount: theoryRootIds.length,
+                onPageChanged: (i) => setState(() => _current = i),
+                itemBuilder: (context, i) {
+                  final id = theoryRootIds[i];
+
+                  return TreeView(
+                    graph: graph,
+                    progress: progress,
+                    availablePoints: available,
+                    path: _paths[id]!,
+                    panelOpen: _panelOpen[id]!,
+                    onTogglePanel: () =>
+                        setState(() => _panelOpen[id] = !_panelOpen[id]!),
+                    onEnter: (node) => setState(() {
+                      _paths[id]!.add(node.id);
+                      _panelOpen[id] = true;
+                    }),
+                    onLeave: _leave,
+                    onAction: _act,
+                    onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
+                    onNextArea: i < theoryRootIds.length - 1
+                        ? () => _goToArea(i + 1)
+                        : null,
+                  );
+                },
               ),
             ),
-          ),
-          Expanded(
-            child: InteractiveViewer(
-              transformationController: _view,
-              constrained: false,
-              minScale: 0.4,
-              maxScale: 2.5,
-              boundaryMargin: const EdgeInsets.all(80),
-              child: SizedBox(
-                width: layout.size.width,
-                height: layout.size.height,
-                child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: TreePainter(
-                          graph: graph,
-                          layout: layout,
-                          openIds: progress.openIdsIn(graph),
-                        ),
-                      ),
-                    ),
-                    for (final entry in layout.bandTops.entries)
-                      Positioned(
-                        left: 12,
-                        top: entry.value,
-                        child: _BandLabel(
-                          text: graph.nodeById(entry.key)?.name ?? entry.key,
-                        ),
-                      ),
-                    for (final node in graph.nodes)
-                      if (layout[node.id] case final Offset at)
-                        Positioned(
-                          left: at.dx - NodeBubble.labelWidth / 2,
-                          top: at.dy - TreeLayout.nodeRadius,
-                          child: NodeBubble(
-                            node: node,
-                            state: stateOf(node, graph, progress, available),
-                            onTap: () => _tap(node, graph, progress, available),
-                          ),
-                        ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  /// In welchem Zustand ein Knoten ist.
+  /// Wie viele Seiten eines Gebiets bestanden sind.
   ///
-  /// **Erreichbarkeit und Preis sind zwei verschiedene Absagen.** Die
-  /// eine geht mit dem nächsten Levelaufstieg weg, die andere nicht —
-  /// sähen sie gleich aus, wüsste niemand, ob Warten hilft.
-  static NodeState stateOf(
-    TheoryNode node,
-    TheoryGraph graph,
-    TheoryProgress progress,
-    int available,
-  ) {
-    if (progress.isPassed(node.lesson.id)) return NodeState.passed;
-    if (progress.isNodeOpened(node.id, graph)) return NodeState.open;
-    if (!graph.canOpen(node.id, progress.openIdsIn(graph))) {
-      return NodeState.unreachable;
-    }
-    return node.cost <= available
-        ? NodeState.affordable
-        : NodeState.tooExpensive;
+  /// Ein Knoten mit zwei Eltern zählt in **beiden** Gebieten mit — das
+  /// ist keine Doppelzählung, sondern die Aussage des Graphen: *Stress*
+  /// gehört zu Körper und zu Geist.
+  int _passedIn(TheoryGraph graph, TheoryProgress progress, String areaId) {
+    return graph
+        .descendantsOf(areaId, includeSelf: true)
+        .where((n) => progress.isPassed(n.lesson.id))
+        .length;
   }
 
-  Future<void> _tap(
-    TheoryNode node,
-    TheoryGraph graph,
-    TheoryProgress progress,
-    int available,
-  ) async {
-    final state = stateOf(node, graph, progress, available);
-
-    final action = await showModalBottomSheet<NodeAction>(
-      context: context,
-      backgroundColor: Palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) =>
-          NodeSheet(node: node, state: state, availablePoints: available),
+  /// Zum Gebiet [index] wechseln.
+  ///
+  /// Animiert und nicht gesprungen: Der Wisch bewegt die Seiten, und ein
+  /// Pfeil, der sie stattdessen austauschte, saehe aus wie ein anderer
+  /// Bildschirm statt wie dasselbe Regal einen Schritt weiter.
+  void _goToArea(int index) {
+    _pages.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
     );
+  }
 
-    if (action == null || !mounted) return;
+  void _leave() {
+    if (_path.length == 1) return;
+    setState(() {
+      _paths[_areaId]!.removeLast();
+      // Zurückgehen ist kein Wählen. Der Knoten, auf dem man landet,
+      // war eben noch der Weg dorthin -- er soll nicht so aussehen, als
+      // stünde jetzt eine Entscheidung an.
+      _panelOpen[_areaId] = false;
+    });
+  }
 
+  Future<void> _act(TheoryNode node, NodeAction action) async {
     switch (action) {
       case NodeAction.read:
         await Navigator.of(context).push(
@@ -177,130 +196,127 @@ class _SkillTreeScreenState extends ConsumerState<SkillTreeScreen> {
       case NodeAction.open:
         ref
             .read(theoryProgressProvider.notifier)
-            .openNode(node.id, availablePoints: available);
+            .openNode(
+              node.id,
+              availablePoints: ref.read(availableTheoryPointsProvider),
+            );
     }
   }
 }
 
-class _BandLabel extends StatelessWidget {
-  const _BandLabel({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: const TextStyle(
-        color: Palette.muted,
-        fontSize: 11,
-        letterSpacing: 2,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
-}
-
+/// Fortschritt des Gebiets groß, Gesamtfortschritt klein daneben
+/// (ADR-0026, Punkt 6).
+///
+/// Die freien Punkte stehen nicht hier, sondern als [PointsChip] in der
+/// Leiste darüber — sie gelten für alle vier Gebiete und wären hier eine
+/// Zahl, die beim Wischen mitwandert, ohne sich zu ändern.
 class _Header extends StatelessWidget {
   const _Header({
+    required this.area,
+    required this.areaPassed,
+    required this.areaTotal,
     required this.passed,
     required this.total,
-    required this.available,
-    required this.handbookDone,
-    required this.onHandbook,
+    required this.areaIndex,
+    required this.areaCount,
   });
 
+  final TheoryNode? area;
+  final int areaPassed;
+  final int areaTotal;
   final int passed;
   final int total;
-  final int available;
-  final bool handbookDone;
-  final VoidCallback onHandbook;
+  final int areaIndex;
+  final int areaCount;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Material(
-            color: Palette.surface,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: onHandbook,
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      handbookDone
-                          ? Icons.check_circle
-                          : Icons.menu_book_outlined,
-                      size: 20,
-                      color: handbookDone ? Palette.success : Palette.accent,
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Das Handbuch',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      handbookDone ? 'durch' : 'offen',
-                      style: TextStyle(
-                        color: handbookDone ? Palette.success : Palette.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Palette.muted,
-                      size: 18,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Beide Hälften müssen schrumpfen dürfen. Bei großer Schrift
-          // — und im Widget-Test, wo jede Glyphe quadratisch ist —
-          // passen die vollen Sätze sonst nicht nebeneinander.
+          // Beide Hälften müssen schrumpfen dürfen. Bei großer Schrift —
+          // und im Widget-Test, wo jede Glyphe quadratisch ist — passen
+          // die vollen Sätze sonst nicht nebeneinander.
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: <Widget>[
               Flexible(
                 child: Text(
-                  '$passed von $total Seiten bestanden',
+                  '$areaPassed von $areaTotal',
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Palette.textDim, fontSize: 12),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  available > 0
-                      ? '$available Punkte frei'
-                      : 'Aufstieg gibt 2 Punkte',
+                  'gesamt $passed von $total',
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: available > 0 ? Palette.gold : Palette.muted,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(color: Palette.muted, fontSize: 11.5),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 6),
+          Row(
+            children: <Widget>[
+              Flexible(
+                child: Text(
+                  (area?.name ?? '').toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Palette.accent,
+                    fontSize: 11,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              _Dots(index: areaIndex, count: areaCount),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Vier Punkte für vier Gebiete.
+///
+/// Ohne sie wäre nicht zu sehen, dass es überhaupt etwas zum Wischen
+/// gibt — eine Geste, die niemand vermutet, existiert nicht.
+class _Dots extends StatelessWidget {
+  const _Dots({required this.index, required this.count});
+
+  final int index;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (var i = 0; i < count; i++)
+          Padding(
+            padding: const EdgeInsets.only(left: 5),
+            child: Container(
+              width: i == index ? 16 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: i == index ? Palette.accent : Palette.muted,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

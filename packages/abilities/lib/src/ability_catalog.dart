@@ -73,7 +73,7 @@ abstract final class AbilityCatalog {
     ),
     Ability(
       moveId: 'steinhaut',
-      source: FromTheory('koerper-stress'),
+      source: FromTheory('gesellschaft-grenzen'),
       requirement: 'Körper: „Stress" bestehen',
       rarity: Rarity.common,
     ),
@@ -91,7 +91,7 @@ abstract final class AbilityCatalog {
     ),
     Ability(
       moveId: 'bluetentau',
-      source: FromTheory('koerper-erholung'),
+      source: FromTheory('gesellschaft-hilfe'),
       requirement: 'Körper: „Erholung" bestehen',
       rarity: Rarity.uncommon,
     ),
@@ -111,13 +111,13 @@ abstract final class AbilityCatalog {
     ),
     Ability(
       moveId: 'prisma_barriere',
-      source: FromTheory('geist-unbehagen'),
+      source: FromTheory('wissenschaft-quelle'),
       requirement: 'Geist: „Unbehagen aushalten" bestehen',
       rarity: Rarity.uncommon,
     ),
     Ability(
       moveId: 'giftmoor',
-      source: FromTheory('geist-motivation'),
+      source: FromTheory('gesellschaft-umfeld'),
       requirement: 'Geist: „Motivation" bestehen',
       rarity: Rarity.rare,
     ),

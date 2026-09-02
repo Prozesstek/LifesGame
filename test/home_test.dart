@@ -9,6 +9,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:abilities/abilities.dart';
+import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 import 'package:lifes_game/main.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
@@ -65,7 +66,34 @@ void main() {
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      expect(find.textContaining('Erst das Handbuch'), findsOneWidget);
+      // **Seit ADR-0025 nennt sie nicht mehr das Handbuch.** Der Kampf
+      // hängt nur noch am Moveset; das Handbuch sperrt den Baum. Die
+      // Kette ist dieselbe, sie steht nur nicht mehr zweimal da.
+      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
+      expect(find.textContaining('Erst das Handbuch'), findsNothing);
+    });
+
+    testWidgets('das Handbuch sperrt den Kampf nicht mehr (ADR-0025)', (
+      tester,
+    ) async {
+      // Der Gegenbeweis zur alten Sperre: Ein Stand **ohne** Handbuch,
+      // aber mit zwei Moves, darf kämpfen. Bis ADR-0025 war das
+      // ausgeschlossen -- und zwar aus einem Grund, der nie der echte
+      // war (siehe `combatUnlockedProvider`).
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(_ohneHandbuchAberMitMoves()),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
+
+      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
+
+      expect(tiles.where((t) => t.onTap == null), isEmpty);
     });
 
     testWidgets('mit durchgearbeitetem Handbuch geht der Kampf auf', (
@@ -128,7 +156,7 @@ void main() {
       expect(find.byType(EnemyPickerScreen), findsOneWidget);
     });
 
-    testWidgets('das Handbuch allein reicht seit ADR-0020 nicht', (
+    testWidgets('ohne Fähigkeit bleibt der Kampf zu (ADR-0020)', (
       tester,
     ) async {
       // **Der Grund für diesen Test.** Bis ADR-0019 waren vier
@@ -272,6 +300,45 @@ SaveData _kampfbereit() {
   progress = progress.submit(lesson, <int?>[
     for (final question in lesson.questions) question.correctIndex,
   ]).progress;
+
+  return SaveData(
+    theory: progress,
+    abilities: const ChosenAbilities.empty().withAt(
+      0,
+      _ersterFaehigkeitsknotenMoveId,
+    ),
+  );
+}
+
+/// Ein Stand **ohne** Handbuch, aber mit zwei Moves.
+///
+/// Konstruiert und nicht erspielbar -- genau das ist der Punkt: Er
+/// trennt die beiden Bedingungen, die bis ADR-0025 zusammen auftraten,
+/// und weist nach, dass nur noch eine von beiden zählt.
+///
+/// Erfahrung kommt hier aus **Graphseiten** statt aus dem Handbuch,
+/// weil der zweite Fähigkeitsplatz Level 3 braucht. Gelesen wird bis
+/// dorthin und keine Seite weiter -- eine feste Zahl würde still falsch,
+/// sobald jemand an `TheoryRewards` oder der Levelkurve dreht.
+SaveData _ohneHandbuchAberMitMoves() {
+  var progress = const TheoryProgress.empty();
+
+  List<int?> richtig(Lesson lesson) => <int?>[
+    for (final question in lesson.questions) question.correctIndex,
+  ];
+
+  progress = progress
+      .submit(
+        _ersterFaehigkeitsknoten.lesson,
+        richtig(_ersterFaehigkeitsknoten.lesson),
+      )
+      .progress;
+
+  for (final node in theoryGraph.nodes) {
+    if (LevelCurve.levelFor(progress.totalXp).level >= 3) break;
+    if (node.id == _ersterFaehigkeitsknoten.id) continue;
+    progress = progress.submit(node.lesson, richtig(node.lesson)).progress;
+  }
 
   return SaveData(
     theory: progress,

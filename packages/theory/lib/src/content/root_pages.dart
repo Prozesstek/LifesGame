@@ -47,11 +47,11 @@ const Lesson koerperRootPage = Lesson(
     Question(
       prompt: 'Warum stehen Schlaf und Bewegung am Anfang?',
       options: <String>[
-        'Weil sie am leichtesten zu messen sind',
         'Weil Konzentration und Selbstbeherrschung von ihnen abhängen',
-        'Weil sie nichts kosten',
+        'Weil sie sich am leichtesten messen und aufschreiben lassen',
+        'Weil sie ohne Geld und ohne Ausrüstung zu bekommen sind',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Was wie Charakterstärke aussieht, ist zu großen Teilen '
           'Grundversorgung. Ohne sie fehlt die Substanz für alles andere.',
@@ -59,27 +59,28 @@ const Lesson koerperRootPage = Lesson(
     Question(
       prompt: 'Was haben die drei großen Stellschrauben gemeinsam?',
       options: <String>[
+        'Sie zeigen ihre Wirkung noch am selben Tag deutlich',
         'Sie verlangen eine Entscheidung im Voraus, nicht im Moment',
-        'Sie wirken sofort am selben Tag',
-        'Sie brauchen Ausrüstung',
+        'Sie brauchen Ausrüstung, die man erst besorgen muss',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
           'Wer erst bei Hunger entscheidet, entscheidet schlecht. Die Arbeit '
           'liegt davor — beim Einkauf, beim Wecker, bei den Schuhen an der '
           'Tür.',
     ),
     Question(
-      prompt: 'Auf welche Charakterwerte zahlt dieser Zweig ein?',
+      prompt: 'Was fehlt nach einer zu kurzen Nacht?',
       options: <String>[
-        'Klarheit und Disziplin',
-        'Nur Stärke',
-        'Ausdauer und Stärke',
+        'Der Wille, überhaupt etwas anfangen zu wollen',
+        'Die Zeit, die man am Tag zur Verfügung hat',
+        'Der Stoff, aus dem Konzentration gemacht ist',
       ],
       correctIndex: 2,
       explanation:
-          'Ausdauer wird zu Trefferpunkten, Stärke zu Angriff — die beiden '
-          'Werte, an denen ein Kampf am schnellsten kippt.',
+          'Wer zu wenig geschlafen hat, ist nicht plötzlich ein anderer '
+          'Mensch — er hat weniger von dem, woraus Konzentration und '
+          'Geduld gemacht sind.',
     ),
   ],
 );
@@ -117,21 +118,21 @@ const Lesson geistRootPage = Lesson(
     Question(
       prompt: 'Warum ist Aufmerksamkeit knapper als Zeit?',
       options: <String>[
-        'Weil der Tag zu kurz ist',
-        'Weil nur ein Teil der Zeit tatsächlich bei einer Sache ankommt',
-        'Weil man nachts nicht arbeiten kann',
+        'Weil der Tag für alle Menschen gleich lang ist',
+        'Weil nachts niemand konzentriert arbeiten kann',
+        'Weil nur ein Teil der Zeit bei einer Sache ankommt',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Unterbrochene Stunden sind keine Stunden. Die Zeit vergeht '
           'trotzdem — die Aufmerksamkeit nicht.',
     ),
     Question(
-      prompt: 'Was ist ein Gedanke nach diesem Zweig?',
+      prompt: 'Was ist ein Gedanke, genau genommen?',
       options: <String>[
         'Ein Vorschlag, der stimmen kann oder auch nicht',
-        'Eine Beobachtung der Wirklichkeit',
-        'Ein Befehl, dem man folgen muss',
+        'Eine verlässliche Beobachtung der Wirklichkeit',
+        'Ein Befehl, dem man besser gleich folgt',
       ],
       correctIndex: 0,
       explanation:
@@ -139,12 +140,16 @@ const Lesson geistRootPage = Lesson(
           'aus dem heraus eine Entscheidung möglich wird.',
     ),
     Question(
-      prompt: 'Welchen Kampfwert speist Klarheit?',
-      options: <String>['Angriff', 'Verteidigung', 'Energie'],
-      correctIndex: 2,
+      prompt: 'Was lässt sich an Gedanken üben?',
+      options: <String>[
+        'Sie ganz abzustellen, wenn sie gerade stören',
+        'Zu bemerken, wann einer nur ein Vorschlag ist',
+        'Sie durch angenehmere Gedanken zu ersetzen',
+      ],
+      correctIndex: 1,
       explanation:
-          'Energie ist das, was Handlungsfähigkeit im Kampf ausmacht — ohne '
-          'sie bleibt nur der Grundangriff.',
+          'Den Unterschied zwischen einer Beobachtung und einem Vorschlag '
+          'zu bemerken ist eine Fähigkeit — und der Kern dieses Gebiets.',
     ),
   ],
 );
@@ -181,13 +186,13 @@ const Lesson wissenschaftRootPage = Lesson(
   ],
   questions: <Question>[
     Question(
-      prompt: 'Wozu dient dieser Zweig?',
+      prompt: 'Wozu dient wissenschaftliches Denken im Alltag?',
       options: <String>[
+        'Um Studien und ihre Ergebnisse zuverlässig auswendig zu lernen',
         'Um Ratschläge auseinanderzuhalten, statt dem lautesten zu glauben',
-        'Um Studien auswendig zu lernen',
-        'Um Diskussionen zu gewinnen',
+        'Um in Diskussionen die besseren Argumente zu haben',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
           'Widersprüchliche Ratschläge sind der Normalfall. Ein Werkzeug '
           'zum Sortieren ist nützlicher als noch ein Ratschlag.',
@@ -195,11 +200,11 @@ const Lesson wissenschaftRootPage = Lesson(
     Question(
       prompt: 'Welche zwei Fragen bringen am meisten?',
       options: <String>[
-        'Wer sagt das? und Wie viel kostet es?',
+        'Wer sagt das? und Wie viel Geld kostet es mich?',
+        'Ist das neu? und Wird das gerade oft empfohlen?',
         'Woher weißt du das? und Könnte es andersherum sein?',
-        'Ist das neu? und Ist das beliebt?',
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
           'Die erste fragt nach der Grundlage, die zweite nach der '
           'Gegenrichtung. Zusammen sieben sie den meisten Unsinn aus.',
@@ -207,11 +212,11 @@ const Lesson wissenschaftRootPage = Lesson(
     Question(
       prompt: 'Warum reicht ein guter Durchschnittsbefund nicht?',
       options: <String>[
-        'Weil Durchschnitte immer falsch sind',
-        'Weil Studien alt sind',
         'Weil er über viele Menschen gilt und nicht über dich',
+        'Weil Durchschnitte grundsätzlich in die Irre führen',
+        'Weil ältere Studien selten noch zutreffen',
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
           'Ein Mittelwert beschreibt eine Gruppe. Ob du dazugehörst, zeigt '
           'nur der eigene Versuch.',
@@ -251,11 +256,11 @@ const Lesson gesellschaftRootPage = Lesson(
     Question(
       prompt: 'Was entscheidet oft mehr als der Vorsatz selbst?',
       options: <String>[
+        'Die Tageszeit, zu der man beginnt',
         'Die Umgebung und die Menschen darin',
-        'Die Uhrzeit',
-        'Die Länge des Vorsatzes',
+        'Wie genau der Vorsatz formuliert ist',
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
           'Verhalten ist ansteckend. Wer die Umgebung ändert, muss weniger '
           'gegen sich selbst kämpfen.',
@@ -263,21 +268,21 @@ const Lesson gesellschaftRootPage = Lesson(
     Question(
       prompt: 'Warum ist die passende Umgebung eine Abkürzung?',
       options: <String>[
-        'Weil sie schneller geht',
         'Weil dort das gewünschte Verhalten normal ist statt auffällig',
-        'Weil man dort nicht nachdenken muss',
+        'Weil man dort schneller zu Ergebnissen kommt als allein',
+        'Weil man über die eigenen Vorsätze nicht nachdenken muss',
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
           'Gegen eine Umgebung anzulaufen kostet dauerhaft Kraft. Mit ihr '
           'zu laufen kostet einmal die Suche.',
     ),
     Question(
-      prompt: 'Warum gehört Ablehnen in diesen Zweig?',
+      prompt: 'Warum gehört Ablehnen zu einem Vorsatz dazu?',
       options: <String>[
-        'Weil man Konflikte üben sollte',
-        'Weil Freundlichkeit überschätzt wird',
-        'Weil ohne Grenzen keine Zeit für das Vorgenommene bleibt',
+        'Weil man den Umgang mit Konflikten üben sollte',
+        'Weil Freundlichkeit im Alltag überschätzt wird',
+        'Weil ohne Grenzen keine Zeit für das Eigene bleibt',
       ],
       correctIndex: 2,
       explanation:

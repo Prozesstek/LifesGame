@@ -1,7 +1,7 @@
 # ADR-0018: Der Kampf öffnet sich erst nach dem Handbuch
 
 **Datum:** 22.08.2026
-**Status:** Ergänzt durch ADR-0020
+**Status:** Abgelöst durch ADR-0025
 
 > **Was ADR-0020 ändert:** Die Sperre hängt nicht mehr am Handbuch allein,
 > sondern zusätzlich an der Zahl der Moves. Der Grund ist ADR-0019 — seit

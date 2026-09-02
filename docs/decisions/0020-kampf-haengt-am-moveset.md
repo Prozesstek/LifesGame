@@ -1,7 +1,7 @@
 # ADR-0020: Der Kampf hängt am Moveset, nicht mehr am Handbuch allein
 
 **Datum:** 24.08.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch ADR-0025
 **Entschieden von:** Frederik
 
 ## Kontext

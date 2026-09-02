@@ -104,6 +104,31 @@ void main() {
       });
     }
 
+    testWidgets('Skillbaum läuft auch eine Ebene tiefer nicht über', (
+      tester,
+    ) async {
+      // Der Bildschirm oben zeigt nur die Wurzel. Eine Ebene tiefer
+      // stehen **zusätzlich** die Elternleiste und der größere
+      // Startknoten — das ist die vollste Fassung, und die engste
+      // Stelle ist der Handlungsknopf zwischen beiden (ADR-0026).
+      usePhoneView(tester);
+      await tester.pumpWidget(appMit(const SkillTreeScreen()));
+      await tester.pumpAndSettle();
+
+      final kind = theoryGraph.childrenOf(theoryRootIds.first).first;
+      await tester.tap(find.text(kind.name));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Zurück zu'), findsOneWidget);
+
+      for (var i = 0; i < _scrollSchritte; i++) {
+        await tester.drag(find.byType(Scaffold), const Offset(0, -400));
+        await tester.pumpAndSettle();
+      }
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('Charakter läuft auch ohne Fortschritt nicht über', (
       tester,
     ) async {

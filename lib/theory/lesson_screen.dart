@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../character/abilities_controller.dart';
+import '../character/show_ability_unlock.dart';
 import '../ui/palette.dart';
 import 'theory_controller.dart';
 import 'widgets/lesson_result_view.dart';
@@ -28,9 +33,21 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   List<int?> _answers = const <int?>[];
   LessonResult? _result;
 
+  /// Die Lektion in der Reihenfolge, in der sie **angezeigt** wird
+  /// (ADR-0027). Null, solange noch gelesen wird.
+  ///
+  /// Neu gemischt bei jedem Anlauf: Wer eine Seite wiederholt, soll sich
+  /// nicht an Stellen erinnern statt an Inhalte.
+  ShuffledLesson? _shuffled;
+
   Lesson get _lesson => widget.lesson;
 
-  Question get _question => _lesson.questions[_index];
+  Question get _question {
+    final gemischt = _shuffled;
+    if (gemischt == null) return _lesson.questions[_index];
+
+    return gemischt.questions[_index].question;
+  }
 
   bool get _isAnswered => _answers[_index] != null;
 
@@ -42,6 +59,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       _index = 0;
       _answers = List<int?>.filled(_lesson.questionCount, null);
       _result = null;
+      _shuffled = ShuffledLesson.of(_lesson, Random());
     });
   }
 
@@ -62,12 +80,30 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   void _finish() {
+    // Zurueckuebersetzen, bevor ausgewertet wird — die Stellen auf dem
+    // Bildschirm sind nicht die Stellen im Katalog.
+    final gemischt = _shuffled;
+    final inLektion = gemischt == null
+        ? _answers
+        : gemischt.toLessonAnswers(_answers);
+
+    // **Vor dem Abgeben lesen.** Danach ist der Fortschritt drin und der
+    // Unterschied verschwunden — es gaebe nichts mehr zu feiern.
+    final vorher = ref.read(unlockedAbilitiesProvider);
+
     final result = ref
         .read(theoryProgressProvider.notifier)
-        .submit(_lesson, _answers);
+        .submit(_lesson, inLektion);
     setState(() {
       _result = result;
       _stage = _Stage.result;
+    });
+
+    // Einen Bildaufbau spaeter: Erst steht das Ergebnis da, dann kommt
+    // die Feier darueber. Andersherum verdeckte sie, wofuer sie kommt.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(showAbilityUnlocks(context, ref, before: vorher));
     });
   }
 

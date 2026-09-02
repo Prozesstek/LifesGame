@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
+import '../character/abilities_controller.dart';
+import '../character/show_ability_unlock.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
 import 'habits_controller.dart';
@@ -102,10 +106,21 @@ class HabitsScreen extends ConsumerWidget {
 
   void _toggle(BuildContext context, WidgetRef ref, HabitTemplate template) {
     final today = ref.read(todayProvider);
+
+    // Vier Faehigkeiten haengen an Streak-Marken (ADR-0022). Genau hier
+    // reisst eine Kette weiter -- und nur hier ist der Moment, in dem
+    // sich eine Marke ueberschreiten laesst.
+    final vorher = ref.read(unlockedAbilitiesProvider);
+
     final result = ref
         .read(habitTrackerProvider.notifier)
         .toggle(template.id, today);
     if (result == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      unawaited(showAbilityUnlocks(context, ref, before: vorher));
+    });
 
     final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
     messenger.showSnackBar(

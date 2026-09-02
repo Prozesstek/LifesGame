@@ -4,18 +4,22 @@ import 'package:theory/theory.dart';
 import '../../ui/palette.dart';
 import 'tree_layout.dart';
 
-/// Zeichnet die Verbindungen zwischen den Knoten.
+/// Zeichnet die Verbindungen vom Startknoten zu seinen Kindern.
 ///
 /// **Die Linien sind der Unterschied zwischen einem Baum und einer
-/// Liste.** Ohne sie stünden 24 Kacheln nebeneinander und niemand sähe,
-/// dass *Stress* an Körper **und** Geist hängt.
+/// Liste.** Ohne sie stünden fünf Kacheln nebeneinander und niemand
+/// sähe, dass sie an dem Knoten hängen, der darunter sitzt.
 ///
-/// Zwei Sorten Linie, und der Unterschied trägt eine Aussage:
+/// Seit ADR-0026 ist nur **eine** Ebene im Bild, also gibt es auch nur
+/// eine Sorte Verbindung: von unten nach oben. Die alte Unterscheidung
+/// zwischen Linien innerhalb eines Bandes und quer über die Bänder ist
+/// damit gegenstandslos — es gibt keine Bänder mehr.
 ///
-/// * **Durchgezogen** — die Verbindung zur eigenen Wurzel.
-/// * **Gestrichelt** — eine Verbindung in ein anderes Gebiet. Sie läuft
-///   quer über die Bänder und wäre sonst nicht als etwas anderes zu
-///   erkennen.
+/// Geblieben ist eine Unterscheidung, und sie trägt weiter eine Aussage:
+///
+/// * **Durchgezogen** — ein Kind, das nur hier hängt.
+/// * **Gestrichelt** — ein Kind mit zwei Eltern. Es steht in beiden
+///   Gebieten, und ohne die gestrichelte Linie sähe man ihm das nicht an.
 class TreePainter extends CustomPainter {
   const TreePainter({
     required this.graph,
@@ -32,37 +36,30 @@ class TreePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (final node in graph.nodes) {
-      final to = layout[node.id];
-      if (to == null) continue;
+    final start = layout[layout.focusId];
+    if (start == null) return;
 
-      for (final parentId in node.parentIds) {
-        final from = layout[parentId];
-        if (from == null) continue;
+    for (final kind in graph.childrenOf(layout.focusId)) {
+      final ziel = layout[kind.id];
+      if (ziel == null) continue;
 
-        final erreicht = openIds.contains(node.id);
-        final quer = _isCrossBand(from, to);
+      final erreicht = openIds.contains(kind.id);
+      final geteilt = kind.parentIds.length > 1;
 
-        final paint = Paint()
-          ..color = erreicht
-              ? Palette.accent.withValues(alpha: quer ? 0.45 : 0.7)
-              : Palette.muted.withValues(alpha: quer ? 0.25 : 0.4)
-          ..strokeWidth = erreicht ? 2.0 : 1.4
-          ..style = PaintingStyle.stroke;
+      final paint = Paint()
+        ..color = erreicht
+            ? Palette.accent.withValues(alpha: geteilt ? 0.5 : 0.75)
+            : Palette.muted.withValues(alpha: geteilt ? 0.3 : 0.45)
+        ..strokeWidth = erreicht ? 2.2 : 1.5
+        ..style = PaintingStyle.stroke;
 
-        final path = _curve(from, to);
-        if (quer) {
-          _drawDashed(canvas, path, paint);
-        } else {
-          canvas.drawPath(path, paint);
-        }
+      final pfad = _curve(start, ziel);
+      if (geteilt) {
+        _drawDashed(canvas, pfad, paint);
+      } else {
+        canvas.drawPath(pfad, paint);
       }
     }
-  }
-
-  /// Eine Verbindung läuft quer, wenn sie mehr als ein Band überspringt.
-  bool _isCrossBand(Offset from, Offset to) {
-    return (to.dy - from.dy).abs() > TreeLayout.bandHeight * 0.8;
   }
 
   /// Eine weiche Kurve statt einer Geraden — gerade Linien zwischen
@@ -91,7 +88,8 @@ class TreePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TreePainter old) {
-    return old.openIds.length != openIds.length ||
+    return old.layout.focusId != layout.focusId ||
+        old.openIds.length != openIds.length ||
         old.layout != layout ||
         old.graph != graph;
   }
