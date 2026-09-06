@@ -50,7 +50,7 @@ void main() {
 
       expect(before.activeIds, isEmpty);
       expect(after.activeIds, <String>[staerke.id]);
-      expect(after.activeTemplates.single.id, staerke.id);
+      expect(after.activeHabits.single.id, staerke.id);
     });
 
     test('dieselbe Vorlage lässt sich nicht zweimal aktivieren', () {

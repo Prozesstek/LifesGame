@@ -197,6 +197,28 @@ Aus Vorlagen wählbar, jede Vorlage fest verknüpft mit einem Stat und einem
 Theoriezweig. Gebaut, siehe
 [ADR-0008](docs/decisions/0008-gewohnheiten-als-eigenes-package.md).
 
+**Dazu eigene Gewohnheiten**, seit dem 06.09. und
+[ADR-0028](docs/decisions/0028-eigene-gewohnheiten.md). Ein Tracker, in
+den man nicht schreiben kann, was man tatsächlich tut, ist keiner. Vier
+Regeln halten sie im Rahmen:
+
+- **Ein Platz je freigeschalteter Vorlage.** Der Baum bleibt der Motor —
+  ohne Lektion keine eigene Gewohnheit. Aber was am Ende auf der Liste
+  steht, entscheidet der Spieler.
+- **Der Schwierigkeitsgrad ist eine feste, schmale Spanne** auf die
+  Erfahrung (leicht ×0,8, mittel ×1,0, schwer ×1,3) und wirkt **nicht**
+  auf Gold. Er wird selbst gesetzt; frei eingebbar wäre er ein Regler am
+  Spielgleichgewicht.
+- **Ein Tagesziel** in Menge oder Minuten füllt sich über den Tag und
+  zahlt erst voll aus. Halb getan ist nicht getan — sonst wäre die Streak
+  nichts mehr wert.
+- **Die Priorität ordnet nur die Liste.** Sie ist ausdrücklich für die
+  eigene Wertung und bewegt keine Zahl im Spiel.
+
+Wert, Schwierigkeit und Ziel stehen mit dem Anlegen fest: Erfahrung und
+Charakterwerte werden aus der Historie gerechnet, eine nachträgliche
+Änderung schriebe die Vergangenheit um.
+
 **Vier Werte**, jeder mit einer Wirkung im Kampf:
 
 | Wert | Kampf | Beispielvorlage |
@@ -218,7 +240,9 @@ nicht**, sonst wird eine lange Kette zur Abkürzung durch den Shop.
 
 **Höchstens fünf Gewohnheiten gleichzeitig.** Ohne Grenze hakt man alle
 Vorlagen an und keine davon ab; außerdem hält die Grenze die Erfahrung pro
-Tag berechenbar, worauf die Levelkurve angewiesen ist.
+Tag berechenbar, worauf die Levelkurve angewiesen ist. Vorlagen und eigene
+Gewohnheiten teilen sich diese fünf Plätze — anlegen und täglich verfolgen
+sind zwei verschiedene Grenzen.
 
 ### 3.8 Errungenschaften
 Offen. Sie sollen später eine dritte Quelle für Fähigkeiten sein (3.1) und

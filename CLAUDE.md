@@ -65,8 +65,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | zwei Theoriepunkte je Aufstieg | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 71 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 114 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
+| `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
@@ -83,7 +84,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/habits/habits_screen.dart` | Werte, Tagesliste, freigeschaltete Vorlagen | Flutter |
+| `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
+| `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
@@ -134,7 +136,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 311 Tests
+flutter test             # 322 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -148,7 +150,7 @@ dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 71 Tests
+dart test                              # 114 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -198,6 +200,28 @@ Erfahrung je Häkchen, Streak-Meilensteine, Deckel, Stat-Kurve — stehen in
 lassen, die 90-Tage-Tabelle vergleichen. Neue Vorlagen kommen nach
 `catalog.dart` und brauchen eine Lektion mit passendem `unlocksHabit` —
 sonst schlägt `test/habits_theory_test.dart` fehl.
+
+**Der Katalog ist Inhalt, der Tracker ist Nutzerzustand — und seit
+[ADR-0028](docs/decisions/0028-eigene-gewohnheiten.md) hält der Tracker
+auch Gewohnheiten.** Eine Id wird an **einer** Stelle aufgelöst:
+`HabitTracker.definitionFor`, erst Katalog, dann eigene. Wer eine Id in
+etwas Anzeigbares verwandelt, fragt dort — sonst entsteht der Fall aus
+`gotchas.md`, bei dem zwei Stellen dieselbe Frage verschieden beantwortet
+haben.
+
+Drei Regeln zu eigenen Gewohnheiten, die im Code an je einer Stelle
+stehen und dort bleiben müssen:
+
+| Frage | Antwortet |
+|---|---|
+| Wie viele eigene darf jemand anlegen? | `HabitRewards.customSlotsFor` — ein Platz je freigeschalteter Vorlage |
+| Was ändert der Schwierigkeitsgrad? | `HabitDifficulty.xpFactor` — nur Erfahrung, nie Gold |
+| Was darf sich nachträglich ändern? | `CustomHabit.editable` — nur, was keine Zahl erzeugt |
+
+Der Grad ist gemessen, nicht geschätzt: Fünf „schwere" eigene
+Gewohnheiten erreichen Level 50 in 188 Tagen statt in 240. Wer an
+`HabitDifficulty` dreht, lässt `flutter test test/progression_test.dart`
+laufen — dort steht die Spanne als Test.
 
 **Ausrüstung ändern heißt gegen den Gold-Zufluss rechnen.** Alle Preise
 stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`

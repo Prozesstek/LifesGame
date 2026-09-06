@@ -176,6 +176,48 @@ void main() {
 
       expect(tage, greaterThan(120), reason: 'Level 50 nach $tage Tagen.');
     });
+
+    test('die Schwierigkeit verbiegt die Kurve nicht (ADR-0028)', () {
+      // **Der Grund, warum die Spanne schmal ist.** Der Spieler setzt den
+      // Schwierigkeitsgrad selbst; er spricht sich damit einen Faktor auf
+      // die Erfahrung zu. Solange fünf „schwere" Gewohnheiten dieselbe
+      // Kurve gehen wie fünf Vorlagen, ist das eine Farbe und kein
+      // Schlupfloch. Gemessen am 06.09.2026:
+      //
+      //   Vorlagen / mittel  240 Tage bis Level 50, 18 bis Level 10
+      //   nur „leicht"       297 Tage             , 22
+      //   nur „schwer"       188 Tage             , 15
+      final schwer = _daysToLevel(
+        LevelCurve.maxLevel,
+        difficulty: HabitDifficulty.schwer,
+      );
+      final leicht = _daysToLevel(
+        LevelCurve.maxLevel,
+        difficulty: HabitDifficulty.leicht,
+      );
+
+      expect(
+        schwer,
+        greaterThan(120),
+        reason:
+            'Fünf schwere eigene Gewohnheiten bringen Level 50 in $schwer '
+            'Tagen. Unter 120 wäre der selbst gesetzte Grad eine Abkürzung.',
+      );
+      expect(
+        leicht,
+        greaterThan(schwer),
+        reason:
+            'Leicht muss langsamer sein als schwer, sonst ist der Grad '
+            'verdreht.',
+      );
+
+      // Auch der schnellste Weg darf den Baum nicht überrennen: Der
+      // zweite Fähigkeitsslot auf Level 3 soll erarbeitet sein.
+      expect(
+        _daysToLevel(3, difficulty: HabitDifficulty.schwer),
+        greaterThanOrEqualTo(2),
+      );
+    });
   });
 }
 
@@ -187,13 +229,34 @@ int get _highestUnlock {
 }
 
 /// Wie viele Tage tägliches Abhaken bis zum Level [target] brauchen.
-int _daysToLevel(int target) {
-  final chosen = HabitCatalog.all
-      .take(HabitRewards.maxActiveHabits)
-      .map((t) => t.id)
-      .toList();
-
+///
+/// [difficulty] ist der schnellste denkbare Weg seit ADR-0028: Die
+/// Tagesliste besteht dann aus fünf **selbst angelegten** Gewohnheiten mit
+/// diesem Grad. Ohne Angabe rechnet sie mit Vorlagen, und die sind immer
+/// mittel — das ist die Zahl, die seit ADR-0008 gilt.
+int _daysToLevel(int target, {HabitDifficulty? difficulty}) {
   var tracker = const HabitTracker.empty();
+  final chosen = <String>[];
+
+  if (difficulty == null) {
+    for (final template in HabitCatalog.all.take(
+      HabitRewards.maxActiveHabits,
+    )) {
+      chosen.add(template.id);
+    }
+  } else {
+    for (var i = 0; i < HabitRewards.maxActiveHabits; i++) {
+      final habit = CustomHabit(
+        id: 'eigen-$i',
+        name: 'Eigene $i',
+        stat: HabitStat.values[i % HabitStat.values.length],
+        difficulty: difficulty,
+      );
+      tracker = tracker.addCustom(habit, slots: HabitRewards.maxActiveHabits);
+      chosen.add(habit.id);
+    }
+  }
+
   for (final id in chosen) {
     tracker = tracker.activate(id);
   }

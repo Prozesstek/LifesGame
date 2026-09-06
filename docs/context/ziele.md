@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
+**Zuletzt aktualisiert:** 06.09.2026 · Prozesstek
 
 ---
 
@@ -393,6 +393,12 @@ Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
 
 ## Verlauf
 
+- **06.09.2026** — Issue #28 (eigene Gewohnheiten) gebaut, siehe
+  [ADR-0028](../decisions/0028-eigene-gewohnheiten.md). **Kein neues Ziel:**
+  Es ist kein MVP-Schnitt, sondern eine Voraussetzung für Ziel 7. Ein
+  Tracker, in den man nicht schreiben kann, was man tatsächlich täglich
+  tut, wird dreißig Tage lang nicht benutzt — und genau das ist die Frage,
+  die Ziel 7 beantworten soll. Die Sperrliste ist unberührt geblieben.
 - **24.08.2026, abends** — Nach drei Issues vom selben Nachmittag überarbeitet.
   #16 holt den Skillbaum in den MVP zurück (er stand mittags noch auf der
   Sperrliste) und setzt den 31.08.; ADR-0019 hält die Abweichungen von

@@ -296,6 +296,59 @@ void main() {
       expect(container.read(habitTrackerProvider).activeIds, isEmpty);
     });
 
+    test('eigene Gewohnheiten überleben den Neustart (ADR-0028)', () {
+      final store = InMemorySaveStore();
+      final erste = containerMit(const SaveData(), store);
+
+      // Eine Vorlage freischalten — sie ist der Platz für die eigene.
+      final lesson = habitsBranch.lessons.first;
+      erste.read(theoryProgressProvider.notifier).submit(lesson, <int?>[
+        for (final question in lesson.questions) question.correctIndex,
+      ]);
+
+      final habit = erste
+          .read(habitTrackerProvider.notifier)
+          .addCustom(
+            name: 'Fünf Gläser Wasser',
+            stat: HabitStat.ausdauer,
+            difficulty: HabitDifficulty.schwer,
+            goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
+            priority: HabitPriority.hoch,
+            why: 'Weil ich es sonst vergesse.',
+          );
+      expect(habit, isNotNull);
+
+      // Ein angefangener Tag: zwei von fünf Gläsern.
+      erste.read(habitTrackerProvider.notifier).advance(habit!.id, tag);
+      erste.read(habitTrackerProvider.notifier).advance(habit.id, tag);
+
+      final stand = SaveData(
+        theory: erste.read(theoryProgressProvider),
+        habits: erste.read(habitTrackerProvider),
+      );
+      final zweite = containerMit(SaveData.decode(stand.encode()), store);
+      final tracker = zweite.read(habitTrackerProvider);
+
+      final gelesen = tracker.customHabits.single;
+      expect(gelesen.id, habit.id);
+      expect(gelesen.name, 'Fünf Gläser Wasser');
+      expect(gelesen.stat, HabitStat.ausdauer);
+      expect(gelesen.difficulty, HabitDifficulty.schwer);
+      expect(gelesen.priority, HabitPriority.hoch);
+      expect(gelesen.why, 'Weil ich es sonst vergesse.');
+      expect(gelesen.goal?.target, 5);
+      expect(gelesen.goal?.unit, 'Gläser');
+
+      expect(tracker.isActive(habit.id), isTrue);
+      expect(
+        tracker.progressOn(habit.id, tag),
+        2,
+        reason:
+            'ein angefangener Tag darf durch einen Neustart nicht '
+            'verloren gehen',
+      );
+    });
+
     test('der Gesamtstand überlebt Kodieren und Dekodieren', () {
       final tracker = const HabitTracker.empty()
           .activate(habitId)
