@@ -90,11 +90,33 @@ abstract final class HabitRewards {
     return null;
   }
 
+  /// Wie viele eigene Gewohnheiten anlegen darf, wer [unlockedTemplates]
+  /// Vorlagen freigeschaltet hat.
+  ///
+  /// **Ein Platz je Vorlage** (ADR-0028). Die Kette „erst verstehen, dann
+  /// verfolgen" bleibt damit der Motor: Wer eigene Gewohnheiten führen
+  /// will, holt sich die Plätze dafür aus dem Baum. Wären sie von Anfang
+  /// an frei, verlöre der Baum seine Rolle für die Gewohnheiten ganz.
+  ///
+  /// Die Umrechnung ist heute eins zu eins und steht trotzdem als eigene
+  /// Funktion da: Sie ist der Hebel, an dem nachjustiert wird, wenn der
+  /// 30-Tage-Lauf zeigt, dass es zu viele oder zu wenige sind.
+  static int customSlotsFor(int unlockedTemplates) {
+    return unlockedTemplates < 0 ? 0 : unlockedTemplates;
+  }
+
   /// Erfahrung für ein Häkchen, das eine Streak von [streak] Tagen
   /// abschließt. [streak] zählt dieses Häkchen mit: Der erste Tag ist 1.
-  static int xpFor(int streak) {
+  ///
+  /// [difficulty] ist der zweite Faktor neben dem Streak und steht auf
+  /// [HabitDifficulty.mittel], solange niemand etwas anderes sagt — damit
+  /// rechnet jede Vorlage exakt wie vor ADR-0028.
+  static int xpFor(
+    int streak, [
+    HabitDifficulty difficulty = HabitDifficulty.mittel,
+  ]) {
     if (streak <= 0) return 0;
-    return (xpPerCheck * multiplierFor(streak)).round();
+    return (xpPerCheck * multiplierFor(streak) * difficulty.xpFactor).round();
   }
 
   /// Gold für ein Häkchen. Der Streak spielt hier bewusst keine Rolle.

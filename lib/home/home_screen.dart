@@ -37,7 +37,7 @@ class HomeScreen extends ConsumerWidget {
     final tracker = ref.watch(habitTrackerProvider);
     final unlockedHabits = ref.watch(unlockedHabitsProvider);
     final today = ref.watch(todayProvider);
-    final activeHabits = tracker.activeTemplates;
+    final activeHabits = tracker.activeHabits;
     final enemy = ref.watch(selectedEnemyProvider);
     final equippedCount = ref.watch(loadoutProvider).equippedCount;
     final combatOpen = ref.watch(combatUnlockedProvider);

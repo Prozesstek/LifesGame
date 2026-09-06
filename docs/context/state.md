@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.08.2026, abends · AktivesBrett
+**Zuletzt aktualisiert:** 06.09.2026 · Prozesstek
 
 ---
 
@@ -17,6 +17,12 @@
 freischalten → täglich abhaken → Werte steigen → Gold sammeln → Ausrüstung
 kaufen → nächsten Gegner schlagen. Alles davon überlebt jetzt einen
 Neustart.
+
+Seit dem 06.09. hat die Kette einen Abzweig: Jede freigeschaltete Vorlage
+gibt zusätzlich einen Platz für eine **eigene** Gewohnheit
+([ADR-0028](../decisions/0028-eigene-gewohnheiten.md)). Der Baum bleibt
+der Motor, aber was am Ende auf der Tagesliste steht, entscheidet der
+Spieler.
 
 Seit dem 22.08. gibt es **eine** Sperre wieder, und sie ist gewollt:
 Der **Kampf** wartet, bis das Handbuch durch ist
@@ -106,6 +112,103 @@ flutter run -d chrome
   - `test/progression_test.dart` prüft, was kein Package allein kann: dass
     Belohnungs-, Habit-, Level- **und Preiskurve** zusammenpassen
   - `test/persistence_test.dart` prüft, dass ein Neustart nichts verliert
+
+## Sitzung 06.09.2026: Eigene Gewohnheiten
+
+Issue [#28](https://github.com/Prozesstek/LifesGame/issues/28) gebaut:
+Der Tracker nimmt jetzt auf, was jemand **tatsächlich** täglich tut, statt
+nur das, was zufällig unter den elf Vorlagen steht
+([ADR-0028](../decisions/0028-eigene-gewohnheiten.md)). 322 App-Tests
+(vorher 311), habits 114 (vorher 71).
+
+### Was gebaut ist
+
+- **`CustomHabit`** neben `HabitTemplate`, beide unter dem `sealed` Obertyp
+  **`Habit`**. Die Tagesliste, die Streak-Rechnung und der Speicher kennen
+  nur noch diesen Typ
+- **Ein Knopf** auf dem Gewohnheiten-Bildschirm, dahinter ein Formular:
+  Name, Charakterwert, Schwierigkeit, Tagesziel (Menge oder Zeit),
+  Priorität, freiwillige Begründung
+- **Tagesziele mit Zähler:** „3 / 5 Gläser" mit Balken auf der Kachel. Das
+  Plus füllt um einen Schritt, die Kachel selbst hakt ganz ab
+- **Schwierigkeit** als Faktor auf die Erfahrung — leicht ×0,8, mittel
+  ×1,0, schwer ×1,3, **nie** auf Gold
+- **Priorität** sortiert die Tagesliste und sonst gar nichts
+- Alles davon überlebt einen Neustart, angefangene Tage eingeschlossen
+
+### Vier Entscheidungen, die begründet gehören
+
+**Ein Platz je freigeschalteter Vorlage.** Der Skillbaum bleibt damit der
+Motor — ohne Lektion keine eigene Gewohnheit —, aber was am Ende auf der
+Liste steht, entscheidet der Spieler. Fünf freie Plätze von Anfang an
+hätten den Baum für die Gewohnheiten bedeutungslos gemacht, sieben Tage
+nachdem Ziel 2 ihn zur Entscheidung gemacht hat.
+
+**Die Schwierigkeit ist eine schmale, feste Spanne, weil sie der Spieler
+selbst setzt.** Ein frei eingebbarer Faktor wäre ein Regler am
+Spielgleichgewicht in der Hand dessen, der ihn gewinnen will. Gemessen:
+
+| Tagesliste | bis Level 10 | bis Level 50 |
+|---|---|---|
+| fünf Vorlagen (= mittel) | 18 Tage | 240 Tage |
+| fünf eigene, alle „leicht" | 22 Tage | 297 Tage |
+| fünf eigene, alle „schwer" | 15 Tage | **188 Tage** |
+
+Der schnellste denkbare Weg ist 22 % schneller als der bisherige — eine
+Farbe, kein Schlupfloch. `progression_test.dart` misst alle drei Fälle
+seither mit; wer an `HabitDifficulty` dreht, sieht es dort.
+
+**Halb getan ist nicht getan.** Ein Tagesziel zahlt erst aus, wenn es voll
+ist, und Teilfortschritt wandert nicht in den nächsten Tag. Anteilig
+auszuschütten machte die Streak wertlos — sie ist die Aussage „an diesem
+Tag stand es". Und eine Woche halber Tage summierte sich sonst zu einem
+geschenkten Häkchen.
+
+**Was eine Zahl erzeugt, lässt sich nicht mehr ändern.** Wert,
+Schwierigkeit und Ziel stehen mit dem Anlegen fest; Name, Begründung und
+Priorität nicht. Der Grund ist ADR-0008: Erfahrung und Charakterwerte
+werden aus der Historie *gerechnet*. Wer die Schwierigkeit nachträglich
+hochsetzte, schriebe jedes Häkchen der Vergangenheit um und stiege
+rückwirkend im Level. Die Trennlinie steht als eine Methode da,
+`CustomHabit.editable`.
+
+**Gelöscht wird nichts.** Eine eigene Gewohnheit lässt sich stoppen wie
+eine Vorlage — ihre Häkchen bleiben und damit die Charakterwerte. Gelöscht
+wären sie keinem Wert mehr zuzuordnen.
+
+### Was der Umbau am Bestehenden geändert hat
+
+- `activeTemplates` heißt **`activeHabits`**, dazu kam
+  `activeHabitsByPriority`
+- `HabitTracker` löst eine Id an **einer** Stelle auf
+  (`definitionFor`) — erst Katalog, dann eigene. Das ist bewusst dieselbe
+  Vorsichtsmaßnahme wie in `gotchas.md` unter „Zwei Stellen, die dieselbe
+  Frage beantworten"
+- Der Spielstand hat zwei neue Abschnitte, `custom` und `progress`, und
+  schreibt beide **nur, wenn sie belegt sind** — ein Stand ohne eigene
+  Gewohnheiten sieht aus wie vorher
+- Die 71 vorhandenen Package-Tests liefen **unverändert** durch. Das war
+  das Ziel: Vorlagen sind immer „mittel" und haben kein Ziel, also rechnet
+  jede alte Zahl wie vorher
+
+### Offen
+
+**Zwei Griffe auf einer Kachel.** Die Kachel hakt ganz ab, das Plus füllt
+um einen Schritt. Ob das auf einem Handy im Alltag verwechselt wird, sagt
+der 30-Tage-Lauf, nicht eine Vermutung.
+
+**Nicht am Bild geprüft.** Alle Layouts laufen im Test bei 390 × 844 ohne
+Überlauf, das Formular eingeschlossen. Wie das Blatt mit offener Tastatur
+**aussieht**, muss jemand ansehen.
+
+**Der Katalog ist nicht gewachsen.** Die Überschrift von Issue #28 lautet
+„Mehr Gewohnheiten hinzufügen"; die beiden Unterpunkte beschreiben eigene
+Gewohnheiten, und die sind gebaut. Weitere **Vorlagen** brauchen je eine
+Lektion mit passendem `unlocksHabit` (`habits_theory_test.dart` erzwingt
+das) und sind damit Schreibarbeit, kein Code. Elf Vorlagen auf
+neunundzwanzig Seiten — die Schieflage aus der Konzeptrunde vom 18.08.
+(zu wenig Stärke und Ausdauer) ist damit nicht behoben, aber entschärft:
+Wer Kraftsport treibt, legt ihn jetzt selbst an.
 
 ## Sitzung 26.08.2026: Das Fähigkeiten-Set
 

@@ -46,10 +46,39 @@ void main() {
       }
     }
 
+    // Vier Vorlagen plus eine eigene: Die eigene ist die vollste Kachel,
+    // die es gibt — Ziel, Schwierigkeit und Priorität stehen zusätzlich
+    // in einer eigenen Zeile, und neben dem Namen sitzen dann **zwei**
+    // Knöpfe statt einem. Die zweite wartet unter „Eigene" und prüft
+    // damit auch die ruhende Kachel.
     var tracker = const HabitTracker.empty();
-    for (final template in HabitCatalog.all.take(5)) {
+    for (final template in HabitCatalog.all.take(4)) {
       tracker = tracker.activate(template.id);
     }
+    tracker = tracker
+        .addCustom(
+          CustomHabit(
+            id: 'eigen-1',
+            name: 'Fünf Gläser Wasser über den Tag verteilt trinken',
+            stat: HabitStat.ausdauer,
+            difficulty: HabitDifficulty.schwer,
+            goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
+            priority: HabitPriority.hoch,
+          ),
+          slots: 5,
+        )
+        .addCustom(
+          const CustomHabit(
+            id: 'eigen-2',
+            name: 'Zwanzig Minuten Krafttraining am Abend',
+            stat: HabitStat.staerke,
+            difficulty: HabitDifficulty.leicht,
+            priority: HabitPriority.niedrig,
+            why: 'Weil der Abend sonst im Sessel endet und nichts bleibt.',
+          ),
+          slots: 5,
+        )
+        .activate('eigen-1');
 
     // Jeder Platz belegt. Ein leeres Ausrüstungsraster zeigt sechsmal
     // „leer" -- die echten Namen sind das, was in der schmalen Kachel
@@ -103,6 +132,43 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+
+    testWidgets('das Formular für eine eigene Gewohnheit passt', (
+      tester,
+    ) async {
+      // Der längste neue Bildschirm: vier Wertekacheln, drei
+      // Schwierigkeiten mit Prozentangabe, drei Zielarten, drei
+      // Prioritäten und vier Eingabefelder. Die engste Stelle sind die
+      // Werte-Kacheln — „Lebenspunkte" neben „Ausdauer" in einem Chip.
+      usePhoneView(tester);
+      await tester.pumpWidget(appMit(const HabitsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byIcon(Icons.playlist_add),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byIcon(Icons.playlist_add));
+      await tester.pumpAndSettle();
+
+      // Beide Zielarten aufklappen — sie bringen je zusätzliche Felder
+      // mit, und aufgeklappt ist das Blatt am höchsten.
+      for (final art in <String>['Menge', 'Zeit']) {
+        await tester.tap(find.text(art));
+        await tester.pumpAndSettle();
+      }
+
+      for (var i = 0; i < _scrollSchritte; i++) {
+        await tester.drag(
+          find.text('Eigene Gewohnheit'),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('Skillbaum läuft auch eine Ebene tiefer nicht über', (
       tester,
