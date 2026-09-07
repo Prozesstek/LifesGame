@@ -22,6 +22,7 @@ abstract final class GearCatalog {
       id: 'gear-uebungsklinge',
       name: 'Übungsklinge',
       slot: GearSlot.waffe,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Waffe,
       bonus: GearBonus(attack: 1),
       why: 'Ein Angriffspunkt klingt nach wenig und ist es nicht: Der '
@@ -32,6 +33,7 @@ abstract final class GearCatalog {
       id: 'gear-lederwams',
       name: 'Lederwams',
       slot: GearSlot.ruestung,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Ruestung,
       bonus: GearBonus(maxHp: 16, defense: 1),
       why: 'Lebenspunkte verlängern den Kampf, und ein längerer Kampf gibt '
@@ -41,6 +43,7 @@ abstract final class GearCatalog {
       id: 'gear-lederkappe',
       name: 'Lederkappe',
       slot: GearSlot.helm,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Helm,
       bonus: GearBonus(maxHp: 8),
       why: 'Der billigste Platz, und der erste, den man belegen sollte: '
@@ -50,6 +53,7 @@ abstract final class GearCatalog {
       id: 'gear-feste-stiefel',
       name: 'Feste Stiefel',
       slot: GearSlot.schuhe,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Schuhe,
       bonus: GearBonus(defense: 1),
       why: 'Verteidigung senkt jeden eingehenden Treffer prozentual. Gegen '
@@ -59,6 +63,7 @@ abstract final class GearCatalog {
       id: 'gear-schlichter-ring',
       name: 'Schlichter Ring',
       slot: GearSlot.ring,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Ring,
       bonus: GearBonus(maxEnergy: 1),
       why: 'Ein Punkt Energie mehr heißt: Der Wuchtschlag ist eine Runde '
@@ -69,6 +74,7 @@ abstract final class GearCatalog {
       id: 'gear-glasperle',
       name: 'Glasperle',
       slot: GearSlot.talisman,
+      rarity: GearRarity.common,
       price: GearPrices.stufe1Talisman,
       bonus: GearBonus(attack: 1, maxHp: 4),
       why: 'Der Platz für kleine Vielseitigkeit. Wer nicht weiß, was fehlt, '
@@ -80,6 +86,7 @@ abstract final class GearCatalog {
       id: 'gear-geschliffene-klinge',
       name: 'Geschliffene Klinge',
       slot: GearSlot.waffe,
+      rarity: GearRarity.uncommon,
       price: GearPrices.stufe2Waffe,
       bonus: GearBonus(attack: 3),
       why: 'Drei Angriffspunkte sind etwa zehn Tage Gewohnheiten. Deshalb '
@@ -89,6 +96,7 @@ abstract final class GearCatalog {
       id: 'gear-schuppenpanzer',
       name: 'Schuppenpanzer',
       slot: GearSlot.ruestung,
+      rarity: GearRarity.uncommon,
       price: GearPrices.stufe2Ruestung,
       bonus: GearBonus(maxHp: 32, defense: 3),
       why: 'Das Stück, mit dem der Bergwaechter kippt: Er schlägt hart, und '
@@ -98,6 +106,7 @@ abstract final class GearCatalog {
       id: 'gear-taktring',
       name: 'Taktring',
       slot: GearSlot.ring,
+      rarity: GearRarity.uncommon,
       price: GearPrices.stufe2Ring,
       bonus: GearBonus(maxEnergy: 2),
       why: 'Zwei Punkte Energie machen aus „Wuchtschlag, wenn es reicht" '

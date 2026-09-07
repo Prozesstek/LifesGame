@@ -56,27 +56,29 @@ void main() {
       }
     });
 
-    test('teurer heißt auf demselben Platz auch besser', () {
-      // Sonst ist eine Kaufentscheidung eine Falle.
+    test('jedes Stück hat eine Seltenheit, und jede kommt vor', () {
+      final vorhanden = GearCatalog.all.map((item) => item.rarity).toSet();
+
+      expect(
+        vorhanden,
+        contains(GearRarity.common),
+        reason: 'Ohne gewöhnliche Stücke gibt es keinen Einstieg',
+      );
+    });
+
+    test('teurer heißt bei gleicher Seltenheit auch besser', () {
+      // **Nur noch innerhalb einer Seltenheit** (ADR-0029). Zwischen den
+      // Stufen gilt es ausdrücklich nicht: Ein seltenes Stück darf in
+      // reinen Zahlen schwächer sein und seinen Wert aus einem Set oder
+      // einer Fähigkeit ziehen. Innerhalb einer Stufe wäre ein teureres,
+      // schwächeres Stück dagegen weiter eine Falle.
       for (final slot in GearSlot.values) {
-        final items = GearCatalog.forSlot(slot);
-        for (var i = 1; i < items.length; i++) {
-          final billiger = items[i - 1].bonus;
-          final teurer = items[i].bonus;
-          final summeBilliger = billiger.attack +
-              billiger.maxHp +
-              billiger.defense * 8 +
-              billiger.maxEnergy * 8;
-          final summeTeurer = teurer.attack +
-              teurer.maxHp +
-              teurer.defense * 8 +
-              teurer.maxEnergy * 8;
-          expect(
-            summeTeurer,
-            greaterThan(summeBilliger),
-            reason: '${items[i].name} kostet mehr als ${items[i - 1].name}, '
-                'bringt aber nicht mehr',
-          );
+        for (final rarity in GearRarity.values) {
+          final items = GearCatalog.forSlot(
+            slot,
+          ).where((item) => item.rarity == rarity).toList();
+
+          _teurerIstBesser(items);
         }
       }
     });
@@ -118,4 +120,23 @@ void main() {
       }
     });
   });
+}
+
+/// Prüft für eine nach Preis sortierte Liste, dass der Bonus mitwächst.
+///
+/// Verteidigung und Energie zählen achtfach: Ein Punkt davon wiegt im
+/// Kampf deutlich schwerer als ein Punkt Angriff oder Leben.
+void _teurerIstBesser(List<GearItem> items) {
+  int wert(GearBonus bonus) {
+    return bonus.attack + bonus.maxHp + bonus.defense * 8 + bonus.maxEnergy * 8;
+  }
+
+  for (var i = 1; i < items.length; i++) {
+    expect(
+      wert(items[i].bonus),
+      greaterThan(wert(items[i - 1].bonus)),
+      reason: '${items[i].name} kostet mehr als ${items[i - 1].name}, '
+          'bringt aber nicht mehr',
+    );
+  }
 }

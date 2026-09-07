@@ -3,6 +3,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import 'rarity_badge.dart';
 
 /// Ein Ausrüstungsstück im Laden.
 ///
@@ -68,13 +69,24 @@ class ShopItemTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        item.name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: _isOwned ? Palette.textDim : Colors.white,
-                        ),
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              item.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: _isOwned
+                                    ? Palette.textDim
+                                    : Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          RarityBadge(rarity: item.rarity, faded: _isOwned),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(
