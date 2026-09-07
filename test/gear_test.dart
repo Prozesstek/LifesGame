@@ -125,10 +125,37 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      for (final slot in GearSlot.values) {
-        expect(find.text(slot.label), findsWidgets, reason: slot.label);
+      // **Durchscrollen, sonst prüft der Test nur die obere Hälfte.** Der
+      // Laden führt fünf Stücke je Platz; was in der `ListView` weiter
+      // unten steht, wird gar nicht erst gebaut — und was nicht gebaut
+      // wird, findet `find.text` nicht (`docs/context/gotchas.md`).
+      final gefunden = <String>{};
+      for (var i = 0; i < 12; i++) {
+        for (final slot in GearSlot.values) {
+          if (find.text(slot.label).evaluate().isNotEmpty) {
+            gefunden.add(slot.label);
+          }
+        }
+        await tester.drag(find.byType(Scaffold), const Offset(0, -400));
+        await tester.pumpAndSettle();
       }
+
+      for (final slot in GearSlot.values) {
+        expect(gefunden, contains(slot.label), reason: slot.label);
+      }
+    });
+
+    testWidgets('zeigt das erste Stück mit Namen und Seltenheit', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Übungsklinge'), findsOneWidget);
+      expect(find.text(GearRarity.common.label), findsWidgets);
     });
 
     testWidgets('ohne Gold ist Kaufen aus', (tester) async {

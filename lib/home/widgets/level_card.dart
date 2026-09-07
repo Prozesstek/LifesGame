@@ -24,24 +24,49 @@ class LevelCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          // **Beide Seiten müssen schrumpfen können.** Hier stand ein
+          // `Spacer` zwischen zwei festen Texten — der verteilt nur, was
+          // übrig ist, und schrumpft nichts (`docs/context/gotchas.md`).
+          // Aufgefallen ist es an einem langen Goldbetrag: Sobald die Zahl
+          // mehr Stellen bekommt, lief die Zeile über.
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text(
-                'Level ${level.level}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: Text(
+                  'Level ${level.level}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              const Spacer(),
-              const Icon(Icons.savings_outlined, size: 18, color: Palette.gold),
-              const SizedBox(width: 6),
-              Text(
-                '$gold Gold',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.gold,
+              const SizedBox(width: 12),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Icon(
+                      Icons.savings_outlined,
+                      size: 18,
+                      color: Palette.gold,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        '$gold Gold',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.gold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

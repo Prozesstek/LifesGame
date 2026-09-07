@@ -7,7 +7,60 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 07.09.2026 · AktivesBrett
+
+---
+
+## Läuft gerade: der Laden wächst (Branch `feat/items-und-sets`)
+
+Vier Schritte, einzeln prüfbar. Auslöser war der Wunsch nach mehr Inhalt:
+Mit neun Stücken ist der Laden nach zwei Wochen gesehen, und Ziel 7
+verlangt dreißig Tage.
+
+| Schritt | Inhalt | Stand |
+|---|---|---|
+| 1 | Seltenheit je Stück | **fertig** |
+| 2 | Fünf Stücke je Platz | **fertig**, außer Waffe |
+| 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | offen |
+| 4 | Sets, Set-Boni, Verkauf | offen |
+
+### Was Schritt 1 und 2 gebracht haben
+
+**27 Stücke statt 9.** Fünf je Platz — zwei gewöhnliche, zwei
+ungewöhnliche, ein seltenes — auf allen Plätzen außer der Waffe.
+
+**Die Waffe hinkt mit Absicht hinterher.** `abilities_seam_test.dart`
+verlangt, dass **jede Waffe im Laden eine Fähigkeit mitbringt**; eine
+neue Klinge ohne Fähigkeit lässt den Test umfallen. Der Test erzwingt
+damit, dass Schritt 3 die Waffen samt Fähigkeiten bringt — genau
+richtig, denn der Waffenslot ist auf Level 1 der einzige offene
+(ADR-0016).
+
+**Eine Regel musste weichen** ([ADR-0029](../decisions/0029-seltenheit-statt-preisleiter.md)):
+ADR-0011 sicherte zu, dass auf demselben Platz teurer auch besser heißt.
+Das setzt eine Leiter voraus — und Sidegrade-Waffen, Set-Teile und
+Fähigkeiten am Stück brechen sie. Die Regel gilt jetzt **innerhalb einer
+Seltenheit**, wo sie noch schützt.
+
+**Die Preise bleiben am Gold-Zufluss gemessen.** Zwei Grenzen prüft
+`catalog_test.dart`: Ein voller Satz der billigsten Stücke muss in etwa
+einem Monat tragbar sein (heute 33,6 Tage), und das teuerste Einzelstück
+ebenso (der Aderring mit 1050 Gold, also 42 Tage).
+
+### Zwei Layout-Fehler, die dabei aufgefallen sind
+
+Beide dieselbe Wurzel wie der Eintrag in `gotchas.md`: **zwei Texte
+nebeneinander in einer `Row`, von denen keiner schrumpfen kann.**
+
+Der Layout-Test kauft im Aufbau **jedes** Stück des Katalogs. Mit 27
+statt 9 Stücken wurde das Gold tief negativ, der Text damit länger — und
+prompt liefen `LevelCard` (dort stand ein `Spacer` zwischen zwei festen
+Texten) und `HubTile` über. Beide schrumpfen jetzt mit `Flexible` und
+`ellipsis`.
+
+**Der Aufbau selbst bleibt so**, obwohl er einen unerreichbaren Zustand
+erzeugt — im Spiel prüft `Loadout.buy` das Gold, man kann sich nicht
+überkaufen. Als Belastungsprobe hat er sich gerade bewährt.
 
 ---
 

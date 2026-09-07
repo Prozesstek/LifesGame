@@ -75,12 +75,23 @@ class HubTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
+                // **Der Status muss schrumpfen können.** Zwei Texte
+                // nebeneinander in einer `Row` brauchen beide `Flexible`
+                // und `overflow` — `Spacer` und feste Breiten helfen
+                // nicht (`docs/context/gotchas.md`). Aufgefallen ist es
+                // bei einem langen Goldbetrag: Sobald die Zahl mehr
+                // Stellen bekommt, lief die Kachel über.
                 if (status != null)
-                  Text(
-                    status ?? '',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _isLocked ? Palette.muted : Palette.textDim,
+                  Flexible(
+                    child: Text(
+                      status ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _isLocked ? Palette.muted : Palette.textDim,
+                      ),
                     ),
                   )
                 else if (!_isLocked)

@@ -56,6 +56,48 @@ void main() {
       }
     });
 
+    test('jeder Platz führt fünf Stücke — bis auf die Waffe', () {
+      // **Die Waffe hinkt bewusst hinterher.** Jede Waffe im Laden muss
+      // eine Fähigkeit mitbringen (`test/abilities_seam_test.dart` in der
+      // App); die fehlenden zwei kommen deshalb zusammen mit ihren
+      // Fähigkeiten. Sobald das passiert ist, fällt diese Ausnahme —
+      // und dieser Test erinnert daran.
+      for (final slot in GearSlot.values) {
+        final erwartet = slot == GearSlot.waffe ? 2 : 5;
+
+        expect(
+          GearCatalog.forSlot(slot),
+          hasLength(erwartet),
+          reason: 'Platz ${slot.label} führt nicht $erwartet Stücke',
+        );
+      }
+    });
+
+    test('jeder volle Platz hat zwei, zwei und ein Stück', () {
+      // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes. Die Form ist
+      // überall dieselbe, damit ein Platz nicht heimlich reicher wird als
+      // ein anderer.
+      for (final slot in GearSlot.values) {
+        if (GearCatalog.forSlot(slot).length < 5) continue;
+
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.common),
+          hasLength(2),
+          reason: slot.label,
+        );
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.uncommon),
+          hasLength(2),
+          reason: slot.label,
+        );
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.rare),
+          hasLength(1),
+          reason: slot.label,
+        );
+      }
+    });
+
     test('jedes Stück hat eine Seltenheit, und jede kommt vor', () {
       final vorhanden = GearCatalog.all.map((item) => item.rarity).toSet();
 
@@ -107,15 +149,38 @@ void main() {
       expect(tage, lessThan(45));
     });
 
-    test('die zweite Stufe kostet deutlich mehr als die erste', () {
+    test('die ungewöhnliche Stufe kostet ein Vielfaches der gewöhnlichen', () {
+      // **Der Test hieß früher „die zweite Stufe kostet mehr als die
+      // erste" und verglich die ersten beiden Stücke eines Platzes.** Mit
+      // fünf Stücken je Platz stehen dort jetzt zwei gewöhnliche
+      // nebeneinander, und die liegen absichtlich dicht beieinander. Was
+      // weit auseinander liegen muss, sind die **Seltenheiten**.
       for (final slot in GearSlot.values) {
-        final items = GearCatalog.forSlot(slot);
-        if (items.length < 2) continue;
+        final common = GearCatalog.forSlotAndRarity(slot, GearRarity.common);
+        final uncommon = GearCatalog.forSlotAndRarity(
+          slot,
+          GearRarity.uncommon,
+        );
+        if (common.isEmpty || uncommon.isEmpty) continue;
+
         expect(
-          items[1].price,
-          greaterThan(items[0].price * 3),
-          reason: 'Auf ${slot.label} liegen die Stufen zu dicht beieinander — '
-              'dann ist die erste Stufe überflüssig',
+          uncommon.first.price,
+          greaterThan(common.first.price * 2.5),
+          reason: 'Auf ${slot.label} liegen die Seltenheiten zu dicht '
+              'beieinander — dann ist die gewöhnliche Stufe überflüssig',
+        );
+      }
+    });
+
+    test('das seltene Stück ist auf seinem Platz das teuerste', () {
+      for (final slot in GearSlot.values) {
+        final selten = GearCatalog.forSlotAndRarity(slot, GearRarity.rare);
+        if (selten.isEmpty) continue;
+
+        expect(
+          selten.single.price,
+          GearCatalog.forSlot(slot).last.price,
+          reason: 'Auf ${slot.label} ist das seltene Stück nicht das teuerste',
         );
       }
     });
