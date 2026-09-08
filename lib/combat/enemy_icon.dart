@@ -11,7 +11,7 @@
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
 /// 1. Datei nach `assets/enemies/` legen, benannt wie die Gegner-Id, in
-///    [assetWidth] × [assetHeight] Pixeln. Den Ordner in `pubspec.yaml`
+///    [assetSize] Pixel Kantenlänge. Den Ordner in `pubspec.yaml`
 ///    eintragen — `assets/character/` steht dort als Vorbild.
 /// 2. Eine Zeile in [_dateien] ergänzen.
 ///
@@ -32,18 +32,19 @@ abstract final class EnemyIcons {
   /// Alle Gegner-Ids, für die es ein Bild gibt.
   static Iterable<String> get enemyIds => _dateien.keys;
 
-  /// Die Auflösung der abgelegten Bilder — **hochkant, nicht
-  /// quadratisch**.
+  /// **Gezeichnet auf 64 × 64, abgelegt als 256 × 256** — dieselbe
+  /// Vorgabe wie bei [MoveIcons] und [GearIcons].
   ///
-  /// Die Fläche auf dem Bildschirm misst gemessen 322 × 466 logische
-  /// Punkte (Handy im Hochformat, 390 × 844). Bei dreifacher Pixeldichte
-  /// sind das 966 × 1398 echte Pixel — 1024 × 1536 liegt knapp darüber
-  /// und ist dieselbe Vorgabe wie beim Charakter-Sprite. Damit gibt es
-  /// für gezeichnete Figuren nur **ein** Format im Projekt.
+  /// Hier stand zuerst ein hochkantes Format, weil die Flaeche hochkant
+  /// war. Seit die Zeichnungen durchgehend quadratisch sind, ist die
+  /// **Flaeche** quadratisch geworden und nicht das Bild — sonst
+  /// stuenden 144 Punkte Rahmen leer.
   ///
-  /// Hier stand zuerst eine quadratische Zahl. Das war schlicht falsch:
-  /// Ein quadratisches Bild wird in dieser Fläche oben und unten
-  /// eingerahmt und nutzt keine 40 % der Höhe.
-  static const int assetWidth = 1024;
-  static const int assetHeight = 1536;
+  /// Ein Gegner wird damit deutlich groeber dargestellt als eine
+  /// Fähigkeitskachel: 64 Bildpunkte auf rund 320 Punkte Breite, also
+  /// jeder Bildpunkt fuenf Punkte gross. Das ist der Stil, nicht ein
+  /// Fehler — wer feinere Gegner will, zeichnet sie auf 128 × 128 und
+  /// legt sie als 512 ab.
+  static const int artSize = 64;
+  static const int assetSize = 256;
 }

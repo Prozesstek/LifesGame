@@ -323,7 +323,16 @@ class _ItemRaster extends StatelessWidget {
 
   /// Höhe einer Kachel. Fest, damit sie nicht an der Fensterbreite hängt:
   /// Bild, zwei Zeilen Name und die Fußnote.
-  static const double _hoehe = 104;
+  ///
+  /// **141 und nicht 104, seit die Bilder feststehen.** Bei 104 blieben
+  /// dem Bild 53 Punkte Höhe — auf einem Handy mit dreifacher
+  /// Pixeldichte 159 echte Pixel, und ein abgelegtes 256er Bild hätte
+  /// dorthin **verkleinert** werden müssen. Genau das ist bei
+  /// Pixelgrafik der schlimme Fall: Mit `FilterQuality.none` fallen
+  /// dabei einzelne Bildpunkte weg, und ein 64er Raster wird löchrig.
+  /// Bei 141 sind es rund 90 Punkte, also 270 echte Pixel — das Bild
+  /// wird knapp vergrößert statt verkleinert.
+  static const double _hoehe = 141;
 
   @override
   Widget build(BuildContext context) {

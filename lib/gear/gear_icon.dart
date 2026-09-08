@@ -52,8 +52,9 @@ abstract final class GearIcons {
     };
   }
 
-  /// Die Auflösung der abgelegten Bilder — wie bei den Fähigkeiten
-  /// dreifache Kachelgröße, damit auf einem dichten Bildschirm nicht
-  /// hochgerechnet werden muss.
-  static const int assetSize = 288;
+  /// **Gezeichnet auf 64 × 64, abgelegt als 256 × 256** — dieselbe
+  /// Vorgabe wie bei [MoveIcons] und [EnemyIcons]. Ein Format fuer das
+  /// ganze Projekt.
+  static const int artSize = 64;
+  static const int assetSize = 256;
 }

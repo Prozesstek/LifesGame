@@ -74,8 +74,16 @@ abstract final class MoveIcons {
 
   /// Die Auflösung der abgelegten Bilder.
   ///
-  /// Dreifache Kachelgröße, damit sie auf einem Handy mit dreifacher
-  /// Pixeldichte nicht hochgerechnet werden müssen. Die Vorlagen sind
-  /// 1024 × 1024 — es wird also verkleinert, nie vergrößert.
-  static const int assetSize = 384;
+  /// **Gezeichnet wird auf 64 × 64, abgelegt wird auf 256 × 256** — also
+  /// jeder Bildpunkt der Zeichnung als 4 × 4 Block. Beides zusammen ist
+  /// die Vorgabe fuer das ganze Projekt (`GearIcons`, `EnemyIcons`).
+  ///
+  /// **Warum 256 und nicht mehr.** Die Kachel ist hoechstens 88 Punkte
+  /// breit, auf einem Handy mit dreifacher Pixeldichte also 264 echte
+  /// Pixel. Ein 256er Bild wird dorthin um 1,03 vergroessert — praktisch
+  /// eins zu eins. Ein groesseres Bild muesste **verkleinert** werden,
+  /// und das ist bei Pixelgrafik der schlimmere Fall: Mit
+  /// `FilterQuality.none` fallen dabei einzelne Bildpunkte einfach weg.
+  static const int artSize = 64;
+  static const int assetSize = 256;
 }

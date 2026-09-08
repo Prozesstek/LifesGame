@@ -129,6 +129,25 @@ class _GegnerBild extends StatelessWidget {
   Widget build(BuildContext context) {
     final bild = EnemyIcons.forEnemyId(enemy.id);
 
+    // **Quadratisch, weil die Bilder es sind.** Der Entwurf zeigt eine
+    // hochkante Flaeche; gezeichnet wird aber auf 64 x 64. Ein
+    // quadratisches Bild in einer hochkanten Flaeche liesse rund 144
+    // Punkte Rahmen leer, und das sieht aus wie ein Fehler. Der Rahmen
+    // richtet sich deshalb nach dem Bild, nicht umgekehrt -- der
+    // uebrige Platz wird zu Luft darum herum.
+    return Center(
+      child: AspectRatio(aspectRatio: 1, child: _Rahmen(bild: bild)),
+    );
+  }
+}
+
+class _Rahmen extends StatelessWidget {
+  const _Rahmen({required this.bild});
+
+  final String? bild;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -140,7 +159,7 @@ class _GegnerBild extends StatelessWidget {
       child: bild == null
           ? const _KeinBild()
           : Image.asset(
-              bild,
+              bild!,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.none,
               errorBuilder: (context, error, stack) => const _KeinBild(),
