@@ -50,6 +50,23 @@ class GearController extends Notifier<Loadout> {
   /// `package:gear`: Es ist kein Preis, sondern das Abschalten der Prüfung.
   static const int _unlimitedGold = 1 << 30;
 
+  /// Verkauft ein Stück für die Hälfte seines Preises (ADR-0031).
+  ///
+  /// Gibt zurück, wie viel dabei herauskam — oder null, wenn nichts
+  /// verkauft wurde. Die Zahl dient nur der Rückmeldung; gerechnet wird
+  /// sie in `package:gear`.
+  ///
+  /// **Kein Gold-Provider im Spiel.** Verkaufen prüft keinen Kontostand,
+  /// also entsteht auch nicht der Kreis, den [buy] umgehen muss.
+  int? sell(String itemId) {
+    if (!state.canSell(itemId)) return null;
+    final item = GearCatalog.byId(itemId);
+    if (item == null) return null;
+
+    state = state.sell(itemId);
+    return Loadout.refundFor(item);
+  }
+
   void equip(String itemId) {
     state = state.equip(itemId);
   }
@@ -79,6 +96,18 @@ final equippedStatsProvider = Provider<EquippedStats>((ref) {
     base: ref.watch(characterStatsProvider),
     bonus: ref.watch(loadoutProvider).bonus,
   );
+});
+
+/// Welche Ausrüstungs-Sets gerade wirken.
+///
+/// **Eine Frage, eine Stelle** (`docs/context/gotchas.md`). Der
+/// Charakterbildschirm zeigt sie, der Laden weist darauf hin, und der
+/// Kampf rechnet damit — alle drei fragen hier.
+///
+/// Abgeleitet aus dem, was getragen wird: `Loadout.activeSets` zählt die
+/// Teile, `package:gear` sagt, was daraus folgt. Hier steht keine Regel.
+final activeSetsProvider = Provider<List<ActiveSet>>((ref) {
+  return ref.watch(loadoutProvider).activeSets;
 });
 
 /// Charakterwerte einschließlich Ausrüstung, mit Blick auf beide Anteile.

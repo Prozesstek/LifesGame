@@ -3,6 +3,7 @@ import 'dart:math';
 import 'ability_moves.dart';
 import 'balance.dart';
 import 'environment.dart';
+import 'move_kind.dart';
 import 'timing_spec.dart';
 
 /// Zusatzwirkung eines Moves, unabhaengig vom Schaden.
@@ -229,6 +230,26 @@ class Move {
   bool get isMultiHit => hits > 1;
 
   bool get dealsDamage => power > 0;
+
+  /// Wofuer man diesen Zug drueckt — die Art, auf die ein Set wirkt.
+  ///
+  /// **Abgeleitet, nicht gesetzt**, aus demselben Grund wie
+  /// [hasTimingWindow]: Ein Feld, das jemand beim Anlegen einer Faehigkeit
+  /// vergessen kann, meldet sich nie (`docs/context/gotchas.md`).
+  ///
+  /// Die Reihenfolge entscheidet die Grenzfaelle, und es gibt genau einen:
+  /// **Vulkanbruch** legt Lava *und* macht Schaden. Er zaehlt als
+  /// Umgebung, weil das die seltenere und teurere Eigenschaft ist — ein
+  /// Set fuer Umgebungen waere sonst ausgerechnet um die staerkste
+  /// Umgebung aermer.
+  MoveKind get kind {
+    final legtUmgebung = effects.any((e) => e is SetEnvironment) ||
+        perfectEffects.any((e) => e is SetEnvironment);
+
+    if (legtUmgebung) return MoveKind.umgebung;
+    if (dealsDamage) return MoveKind.angriff;
+    return MoveKind.schutz;
+  }
 
   /// Ob dieser Zug ein Zeitfenster hat -- ob also getippt wird.
   ///

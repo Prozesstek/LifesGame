@@ -26,6 +26,8 @@ export 'src/environment.dart';
 export 'src/engine.dart';
 export 'src/events.dart';
 export 'src/move.dart';
+export 'src/move_kind.dart';
+export 'src/set_effect.dart';
 export 'src/state.dart';
 export 'src/status.dart';
 export 'src/timed_hit.dart';

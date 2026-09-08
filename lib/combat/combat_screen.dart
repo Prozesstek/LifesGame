@@ -221,7 +221,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: _buildControls(state, session.moves),
+          child: _buildControls(session, session.moves),
         ),
       ],
     );
@@ -231,14 +231,18 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
   ///
   /// Fällt auf den Standard zurück, solange nichts gewählt ist — die
   /// Leiste steht dann ohnehin nicht im Bild.
-  TimingSpec _timingFor(CombatState state) {
+  TimingSpec _timingFor(CombatSession session) {
     final move = _pendingMove;
     if (move == null) return TimingSpec.standard;
 
-    return timingForSide(state, Side.player, move);
+    // **Die Sets gehen mit hinein.** Eine breitere, langsamere Leiste,
+    // die man nicht sieht, waere keine — der Bildschirm muss dieselbe
+    // Rechnung anstellen wie die Engine. Gerechnet wird sie in
+    // `package:combat`, nicht hier (ADR-0002).
+    return timingForSide(session.state, Side.player, move, sets: session.sets);
   }
 
-  Widget _buildControls(CombatState state, List<Move> loadout) {
+  Widget _buildControls(CombatSession session, List<Move> loadout) {
     return switch (_phase) {
       // Geschwindigkeit und Fenster kommen aus `package:combat` — sie
       // hängen an der Fähigkeit, an Statuseffekten und an der Umgebung.
@@ -248,7 +252,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
         child: Center(
           child: TimingBar(
             key: _timingKey,
-            spec: _timingFor(state),
+            spec: _timingFor(session),
             hits: _pendingMove?.hits ?? 1,
             onResult: _onTimingResult,
           ),
@@ -261,9 +265,9 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                state.outcome == CombatOutcome.victory
-                    ? 'Gewonnen nach ${state.round - 1} Runden'
-                    : 'Verloren nach ${state.round - 1} Runden',
+                session.state.outcome == CombatOutcome.victory
+                    ? 'Gewonnen nach ${session.state.round - 1} Runden'
+                    : 'Verloren nach ${session.state.round - 1} Runden',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -290,7 +294,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       // selbst: Sie sind quadratisch, ihre Breite bestimmt also ihre Höhe.
       // Was sie nicht brauchen, bleibt der Arena — und eine zweite Reihe
       // hätte davon rund 190 Pixel genommen.
-      _Phase.chooseMove || _Phase.animating => _moveRow(loadout, state),
+      _Phase.chooseMove || _Phase.animating => _moveRow(loadout, session.state),
     };
   }
 

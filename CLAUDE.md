@@ -49,11 +49,12 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 80 Tests | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 96 Tests | nur Dart-SDK |
 | `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
 | `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
 | `packages/combat/lib/src/environment.dart` | die vier Umgebungen | nur Dart-SDK |
 | `packages/combat/lib/src/timing_rules.dart` | welche Timing-Werte gerade gelten | nur Dart-SDK |
+| `packages/combat/lib/src/set_effect.dart` | was ein Ausrüstungs-Set im Kampf ändert | nur Dart-SDK |
 | `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
@@ -69,10 +70,13 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 27 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 64 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
-| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 35 Tests | nur Dart-SDK |
+| `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
+| `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
+| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
@@ -126,7 +130,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 **Schichtregel:** Kampfregeln und Gegnerwerte nur in `packages/combat`,
 Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
-Preise und Ausrüstungsboni nur in `packages/gear`, Titel und ihre
+Preise, Ausrüstungsboni **und Set-Wirkungen** nur in `packages/gear`,
+Titel und ihre
 Bedingungen nur in `packages/identity`, Freischaltbedingungen für
 Fähigkeiten nur in `packages/abilities`. Die Controller reichen durch
 und halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl
@@ -136,7 +141,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 322 Tests
+flutter test             # 355 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -144,7 +149,7 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 80 Tests
+dart test                              # 96 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
@@ -156,8 +161,8 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 129 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
-cd packages/abilities   ; dart test    # 35 Tests
+cd packages/gear        ; dart test    # 64 Tests, prüft Preise, Sets und den Verkauf
+cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
@@ -228,8 +233,46 @@ stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`
 nicht und muss den Zufluss deshalb annehmen (25 Gold am Tag); dass die
 Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
-mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
-muss auch besser sein.
+mitgeprüft — jedes Stück muss wirken, jeder Platz führt fünf, und teurer
+muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
+
+**Verkauf gibt es seit [ADR-0031](docs/decisions/0031-verkauf-als-versenkte-kosten.md),
+und die Hälfte bleibt versenkt.** Der Satz steht als
+`GearPrices.refundShare`. Wer das anfasst, muss den Grund kennen: Gold ist
+abgeleitet, also gäbe ein Verkauf **von selbst den vollen Preis zurück** —
+das Stück fällt einfach aus `spentGold` heraus. Der zweite Summand
+(`Loadout.lostGold`, gerechnet aus `soldIds`) ist das, was das verhindert.
+
+`soldIds` ist eine **Historie**, kein Kontostand — dieselbe Bauform wie
+die Häkchen. Ein gespeicherter Goldstand könnte von der Rechnung
+abweichen, eine Historie *ist* die Rechnung. Und sie muss von jeder
+Methode weitergereicht werden, die ein neues `Loadout` baut; wer eine
+vergisst, verschenkt Gold. Ein Test in `loadout_test.dart` geht deshalb
+den Weg verkaufen → kaufen → anlegen → ablegen.
+
+**Sets ändern heißt: den Set-Katalog anfassen, nicht die Engine.** Alle
+drei stehen in `packages/gear/lib/src/set_catalog.dart`, welche Stücke
+dazugehören steht als `setId` **am Stück** ([ADR-0030](docs/decisions/0030-sets-wirken-auf-eine-art-von-faehigkeit.md)).
+Drei Regeln bleiben an je einer Stelle:
+
+| Frage | Antwortet |
+|---|---|
+| Welche Art von Zug ist das? | `Move.kind` — abgeleitet, nie gesetzt |
+| Auf welche Züge wirkt ein Set? | `SetEffect.appliesTo` — passende Art **und** Energiekosten > 0 |
+| Welche Sets liegen an? | `Loadout.activeSets` — gezählt, nie gespeichert |
+
+Die zweite Regel nimmt den **Waffenzug** aus, obwohl er als Angriff zählt.
+Das ist ADR-0009 ein zweites Mal: Ein Faktor auf den Zug, den man jede
+Runde drückt, entscheidet den Kampf allein. Wer daran dreht, lässt
+`flutter test test/gear_sets_seam_test.dart` laufen — dort steht es als
+Zusage.
+
+**Die Waffe ist dabei der Sonderfall.** Sie ist der einzige Platz, dessen
+Stück eine **Fähigkeit** mitbringt, und keine zwei tragen dieselbe
+(ADR-0017, Punkt 2). Eine sechste Waffe braucht deshalb einen sechsten
+Zug, der Energie *erzeugt* — sonst fällt `test/abilities_seam_test.dart`
+um. Ob die fünf Rhythmen sich wirklich unterscheiden, misst
+`dart run tool/balance_sim.dart` im Abschnitt „Siegquote je Waffe".
 
 **Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Engine.**
 Alle fünfzehn stehen in `packages/combat/lib/src/ability_moves.dart`, ihre
@@ -315,7 +358,7 @@ eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
 gehen in den Kampf (`combat`), Streaks und Lektionen verdienen Titel
 (`identity`).
 
-Es gibt genau **neun** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **zehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -328,6 +371,7 @@ Es gibt genau **neun** Stellen, an denen etwas zusammenläuft:
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
 | `combatUnlockedProvider` | ob der Kampf offensteht (ADR-0020) |
+| `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 
 **`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
 ADR-0019 zu wenig zählt** — zwölf von neunundzwanzig Seiten liegen nur
@@ -344,8 +388,9 @@ beim Start ein.
 `packages/abilities` kennt weder `combat` noch `gear` — es hält nur
 Move-Ids und Waffen-Ids. Was daraus wird, prüft
 `test/abilities_seam_test.dart` in der App: jede Move-Id kommt in
-`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, und jeder
-Waffenmove **erzeugt** Energie. Der letzte Punkt ist keine Kosmetik:
+`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, **keine zwei
+Waffen dieselbe**, und jeder Waffenmove **erzeugt** Energie. Der letzte
+Punkt ist keine Kosmetik:
 Auf Level 1 ist nur der Waffenslot offen
 ([ADR-0017](docs/decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
 

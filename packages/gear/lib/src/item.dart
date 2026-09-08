@@ -59,15 +59,38 @@ class GearBonus {
   static String _signed(int value) => value > 0 ? '+$value' : '$value';
 }
 
+/// Wie selten ein Ausrüstungsstück ist.
+///
+/// **Ein eigener Typ, kein Import aus `package:abilities`.** Dieselbe
+/// Überlegung wie bei [GearBonus]: Die beiden Packages wissen nichts
+/// voneinander, und die Seltenheit einer Fähigkeit ist eine andere Sache
+/// als die eines Ausrüstungsstücks — sie hängt dort an der Quelle
+/// (Theorieknoten, Streak-Marke), hier am Preis und am Set.
+///
+/// Drei Stufen, nicht fünf: Episch und Legendär sind in
+/// `package:abilities` der Lohn für tiefen Fortschritt. Im Laden gibt es
+/// nichts zu erreichen, nur zu kaufen — dafür reichen drei.
+enum GearRarity {
+  common('Gewöhnlich'),
+  uncommon('Ungewöhnlich'),
+  rare('Selten');
+
+  const GearRarity(this.label);
+
+  final String label;
+}
+
 /// Ein kaufbares Ausrüstungsstück.
 class GearItem {
   const GearItem({
     required this.id,
     required this.name,
     required this.slot,
+    required this.rarity,
     required this.price,
     required this.bonus,
     required this.why,
+    this.setId,
   });
 
   /// Stabiler Bezeichner für Speicherstände und Tests.
@@ -75,6 +98,15 @@ class GearItem {
 
   final String name;
   final GearSlot slot;
+
+  /// Wie selten das Stück ist.
+  ///
+  /// **Sie ist kein Etikett auf einer Leiter.** Innerhalb einer Stufe gilt
+  /// weiter „teurer heißt besser"; zwischen den Stufen gilt das
+  /// ausdrücklich **nicht** — ein seltenes Stück kann in reinen Zahlen
+  /// schwächer sein und seinen Wert aus einem Set oder einer Fähigkeit
+  /// ziehen (ADR-0029).
+  final GearRarity rarity;
 
   /// Preis in Gold. Alle Preise stehen in `prices.dart` — hier landet nur
   /// das Ergebnis.
@@ -85,4 +117,20 @@ class GearItem {
   /// Ein Satz dazu, was das Stück im Kampf ändert. Dieselbe Rolle wie
   /// `HabitTemplate.why`: Eine Zahl allein erklärt keine Entscheidung.
   final String why;
+
+  /// Zu welchem Set dieses Stück gehört, oder null.
+  ///
+  /// **Die Zugehörigkeit steht hier und nicht im Set-Katalog.** Zwei
+  /// Listen, die dasselbe behaupten, laufen auseinander — genau der
+  /// Fallstrick aus `docs/context/gotchas.md`. `GearCatalog.piecesOf`
+  /// liest diese Marke und ist damit die einzige Antwort auf „was gehört
+  /// zu diesem Set".
+  ///
+  /// Set-Teile sind **gewöhnliche Stücke mit einer Marke**, keine eigene
+  /// Klasse: Sie kosten dasselbe, wirken dasselbe und stehen an derselben
+  /// Stelle im Laden. Nur wer zwei oder vier davon trägt, bekommt etwas
+  /// obendrauf.
+  final String? setId;
+
+  bool get isSetPiece => setId != null;
 }

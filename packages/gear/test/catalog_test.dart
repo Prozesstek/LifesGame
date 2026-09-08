@@ -56,27 +56,66 @@ void main() {
       }
     });
 
-    test('teurer heißt auf demselben Platz auch besser', () {
-      // Sonst ist eine Kaufentscheidung eine Falle.
+    test('jeder Platz führt fünf Stücke', () {
+      // **Die Ausnahme für die Waffe ist mit Ziel 3 gefallen.** Sie stand
+      // hier, weil jede Waffe im Laden eine Fähigkeit mitbringen muss
+      // (`test/abilities_seam_test.dart` in der App) — jetzt tun das alle
+      // fünf.
       for (final slot in GearSlot.values) {
-        final items = GearCatalog.forSlot(slot);
-        for (var i = 1; i < items.length; i++) {
-          final billiger = items[i - 1].bonus;
-          final teurer = items[i].bonus;
-          final summeBilliger = billiger.attack +
-              billiger.maxHp +
-              billiger.defense * 8 +
-              billiger.maxEnergy * 8;
-          final summeTeurer = teurer.attack +
-              teurer.maxHp +
-              teurer.defense * 8 +
-              teurer.maxEnergy * 8;
-          expect(
-            summeTeurer,
-            greaterThan(summeBilliger),
-            reason: '${items[i].name} kostet mehr als ${items[i - 1].name}, '
-                'bringt aber nicht mehr',
-          );
+        expect(
+          GearCatalog.forSlot(slot),
+          hasLength(5),
+          reason: 'Platz ${slot.label} führt nicht fünf Stücke',
+        );
+      }
+    });
+
+    test('jeder Platz hat zwei, zwei und ein Stück', () {
+      // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes. Die Form ist
+      // überall dieselbe, damit ein Platz nicht heimlich reicher wird als
+      // ein anderer.
+      for (final slot in GearSlot.values) {
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.common),
+          hasLength(2),
+          reason: slot.label,
+        );
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.uncommon),
+          hasLength(2),
+          reason: slot.label,
+        );
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.rare),
+          hasLength(1),
+          reason: slot.label,
+        );
+      }
+    });
+
+    test('jedes Stück hat eine Seltenheit, und jede kommt vor', () {
+      final vorhanden = GearCatalog.all.map((item) => item.rarity).toSet();
+
+      expect(
+        vorhanden,
+        contains(GearRarity.common),
+        reason: 'Ohne gewöhnliche Stücke gibt es keinen Einstieg',
+      );
+    });
+
+    test('teurer heißt bei gleicher Seltenheit auch besser', () {
+      // **Nur noch innerhalb einer Seltenheit** (ADR-0029). Zwischen den
+      // Stufen gilt es ausdrücklich nicht: Ein seltenes Stück darf in
+      // reinen Zahlen schwächer sein und seinen Wert aus einem Set oder
+      // einer Fähigkeit ziehen. Innerhalb einer Stufe wäre ein teureres,
+      // schwächeres Stück dagegen weiter eine Falle.
+      for (final slot in GearSlot.values) {
+        for (final rarity in GearRarity.values) {
+          final items = GearCatalog.forSlot(
+            slot,
+          ).where((item) => item.rarity == rarity).toList();
+
+          _teurerIstBesser(items);
         }
       }
     });
@@ -105,17 +144,84 @@ void main() {
       expect(tage, lessThan(45));
     });
 
-    test('die zweite Stufe kostet deutlich mehr als die erste', () {
+    test('die ungewöhnliche Stufe kostet ein Vielfaches der gewöhnlichen', () {
+      // **Der Test hieß früher „die zweite Stufe kostet mehr als die
+      // erste" und verglich die ersten beiden Stücke eines Platzes.** Mit
+      // fünf Stücken je Platz stehen dort jetzt zwei gewöhnliche
+      // nebeneinander, und die liegen absichtlich dicht beieinander. Was
+      // weit auseinander liegen muss, sind die **Seltenheiten**.
       for (final slot in GearSlot.values) {
-        final items = GearCatalog.forSlot(slot);
-        if (items.length < 2) continue;
+        final common = GearCatalog.forSlotAndRarity(slot, GearRarity.common);
+        final uncommon = GearCatalog.forSlotAndRarity(
+          slot,
+          GearRarity.uncommon,
+        );
+        if (common.isEmpty || uncommon.isEmpty) continue;
+
         expect(
-          items[1].price,
-          greaterThan(items[0].price * 3),
-          reason: 'Auf ${slot.label} liegen die Stufen zu dicht beieinander — '
-              'dann ist die erste Stufe überflüssig',
+          uncommon.first.price,
+          greaterThan(common.first.price * 2.5),
+          reason: 'Auf ${slot.label} liegen die Seltenheiten zu dicht '
+              'beieinander — dann ist die gewöhnliche Stufe überflüssig',
+        );
+      }
+    });
+
+    test('ein Verkauf bringt weniger zurück, als er gekostet hat', () {
+      // **Beide Grenzen sind eine Entscheidung** (ADR-0031). Bei 1,0 wäre
+      // der Laden folgenlos — kaufen, ansehen, zurückgeben —, bei 0,0
+      // wäre der Verkauf eine Löschtaste.
+      expect(GearPrices.refundShare, greaterThan(0));
+      expect(GearPrices.refundShare, lessThan(1));
+
+      for (final item in GearCatalog.all) {
+        final erloes = Loadout.refundFor(item);
+
+        expect(erloes, greaterThan(0), reason: item.name);
+        expect(erloes, lessThan(item.price), reason: item.name);
+      }
+    });
+
+    test('ein Fehlkauf kostet höchstens gut eine Woche', () {
+      // Der Verlust muss spürbar sein, aber ein Irrtum darf nicht den
+      // ganzen Monat kosten — sonst kauft niemand mehr etwas aus.
+      final teuerstes = GearCatalog.all
+          .map((item) => item.price - Loadout.refundFor(item))
+          .reduce((a, b) => a > b ? a : b);
+
+      expect(teuerstes / goldProTag, lessThan(25));
+    });
+
+    test('das seltene Stück ist auf seinem Platz das teuerste', () {
+      for (final slot in GearSlot.values) {
+        final selten = GearCatalog.forSlotAndRarity(slot, GearRarity.rare);
+        if (selten.isEmpty) continue;
+
+        expect(
+          selten.single.price,
+          GearCatalog.forSlot(slot).last.price,
+          reason: 'Auf ${slot.label} ist das seltene Stück nicht das teuerste',
         );
       }
     });
   });
+}
+
+/// Prüft für eine nach Preis sortierte Liste, dass der Bonus mitwächst.
+///
+/// Verteidigung und Energie zählen achtfach: Ein Punkt davon wiegt im
+/// Kampf deutlich schwerer als ein Punkt Angriff oder Leben.
+void _teurerIstBesser(List<GearItem> items) {
+  int wert(GearBonus bonus) {
+    return bonus.attack + bonus.maxHp + bonus.defense * 8 + bonus.maxEnergy * 8;
+  }
+
+  for (var i = 1; i < items.length; i++) {
+    expect(
+      wert(items[i].bonus),
+      greaterThan(wert(items[i - 1].bonus)),
+      reason: '${items[i].name} kostet mehr als ${items[i - 1].name}, '
+          'bringt aber nicht mehr',
+    );
+  }
 }

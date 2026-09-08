@@ -17,6 +17,7 @@ import 'widgets/consistency_card.dart';
 import 'widgets/equipment_slot_tile.dart';
 import 'widgets/identity_card.dart';
 import 'widgets/name_dialog.dart';
+import 'widgets/set_card.dart';
 import 'widgets/title_dialog.dart';
 
 /// Der Charakterbildschirm: Werte, Ausrüstung, Herkunft der Zahlen.
@@ -141,6 +142,15 @@ class CharacterScreen extends ConsumerWidget {
                       ),
                   ],
                 ),
+                // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
+                // „keine Sets" sagt, ist eine Zeile über nichts — die
+                // Zugehörigkeit steht ohnehin an jedem Stück im Laden.
+                if (loadout.wearsAnySetPiece) ...<Widget>[
+                  const SizedBox(height: 18),
+                  const _SectionTitle('Sets'),
+                  const SizedBox(height: 10),
+                  SetCard(loadout: loadout),
+                ],
                 const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(

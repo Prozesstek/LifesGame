@@ -79,6 +79,44 @@ void main() {
         );
       }
     });
+
+    test('keine zwei Waffen tragen dieselbe Move-Id', () {
+      // **Die Zusage von Ziel 3.** Bis dahin gaben beide Klingen im Laden
+      // `sword_strike` — die Waffe bestimmte damit nichts, und der Slot,
+      // der auf Level 1 als einziger offen ist, war Dekoration.
+      final waffen = GearCatalog.all.where((i) => i.slot == GearSlot.waffe);
+      final moveIds = <String, String>{};
+
+      for (final waffe in waffen) {
+        final moveId = AbilityCatalog.weaponMoveFor(waffe.id);
+        final schon = moveIds[moveId];
+
+        expect(
+          schon,
+          isNull,
+          reason:
+              '"${waffe.id}" und "$schon" bringen beide "$moveId" mit. '
+              'Dann ist der Kauf der zweiten Waffe keine Entscheidung.',
+        );
+        moveIds[moveId] = waffe.id;
+      }
+    });
+
+    test('jede Waffe im Laden gibt einen anderen Rhythmus', () {
+      // Der Rhythmus *ist* die Entscheidung (ADR-0017): Wer +5 erzeugt,
+      // kann sich teure Fähigkeiten leisten; wer +2 erzeugt, schlägt
+      // dafür jede Runde härter zu. Fünf gleiche Energiewerte wären fünf
+      // Waffen mit fünf Namen und einem Verhalten.
+      final waffen = GearCatalog.all.where((i) => i.slot == GearSlot.waffe);
+      final profile = <String>{};
+
+      for (final waffe in waffen) {
+        final move = Moves.byId(AbilityCatalog.weaponMoveFor(waffe.id))!;
+        profile.add('${move.power}/${move.energyDelta}');
+      }
+
+      expect(profile, hasLength(waffen.length));
+    });
   });
 
   group('Der Waffenslot trägt auf Level 1 allein', () {

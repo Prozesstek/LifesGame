@@ -6,6 +6,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
+import 'package:lifes_game/gear/weapon_ability_line.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -82,6 +83,69 @@ void main() {
     });
   });
 
+  group('Verkaufen (ADR-0031)', () {
+    test('ein Verkauf gibt die Hälfte zurück, nicht den ganzen Preis', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final zufluss = container.read(goldProvider);
+      final preis = GearCatalog.byId(klinge)!.price;
+      final erloes = Loadout.refundFor(GearCatalog.byId(klinge)!);
+
+      container.read(loadoutProvider.notifier).buy(klinge);
+      expect(container.read(goldProvider), zufluss - preis);
+
+      expect(container.read(loadoutProvider.notifier).sell(klinge), erloes);
+
+      // **Nicht zurück auf den Anfang.** Die Differenz ist versenkt.
+      expect(container.read(goldProvider), zufluss - preis + erloes);
+      expect(container.read(goldEarnedProvider), zufluss);
+    });
+
+    test('verkaufte Ausrüstung wirkt nicht mehr', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final vorher = container.read(equippedStatsProvider).attack;
+      container.read(loadoutProvider.notifier).buy(klinge);
+      expect(container.read(equippedStatsProvider).attack, greaterThan(vorher));
+
+      container.read(loadoutProvider.notifier).sell(klinge);
+
+      expect(container.read(equippedStatsProvider).attack, vorher);
+      expect(container.read(loadoutProvider).isOwned(klinge), isFalse);
+    });
+
+    test('ein verkauftes Set-Teil zählt nicht mehr zum Set', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final teile = GearCatalog.piecesOf(GearSets.ruhigerStand.id).take(2);
+      for (final teil in teile) {
+        container.read(loadoutProvider.notifier).buy(teil.id);
+      }
+      expect(container.read(activeSetsProvider), hasLength(1));
+
+      container.read(loadoutProvider.notifier).sell(teile.first.id);
+
+      expect(container.read(activeSetsProvider), isEmpty);
+    });
+
+    test('was man nicht besitzt, bringt nichts ein', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(loadoutProvider.notifier).sell(klinge), isNull);
+      expect(container.read(goldProvider), 0);
+    });
+  });
+
   group('Ausrüstung wirkt im Kampf', () {
     test('ein getragenes Stück erhöht die Kampfwerte', () {
       final container = ProviderContainer(
@@ -117,6 +181,41 @@ void main() {
     });
   });
 
+  group('Die Zeile zur Waffenfähigkeit', () {
+    test('nur Waffen haben eine', () {
+      for (final item in GearCatalog.all) {
+        final zeile = weaponAbilityLine(item);
+
+        if (item.slot == GearSlot.waffe) {
+          expect(zeile, isNotNull, reason: item.name);
+        } else {
+          expect(zeile, isNull, reason: item.name);
+        }
+      }
+    });
+
+    test('sie nennt Zug, Schadensfaktor und Energie', () {
+      final zeile = weaponAbilityLine(GearCatalog.byId(klinge)!);
+
+      // Die Übungsklinge trägt den Hieb: ×1,3 Schaden, +2 Energie
+      // (ADR-0017, Punkt 2). Steht die Zahl hier falsch, steht sie im
+      // Laden falsch.
+      expect(zeile, 'Bringt Hieb mit — ×1,3 Schaden, +2 Energie je Runde');
+    });
+
+    test('keine zwei Waffen bekommen dieselbe Zeile', () {
+      // Der sichtbare Teil der Zusage aus `abilities_seam_test.dart`:
+      // Zwei gleich beschriebene Waffen wären im Laden nicht zu
+      // unterscheiden, auch wenn der Katalog es wäre.
+      final zeilen = <String?>[
+        for (final waffe in GearCatalog.forSlot(GearSlot.waffe))
+          weaponAbilityLine(waffe),
+      ];
+
+      expect(zeilen.toSet(), hasLength(zeilen.length));
+    });
+  });
+
   group('ShopScreen', () {
     testWidgets('zeigt jeden Platz und jedes Stück', (tester) async {
       useTallView(tester);
@@ -125,10 +224,58 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      for (final slot in GearSlot.values) {
-        expect(find.text(slot.label), findsWidgets, reason: slot.label);
+      // **Durchscrollen, sonst prüft der Test nur die obere Hälfte.** Der
+      // Laden führt fünf Stücke je Platz; was in der `ListView` weiter
+      // unten steht, wird gar nicht erst gebaut — und was nicht gebaut
+      // wird, findet `find.text` nicht (`docs/context/gotchas.md`).
+      final gefunden = <String>{};
+      for (var i = 0; i < 12; i++) {
+        for (final slot in GearSlot.values) {
+          if (find.text(slot.label).evaluate().isNotEmpty) {
+            gefunden.add(slot.label);
+          }
+        }
+        await tester.drag(find.byType(Scaffold), const Offset(0, -400));
+        await tester.pumpAndSettle();
       }
+
+      for (final slot in GearSlot.values) {
+        expect(gefunden, contains(slot.label), reason: slot.label);
+      }
+    });
+
+    testWidgets('nennt bei jeder Waffe, welchen Zug sie mitbringt', (
+      tester,
+    ) async {
+      // **Fünf Waffen mit fünf Rhythmen sind nur dann eine
+      // Entscheidung, wenn man vor dem Kauf sieht, welchen man
+      // bekommt** (Ziel 3). Die Waffen stehen zuoberst im Laden, also
+      // ohne Scrollen erreichbar.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      for (final waffe in GearCatalog.forSlot(GearSlot.waffe)) {
+        final zeile = weaponAbilityLine(waffe);
+
+        expect(zeile, isNotNull, reason: waffe.name);
+        expect(find.text(zeile!), findsOneWidget, reason: waffe.name);
+      }
+    });
+
+    testWidgets('zeigt das erste Stück mit Namen und Seltenheit', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Übungsklinge'), findsOneWidget);
+      expect(find.text(GearRarity.common.label), findsWidgets);
     });
 
     testWidgets('ohne Gold ist Kaufen aus', (tester) async {
@@ -158,6 +305,61 @@ void main() {
       expect(find.textContaining('Tage Gewohnheiten'), findsWidgets);
     });
 
+    testWidgets('Gekauftes lässt sich verkaufen — nach Rückfrage', (
+      tester,
+    ) async {
+      // **Der Dialog ist kein Zierrat.** Ein Verkauf lässt sich nicht
+      // ohne Verlust rückgängig machen; ein Fehlgriff auf einem Handy
+      // wäre teuer.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
+      await tester.pumpAndSettle();
+
+      final erloes = Loadout.refundFor(
+        GearCatalog.forSlot(GearSlot.waffe).first,
+      );
+      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
+      await tester.pumpAndSettle();
+
+      // Erst der Dialog, und er nennt beide Zahlen.
+      expect(find.textContaining('Das bringt $erloes Gold'), findsOneWidget);
+      expect(find.text('Behalten'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('+$erloes Gold'), findsNothing);
+      expect(find.text('Verkaufen ($erloes)'), findsNothing);
+    });
+
+    testWidgets('„Behalten" ändert nichts', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ShopScreen)),
+      );
+      final vorher = container.read(goldProvider);
+
+      final erloes = Loadout.refundFor(
+        GearCatalog.forSlot(GearSlot.waffe).first,
+      );
+      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Behalten'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(goldProvider), vorher);
+      expect(find.text('+$erloes Gold'), findsOneWidget);
+    });
+
     testWidgets('mit Gold lässt sich kaufen und es wird angelegt', (
       tester,
     ) async {
@@ -169,6 +371,87 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('getragen'), findsWidgets);
+    });
+  });
+
+  group('Sets im Bild', () {
+    /// Ein Stand, der die [anzahl] billigsten Teile eines Sets trägt.
+    SaveData mitTeilenVon(GearSet set, int anzahl) {
+      var loadout = const Loadout.empty();
+      for (final item in GearCatalog.piecesOf(set.id).take(anzahl)) {
+        loadout = loadout.buy(item.id, availableGold: 100000);
+      }
+      return SaveData(loadout: loadout);
+    }
+
+    testWidgets('der Laden nennt die Set-Zugehörigkeit', (tester) async {
+      // Wer nach einem Set kauft, sucht im Laden — nicht auf einem
+      // zweiten Bildschirm.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      final waffe = GearCatalog.piecesOf(
+        GearSets.eisernerWille.id,
+      ).firstWhere((i) => i.slot == GearSlot.waffe);
+
+      expect(find.text(waffe.name), findsOneWidget);
+      expect(
+        find.textContaining('Teil von „${GearSets.eisernerWille.name}"'),
+        findsWidgets,
+      );
+    });
+
+    testWidgets('ohne Set-Teile zeigt der Charakter keine Set-Karte', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sets'), findsNothing);
+    });
+
+    testWidgets('ein einzelnes Teil steht da, wirkt aber noch nicht', (
+      tester,
+    ) async {
+      // **Ein Anfang soll sichtbar sein.** Wer ein Teil trägt, ohne es zu
+      // wissen, hat kein Ziel — er hat Zufall.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(mitTeilenVon(GearSets.sturmruf, 1), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sets'), findsOneWidget);
+      expect(find.text('1 / ${GearSet.fullSize}'), findsOneWidget);
+      expect(
+        find.textContaining('Noch ein Teil bis zur nächsten Stufe'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('zwei Teile nennen die Wirkung mit echten Zahlen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(mitTeilenVon(GearSets.sturmruf, 2), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      // Der Text baut sich aus dem Katalog — wer die Zahl dort ändert,
+      // muss hier nichts nachziehen.
+      final erwartet =
+          '${GearSets.sturmruf.twoPiece.labels.join(' · ')} auf '
+          '${GearSets.sturmruf.target.label}';
+
+      expect(find.text('2 / ${GearSet.fullSize}'), findsOneWidget);
+      expect(find.text(erwartet), findsOneWidget);
     });
   });
 
@@ -210,7 +493,10 @@ void main() {
       container.read(loadoutProvider.notifier).buy(klinge);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('+1 Ausrüstung'), findsOneWidget);
+      // Die Zahl kommt aus dem Katalog, nicht aus diesem Test — sonst
+      // fällt er bei jeder Preisrunde um, ohne dass etwas kaputt ist.
+      final bonus = GearCatalog.byId(klinge)!.bonus.attack;
+      expect(find.textContaining('+$bonus Ausrüstung'), findsOneWidget);
     });
   });
 }

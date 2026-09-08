@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 06.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett
 
 ---
 
@@ -33,7 +33,7 @@ Instanz, die zählt.
 |---|---|---|---|
 | 1 | Der Kampf lässt sich starten | Issue #15 | **26.08.** |
 | 2 | Skillbaum mit vier Wurzeln | Issue #16 | **31.08.** |
-| 3 | Der Laden trifft eine Entscheidung | `state.md` Punkt 1 | 06.09. |
+| 3 | Der Laden trifft eine Entscheidung ✓ | `state.md` Punkt 1 | ~~06.09.~~ **08.09.** |
 | 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | 06.09. |
 | 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
 | 6 | Der Dungeon schließt den MVP-Schnitt | `state.md` Punkt 4+5 | 20.09. |
@@ -51,7 +51,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Kampfsystem-Umbau** (Initiative, Kontern) | Nicht entschieden, kein Dokument im Repo. Ein unentschiedener Umbau gehört nicht in einen terminierten Plan. |
 | ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
 | **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
-| **Verkauf im Laden, Entprellen der Persistenz** | Beides sind Signale für später, kein Mangel heute. |
+| ~~**Verkauf im Laden**~~ → **gebaut am 08.09.** | Das Signal war eingetreten ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)): Mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets kostet ein Fehlgriff bis zu 42 Tage und war nicht zu korrigieren. Wer fünf Rhythmen anbietet, muss das Ausprobieren bezahlbar machen — sonst probiert niemand. **Entprellen der Persistenz** bleibt zurückgestellt. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
 
@@ -184,26 +184,34 @@ Fünf Waffen im Laden, jede mit **eigener** Fähigkeit und eigenem Rhythmus, zum
 
 ### Messbar
 
-| Kriterium | Ist | Soll |
+| Kriterium | Ist (08.09., Abschluss) | Soll |
 |---|---|---|
-| Einträge in `AbilityCatalog.weaponMoves` | 2 | 5 |
-| **verschiedene** Move-Ids darunter | **1** | **5** |
-| Waffen in `gear/catalog.dart` | 2 | 5 |
-| ADR zur Sidegrade-Regel | — | existiert |
+| Einträge in `AbilityCatalog.weaponMoves` | **5** ✓ | 5 |
+| **verschiedene** Move-Ids darunter | **5** ✓ | **5** |
+| Waffen in `gear/catalog.dart` | **5** ✓ | 5 |
+| ADR zur Sidegrade-Regel | [ADR-0029](../decisions/0029-seltenheit-statt-preisleiter.md) ✓ | existiert |
+| Rhythmus im Laden sichtbar | **ja**, Zeile je Waffe ✓ | — |
 
 ```bash
-cd packages/gear      ; dart test
-cd packages/abilities ; dart test
+cd packages/gear      ; dart test    # 31
+cd packages/abilities ; dart test    # 36
 flutter test test/abilities_seam_test.dart
+dart run tool/balance_sim.dart       # Abschnitt „Siegquote je Waffe"
 ```
 
-Der Naht-Test bekommt eine Prüfung dazu: **keine zwei Waffen tragen dieselbe
-Move-Id.**
+Der Naht-Test hat die Prüfung dazubekommen: **keine zwei Waffen tragen
+dieselbe Move-Id** — und eine zweite, die weiter geht: keine zwei Waffen
+haben dasselbe Paar aus Power und Energie. Fünf verschiedene Ids mit
+denselben Zahlen wären fünf Namen für eine Waffe.
+
+**Ziel 3 ist erfüllt.** Die Waffe entscheidet jetzt messbar: An Tag 21
+gegen den Söldner stehen 4 % (Geschliffene Klinge) gegen 100 %
+(Übungsklinge). Die Zahlen und der Befund dazu stehen in `state.md`.
 
 ### Relevant
 
-Heute geben **beide** Klingen `sword_strike`. Die Waffe bestimmt damit nichts —
-der ganze Waffenslot ist Dekoration.
+Bis dahin gaben **beide** Klingen `sword_strike`. Die Waffe bestimmte damit
+nichts — der ganze Waffenslot war Dekoration.
 
 ---
 
@@ -393,6 +401,13 @@ Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
 
 ## Verlauf
 
+- **08.09.2026** — **Ziel 3 erfüllt**, zwei Tage nach Termin. Fünf Waffen
+  mit fünf verschiedenen Zügen; der ADR zur Sidegrade-Regel war mit
+  [ADR-0029](../decisions/0029-seltenheit-statt-preisleiter.md) schon da.
+  Die Simulation hat einen Abschnitt dazubekommen, der die Behauptung
+  prüft statt sie zu wiederholen — und sie bestätigt: Die Waffe entscheidet
+  Kämpfe. Sie zeigt zugleich, dass sie es **zu einseitig** tut; der Befund
+  steht in `state.md` und gehört zum zurückgestellten Balancing.
 - **06.09.2026** — Issue #28 (eigene Gewohnheiten) gebaut, siehe
   [ADR-0028](../decisions/0028-eigene-gewohnheiten.md). **Kein neues Ziel:**
   Es ist kein MVP-Schnitt, sondern eine Voraussetzung für Ziel 7. Ein

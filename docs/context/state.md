@@ -7,7 +7,233 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett
+
+---
+
+## Läuft gerade: der Laden wächst (Branch `feat/items-und-sets`)
+
+Vier Schritte, einzeln prüfbar. Auslöser war der Wunsch nach mehr Inhalt:
+Mit neun Stücken ist der Laden nach zwei Wochen gesehen, und Ziel 7
+verlangt dreißig Tage.
+
+| Schritt | Inhalt | Stand |
+|---|---|---|
+| 1 | Seltenheit je Stück | **fertig** |
+| 2 | Fünf Stücke je Platz | **fertig**, außer Waffe |
+| 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | **fertig** |
+| 4 | Sets und Set-Boni | **fertig** |
+| + | Verkauf im Laden (nachgereicht) | **fertig** |
+
+### Was Schritt 1 und 2 gebracht haben
+
+**27 Stücke statt 9.** Fünf je Platz — zwei gewöhnliche, zwei
+ungewöhnliche, ein seltenes — auf allen Plätzen außer der Waffe.
+
+**Die Waffe hinkt mit Absicht hinterher.** `abilities_seam_test.dart`
+verlangt, dass **jede Waffe im Laden eine Fähigkeit mitbringt**; eine
+neue Klinge ohne Fähigkeit lässt den Test umfallen. Der Test erzwingt
+damit, dass Schritt 3 die Waffen samt Fähigkeiten bringt — genau
+richtig, denn der Waffenslot ist auf Level 1 der einzige offene
+(ADR-0016).
+
+**Eine Regel musste weichen** ([ADR-0029](../decisions/0029-seltenheit-statt-preisleiter.md)):
+ADR-0011 sicherte zu, dass auf demselben Platz teurer auch besser heißt.
+Das setzt eine Leiter voraus — und Sidegrade-Waffen, Set-Teile und
+Fähigkeiten am Stück brechen sie. Die Regel gilt jetzt **innerhalb einer
+Seltenheit**, wo sie noch schützt.
+
+**Die Preise bleiben am Gold-Zufluss gemessen.** Zwei Grenzen prüft
+`catalog_test.dart`: Ein voller Satz der billigsten Stücke muss in etwa
+einem Monat tragbar sein (heute 33,6 Tage), und das teuerste Einzelstück
+ebenso (der Aderring mit 1050 Gold, also 42 Tage).
+
+### Zwei Layout-Fehler, die dabei aufgefallen sind
+
+Beide dieselbe Wurzel wie der Eintrag in `gotchas.md`: **zwei Texte
+nebeneinander in einer `Row`, von denen keiner schrumpfen kann.**
+
+Der Layout-Test kauft im Aufbau **jedes** Stück des Katalogs. Mit 27
+statt 9 Stücken wurde das Gold tief negativ, der Text damit länger — und
+prompt liefen `LevelCard` (dort stand ein `Spacer` zwischen zwei festen
+Texten) und `HubTile` über. Beide schrumpfen jetzt mit `Flexible` und
+`ellipsis`.
+
+**Der Aufbau selbst bleibt so**, obwohl er einen unerreichbaren Zustand
+erzeugt — im Spiel prüft `Loadout.buy` das Gold, man kann sich nicht
+überkaufen. Als Belastungsprobe hat er sich gerade bewährt.
+
+### Was Schritt 3 gebracht hat — und damit Ziel 3
+
+**Fünf Waffen, fünf verschiedene Züge.** Bis heute gaben *beide* Klingen
+im Laden `sword_strike`; die Waffe bestimmte nichts, und der Slot, der auf
+Level 1 als einziger offen ist (ADR-0016), war Dekoration.
+
+| Waffe | Seltenheit | Preis | Zug | Power | Energie |
+|---|---|---|---|---|---|
+| Kurzbogen | gewöhnlich | 140 | Bogenschuss | 1,0 | +3 |
+| Übungsklinge | gewöhnlich | 240 | Hieb | 1,3 | +2 |
+| Streitkolben | ungewöhnlich | 620 | Wuchtstoß | 0,9 | +3, Verteidigung runter |
+| Geschliffene Klinge | ungewöhnlich | 760 | Doppelstich | 0,5 | +4 |
+| Kriegsstab | selten | 980 | Sammelschlag | 0,6 | +5 |
+
+Die Tabelle ist die aus [ADR-0017](../decisions/0017-faehigkeitskatalog-aus-drei-quellen.md),
+Punkt 2 — sie stand seit dem 22.08. geschrieben da und galt im Code nicht.
+Neue Zahlen in `packages/combat` gab es dafür keine.
+
+**Der Kurzbogen trägt denselben Zug wie der Rückfall**, und das ist
+Absicht: ADR-0017 zählt ihn unter die fünf Waffen, und „den Bogen hat
+jeder" ist genau der Grund, warum er auch der Rückfall ist. Gekauft gibt
+er Angriff statt eines neuen Rhythmus — der ruhigste Einstieg, den der
+Laden hat.
+
+**Der Laden sagt jetzt, was eine Waffe mitbringt.** Eine Zeile je Waffe
+(„Bringt Hieb mit — ×1,3 Schaden, +2 Energie je Runde"), zusammengesetzt
+von `weaponAbilityLine` in `lib/gear/`. Ohne sie wäre der Kauf blind:
+Fünf Rhythmen sind nur dann eine Entscheidung, wenn man vor dem Kauf
+sieht, welchen man bekommt.
+
+### Der Befund: die Waffe entscheidet — zu einseitig
+
+`tool/balance_sim.dart` hat einen Abschnitt dazubekommen, der genau die
+Behauptung prüft, auf der Ziel 3 steht. Siegquote je Waffe, mit
+Waffenbonus und Waffenzug, gemischtes Timing:
+
+| Waffe | Söldner Tag 21 | Bergwächter Tag 21 | Söldner Tag 30 | Bergwächter Tag 30 |
+|---|---|---|---|---|
+| Kurzbogen | 40 % | 8 % | 99 % | 33 % |
+| **Übungsklinge** | **100 %** | **66 %** | **100 %** | **96 %** |
+| Streitkolben | 82 % | 14 % | 100 % | 47 % |
+| Geschliffene Klinge | 4 % | 3 % | 41 % | 12 % |
+| Kriegsstab | 11 % | 4 % | 62 % | 16 % |
+
+**Die gute Hälfte:** Die Waffe entscheidet Kämpfe. 4 % gegen 100 % auf
+demselben Gegner am selben Tag — der Waffenslot ist keine Dekoration
+mehr.
+
+**Die schlechte:** Es ist kein Sidegrade, sondern eine Rangfolge, und die
+zweitbilligste Waffe steht oben. Wer 980 Gold für den Kriegsstab
+ausgibt, kämpft schlechter als mit den 240 der Übungsklinge.
+
+**Die Ursache ist bekannt und steht seit dem 26.08. hier:** Die frühen
+Spielerfähigkeiten sind schwächer als der Basisangriff. Energie zu
+erzeugen lohnt nur, wenn es etwas gibt, wofür man sie ausgibt — und an
+Tag 21 hat der simulierte Spieler Funkenstoß (Power 0,75) und zwei
+weitere Commons. Der Waffenbefund ist damit kein neuer, sondern derselbe
+aus einer zweiten Richtung.
+
+**Zwei Einschränkungen der Messung**, beide schon bekannt: Der simulierte
+Spieler wird von `SimpleEnemyPolicy` gesteuert und benutzt keine Utility
+(`utilityChance` 0). Mit mehr Möglichkeiten wählt ein Bot schlechter —
+die energiestarken Waffen sind also **unter**bewertet, wie schon bei „drei
+Moves sind schlechter als zwei" (22.08.).
+
+**Balancing bleibt zurückgestellt.** Gemessen und gemeldet ist es; die
+Hebel sind dieselben drei wie am 26.08.: die `power`-Werte der Commons,
+die Gegner-Sets, oder der Nenner 16.
+
+**Was der Laden trotzdem schon tut:** Der `why`-Text jeder teuren Waffe
+sagt es ausdrücklich. Beim Kriegsstab steht „Wer nur zuschlagen will, ist
+mit der halb so teuren Übungsklinge besser bedient", bei der
+Geschliffenen Klinge „sie lohnt sich erst, wenn auf den freien Plätzen
+etwas liegt, das Energie kostet". Eine Falle, die sich selbst benennt,
+ist keine mehr — aber sie bleibt eine, bis die Zahlen stimmen.
+
+### Was Schritt 4 gebracht hat: drei Sets
+
+[ADR-0030](../decisions/0030-sets-wirken-auf-eine-art-von-faehigkeit.md).
+348 App-Tests (vorher 336), gear 51 (vorher 31), combat 96 (vorher 80).
+
+**Kein neues Stück.** Von den fünf Stücken auf Waffe, Rüstung, Helm und
+Schuhe tragen drei eine Set-Marke, zwei keine — drei Sets à vier Teile
+gehen damit genau auf. Ring und Talisman gehören zu keinem Set, sonst
+hieße „Set voll" auch „die ganze Ausrüstung steht fest".
+
+| Set | Wirkt auf | 2 Teile | 4 Teile | voll |
+|---|---|---|---|---|
+| Eiserner Wille | Angriffs-Fähigkeiten | +10 % Schaden | +25 % | 1880 |
+| Sturmruf | Umgebungen | −1 Energie | −2 Energie | 1870 |
+| Ruhiger Stand | Schutz und Heilung | Leiste ×0,85 / ×1,25 | ×0,7 / ×1,6 | 1840 |
+
+**Jedes Set wirkt auf genau eine Art.** Bei „alles gleich" gäbe es eine
+richtige Antwort — das Set mit der größten Zahl. So hängt die Antwort
+daran, was auf den Fähigkeitsplätzen liegt, und damit am Skillbaum und an
+den Streaks.
+
+**Ein Set wirkt nicht auf den Waffenzug**, obwohl der als Angriff zählt.
+Das ist ADR-0009 ein zweites Mal: Ein Faktor auf den Zug, den man jede
+Runde drückt, entscheidet den Kampf allein.
+
+**Der Spielstand ist unverändert.** Was aktiv ist, wird aus dem Getragenen
+abgeleitet — wie das Gold (ADR-0011) und die Erfahrung (ADR-0008). Sets
+überleben einen Neustart, weil die Ausrüstung es tut.
+
+**Die 2er-Stufe ist in 10 bis 19 Tagen erreichbar, die 4er in rund 75.**
+Beides prüft `set_catalog_test.dart`. Die volle Stufe liegt bewusst
+jenseits des 30-Tage-Laufs: Der Laden soll danach noch etwas zu wollen
+übrig lassen.
+
+### Was die Simulation dazu sagt — und was sie nicht sagen kann
+
+`_setvergleich` in `tool/balance_sim.dart` misst denselben Spieler mit und
+ohne Set-Wirkung. Rundenzahl statt Siegquote, weil die Quote sättigt:
+
+| Set | Wegelagerer | Söldner | Bergwächter |
+|---|---|---|---|
+| Eiserner Wille | 5,3 → 5,3 | 10,8 → 10,8 | 10,4 → 10,4 |
+| **Sturmruf** | 5,0 → 5,0 | **6,2 → 5,3** | **8,0 → 7,2** |
+| Ruhiger Stand | 7,1 → 7,1 | 19,2 → 19,2 | 16,1 → 16,1 |
+
+**Nur Sturmruf ist messbar, und die beiden Nullen liegen an der
+Simulation, nicht an den Sets:**
+
+- *Ruhiger Stand* macht die Leiste breiter und langsamer. Der simulierte
+  Spieler **tippt aber nicht** — sein Timing kommt aus einer gewichteten
+  Münze (`timingSkill`), nie aus `TimingSpec.judgeAt`. Eine breitere
+  Leiste kann für ihn nichts ändern.
+- *Eiserner Wille* verstärkt Angriffs-Fähigkeiten. Die drei, die dem
+  Spieler an Tag 30 zuerst zufallen, sind schwächer als sein Waffenzug,
+  und `SimpleEnemyPolicy` wählt sie deshalb nicht. **Derselbe Befund wie
+  beim Waffenvergleich, aus einer dritten Richtung.**
+
+**Und ein Befund, der über die Sets hinausgeht: Gegen drei Gegner ist ein
+volles Set Überfluss.** Die Siegquote steht mit vier Set-Stücken überall
+auf 100 %. Der Platz eines Sets ist der Dungeon (Ziel 6), wo HP zwischen
+den Kämpfen nicht heilen und jede gesparte Runde zählt.
+
+### Nachgeliefert: der Laden verzeiht jetzt
+
+[ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md). 355
+App-Tests (vorher 348), gear 64 (vorher 51).
+
+**Ein Verkauf bringt die Hälfte, die andere Hälfte bleibt ausgegeben.**
+Das war der Grund, warum ADR-0011 den Verkauf ausgeschlossen hatte — und
+der Grund ist mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets
+weggefallen: Ein Fehlgriff kostet bis zu 1050 Gold, also 42 Tage, und war
+nicht zu korrigieren.
+
+**Der Fehler, der beinahe von selbst passiert wäre:** Gold ist abgeleitet
+(Zufluss minus Preis des Besitzes). Ein Stück aus dem Besitz zu nehmen
+gibt deshalb **von selbst den vollen Preis zurück** — man hätte dafür
+nichts bauen müssen. Genau das wäre falsch gewesen: Der Laden wäre
+folgenlos, jede Kaufentscheidung widerrufbar und damit keine.
+
+**Und es ist trotzdem keine zweite Wahrheit.** Gespeichert wird
+`Loadout.soldIds`, eine **Historie** — dieselbe Bauform wie die Häkchen
+und wie `ownedIds` selbst. Was daraus fürs Gold folgt, wird gerechnet
+(`lostGold`). Ein gespeicherter Goldstand könnte von der Rechnung
+abweichen; eine Historie *ist* die Rechnung.
+
+**Verkaufen legt ab**, und ein Set verliert damit sofort sein Teil. Im
+Laden steht der Knopf da, wo sonst „Kaufen" steht, davor eine Rückfrage
+mit beiden Zahlen: was zurückkommt und was ein Rückkauf kostet. Ein Kauf
+lässt sich ohne Verlust rückgängig machen, ein Verkauf nicht.
+
+### Offen aus Schritt 4
+
+**Nicht am Bild geprüft.** Set-Karte und Laden-Marke laufen im Test bei
+390 × 844 ohne Überlauf. Wie drei Set-Zeilen untereinander auf einem Handy
+**aussehen**, muss jemand ansehen.
 
 ---
 
@@ -71,8 +297,8 @@ flutter run -d chrome
   - **Sechs Plätze, neun Stücke in zwei Stufen.** Energie sitzt auf Ring und
     Talisman — das Konzept verlangt Ausrüstung, die Entscheidungen ändert
     und nicht nur Zahlen
-  - **Gold wird abgeleitet:** Zufluss minus Preis des Besitzes. Kein
-    gespeicherter Kontostand, deshalb auch kein Verkauf
+  - **Gold wird abgeleitet:** Zufluss minus Preis des Besitzes und minus
+    versenkter Verkäufe. Kein gespeicherter Kontostand (ADR-0031)
   - `catalog_test.dart` prüft den Inhalt des Ladens wie `content_test.dart`
     die Lektionen
 - **`packages/identity`** — Name und verdiente Titel, 28 Tests grün
@@ -1256,9 +1482,10 @@ Beides ist heute richtig und wird es nicht bleiben:
   Bei drei Objekten irrelevant. Sobald der Dungeon Lauf-Historie mitbringt,
   braucht es Entprellen — oder tatsächlich Drift. Der Anschluss steht dafür
   bereit (ADR-0010).
-- **Kein Verkauf im Laden:** tragbar bei sechs Plätzen und neun Stücken.
-  Kommen Drops dazu, wird ein voller Rucksack ohne Ausgang unangenehm
-  (ADR-0011).
+- ~~**Kein Verkauf im Laden**~~ — **erledigt am 08.09.** ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)).
+  Das Signal war eingetreten: Mit 27 Stücken, fünf Sidegrade-Waffen und
+  drei Sets war ein Fehlgriff bis zu 42 Tage teuer und nicht zu
+  korrigieren.
 
 ## Aufgabenteilung
 

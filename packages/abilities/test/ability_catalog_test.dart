@@ -38,6 +38,21 @@ void main() {
       }
     });
 
+    test('fünf Waffen, und jede bringt einen anderen Zug mit', () {
+      // ADR-0017 Punkt 2 zählt fünf Waffen auf. Dass es sie im Laden
+      // gibt, kann dieses Package nicht wissen — dass keine zwei
+      // denselben Zug tragen, schon.
+      final ids = AbilityCatalog.weaponMoves.values.toList();
+
+      expect(ids, hasLength(5));
+      expect(
+        ids.toSet(),
+        hasLength(ids.length),
+        reason: 'Zwei Waffen tragen denselben Zug. Dann bestimmt die Waffe '
+            'nichts, und der Slot ist Dekoration.',
+      );
+    });
+
     test('keine Waffenfähigkeit steht in der Auswahl', () {
       // Slot 1 wird nicht gewählt, sondern folgt aus der Ausrüstung
       // (ADR-0013). Stünde sie in beiden Listen, gäbe es zwei Wege zu
