@@ -10,6 +10,14 @@ import '../../ui/palette.dart';
 /// einzige für alles ohne Ziel. Das Plus daneben füllt ein Ziel um einen
 /// Schritt. Wer fünf Gläser trinkt, tippt fünfmal auf das Plus; wer schon
 /// weiß, dass der Tag steht, tippt einmal auf die Kachel.
+///
+/// **Ohne Untertexte seit Issue #35.** Unter dem Namen stand bis dahin
+/// eine Zeile Prosa („+1 Stärke · 3 Tage am Stück · x1,2") und darunter
+/// oft eine zweite. Bei fünf Gewohnheiten waren das zehn Zeilen, die sich
+/// täglich kaum ändern. Die **Zahlen** sind geblieben und nach rechts
+/// gewandert: Die Streak steht als Marke neben dem Namen, der Stand eines
+/// Tagesziels am Balken. Verloren ist nur der Stat-Name — welcher Wert
+/// wovon wächst, steht mit Herkunft auf dem Charakterbildschirm.
 class HabitCheckTile extends StatelessWidget {
   const HabitCheckTile({
     required this.habit,
@@ -48,6 +56,7 @@ class HabitCheckTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final goal = _goal;
     final zeigtPlus = goal != null && !isChecked;
+    final zeigtBalken = goal != null && !isChecked;
 
     return Material(
       color: isChecked ? Palette.surfaceRaised : Palette.surface,
@@ -85,31 +94,21 @@ class HabitCheckTile extends StatelessWidget {
                         decorationColor: Palette.muted,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                    if (_details.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 3),
-                      Text(
-                        _details,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Palette.muted,
-                        ),
-                      ),
-                    ],
-                    if (goal != null && !isChecked) ...<Widget>[
+                    if (zeigtBalken) ...<Widget>[
                       const SizedBox(height: 7),
-                      _GoalBar(done: progress, target: goal.target),
+                      _GoalBar(
+                        done: progress,
+                        target: goal.target,
+                        label: goal.progressLabel(progress),
+                      ),
                     ],
                   ],
                 ),
               ),
+              if (streak > 0) ...<Widget>[
+                const SizedBox(width: 8),
+                _StreakBadge(streak: streak, nextMultiplier: nextMultiplier),
+              ],
               if (zeigtPlus)
                 IconButton(
                   onPressed: onAdvance,
@@ -133,58 +132,94 @@ class HabitCheckTile extends StatelessWidget {
   static String _plusTooltip(HabitGoal goal) {
     return goal.step == 1 ? 'Eins mehr' : '${goal.step} ${goal.unit} mehr';
   }
+}
 
-  /// Streak und Wirkung in einer Zeile — beides ist der Grund, warum man
-  /// morgen wiederkommt.
-  String get _subtitle {
-    final wirkung = '+1 ${habit.stat.label}';
-    if (streak <= 0) return '$wirkung · noch keine Streak';
+/// Die Kette als Marke neben dem Namen.
+///
+/// Sie ist der Grund, morgen wiederzukommen, und damit die einzige Zahl,
+/// die den Weg aus dem Untertext heraus verdient hat. Ohne laufende Kette
+/// erscheint sie gar nicht — „noch keine Streak" ist eine Null, die
+/// niemand lesen muss.
+class _StreakBadge extends StatelessWidget {
+  const _StreakBadge({required this.streak, required this.nextMultiplier});
 
-    final tage = streak == 1 ? '1 Tag' : '$streak Tage';
-    if (nextMultiplier <= 1.0) return '$wirkung · $tage am Stück';
+  final int streak;
+  final double nextMultiplier;
 
-    final faktor = nextMultiplier.toStringAsFixed(1).replaceAll('.', ',');
-    return '$wirkung · $tage am Stück · x$faktor';
-  }
+  @override
+  Widget build(BuildContext context) {
+    final faktor = nextMultiplier <= 1.0
+        ? null
+        : 'x${nextMultiplier.toStringAsFixed(1).replaceAll('.', ',')}';
 
-  /// Ziel, Schwierigkeit und Priorität — aber nur, was vom Normalfall
-  /// abweicht. Eine Zeile, die bei jeder Gewohnheit „Mittel · Normal"
-  /// sagt, sagt nichts.
-  String get _details {
-    final teile = <String>[];
-    final goal = _goal;
-    if (goal != null) teile.add(goal.progressLabel(progress));
-    if (habit.difficulty != HabitDifficulty.mittel) {
-      teile.add(habit.difficulty.label);
-    }
-    if (habit.priority != HabitPriority.normal) {
-      teile.add(habit.priority.label);
-    }
-    return teile.join(' · ');
+    return Semantics(
+      label: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Icon(
+            Icons.local_fire_department,
+            size: 14,
+            color: Palette.gold,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            faktor == null ? '$streak' : '$streak · $faktor',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Palette.gold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-/// Ein schmaler Balken für den angefangenen Tag.
+/// Ein schmaler Balken für den angefangenen Tag, mit seiner Zahl daneben.
 ///
-/// Die Zahl steht schon in der Zeile darüber; der Balken ist für den
-/// Blick im Vorbeigehen, nicht zum Ablesen.
+/// Die Zahl stand bis Issue #35 in der Zeile darüber. Sie ist mit an den
+/// Balken gewandert statt zu verschwinden: Ein Balken allein sagt „etwa
+/// die Hälfte", und wer fünf Gläser zählt, will wissen, ob er beim
+/// dritten oder vierten steht.
 class _GoalBar extends StatelessWidget {
-  const _GoalBar({required this.done, required this.target});
+  const _GoalBar({
+    required this.done,
+    required this.target,
+    required this.label,
+  });
 
   final int done;
   final int target;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final anteil = target <= 0 ? 0.0 : (done / target).clamp(0.0, 1.0);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: LinearProgressIndicator(
-        value: anteil,
-        minHeight: 4,
-        backgroundColor: Palette.surfaceRaised,
-        valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
-      ),
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: anteil,
+              minHeight: 4,
+              backgroundColor: Palette.surfaceRaised,
+              valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, color: Palette.textDim),
+          ),
+        ),
+      ],
     );
   }
 }

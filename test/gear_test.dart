@@ -6,6 +6,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
+import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
 import 'package:lifes_game/gear/weapon_ability_line.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -249,8 +250,9 @@ void main() {
     ) async {
       // **Fünf Waffen mit fünf Rhythmen sind nur dann eine
       // Entscheidung, wenn man vor dem Kauf sieht, welchen man
-      // bekommt** (Ziel 3). Die Waffen stehen zuoberst im Laden, also
-      // ohne Scrollen erreichbar.
+      // bekommt** (Ziel 3). Seit Issue #35 steht die Zeile in der
+      // Detailfläche statt auf jeder Kachel — der Weg dorthin ist ein
+      // Tipp, und dieser Test geht ihn für jede der fünf Waffen.
       useTallView(tester);
       await tester.pumpWidget(
         appMit(const SaveData.empty(), const ShopScreen()),
@@ -259,10 +261,85 @@ void main() {
 
       for (final waffe in GearCatalog.forSlot(GearSlot.waffe)) {
         final zeile = weaponAbilityLine(waffe);
-
         expect(zeile, isNotNull, reason: waffe.name);
+
+        await tester.tap(
+          find.widgetWithText(ShopItemCell, waffe.name),
+          warnIfMissed: false,
+        );
+        await tester.pumpAndSettle();
+
         expect(find.text(zeile!), findsOneWidget, reason: waffe.name);
       }
+    });
+
+    testWidgets('ein Reiter je Platz, das Raster zeigt nur einen', (
+      tester,
+    ) async {
+      // **Der Kern des Umbaus aus Issue #35.** Vorher lagen alle
+      // siebenundzwanzig Stücke untereinander; jetzt liegt ein Platz auf
+      // einem Bildschirm. Der Test hält beide Hälften fest: Alle sechs
+      // Reiter sind da, und im Raster steht nur der gewählte Platz.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      for (final slot in GearSlot.values) {
+        expect(find.text(slot.label), findsWidgets, reason: slot.label);
+      }
+
+      final zellen = tester.widgetList<ShopItemCell>(find.byType(ShopItemCell));
+
+      expect(zellen.map((z) => z.item.slot).toSet(), <GearSlot>{
+        GearSlot.waffe,
+      });
+      expect(zellen, hasLength(GearCatalog.forSlot(GearSlot.waffe).length));
+    });
+
+    testWidgets('ein anderer Reiter zeigt andere Stücke', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(GearSlot.ring.label));
+      await tester.pumpAndSettle();
+
+      final zellen = tester.widgetList<ShopItemCell>(find.byType(ShopItemCell));
+
+      expect(zellen.map((z) => z.item.slot).toSet(), <GearSlot>{GearSlot.ring});
+
+      // **Die Detailfläche ist nie leer.** Sie rückt beim Wechsel auf das
+      // erste Stück des neuen Platzes — sonst stünde dort noch eine Waffe
+      // unter der Überschrift „Ring", oder gar nichts.
+      final ersterRing = GearCatalog.forSlot(GearSlot.ring).first;
+      expect(find.text(ersterRing.why), findsOneWidget);
+    });
+
+    testWidgets('die Detailfläche folgt der gewählten Kachel', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      final waffen = GearCatalog.forSlot(GearSlot.waffe);
+      final andere = waffen[1];
+
+      // Vorher: die Begründung der zweiten Waffe steht nirgends.
+      expect(find.text(andere.why), findsNothing);
+
+      await tester.tap(
+        find.widgetWithText(ShopItemCell, andere.name),
+        warnIfMissed: false,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(andere.why), findsOneWidget);
+      expect(find.text(waffen.first.why), findsNothing);
     });
 
     testWidgets('zeigt das erste Stück mit Namen und Seltenheit', (
@@ -397,7 +474,14 @@ void main() {
         GearSets.eisernerWille.id,
       ).firstWhere((i) => i.slot == GearSlot.waffe);
 
-      expect(find.text(waffe.name), findsOneWidget);
+      // Seit Issue #35 steht die Zugehörigkeit in der Detailfläche, also
+      // an dem Stück, das gerade gewählt ist — nicht an allen zugleich.
+      await tester.tap(
+        find.widgetWithText(ShopItemCell, waffe.name),
+        warnIfMissed: false,
+      );
+      await tester.pumpAndSettle();
+
       expect(
         find.textContaining('Teil von „${GearSets.eisernerWille.name}"'),
         findsWidgets,

@@ -41,6 +41,20 @@ class HabitsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Gewohnheiten')),
+
+      // **Unten rechts, wo der Daumen ist.** Der Knopf sass bis Issue #35
+      // als Zeile mitten in der Liste unter „Eigene" -- also genau dort,
+      // wo man ihn nur findet, wenn man ohnehin schon scrollt. Er ist
+      // ausgeblendet, solange der Skillbaum keine einzige Vorlage
+      // hergegeben hat: Ohne Vorlage gibt es keinen Platz (ADR-0028), und
+      // ein Knopf, der nur absagen kann, ist keiner.
+      floatingActionButton: unlocked.isEmpty
+          ? null
+          : _CustomHabitFab(
+              slotsLeft: slotsLeft,
+              listeVoll: tracker.isFull,
+              onCreate: () => _createCustom(context, ref),
+            ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -48,7 +62,7 @@ class HabitsScreen extends ConsumerWidget {
             child: unlocked.isEmpty
                 ? const _NothingUnlockedYet()
                 : ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
                     children: <Widget>[
                       StatSummary(stats: stats),
                       const SizedBox(height: 24),
@@ -88,13 +102,12 @@ class HabitsScreen extends ConsumerWidget {
                         trailing: '${tracker.customCount} / $slots',
                       ),
                       const SizedBox(height: 10),
-                      _CustomHabitButton(
-                        slotsLeft: slotsLeft,
-                        listeVoll: tracker.isFull,
-                        onTap: () => _createCustom(context, ref),
-                      ),
+                      if (ruhendeEigene.isEmpty)
+                        const _Hint(
+                          'Noch keine eigene angelegt. Der Knopf unten '
+                          'rechts fragt nach Name, Wert und Tagesziel.',
+                        ),
                       for (final habit in ruhendeEigene) ...<Widget>[
-                        const SizedBox(height: 8),
                         _RestingCustomTile(
                           habit: habit,
                           canActivate: tracker.canActivate(habit.id),
@@ -243,11 +256,19 @@ class HabitsScreen extends ConsumerWidget {
 ///
 /// Bleibt sichtbar statt zu verschwinden: Ein Knopf, der fehlt, wirft die
 /// Frage auf, ob es ihn je gab. Einer, der den Weg nennt, beantwortet sie.
-class _CustomHabitButton extends StatelessWidget {
-  const _CustomHabitButton({
+/// Der schwebende Knopf, der eine eigene Gewohnheit anlegt.
+///
+/// **Er sagt auch ab, statt zu verschwinden.** Ohne freien Platz bleibt
+/// er sichtbar, wird aber matt und erklaert beim Antippen, woran es
+/// liegt. Ein Knopf, der bei fehlendem Platz einfach fehlt, laesst genau
+/// die Frage offen, die dann aufkommt -- und die Antwort („jede
+/// freigeschaltete Vorlage gibt einen Platz") ist der Weg zurueck in den
+/// Skillbaum.
+class _CustomHabitFab extends StatelessWidget {
+  const _CustomHabitFab({
     required this.slotsLeft,
     required this.listeVoll,
-    required this.onTap,
+    required this.onCreate,
   });
 
   final int slotsLeft;
@@ -256,72 +277,44 @@ class _CustomHabitButton extends StatelessWidget {
   /// wartet dann unter „Eigene".
   final bool listeVoll;
 
-  final VoidCallback onTap;
+  final VoidCallback onCreate;
+
+  bool get _offen => slotsLeft > 0;
 
   @override
   Widget build(BuildContext context) {
-    final offen = slotsLeft > 0;
-    return Material(
-      color: Palette.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: offen ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-          child: Row(
-            children: <Widget>[
-              // Bewusst ein anderes Zeichen als das Plus, mit dem eine
-              // fertige Vorlage gestartet wird: Hier entsteht etwas
-              // Neues, dort wird etwas Vorhandenes aufgenommen.
-              Icon(
-                Icons.playlist_add,
-                size: 22,
-                color: offen ? Palette.accent : Palette.muted,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Eigene Gewohnheit anlegen',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: offen ? Colors.white : Palette.muted,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _hinweis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        height: 1.35,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return FloatingActionButton(
+      onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
+      backgroundColor: _offen ? Palette.accent : Palette.surfaceRaised,
+      foregroundColor: _offen ? Colors.white : Palette.muted,
+      tooltip: _hinweis,
+      // Dasselbe Zeichen wie vorher in der Liste, und bewusst ein
+      // anderes als das Plus, mit dem eine fertige Vorlage gestartet
+      // wird: Hier entsteht etwas Neues, dort wird etwas Vorhandenes
+      // aufgenommen.
+      child: const Icon(Icons.playlist_add),
     );
   }
 
+  void _sageWarumNicht(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(content: Text(_hinweis), duration: const Duration(seconds: 3)),
+      );
+  }
+
   String get _hinweis {
-    if (slotsLeft <= 0) {
+    if (!_offen) {
       return 'Kein Platz frei. Jede freigeschaltete Vorlage gibt einen '
           'Platz für eine eigene.';
     }
     final plaetze = slotsLeft == 1 ? 'ein Platz' : '$slotsLeft Plätze';
     if (listeVoll) {
       return 'Noch $plaetze — die Tagesliste ist voll, sie wartet dann '
-          'hier unten.';
+          'unter „Eigene".';
     }
-    return 'Noch $plaetze frei.';
+    return 'Eigene Gewohnheit anlegen — noch $plaetze frei.';
   }
 }
 
@@ -360,18 +353,7 @@ class _RestingCustomTile extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                if (habit.why.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 4),
-                  Text(
-                    habit.why,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      height: 1.4,
-                      color: Palette.textDim,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   _zeile,
                   style: const TextStyle(
