@@ -44,6 +44,7 @@ void main(List<String> args) {
   _timingSpanne(fights);
   _waffenvergleich(fights);
   _setvergleich(fights);
+  _reihe(fights);
 }
 
 /// Ob ein volles Set im Kampf etwas ausmacht.
@@ -462,4 +463,119 @@ TimedHit _roll(Random random, double skill) {
   if (value < skill * 0.6) return TimedHit.perfect;
   if (value < skill * 0.6 + 0.3) return TimedHit.good;
   return TimedHit.none;
+}
+
+/// Ob die Gegnerreihe aus Issue #36 durchspielbar ist.
+///
+/// **Die eine Frage, die das Issue ausdrücklich stellt:** „Beim Balancing
+/// sollte trotzdem darauf geachtet werden, dass Gegner 30 erreichbar
+/// ist." Erreichbar heißt hier: Ein Charakter am Werte-Deckel, mit der
+/// besten Ausrüstung und der stärksten Waffe, gewinnt gegen Sprosse 30
+/// verlässlich — und gegen die Sprossen davor in aufsteigender Reihe
+/// immer knapper, statt an einer Stelle gegen eine Wand zu laufen.
+///
+/// Gemessen werden zwei Spieler, weil beide vorkommen: der **nackte** an
+/// Tag 30 (kein Gold ausgegeben) und der **ausgerüstete** an Tag 60. Der
+/// erste sagt, wie weit man ohne Laden kommt; der zweite, ob oben
+/// überhaupt etwas erreichbar ist.
+void _reihe(int fights) {
+  print('\n--- Die Reihe: Siegquote je Sprosse ---');
+  print('(A = Tag 30 ohne Ausrüstung, B = Tag 60 mit bester Ausrüstung)\n');
+
+  final besteWaffe = _besteWaffe();
+  final vollesGear = _bestesGear();
+  final moveId = AbilityCatalog.weaponMoves[besteWaffe.id];
+
+  final a = _statsNach(30);
+  final b = _statsNach(60);
+  print(
+    '  A: ATK ${a.attack}  HP ${a.maxHp}  DEF ${a.defense}  '
+    'EN ${a.maxEnergy}',
+  );
+  print(
+    '  B: ATK ${b.attack + vollesGear.attack}  '
+    'HP ${b.maxHp + vollesGear.maxHp}  '
+    'DEF ${b.defense + vollesGear.defense}  '
+    'EN ${b.maxEnergy + vollesGear.maxEnergy}  '
+    '(Waffe: ${besteWaffe.name})',
+  );
+  print('');
+
+  print('  ${'Sprosse'.padRight(24)}${'A'.padLeft(8)}${'B'.padLeft(8)}');
+
+  for (var rung = 1; rung <= Enemies.rungs; rung++) {
+    final gegner = Enemies.atRung(rung);
+
+    final nackt = _run(
+      fights: fights,
+      stats: _statsNach(30),
+      loadout: _loadoutNach(30),
+      gegner: gegner,
+      timingSkill: 0.5,
+    );
+
+    final geruestet = _run(
+      fights: fights,
+      stats: _statsNach(60),
+      loadout: _loadoutNach(60, weaponMoveId: moveId),
+      bonus: vollesGear,
+      gegner: gegner,
+      timingSkill: 0.5,
+    );
+
+    final name = '$rung. ${gegner.name}';
+    print(
+      '  ${name.padRight(24)}'
+      '${'${(nackt.winRate * 100).round()} %'.padLeft(8)}'
+      '${'${(geruestet.winRate * 100).round()} %'.padLeft(8)}',
+    );
+  }
+}
+
+/// Die Waffe mit dem höchsten Schaden je Runde — nicht die teuerste.
+///
+/// Seit ADR-0029 sind die fünf Waffen Sidegrades, der Preis sagt also
+/// nichts mehr über die Stärke. Gemessen wird deshalb, was zählt.
+GearItem _besteWaffe() {
+  final waffen = GearCatalog.forSlot(GearSlot.waffe);
+  var beste = waffen.first;
+
+  for (final waffe in waffen) {
+    final move = Moves.byId(AbilityCatalog.weaponMoves[waffe.id] ?? '');
+    final besterMove = Moves.byId(AbilityCatalog.weaponMoves[beste.id] ?? '');
+    if (move == null || besterMove == null) continue;
+    if (move.power > besterMove.power) beste = waffe;
+  }
+
+  return beste;
+}
+
+/// Das beste Stück je Platz, aufsummiert.
+///
+/// „Bestes" heißt hier: die größte Summe aus den vier Werten. Das ist
+/// grob — ein Energiepunkt wiegt anders als acht HP —, reicht aber für
+/// die Frage, ob die Spitze der Reihe überhaupt erreichbar ist.
+GearBonus _bestesGear() {
+  var summe = const GearBonus();
+
+  for (final slot in GearSlot.values) {
+    GearItem? bestes;
+    var besteSumme = -1;
+
+    for (final item in GearCatalog.forSlot(slot)) {
+      final wert =
+          item.bonus.attack * 8 +
+          item.bonus.maxHp +
+          item.bonus.defense * 8 +
+          item.bonus.maxEnergy * 8;
+      if (wert > besteSumme) {
+        besteSumme = wert;
+        bestes = item;
+      }
+    }
+
+    if (bestes != null) summe = summe + bestes.bonus;
+  }
+
+  return summe;
 }

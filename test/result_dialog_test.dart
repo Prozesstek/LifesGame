@@ -4,17 +4,26 @@ import 'package:lifes_game/combat/widgets/result_dialog.dart';
 
 /// Das Blatt am Ende eines Kampfes.
 ///
-/// Der wichtigste Test ist der letzte: **Es darf keine Belohnung nennen.**
-/// Der Kampf ist im Konzept die Auszahlung des Fortschritts, nicht seine
-/// Quelle (`konzept.md` Abschnitt 2). Stünde dort eines Tages „+50 XP",
-/// wäre das eine Richtungsentscheidung und kein Textdetail — dieser Test
-/// zwingt sie ans Licht.
+/// **Der Test, der hier stand, hat seine Aufgabe erfüllt.** Er verbot
+/// jede Belohnung — „stünde dort eines Tages ‚+50 XP', wäre das eine
+/// Richtungsentscheidung und kein Textdetail" — und hat sie mit Issue #36
+/// ans Licht gezwungen. Die Entscheidung fiel in ADR-0032, und sie ist
+/// kleiner als der alte Test annahm: Belohnung ja, aber **einmal je
+/// Gegner**.
+///
+/// An seiner Stelle stehen zwei Zusicherungen, die dieselbe Grenze
+/// bewachen: Ein zweiter Sieg gegen denselben Gegner zahlt nichts, und
+/// eine Niederlage erst recht nicht. Fällt eine davon, ist aus der
+/// Belohnung eine Dauerquelle geworden, und `konzept.md` Abschnitt 2 gilt
+/// nicht mehr.
 void main() {
   Future<void> pumpDialog(
     WidgetTester tester, {
     required bool won,
     int rounds = 9,
     String enemyName = 'Wegelagerer',
+    int earnedXp = 0,
+    int earnedGold = 0,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -23,10 +32,20 @@ void main() {
             won: won,
             rounds: rounds,
             enemyName: enemyName,
+            earnedXp: earnedXp,
+            earnedGold: earnedGold,
           ),
         ),
       ),
     );
+  }
+
+  /// Alle Texte des Blattes in einer Zeichenkette.
+  String texteVon(WidgetTester tester) {
+    return tester
+        .widgetList<Text>(find.byType(Text))
+        .map((t) => t.data ?? '')
+        .join(' ');
   }
 
   group('Ein gewonnener Kampf', () {
@@ -64,29 +83,46 @@ void main() {
     });
   });
 
-  group('Es steht keine Belohnung darin', () {
-    testWidgets('weder gewonnen noch verloren nennt eine Zahl an XP', (
-      tester,
-    ) async {
-      for (final gewonnen in <bool>[true, false]) {
-        await pumpDialog(tester, won: gewonnen);
+  group('Belohnung gibt es genau einmal je Gegner', () {
+    testWidgets('der erste Sieg nennt Erfahrung und Gold', (tester) async {
+      await pumpDialog(tester, won: true, earnedXp: 35, earnedGold: 14);
 
-        final texte = tester
-            .widgetList<Text>(find.byType(Text))
-            .map((t) => t.data ?? '')
-            .join(' ');
-
-        // Kein „+N XP", kein „+N Gold" — der Kampf gibt nichts.
-        expect(
-          RegExp(r'\+\s*\d').hasMatch(texte),
-          isFalse,
-          reason: 'Das Blatt verspricht eine Belohnung: $texte',
-        );
-      }
+      expect(find.textContaining('+35 Erfahrung'), findsOneWidget);
+      expect(find.textContaining('+14 Gold'), findsOneWidget);
     });
 
-    testWidgets('sondern sagt, woher der Fortschritt kommt', (tester) async {
+    testWidgets('ein zweiter Sieg gegen denselben Gegner nennt keine', (
+      tester,
+    ) async {
+      // **Die Grenze, unter der es ueberhaupt Belohnung geben darf.**
+      // Ohne sie liesse sich der leichteste Gegner in Dauerschleife
+      // schlagen, statt Haekchen zu setzen.
       await pumpDialog(tester, won: true);
+
+      expect(
+        RegExp(r'\+\s*\d').hasMatch(texteVon(tester)),
+        isFalse,
+        reason: 'Ein wiederholter Sieg verspricht eine Belohnung.',
+      );
+      expect(find.textContaining('Den hattest du schon'), findsOneWidget);
+    });
+
+    testWidgets('eine Niederlage erst recht nicht', (tester) async {
+      // Auch dann nicht, wenn der Aufrufer sich irrt und Zahlen
+      // hereingibt: Das Blatt ist die letzte Stelle, an der das auffaellt.
+      await pumpDialog(tester, won: false, earnedXp: 35, earnedGold: 14);
+
+      expect(
+        RegExp(r'\+\s*\d').hasMatch(texteVon(tester)),
+        isFalse,
+        reason: 'Eine Niederlage verspricht eine Belohnung.',
+      );
+    });
+
+    testWidgets('und es sagt weiter, woher der Fortschritt kommt', (
+      tester,
+    ) async {
+      await pumpDialog(tester, won: true, earnedXp: 35, earnedGold: 14);
 
       expect(find.textContaining('Gewohnheiten'), findsOneWidget);
     });

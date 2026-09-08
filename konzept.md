@@ -160,17 +160,30 @@ Thema ohne tägliche Handlung ist ein Essay, kein Knoten.
 > Baum, wenn sein Inhalt steht. Ein halber Knoten ist schlimmer als keiner —
 > für ihn wurde ein Punkt bezahlt.
 
-### 3.4 Dungeon
-4 Gegner + 1 Boss, etwa 8–12 Minuten.
+### 3.4 Gegnerreihe
 
-- **HP heilt nicht zwischen den Kämpfen** → Zermürbung erzeugt echte
-  Entscheidungen (Trank jetzt oder für den Boss aufsparen?)
-- Niederlage: Dungeon von vorn
-- Zugang kostet Gold
+**Dreißig Gegner, aufsteigend, einer nach dem anderen.** Der Bildschirm
+zeigt „17 / 30", den nächsten Gegner und einen Knopf. Ein erstmals
+besiegter Gegner zahlt Erfahrung und Gold; ein zweiter Sieg gegen
+denselben zahlt nichts. Gebaut, siehe
+[ADR-0032](docs/decisions/0032-gegnerreihe-statt-dungeon.md).
 
-> **Konflikt:** Niederlage + verfallener Eintritt bestraft doppelt, und
-> man kann sich nicht hochgrinden, weil Stärke aus echten Habits kommt.
-> Ohne ein Wiederbelebungs-Item wird das zur Abwärtsspirale.
+**Das ist die einzige Stelle, an der ein Kampf etwas einbringt** — und
+sie ist gedeckelt: dreißig Sprossen, jede zahlt einmal. Abschnitt 2 gilt
+damit unverändert. Ein wiederholbarer Sieg wäre eine Dauerquelle und
+würde die Aussage des Produkts widerlegen.
+
+#### Dungeon — zurückgestellt
+
+4 Gegner + 1 Boss in einem Lauf, etwa 8–12 Minuten, HP heilt nicht
+zwischen den Kämpfen, Zugang kostet Gold. Steht seit dem 08.09. hinter
+dem Teststart (`docs/context/ziele.md`).
+
+> **Der Konflikt, der ihn zurückgestellt hat:** Niederlage + verfallener
+> Eintritt bestraft doppelt, und man kann sich nicht hochgrinden, weil
+> Stärke aus echten Habits kommt. Ohne ein Wiederbelebungs-Item wird das
+> zur Abwärtsspirale. Diese Frage ist bis heute nicht entschieden — und
+> ein unentschiedener Umbau gehört nicht in einen terminierten Plan.
 
 ### 3.5 Shop
 Ausrüstung über sechs Plätze, in zwei Stufen. Gebaut, siehe

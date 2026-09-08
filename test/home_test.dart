@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/character/character_screen.dart';
-import 'package:lifes_game/combat/enemy_picker_screen.dart';
+import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/home/widgets/character_stage.dart';
@@ -163,7 +163,7 @@ void main() {
       await tester.tap(find.text('Kampf'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(EnemyPickerScreen), findsOneWidget);
+      expect(find.byType(LadderScreen), findsOneWidget);
     });
 
     testWidgets('ohne Fähigkeit bleibt der Kampf zu (ADR-0020)', (
@@ -240,7 +240,7 @@ void main() {
       await tester.tap(find.text('Kampf'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(EnemyPickerScreen), findsNothing);
+      expect(find.byType(LadderScreen), findsNothing);
     });
 
     testWidgets('Laden führt zum Shop', (tester) async {

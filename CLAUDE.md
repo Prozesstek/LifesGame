@@ -49,8 +49,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 96 Tests | nur Dart-SDK |
-| `packages/combat/lib/src/enemy.dart` | die drei Gegner und ihre Werte | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 115 Tests | nur Dart-SDK |
+| `packages/combat/lib/src/enemy.dart` | die **dreissig Gegner** der Reihe und ihre Kurve | nur Dart-SDK |
+| `packages/combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was ein Sieg einbringt | nur Dart-SDK |
 | `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
 | `packages/combat/lib/src/environment.dart` | die vier Umgebungen | nur Dart-SDK |
 | `packages/combat/lib/src/timing_rules.dart` | welche Timing-Werte gerade gelten | nur Dart-SDK |
@@ -82,7 +83,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm, Weg zu allen Bereichen | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
+| `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
+| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
@@ -91,7 +94,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden — der einzige Gold-Abfluss | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: Reiter je Platz, Raster, Detailfläche | Flutter |
+| `lib/gear/widgets/shop_item_cell.dart` | ein Stück als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
@@ -109,11 +113,14 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/battle/move_animation.dart` | wie ein Move **aussieht** (nicht was er tut) | Flutter |
 | `lib/combat/battle/floating_text.dart` | Schadens- und Heilungszahlen über den Kämpfern | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/enemy_picker_screen.dart` | Gegnerwahl mit Einschätzung vor dem Kampf | Flutter |
+| `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
+| `lib/combat/ladder_screen.dart` | die Reihe: „17 / 30", Gegner, Kampf-Knopf | Flutter |
+| `lib/combat/enemy_icon.dart` | welches Bild zu einem Gegner gehört | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Kachelleiste, Timing | Flutter |
 | `lib/combat/move_help.dart` | was ein Zug tut, in Worten und echten Zahlen | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einem Zug gehoert | Flutter |
+| `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
 | `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
 | `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
 | `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Kampfes | Flutter |
@@ -131,6 +138,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
 Preise, Ausrüstungsboni **und Set-Wirkungen** nur in `packages/gear`,
+Gegnerwerte und die Belohnung der Reihe nur in `packages/combat`,
 Titel und ihre
 Bedingungen nur in `packages/identity`, Freischaltbedingungen für
 Fähigkeiten nur in `packages/abilities`. Die Controller reichen durch
@@ -141,7 +149,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 355 Tests
+flutter test             # 378 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -149,7 +157,7 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 96 Tests
+dart test                              # 115 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
@@ -351,6 +359,24 @@ in zwei Tagen komplett, oder der Laden ist leer gekauft, bevor er interessant
 wird. `flutter test test/progression_test.dart` spielt alles durch und meldet
 genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 
+**Der Kampf zahlt seit [ADR-0032](docs/decisions/0032-gegnerreihe-statt-dungeon.md)
+ein — aber genau einmal je Gegner.** Bis dahin gab er ausdrücklich
+nichts: `konzept.md` Abschnitt 2 macht ihn zur Auszahlung des
+Fortschritts, nicht zu seiner Quelle. Der Einwand galt jedoch nur
+*wiederholbarer* Belohnung. Die Reihe hat dreißig Sprossen, jede zahlt
+einmal, und der Gesamtbetrag steht deshalb als Zahl fest
+(`LadderRewards.lifetimeXp`). Wer daran dreht, lässt
+`flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
+mit in den vier Kurven.
+
+**Die Reihe steigt in ihren Werten stetig, in der Siegquote nicht.**
+`enemy_ladder_test.dart` prüft das Erste und kann das Zweite nicht: Wo
+das Gegner-Moveset von Uncommon auf Rare wechselt (Sprosse 17), wird der
+Kampf gemessen *leichter*, weil Rare-Züge mehr Energie kosten, als der
+Gegner dort hat. Wer die Reihe anfasst, lässt
+`dart run tool/balance_sim.dart` laufen und sieht im Abschnitt „Die
+Reihe" nach.
+
 **Der Kern-Loop verbindet alle sieben Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
@@ -358,11 +384,11 @@ eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
 gehen in den Kampf (`combat`), Streaks und Lektionen verdienen Titel
 (`identity`).
 
-Es gibt genau **zehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **zwölf** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
-| `totalXpProvider` | Erfahrung aus Theorie und Gewohnheiten |
+| `totalXpProvider` | Erfahrung aus Theorie, Gewohnheiten **und der Reihe** |
 | `goldProvider` | Gold aus allen Quellen |
 | `equippedStatsProvider` | Kampfwerte aus Gewohnheiten und Ausrüstung |
 | `titleStatsProvider` | die drei Zahlen hinter den Titeln |
@@ -372,6 +398,8 @@ Es gibt genau **zehn** Stellen, an denen etwas zusammenläuft:
 | `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
 | `combatUnlockedProvider` | ob der Kampf offensteht (ADR-0020) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
+| `ladderProvider` | wie weit die Gegnerreihe gegangen ist (ADR-0032) |
+| `nextEnemyProvider` | **die einzige Stelle**, die „welcher Gegner" beantwortet |
 
 **`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
 ADR-0019 zu wenig zählt** — zwölf von neunundzwanzig Seiten liegen nur
@@ -403,7 +431,7 @@ zu erfinden. Wer an einer abgeleiteten Zahl dreht, lässt
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen
-sechsten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
+achten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
 gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
 (`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
 nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).

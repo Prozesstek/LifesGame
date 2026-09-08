@@ -26,11 +26,14 @@ void main() {
       }
     });
 
-    test('es sind genau drei — Episch und Legendär gehören den Fähigkeiten', () {
-      // `package:abilities` hat fünf Stufen, weil dort etwas zu erreichen
-      // ist. Im Laden gibt es nur zu kaufen; drei reichen.
-      expect(GearRarity.values, hasLength(3));
-    });
+    test(
+      'es sind genau drei — Episch und Legendär gehören den Fähigkeiten',
+      () {
+        // `package:abilities` hat fünf Stufen, weil dort etwas zu erreichen
+        // ist. Im Laden gibt es nur zu kaufen; drei reichen.
+        expect(GearRarity.values, hasLength(3));
+      },
+    );
   });
 
   group('Die Marke im Laden', () {

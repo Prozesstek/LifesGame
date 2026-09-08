@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../combat/ladder_controller.dart';
 import 'package:progression/progression.dart';
 
 import '../dev/dev_controller.dart';
@@ -12,12 +14,21 @@ import '../theory/theory_controller.dart';
 /// Levelsperre des Skillbaums so, wie ADR-0007 sie gemeint hat: Solange
 /// nur Lesen Erfahrung brachte, öffnete sich der Baum durchs Lesen.
 ///
-/// Kämpfe zahlen bewusst nicht ein. Das Konzept nennt sie als Ausgabe,
-/// nicht als Einnahme — sonst ließe sich der Habit-Teil weggrinden.
+/// **Kämpfe zahlen seit ADR-0032 ein, aber nur einmal je Gegner.** Das
+/// Konzept nennt den Kampf als Ausgabe und nicht als Einnahme — der
+/// Einwand galt jedoch wiederholbarer Belohnung: Sonst ließe sich der
+/// Habit-Teil weggrinden. Die Reihe hat dreißig Sprossen, jede zahlt
+/// genau einmal, und damit steht der Gesamtbetrag als Zahl fest
+/// (`LadderRewards.lifetimeXp`).
 final totalXpProvider = Provider<int>((ref) {
   final theory = ref.watch(theoryProgressProvider).totalXp;
   final habits = ref.watch(habitTrackerProvider).totalXp;
-  return theory + habits;
+  // **Seit ADR-0032 gibt auch der Kampf etwas** — aber nur einmal je
+  // Gegner, und damit gedeckelt auf `LadderRewards.lifetimeXp`. Ein
+  // wiederholbarer Sieg waere eine Dauerquelle und wuerde `konzept.md`
+  // Abschnitt 2 widerlegen.
+  final reihe = ref.watch(ladderProvider).earnedXp;
+  return theory + habits + reihe;
 });
 
 /// Erfahrung einschließlich Dev-Zuschlag.
@@ -47,7 +58,8 @@ final playerLevelProvider = Provider<PlayerLevel>((ref) {
 final goldEarnedProvider = Provider<int>((ref) {
   final theory = ref.watch(theoryProgressProvider).totalGold;
   final habits = ref.watch(habitTrackerProvider).totalGold;
-  return theory + habits;
+  final reihe = ref.watch(ladderProvider).earnedGold;
+  return theory + habits + reihe;
 });
 
 /// Verfügbares Gold: Zufluss minus Besitz.

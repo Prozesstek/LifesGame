@@ -5,7 +5,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
-import 'package:lifes_game/combat/enemy_picker_screen.dart';
+import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
@@ -107,7 +107,7 @@ void main() {
     'Gewohnheiten': const HabitsScreen(),
     'Laden': const ShopScreen(),
     'Charakter': const CharacterScreen(),
-    'Gegnerwahl': const EnemyPickerScreen(),
+    'Gegnerreihe': const LadderScreen(),
   };
 
   group('Jeder Bildschirm passt aufs Handy', () {
