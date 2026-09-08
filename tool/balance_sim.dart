@@ -20,6 +20,7 @@ import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/gear/set_effects.dart';
 import 'package:progression/progression.dart';
 
 /// Spieler und Gegner nutzen dieselbe Policy — sie beschreibt nur
@@ -42,6 +43,91 @@ void main(List<String> args) {
   _rundenzahlen(fights);
   _timingSpanne(fights);
   _waffenvergleich(fights);
+  _setvergleich(fights);
+}
+
+/// Ob ein volles Set im Kampf etwas ausmacht.
+///
+/// **Dieselbe Frage wie beim Waffenvergleich, und aus demselben Grund
+/// gestellt:** „Das Set verstärkt Angriffs-Fähigkeiten" ist eine
+/// Behauptung, solange niemand nachrechnet.
+///
+/// Gemessen wird ehrlich: Der Spieler trägt die vier Stücke des Sets (also
+/// deren Werte **und** deren Waffe) und legt auf die freien Plätze
+/// bevorzugt Fähigkeiten der passenden Art. Verglichen wird gegen genau
+/// denselben Spieler ohne die Set-Wirkung — der Unterschied ist damit die
+/// Wirkung allein, nicht die bessere Ausrüstung.
+///
+/// **Gemessen wird die Rundenzahl, nicht die Siegquote.** Wer vier
+/// Set-Stücke trägt, hat rund 1880 Gold ausgegeben und gewinnt gegen alle
+/// drei Gegner ohnehin — die Quote steht überall auf 100 % und sagt
+/// nichts. Die Rundenzahl sättigt nicht: Sie zeigt, wie viel schneller
+/// derselbe Kampf endet.
+///
+/// Dass die Quote sättigt, ist selbst ein Befund und steht in
+/// `docs/context/state.md`: Gegen drei Gegner ist ein volles Set
+/// Überfluss. Sein Platz ist der Dungeon (Ziel 6), wo HP zwischen den
+/// Kämpfen nicht heilen und jede gesparte Runde zählt.
+///
+/// **Zwei der drei Sets kann diese Simulation nicht messen, und das liegt
+/// an ihr, nicht an den Sets:**
+///
+/// - *Ruhiger Stand* macht die Leiste breiter und langsamer. Der
+///   simulierte Spieler tippt aber nicht — sein Ergebnis kommt aus
+///   [_roll], einer Münze mit `timingSkill` als Gewicht, und nie aus
+///   [TimingSpec.judgeAt]. Eine breitere Leiste ändert für ihn nichts.
+/// - *Eiserner Wille* verstärkt Angriffs-Fähigkeiten. Die drei, die dem
+///   Spieler an Tag 30 zuerst zufallen, sind schwächer als sein Waffenzug
+///   (Funkenstoß 0,75 gegen Hieb 1,3), und [SimpleEnemyPolicy] wählt sie
+///   deshalb nicht. Verstärkt wird ein Zug, den niemand drückt — derselbe
+///   Befund wie beim Waffenvergleich, aus einer dritten Richtung.
+///
+/// Beides wäre zu beheben, kostet aber die Vergleichbarkeit mit allen
+/// Zahlen weiter oben. Solange Balancing zurückgestellt ist, steht die
+/// Einschränkung lieber hier als ungenannt in einer Nullzeile.
+void _setvergleich(int fights) {
+  print('\n--- Was ein volles Set an Tag 30 ausmacht ---');
+  print('(Runden im Schnitt; dieselben vier Stücke, ohne → mit Wirkung)\n');
+
+  const tag = 30;
+  final kopf = Enemies.all.map((e) => e.name.padLeft(20)).join();
+  print('  ${'Set'.padRight(18)}$kopf');
+
+  for (final set in GearSets.all) {
+    final stuecke = GearCatalog.piecesOf(set.id);
+    var bonus = const GearBonus();
+    for (final stueck in stuecke) {
+      bonus = bonus + stueck.bonus;
+    }
+
+    final waffe = stuecke.firstWhere((i) => i.slot == GearSlot.waffe);
+    final loadout = _loadoutNach(
+      tag,
+      weaponMoveId: AbilityCatalog.weaponMoveFor(waffe.id),
+      preferKind: moveKindFor(set.target),
+    );
+    final wirkung = setEffectsFor(<ActiveSet>[
+      ActiveSet(set: set, pieces: GearSet.fullSize, perk: set.fourPiece),
+    ]);
+
+    final felder = Enemies.all.map((gegner) {
+      double runden(List<SetEffect> sets) => _run(
+        fights: fights,
+        stats: _statsNach(tag),
+        bonus: bonus,
+        loadout: loadout,
+        sets: sets,
+        gegner: gegner,
+        timingSkill: 0.5,
+      ).averageRounds;
+
+      final ohne = runden(const <SetEffect>[]).toStringAsFixed(1);
+      final mit = runden(wirkung).toStringAsFixed(1);
+      return '$ohne → $mit'.padLeft(20);
+    }).join();
+
+    print('  ${set.name.padRight(18)}$felder');
+  }
 }
 
 /// Ob die Waffe im Laden wirklich etwas entscheidet (Ziel 3).
@@ -228,17 +314,36 @@ int _levelNach(int tage) {
 /// `AbilityCatalog`, also dem Kurzbogen -- so, wie jemand ohne gekaufte
 /// Waffe dasteht. Die uebrigen Abschnitte messen absichtlich diesen Fall;
 /// was eine gekaufte Waffe aendert, misst `_waffenvergleich`.
-List<Move> _loadoutNach(int tage, {String? weaponMoveId}) {
+/// **[preferKind] steuert, was auf die freien Plaetze kommt.** Ohne
+/// Angabe nimmt der Spieler, was zuerst im Katalog steht -- die
+/// anspruchsloseste Annahme. Wer ein Set traegt, waehlt dagegen passend;
+/// ein Umgebungs-Set neben drei Angriffs-Faehigkeiten zu messen waere ein
+/// Strohmann.
+List<Move> _loadoutNach(
+  int tage, {
+  String? weaponMoveId,
+  MoveKind? preferKind,
+}) {
   final offen = AbilitySlots.openAt(_levelNach(tage));
   final moves = <Move>[
     Moves.byId(weaponMoveId ?? AbilityCatalog.fallbackMoveId) ??
         Moves.basicAttack,
   ];
 
-  for (final ability in AbilityCatalog.unlockedBy(_fortschrittNach(tage))) {
+  final offene = AbilityCatalog.unlockedBy(
+    _fortschrittNach(tage),
+  ).map((a) => Moves.byId(a.moveId)).nonNulls.toList();
+  if (preferKind != null) {
+    offene.sort((a, b) {
+      final aPasst = a.kind == preferKind ? 0 : 1;
+      final bPasst = b.kind == preferKind ? 0 : 1;
+      return aPasst.compareTo(bPasst);
+    });
+  }
+
+  for (final move in offene) {
     if (moves.length >= offen) break;
-    final move = Moves.byId(ability.moveId);
-    if (move != null) moves.add(move);
+    moves.add(move);
   }
 
   return moves;
@@ -297,6 +402,9 @@ _Ergebnis _run({
 
   /// Was eine angelegte Waffe obendrauf gibt. Leer heisst: keine Waffe.
   GearBonus bonus = const GearBonus(),
+
+  /// Was vollstaendige Sets beitragen. Leer heisst: keins voll.
+  List<SetEffect> sets = const <SetEffect>[],
 }) {
   // Zwei getrennte Generatoren, und das ist keine Kosmetik: Mit einem
   // einzigen verschiebt die Timing-Spalte alle folgenden Kampf-Seeds, weil
@@ -314,6 +422,7 @@ _Ergebnis _run({
       seed: seeds.nextInt(1 << 30),
       enemyLoadout: gegner.loadout,
       enemyUtilityChance: gegner.utilityChance,
+      playerSets: sets,
     );
     var state = CombatState.start(
       player: Combatant.fresh(

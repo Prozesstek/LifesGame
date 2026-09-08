@@ -256,6 +256,87 @@ void main() {
     });
   });
 
+  group('Sets im Bild', () {
+    /// Ein Stand, der die [anzahl] billigsten Teile eines Sets trägt.
+    SaveData mitTeilenVon(GearSet set, int anzahl) {
+      var loadout = const Loadout.empty();
+      for (final item in GearCatalog.piecesOf(set.id).take(anzahl)) {
+        loadout = loadout.buy(item.id, availableGold: 100000);
+      }
+      return SaveData(loadout: loadout);
+    }
+
+    testWidgets('der Laden nennt die Set-Zugehörigkeit', (tester) async {
+      // Wer nach einem Set kauft, sucht im Laden — nicht auf einem
+      // zweiten Bildschirm.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      final waffe = GearCatalog.piecesOf(
+        GearSets.eisernerWille.id,
+      ).firstWhere((i) => i.slot == GearSlot.waffe);
+
+      expect(find.text(waffe.name), findsOneWidget);
+      expect(
+        find.textContaining('Teil von „${GearSets.eisernerWille.name}"'),
+        findsWidgets,
+      );
+    });
+
+    testWidgets('ohne Set-Teile zeigt der Charakter keine Set-Karte', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sets'), findsNothing);
+    });
+
+    testWidgets('ein einzelnes Teil steht da, wirkt aber noch nicht', (
+      tester,
+    ) async {
+      // **Ein Anfang soll sichtbar sein.** Wer ein Teil trägt, ohne es zu
+      // wissen, hat kein Ziel — er hat Zufall.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(mitTeilenVon(GearSets.sturmruf, 1), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sets'), findsOneWidget);
+      expect(find.text('1 / ${GearSet.fullSize}'), findsOneWidget);
+      expect(
+        find.textContaining('Noch ein Teil bis zur nächsten Stufe'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('zwei Teile nennen die Wirkung mit echten Zahlen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(mitTeilenVon(GearSets.sturmruf, 2), const CharacterScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      // Der Text baut sich aus dem Katalog — wer die Zahl dort ändert,
+      // muss hier nichts nachziehen.
+      final erwartet =
+          '${GearSets.sturmruf.twoPiece.labels.join(' · ')} auf '
+          '${GearSets.sturmruf.target.label}';
+
+      expect(find.text('2 / ${GearSet.fullSize}'), findsOneWidget);
+      expect(find.text(erwartet), findsOneWidget);
+    });
+  });
+
   group('CharacterScreen', () {
     testWidgets('zeigt alle vier Werte und alle sechs Plätze', (tester) async {
       useTallView(tester);

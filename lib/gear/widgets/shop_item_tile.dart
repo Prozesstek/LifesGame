@@ -19,6 +19,7 @@ class ShopItemTile extends StatelessWidget {
     required this.missingGold,
     required this.onBuy,
     this.abilityLine,
+    this.setPieces = 0,
     super.key,
   });
 
@@ -30,6 +31,13 @@ class ShopItemTile extends StatelessWidget {
   /// Zusammengesetzt wird sie im [ShopScreen] — `package:gear` kennt
   /// weder Fähigkeiten noch Moves, und soll es nicht.
   final String? abilityLine;
+
+  /// Wie viele Teile des Sets dieses Stücks bereits getragen werden.
+  ///
+  /// Ohne die Zahl wäre die Marke nur ein Etikett; mit ihr ist sie ein
+  /// Fortschritt. Gezählt wird in `Loadout.equippedPiecesOf` — hier steht
+  /// nur das Ergebnis.
+  final int setPieces;
 
   /// Warum der Kauf nicht geht. Null heißt: geht.
   final PurchaseBlock? block;
@@ -104,6 +112,23 @@ class ShopItemTile extends StatelessWidget {
                           color: Palette.success,
                         ),
                       ),
+                      // **Die Set-Marke gehört an das Stück, nicht in eine
+                      // eigene Liste.** Wer nach einem Set kauft, sucht
+                      // im Laden — nicht auf einem zweiten Bildschirm.
+                      if (GearSets.byId(item.setId)
+                          case final GearSet set) ...<Widget>[
+                        const SizedBox(height: 3),
+                        Text(
+                          'Teil von „${set.name}" · $setPieces von '
+                          '${GearSet.fullSize} getragen',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: setPieces >= GearSet.smallSize
+                                ? Palette.accent
+                                : Palette.muted,
+                          ),
+                        ),
+                      ],
                       // **Ohne diese Zeile ist der Waffenkauf blind.**
                       // Fünf Waffen mit fünf Rhythmen sind nur dann eine
                       // Entscheidung, wenn man vor dem Kauf sieht,

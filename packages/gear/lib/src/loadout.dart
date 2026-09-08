@@ -1,5 +1,7 @@
 import 'catalog.dart';
+import 'gear_set.dart';
 import 'item.dart';
+import 'set_catalog.dart';
 
 /// Warum ein Kauf nicht geht. Null heißt: geht.
 enum PurchaseBlock {
@@ -168,6 +170,46 @@ class Loadout {
     if (!_equipped.containsKey(slot)) return this;
     final next = <GearSlot, String>{..._equipped}..remove(slot);
     return Loadout(ownedIds: _ownedIds, equipped: next);
+  }
+
+  // --- Sets ---
+
+  /// Wie viele Teile eines Sets **getragen** werden.
+  ///
+  /// Besitz zählt nicht. Ein Set im Rucksack ist kein Set — sonst wäre die
+  /// Wahl auf jedem Platz folgenlos, sobald man einmal alles gekauft hat.
+  int equippedPiecesOf(String setId) {
+    var count = 0;
+    for (final id in _equipped.values) {
+      if (GearCatalog.byId(id)?.setId == setId) count++;
+    }
+    return count;
+  }
+
+  /// Ob überhaupt ein Set-Teil getragen wird.
+  ///
+  /// Nicht dasselbe wie „ein Set wirkt": Ein einzelnes Teil wirkt nicht,
+  /// ist aber ein Anfang — und genau das soll der Charakterbildschirm
+  /// zeigen dürfen, statt es zu verschweigen.
+  bool get wearsAnySetPiece {
+    return _equipped.values
+        .any((id) => GearCatalog.byId(id)?.isSetPiece ?? false);
+  }
+
+  /// Alle Sets, die gerade wirken — mit Stufe und Wirkung.
+  ///
+  /// **Abgeleitet, nicht gespeichert**, wie das Gold (ADR-0011) und die
+  /// Erfahrung (ADR-0008). Ein gespeicherter Set-Zustand könnte von dem
+  /// abweichen, was tatsächlich getragen wird.
+  List<ActiveSet> get activeSets {
+    final aktiv = <ActiveSet>[];
+    for (final set in GearSets.all) {
+      final pieces = equippedPiecesOf(set.id);
+      final perk = set.perkFor(pieces);
+      if (perk == null) continue;
+      aktiv.add(ActiveSet(set: set, pieces: pieces, perk: perk));
+    }
+    return List<ActiveSet>.unmodifiable(aktiv);
   }
 
   /// Die Summe aller getragenen Stücke. Was nur im Besitz ist, wirkt

@@ -81,6 +81,18 @@ final equippedStatsProvider = Provider<EquippedStats>((ref) {
   );
 });
 
+/// Welche Ausrüstungs-Sets gerade wirken.
+///
+/// **Eine Frage, eine Stelle** (`docs/context/gotchas.md`). Der
+/// Charakterbildschirm zeigt sie, der Laden weist darauf hin, und der
+/// Kampf rechnet damit — alle drei fragen hier.
+///
+/// Abgeleitet aus dem, was getragen wird: `Loadout.activeSets` zählt die
+/// Teile, `package:gear` sagt, was daraus folgt. Hier steht keine Regel.
+final activeSetsProvider = Provider<List<ActiveSet>>((ref) {
+  return ref.watch(loadoutProvider).activeSets;
+});
+
 /// Charakterwerte einschließlich Ausrüstung, mit Blick auf beide Anteile.
 ///
 /// Die Aufteilung bleibt sichtbar, weil der Charakterbildschirm sie zeigen

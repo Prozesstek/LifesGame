@@ -69,6 +69,9 @@ class ShopScreen extends ConsumerWidget {
                       isEquipped: loadout.isEquipped(item.id),
                       missingGold: item.price - gold,
                       abilityLine: weaponAbilityLine(item),
+                      setPieces: item.setId == null
+                          ? 0
+                          : loadout.equippedPiecesOf(item.setId ?? ''),
                       onBuy: () => _buy(context, ref, item),
                     ),
                     const SizedBox(height: 8),

@@ -191,4 +191,87 @@ void main() {
       );
     });
   });
+
+  group('Sets', () {
+    /// Ein Stand, der die [anzahl] billigsten Teile eines Sets trägt.
+    Loadout mitTeilenVon(GearSet set, int anzahl) {
+      var loadout = const Loadout.empty();
+      for (final item in GearCatalog.piecesOf(set.id).take(anzahl)) {
+        loadout = loadout.buy(item.id, availableGold: 100000);
+      }
+      return loadout;
+    }
+
+    test('ein Teil allein wirkt noch nicht', () {
+      final loadout = mitTeilenVon(GearSets.eisernerWille, 1);
+
+      expect(loadout.equippedPiecesOf(GearSets.eisernerWille.id), 1);
+      expect(loadout.activeSets, isEmpty);
+    });
+
+    test('zwei Teile geben die kleine Stufe', () {
+      final loadout = mitTeilenVon(GearSets.eisernerWille, 2);
+      final aktiv = loadout.activeSets.single;
+
+      expect(aktiv.set.id, GearSets.eisernerWille.id);
+      expect(aktiv.pieces, 2);
+      expect(aktiv.perk, GearSets.eisernerWille.twoPiece);
+      expect(aktiv.isFull, isFalse);
+    });
+
+    test('vier Teile geben die volle Stufe, nicht beide', () {
+      final loadout = mitTeilenVon(GearSets.eisernerWille, 4);
+      final aktiv = loadout.activeSets.single;
+
+      expect(aktiv.pieces, 4);
+      expect(aktiv.perk, GearSets.eisernerWille.fourPiece);
+      expect(aktiv.isFull, isTrue);
+    });
+
+    test('Ablegen nimmt die Stufe wieder weg', () {
+      // **Besitz zählt nicht, nur was getragen wird.** Sonst wäre die
+      // Wahl auf jedem Platz folgenlos, sobald man einmal alles gekauft
+      // hat.
+      final voll = mitTeilenVon(GearSets.eisernerWille, 4);
+      final ohneHelm = voll.unequip(GearSlot.helm);
+
+      expect(ohneHelm.activeSets.single.pieces, 3);
+      expect(
+        ohneHelm.activeSets.single.perk,
+        GearSets.eisernerWille.twoPiece,
+      );
+      // Der Helm liegt weiter im Rucksack.
+      expect(
+        ohneHelm.owned.any((i) => i.setId == GearSets.eisernerWille.id),
+        isTrue,
+      );
+    });
+
+    test('zwei Sets können gleichzeitig anliegen', () {
+      // Vier Set-Plätze, zwei Sets zu je zwei Teilen — das geht auf, und
+      // es soll gehen: Zwei kleine Stufen gegen eine volle ist genau die
+      // Entscheidung, die ein Set-System interessant macht.
+      var loadout = const Loadout.empty();
+      for (final set in <GearSet>[
+        GearSets.eisernerWille,
+        GearSets.sturmruf,
+      ]) {
+        for (final item in GearCatalog.piecesOf(set.id).take(2)) {
+          loadout = loadout.buy(item.id, availableGold: 100000);
+        }
+      }
+
+      expect(loadout.activeSets, hasLength(2));
+      expect(loadout.activeSets.every((a) => a.pieces == 2), isTrue);
+    });
+
+    test('ein Stück ohne Set trägt zu keinem bei', () {
+      final loadout = const Loadout.empty().buy(
+        'gear-lederkappe',
+        availableGold: 100000,
+      );
+
+      expect(loadout.activeSets, isEmpty);
+    });
+  });
 }

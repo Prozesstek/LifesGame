@@ -90,6 +90,7 @@ class GearItem {
     required this.price,
     required this.bonus,
     required this.why,
+    this.setId,
   });
 
   /// Stabiler Bezeichner für Speicherstände und Tests.
@@ -116,4 +117,20 @@ class GearItem {
   /// Ein Satz dazu, was das Stück im Kampf ändert. Dieselbe Rolle wie
   /// `HabitTemplate.why`: Eine Zahl allein erklärt keine Entscheidung.
   final String why;
+
+  /// Zu welchem Set dieses Stück gehört, oder null.
+  ///
+  /// **Die Zugehörigkeit steht hier und nicht im Set-Katalog.** Zwei
+  /// Listen, die dasselbe behaupten, laufen auseinander — genau der
+  /// Fallstrick aus `docs/context/gotchas.md`. `GearCatalog.piecesOf`
+  /// liest diese Marke und ist damit die einzige Antwort auf „was gehört
+  /// zu diesem Set".
+  ///
+  /// Set-Teile sind **gewöhnliche Stücke mit einer Marke**, keine eigene
+  /// Klasse: Sie kosten dasselbe, wirken dasselbe und stehen an derselben
+  /// Stelle im Laden. Nur wer zwei oder vier davon trägt, bekommt etwas
+  /// obendrauf.
+  final String? setId;
+
+  bool get isSetPiece => setId != null;
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../character/abilities_controller.dart';
 import '../gear/gear_controller.dart';
+import '../gear/set_effects.dart';
 
 /// Gegen wen der nächste Kampf geht.
 ///
@@ -25,10 +26,17 @@ final selectedEnemyProvider =
 
 /// Was der Bildschirm über einen laufenden Kampf wissen muss.
 class CombatSession {
+  /// **Alle Felder sind `required`, auch die Listen.** Ein Standardwert
+  /// hat hier schon einmal ein vergessenes Feld unsichtbar gemacht:
+  /// `moves` kam dazu, `restart()` bekam es nicht, und jeder über die
+  /// Gegnerwahl begonnene Kampf hatte keinen einzigen Knopf. Der Compiler
+  /// schwieg, weil der Standardwert einsprang
+  /// (`docs/context/gotchas.md`).
   const CombatSession({
     required this.state,
     required this.log,
-    this.moves = const <Move>[],
+    required this.moves,
+    required this.sets,
   });
 
   final CombatState state;
@@ -44,15 +52,28 @@ class CombatSession {
   /// [CombatController._freshFight]: Neues gilt ab dem nächsten Kampf.
   final List<Move> moves;
 
+  /// Die Ausrüstungs-Sets dieses Kampfes — ebenfalls eingefroren.
+  ///
+  /// Aus demselben Grund wie [moves]: Wer mitten im Kampf ein Set-Teil
+  /// ablegt, würde sonst die Leiste unter dem eigenen Finger schmaler
+  /// machen.
+  ///
+  /// Der Bildschirm braucht sie, weil die Leiste dieselbe Rechnung
+  /// anstellen muss wie die Engine — eine breitere, langsamere Leiste, die
+  /// man nicht *sieht*, ist keine.
+  final List<SetEffect> sets;
+
   CombatSession copyWith({
     CombatState? state,
     List<String>? log,
     List<Move>? moves,
+    List<SetEffect>? sets,
   }) {
     return CombatSession(
       state: state ?? this.state,
       log: log ?? this.log,
       moves: moves ?? this.moves,
+      sets: sets ?? this.sets,
     );
   }
 }
@@ -70,12 +91,22 @@ class CombatController extends Notifier<CombatSession> {
     seed: DateTime.now().millisecondsSinceEpoch,
   );
 
+  /// Die Sets dieses Kampfes, gesetzt von [_freshFight].
+  ///
+  /// **Steht hier, damit die Frage einmal beantwortet wird.** Die Engine
+  /// braucht sie zum Rechnen, der Bildschirm zum Zeichnen der Leiste —
+  /// beide zweimal aus `activeSetsProvider` zu lesen wäre der Fall aus
+  /// `docs/context/gotchas.md`: zwei Stellen, dieselbe Frage.
+  List<SetEffect> _sets = const <SetEffect>[];
+
   @override
   CombatSession build() {
+    final state = _freshFight();
     return CombatSession(
-      state: _freshFight(),
+      state: state,
       log: const <String>[],
       moves: ref.read(activeMovesProvider),
+      sets: _sets,
     );
   }
 
@@ -97,10 +128,12 @@ class CombatController extends Notifier<CombatSession> {
     final stats = ref.read(equippedStatsProvider);
     final enemy = ref.read(selectedEnemyProvider);
 
+    _sets = setEffectsFor(ref.read(activeSetsProvider));
     _engine = CombatEngine(
       seed: DateTime.now().millisecondsSinceEpoch,
       enemyLoadout: enemy.loadout,
       enemyUtilityChance: enemy.utilityChance,
+      playerSets: _sets,
     );
 
     return CombatState.start(
@@ -134,6 +167,7 @@ class CombatController extends Notifier<CombatSession> {
       state: step.state,
       log: <String>[...state.log],
       moves: state.moves,
+      sets: state.sets,
     );
     return step.events;
   }
@@ -151,21 +185,25 @@ class CombatController extends Notifier<CombatSession> {
   /// Setzt den Kampf auf Anfang — mit frischem Gegner **und** frischem
   /// Moveset.
   ///
-  /// **Das Moveset muss hier mit.** `CombatSession.moves` hat einen leeren
-  /// Standardwert; wer ihn beim Neubauen vergisst, bekommt einen Kampf ohne
-  /// einen einzigen Knopf. Genau das ist passiert, als `moves` zu
-  /// [CombatSession] dazukam: [build] bekam es, `restart` nicht — und weil
-  /// die Gegnerwahl `restart` aufruft, war jeder über den Startbildschirm
-  /// begonnene Kampf unbedienbar.
+  /// **Das Moveset muss hier mit.** `CombatSession.moves` hatte einmal
+  /// einen leeren Standardwert; wer ihn beim Neubauen vergaß, bekam einen
+  /// Kampf ohne einen einzigen Knopf. Genau das ist passiert, als `moves`
+  /// zu [CombatSession] dazukam: [build] bekam es, `restart` nicht — und
+  /// weil die Gegnerwahl `restart` aufruft, war jeder über den
+  /// Startbildschirm begonnene Kampf unbedienbar. Seit die Felder
+  /// `required` sind, kann derselbe Fehler nicht mehr schweigen.
   ///
   /// Neu eingelesen statt übernommen ist dabei Absicht: Ein neuer Kampf
   /// soll die Ausrüstung und die Fähigkeiten von *jetzt* verwenden. Nur
-  /// innerhalb eines laufenden Kampfes friert das Moveset ein (ADR-0017).
+  /// innerhalb eines laufenden Kampfes frieren Moveset und Sets ein
+  /// (ADR-0017).
   void restart() {
+    final fresh = _freshFight();
     state = CombatSession(
-      state: _freshFight(),
+      state: fresh,
       log: const <String>[],
       moves: ref.read(activeMovesProvider),
+      sets: _sets,
     );
   }
 }

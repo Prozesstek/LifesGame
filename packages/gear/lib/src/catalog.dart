@@ -36,6 +36,7 @@ abstract final class GearCatalog {
     // ---------------------------------------------------------------
     GearItem(
       id: 'gear-kurzbogen',
+      setId: 'set-ruhiger-stand',
       name: 'Kurzbogen',
       slot: GearSlot.waffe,
       rarity: GearRarity.common,
@@ -47,6 +48,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-uebungsklinge',
+      setId: 'set-eiserner-wille',
       name: 'Übungsklinge',
       slot: GearSlot.waffe,
       rarity: GearRarity.common,
@@ -82,6 +84,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-kriegsstab',
+      setId: 'set-sturmruf',
       name: 'Kriegsstab',
       slot: GearSlot.waffe,
       rarity: GearRarity.rare,
@@ -107,6 +110,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-gestepptes-wams',
+      setId: 'set-sturmruf',
       name: 'Gestepptes Wams',
       slot: GearSlot.ruestung,
       rarity: GearRarity.common,
@@ -128,6 +132,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-kettenpanzer',
+      setId: 'set-ruhiger-stand',
       name: 'Kettenpanzer',
       slot: GearSlot.ruestung,
       rarity: GearRarity.uncommon,
@@ -138,6 +143,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-plattenharnisch',
+      setId: 'set-eiserner-wille',
       name: 'Plattenharnisch',
       slot: GearSlot.ruestung,
       rarity: GearRarity.rare,
@@ -163,6 +169,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-eisenhaube',
+      setId: 'set-eiserner-wille',
       name: 'Eisenhaube',
       slot: GearSlot.helm,
       rarity: GearRarity.common,
@@ -174,6 +181,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-schuppenhaube',
+      setId: 'set-sturmruf',
       name: 'Schuppenhaube',
       slot: GearSlot.helm,
       rarity: GearRarity.uncommon,
@@ -194,6 +202,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-turnierhelm',
+      setId: 'set-ruhiger-stand',
       name: 'Turnierhelm',
       slot: GearSlot.helm,
       rarity: GearRarity.rare,
@@ -209,6 +218,7 @@ abstract final class GearCatalog {
     // ---------------------------------------------------------------
     GearItem(
       id: 'gear-feste-stiefel',
+      setId: 'set-ruhiger-stand',
       name: 'Feste Stiefel',
       slot: GearSlot.schuhe,
       rarity: GearRarity.common,
@@ -219,6 +229,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-genagelte-stiefel',
+      setId: 'set-sturmruf',
       name: 'Genagelte Stiefel',
       slot: GearSlot.schuhe,
       rarity: GearRarity.common,
@@ -229,6 +240,7 @@ abstract final class GearCatalog {
     ),
     GearItem(
       id: 'gear-schienbeinschutz',
+      setId: 'set-eiserner-wille',
       name: 'Schienbeinschutz',
       slot: GearSlot.schuhe,
       rarity: GearRarity.uncommon,
@@ -385,6 +397,26 @@ abstract final class GearCatalog {
     final items = all.where((item) => item.slot == slot).toList()
       ..sort((a, b) => a.price.compareTo(b.price));
     return List<GearItem>.unmodifiable(items);
+  }
+
+  /// Die Stücke eines Sets, günstigstes zuerst.
+  ///
+  /// **Die einzige Antwort auf „was gehört zu diesem Set".** Die
+  /// Zugehörigkeit steht an den Stücken (`GearItem.setId`); eine zweite
+  /// Liste im Set-Katalog könnte davon abweichen.
+  static List<GearItem> piecesOf(String setId) {
+    final items = all.where((item) => item.setId == setId).toList()
+      ..sort((a, b) => a.price.compareTo(b.price));
+    return List<GearItem>.unmodifiable(items);
+  }
+
+  /// Was ein volles Set kostet.
+  static int fullSetPrice(String setId) {
+    var sum = 0;
+    for (final item in piecesOf(setId)) {
+      sum += item.price;
+    }
+    return sum;
   }
 
   /// Alles einer Seltenheit auf einem Platz, günstigstes zuerst.

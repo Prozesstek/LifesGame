@@ -6,6 +6,7 @@ import 'enemy_policy.dart';
 import 'environment.dart';
 import 'events.dart';
 import 'move.dart';
+import 'set_effect.dart';
 import 'state.dart';
 import 'status.dart';
 import 'timed_hit.dart';
@@ -24,11 +25,20 @@ class CombatEngine {
     this.enemyPolicy = const SimpleEnemyPolicy(),
     this.enemyLoadout = Moves.defaultLoadout,
     this.enemyUtilityChance = 0,
+    this.playerSets = const <SetEffect>[],
   }) : _random = Random(seed);
 
   final Balance balance;
   final EnemyPolicy enemyPolicy;
   final List<Move> enemyLoadout;
+
+  /// Was die vollstaendigen Ausruestungs-Sets des Spielers beitragen.
+  ///
+  /// **Nur der Spieler traegt welche.** Gegner haben keine Ausruestung —
+  /// das ist keine Ausnahme von ADR-0023, sondern liegt daneben: Dort ging
+  /// es um Timing und Zugwahl, also darum, wie beide Seiten *spielen*.
+  /// Woher ihre Werte kommen, war nie dieselbe Frage.
+  final List<SetEffect> playerSets;
 
   /// Wie oft dieser Gegner etwas anderes tut als zuzuschlagen. Kommt aus
   /// [EnemyBlueprint.utilityChance] und ist damit eine Gegnerzahl, keine
@@ -113,6 +123,7 @@ class CombatEngine {
       actor: round.of(side),
       side: side,
       environment: round.environment,
+      sets: _setsOf(side),
     );
     return <TimedHit>[
       for (var i = 0; i < move.hits; i++) spec.judgeAt(_random.nextDouble()),
@@ -122,7 +133,14 @@ class CombatEngine {
   /// Fuehrt einen Move aus: Kosten, Schaden, Zusatzwirkungen.
   void _act(_Round round, Side side, Move move, List<TimedHit> hits) {
     final actor = round.of(side);
-    final discount = _costDiscount(actor);
+    // Rabatt aus dem Statuseffekt **und** aus den Sets. Beide addieren
+    // sich, aber zusammen hoechstens bis auf null Kosten — sonst wuerde
+    // ein Zug, den man sich leisten muss, plötzlich Energie *einbringen*.
+    final fromStatus = _costDiscount(actor);
+    final discount = min(
+      fromStatus + _setsOf(side).energyDiscountFor(move),
+      move.energyCost,
+    );
     if (actor.energy < move.energyCost - discount) {
       round.emit(
         MoveFailed(
@@ -138,7 +156,10 @@ class CombatEngine {
     final environmentBefore = round.environment;
     round.emit(MoveUsed(side: side, moveId: move.id));
     _applyEnergy(round, side, move.energyDelta + discount);
-    if (discount > 0) {
+    // **Nur der Statuseffekt verbraucht sich.** Ein Set liegt an, solange
+    // die Stuecke getragen werden — wuerde es hier mitgeloescht, wirkte es
+    // genau einmal je Kampf.
+    if (fromStatus > 0) {
       round.set(side, round.of(side).withoutStatus('cost_reduction'));
     }
 
@@ -205,6 +226,12 @@ class CombatEngine {
     return 0;
   }
 
+  /// Was die Sets des Spielers auf diesen Zug geben. Fuer den Gegner ist
+  /// die Liste leer — er traegt keine Ausruestung.
+  List<SetEffect> _setsOf(Side side) {
+    return side == Side.player ? playerSets : const <SetEffect>[];
+  }
+
   void _applyEnergy(_Round round, Side side, int delta) {
     if (delta == 0) return;
     final before = round.of(side).energy;
@@ -224,11 +251,12 @@ class CombatEngine {
     final factor = _timingFactor(round, side, move, timedHit);
     final environment = round.environment;
     final fromField = environment?.damageFactorFor(side) ?? 1.0;
+    final fromSets = _setsOf(side).damageFactorFor(move);
     final raw = _rawDamage(
       round.of(side),
       round.of(target),
       move,
-      factor * fromField,
+      factor * fromField * fromSets,
     );
 
     // Schutz ignorieren steht bei Sternenfall in den Perfect-Wirkungen --

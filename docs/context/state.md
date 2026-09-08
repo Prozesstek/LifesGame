@@ -22,7 +22,7 @@ verlangt dreißig Tage.
 | 1 | Seltenheit je Stück | **fertig** |
 | 2 | Fünf Stücke je Platz | **fertig**, außer Waffe |
 | 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | **fertig** |
-| 4 | Sets, Set-Boni, Verkauf | offen |
+| 4 | Sets und Set-Boni | **fertig** |
 
 ### Was Schritt 1 und 2 gebracht haben
 
@@ -137,6 +137,80 @@ mit der halb so teuren Übungsklinge besser bedient", bei der
 Geschliffenen Klinge „sie lohnt sich erst, wenn auf den freien Plätzen
 etwas liegt, das Energie kostet". Eine Falle, die sich selbst benennt,
 ist keine mehr — aber sie bleibt eine, bis die Zahlen stimmen.
+
+### Was Schritt 4 gebracht hat: drei Sets
+
+[ADR-0030](../decisions/0030-sets-wirken-auf-eine-art-von-faehigkeit.md).
+348 App-Tests (vorher 336), gear 51 (vorher 31), combat 96 (vorher 80).
+
+**Kein neues Stück.** Von den fünf Stücken auf Waffe, Rüstung, Helm und
+Schuhe tragen drei eine Set-Marke, zwei keine — drei Sets à vier Teile
+gehen damit genau auf. Ring und Talisman gehören zu keinem Set, sonst
+hieße „Set voll" auch „die ganze Ausrüstung steht fest".
+
+| Set | Wirkt auf | 2 Teile | 4 Teile | voll |
+|---|---|---|---|---|
+| Eiserner Wille | Angriffs-Fähigkeiten | +10 % Schaden | +25 % | 1880 |
+| Sturmruf | Umgebungen | −1 Energie | −2 Energie | 1870 |
+| Ruhiger Stand | Schutz und Heilung | Leiste ×0,85 / ×1,25 | ×0,7 / ×1,6 | 1840 |
+
+**Jedes Set wirkt auf genau eine Art.** Bei „alles gleich" gäbe es eine
+richtige Antwort — das Set mit der größten Zahl. So hängt die Antwort
+daran, was auf den Fähigkeitsplätzen liegt, und damit am Skillbaum und an
+den Streaks.
+
+**Ein Set wirkt nicht auf den Waffenzug**, obwohl der als Angriff zählt.
+Das ist ADR-0009 ein zweites Mal: Ein Faktor auf den Zug, den man jede
+Runde drückt, entscheidet den Kampf allein.
+
+**Der Spielstand ist unverändert.** Was aktiv ist, wird aus dem Getragenen
+abgeleitet — wie das Gold (ADR-0011) und die Erfahrung (ADR-0008). Sets
+überleben einen Neustart, weil die Ausrüstung es tut.
+
+**Die 2er-Stufe ist in 10 bis 19 Tagen erreichbar, die 4er in rund 75.**
+Beides prüft `set_catalog_test.dart`. Die volle Stufe liegt bewusst
+jenseits des 30-Tage-Laufs: Der Laden soll danach noch etwas zu wollen
+übrig lassen.
+
+### Was die Simulation dazu sagt — und was sie nicht sagen kann
+
+`_setvergleich` in `tool/balance_sim.dart` misst denselben Spieler mit und
+ohne Set-Wirkung. Rundenzahl statt Siegquote, weil die Quote sättigt:
+
+| Set | Wegelagerer | Söldner | Bergwächter |
+|---|---|---|---|
+| Eiserner Wille | 5,3 → 5,3 | 10,8 → 10,8 | 10,4 → 10,4 |
+| **Sturmruf** | 5,0 → 5,0 | **6,2 → 5,3** | **8,0 → 7,2** |
+| Ruhiger Stand | 7,1 → 7,1 | 19,2 → 19,2 | 16,1 → 16,1 |
+
+**Nur Sturmruf ist messbar, und die beiden Nullen liegen an der
+Simulation, nicht an den Sets:**
+
+- *Ruhiger Stand* macht die Leiste breiter und langsamer. Der simulierte
+  Spieler **tippt aber nicht** — sein Timing kommt aus einer gewichteten
+  Münze (`timingSkill`), nie aus `TimingSpec.judgeAt`. Eine breitere
+  Leiste kann für ihn nichts ändern.
+- *Eiserner Wille* verstärkt Angriffs-Fähigkeiten. Die drei, die dem
+  Spieler an Tag 30 zuerst zufallen, sind schwächer als sein Waffenzug,
+  und `SimpleEnemyPolicy` wählt sie deshalb nicht. **Derselbe Befund wie
+  beim Waffenvergleich, aus einer dritten Richtung.**
+
+**Und ein Befund, der über die Sets hinausgeht: Gegen drei Gegner ist ein
+volles Set Überfluss.** Die Siegquote steht mit vier Set-Stücken überall
+auf 100 %. Der Platz eines Sets ist der Dungeon (Ziel 6), wo HP zwischen
+den Kämpfen nicht heilen und jede gesparte Runde zählt.
+
+### Offen aus Schritt 4
+
+**Verkauf gibt es weiter nicht** — und mit Sets wird das unangenehmer als
+bei sechs Plätzen (ADR-0011). Wer auf ein Set hinkauft und sich
+umentscheidet, sitzt auf den Stücken. Bewusst nicht mitgelöst: Verkauf
+bräuchte eine Verkaufshistorie und damit die zweite Wahrheit, die ADR-0008
+vermeiden wollte.
+
+**Nicht am Bild geprüft.** Set-Karte und Laden-Marke laufen im Test bei
+390 × 844 ohne Überlauf. Wie drei Set-Zeilen untereinander auf einem Handy
+**aussehen**, muss jemand ansehen.
 
 ---
 
