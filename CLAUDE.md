@@ -115,7 +115,6 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_screen.dart` | die Reihe: „17 / 30", Gegner, Kampf-Knopf | Flutter |
-| `lib/combat/enemy_outlook.dart` | die Einschätzung vor dem Kampf — reine Rechnung | Flutter |
 | `lib/combat/enemy_icon.dart` | welches Bild zu einem Gegner gehört | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Kachelleiste, Timing | Flutter |

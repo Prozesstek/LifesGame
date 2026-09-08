@@ -317,9 +317,8 @@ void main() {
 
   group('LadderScreen', () {
     // Die Gegnerwahl ist mit Issue #36 entfallen: Es gibt genau einen
-    // naechsten Gegner. Was von ihr bleibt, ist die Einschaetzung -- sie
-    // steht jetzt unter dem Namen.
-    testWidgets('zeigt Sprosse, Gegner und Einschaetzung', (tester) async {
+    // naechsten Gegner.
+    testWidgets('zeigt Sprosse und Gegner', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(child: MaterialApp(home: LadderScreen())),
       );
@@ -327,10 +326,25 @@ void main() {
 
       expect(find.text('0 / ${Enemies.rungs}'), findsOneWidget);
       expect(find.text(Enemies.atRung(1).name), findsOneWidget);
+    });
 
-      // Ein frischer Charakter schafft den ersten knapp -- genau das soll
-      // der Bildschirm vorher sagen.
-      expect(find.text('wird knapp'), findsOneWidget);
+    testWidgets('und sagt nicht voraus, wie es ausgeht', (tester) async {
+      // Die Einschaetzung stammte aus der Gegnerwahl, wo sie eine
+      // Entscheidung stuetzte. In der Reihe gibt es nichts zu
+      // entscheiden -- eine Vorhersage, die man nicht befolgen kann,
+      // ist Reibung.
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: LadderScreen())),
+      );
+      await tester.pumpAndSettle();
+
+      for (final satz in <String>[
+        'wird knapp',
+        'sollte gut ausgehen',
+        'vermutlich noch zu stark',
+      ]) {
+        expect(find.text(satz), findsNothing, reason: satz);
+      }
     });
 
     testWidgets('nennt die Belohnung vor dem Kampf', (tester) async {

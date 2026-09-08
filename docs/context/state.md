@@ -458,7 +458,11 @@ ansehen.
   - **Startbildschirm** mit allen fünf Bereichen. Der **Kampf** wartet,
     bis das Handbuch durch ist ([ADR-0018](../decisions/0018-kampf-hinter-dem-handbuch.md))
   - **Skillbaum**, **Theorie**, **Gewohnheiten** wie bisher
-  - **Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")
+  - ~~**Gegnerwahl** vor dem Kampf, mit Einschätzung („wird knapp")~~ —
+    am 08.09. durch die **Gegnerreihe** ersetzt
+    ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)). Die
+    Einschätzung ist mit ihr weggefallen: Sie stützte eine Wahl, und die
+    gibt es nicht mehr
   - **Kampf**: Flame-Darstellung, Statusleisten, Move-Buttons, Log, Timing
   - **Laden**: sechs Plätze, Preis, Wirkung, Begründung — und bei zu wenig
     Gold, wie viele Tage noch fehlen

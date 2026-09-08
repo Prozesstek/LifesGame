@@ -2,12 +2,10 @@ import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../gear/gear_controller.dart';
 import '../ui/palette.dart';
 import 'combat_controller.dart';
 import 'combat_screen.dart';
 import 'enemy_icon.dart';
-import 'enemy_outlook.dart';
 import 'ladder_controller.dart';
 
 /// Die Gegnerreihe — dreißig Stufen, eine nach der anderen.
@@ -31,13 +29,6 @@ class LadderScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stand = ref.watch(ladderProvider);
     final gegner = ref.watch(nextEnemyProvider);
-    final stats = ref.watch(equippedStatsProvider);
-
-    final aussicht = outlookFor(
-      gegner,
-      playerAttack: stats.attack,
-      playerHp: stats.maxHp,
-    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Kampf')),
@@ -53,7 +44,7 @@ class LadderScreen extends ConsumerWidget {
                   const SizedBox(height: 14),
                   Expanded(child: _GegnerBild(enemy: gegner)),
                   const SizedBox(height: 14),
-                  _Namensleiste(enemy: gegner, aussicht: aussicht),
+                  _Namensleiste(enemy: gegner),
                   const SizedBox(height: 10),
                   _Belohnung(stand: stand),
                   const SizedBox(height: 14),
@@ -173,12 +164,17 @@ class _KeinBild extends StatelessWidget {
   }
 }
 
-/// Name des Gegners und die Einschätzung darunter.
+/// Name und Werte des Gegners.
+///
+/// **Ohne Einschätzung.** Bis Issue #36 stand hier „wird knapp" oder
+/// „vermutlich noch zu stark" — geerbt von der Gegnerwahl, wo sie eine
+/// Entscheidung stützte. In der Reihe gibt es nichts zu entscheiden: Es
+/// steht genau ein Gegner an, und ob er zu stark ist, sagt der Kampf.
+/// Eine Vorhersage, die man ohnehin nicht befolgen kann, ist Reibung.
 class _Namensleiste extends StatelessWidget {
-  const _Namensleiste({required this.enemy, required this.aussicht});
+  const _Namensleiste({required this.enemy});
 
   final EnemyBlueprint enemy;
-  final EnemyOutlook aussicht;
 
   @override
   Widget build(BuildContext context) {
@@ -210,15 +206,6 @@ class _Namensleiste extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12, color: Palette.textDim),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            aussicht.label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: aussicht.color,
-            ),
           ),
         ],
       ),
