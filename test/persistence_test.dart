@@ -210,6 +210,38 @@ void main() {
       expect(zweite.read(goldProvider), goldVorher);
     });
 
+    test('ein Verkauf überlebt den Neustart (ADR-0031)', () {
+      // **Der Fall, der ohne die Verkaufshistorie schiefginge:** Nach
+      // einem Neustart wäre das Stück weg und sein Preis wieder da — der
+      // Spieler bekäme die Hälfte geschenkt, jedes Mal beim Starten.
+      final store = InMemorySaveStore();
+      final erste = containerMit(const SaveData.empty(), store);
+
+      erste.read(habitTrackerProvider.notifier).activate(habitId);
+      var haken = tag;
+      for (var i = 0; i < 28; i++) {
+        erste.read(habitTrackerProvider.notifier).toggle(habitId, haken);
+        haken = haken.next;
+      }
+
+      expect(erste.read(loadoutProvider.notifier).buy(itemId), isNull);
+      final erloes = erste.read(loadoutProvider.notifier).sell(itemId);
+      expect(erloes, isNotNull);
+
+      final goldVorher = erste.read(goldProvider);
+      final stand = SaveData(
+        theory: erste.read(theoryProgressProvider),
+        habits: erste.read(habitTrackerProvider),
+        loadout: erste.read(loadoutProvider),
+      );
+
+      final zweite = containerMit(SaveData.decode(stand.encode()), store);
+
+      expect(zweite.read(loadoutProvider).isOwned(itemId), isFalse);
+      expect(zweite.read(loadoutProvider).soldIds, <String>[itemId]);
+      expect(zweite.read(goldProvider), goldVorher);
+    });
+
     test('geöffnete Theorieknoten überleben den Neustart (ADR-0019)', () {
       final store = InMemorySaveStore();
       final erste = containerMit(const SaveData(), store);

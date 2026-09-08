@@ -192,6 +192,121 @@ void main() {
     });
   });
 
+  group('Verkaufen', () {
+    final stueck = GearCatalog.byId(klinge)!;
+    final erloes = Loadout.refundFor(stueck);
+
+    Loadout mitKlinge() =>
+        const Loadout.empty().buy(klinge, availableGold: 100000);
+
+    test('der Erlös ist die Hälfte des Preises', () {
+      expect(erloes, (stueck.price * GearPrices.refundShare).floor());
+    });
+
+    test('verkauft heißt: nicht mehr im Besitz, nicht mehr getragen', () {
+      final nachher = mitKlinge().sell(klinge);
+
+      expect(nachher.isOwned(klinge), isFalse);
+      expect(nachher.isEquipped(klinge), isFalse);
+      expect(nachher.equippedIn(GearSlot.waffe), isNull);
+    });
+
+    test('zurück kommt genau die Hälfte, nicht der ganze Preis', () {
+      // **Der Kern von ADR-0031.** Ohne die versenkten Kosten fiele der
+      // volle Preis aus `spentGold` heraus, sobald das Stück den Besitz
+      // verlässt — der Laden wäre folgenlos.
+      final vorher = mitKlinge();
+      final nachher = vorher.sell(klinge);
+
+      expect(vorher.spentGold, stueck.price);
+      expect(nachher.spentGold, stueck.price - erloes);
+      expect(nachher.lostGold, stueck.price - erloes);
+    });
+
+    test('zweimal kaufen und verkaufen kostet zweimal', () {
+      final einmal = mitKlinge().sell(klinge);
+      final zweimal = einmal.buy(klinge, availableGold: 100000).sell(klinge);
+
+      expect(zweimal.soldIds, <String>[klinge, klinge]);
+      expect(zweimal.lostGold, einmal.lostGold * 2);
+    });
+
+    test('was man nicht besitzt, kann man nicht verkaufen', () {
+      const leer = Loadout.empty();
+
+      expect(leer.canSell(klinge), isFalse);
+      expect(leer.sell(klinge), same(leer));
+      expect(leer.sell('gear-gibt-es-nicht'), same(leer));
+    });
+
+    test('ein anderes Stück auf demselben Platz bleibt liegen', () {
+      // Verkauft wird genau eines, nicht der Platz.
+      final beide = const Loadout.empty()
+          .buy(klinge, availableGold: 100000)
+          .buy(grosseKlinge, availableGold: 100000);
+
+      final nachher = beide.sell(grosseKlinge);
+
+      expect(nachher.isOwned(klinge), isTrue);
+      expect(nachher.isOwned(grosseKlinge), isFalse);
+      // Der Platz ist frei — das verkaufte Stück war das getragene.
+      expect(nachher.equippedIn(GearSlot.waffe), isNull);
+    });
+
+    test('Gold kann durch einen Verkauf nie sinken', () {
+      // Verkaufen gibt zurück, es nimmt nicht. Formal: `spentGold` darf
+      // dabei nur fallen.
+      for (final item in GearCatalog.all) {
+        final mit = const Loadout.empty().buy(item.id, availableGold: 100000);
+        final ohne = mit.sell(item.id);
+
+        expect(
+          ohne.spentGold,
+          lessThanOrEqualTo(mit.spentGold),
+          reason: item.name,
+        );
+      }
+    });
+
+    test('die Historie überlebt Kaufen, Anlegen und Ablegen', () {
+      // **Der Fallstrick aus `gotchas.md`, vorweggenommen:** `soldIds`
+      // ist ein Feld, das jede Methode weiterreichen muss, die ein neues
+      // Loadout baut. Wer eine vergisst, löscht die versenkten Kosten —
+      // und der Spieler bekommt sein Gold zurück.
+      var loadout = mitKlinge().sell(klinge);
+      final erwartet = loadout.lostGold;
+
+      loadout = loadout
+          .buy(helm, availableGold: 100000)
+          .equip(helm)
+          .unequip(GearSlot.helm);
+
+      expect(loadout.lostGold, erwartet);
+      expect(loadout.soldIds, <String>[klinge]);
+    });
+
+    test('ein Verkauf überlebt Speichern und Laden', () {
+      final vorher = mitKlinge().sell(klinge);
+      final nachher = Loadout.fromJson(vorher.toJson());
+
+      expect(nachher.soldIds, vorher.soldIds);
+      expect(nachher.lostGold, vorher.lostGold);
+    });
+
+    test('ohne Verkäufe steht nichts im Stand', () {
+      // Ein Stand ohne Verkäufe sieht aus wie vor ADR-0031.
+      expect(mitKlinge().toJson().containsKey('soldIds'), isFalse);
+    });
+
+    test('eine unbekannte Id fällt beim Laden heraus', () {
+      final gelesen = Loadout.fromJson(<String, Object?>{
+        'soldIds': <Object?>['gear-gibt-es-nicht', klinge, 42],
+      });
+
+      expect(gelesen.soldIds, <String>[klinge]);
+    });
+  });
+
   group('Sets', () {
     /// Ein Stand, der die [anzahl] billigsten Teile eines Sets trägt.
     Loadout mitTeilenVon(GearSet set, int anzahl) {

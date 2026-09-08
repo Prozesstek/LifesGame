@@ -51,7 +51,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Kampfsystem-Umbau** (Initiative, Kontern) | Nicht entschieden, kein Dokument im Repo. Ein unentschiedener Umbau gehört nicht in einen terminierten Plan. |
 | ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
 | **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
-| **Verkauf im Laden, Entprellen der Persistenz** | Beides sind Signale für später, kein Mangel heute. |
+| ~~**Verkauf im Laden**~~ → **gebaut am 08.09.** | Das Signal war eingetreten ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)): Mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets kostet ein Fehlgriff bis zu 42 Tage und war nicht zu korrigieren. Wer fünf Rhythmen anbietet, muss das Ausprobieren bezahlbar machen — sonst probiert niemand. **Entprellen der Persistenz** bleibt zurückgestellt. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
 

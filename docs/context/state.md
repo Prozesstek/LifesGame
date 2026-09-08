@@ -23,6 +23,7 @@ verlangt dreißig Tage.
 | 2 | Fünf Stücke je Platz | **fertig**, außer Waffe |
 | 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | **fertig** |
 | 4 | Sets und Set-Boni | **fertig** |
+| + | Verkauf im Laden (nachgereicht) | **fertig** |
 
 ### Was Schritt 1 und 2 gebracht haben
 
@@ -200,13 +201,35 @@ volles Set Überfluss.** Die Siegquote steht mit vier Set-Stücken überall
 auf 100 %. Der Platz eines Sets ist der Dungeon (Ziel 6), wo HP zwischen
 den Kämpfen nicht heilen und jede gesparte Runde zählt.
 
-### Offen aus Schritt 4
+### Nachgeliefert: der Laden verzeiht jetzt
 
-**Verkauf gibt es weiter nicht** — und mit Sets wird das unangenehmer als
-bei sechs Plätzen (ADR-0011). Wer auf ein Set hinkauft und sich
-umentscheidet, sitzt auf den Stücken. Bewusst nicht mitgelöst: Verkauf
-bräuchte eine Verkaufshistorie und damit die zweite Wahrheit, die ADR-0008
-vermeiden wollte.
+[ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md). 355
+App-Tests (vorher 348), gear 64 (vorher 51).
+
+**Ein Verkauf bringt die Hälfte, die andere Hälfte bleibt ausgegeben.**
+Das war der Grund, warum ADR-0011 den Verkauf ausgeschlossen hatte — und
+der Grund ist mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets
+weggefallen: Ein Fehlgriff kostet bis zu 1050 Gold, also 42 Tage, und war
+nicht zu korrigieren.
+
+**Der Fehler, der beinahe von selbst passiert wäre:** Gold ist abgeleitet
+(Zufluss minus Preis des Besitzes). Ein Stück aus dem Besitz zu nehmen
+gibt deshalb **von selbst den vollen Preis zurück** — man hätte dafür
+nichts bauen müssen. Genau das wäre falsch gewesen: Der Laden wäre
+folgenlos, jede Kaufentscheidung widerrufbar und damit keine.
+
+**Und es ist trotzdem keine zweite Wahrheit.** Gespeichert wird
+`Loadout.soldIds`, eine **Historie** — dieselbe Bauform wie die Häkchen
+und wie `ownedIds` selbst. Was daraus fürs Gold folgt, wird gerechnet
+(`lostGold`). Ein gespeicherter Goldstand könnte von der Rechnung
+abweichen; eine Historie *ist* die Rechnung.
+
+**Verkaufen legt ab**, und ein Set verliert damit sofort sein Teil. Im
+Laden steht der Knopf da, wo sonst „Kaufen" steht, davor eine Rückfrage
+mit beiden Zahlen: was zurückkommt und was ein Rückkauf kostet. Ein Kauf
+lässt sich ohne Verlust rückgängig machen, ein Verkauf nicht.
+
+### Offen aus Schritt 4
 
 **Nicht am Bild geprüft.** Set-Karte und Laden-Marke laufen im Test bei
 390 × 844 ohne Überlauf. Wie drei Set-Zeilen untereinander auf einem Handy
@@ -274,8 +297,8 @@ flutter run -d chrome
   - **Sechs Plätze, neun Stücke in zwei Stufen.** Energie sitzt auf Ring und
     Talisman — das Konzept verlangt Ausrüstung, die Entscheidungen ändert
     und nicht nur Zahlen
-  - **Gold wird abgeleitet:** Zufluss minus Preis des Besitzes. Kein
-    gespeicherter Kontostand, deshalb auch kein Verkauf
+  - **Gold wird abgeleitet:** Zufluss minus Preis des Besitzes und minus
+    versenkter Verkäufe. Kein gespeicherter Kontostand (ADR-0031)
   - `catalog_test.dart` prüft den Inhalt des Ladens wie `content_test.dart`
     die Lektionen
 - **`packages/identity`** — Name und verdiente Titel, 28 Tests grün
@@ -1459,9 +1482,10 @@ Beides ist heute richtig und wird es nicht bleiben:
   Bei drei Objekten irrelevant. Sobald der Dungeon Lauf-Historie mitbringt,
   braucht es Entprellen — oder tatsächlich Drift. Der Anschluss steht dafür
   bereit (ADR-0010).
-- **Kein Verkauf im Laden:** tragbar bei sechs Plätzen und neun Stücken.
-  Kommen Drops dazu, wird ein voller Rucksack ohne Ausgang unangenehm
-  (ADR-0011).
+- ~~**Kein Verkauf im Laden**~~ — **erledigt am 08.09.** ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)).
+  Das Signal war eingetreten: Mit 27 Stücken, fünf Sidegrade-Waffen und
+  drei Sets war ein Fehlgriff bis zu 42 Tage teuer und nicht zu
+  korrigieren.
 
 ## Aufgabenteilung
 

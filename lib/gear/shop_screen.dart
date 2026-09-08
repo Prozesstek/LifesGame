@@ -73,6 +73,7 @@ class ShopScreen extends ConsumerWidget {
                           ? 0
                           : loadout.equippedPiecesOf(item.setId ?? ''),
                       onBuy: () => _buy(context, ref, item),
+                      onSell: () => _sell(context, ref, item),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -97,6 +98,62 @@ class ShopScreen extends ConsumerWidget {
       PurchaseBlock.unbekannt => 'Dieses Stück gibt es nicht mehr.',
     };
 
+    _say(context, message);
+  }
+
+  /// Verkauft ein Stück — **nach Rückfrage**.
+  ///
+  /// Anders als der Kauf lässt sich ein Verkauf nicht ohne Verlust
+  /// rückgängig machen: Zurück kommt die Hälfte, zurückkaufen kostet den
+  /// vollen Preis (ADR-0031). Ein Fehlgriff auf einem Handy wäre damit
+  /// teuer, und der Dialog nennt genau diese beiden Zahlen.
+  Future<void> _sell(BuildContext context, WidgetRef ref, GearItem item) async {
+    final erloes = Loadout.refundFor(item);
+
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Palette.surface,
+        title: Text('${item.name} verkaufen?'),
+        content: Text(
+          'Das bringt $erloes Gold. Zurückkaufen kostet wieder '
+          '${item.price} Gold.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Behalten'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Verkaufen'),
+          ),
+        ],
+      ),
+    );
+
+    if (bestaetigt != true || !context.mounted) return;
+
+    // **Erst im nächsten Bild ändern.** `showDialog` kehrt zurück, sobald
+    // `Navigator.pop` gerufen wurde — der Dialog wird zu dem Zeitpunkt
+    // noch abgebaut. Eine Zustandsänderung, die in diesen Abbau fällt,
+    // hat im Entwicklermodus schon einmal „setState called during build"
+    // ausgelöst, und zwar nur im Browser: Ein Widget-Test ist dafür kein
+    // Nachweis (`docs/context/gotchas.md`).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      final erhalten = ref.read(loadoutProvider.notifier).sell(item.id);
+
+      _say(
+        context,
+        erhalten == null
+            ? 'Das besitzt du nicht.'
+            : '${item.name} verkauft — $erhalten Gold zurück.',
+      );
+    });
+  }
+
+  void _say(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(

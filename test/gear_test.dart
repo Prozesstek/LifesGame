@@ -83,6 +83,69 @@ void main() {
     });
   });
 
+  group('Verkaufen (ADR-0031)', () {
+    test('ein Verkauf gibt die Hälfte zurück, nicht den ganzen Preis', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final zufluss = container.read(goldProvider);
+      final preis = GearCatalog.byId(klinge)!.price;
+      final erloes = Loadout.refundFor(GearCatalog.byId(klinge)!);
+
+      container.read(loadoutProvider.notifier).buy(klinge);
+      expect(container.read(goldProvider), zufluss - preis);
+
+      expect(container.read(loadoutProvider.notifier).sell(klinge), erloes);
+
+      // **Nicht zurück auf den Anfang.** Die Differenz ist versenkt.
+      expect(container.read(goldProvider), zufluss - preis + erloes);
+      expect(container.read(goldEarnedProvider), zufluss);
+    });
+
+    test('verkaufte Ausrüstung wirkt nicht mehr', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final vorher = container.read(equippedStatsProvider).attack;
+      container.read(loadoutProvider.notifier).buy(klinge);
+      expect(container.read(equippedStatsProvider).attack, greaterThan(vorher));
+
+      container.read(loadoutProvider.notifier).sell(klinge);
+
+      expect(container.read(equippedStatsProvider).attack, vorher);
+      expect(container.read(loadoutProvider).isOwned(klinge), isFalse);
+    });
+
+    test('ein verkauftes Set-Teil zählt nicht mehr zum Set', () {
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      final teile = GearCatalog.piecesOf(GearSets.ruhigerStand.id).take(2);
+      for (final teil in teile) {
+        container.read(loadoutProvider.notifier).buy(teil.id);
+      }
+      expect(container.read(activeSetsProvider), hasLength(1));
+
+      container.read(loadoutProvider.notifier).sell(teile.first.id);
+
+      expect(container.read(activeSetsProvider), isEmpty);
+    });
+
+    test('was man nicht besitzt, bringt nichts ein', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(loadoutProvider.notifier).sell(klinge), isNull);
+      expect(container.read(goldProvider), 0);
+    });
+  });
+
   group('Ausrüstung wirkt im Kampf', () {
     test('ein getragenes Stück erhöht die Kampfwerte', () {
       final container = ProviderContainer(
@@ -240,6 +303,61 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Tage Gewohnheiten'), findsWidgets);
+    });
+
+    testWidgets('Gekauftes lässt sich verkaufen — nach Rückfrage', (
+      tester,
+    ) async {
+      // **Der Dialog ist kein Zierrat.** Ein Verkauf lässt sich nicht
+      // ohne Verlust rückgängig machen; ein Fehlgriff auf einem Handy
+      // wäre teuer.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
+      await tester.pumpAndSettle();
+
+      final erloes = Loadout.refundFor(
+        GearCatalog.forSlot(GearSlot.waffe).first,
+      );
+      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
+      await tester.pumpAndSettle();
+
+      // Erst der Dialog, und er nennt beide Zahlen.
+      expect(find.textContaining('Das bringt $erloes Gold'), findsOneWidget);
+      expect(find.text('Behalten'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('+$erloes Gold'), findsNothing);
+      expect(find.text('Verkaufen ($erloes)'), findsNothing);
+    });
+
+    testWidgets('„Behalten" ändert nichts', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ShopScreen)),
+      );
+      final vorher = container.read(goldProvider);
+
+      final erloes = Loadout.refundFor(
+        GearCatalog.forSlot(GearSlot.waffe).first,
+      );
+      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Behalten'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(goldProvider), vorher);
+      expect(find.text('+$erloes Gold'), findsOneWidget);
     });
 
     testWidgets('mit Gold lässt sich kaufen und es wird angelegt', (

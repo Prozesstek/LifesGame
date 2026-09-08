@@ -1,7 +1,7 @@
 # ADR-0011: Ausrüstung als eigenes Package, Gold abgeleitet statt gezählt
 
 **Datum:** 17.08.2026
-**Status:** Aktiv
+**Status:** Aktiv — zwei Punkte daraus sind ergänzt: die Preisleiter durch [ADR-0029](0029-seltenheit-statt-preisleiter.md), der ausgeschlossene Verkauf durch [ADR-0031](0031-verkauf-als-versenkte-kosten.md)
 **Entschieden von:** Frederik
 
 ## Kontext

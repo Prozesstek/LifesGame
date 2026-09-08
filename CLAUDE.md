@@ -70,7 +70,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 51 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 64 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
@@ -141,7 +141,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 348 Tests
+flutter test             # 355 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -161,7 +161,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 129 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 51 Tests, prüft Preise und Sets
+cd packages/gear        ; dart test    # 64 Tests, prüft Preise, Sets und den Verkauf
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
@@ -235,6 +235,20 @@ Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
 mitgeprüft — jedes Stück muss wirken, jeder Platz führt fünf, und teurer
 muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
+
+**Verkauf gibt es seit [ADR-0031](docs/decisions/0031-verkauf-als-versenkte-kosten.md),
+und die Hälfte bleibt versenkt.** Der Satz steht als
+`GearPrices.refundShare`. Wer das anfasst, muss den Grund kennen: Gold ist
+abgeleitet, also gäbe ein Verkauf **von selbst den vollen Preis zurück** —
+das Stück fällt einfach aus `spentGold` heraus. Der zweite Summand
+(`Loadout.lostGold`, gerechnet aus `soldIds`) ist das, was das verhindert.
+
+`soldIds` ist eine **Historie**, kein Kontostand — dieselbe Bauform wie
+die Häkchen. Ein gespeicherter Goldstand könnte von der Rechnung
+abweichen, eine Historie *ist* die Rechnung. Und sie muss von jeder
+Methode weitergereicht werden, die ein neues `Loadout` baut; wer eine
+vergisst, verschenkt Gold. Ein Test in `loadout_test.dart` geht deshalb
+den Weg verkaufen → kaufen → anlegen → ablegen.
 
 **Sets ändern heißt: den Set-Katalog anfassen, nicht die Engine.** Alle
 drei stehen in `packages/gear/lib/src/set_catalog.dart`, welche Stücke

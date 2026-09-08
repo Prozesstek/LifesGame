@@ -18,6 +18,7 @@ class ShopItemTile extends StatelessWidget {
     required this.isEquipped,
     required this.missingGold,
     required this.onBuy,
+    required this.onSell,
     this.abilityLine,
     this.setPieces = 0,
     super.key,
@@ -49,6 +50,9 @@ class ShopItemTile extends StatelessWidget {
   final int missingGold;
 
   final VoidCallback onBuy;
+
+  /// Verkaufen. Fragt vorher nach — der Rückkauf kostet den vollen Preis.
+  final VoidCallback onSell;
 
   bool get _isOwned => block == PurchaseBlock.bereitsGekauft;
 
@@ -152,6 +156,7 @@ class ShopItemTile extends StatelessWidget {
                   block: block,
                   isEquipped: isEquipped,
                   onBuy: onBuy,
+                  onSell: onSell,
                 ),
               ],
             ),
@@ -185,23 +190,52 @@ class _Action extends StatelessWidget {
     required this.block,
     required this.isEquipped,
     required this.onBuy,
+    required this.onSell,
   });
 
   final GearItem item;
   final PurchaseBlock? block;
   final bool isEquipped;
   final VoidCallback onBuy;
+  final VoidCallback onSell;
 
   @override
   Widget build(BuildContext context) {
     if (block == PurchaseBlock.bereitsGekauft) {
-      return Text(
-        isEquipped ? 'getragen' : 'gekauft',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: isEquipped ? Palette.accent : Palette.muted,
-        ),
+      // **Der Verkauf steht bei dem, was man besitzt** — an derselben
+      // Stelle wie sonst der Kaufknopf. Ein eigener Bildschirm für den
+      // Verkauf hieße, denselben Katalog zweimal zu durchsuchen.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Text(
+            isEquipped ? 'getragen' : 'gekauft',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isEquipped ? Palette.accent : Palette.muted,
+            ),
+          ),
+          // Spiegelbild der Kaufseite: erst die Zahl, dann der Knopf. Der
+          // Betrag gehört **nicht** in die Knopfbeschriftung — dort wird
+          // sie so breit, dass die Zeile überläuft, sobald ein Preis
+          // vierstellig wird (`docs/context/gotchas.md`).
+          Text(
+            '+${Loadout.refundFor(item)} Gold',
+            style: const TextStyle(fontSize: 12, color: Palette.gold),
+          ),
+          TextButton(
+            onPressed: onSell,
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              minimumSize: const Size(0, 30),
+              foregroundColor: Palette.textDim,
+              textStyle: const TextStyle(fontSize: 12),
+            ),
+            child: const Text('Verkaufen'),
+          ),
+        ],
       );
     }
 

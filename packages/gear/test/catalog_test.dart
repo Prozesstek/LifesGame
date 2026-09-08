@@ -167,6 +167,31 @@ void main() {
       }
     });
 
+    test('ein Verkauf bringt weniger zurück, als er gekostet hat', () {
+      // **Beide Grenzen sind eine Entscheidung** (ADR-0031). Bei 1,0 wäre
+      // der Laden folgenlos — kaufen, ansehen, zurückgeben —, bei 0,0
+      // wäre der Verkauf eine Löschtaste.
+      expect(GearPrices.refundShare, greaterThan(0));
+      expect(GearPrices.refundShare, lessThan(1));
+
+      for (final item in GearCatalog.all) {
+        final erloes = Loadout.refundFor(item);
+
+        expect(erloes, greaterThan(0), reason: item.name);
+        expect(erloes, lessThan(item.price), reason: item.name);
+      }
+    });
+
+    test('ein Fehlkauf kostet höchstens gut eine Woche', () {
+      // Der Verlust muss spürbar sein, aber ein Irrtum darf nicht den
+      // ganzen Monat kosten — sonst kauft niemand mehr etwas aus.
+      final teuerstes = GearCatalog.all
+          .map((item) => item.price - Loadout.refundFor(item))
+          .reduce((a, b) => a > b ? a : b);
+
+      expect(teuerstes / goldProTag, lessThan(25));
+    });
+
     test('das seltene Stück ist auf seinem Platz das teuerste', () {
       for (final slot in GearSlot.values) {
         final selten = GearCatalog.forSlotAndRarity(slot, GearRarity.rare);

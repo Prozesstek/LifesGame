@@ -1,6 +1,7 @@
 import 'catalog.dart';
 import 'gear_set.dart';
 import 'item.dart';
+import 'prices.dart';
 import 'set_catalog.dart';
 
 /// Warum ein Kauf nicht geht. Null heißt: geht.
@@ -26,20 +27,24 @@ enum PurchaseBlock {
 /// „falschen" Goldstand haben — es gibt keinen gespeicherten Goldstand, der
 /// abweichen könnte.
 ///
-/// Das ist auch der Grund, warum es keinen Verkauf gibt: Er bräuchte eine
-/// Verkaufshistorie und damit die zweite Wahrheit, die ADR-0008 vermeiden
-/// wollte. Der Preis dafür ist überschaubar, weil jedes Stück einen eigenen
-/// Platz belegt — man kauft nichts doppelt.
+/// **Verkauf gibt es seit ADR-0031 — und er bricht die Regel nicht.** Was
+/// gespeichert wird, ist keine zweite Wahrheit über den Kontostand, sondern
+/// eine dritte *Historie* neben Besitz und Häkchen: [soldIds], die Liste
+/// dessen, was verkauft wurde. Was daraus für das Gold folgt, wird weiter
+/// gerechnet ([lostGold]).
 class Loadout {
   Loadout({
     Iterable<String> ownedIds = const <String>[],
     Map<GearSlot, String> equipped = const <GearSlot, String>{},
+    Iterable<String> soldIds = const <String>[],
   })  : _ownedIds = Set<String>.unmodifiable(ownedIds),
-        _equipped = Map<GearSlot, String>.unmodifiable(equipped);
+        _equipped = Map<GearSlot, String>.unmodifiable(equipped),
+        _soldIds = List<String>.unmodifiable(soldIds);
 
   const Loadout.empty()
       : _ownedIds = const <String>{},
-        _equipped = const <GearSlot, String>{};
+        _equipped = const <GearSlot, String>{},
+        _soldIds = const <String>[];
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -71,11 +76,23 @@ class Loadout {
       }
     }
 
-    return Loadout(ownedIds: owned, equipped: equipped);
+    // **Die Verkaufshistorie behält ihre Reihenfolge und ihre
+    // Wiederholungen.** Wer dasselbe Stück zweimal gekauft und verkauft
+    // hat, hat auch zweimal draufgezahlt.
+    final sold = <String>[];
+    final rawSold = json['soldIds'];
+    if (rawSold is List) {
+      for (final id in rawSold) {
+        if (id is String && GearCatalog.byId(id) != null) sold.add(id);
+      }
+    }
+
+    return Loadout(ownedIds: owned, equipped: equipped, soldIds: sold);
   }
 
   final Set<String> _ownedIds;
   final Map<GearSlot, String> _equipped;
+  final List<String> _soldIds;
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
@@ -83,6 +100,9 @@ class Loadout {
       'equipped': <String, Object?>{
         for (final entry in _equipped.entries) entry.key.name: entry.value,
       },
+      // Nur schreiben, wenn etwas drinsteht: Ein Stand ohne Verkäufe sieht
+      // aus wie vor ADR-0031.
+      if (_soldIds.isNotEmpty) 'soldIds': _soldIds,
     };
   }
 
@@ -99,14 +119,42 @@ class Loadout {
 
   bool isOwned(String itemId) => _ownedIds.contains(itemId);
 
-  /// Wie viel Gold der Besitz gekostet hat. Der einzige Gold-Abfluss des
-  /// Spiels.
+  /// Wie viel Gold ausgegeben ist: was der Besitz gekostet hat, plus was
+  /// bei Verkäufen liegen geblieben ist.
+  ///
+  /// **Der zweite Summand ist der ganze Trick von ADR-0031.** Ohne ihn
+  /// gäbe ein Verkauf den vollen Preis zurück — nicht weil es so gedacht
+  /// wäre, sondern weil das Stück aus [_ownedIds] verschwindet und damit
+  /// aus dieser Summe. Der Laden wäre folgenlos: kaufen, ansehen,
+  /// zurückgeben.
   int get spentGold {
-    var sum = 0;
+    var sum = lostGold;
     for (final id in _ownedIds) {
       sum += GearCatalog.byId(id)?.price ?? 0;
     }
     return sum;
+  }
+
+  /// Was Verkäufe gekostet haben — die Hälfte des Preises je Verkauf.
+  ///
+  /// **Gerechnet aus der Historie, nicht mitgezählt.** Dieselbe Bauform
+  /// wie bei [spentGold] und wie bei der Erfahrung in `package:habits`:
+  /// gespeichert wird, *was passiert ist*, abgeleitet wird, *was daraus
+  /// folgt*. Eine mitgeführte Zahl könnte von der Liste abweichen; diese
+  /// hier kann es nicht.
+  int get lostGold {
+    var sum = 0;
+    for (final id in _soldIds) {
+      final item = GearCatalog.byId(id);
+      if (item == null) continue;
+      sum += item.price - refundFor(item);
+    }
+    return sum;
+  }
+
+  /// Was ein Verkauf einbringt. Der Satz steht in [GearPrices].
+  static int refundFor(GearItem item) {
+    return (item.price * GearPrices.refundShare).floor();
   }
 
   /// Warum ein Kauf nicht geht — oder null, wenn er geht.
@@ -140,6 +188,41 @@ class Loadout {
     return Loadout(
       ownedIds: <String>{..._ownedIds, itemId},
       equipped: <GearSlot, String>{..._equipped, item.slot: itemId},
+      soldIds: _soldIds,
+    );
+  }
+
+  // --- Verkaufen ---
+
+  /// Alles, was verkauft wurde, in der Reihenfolge der Verkäufe.
+  ///
+  /// Mit Wiederholungen: Wer dasselbe Stück zweimal gekauft und verkauft
+  /// hat, steht zweimal darin und hat zweimal draufgezahlt.
+  List<String> get soldIds => _soldIds;
+
+  bool canSell(String itemId) => isOwned(itemId);
+
+  /// Verkauft ein Stück für die Hälfte seines Preises.
+  ///
+  /// Gibt unverändert zurück, was man nicht besitzt — dieselbe Nachsicht
+  /// wie bei [equip]. Ein getragenes Stück wird dabei **abgelegt**: Es
+  /// gehört einem nicht mehr, also kann es nicht mehr wirken.
+  ///
+  /// Zurückkaufen geht jederzeit, aber zum vollen Preis. Genau darin
+  /// besteht die Entscheidung.
+  Loadout sell(String itemId) {
+    if (!canSell(itemId)) return this;
+    final item = GearCatalog.byId(itemId);
+    if (item == null) return this;
+
+    final owned = <String>{..._ownedIds}..remove(itemId);
+    final equipped = <GearSlot, String>{..._equipped};
+    if (equipped[item.slot] == itemId) equipped.remove(item.slot);
+
+    return Loadout(
+      ownedIds: owned,
+      equipped: equipped,
+      soldIds: <String>[..._soldIds, itemId],
     );
   }
 
@@ -163,13 +246,14 @@ class Loadout {
     return Loadout(
       ownedIds: _ownedIds,
       equipped: <GearSlot, String>{..._equipped, item.slot: itemId},
+      soldIds: _soldIds,
     );
   }
 
   Loadout unequip(GearSlot slot) {
     if (!_equipped.containsKey(slot)) return this;
     final next = <GearSlot, String>{..._equipped}..remove(slot);
-    return Loadout(ownedIds: _ownedIds, equipped: next);
+    return Loadout(ownedIds: _ownedIds, equipped: next, soldIds: _soldIds);
   }
 
   // --- Sets ---

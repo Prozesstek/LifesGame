@@ -33,6 +33,19 @@
 /// *weniger* an als die für 240 und zahlt das mit Energie zurück — genau
 /// der Fall, den ADR-0029 zwischen den Seltenheiten erlaubt.
 abstract final class GearPrices {
+  /// Wie viel ein Verkauf zurückbringt — die Hälfte des Preises.
+  ///
+  /// **Die Zahl ist der ganze Verkauf** ([ADR-0031](../../../../docs/decisions/0031-verkauf-als-versenkte-kosten.md)).
+  /// Bei 1,0 wäre der Laden folgenlos: kaufen, ansehen, zurückgeben,
+  /// nächstes ansehen — und die Entscheidung, um die es geht, gäbe es
+  /// nicht mehr. Bei 0,0 gäbe es keinen Verkauf, sondern eine
+  /// Löschtaste.
+  ///
+  /// Die Hälfte lässt einen Irrtum korrigieren und kostet dafür etwa fünf
+  /// Tage Gewohnheiten je Stück. `catalog_test.dart` hält beide Grenzen
+  /// fest.
+  static const double refundShare = 0.5;
+
   // --- Waffe ---
   static const int waffeCommon1 = 140;
   static const int waffeCommon2 = 240;
