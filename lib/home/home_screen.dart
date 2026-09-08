@@ -5,7 +5,7 @@ import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
 import '../combat/combat_controller.dart';
-import '../combat/enemy_picker_screen.dart';
+import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                         // der dritte ist der wichtigste: gelernt, aber
                         // nicht angelegt.
                         lockedReason: combatOpen ? null : combatBlock,
-                        onTap: () => _open(context, const EnemyPickerScreen()),
+                        onTap: () => _open(context, const LadderScreen()),
                       ),
                     ],
                   ),

@@ -7,6 +7,7 @@ import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/identity_controller.dart';
+import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/main.dart';
@@ -264,6 +265,44 @@ void main() {
         isTrue,
       );
       expect(zweite.read(spentTheoryPointsProvider), 1);
+    });
+
+    test('die Gegnerreihe überlebt den Neustart (ADR-0032)', () {
+      final store = InMemorySaveStore();
+      final erste = containerMit(const SaveData(), store);
+
+      erste.read(ladderProvider.notifier).defeat(1);
+      erste.read(ladderProvider.notifier).defeat(2);
+
+      final stand = SaveData(ladder: erste.read(ladderProvider));
+      final zweite = containerMit(SaveData.decode(stand.encode()), store);
+
+      expect(zweite.read(ladderProvider).highestDefeated, 2);
+      expect(zweite.read(nextRungProvider), 3);
+
+      // **Und die Belohnung kommt mit** — nicht als gespeicherter Betrag,
+      // sondern weil sie aus der Sprossenzahl gerechnet wird. Ein
+      // gespeicherter Betrag könnte von der Rechnung abweichen; eine
+      // Sprossenzahl *ist* die Rechnung (ADR-0008).
+      final erwartetXp = LadderRewards.xpFor(1) + LadderRewards.xpFor(2);
+      expect(zweite.read(totalXpProvider), greaterThanOrEqualTo(erwartetXp));
+    });
+
+    test('ein zweiter Sieg zahlt nicht noch einmal (ADR-0032)', () {
+      // **Die Bedingung, unter der es überhaupt Belohnung gibt.** Fällt
+      // dieser Test, ließe sich der leichteste Gegner in Dauerschleife
+      // schlagen, statt Häkchen zu setzen — und `konzept.md` Abschnitt 2
+      // gälte nicht mehr.
+      final store = InMemorySaveStore();
+      final container = containerMit(const SaveData(), store);
+
+      container.read(ladderProvider.notifier).defeat(1);
+      final nachErstem = container.read(totalXpProvider);
+
+      container.read(ladderProvider.notifier).defeat(1);
+
+      expect(container.read(totalXpProvider), nachErstem);
+      expect(container.read(ladderProvider).highestDefeated, 1);
     });
 
     test('Name und Titel kommen wieder', () {

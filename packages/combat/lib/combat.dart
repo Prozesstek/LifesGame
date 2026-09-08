@@ -22,6 +22,7 @@ export 'src/balance.dart';
 export 'src/combatant.dart';
 export 'src/enemy.dart';
 export 'src/enemy_policy.dart';
+export 'src/ladder.dart';
 export 'src/environment.dart';
 export 'src/engine.dart';
 export 'src/events.dart';

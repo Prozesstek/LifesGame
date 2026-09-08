@@ -10,7 +10,7 @@ import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/widgets/timing_bar.dart';
-import 'package:lifes_game/combat/enemy_picker_screen.dart';
+import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -315,20 +315,48 @@ void main() {
     });
   });
 
-  group('EnemyPickerScreen', () {
-    testWidgets('zeigt alle Gegner mit einer Einschaetzung', (tester) async {
+  group('LadderScreen', () {
+    // Die Gegnerwahl ist mit Issue #36 entfallen: Es gibt genau einen
+    // naechsten Gegner. Was von ihr bleibt, ist die Einschaetzung -- sie
+    // steht jetzt unter dem Namen.
+    testWidgets('zeigt Sprosse, Gegner und Einschaetzung', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: EnemyPickerScreen())),
+        const ProviderScope(child: MaterialApp(home: LadderScreen())),
       );
       await tester.pumpAndSettle();
 
-      for (final gegner in Enemies.all) {
-        expect(find.text(gegner.name), findsOneWidget, reason: gegner.name);
-      }
-      // Ein frischer Charakter schafft den ersten knapp und die anderen
-      // nicht -- genau das soll der Bildschirm vorher sagen.
+      expect(find.text('0 / ${Enemies.rungs}'), findsOneWidget);
+      expect(find.text(Enemies.atRung(1).name), findsOneWidget);
+
+      // Ein frischer Charakter schafft den ersten knapp -- genau das soll
+      // der Bildschirm vorher sagen.
       expect(find.text('wird knapp'), findsOneWidget);
-      expect(find.text('vermutlich noch zu stark'), findsNWidgets(2));
+    });
+
+    testWidgets('nennt die Belohnung vor dem Kampf', (tester) async {
+      // Eine Belohnung, von der man erst hinterher erfaehrt, motiviert
+      // den Kampf nicht, den man gerade ueberlegt.
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: LadderScreen())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('+${LadderRewards.xpFor(1)} Erfahrung'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('nur der naechste Gegner steht da', (tester) async {
+      // Der Entwurf zeigt einen Gegner und einen Knopf. Stuenden alle
+      // dreissig da, waere es wieder eine Liste.
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: LadderScreen())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(Enemies.atRung(2).name), findsNothing);
+      expect(find.text(Enemies.atRung(20).name), findsNothing);
     });
   });
 }

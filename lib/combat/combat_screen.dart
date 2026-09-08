@@ -7,6 +7,7 @@ import '../ui/palette.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
+import 'ladder_controller.dart';
 import 'move_help.dart';
 import 'move_icon.dart';
 import 'widgets/environment_banner.dart';
@@ -106,14 +107,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     }
   }
 
-  /// Das Ergebnis als Blatt, das man wegtippen muss.
+  /// Das Ergebnis als Blatt, das man wegtippen muss — und die Stelle, an
+  /// der ein Sieg in der Reihe ankommt.
   ///
-  /// **Es steht bewusst keine Belohnung darin, denn es gibt keine.**
-  /// Erfahrung und Gold kommen aus Gewohnheiten und Theorie, nie aus
-  /// einem Kampf (`konzept.md` Abschnitt 2). Der Kampf ist die Stelle, an
-  /// der sich der Fortschritt auszahlt — gäbe es dort XP, könnte man ihn
-  /// erkämpfen statt erarbeiten, und die Aussage des Produkts wäre hin.
-  /// Der Satz am Ende sagt das, damit die Frage nicht offen bleibt.
+  /// **Der Sieg wird hier eingetragen, nicht im Kampfbildschirm der
+  /// Reihe.** Nur hier steht fest, dass der Kampf vorbei *und* gewonnen
+  /// ist. Ob er etwas einbringt, entscheidet `LadderProgress` allein
+  /// (ADR-0032): Ein zweiter Sieg gegen denselben Gegner ändert den Stand
+  /// nicht, und die Differenz davor/danach ist deshalb von selbst null.
   Future<void> _showResult() async {
     if (!mounted) return;
 
@@ -121,12 +122,34 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     final gewonnen = state.outcome == CombatOutcome.victory;
     final runden = state.round - 1;
 
+    var xp = 0;
+    var gold = 0;
+
+    if (gewonnen) {
+      final notifier = ref.read(ladderProvider.notifier);
+      final vorher = ref.read(ladderProvider);
+
+      // **Gegen die Sprosse melden, nicht gegen den Gegner im Kampf.**
+      // Der Kampf kennt nur einen `Combatant` mit Namen; welche Sprosse
+      // gerade dran war, weiß die Reihe. Zwei Stellen, die dieselbe Frage
+      // beantworten, driften auseinander (`gotchas.md`).
+      notifier.defeat(vorher.nextRung);
+
+      final nachher = ref.read(ladderProvider);
+      xp = nachher.earnedXp - vorher.earnedXp;
+      gold = nachher.earnedGold - vorher.earnedGold;
+    }
+
+    if (!mounted) return;
+
     await showDialog<void>(
       context: context,
       builder: (context) => CombatResultDialog(
         won: gewonnen,
         rounds: runden,
         enemyName: state.enemy.name,
+        earnedXp: xp,
+        earnedGold: gold,
       ),
     );
   }

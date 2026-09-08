@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:abilities/abilities.dart';
+import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
@@ -26,6 +27,7 @@ class SaveData {
     this.loadout = const Loadout.empty(),
     this.identity = const Identity.empty(),
     this.abilities = const ChosenAbilities.empty(),
+    this.ladder = const LadderProgress.empty(),
     this.grants = const DebugGrants.none(),
   });
 
@@ -52,6 +54,11 @@ class SaveData {
   /// der folgt aus der getragenen Waffe (ADR-0017).
   final ChosenAbilities abilities;
 
+  /// Wie weit die Gegnerreihe gegangen ist — eine einzige Zahl
+  /// (ADR-0032). Erfahrung und Gold daraus stehen nicht hier, sie werden
+  /// gerechnet, wie alles andere auch.
+  final LadderProgress ladder;
+
   /// Was der Entwicklermodus verschenkt hat. Im echten Stand immer leer —
   /// der Modus arbeitet auf einem eigenen Schlüssel (ADR-0021).
   final DebugGrants grants;
@@ -62,7 +69,8 @@ class SaveData {
         habits.activeIds.isEmpty &&
         loadout.owned.isEmpty &&
         !identity.hasName &&
-        abilities.isEmpty;
+        abilities.isEmpty &&
+        ladder.highestDefeated == 0;
   }
 
   Map<String, Object?> toJson() {
@@ -73,6 +81,7 @@ class SaveData {
       'gear': loadout.toJson(),
       'identity': identity.toJson(),
       'abilities': abilities.toJson(),
+      'ladder': ladder.toJson(),
       'grants': grants.toJson(),
     };
   }
@@ -88,6 +97,7 @@ class SaveData {
     final gear = json['gear'];
     final identity = json['identity'];
     final abilities = json['abilities'];
+    final ladder = json['ladder'];
     final grants = json['grants'];
 
     return SaveData(
@@ -106,6 +116,9 @@ class SaveData {
       abilities: abilities is Map<String, Object?>
           ? ChosenAbilities.fromJson(abilities)
           : const ChosenAbilities.empty(),
+      ladder: ladder is Map<String, Object?>
+          ? LadderProgress.fromJson(ladder)
+          : const LadderProgress.empty(),
       grants: grants is Map<String, Object?>
           ? DebugGrants.fromJson(grants)
           : const DebugGrants.none(),
@@ -134,6 +147,7 @@ class SaveData {
     Loadout? loadout,
     Identity? identity,
     ChosenAbilities? abilities,
+    LadderProgress? ladder,
     DebugGrants? grants,
   }) {
     return SaveData(
@@ -142,6 +156,7 @@ class SaveData {
       loadout: loadout ?? this.loadout,
       identity: identity ?? this.identity,
       abilities: abilities ?? this.abilities,
+      ladder: ladder ?? this.ladder,
       grants: grants ?? this.grants,
     );
   }

@@ -7,11 +7,16 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett (Laden) und Prozesstek (Oberfläche, Gegnerreihe)
 
 ---
 
-## Läuft gerade: der Laden wächst (Branch `feat/items-und-sets`)
+## Sitzung 08.09.2026, tagsüber: der Laden wächst
+
+> **Seit PR [#33](https://github.com/Prozesstek/LifesGame/pull/33) auf
+> `main`.** Die Überschrift hieß bis zum Abend „Läuft gerade" — der
+> Branch `feat/items-und-sets` ist gemergt, alle vier Schritte plus
+> Verkauf sind drin.
 
 Vier Schritte, einzeln prüfbar. Auslöser war der Wunsch nach mehr Inhalt:
 Mit neun Stücken ist der Laden nach zwei Wochen gesehen, und Ziel 7
@@ -239,10 +244,18 @@ lässt sich ohne Verlust rückgängig machen, ein Verkauf nicht.
 
 ## Phase
 
-**Der MVP-Schnitt steht bis auf den Dungeon.** Lektion lesen → Vorlage
-freischalten → täglich abhaken → Werte steigen → Gold sammeln → Ausrüstung
-kaufen → nächsten Gegner schlagen. Alles davon überlebt jetzt einen
-Neustart.
+**Der MVP-Schnitt steht.** Lektion lesen → Vorlage freischalten →
+täglich abhaken → Werte steigen → Gold sammeln → Ausrüstung kaufen →
+nächsten Gegner der Reihe schlagen. Alles davon überlebt einen Neustart.
+
+Seit dem 08.09. ist der letzte offene Punkt zu — allerdings anders als
+geplant: Ziel 6 war der Dungeon und ist jetzt die **Gegnerreihe** aus
+dreißig Stufen ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)).
+Der Dungeon steht auf der Sperrliste in `ziele.md`.
+
+Damit ist auch eine Entscheidung gefallen, die seit dem ersten
+Konzeptentwurf stand: **Der Kampf zahlt jetzt Erfahrung und Gold — genau
+einmal je Gegner.**
 
 Seit dem 06.09. hat die Kette einen Abzweig: Jede freigeschaltete Vorlage
 gibt zusätzlich einen Platz für eine **eigene** Gewohnheit
@@ -258,6 +271,125 @@ einem Fähigkeitsslot wäre der erste Gegner unschlagbar.
 ```bash
 flutter run -d chrome
 ```
+
+## Sitzung 08.09.2026, abends: Oberfläche und die Gegnerreihe
+
+Zwei Issues an einem Abend. 378 App-Tests (vorher 355), combat 115
+(vorher 96).
+
+### Issue [#35](https://github.com/Prozesstek/LifesGame/issues/35): das Layout
+
+Drei Bildschirme nach den Entwürfen umgebaut.
+
+**Der Startbildschirm ist kein Menü mehr.** Die Figur steht in der Mitte,
+die fünf Bereiche liegen als Kreise darum, Level und Gold sitzen unter
+der Figur. Fünf Kacheln untereinander haben funktioniert und nichts
+erzählt — ein Habit-Tracker, dessen Startseite aussieht wie ein
+Einstellungsmenü, muss seine Aussage jeden Tag neu behaupten.
+
+Der Sperrgrund des Kampfes hat auf einem Kreis keinen Platz mehr. Er ist
+nicht weg, er kommt beim Antippen — ADR-0020 nennt ihn ausdrücklich
+wichtig, und alle drei Fälle sind erhalten.
+
+**Der Laden hat Reiter.** Ein Platz je Reiter, darunter das Raster und
+eine Detailfläche. Mit siebenundzwanzig Stücken war er eine Rolle von
+rund fünftausend Pixeln: Wer Ringe vergleichen wollte, scrollte an vier
+Plätzen vorbei und hatte den ersten vergessen, bevor er den letzten sah.
+
+**Die Gewohnheiten haben einen schwebenden Knopf und keine Untertexte
+mehr.** Die **Zahlen** sind geblieben und nach rechts gewandert: die
+Kette als Marke neben dem Namen, der Stand eines Tagesziels an seinem
+Balken. Sie mitzunehmen wäre aus einer Layout-Änderung eine
+Produktänderung geworden — die Streak ist der Grund, morgen
+wiederzukommen (`konzept.md` 3.7).
+
+**Vorbereitet, nicht gebaut:** `GearIcons` und `EnemyIcons` halten die
+Plätze für Item- und Gegnerbilder frei, gebaut wie `MoveIcons` — Datei
+ablegen, eine Zeile ergänzen, der Test greift ab dann von selbst. Die
+übrigen Designs aus dem Issue (Button, Background, Abilities) sind
+Grafikarbeit und stehen aus.
+
+### Issue [#36](https://github.com/Prozesstek/LifesGame/issues/36): dreißig Gegner
+
+**Ziel 6 ist umgeschrieben und erfüllt**
+([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)). Das Issue
+beschreibt nicht den Dungeon, sondern eine Reihe: dreißig Gegner,
+aufsteigend, „1 / 30" und ein Kampf-Knopf. Der Dungeon steht jetzt auf
+der Sperrliste in `ziele.md`.
+
+**Die drei alten Gegner sind Stützstellen geblieben.** Ihre Werte sind in
+ADR-0009 gemessen worden; sie zu überschreiben hätte die einzigen
+belastbaren Zahlen des Projekts entwertet. Die Reihe wächst *zwischen*
+ihnen — Wegelagerer auf Sprosse 1, Söldner auf 6, Bergwächter auf 20,
+dazu eine neue Spitze auf 30.
+
+**Die Werte sind gerechnet, nicht getippt.** Eine Tabelle mit dreißig
+Zeilen lässt sich nicht „stetig steigend" halten, ohne dass es jemand
+nachrechnet; `enemy_ladder_test.dart` tut das, und bei einer Tabelle
+hätte er nichts zu prüfen gehabt außer Tippfehlern. Er hat sofort etwas
+gefunden: Die Utility-Quote fiel von Sprosse 6 auf 7, weil die
+Stützstellen ihre eigene tragen und eine Formel daneben lief.
+
+### Die Entscheidung, die ein Test erzwungen hat
+
+Das Issue sagt: „Als Belohnung gibt es Gold und XP." Dagegen stand
+`konzept.md` Abschnitt 2 — der Kampf ist die *Auszahlung* des
+Fortschritts, nicht seine Quelle — und ein Test, der genau dafür
+geschrieben worden war:
+
+> „Stünde dort eines Tages ‚+50 XP', wäre das eine Richtungsentscheidung
+> und kein Textdetail — dieser Test zwingt sie ans Licht."
+
+**Er hat funktioniert.** Die Entscheidung ist kleiner ausgefallen, als er
+annahm: Belohnung ja, aber **einmal je Gegner**. Der alte Einwand trifft
+nur wiederholbare Belohnung; eine Lektion in `package:theory` zahlt
+ebenfalls, und ebenfalls genau einmal. Der Gesamtbetrag steht damit als
+Zahl fest: 2775 Erfahrung und 1110 Gold über dreißig Kämpfe.
+
+Der Test ist nicht gelöscht, sondern umgeschrieben: Er bewacht jetzt die
+Grenze statt des Verbots — ein zweiter Sieg zahlt nichts, eine Niederlage
+erst recht nicht.
+
+### Was die Simulation sagt
+
+`tool/balance_sim.dart` hat einen Abschnitt „Die Reihe" bekommen. Er
+beantwortet die Frage, die das Issue ausdrücklich stellt.
+
+| | Tag 30, ohne Ausrüstung | Tag 60, voll ausgerüstet |
+|---|---|---|
+| Sprosse 1–5 | 100 % | 100 % |
+| Sprosse 10 | 27 % | 100 % |
+| Sprosse 20 (Bergwächter) | 18 % | 100 % |
+| Sprosse 27 | 0 % | 100 % |
+| **Sprosse 30** | **0 %** | **62 %** |
+
+**Sprosse 30 ist erreichbar**, wie das Issue es verlangt — und die
+Simulation ist dabei pessimistisch für den Spieler: Ihr Bot tippt
+gemischt und benutzt keine Utility.
+
+**Die Spitze hat drei Anläufe gebraucht.** Bei 300 HP gewann ein
+ausgerüsteter Charakter gegen *alle* dreißig zu 100 %, bei 1000 HP gegen
+keinen ab Sprosse 26. Sie steht jetzt bei 460 HP, 25 Angriff, 15
+Verteidigung — gemessen, nicht geraten.
+
+### Zwei Befunde, die offen bleiben
+
+**Die Reihe steigt in ihren Werten stetig, in der Siegquote nicht.**
+Zwischen Sprosse 16 und 17 springt sie nach oben (2 % auf 32 % ohne
+Ausrüstung), weil dort das Gegner-Moveset von Uncommon auf Rare wechselt
+und die Rare-Züge mehr Energie kosten, als die Gegner dort haben. Es ist
+derselbe Effekt wie beim Bergwächter am 26.08. („Donnerkeil kostet 5
+Energie — Kraftschlag konnte er öfter spielen"). Balancing bleibt
+zurückgestellt, aber der Befund steht mit Zahlen da.
+
+**Die obere Mitte ist für einen Ausgerüsteten flach.** Sprosse 21 bis 27
+stehen alle auf 100 %. Sieben Kämpfe ohne Spannung — die Kurve müsste
+dort früher steiler werden.
+
+**Nicht am Bild geprüft.** Beide Issues sind Oberflächenarbeit; alle
+Layouts laufen im Test bei 390 × 844 ohne Überlauf und `flutter build
+web` steht, aber wie es auf einem Handy **aussieht**, muss jemand
+ansehen.
 
 ## Fertig
 

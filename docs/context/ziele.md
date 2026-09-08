@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 08.09.2026 · Prozesstek
 
 ---
 
@@ -36,7 +36,7 @@ Instanz, die zählt.
 | 3 | Der Laden trifft eine Entscheidung ✓ | `state.md` Punkt 1 | ~~06.09.~~ **08.09.** |
 | 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | 06.09. |
 | 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
-| 6 | Der Dungeon schließt den MVP-Schnitt | `state.md` Punkt 4+5 | 20.09. |
+| 6 | Die Gegnerreihe schließt den MVP-Schnitt ✓ | Issue #36 | ~~20.09.~~ **08.09.** |
 | 7 | Der Nachweis | diese Datei | 20.10. |
 
 ## Was **nicht** im MVP ist — und warum
@@ -52,6 +52,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
 | **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
 | ~~**Verkauf im Laden**~~ → **gebaut am 08.09.** | Das Signal war eingetreten ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)): Mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets kostet ein Fehlgriff bis zu 42 Tage und war nicht zu korrigieren. Wer fünf Rhythmen anbietet, muss das Ausprobieren bezahlbar machen — sonst probiert niemand. **Entprellen der Persistenz** bleibt zurückgestellt. |
+| **Dungeon** (Lauf aus 5 Kämpfen, Tränke, Wiederbelebung) | Neu auf dieser Liste am 08.09. ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)): Issue #36 hat Ziel 6 auf die Gegnerreihe umgeschrieben. Der Dungeon braucht drei Systeme mehr **und** eine Entscheidung, die `konzept.md` selbst offen lässt. Nach dem Teststart. |
 | **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
 
@@ -319,43 +320,60 @@ nennt den Charakter eine Kommandozentrale; mit 3 aus 4 ist er ein Formular.
 
 ---
 
-## Ziel 6 — Der Dungeon schließt den MVP-Schnitt
+## Ziel 6 — Die Gegnerreihe schließt den MVP-Schnitt
 
-**Termin: Sonntag, 20.09.2026**
+**Termin: Sonntag, 20.09.2026 · Issue [#36](https://github.com/Prozesstek/LifesGame/issues/36) · [ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)**
+
+> **Umgeschrieben am 08.09.2026.** Hier stand bis dahin der Dungeon aus
+> `konzept.md` 3.4: vier Gegner plus Boss in einem Lauf, HP heilt nicht
+> dazwischen, Tränke, Eintritt kostet Gold. Issue #36 beschreibt etwas
+> anderes — dreißig aufsteigende Gegner mit einer Fortschrittsanzeige —
+> und begründet es mit Ziel 7: „Motivation / Vergleich zwischen den
+> Spielern während des Teststarts."
+>
+> Der Dungeon wandert hinter den Teststart. Der Grund steht in ADR-0032
+> und ist nicht Geschmack, sondern Termin: Er braucht Tränke,
+> Wiederbelebung, eine Eintrittsökonomie **und** zuerst eine
+> Entscheidung, die `konzept.md` selbst als ungelöst markiert
+> („bestraft doppelt"). Die Reihe braucht einen Zähler und eine
+> Gegnerkurve.
 
 ### Spezifisch
 
-Vier Gegner plus Boss in einem Lauf, HP heilt zwischen den Kämpfen **nicht**.
-Tränke und Wiederbelebung als Gegenmittel. Davor die Entscheidung, die
-`konzept.md` Punkt 3 offen lässt: Was passiert bei einer Niederlage?
+Dreißig Gegner, stetig steigend, einer nach dem anderen. Ein Bildschirm
+mit Fortschrittsanzeige, Gegnerbild, Namen und Kampf-Knopf. Ein erstmals
+besiegter Gegner zahlt Erfahrung und Gold; ein zweiter Sieg gegen
+denselben zahlt nichts.
 
 ### Messbar
 
-| Kriterium | Soll |
-|---|---|
-| ADR zur Niederlagen-Regel | existiert, **bevor** gebaut wird |
-| Gegner im Lauf | 4 + Boss |
-| HP zwischen Kämpfen | wird **nicht** aufgefüllt |
-| Tränke / Wiederbelebung | im Laden kaufbar, im Lauf einsetzbar |
-| Lauf-Zustand nach Neustart | überlebt |
+| Kriterium | Ist (08.09.) | Soll |
+|---|---|---|
+| Gegner in der Reihe | **30** ✓ | 30 |
+| Werte steigen stetig | **Test weist es nach** ✓ | kein Wert fällt |
+| Sprosse 30 erreichbar | **62 %** ✓ | > 0 %, voll ausgerüstet |
+| Belohnung je Gegner | **einmal** ✓ | einmal |
+| Fortschritt nach Neustart | **überlebt** ✓ | überlebt |
+| Gegnerbilder | **Platzhalter** | Platzhalter genügt (Issue #35) |
 
 ```bash
-dart run tool/balance_sim.dart    # Lauf ab Tag N schaffbar, davor nicht
+cd packages/combat ; dart test        # enemy_ladder_test, ladder_test
 flutter test test/persistence_test.dart
+flutter test test/result_dialog_test.dart
+dart run tool/balance_sim.dart        # Abschnitt „Die Reihe"
 ```
 
-### Erreichbar
-
-Die Engine kann alles Nötige. Ein Lauf ist eine Kette von Kämpfen mit
-übernommenem HP-Stand — keine neue Mechanik, eine neue Klammer. Der Aufwand
-steckt in der Niederlagen-Regel, und die ist eine Konzeptfrage: Verfallener
-Eintritt *plus* Neustart bestraft doppelt.
+**Ziel 6 ist erfüllt** — zwölf Tage vor dem Termin. Was **nicht** erfüllt
+ist und bewusst offen bleibt, steht in `state.md`: Die Reihe steigt in
+ihren Werten stetig, in der gemessenen Siegquote nicht. Balancing bleibt
+zurückgestellt.
 
 ### Relevant
 
-Das einzige Stück, das der MVP-Schnitt noch offen hat. Und der Grund, überhaupt
-Ausrüstung zu kaufen: Ein Einzelkampf verzeiht schlechte Werte, eine Kette
-nicht.
+Das einzige Stück, das der MVP-Schnitt noch offen hatte. Und die Zahl,
+die Ziel 7 überhaupt vergleichbar macht: Zwei Spieler, die dreißig Tage
+lang abhaken, haben mit „17 / 30" gegen „21 / 30" zum ersten Mal etwas,
+worüber sie reden können.
 
 ---
 
@@ -401,6 +419,14 @@ Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
 
 ## Verlauf
 
+- **08.09.2026, abends** — **Ziel 6 umgeschrieben und erfüllt**
+  ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)). Issue #36
+  beschreibt nicht den Dungeon, sondern eine Reihe aus dreißig Gegnern —
+  und begründet sie mit Ziel 7. Der Dungeon steht jetzt auf der
+  Sperrliste. Mit derselben Entscheidung fällt eine, die seit dem ersten
+  Konzeptentwurf stand: **Der Kampf zahlt jetzt Erfahrung und Gold, aber
+  genau einmal je Gegner.** Erzwungen hat sie ein Test, der genau dafür
+  geschrieben worden war (`result_dialog_test.dart`).
 - **08.09.2026** — **Ziel 3 erfüllt**, zwei Tage nach Termin. Fünf Waffen
   mit fünf verschiedenen Zügen; der ADR zur Sidegrade-Regel war mit
   [ADR-0029](../decisions/0029-seltenheit-statt-preisleiter.md) schon da.
