@@ -18,6 +18,7 @@ import 'dart:math';
 
 import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
+import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:progression/progression.dart';
 
@@ -40,6 +41,44 @@ void main(List<String> args) {
   _siegquoten(fights);
   _rundenzahlen(fights);
   _timingSpanne(fights);
+  _waffenvergleich(fights);
+}
+
+/// Ob die Waffe im Laden wirklich etwas entscheidet (Ziel 3).
+///
+/// **Die Frage, die kein anderer Abschnitt beantwortet.** Bis zu den fünf
+/// Waffen gaben beide Klingen denselben Zug; ein Waffenkauf war ein
+/// Zahlenaufschlag. Seither trägt jede einen eigenen Rhythmus — und
+/// „Rhythmus" ist eine Behauptung, solange niemand nachrechnet, ob die
+/// Siegquoten auseinandergehen.
+///
+/// Gemessen wird mit Waffenbonus **und** Waffenzug, also so, wie ein
+/// Spieler sie kauft. Liegen alle fünf Zeilen dicht beieinander, ist der
+/// Waffenplatz weiter Dekoration, nur teurer.
+void _waffenvergleich(int fights) {
+  final waffen = GearCatalog.forSlot(GearSlot.waffe);
+
+  for (final tag in <int>[21, 30]) {
+    print('\n--- Siegquote je Waffe an Tag $tag ---');
+    final kopf = Enemies.all.map((e) => e.name.padLeft(14)).join();
+    print('  ${'Waffe'.padRight(22)}$kopf');
+
+    for (final waffe in waffen) {
+      final moveId = AbilityCatalog.weaponMoveFor(waffe.id);
+      final felder = Enemies.all.map((gegner) {
+        final ergebnis = _run(
+          fights: fights,
+          stats: _statsNach(tag),
+          bonus: waffe.bonus,
+          loadout: _loadoutNach(tag, weaponMoveId: moveId),
+          gegner: gegner,
+          timingSkill: 0.5,
+        );
+        return '${(ergebnis.winRate * 100).round()} %'.padLeft(14);
+      }).join();
+      print('  ${waffe.name.padRight(22)}$felder');
+    }
+  }
 }
 
 /// Siegquote je Gegner und Tag. Die Diagonale ist das Ziel: Zu jedem
@@ -185,14 +224,15 @@ int _levelNach(int tage) {
 /// Eine klug gewaehlte Zusammenstellung waere eine Annahme ueber sein
 /// Verhalten; diese hier ist die anspruchsloseste.
 ///
-/// **Ohne Waffe:** Der Spieler kaempft mit dem Rueckfall aus
-/// `AbilityCatalog`, also dem Kurzbogen. Eine gekaufte Waffe wuerde den
-/// Rhythmus aendern -- das zu simulieren braucht erst die drei fehlenden
-/// Waffen im Laden.
-List<Move> _loadoutNach(int tage) {
+/// **Ohne [weaponMoveId] kaempft der Spieler mit dem Rueckfall** aus
+/// `AbilityCatalog`, also dem Kurzbogen -- so, wie jemand ohne gekaufte
+/// Waffe dasteht. Die uebrigen Abschnitte messen absichtlich diesen Fall;
+/// was eine gekaufte Waffe aendert, misst `_waffenvergleich`.
+List<Move> _loadoutNach(int tage, {String? weaponMoveId}) {
   final offen = AbilitySlots.openAt(_levelNach(tage));
   final moves = <Move>[
-    Moves.byId(AbilityCatalog.fallbackMoveId) ?? Moves.basicAttack,
+    Moves.byId(weaponMoveId ?? AbilityCatalog.fallbackMoveId) ??
+        Moves.basicAttack,
   ];
 
   for (final ability in AbilityCatalog.unlockedBy(_fortschrittNach(tage))) {
@@ -254,6 +294,9 @@ _Ergebnis _run({
   required EnemyBlueprint gegner,
   required double timingSkill,
   required List<Move> loadout,
+
+  /// Was eine angelegte Waffe obendrauf gibt. Leer heisst: keine Waffe.
+  GearBonus bonus = const GearBonus(),
 }) {
   // Zwei getrennte Generatoren, und das ist keine Kosmetik: Mit einem
   // einzigen verschiebt die Timing-Spalte alle folgenden Kampf-Seeds, weil
@@ -275,10 +318,10 @@ _Ergebnis _run({
     var state = CombatState.start(
       player: Combatant.fresh(
         name: 'Du',
-        maxHp: stats.maxHp,
-        attack: stats.attack,
-        defense: stats.defense,
-        maxEnergy: stats.maxEnergy,
+        maxHp: stats.maxHp + bonus.maxHp,
+        attack: stats.attack + bonus.attack,
+        defense: stats.defense + bonus.defense,
+        maxEnergy: stats.maxEnergy + bonus.maxEnergy,
       ),
       enemy: gegner.spawn(),
     );

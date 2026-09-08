@@ -20,20 +20,30 @@
 ///
 /// | Platz | Gewöhnlich | Ungewöhnlich | Selten |
 /// |---|---|---|---|
-/// | Waffe | 140 | 620 | — |
+/// | Waffe | 140 · 240 | 620 · 760 | 980 |
 /// | Rüstung | 160 · 280 | 680 · 840 | 1040 |
 /// | Helm | 110 · 200 | 420 · 560 | 760 |
 /// | Schuhe | 100 · 190 | 400 · 530 | 720 |
 /// | Ring | 180 · 320 | 740 · 880 | 1050 |
 /// | Talisman | 150 · 270 | 520 · 660 | 880 |
 ///
-/// Die Waffe ist bewusst noch nicht gefüllt: Jede Waffe im Laden muss eine
-/// Fähigkeit mitbringen (`test/abilities_seam_test.dart` in der App), und
-/// die kommen mit Ziel 3.
+/// **Die Waffen sind der eine Platz, auf dem der Preis am wenigsten sagt.**
+/// Man kauft die zweite Waffe nicht für mehr Zahlen, sondern für einen
+/// anderen Rhythmus (Ziel 3). Die Klinge für 760 richtet je Treffer
+/// *weniger* an als die für 240 und zahlt das mit Energie zurück — genau
+/// der Fall, den ADR-0029 zwischen den Seltenheiten erlaubt.
 abstract final class GearPrices {
   // --- Waffe ---
   static const int waffeCommon1 = 140;
+  static const int waffeCommon2 = 240;
   static const int waffeUncommon1 = 620;
+  static const int waffeUncommon2 = 760;
+
+  /// Die teuerste Waffe bleibt unter dem Aderring (1050). Wer seinen
+  /// ganzen Rhythmus umstellen will, zahlt weniger als für das teuerste
+  /// Einzelstück des Ladens — sonst wäre ein Waffenwechsel eine
+  /// Lebensentscheidung statt eines Versuchs.
+  static const int waffeRare = 980;
 
   // --- Rüstung ---
   static const int ruestungCommon1 = 160;

@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 07.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett
 
 ---
 
@@ -21,7 +21,7 @@ verlangt dreißig Tage.
 |---|---|---|
 | 1 | Seltenheit je Stück | **fertig** |
 | 2 | Fünf Stücke je Platz | **fertig**, außer Waffe |
-| 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | offen |
+| 3 | Fünf Waffen mit eigener Fähigkeit (= Ziel 3) | **fertig** |
 | 4 | Sets, Set-Boni, Verkauf | offen |
 
 ### Was Schritt 1 und 2 gebracht haben
@@ -61,6 +61,82 @@ Texten) und `HubTile` über. Beide schrumpfen jetzt mit `Flexible` und
 **Der Aufbau selbst bleibt so**, obwohl er einen unerreichbaren Zustand
 erzeugt — im Spiel prüft `Loadout.buy` das Gold, man kann sich nicht
 überkaufen. Als Belastungsprobe hat er sich gerade bewährt.
+
+### Was Schritt 3 gebracht hat — und damit Ziel 3
+
+**Fünf Waffen, fünf verschiedene Züge.** Bis heute gaben *beide* Klingen
+im Laden `sword_strike`; die Waffe bestimmte nichts, und der Slot, der auf
+Level 1 als einziger offen ist (ADR-0016), war Dekoration.
+
+| Waffe | Seltenheit | Preis | Zug | Power | Energie |
+|---|---|---|---|---|---|
+| Kurzbogen | gewöhnlich | 140 | Bogenschuss | 1,0 | +3 |
+| Übungsklinge | gewöhnlich | 240 | Hieb | 1,3 | +2 |
+| Streitkolben | ungewöhnlich | 620 | Wuchtstoß | 0,9 | +3, Verteidigung runter |
+| Geschliffene Klinge | ungewöhnlich | 760 | Doppelstich | 0,5 | +4 |
+| Kriegsstab | selten | 980 | Sammelschlag | 0,6 | +5 |
+
+Die Tabelle ist die aus [ADR-0017](../decisions/0017-faehigkeitskatalog-aus-drei-quellen.md),
+Punkt 2 — sie stand seit dem 22.08. geschrieben da und galt im Code nicht.
+Neue Zahlen in `packages/combat` gab es dafür keine.
+
+**Der Kurzbogen trägt denselben Zug wie der Rückfall**, und das ist
+Absicht: ADR-0017 zählt ihn unter die fünf Waffen, und „den Bogen hat
+jeder" ist genau der Grund, warum er auch der Rückfall ist. Gekauft gibt
+er Angriff statt eines neuen Rhythmus — der ruhigste Einstieg, den der
+Laden hat.
+
+**Der Laden sagt jetzt, was eine Waffe mitbringt.** Eine Zeile je Waffe
+(„Bringt Hieb mit — ×1,3 Schaden, +2 Energie je Runde"), zusammengesetzt
+von `weaponAbilityLine` in `lib/gear/`. Ohne sie wäre der Kauf blind:
+Fünf Rhythmen sind nur dann eine Entscheidung, wenn man vor dem Kauf
+sieht, welchen man bekommt.
+
+### Der Befund: die Waffe entscheidet — zu einseitig
+
+`tool/balance_sim.dart` hat einen Abschnitt dazubekommen, der genau die
+Behauptung prüft, auf der Ziel 3 steht. Siegquote je Waffe, mit
+Waffenbonus und Waffenzug, gemischtes Timing:
+
+| Waffe | Söldner Tag 21 | Bergwächter Tag 21 | Söldner Tag 30 | Bergwächter Tag 30 |
+|---|---|---|---|---|
+| Kurzbogen | 40 % | 8 % | 99 % | 33 % |
+| **Übungsklinge** | **100 %** | **66 %** | **100 %** | **96 %** |
+| Streitkolben | 82 % | 14 % | 100 % | 47 % |
+| Geschliffene Klinge | 4 % | 3 % | 41 % | 12 % |
+| Kriegsstab | 11 % | 4 % | 62 % | 16 % |
+
+**Die gute Hälfte:** Die Waffe entscheidet Kämpfe. 4 % gegen 100 % auf
+demselben Gegner am selben Tag — der Waffenslot ist keine Dekoration
+mehr.
+
+**Die schlechte:** Es ist kein Sidegrade, sondern eine Rangfolge, und die
+zweitbilligste Waffe steht oben. Wer 980 Gold für den Kriegsstab
+ausgibt, kämpft schlechter als mit den 240 der Übungsklinge.
+
+**Die Ursache ist bekannt und steht seit dem 26.08. hier:** Die frühen
+Spielerfähigkeiten sind schwächer als der Basisangriff. Energie zu
+erzeugen lohnt nur, wenn es etwas gibt, wofür man sie ausgibt — und an
+Tag 21 hat der simulierte Spieler Funkenstoß (Power 0,75) und zwei
+weitere Commons. Der Waffenbefund ist damit kein neuer, sondern derselbe
+aus einer zweiten Richtung.
+
+**Zwei Einschränkungen der Messung**, beide schon bekannt: Der simulierte
+Spieler wird von `SimpleEnemyPolicy` gesteuert und benutzt keine Utility
+(`utilityChance` 0). Mit mehr Möglichkeiten wählt ein Bot schlechter —
+die energiestarken Waffen sind also **unter**bewertet, wie schon bei „drei
+Moves sind schlechter als zwei" (22.08.).
+
+**Balancing bleibt zurückgestellt.** Gemessen und gemeldet ist es; die
+Hebel sind dieselben drei wie am 26.08.: die `power`-Werte der Commons,
+die Gegner-Sets, oder der Nenner 16.
+
+**Was der Laden trotzdem schon tut:** Der `why`-Text jeder teuren Waffe
+sagt es ausdrücklich. Beim Kriegsstab steht „Wer nur zuschlagen will, ist
+mit der halb so teuren Übungsklinge besser bedient", bei der
+Geschliffenen Klinge „sie lohnt sich erst, wenn auf den freien Plätzen
+etwas liegt, das Energie kostet". Eine Falle, die sich selbst benennt,
+ist keine mehr — aber sie bleibt eine, bis die Zahlen stimmen.
 
 ---
 

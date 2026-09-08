@@ -5,6 +5,7 @@ import 'package:gear/gear.dart';
 import '../progression/level_provider.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
+import 'weapon_ability_line.dart';
 import 'widgets/shop_item_tile.dart';
 
 /// Der Laden — der einzige Ort, an dem Gold wieder verschwindet.
@@ -67,6 +68,7 @@ class ShopScreen extends ConsumerWidget {
                       block: loadout.blockFor(item.id, availableGold: gold),
                       isEquipped: loadout.isEquipped(item.id),
                       missingGold: item.price - gold,
+                      abilityLine: weaponAbilityLine(item),
                       onBuy: () => _buy(context, ref, item),
                     ),
                     const SizedBox(height: 8),

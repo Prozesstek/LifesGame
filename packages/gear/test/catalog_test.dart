@@ -56,30 +56,25 @@ void main() {
       }
     });
 
-    test('jeder Platz führt fünf Stücke — bis auf die Waffe', () {
-      // **Die Waffe hinkt bewusst hinterher.** Jede Waffe im Laden muss
-      // eine Fähigkeit mitbringen (`test/abilities_seam_test.dart` in der
-      // App); die fehlenden zwei kommen deshalb zusammen mit ihren
-      // Fähigkeiten. Sobald das passiert ist, fällt diese Ausnahme —
-      // und dieser Test erinnert daran.
+    test('jeder Platz führt fünf Stücke', () {
+      // **Die Ausnahme für die Waffe ist mit Ziel 3 gefallen.** Sie stand
+      // hier, weil jede Waffe im Laden eine Fähigkeit mitbringen muss
+      // (`test/abilities_seam_test.dart` in der App) — jetzt tun das alle
+      // fünf.
       for (final slot in GearSlot.values) {
-        final erwartet = slot == GearSlot.waffe ? 2 : 5;
-
         expect(
           GearCatalog.forSlot(slot),
-          hasLength(erwartet),
-          reason: 'Platz ${slot.label} führt nicht $erwartet Stücke',
+          hasLength(5),
+          reason: 'Platz ${slot.label} führt nicht fünf Stücke',
         );
       }
     });
 
-    test('jeder volle Platz hat zwei, zwei und ein Stück', () {
+    test('jeder Platz hat zwei, zwei und ein Stück', () {
       // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes. Die Form ist
       // überall dieselbe, damit ein Platz nicht heimlich reicher wird als
       // ein anderer.
       for (final slot in GearSlot.values) {
-        if (GearCatalog.forSlot(slot).length < 5) continue;
-
         expect(
           GearCatalog.forSlotAndRarity(slot, GearRarity.common),
           hasLength(2),

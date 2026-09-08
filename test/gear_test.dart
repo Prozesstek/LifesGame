@@ -6,6 +6,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
+import 'package:lifes_game/gear/weapon_ability_line.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -117,6 +118,41 @@ void main() {
     });
   });
 
+  group('Die Zeile zur Waffenfähigkeit', () {
+    test('nur Waffen haben eine', () {
+      for (final item in GearCatalog.all) {
+        final zeile = weaponAbilityLine(item);
+
+        if (item.slot == GearSlot.waffe) {
+          expect(zeile, isNotNull, reason: item.name);
+        } else {
+          expect(zeile, isNull, reason: item.name);
+        }
+      }
+    });
+
+    test('sie nennt Zug, Schadensfaktor und Energie', () {
+      final zeile = weaponAbilityLine(GearCatalog.byId(klinge)!);
+
+      // Die Übungsklinge trägt den Hieb: ×1,3 Schaden, +2 Energie
+      // (ADR-0017, Punkt 2). Steht die Zahl hier falsch, steht sie im
+      // Laden falsch.
+      expect(zeile, 'Bringt Hieb mit — ×1,3 Schaden, +2 Energie je Runde');
+    });
+
+    test('keine zwei Waffen bekommen dieselbe Zeile', () {
+      // Der sichtbare Teil der Zusage aus `abilities_seam_test.dart`:
+      // Zwei gleich beschriebene Waffen wären im Laden nicht zu
+      // unterscheiden, auch wenn der Katalog es wäre.
+      final zeilen = <String?>[
+        for (final waffe in GearCatalog.forSlot(GearSlot.waffe))
+          weaponAbilityLine(waffe),
+      ];
+
+      expect(zeilen.toSet(), hasLength(zeilen.length));
+    });
+  });
+
   group('ShopScreen', () {
     testWidgets('zeigt jeden Platz und jedes Stück', (tester) async {
       useTallView(tester);
@@ -142,6 +178,27 @@ void main() {
 
       for (final slot in GearSlot.values) {
         expect(gefunden, contains(slot.label), reason: slot.label);
+      }
+    });
+
+    testWidgets('nennt bei jeder Waffe, welchen Zug sie mitbringt', (
+      tester,
+    ) async {
+      // **Fünf Waffen mit fünf Rhythmen sind nur dann eine
+      // Entscheidung, wenn man vor dem Kauf sieht, welchen man
+      // bekommt** (Ziel 3). Die Waffen stehen zuoberst im Laden, also
+      // ohne Scrollen erreichbar.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const ShopScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      for (final waffe in GearCatalog.forSlot(GearSlot.waffe)) {
+        final zeile = weaponAbilityLine(waffe);
+
+        expect(zeile, isNotNull, reason: waffe.name);
+        expect(find.text(zeile!), findsOneWidget, reason: waffe.name);
       }
     });
 
@@ -237,7 +294,10 @@ void main() {
       container.read(loadoutProvider.notifier).buy(klinge);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('+1 Ausrüstung'), findsOneWidget);
+      // Die Zahl kommt aus dem Katalog, nicht aus diesem Test — sonst
+      // fällt er bei jeder Preisrunde um, ohne dass etwas kaputt ist.
+      final bonus = GearCatalog.byId(klinge)!.bonus.attack;
+      expect(find.textContaining('+$bonus Ausrüstung'), findsOneWidget);
     });
   });
 }

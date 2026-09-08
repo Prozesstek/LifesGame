@@ -34,14 +34,36 @@ abstract final class AbilityCatalog {
 
   /// Welche Waffe welche Fähigkeit mitbringt.
   ///
-  /// **Heute zwei Einträge, laut ADR-0017 sollen es fünf sein.** Dolch,
-  /// Streitkolben und Stab gibt es im Laden noch nicht — und ob es sie
-  /// als *Alternativen* zum selben Preis oder als Leiter geben soll, ist
-  /// eine Entscheidung über den Laden, nicht über Fähigkeiten. Solange
-  /// sie offen ist, bleibt diese Zuordnung kurz.
+  /// **Fünf Waffen, fünf verschiedene Züge** — die Tabelle aus ADR-0017,
+  /// Punkt 2. Bis dahin gaben beide Klingen `sword_strike`; die Waffe
+  /// bestimmte damit nichts, und der ganze Slot war Dekoration.
+  ///
+  /// **Keine zwei Waffen teilen sich einen Zug**, und keiner davon steht
+  /// in [choosable]. Beides prüfen Tests: die Eindeutigkeit hier im
+  /// Package, die Naht zum Laden in `test/abilities_seam_test.dart`.
+  ///
+  /// Was die fünf unterscheidet, ist nicht „mehr" oder „weniger",
+  /// sondern *Schaden jetzt* gegen *Energie für später*:
+  ///
+  /// | Waffe | Zug | Power | Energie |
+  /// |---|---|---|---|
+  /// | Kurzbogen | Bogenschuss | 1,0 | +3 |
+  /// | Übungsklinge | Hieb | 1,3 | +2 |
+  /// | Streitkolben | Wuchtstoß | 0,9 | +3, Verteidigung runter |
+  /// | Geschliffene Klinge | Doppelstich | 0,5 | +4 |
+  /// | Kriegsstab | Sammelschlag | 0,6 | +5 |
+  ///
+  /// **Der Kurzbogen trägt denselben Zug wie [fallbackMoveId]**, und das
+  /// ist Absicht: Laut ADR-0017 ist er eine der fünf Waffen, und „den
+  /// Bogen hat jeder" ist genau der Grund, warum er auch der Rückfall
+  /// ist. Gekauft gibt er Angriff statt eines neuen Rhythmus — der
+  /// ruhigste Einstieg, den der Laden hat.
   static const Map<String, String> weaponMoves = <String, String>{
+    'gear-kurzbogen': 'basic_attack',
     'gear-uebungsklinge': 'sword_strike',
-    'gear-geschliffene-klinge': 'sword_strike',
+    'gear-streitkolben': 'mace_bash',
+    'gear-geschliffene-klinge': 'dagger_double',
+    'gear-kriegsstab': 'staff_gather',
   };
 
   /// Die fünfzehn Fähigkeiten, die der Spieler auf die freien Slots legen

@@ -72,8 +72,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 31 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
+| `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
-| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 35 Tests | nur Dart-SDK |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
@@ -137,7 +138,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 330 Tests
+flutter test             # 336 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -157,8 +158,8 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 129 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 27 Tests, prüft auch die Preise
-cd packages/abilities   ; dart test    # 35 Tests
+cd packages/gear        ; dart test    # 31 Tests, prüft auch die Preise
+cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
 ```
 
@@ -229,8 +230,15 @@ stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`
 nicht und muss den Zufluss deshalb annehmen (25 Gold am Tag); dass die
 Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
-mitgeprüft — jedes Stück muss wirken, jeder Platz braucht eines, und teurer
-muss auch besser sein.
+mitgeprüft — jedes Stück muss wirken, jeder Platz führt fünf, und teurer
+muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
+
+**Die Waffe ist dabei der Sonderfall.** Sie ist der einzige Platz, dessen
+Stück eine **Fähigkeit** mitbringt, und keine zwei tragen dieselbe
+(ADR-0017, Punkt 2). Eine sechste Waffe braucht deshalb einen sechsten
+Zug, der Energie *erzeugt* — sonst fällt `test/abilities_seam_test.dart`
+um. Ob die fünf Rhythmen sich wirklich unterscheiden, misst
+`dart run tool/balance_sim.dart` im Abschnitt „Siegquote je Waffe".
 
 **Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Engine.**
 Alle fünfzehn stehen in `packages/combat/lib/src/ability_moves.dart`, ihre
@@ -345,8 +353,9 @@ beim Start ein.
 `packages/abilities` kennt weder `combat` noch `gear` — es hält nur
 Move-Ids und Waffen-Ids. Was daraus wird, prüft
 `test/abilities_seam_test.dart` in der App: jede Move-Id kommt in
-`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, und jeder
-Waffenmove **erzeugt** Energie. Der letzte Punkt ist keine Kosmetik:
+`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, **keine zwei
+Waffen dieselbe**, und jeder Waffenmove **erzeugt** Energie. Der letzte
+Punkt ist keine Kosmetik:
 Auf Level 1 ist nur der Waffenslot offen
 ([ADR-0017](docs/decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
 

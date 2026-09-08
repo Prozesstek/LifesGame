@@ -18,10 +18,18 @@ class ShopItemTile extends StatelessWidget {
     required this.isEquipped,
     required this.missingGold,
     required this.onBuy,
+    this.abilityLine,
     super.key,
   });
 
   final GearItem item;
+
+  /// Was die Waffe an Fähigkeit mitbringt, in einer Zeile.
+  ///
+  /// Nur Waffen haben eine (ADR-0017), deshalb null bei allem anderen.
+  /// Zusammengesetzt wird sie im [ShopScreen] — `package:gear` kennt
+  /// weder Fähigkeiten noch Moves, und soll es nicht.
+  final String? abilityLine;
 
   /// Warum der Kauf nicht geht. Null heißt: geht.
   final PurchaseBlock? block;
@@ -96,6 +104,20 @@ class ShopItemTile extends StatelessWidget {
                           color: Palette.success,
                         ),
                       ),
+                      // **Ohne diese Zeile ist der Waffenkauf blind.**
+                      // Fünf Waffen mit fünf Rhythmen sind nur dann eine
+                      // Entscheidung, wenn man vor dem Kauf sieht,
+                      // welchen man bekommt (Ziel 3).
+                      if (abilityLine case final String line) ...<Widget>[
+                        const SizedBox(height: 3),
+                        Text(
+                          line,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Palette.accent,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

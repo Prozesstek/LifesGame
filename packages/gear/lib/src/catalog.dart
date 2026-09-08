@@ -8,11 +8,11 @@ import 'prices.dart';
 /// Tage lang etwas zu entscheiden geben; mit neun Stücken war nach zwei
 /// Wochen alles gesehen.
 ///
-/// **Die Waffe ist noch nicht gefüllt.** Jede Waffe im Laden muss eine
-/// Fähigkeit mitbringen — `test/abilities_seam_test.dart` in der App
-/// besteht darauf, und zu Recht: Der Waffenslot ist auf Level 1 der
-/// einzige offene (ADR-0016). Die fehlenden Waffen kommen deshalb
-/// zusammen mit ihren Fähigkeiten (Ziel 3).
+/// **Die Waffen sind der Sonderfall.** Jede bringt eine eigene Fähigkeit
+/// mit — `test/abilities_seam_test.dart` in der App besteht darauf, und
+/// zu Recht: Der Waffenslot ist auf Level 1 der einzige offene
+/// (ADR-0016). Damit ist die Waffe der einzige Platz, auf dem der Preis
+/// keine Rangfolge ist, sondern eine Richtung.
 ///
 /// **Warum die Energie-Stücke die interessanten sind.** Das Konzept
 /// (Abschnitt 3.1) warnt ausdrücklich davor, dass Ausrüstung nur Zahlen
@@ -24,28 +24,72 @@ import 'prices.dart';
 abstract final class GearCatalog {
   static const List<GearItem> all = <GearItem>[
     // ---------------------------------------------------------------
-    // Waffe — die übrigen zwei kommen mit ihren Fähigkeiten (Ziel 3)
+    // Waffe — fünf Rhythmen, keine Leiter
+    //
+    // **Der einzige Platz, auf dem der Preis wenig sagt.** Jede Waffe
+    // bringt eine eigene Fähigkeit mit (`AbilityCatalog.weaponMoves`),
+    // und die unterscheiden sich nicht in „mehr" oder „weniger", sondern
+    // in *Schaden jetzt* gegen *Energie für später*. Der Kriegsstab
+    // richtet je Treffer am wenigsten an und ist trotzdem das seltene
+    // Stück: Er bezahlt die teuren Fähigkeiten auf den Plätzen 2 bis 4 —
+    // und die gibt es erst später (ADR-0016, ADR-0029).
     // ---------------------------------------------------------------
+    GearItem(
+      id: 'gear-kurzbogen',
+      name: 'Kurzbogen',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.common,
+      price: GearPrices.waffeCommon1,
+      bonus: GearBonus(attack: 1),
+      why: 'Der Bogen, mit dem jeder anfängt — nur ein gepflegter. Sein '
+          'Bogenschuss ist genau der Zug, den ein Charakter ohne Waffe '
+          'schon hat: ausgewogen, ohne Schwäche, ohne Aussage.',
+    ),
     GearItem(
       id: 'gear-uebungsklinge',
       name: 'Übungsklinge',
       slot: GearSlot.waffe,
       rarity: GearRarity.common,
-      price: GearPrices.waffeCommon1,
-      bonus: GearBonus(attack: 1),
-      why: 'Ein Angriffspunkt klingt nach wenig und ist es nicht: Der '
-          'Unterschied zwischen knapp verlieren und knapp gewinnen liegt '
-          'im Kampf genau in dieser Größenordnung.',
+      price: GearPrices.waffeCommon2,
+      bonus: GearBonus(attack: 2),
+      why: 'Der Hieb trifft härter als jeder andere Waffenzug und bringt '
+          'dafür am wenigsten Energie. Auf Level 1, wo nur der Waffenplatz '
+          'offen ist, gibt es nichts, wofür sich Energie lohnen würde — '
+          'hier ist sie die beste Wahl im Laden.',
+    ),
+    GearItem(
+      id: 'gear-streitkolben',
+      name: 'Streitkolben',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.uncommon,
+      price: GearPrices.waffeUncommon1,
+      bonus: GearBonus(attack: 3),
+      why: 'Der einzige Waffenzug, der etwas anrichtet außer Schaden: Sein '
+          'Wuchtstoß senkt die Verteidigung des Gegners. Gegen den '
+          'Bergwaechter zählt das mehr als zwei Punkte Angriff.',
     ),
     GearItem(
       id: 'gear-geschliffene-klinge',
       name: 'Geschliffene Klinge',
       slot: GearSlot.waffe,
       rarity: GearRarity.uncommon,
-      price: GearPrices.waffeUncommon1,
-      bonus: GearBonus(attack: 3),
-      why: 'Drei Angriffspunkte sind etwa zehn Tage Gewohnheiten. Deshalb '
-          'kostet die Klinge auch etwa so viel wie zehn Tage Gold.',
+      price: GearPrices.waffeUncommon2,
+      bonus: GearBonus(attack: 4),
+      why: 'Dünn und scharf: zwei schnelle Stiche statt eines schweren '
+          'Hiebs. Je Treffer richtet sie weniger an als die Übungsklinge — '
+          'sie lohnt sich erst, wenn auf den freien Plätzen etwas liegt, '
+          'das Energie kostet.',
+    ),
+    GearItem(
+      id: 'gear-kriegsstab',
+      name: 'Kriegsstab',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.rare,
+      price: GearPrices.waffeRare,
+      bonus: GearBonus(attack: 4, maxEnergy: 1),
+      why: 'Fünf Energie je Runde, dazu ein Punkt mehr Vorrat. Damit wird '
+          'Sternenfall (kostet zehn) überhaupt spielbar. Wer nur zuschlagen '
+          'will, ist mit der halb so teuren Übungsklinge besser bedient.',
     ),
 
     // ---------------------------------------------------------------
