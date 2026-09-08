@@ -5,8 +5,13 @@ import '../../ui/palette.dart';
 
 /// Eine freigeschaltete Vorlage, die noch nicht läuft.
 ///
-/// Zeigt die Begründung aus der Lektion mit an: Eine Gewohnheit, deren
-/// Sinn man nicht kennt, hält keine Woche.
+/// **Ohne Begründung seit Issue #35.** Bis dahin stand `why` aus der
+/// Lektion mit auf der Kachel — mit dem Gedanken, dass eine Gewohnheit,
+/// deren Sinn man nicht kennt, keine Woche hält. Der Sinn steht aber
+/// bereits in der Lektion, die die Vorlage freischaltet; hier war er die
+/// zweite Ausgabe desselben Textes und machte aus einer Liste von acht
+/// Vorlagen eine Textwand. Was bleibt, ist die Wirkung im Kampf — die
+/// steht nirgends sonst.
 class HabitTemplateTile extends StatelessWidget {
   const HabitTemplateTile({
     required this.template,
@@ -46,15 +51,6 @@ class HabitTemplateTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  template.why,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.4,
-                    color: Palette.textDim,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 Text(
                   '${template.stat.label} · ${template.stat.combatLabel}',
                   style: const TextStyle(

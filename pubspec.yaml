@@ -67,8 +67,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Derzeit gibt es keine Bilder. Sobald wieder welche dazukommen, muss
-  # hier der Ordner stehen -- siehe `lib/combat/move_icon.dart`:
+  assets:
+    # Die Figur auf dem Startbildschirm. Ein Ordner statt einer Datei,
+    # damit ein zweites Bild (Ruestung, Pose) nur abgelegt werden muss.
+    - assets/character/
+
+  # Fuer die Faehigkeiten gibt es derzeit keine Bilder. Sobald wieder
+  # welche dazukommen, muss hier der Ordner stehen -- siehe
+  # `lib/combat/move_icon.dart`:
   #
-  #   assets:
   #     - assets/abilities/

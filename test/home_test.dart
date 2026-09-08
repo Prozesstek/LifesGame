@@ -1,10 +1,12 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/enemy_picker_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
-import 'package:lifes_game/home/widgets/hub_tile.dart';
+import 'package:lifes_game/home/widgets/character_stage.dart';
+import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
@@ -43,30 +45,39 @@ void main() {
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      // Tests laufen im Debug-Build, deshalb ist die Dev-Kachel hier
-      // sichtbar (ADR-0021). Sie gehört nicht zum Spiel und wird für die
-      // Zählung herausgenommen — im Release-Build gibt es sie nicht.
-      final tiles = tester
-          .widgetList<HubTile>(find.byType(HubTile))
-          .where((t) => t.title != 'Entwicklermodus')
+      // Der Entwicklermodus ist seit Issue #35 kein Bereich mehr,
+      // sondern ein kleiner Knopf daneben (ADR-0021: er gehört nicht zum
+      // Spiel). Die fünf Kreise sind damit genau die fünf Bereiche.
+      final kreise = tester
+          .widgetList<HubCircle>(find.byType(HubCircle))
           .toList();
-      final locked = tiles
-          .where((t) => t.onTap == null)
-          .map((t) => t.title)
+      final locked = kreise
+          .where((k) => k.isLocked)
+          .map((k) => k.label)
           .toList();
 
-      expect(tiles, hasLength(5));
+      expect(kreise, hasLength(5));
       expect(locked, <String>['Kampf']);
     });
 
-    testWidgets('die gesperrte Kachel nennt den Weg, nicht die Absage', (
+    testWidgets('der gesperrte Kreis nennt den Weg, nicht die Absage', (
       tester,
     ) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      // **Seit ADR-0025 nennt sie nicht mehr das Handbuch.** Der Kampf
+      // **Der Satz steht seit Issue #35 nicht mehr dauerhaft da.** Ein
+      // Kreis hat keinen Platz für ihn; ADR-0020 nennt ihn trotzdem
+      // wichtig, weil eine Sperre ohne Weg jemanden in die Theorie
+      // zurückschickt, wo er nichts mehr zu tun hat. Also kommt er beim
+      // Antippen — und dieser Test geht deshalb genau diesen Weg.
+      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsNothing);
+
+      await tester.tap(find.text('Kampf'));
+      await tester.pump();
+
+      // **Seit ADR-0025 nennt er nicht mehr das Handbuch.** Der Kampf
       // hängt nur noch am Moveset; das Handbuch sperrt den Baum. Die
       // Kette ist dieselbe, sie steht nur nicht mehr zweimal da.
       expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
@@ -91,9 +102,9 @@ void main() {
       );
       await tester.pump();
 
-      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
+      final kreise = tester.widgetList<HubCircle>(find.byType(HubCircle));
 
-      expect(tiles.where((t) => t.onTap == null), isEmpty);
+      expect(kreise.where((k) => k.isLocked), isEmpty);
     });
 
     testWidgets('mit durchgearbeitetem Handbuch geht der Kampf auf', (
@@ -108,10 +119,9 @@ void main() {
       );
       await tester.pump();
 
-      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
-      final locked = tiles.where((t) => t.onTap == null);
+      final kreise = tester.widgetList<HubCircle>(find.byType(HubCircle));
 
-      expect(locked, isEmpty);
+      expect(kreise.where((k) => k.isLocked), isEmpty);
     });
     testWidgets('Gewohnheiten führt zum Tracker', (tester) async {
       useTallView(tester);
@@ -178,13 +188,17 @@ void main() {
       );
       await tester.pump();
 
-      final tiles = tester.widgetList<HubTile>(find.byType(HubTile));
-      final locked = tiles
-          .where((t) => t.onTap == null)
-          .map((t) => t.title)
+      final locked = tester
+          .widgetList<HubCircle>(find.byType(HubCircle))
+          .where((k) => k.isLocked)
+          .map((k) => k.label)
           .toList();
 
       expect(locked, <String>['Kampf']);
+
+      await tester.tap(find.text('Kampf'));
+      await tester.pump();
+
       expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
     });
 
@@ -210,6 +224,9 @@ void main() {
           child: const LifesGameApp(),
         ),
       );
+      await tester.pump();
+
+      await tester.tap(find.text('Kampf'));
       await tester.pump();
 
       expect(find.textContaining('Leg eine Fähigkeit'), findsOneWidget);
@@ -248,6 +265,17 @@ void main() {
       expect(find.byType(CharacterScreen), findsOneWidget);
     });
 
+    testWidgets('die Figur in der Mitte ist wirklich abgelegt', (tester) async {
+      // **Dieselbe Naht wie bei `move_icon_test.dart`.** `rootBundle`
+      // findet nur, was in `pubspec.yaml` unter `assets:` steht — der
+      // Test prueft damit Datei **und** Anmeldung in einem Zug. Ohne ihn
+      // faellt ein vergessener Eintrag erst im Browser auf, und dann als
+      // Platzhalter, den `CharacterStage` absichtlich still zeigt.
+      final daten = await rootBundle.load(CharacterStage.assetPath);
+
+      expect(daten.lengthInBytes, greaterThan(1000));
+    });
+
     testWidgets('der Charakter startet auf Level 1 ohne Gold', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
@@ -256,9 +284,10 @@ void main() {
       expect(find.text('Level 1'), findsOneWidget);
       expect(find.text('0 von 100 Erfahrung bis Level 2'), findsOneWidget);
 
-      // Zweimal: einmal auf der Levelkarte, einmal als Zustand der
-      // Laden-Kachel.
-      expect(find.text('0 Gold'), findsNWidgets(2));
+      // Nur noch einmal: Die Zahl stand vorher zusätzlich als Zustand
+      // auf der Laden-Kachel. Ein Kreis trägt keinen Zustand mehr, und
+      // dieselbe Zahl an zwei Stellen war ohnehin eine zu viel.
+      expect(find.text('0 Gold'), findsOneWidget);
     });
   });
 }

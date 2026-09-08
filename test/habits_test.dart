@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/custom_habit_sheet.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
@@ -364,8 +365,71 @@ void main() {
       await tester.pump();
 
       expect(container.read(customSlotsLeftProvider), 0);
+
+      // Der Knopf verschwindet nicht, er sagt ab. Seit Issue #35 steht
+      // der Grund nicht mehr dauerhaft in der Liste, sondern kommt beim
+      // Antippen -- sonst fehlte er ganz, und die Frage „warum geht das
+      // nicht" bliebe offen.
       expect(find.byIcon(Icons.playlist_add), findsOneWidget);
+      expect(find.textContaining('Kein Platz frei'), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.playlist_add));
+      await tester.pump();
+
       expect(find.textContaining('Kein Platz frei'), findsOneWidget);
+      expect(find.byType(CustomHabitSheet), findsNothing);
+    });
+
+    testWidgets('die Untertexte sind weg, die Zahlen nicht (Issue #35)', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      // Eine eigene Gewohnheit mit Tagesziel, gestern und vorgestern
+      // abgehakt -- damit heute eine Kette von zwei Tagen zaehlt.
+      final controller = container.read(habitTrackerProvider.notifier);
+      final habit = controller.addCustom(
+        name: 'Wasser trinken',
+        stat: HabitStat.ausdauer,
+        difficulty: HabitDifficulty.mittel,
+        goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
+      );
+      controller.toggle(habit!.id, _heute.previous.previous);
+      controller.toggle(habit.id, _heute.previous);
+      controller.advance(habit.id, _heute);
+      await tester.pump();
+
+      // Die Prosa ist weg: kein „+1 Ausdauer", kein „2 Tage am Stück".
+      expect(find.textContaining('am Stück'), findsNothing);
+      expect(find.textContaining('+1 Ausdauer'), findsNothing);
+
+      // Die Zahlen sind geblieben -- die Kette als Marke, der Stand des
+      // Tagesziels am Balken. Ohne sie waere aus einer Layout-Aenderung
+      // eine Produktaenderung geworden.
+      expect(find.text('Wasser trinken'), findsOneWidget);
+      expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+      expect(find.textContaining('2'), findsWidgets);
+      expect(find.textContaining('Gläser'), findsOneWidget);
+    });
+
+    testWidgets('ohne Kette steht keine Marke da', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      container
+          .read(habitTrackerProvider.notifier)
+          .addCustom(
+            name: 'Frisch angelegt',
+            stat: HabitStat.staerke,
+            difficulty: HabitDifficulty.mittel,
+          );
+      await tester.pump();
+
+      expect(find.text('Frisch angelegt'), findsOneWidget);
+      expect(find.byIcon(Icons.local_fire_department), findsNothing);
     });
 
     testWidgets('mehr als die Plätze hergeben, kommt nicht hinzu', (

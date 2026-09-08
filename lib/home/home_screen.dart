@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear/gear.dart';
 
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
 import '../combat/combat_controller.dart';
 import '../combat/enemy_picker_screen.dart';
-import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
-import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
-import '../theory/theory_controller.dart';
 import '../ui/palette.dart';
-import 'widgets/hub_tile.dart';
-import 'widgets/level_card.dart';
+import 'widgets/character_stage.dart';
+import 'widgets/hub_circle.dart';
 
-/// Startbildschirm — der Weg zu allem anderen.
+/// Startbildschirm — die Figur in der Mitte, die Bereiche darum herum.
+///
+/// **Bis Issue #35 war das eine Liste aus fünf Kacheln.** Sie hat
+/// funktioniert und nichts erzählt: Ein Habit-Tracker, dessen Startseite
+/// aussieht wie ein Einstellungsmenü, muss seine eigene Aussage jeden Tag
+/// aufs Neue behaupten. Jetzt steht der Charakter in der Mitte, und die
+/// fünf Bereiche liegen als Kreise darum.
 ///
 /// Gesperrte Bereiche stehen bewusst mit dabei. Ein Startbildschirm, der
-/// nur zeigt, was schon fertig ist, verschweigt, worum es geht.
+/// nur zeigt, was schon fertig ist, verschweigt, worum es geht — und der
+/// Kreis nennt beim Antippen den Weg (ADR-0020).
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -31,15 +34,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
-    final passed = ref.watch(passedPagesProvider);
-    final totalPages = ref.watch(totalPagesProvider);
 
-    final tracker = ref.watch(habitTrackerProvider);
-    final unlockedHabits = ref.watch(unlockedHabitsProvider);
-    final today = ref.watch(todayProvider);
-    final activeHabits = tracker.activeHabits;
-    final enemy = ref.watch(selectedEnemyProvider);
-    final equippedCount = ref.watch(loadoutProvider).equippedCount;
     final combatOpen = ref.watch(combatUnlockedProvider);
     final combatBlock = ref.watch(combatBlockReasonProvider);
 
@@ -48,77 +43,77 @@ class HomeScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-              children: <Widget>[
-                const _Header(),
-                const SizedBox(height: 20),
-                LevelCard(level: level, gold: gold),
-                const SizedBox(height: 24),
-                HubTile(
-                  icon: Icons.check_circle_outline,
-                  title: 'Gewohnheiten',
-                  subtitle: _habitSubtitle(unlockedHabits.length),
-                  status: activeHabits.isEmpty
-                      ? null
-                      : '${tracker.completedOn(today)} / '
-                            '${activeHabits.length}',
-                  onTap: () => _open(context, const HabitsScreen()),
-                ),
-                const SizedBox(height: 10),
-                HubTile(
-                  icon: Icons.account_tree_outlined,
-                  title: 'Theorie',
-                  subtitle:
-                      'Vier Gebiete und das Handbuch, '
-                      'Level ${level.level}',
-                  status: '$passed / $totalPages',
-                  onTap: () => _open(context, const SkillTreeScreen()),
-                ),
-                const SizedBox(height: 10),
-                HubTile(
-                  icon: Icons.sports_martial_arts,
-                  title: 'Kampf',
-                  subtitle: combatBlock ?? 'Drei Gegner — Dungeon kommt später',
-                  status: combatOpen ? enemy.name : null,
-                  // Gesperrt, bis das Handbuch durch ist (ADR-0018). Mit
-                  // nur einem Move ist der erste Kampf nicht knapp,
-                  // sondern unmöglich — und der Zweig gibt genau die
-                  // Erfahrung, die den zweiten Slot öffnet.
-                  onTap: combatOpen
-                      ? () => _open(context, const EnemyPickerScreen())
-                      : null,
-                ),
-                const SizedBox(height: 10),
-                HubTile(
-                  icon: Icons.storefront_outlined,
-                  title: 'Laden',
-                  subtitle: 'Ausrüstung für sechs Plätze',
-                  status: '$gold Gold',
-                  onTap: () => _open(context, const ShopScreen()),
-                ),
-                const SizedBox(height: 10),
-                HubTile(
-                  icon: Icons.person_outline,
-                  title: 'Charakter',
-                  subtitle: 'Werte und Ausrüstung',
-                  status: '$equippedCount / ${GearSlot.values.length}',
-                  onTap: () => _open(context, const CharacterScreen()),
-                ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      HubCircle(
+                        icon: Icons.check_circle_outline,
+                        label: 'Gewohnheiten',
+                        onTap: () => _open(context, const HabitsScreen()),
+                      ),
+                      HubCircle(
+                        icon: Icons.account_tree_outlined,
+                        label: 'Theorie',
+                        onTap: () => _open(context, const SkillTreeScreen()),
+                      ),
+                      HubCircle(
+                        icon: Icons.sports_martial_arts,
+                        label: 'Kampf',
+                        // Der Kampf hängt am Moveset (ADR-0025). Ist es zu
+                        // dünn, nennt der Kreis beim Antippen, woran es
+                        // liegt — der Satz unterscheidet drei Fälle, und
+                        // der dritte ist der wichtigste: gelernt, aber
+                        // nicht angelegt.
+                        lockedReason: combatOpen ? null : combatBlock,
+                        onTap: () => _open(context, const EnemyPickerScreen()),
+                      ),
+                    ],
+                  ),
 
-                // Nur im Debug-Build. Im Release ist der Zweig samt
-                // Bildschirm gar nicht erst im Bündel (ADR-0021).
-                if (devModeAvailable) ...<Widget>[
-                  const SizedBox(height: 10),
-                  HubTile(
-                    icon: Icons.science_outlined,
-                    title: 'Entwicklermodus',
-                    subtitle: 'Werte schenken, alles freischalten',
-                    status: ref.watch(activeSlotProvider).label,
-                    onTap: () => _open(context, const DevScreen()),
+                  // **Die Figur bekommt, was übrig bleibt.** Der Rest des
+                  // Bildschirms steht fest; damit passt das Layout auf
+                  // jede Höhe, ohne zu scrollen und ohne überzulaufen.
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: CharacterStage(level: level, gold: gold),
+                    ),
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      HubCircle(
+                        icon: Icons.storefront_outlined,
+                        label: 'Laden',
+                        onTap: () => _open(context, const ShopScreen()),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          // Nur im Debug-Build. Im Release ist der Zweig
+                          // samt Bildschirm gar nicht erst im Bündel
+                          // (ADR-0021), und an dieser Stelle steht dann
+                          // nichts.
+                          if (devModeAvailable) const _DevKnopf(),
+                          HubCircle(
+                            icon: Icons.person_outline,
+                            label: 'Charakter',
+                            onTap: () =>
+                                _open(context, const CharacterScreen()),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -129,39 +124,43 @@ class HomeScreen extends ConsumerWidget {
   void _open(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
-
-  /// Ohne freigeschaltete Vorlage steht hier der Weg dorthin, nicht das
-  /// Versprechen einer Funktion, die noch leer wäre.
-  static String _habitSubtitle(int unlockedCount) {
-    if (unlockedCount == 0) {
-      return 'Vorlagen kommen aus dem Skillbaum';
-    }
-    return 'Täglich abhaken, Werte aufbauen';
-  }
 }
 
-class _Header extends StatelessWidget {
-  const _Header();
+/// Der kleine Knopf über dem Charakterkreis.
+///
+/// Er sitzt bewusst abseits der fünf Bereiche und ist kleiner als sie:
+/// Der Entwicklermodus ist kein Teil des Spiels, sondern ein Werkzeug —
+/// und er arbeitet auf einem eigenen Spielstand (ADR-0021).
+class _DevKnopf extends ConsumerWidget {
+  const _DevKnopf();
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Text(
-          'Lifes Game',
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4, right: 4),
+      child: Tooltip(
+        message: 'Entwicklermodus — ${ref.watch(activeSlotProvider).label}',
+        child: InkWell(
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute<void>(builder: (_) => const DevScreen())),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: Palette.surface,
+              shape: BoxShape.circle,
+              border: Border.all(color: Palette.muted),
+            ),
+            child: const Icon(
+              Icons.science_outlined,
+              size: 17,
+              color: Palette.muted,
+            ),
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Was du im Alltag tust, macht deinen Charakter stark.',
-          style: TextStyle(fontSize: 14, color: Palette.textDim),
-        ),
-      ],
+      ),
     );
   }
 }
