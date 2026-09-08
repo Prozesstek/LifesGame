@@ -11,7 +11,7 @@
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
 /// 1. Datei nach `assets/enemies/` legen, benannt wie die Gegner-Id, in
-///    [assetSize] Pixel Kantenlänge. Den Ordner in `pubspec.yaml`
+///    [assetWidth] × [assetHeight] Pixeln. Den Ordner in `pubspec.yaml`
 ///    eintragen — `assets/character/` steht dort als Vorbild.
 /// 2. Eine Zeile in [_dateien] ergänzen.
 ///
@@ -32,6 +32,18 @@ abstract final class EnemyIcons {
   /// Alle Gegner-Ids, für die es ein Bild gibt.
   static Iterable<String> get enemyIds => _dateien.keys;
 
-  /// Die Auflösung der abgelegten Bilder.
-  static const int assetSize = 768;
+  /// Die Auflösung der abgelegten Bilder — **hochkant, nicht
+  /// quadratisch**.
+  ///
+  /// Die Fläche auf dem Bildschirm misst gemessen 322 × 466 logische
+  /// Punkte (Handy im Hochformat, 390 × 844). Bei dreifacher Pixeldichte
+  /// sind das 966 × 1398 echte Pixel — 1024 × 1536 liegt knapp darüber
+  /// und ist dieselbe Vorgabe wie beim Charakter-Sprite. Damit gibt es
+  /// für gezeichnete Figuren nur **ein** Format im Projekt.
+  ///
+  /// Hier stand zuerst eine quadratische Zahl. Das war schlicht falsch:
+  /// Ein quadratisches Bild wird in dieser Fläche oben und unten
+  /// eingerahmt und nutzt keine 40 % der Höhe.
+  static const int assetWidth = 1024;
+  static const int assetHeight = 1536;
 }
