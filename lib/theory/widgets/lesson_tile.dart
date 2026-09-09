@@ -53,7 +53,7 @@ class LessonTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: isUnlocked ? Colors.white : Palette.muted,
+                        color: isUnlocked ? Palette.text : Palette.muted,
                       ),
                     ),
                     const SizedBox(height: 3),

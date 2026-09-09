@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'branch_screen.dart';
 import 'lesson_screen.dart';
@@ -94,7 +95,10 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
         backgroundColor: Palette.background,
         appBar: AppBar(
           title: const Text('Theorie'),
+          // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
+          // als Pergamentleiste darüber zu liegen.
           backgroundColor: Palette.background,
+          foregroundColor: Palette.textOnDark,
           actions: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -102,48 +106,52 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
             ),
           ],
         ),
-        body: Column(
-          children: <Widget>[
-            _Header(
-              area: graph.nodeById(_areaId),
-              areaPassed: _passedIn(graph, progress, _areaId),
-              areaTotal: graph.descendantsOf(_areaId, includeSelf: true).length,
-              passed: passed,
-              total: total,
-              areaIndex: _current,
-              areaCount: theoryRootIds.length,
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pages,
-                itemCount: theoryRootIds.length,
-                onPageChanged: (i) => setState(() => _current = i),
-                itemBuilder: (context, i) {
-                  final id = theoryRootIds[i];
-
-                  return TreeView(
-                    graph: graph,
-                    progress: progress,
-                    availablePoints: available,
-                    path: _paths[id]!,
-                    panelOpen: _panelOpen[id]!,
-                    onTogglePanel: () =>
-                        setState(() => _panelOpen[id] = !_panelOpen[id]!),
-                    onEnter: (node) => setState(() {
-                      _paths[id]!.add(node.id);
-                      _panelOpen[id] = true;
-                    }),
-                    onLeave: _leave,
-                    onAction: _act,
-                    onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
-                    onNextArea: i < theoryRootIds.length - 1
-                        ? () => _goToArea(i + 1)
-                        : null,
-                  );
-                },
+        body: OnDark(
+          child: Column(
+            children: <Widget>[
+              _Header(
+                area: graph.nodeById(_areaId),
+                areaPassed: _passedIn(graph, progress, _areaId),
+                areaTotal: graph
+                    .descendantsOf(_areaId, includeSelf: true)
+                    .length,
+                passed: passed,
+                total: total,
+                areaIndex: _current,
+                areaCount: theoryRootIds.length,
               ),
-            ),
-          ],
+              Expanded(
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: theoryRootIds.length,
+                  onPageChanged: (i) => setState(() => _current = i),
+                  itemBuilder: (context, i) {
+                    final id = theoryRootIds[i];
+
+                    return TreeView(
+                      graph: graph,
+                      progress: progress,
+                      availablePoints: available,
+                      path: _paths[id]!,
+                      panelOpen: _panelOpen[id]!,
+                      onTogglePanel: () =>
+                          setState(() => _panelOpen[id] = !_panelOpen[id]!),
+                      onEnter: (node) => setState(() {
+                        _paths[id]!.add(node.id);
+                        _panelOpen[id] = true;
+                      }),
+                      onLeave: _leave,
+                      onAction: _act,
+                      onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
+                      onNextArea: i < theoryRootIds.length - 1
+                          ? () => _goToArea(i + 1)
+                          : null,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -248,7 +256,7 @@ class _Header extends StatelessWidget {
                   '$areaPassed von $areaTotal',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Palette.textOnDark,
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
@@ -259,7 +267,10 @@ class _Header extends StatelessWidget {
                 child: Text(
                   'gesamt $passed von $total',
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Palette.muted, fontSize: 11.5),
+                  style: const TextStyle(
+                    color: Palette.textOnDarkDim,
+                    fontSize: 11.5,
+                  ),
                 ),
               ),
             ],
@@ -272,7 +283,7 @@ class _Header extends StatelessWidget {
                   (area?.name ?? '').toUpperCase(),
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Palette.accent,
+                    color: Palette.accentOnDark,
                     fontSize: 11,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w700,
@@ -311,7 +322,9 @@ class _Dots extends StatelessWidget {
               width: i == index ? 16 : 6,
               height: 6,
               decoration: BoxDecoration(
-                color: i == index ? Palette.accent : Palette.muted,
+                color: i == index
+                    ? Palette.accentOnDark
+                    : Palette.textOnDarkDim,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),

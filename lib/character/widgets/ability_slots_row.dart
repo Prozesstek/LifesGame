@@ -126,7 +126,7 @@ class AbilitySlotsRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Palette.text,
                   ),
                 ),
               ),
@@ -201,7 +201,7 @@ class _AbilityOption extends StatelessWidget {
     if (move == null) return const SizedBox.shrink();
 
     return ListTile(
-      title: Text(move.name, style: const TextStyle(color: Colors.white)),
+      title: Text(move.name, style: const TextStyle(color: Palette.text)),
       subtitle: Text(
         isElsewhere
             ? '${moveSummary(move)} · liegt auf einem anderen Platz'
@@ -308,7 +308,7 @@ class _Slot extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10,
-                    color: move == null ? Palette.muted : Colors.white,
+                    color: move == null ? Palette.muted : Palette.text,
                   ),
                 ),
               ],

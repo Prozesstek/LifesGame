@@ -62,9 +62,13 @@ class EnvironmentBanner extends StatelessWidget {
                 child: Text(
                   active.name,
                   overflow: TextOverflow.ellipsis,
+                  // **Die Farbe muss hier stehen.** Die Leiste ist
+                  // Pergament, liegt aber in der Arena — und die färbt
+                  // alles ohne eigene Angabe hell (`OnDark`).
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
+                    color: Palette.text,
                   ),
                 ),
               ),

@@ -72,6 +72,20 @@ flutter:
     # damit ein zweites Bild (Ruestung, Pose) nur abgelegt werden muss.
     - assets/character/
 
+    # **Die Ordner sind nach der Zeichnung sortiert, nicht nach der Id.**
+    # Wer eine Klinge malt, legt sie zu den Klingen -- welches
+    # Ausruestungsstueck sie darstellt, entscheidet `GearIcons`. Ein
+    # Ordner je Art bedeutet: eine neue Datei ist eine Datei, keine
+    # Aenderung an dieser Liste.
+    - assets/Waffen/Schwerter/
+
+    # Muenze, Beutel und was sonst als Gegenstand auftaucht.
+    - assets/Items/
+
+    # Flaechen, auf denen die Oberflaeche selbst steht -- der runde Knopf
+    # des Startbildschirms und seine Charakter-Fassung.
+    - assets/UI/
+
   # Fuer die Faehigkeiten gibt es derzeit keine Bilder. Sobald wieder
   # welche dazukommen, muss hier der Ordner stehen -- siehe
   # `lib/combat/move_icon.dart`:

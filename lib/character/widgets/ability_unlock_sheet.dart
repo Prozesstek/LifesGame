@@ -86,7 +86,7 @@ class AbilityUnlockSheet extends StatelessWidget {
               'Du hast ${move.name} freigeschaltet',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Palette.text,
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
               ),

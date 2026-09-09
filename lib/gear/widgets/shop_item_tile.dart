@@ -100,7 +100,7 @@ class ShopItemTile extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 color: _isOwned
                                     ? Palette.textDim
-                                    : Colors.white,
+                                    : Palette.text,
                               ),
                             ),
                           ),

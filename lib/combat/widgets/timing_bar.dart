@@ -1,5 +1,6 @@
 import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
+import '../../ui/palette.dart';
 
 /// Der Timed Hit als Eingabe: ein Marker läuft über die Leiste, der Spieler
 /// tippt möglichst mittig.
@@ -116,7 +117,7 @@ class TimingBarState extends State<TimingBar>
             style: const TextStyle(
               letterSpacing: 3,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFFFD166),
+              color: Palette.goldOnDark,
             ),
           ),
           const SizedBox(height: 8),
@@ -153,7 +154,7 @@ class _TimingPainter extends CustomPainter {
       Offset.zero & size,
       const Radius.circular(6),
     );
-    canvas.drawRRect(track, Paint()..color = const Color(0xFF232838));
+    canvas.drawRRect(track, Paint()..color = Palette.trackOnDark);
 
     /// [width] ist die Breite der Zone über die ganze Leiste.
     void zone(double width, Color color) {
@@ -167,13 +168,13 @@ class _TimingPainter extends CustomPainter {
       canvas.drawRect(rect, Paint()..color = color);
     }
 
-    zone(spec.goodWindow, const Color(0xFF35506B));
-    zone(spec.perfectWindow, const Color(0xFF4E8C5A));
+    zone(spec.goodWindow, Palette.timingGood);
+    zone(spec.perfectWindow, Palette.timingPerfect);
 
     final x = size.width * position;
     canvas.drawRect(
       Rect.fromLTWH(x - 2, -3, 4, size.height + 6),
-      Paint()..color = const Color(0xFFFFD166),
+      Paint()..color = Palette.goldOnDark,
     );
   }
 

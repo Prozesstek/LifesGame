@@ -97,10 +97,13 @@ class _Fortschritt extends StatelessWidget {
       children: <Widget>[
         Text(
           '${stand.highestDefeated} / ${Enemies.rungs}',
+          // Die Zahl steht auf dem Leder, nicht auf einer Fläche — und
+          // sie ist die Überschrift des Bildschirms.
           style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
+            color: Palette.textOnDark,
           ),
         ),
         const SizedBox(height: 8),
@@ -109,8 +112,10 @@ class _Fortschritt extends StatelessWidget {
           child: LinearProgressIndicator(
             value: stand.highestDefeated / Enemies.rungs,
             minHeight: 7,
-            backgroundColor: Palette.surfaceRaised,
-            valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
+            backgroundColor: Palette.trackOnDark,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              Palette.accentOnDark,
+            ),
           ),
         ),
       ],
@@ -214,7 +219,7 @@ class _Namensleiste extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Palette.text,
             ),
           ),
           const SizedBox(height: 4),
@@ -253,7 +258,10 @@ class _Belohnung extends StatelessWidget {
                 '+${LadderRewards.goldFor(rung)} Gold'
           : 'Schon geschlagen — bringt nichts mehr ein.',
       textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 12, color: neu ? Palette.gold : Palette.muted),
+      style: TextStyle(
+        fontSize: 12,
+        color: neu ? Palette.goldOnDark : Palette.textOnDarkDim,
+      ),
     );
   }
 }

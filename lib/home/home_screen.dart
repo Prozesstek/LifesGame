@@ -53,16 +53,19 @@ class HomeScreen extends ConsumerWidget {
                       HubCircle(
                         icon: Icons.check_circle_outline,
                         label: 'Gewohnheiten',
+                        image: HubCircleImage.plain,
                         onTap: () => _open(context, const HabitsScreen()),
                       ),
                       HubCircle(
                         icon: Icons.account_tree_outlined,
                         label: 'Theorie',
+                        image: HubCircleImage.plain,
                         onTap: () => _open(context, const SkillTreeScreen()),
                       ),
                       HubCircle(
                         icon: Icons.sports_martial_arts,
                         label: 'Kampf',
+                        image: HubCircleImage.plain,
                         // Der Kampf hängt am Moveset (ADR-0025). Ist es zu
                         // dünn, nennt der Kreis beim Antippen, woran es
                         // liegt — der Satz unterscheidet drei Fälle, und
@@ -91,6 +94,7 @@ class HomeScreen extends ConsumerWidget {
                       HubCircle(
                         icon: Icons.storefront_outlined,
                         label: 'Laden',
+                        image: HubCircleImage.plain,
                         onTap: () => _open(context, const ShopScreen()),
                       ),
                       Column(
@@ -105,6 +109,9 @@ class HomeScreen extends ConsumerWidget {
                           HubCircle(
                             icon: Icons.person_outline,
                             label: 'Charakter',
+                            // Die einzige Flaeche, die ihr Zeichen selbst
+                            // mitbringt.
+                            image: HubCircleImage.character,
                             onTap: () =>
                                 _open(context, const CharacterScreen()),
                           ),

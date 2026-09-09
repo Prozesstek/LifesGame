@@ -130,7 +130,7 @@ class _TitleTile extends StatelessWidget {
       title: Text(
         title.label,
         style: TextStyle(
-          color: isEarned ? Colors.white : Palette.muted,
+          color: isEarned ? Palette.text : Palette.muted,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

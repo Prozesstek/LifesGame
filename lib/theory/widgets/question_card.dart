@@ -85,7 +85,7 @@ class _Option extends StatelessWidget {
     };
     final textColor = switch (state) {
       _OptionState.dimmed => Palette.muted,
-      _ => Colors.white,
+      _ => Palette.text,
     };
 
     return Material(

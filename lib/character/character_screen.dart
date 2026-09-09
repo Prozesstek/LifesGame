@@ -114,7 +114,10 @@ class CharacterScreen extends ConsumerWidget {
                             'zu füllen.'
                       : '${loadout.equippedCount} von '
                             '${GearSlot.values.length} Plätzen belegt.',
-                  style: const TextStyle(fontSize: 13, color: Palette.textDim),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Palette.textOnDarkDim,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 GridView.count(
@@ -232,7 +235,7 @@ class _StatRow extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Palette.text,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -254,7 +257,7 @@ class _StatRow extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Palette.text,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -286,7 +289,7 @@ class _SectionTitle extends StatelessWidget {
       style: const TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Palette.textOnDark,
       ),
     );
   }
@@ -315,23 +318,27 @@ class _DevGrantsCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2413),
+        color: Palette.backgroundRaised,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Palette.gold.withValues(alpha: 0.5)),
+        border: Border.all(color: Palette.goldOnDark.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.science_outlined, size: 18, color: Palette.gold),
+              const Icon(
+                Icons.science_outlined,
+                size: 18,
+                color: Palette.goldOnDark,
+              ),
               const SizedBox(width: 8),
               const Text(
                 'Aus dem Entwicklermodus',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Palette.gold,
+                  color: Palette.goldOnDark,
                 ),
               ),
             ],
@@ -349,7 +356,7 @@ class _DevGrantsCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Palette.textDim,
+                        color: Palette.textOnDarkDim,
                       ),
                     ),
                   ),
@@ -359,7 +366,7 @@ class _DevGrantsCard extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Palette.textOnDark,
                     ),
                   ),
                 ],
@@ -368,7 +375,7 @@ class _DevGrantsCard extends ConsumerWidget {
           const SizedBox(height: 6),
           const Text(
             'Nicht verdient — geschenkt. Im Dev-Modus zurücksetzbar.',
-            style: TextStyle(fontSize: 11, color: Palette.muted),
+            style: TextStyle(fontSize: 11, color: Palette.textOnDarkDim),
           ),
         ],
       ),

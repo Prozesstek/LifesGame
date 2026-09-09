@@ -116,20 +116,77 @@ class LifesGameApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Palette.accent,
-      brightness: Brightness.dark,
-    );
-
     return MaterialApp(
       title: 'Lifes Game',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: scheme,
-        scaffoldBackgroundColor: Palette.background,
-        useMaterial3: true,
-      ),
+      theme: _theme(),
       home: const HomeScreen(),
+    );
+  }
+
+  /// **`Brightness.light`, obwohl der Grund dunkel ist.**
+  ///
+  /// Das sieht falsch aus und ist es nicht: Die Helligkeit eines Themes
+  /// entscheidet, welche Farbe Material für Text ohne eigene Angabe
+  /// wählt — und der steht in dieser App fast immer auf einer
+  /// Pergamentfläche, nicht auf dem Leder dahinter. Mit `dark` wäre jeder
+  /// nicht ausdrücklich gefärbte Text weiß auf Beige und damit
+  /// unsichtbar.
+  ///
+  /// Das Leder kommt über [ThemeData.scaffoldBackgroundColor] herein.
+  /// Was direkt darauf steht — die Namen unter den Bereichskreisen, die
+  /// Zahlen im Kampf — färbt sich ausdrücklich mit
+  /// [Palette.textOnDark]; das sind wenige Stellen, und sie sind in
+  /// `palette.dart` benannt.
+  static ThemeData _theme() {
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: Palette.accent,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: Palette.accent,
+          onPrimary: Palette.surface,
+          secondary: Palette.accent,
+          onSecondary: Palette.surface,
+          surface: Palette.surface,
+          onSurface: Palette.text,
+          surfaceContainerHighest: Palette.surfaceRaised,
+          error: Palette.enemy,
+          onError: Palette.surface,
+          outline: Palette.surfaceRaised,
+        );
+
+    return ThemeData(
+      colorScheme: scheme,
+      scaffoldBackgroundColor: Palette.background,
+      useMaterial3: true,
+
+      // Die Kopfzeile ist selbst eine Pergamentfläche. Ohne diese beiden
+      // Zeilen bliebe ihr Titel in der Standardfarbe des Schemas und
+      // stünde je nach Bildschirm hell auf hell.
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Palette.surface,
+        foregroundColor: Palette.text,
+        elevation: 0,
+      ),
+
+      // Blätter und Dialoge sind Pergament wie alles andere. Material
+      // würde sie sonst aus dem Schema tönen und dabei leicht daneben
+      // liegen.
+      dialogTheme: const DialogThemeData(backgroundColor: Palette.surface),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Palette.surface,
+      ),
+
+      // Der Hinweis auf einen gesperrten Bereich (ADR-0020) steht als
+      // einziges auf dunklem Grund über allem anderen.
+      snackBarTheme: const SnackBarThemeData(
+        backgroundColor: Palette.backgroundRaised,
+        contentTextStyle: TextStyle(color: Palette.textOnDark),
+      ),
+
+      dividerTheme: const DividerThemeData(color: Palette.surfaceRaised),
+      iconTheme: const IconThemeData(color: Palette.text),
     );
   }
 }

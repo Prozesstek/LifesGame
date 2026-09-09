@@ -10,6 +10,7 @@ import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:lifes_game/ui/gold_icon.dart';
 import 'package:abilities/abilities.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -274,6 +275,42 @@ void main() {
       final daten = await rootBundle.load(CharacterStage.assetPath);
 
       expect(daten.lengthInBytes, greaterThan(1000));
+    });
+
+    testWidgets('jede gezeichnete Knopffläche ist wirklich abgelegt', (
+      tester,
+    ) async {
+      // Dieselbe Naht wie eine Zeile darüber: Datei **und** Anmeldung in
+      // `pubspec.yaml`. Fehlt eine, faellt `HubCircle` still auf den
+      // schlichten Kreis zurueck — der Startbildschirm sieht dann aus wie
+      // vorher, und niemand merkt, dass eine Zeichnung fehlt.
+      for (final bild in HubCircleImage.values) {
+        final daten = await rootBundle.load(bild.assetPath);
+
+        expect(
+          daten.lengthInBytes,
+          greaterThan(1000),
+          reason: '${bild.assetPath} ist verdaechtig klein.',
+        );
+      }
+    });
+
+    testWidgets('die Goldmünze ebenfalls', (tester) async {
+      final daten = await rootBundle.load(GoldIcon.assetPath);
+
+      expect(daten.lengthInBytes, greaterThan(1000));
+    });
+
+    testWidgets('nur der Charakterkreis bringt sein Zeichen selbst mit', (
+      tester,
+    ) async {
+      // Waere das bei `plain` ebenfalls gesetzt, stuenden vier Kreise
+      // leer da — die Flaeche allein sagt nicht, wohin sie fuehrt.
+      final selbsttragend = HubCircleImage.values
+          .where((bild) => bild.carriesIcon)
+          .toList();
+
+      expect(selbsttragend, <HubCircleImage>[HubCircleImage.character]);
     });
 
     testWidgets('der Charakter startet auf Level 1 ohne Gold', (tester) async {

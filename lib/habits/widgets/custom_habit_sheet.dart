@@ -145,7 +145,7 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Palette.text,
                 ),
               ),
               const SizedBox(height: 6),
@@ -352,7 +352,7 @@ class _Label extends StatelessWidget {
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Palette.text,
       ),
     );
   }
@@ -385,7 +385,7 @@ class _Field extends StatelessWidget {
       inputFormatters: numeric
           ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
           : null,
-      style: const TextStyle(fontSize: 14, color: Colors.white),
+      style: const TextStyle(fontSize: 14, color: Palette.text),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -430,7 +430,7 @@ class _Chip extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: selected ? Colors.white : Palette.textDim,
+              color: selected ? Palette.surface : Palette.textDim,
             ),
           ),
         ),

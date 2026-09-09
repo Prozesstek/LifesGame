@@ -28,6 +28,7 @@ class BranchScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(branch.name),
         backgroundColor: Palette.background,
+        foregroundColor: Palette.textOnDark,
       ),
       body: Center(
         child: ConstrainedBox(
@@ -37,7 +38,10 @@ class BranchScreen extends ConsumerWidget {
             children: <Widget>[
               Text(
                 branch.description,
-                style: const TextStyle(fontSize: 14, color: Palette.textDim),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Palette.textOnDarkDim,
+                ),
               ),
               const SizedBox(height: 16),
               _ProgressBar(passed: passed, total: branch.lessonCount),
@@ -85,7 +89,7 @@ class _ProgressBar extends StatelessWidget {
       children: <Widget>[
         Text(
           '$passed von $total Lektionen bestanden',
-          style: const TextStyle(fontSize: 13, color: Palette.textDim),
+          style: const TextStyle(fontSize: 13, color: Palette.textOnDarkDim),
         ),
         const SizedBox(height: 8),
         ClipRRect(

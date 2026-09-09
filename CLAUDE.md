@@ -106,7 +106,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
-| `lib/ui/palette.dart` | alle Farben der App | Flutter |
+| `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
+| `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
+| `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
+| `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/battle/fighter.dart` | die beiden gezeichneten Kämpfer | Flutter |
 | `lib/combat/battle/projectile.dart` | fliegende Geschosse, z. B. der Pfeil | Flutter |
@@ -149,7 +152,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 378 Tests
+flutter test             # 399 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -428,6 +431,45 @@ Er schenkt Zuschläge als benannten Summanden, statt Lektionen oder Häkchen
 zu erfinden. Wer an einer abgeleiteten Zahl dreht, lässt
 `flutter test test/dev_mode_test.dart` laufen — dort steht die Zusage, dass
 **ohne** Zuschläge jede Formel unverändert ist.
+
+**Die App hat zwei Untergründe, und jede Bedeutung hat für beide einen
+Wert.** Pergamentflächen (`Palette.surface`) liegen auf dunklem Leder
+(`Palette.background`); die Kampfarena und die Baumfläche sind selbst
+dunkel. Schrift darauf ist `text`/`textDim`/`muted` beziehungsweise
+`textOnDark`/`textOnDarkDim`, Bedeutungen sind `accent` und
+`accentOnDark` und so fort. **Die beiden Grundfarben sind aus
+`assets/UI/ButtonBG.png` abgelesen**, nicht gewählt.
+
+Das Theme ist deshalb `Brightness.light`, obwohl der Grund dunkel ist:
+Die Helligkeit entscheidet, welche Farbe ein `Text` **ohne** eigene
+Angabe bekommt, und der steht fast immer auf Pergament. Wo ein Bereich
+auf Leder liegt, klammert `OnDark` ihn ein — sonst entsteht unsichtbarer
+Text, und der meldet sich nie. Wer eine Farbe ändert, lässt
+`flutter test test/palette_test.dart` laufen; dort stehen die
+Kontrastgrenzen als Zusage.
+
+**Alles Gezeichnete liegt auf 64 × 64 und wird als 256 × 256 abgelegt.**
+Die beiden Zahlen stehen in `PixelArt`; `MoveIcons`, `GearIcons` und
+`EnemyIcons` lesen sie dort. Eine Zeichnung fester Größe kommt über
+`PixelArt` ins Bild und nicht über `Image.asset` — dort hängt die
+Entscheidung „hart oder weich skalieren" an einer Zahl, und unterhalb der
+Zeichengröße ist hart der schlimmere Fall: Bildpunkte fallen dann einfach
+weg. Wer daran dreht, lässt `flutter test test/pixel_art_test.dart`
+laufen.
+
+Welche Datei zu welchem Ding gehört, steht in je einer Tabelle:
+
+| Frage | Antwortet |
+|---|---|
+| Welches Bild trägt ein Ausrüstungsstück? | `GearIcons` — Item-Id → **Pfad** |
+| Welches Bild trägt ein Zug? | `MoveIcons` |
+| Welches Bild trägt ein Gegner? | `EnemyIcons` |
+| Welche Fläche trägt ein Bereichskreis? | `HubCircleImage` |
+
+**Die Zeichnungen liegen nach Art sortiert** (`assets/Waffen/Schwerter/`,
+`assets/Items/`, `assets/UI/`), nicht nach Id. Beim Malen gibt es die Id
+noch gar nicht, und ein Bild kann sein Stück wechseln — die Zuordnung
+gehört deshalb in die Tabelle und nicht in den Dateinamen.
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen

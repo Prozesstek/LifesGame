@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../progression/level_provider.dart';
+import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
 import 'weapon_ability_line.dart';
@@ -65,13 +66,20 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
-              child: Text(
-                '$gold Gold',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.gold,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const GoldIcon(size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    '$gold',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.gold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -279,7 +287,7 @@ class _Reiter extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: istAktiv ? Colors.white : Palette.textDim,
+                    color: istAktiv ? Palette.surface : Palette.textDim,
                   ),
                 ),
                 if (istBesetzt) ...<Widget>[
@@ -289,7 +297,7 @@ class _Reiter extends StatelessWidget {
                     height: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: istAktiv ? Colors.white : Palette.success,
+                      color: istAktiv ? Palette.surface : Palette.success,
                     ),
                   ),
                 ],

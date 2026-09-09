@@ -1,3 +1,5 @@
+import '../ui/pixel_art.dart';
+
 /// Welches Bild zu einem Zug gehört — und wie groß seine Kachel wird.
 ///
 /// **Reine Darstellung.** Was ein Zug tut, steht in `package:combat`; hier
@@ -84,6 +86,6 @@ abstract final class MoveIcons {
   /// eins zu eins. Ein groesseres Bild muesste **verkleinert** werden,
   /// und das ist bei Pixelgrafik der schlimmere Fall: Mit
   /// `FilterQuality.none` fallen dabei einzelne Bildpunkte einfach weg.
-  static const int artSize = 64;
-  static const int assetSize = 256;
+  static const int artSize = PixelArt.artSize;
+  static const int assetSize = PixelArt.assetSize;
 }

@@ -99,7 +99,7 @@ class ShopItemCell extends StatelessWidget {
                     fontSize: 10,
                     height: 1.15,
                     fontWeight: FontWeight.bold,
-                    color: isOwned ? Palette.textDim : Colors.white,
+                    color: isOwned ? Palette.textDim : Palette.text,
                   ),
                 ),
                 const SizedBox(height: 3),

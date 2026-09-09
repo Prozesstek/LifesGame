@@ -7,9 +7,145 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 08.09.2026 · AktivesBrett (Laden) und Prozesstek (Oberfläche, Gegnerreihe)
+**Zuletzt aktualisiert:** 09.09.2026 · Prozesstek (erste Zeichnungen im Spiel)
 
 ---
+
+## Sitzung 09.09.2026: die ersten Zeichnungen sind drin
+
+Sieben Bilder lagen unter `assets/` und waren nirgends angemeldet. Jetzt
+sind sie im Spiel — soweit es dafür etwas gibt, das sie darstellen
+können. Und die App hat danach ihre Farben von ihnen übernommen.
+399 App-Tests (vorher 378).
+
+| Zeichnung | Wo sie steht |
+|---|---|
+| `UI/ButtonBG.png` | die vier Bereichskreise des Startbildschirms |
+| `UI/CharacterButton.png` | der fünfte, der Charakterkreis |
+| `Items/Gold.png` | unter der Figur und im Kopf des Ladens |
+| `Waffen/Schwerter/WoodenSword.png` | Übungsklinge, im Laden und am Platz |
+| `Waffen/Schwerter/Katana.png` | Geschliffene Klinge, ebenso |
+| `Waffen/Schwerter/NormalesSchwert.png` | **nirgends** — siehe unten |
+| `Waffen/Schwerter/RustedSword.png` | **nirgends** |
+
+**Zwei Klingen finden kein Stück.** Von den fünf Waffen des Katalogs sind
+nur zwei Klingen; die drei anderen sind Bogen, Streitkolben und Stab. Ein
+Schwertbild auf den Streitkolben zu legen hieße, im Laden etwas anderes
+zu zeigen, als man kauft — und die Waffe ist seit dem 08.09. der Platz,
+der Kämpfe entscheidet. Es fehlt also entweder ein Bild je Waffenart
+oder ein sechstes und siebtes Klingen-Stück; Letzteres wäre eine
+Katalogänderung und keine Zeichenarbeit.
+
+### Die Ordner heißen nach der Zeichnung, nicht nach der Id
+
+`GearIcons` hielt bisher Dateinamen und setzte `assets/gear/` davor —
+die Datei musste heißen wie die Item-Id. Das geht nicht mehr: Gezeichnet
+wird eine *Klinge*, eingesetzt wird sie als *Übungsklinge*, und beim
+Malen gibt es die Id noch gar nicht. Die Tabelle hält deshalb jetzt
+**Pfade**, und die Zeichnungen bleiben nach Art sortiert. Was welches
+Stück darstellt, entscheidet weiterhin genau diese eine Tabelle.
+
+### Der Fehler, den man nicht sieht, sondern rechnet
+
+Alles Gezeichnete liegt auf 64 × 64, abgelegt als 256 × 256. Bei einer
+Kampfkachel (88 Punkte) ist `FilterQuality.none` richtig. Bei der
+Goldmünze mit 18 Punkten ist es **falsch**: 64 gezeichnete Bildpunkte auf
+18 echten, hart skaliert fällt jeder dritte weg. Übrig bliebe keine
+kleinere Münze, sondern eine zerfressene.
+
+`move_icon.dart` benennt genau diesen Fall seit dem 27.08. als den
+schlimmeren — er stand nur nirgends im Code. Jetzt steht er in
+`lib/ui/pixel_art.dart` als eine Zeile: Ab [PixelArt.artSize] echten
+Pixeln hart, darunter weich. `test/pixel_art_test.dart` hält die Grenze
+fest.
+
+**Nebenbei ist damit eine Dreifachnennung weg.** `artSize` und
+`assetSize` standen wortgleich in `MoveIcons`, `GearIcons` und
+`EnemyIcons`. Seit eine Entscheidung daran hängt, darf es sie nur noch
+einmal geben.
+
+**Und eine Zweifachnennung.** `EquipmentSlotTile._iconFor` war
+zeichengleich mit `GearIcons.fallbackFor` — der Fall aus `gotchas.md`,
+und er wäre still passiert: Laden und Charakterbildschirm hätten
+dasselbe Stück verschieden gezeichnet.
+
+### Und dann die ganze App in denselben Ton
+
+Die gezeichnete Knopffläche lag als Fremdkörper auf einem blaugrauen
+Dunkeldesign. Entschieden wurde die mittlere von drei Möglichkeiten:
+**Pergamentflächen auf Leder.** Nicht dunkles Leder mit warmen Akzenten
+(zu wenig), nicht alles hell (die Arena hat helle Figuren und hätte neu
+gedacht werden müssen).
+
+**Zwei Farben sind gemessen, nicht gewählt.** `Palette.surface` und
+`Palette.text` stehen so in `ButtonBG.png` — die Zeichnung gibt den Ton
+vor, statt sich einzufügen.
+
+**Es gibt jetzt zwei Untergründe, und jede Bedeutung hat für beide einen
+Wert.** Die Bildschirme legen Pergament auf Leder; die Arena ist selbst
+dunkel, weil zwei helle Figuren darauf stehen. Was auf Pergament lesbar
+ist, verschwindet auf Leder — deshalb `accent` **und** `accentOnDark`,
+`gold` **und** `goldOnDark`.
+
+| Untergrund | Fläche | Schrift |
+|---|---|---|
+| Pergament | `surface` `#E8C48C` | `text` `#372200`, `textDim`, `muted` |
+| Leder | `background` `#17110A` | `textOnDark`, `textOnDarkDim` |
+
+**Was das an Arbeit war:** 43 Stellen mit hartem `Colors.white` (28
+wurden Tinte, 11 helles Off-White, 4 Pergament auf gefülltem Akzent) und
+34 rohe Farbwerte, die in die Palette gewandert sind. Dazu das Theme:
+`Brightness.light`, obwohl der Grund dunkel ist — die Helligkeit
+entscheidet, welche Farbe ein `Text` **ohne** eigene Angabe bekommt, und
+der steht fast immer auf Pergament.
+
+**Drei Stellen sind bewusst anders:**
+
+- **Die Arena ist kein Pergament**, sondern ein Blick in die Welt. Sie
+  behält den dunklen Grund und bekommt einen Pergamentrahmen. Auf Beige
+  wären die beiden hellen Kämpfer verschwunden.
+- **Die Lektion ist ganz Pergament.** Ein Fließtext über die volle Höhe
+  ist eine Buchseite und braucht keinen Rahmen, der ihn zur Karte macht.
+- **Kampf, Baum und Handbuch behalten eine dunkle Kopfzeile**, weil sie
+  dort in die Fläche übergeht statt darüber zu liegen.
+
+**`lib/ui/on_dark.dart` ist die Antwort auf den unangenehmsten Fehler
+dieser Art.** Ein `Text` ohne eigene Farbe wird jetzt Tinte — in der
+Arena und auf der Baumfläche ist das genau falsch herum, und das Ergebnis
+ist unsichtbarer Text: kein Absturz, keine Meldung, nichts im Log. `OnDark`
+klammert einen ganzen Bereich ein, statt jeden Text einzeln zu färben und
+beim nächsten den einen zu vergessen.
+
+### Der Test, der die Sitzung zusammenfasst
+
+`test/palette_test.dart` misst Kontraste nach WCAG — 4,5 für Schrift,
+3,0 für Flächen. Er hat sofort vier zu schwache Werte gefunden
+(`textDim`, `accent`, `success`, `gold` standen zwischen 3,25 und 4,32)
+und zwei Seltenheitsfarben dazu.
+
+Zwei seiner Prüfungen sehen wie Spitzfindigkeit aus und sind es nicht:
+Ein Pergamentwert **darf nicht** als Schrift auf Leder taugen, und
+umgekehrt. Genau diese Verwechslung erzeugt den Fehler — wer im Kampf
+`Palette.text` nimmt statt `Palette.textOnDark`, schreibt mit Tinte auf
+Leder.
+
+### Nicht am Bild geprüft
+
+Wie immer bei Oberflächenarbeit: 399 Tests laufen, alle Layouts bei
+390 × 844 ohne Überlauf, `flutter build web` steht. Wie es **aussieht**,
+muss jemand ansehen. Drei Punkte besonders:
+
+- Ob ein gesperrter Kreis mit 45 % Deckkraft noch als gesperrt liest.
+  Die alte Sperre färbte grau; eine Zeichnung lässt sich nicht umfärben,
+  ohne sie zu ruinieren, also trägt das Schloss unten rechts die Aussage
+  jetzt allein.
+- Ob die Arena mit ihrem Pergamentrahmen als eingesetzt wirkt oder als
+  Loch.
+- Ob die gezeichneten Kämpfer und die Flame-Farben zum neuen Ton passen.
+  Sie sind **nicht** angefasst worden: `fighter.dart`,
+  `projectile.dart`, `floating_text.dart` und `battle_game.dart` haben
+  weiter ihre eigenen Werte. Das war Absicht — die Figuren sind Inhalt,
+  nicht Oberfläche.
 
 ## Sitzung 08.09.2026, tagsüber: der Laden wächst
 

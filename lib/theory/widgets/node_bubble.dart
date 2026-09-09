@@ -97,7 +97,9 @@ class NodeBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: _isFocus ? 12 : 10,
                     height: 1.2,
-                    color: _isDim() ? Palette.muted : Colors.white,
+                    color: _isDim()
+                        ? Palette.textOnDarkDim
+                        : Palette.textOnDark,
                     fontWeight: _isFocus || node.isRoot
                         ? FontWeight.w700
                         : FontWeight.w500,
@@ -126,10 +128,10 @@ class NodeBubble extends StatelessWidget {
 
   Color _color() {
     return switch (state) {
-      NodeState.passed => Palette.success,
-      NodeState.open => Palette.accent,
-      NodeState.affordable => Palette.gold,
-      NodeState.tooExpensive || NodeState.unreachable => Palette.muted,
+      NodeState.passed => Palette.successOnDark,
+      NodeState.open => Palette.accentOnDark,
+      NodeState.affordable => Palette.goldOnDark,
+      NodeState.tooExpensive || NodeState.unreachable => Palette.textOnDarkDim,
     };
   }
 }

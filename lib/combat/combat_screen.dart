@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
@@ -172,25 +173,31 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kampf'),
+        // Die Kopfzeile geht hier in die Arena über, statt als
+        // Pergamentleiste darüber zu liegen — deshalb beide Farben von
+        // Hand, gegen das Theme.
         backgroundColor: Palette.background,
+        foregroundColor: Palette.textOnDark,
       ),
       // **Die Tippfläche liegt über dem Körper, nicht über der AppBar.**
       // Während des Zeitfensters zählt jeder Tipp — auf die Kämpfer, auf
       // den Log, auf die Leiste. Nur der Zurück-Pfeil bleibt erreichbar,
       // weil er außerhalb von `body` sitzt. Ohne diese Trennung könnte man
       // den Kampf nicht mehr verlassen, ohne vorher zu tippen.
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            _buildBody(session, state),
-            if (_phase == _Phase.timing)
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => _timingKey.currentState?.lockIn(),
+      body: OnDark(
+        child: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              _buildBody(session, state),
+              if (_phase == _Phase.timing)
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _timingKey.currentState?.lockIn(),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -207,14 +214,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
               Expanded(
                 child: FighterStatus(
                   combatant: state.player,
-                  accent: Palette.accent,
+                  accent: Palette.accentOnDark,
                 ),
               ),
               const SizedBox(width: 28),
               Expanded(
                 child: FighterStatus(
                   combatant: state.enemy,
-                  accent: Palette.enemy,
+                  accent: Palette.enemyOnDark,
                   alignEnd: true,
                 ),
               ),
@@ -226,9 +233,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
           flex: 3,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
+            // **Kein Pergament.** Die Arena ist ein Blick in die Welt und
+            // keine Karte darauf — und die beiden gezeichneten Kämpfer
+            // sind hell. Auf Beige verschwänden sie. Der Rahmen aus
+            // Pergament setzt sie trotzdem in die Oberfläche ein.
             decoration: BoxDecoration(
-              color: Palette.surface,
+              color: Palette.background,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Palette.surfaceRaised, width: 2),
             ),
             clipBehavior: Clip.antiAlias,
             child: GameWidget<BattleGame>(game: _game),
@@ -448,7 +460,7 @@ class _MoveTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: affordable ? Colors.white : Palette.muted,
+                        color: affordable ? Palette.textOnDark : Palette.muted,
                       ),
                     ),
             ),
@@ -477,7 +489,7 @@ class _MoveTile extends StatelessWidget {
           text: '${move.name}\n',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Palette.text,
             height: 1.5,
           ),
         ),
@@ -490,7 +502,7 @@ class _MoveTile extends StatelessWidget {
             text: '\n\nPerfekt: ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color(0xFFFFD166),
+              color: Palette.gold,
               height: 1.35,
             ),
           ),
@@ -559,7 +571,7 @@ class _Kachel extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Palette.text,
                         ),
                       ),
                     ),
@@ -593,7 +605,7 @@ class _EnergieMarke extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: const Color(0xCC0B0E15),
+        color: Palette.background.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -601,7 +613,7 @@ class _EnergieMarke extends StatelessWidget {
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: Palette.textOnDark,
         ),
       ),
     );

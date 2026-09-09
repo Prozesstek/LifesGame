@@ -286,7 +286,7 @@ class _CustomHabitFab extends StatelessWidget {
     return FloatingActionButton(
       onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
       backgroundColor: _offen ? Palette.accent : Palette.surfaceRaised,
-      foregroundColor: _offen ? Colors.white : Palette.muted,
+      foregroundColor: _offen ? Palette.surface : Palette.muted,
       tooltip: _hinweis,
       // Dasselbe Zeichen wie vorher in der Liste, und bewusst ein
       // anderes als das Plus, mit dem eine fertige Vorlage gestartet
@@ -350,7 +350,7 @@ class _RestingCustomTile extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Palette.text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -406,7 +406,11 @@ class _NothingUnlockedYet extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Icon(Icons.spa_outlined, size: 44, color: Palette.muted),
+          const Icon(
+            Icons.spa_outlined,
+            size: 44,
+            color: Palette.textOnDarkDim,
+          ),
           const SizedBox(height: 16),
           const Text(
             'Noch keine Gewohnheit freigeschaltet',
@@ -414,7 +418,7 @@ class _NothingUnlockedYet extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Palette.textOnDark,
             ),
           ),
           const SizedBox(height: 8),
@@ -423,7 +427,11 @@ class _NothingUnlockedYet extends StatelessWidget {
             'dann verfolgen. Die erste wartet im Zweig „Gewohnheiten", '
             'und sie gibt zugleich den ersten Platz für eine eigene.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, height: 1.5, color: Palette.textDim),
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: Palette.textOnDarkDim,
+            ),
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
@@ -457,7 +465,7 @@ class _SectionHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Palette.textOnDark,
             ),
           ),
         ),
@@ -469,7 +477,7 @@ class _SectionHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Palette.textDim,
+              color: Palette.textOnDarkDim,
             ),
           ),
         ),
@@ -489,7 +497,11 @@ class _Hint extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 13, height: 1.4, color: Palette.muted),
+        style: const TextStyle(
+          fontSize: 13,
+          height: 1.4,
+          color: Palette.textOnDarkDim,
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 
 import '../event_text.dart';
+import '../../ui/palette.dart';
 
 /// HP, Energie und Statuseffekte einer Seite.
 class FighterStatus extends StatelessWidget {
@@ -37,7 +38,7 @@ class FighterStatus extends StatelessWidget {
           value: combatant.maxEnergy == 0
               ? 0
               : combatant.energy / combatant.maxEnergy,
-          color: const Color(0xFFFFD166),
+          color: Palette.goldOnDark,
           label: 'EN ${combatant.energy}',
           height: 5,
         ),
@@ -81,7 +82,7 @@ class _Bar extends StatelessWidget {
             builder: (context, animated, _) => LinearProgressIndicator(
               value: animated,
               minHeight: height,
-              backgroundColor: const Color(0xFF232838),
+              backgroundColor: Palette.trackOnDark,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -92,7 +93,7 @@ class _Bar extends StatelessWidget {
             style: const TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Palette.textOnDark,
             ),
           ),
       ],
@@ -111,7 +112,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A3042),
+        color: Palette.chipOnDark,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

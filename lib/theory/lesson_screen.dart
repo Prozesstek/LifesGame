@@ -110,9 +110,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // **Die einzige Seite, die ganz Pergament ist.** Überall sonst
+      // liegen Pergamentflächen auf Leder; hier ist der Bildschirm
+      // selbst die Seite, die gelesen wird — ein Fließtext über die
+      // volle Höhe braucht keinen Rahmen, der ihn zur Karte macht.
+      backgroundColor: Palette.surface,
       appBar: AppBar(
         title: Text(_lesson.title),
-        backgroundColor: Palette.background,
+        backgroundColor: Palette.surface,
         bottom: _stage == _Stage.quiz ? _quizProgress() : null,
       ),
       body: Center(

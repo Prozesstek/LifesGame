@@ -58,7 +58,7 @@ class IdentityCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: identity.hasName ? Colors.white : Palette.muted,
+                        color: identity.hasName ? Palette.text : Palette.muted,
                       ),
                     ),
                     const SizedBox(height: 2),

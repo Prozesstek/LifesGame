@@ -47,7 +47,7 @@ class HabitTemplateTile extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Palette.text,
                   ),
                 ),
                 const SizedBox(height: 4),

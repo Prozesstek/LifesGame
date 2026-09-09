@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
+import '../../gear/gear_icon.dart';
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 
 /// Ein Ausrüstungsplatz als Kachel im 6er-Raster.
 ///
@@ -40,18 +42,15 @@ class EquipmentSlotTile extends StatelessWidget {
   final void Function(String itemId) onEquip;
   final VoidCallback onUnequip;
 
-  /// Das Symbol je Platz. Reine Darstellung — deshalb hier und nicht in
-  /// `package:gear`, das von Symbolen nichts wissen soll.
-  static IconData _iconFor(GearSlot slot) {
-    return switch (slot) {
-      GearSlot.waffe => Icons.colorize,
-      GearSlot.ruestung => Icons.shield_outlined,
-      GearSlot.helm => Icons.sports_motorsports_outlined,
-      GearSlot.schuhe => Icons.directions_walk,
-      GearSlot.ring => Icons.circle_outlined,
-      GearSlot.talisman => Icons.auto_awesome_outlined,
-    };
-  }
+  /// Das Symbol je Platz.
+  ///
+  /// **Es stand hier einmal als eigene Tabelle** und war zeichengleich
+  /// mit `GearIcons.fallbackFor`. Zwei Stellen, die dieselbe Frage
+  /// beantworten, driften auseinander — der Fall steht in
+  /// `docs/context/gotchas.md`, und hier wäre er ohne Meldung passiert:
+  /// Laden und Charakterbildschirm hätten dasselbe Stück verschieden
+  /// gezeichnet.
+  static IconData _iconFor(GearSlot slot) => GearIcons.fallbackFor(slot);
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +83,9 @@ class EquipmentSlotTile extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(
-                  _iconFor(slot),
-                  size: 20,
+                _Zeichen(
+                  slot: slot,
+                  item: item,
                   color: isEmpty ? Palette.muted : Palette.accent,
                 ),
                 const SizedBox(height: 6),
@@ -105,7 +104,7 @@ class EquipmentSlotTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: isEmpty ? FontWeight.normal : FontWeight.bold,
-                    color: isEmpty ? Palette.muted : Colors.white,
+                    color: isEmpty ? Palette.muted : Palette.text,
                   ),
                 ),
               ],
@@ -136,7 +135,7 @@ class EquipmentSlotTile extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Palette.text,
                       ),
                     ),
                   ],
@@ -146,7 +145,7 @@ class EquipmentSlotTile extends StatelessWidget {
                 ListTile(
                   title: Text(
                     option.name,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Palette.text),
                   ),
                   subtitle: Text(
                     option.bonus.labels.join(' · '),
@@ -198,4 +197,34 @@ class _Choice {
   const _Choice.unequip() : itemId = null;
 
   final String? itemId;
+}
+
+/// Was auf einem Platz oben steht: das Bild des getragenen Stücks, sonst
+/// das Zeichen des Platzes.
+///
+/// **Die Größe ist die des Zeichens, nicht die des Bildes.** Ein Raster
+/// aus sechs Kacheln verträgt keine zwei Höhen — eine Kachel, die mit
+/// Bild höher wird als ohne, verschiebt die ganze Zeile.
+class _Zeichen extends StatelessWidget {
+  const _Zeichen({required this.slot, required this.item, required this.color});
+
+  final GearSlot slot;
+  final GearItem? item;
+  final Color color;
+
+  static const double _seite = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    final bild = item == null ? null : GearIcons.forItemId(item!.id);
+    final ersatz = Icon(
+      GearIcons.fallbackFor(slot),
+      size: _seite,
+      color: color,
+    );
+
+    if (bild == null) return ersatz;
+
+    return PixelArt(assetPath: bild, side: _seite, fallback: ersatz);
+  }
 }

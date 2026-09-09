@@ -30,7 +30,7 @@ class PointsChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasAny = points > 0;
-    final color = hasAny ? Palette.gold : Palette.muted;
+    final color = hasAny ? Palette.goldOnDark : Palette.textOnDarkDim;
 
     return Tooltip(
       message: explanation,

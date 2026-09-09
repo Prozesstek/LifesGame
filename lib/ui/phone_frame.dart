@@ -57,7 +57,7 @@ class PhoneFrame extends StatelessWidget {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: ColoredBox(
-            color: const Color(0xFF05070C),
+            color: const Color(0xFF0C0803),
             child: Center(child: _Screen(child: child)),
           ),
         );
@@ -77,7 +77,7 @@ class _Screen extends StatelessWidget {
       width: PhoneFrame.phoneSize.width + PhoneFrame._bezel * 2,
       height: PhoneFrame.phoneSize.height + PhoneFrame._bezel * 2,
       decoration: BoxDecoration(
-        color: const Color(0xFF262C3A),
+        color: const Color(0xFF3A2C1B),
         borderRadius: BorderRadius.circular(38),
         boxShadow: const <BoxShadow>[
           BoxShadow(color: Color(0x66000000), blurRadius: 28, spreadRadius: 4),

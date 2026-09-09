@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 
 /// Ein Bereich des Spiels als runder Knopf.
 ///
@@ -14,16 +15,31 @@ import '../../ui/palette.dart';
 /// Buchstaben je Kreis; ein „K" allein sagt aber weder „Kampf" noch
 /// „Kaufen". Name unter dem Kreis kostet zwölf Pixel und nimmt die Frage
 /// heraus.
+///
+/// **Die Fläche ist seit den ersten Zeichnungen gemalt und nicht
+/// gerechnet.** `assets/UI/ButtonBG.png` liegt unter dem Zeichen; der
+/// Charakterkreis hat mit `CharacterButton.png` eine eigene Fassung, in
+/// der die Figur schon drin steckt. Fehlt eine Datei, bleibt der
+/// gezeichnete Kreis von vorher — der Startbildschirm sieht dann
+/// schlichter aus und nicht kaputt.
 class HubCircle extends StatelessWidget {
   const HubCircle({
     required this.icon,
     required this.label,
     required this.onTap,
     this.lockedReason,
+    this.image,
     super.key,
   });
 
   final IconData icon;
+
+  /// Die gezeichnete Fläche, oder `null` für die schlichte.
+  ///
+  /// **Trägt sie das Zeichen schon selbst**, wie `CharacterButton.png`,
+  /// dann setzt [imageCarriesIcon] das [icon] aus. Zwei Figuren
+  /// übereinander wären eine zu viel.
+  final HubCircleImage? image;
 
   /// Der Name des Bereichs — steht unter dem Kreis.
   final String label;
@@ -48,8 +64,21 @@ class HubCircle extends StatelessWidget {
   /// eine Tippfläche mindestens braucht.
   static const double diameter = 72;
 
+  /// Wie stark eine gesperrte Fläche verblasst.
+  ///
+  /// Die alte Sperre färbte den Kreis grau. Eine Zeichnung lässt sich
+  /// nicht umfärben, ohne sie zu ruinieren — sie wird deshalb blasser,
+  /// und das Schloss unten rechts bleibt die eigentliche Aussage.
+  static const double _lockedOpacity = 0.45;
+
   @override
   Widget build(BuildContext context) {
+    final bild = image;
+
+    // Zwei Farben, weil es zwei Untergründe gibt: der schlichte Kreis
+    // steht auf dunklem Grund, das Zeichen auf der Zeichnung dagegen auf
+    // Pergament. Ein Wert für beides wäre auf einem der beiden
+    // unlesbar.
     final farbe = isLocked ? Palette.muted : Palette.accent;
 
     return Semantics(
@@ -67,16 +96,31 @@ class HubCircle extends StatelessWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: <Widget>[
-                  Container(
-                    width: diameter,
-                    height: diameter,
-                    decoration: BoxDecoration(
-                      color: Palette.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: farbe, width: 2),
+                  if (bild == null)
+                    _SchlichterKreis(icon: icon, farbe: farbe)
+                  else
+                    Opacity(
+                      opacity: isLocked ? _lockedOpacity : 1,
+                      child: SizedBox(
+                        width: diameter,
+                        height: diameter,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            PixelArt(
+                              assetPath: bild.assetPath,
+                              side: diameter,
+                              fallback: _SchlichterKreis(
+                                icon: icon,
+                                farbe: farbe,
+                              ),
+                            ),
+                            if (!bild.carriesIcon)
+                              Icon(icon, size: 30, color: Palette.text),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Icon(icon, size: 30, color: farbe),
-                  ),
                   if (isLocked)
                     Positioned(
                       right: -2,
@@ -107,7 +151,7 @@ class HubCircle extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isLocked ? Palette.muted : Colors.white,
+                    color: isLocked ? Palette.muted : Palette.textOnDark,
                   ),
                 ),
               ),
@@ -127,5 +171,53 @@ class HubCircle extends StatelessWidget {
       ..showSnackBar(
         SnackBar(content: Text(grund), duration: const Duration(seconds: 4)),
       );
+  }
+}
+
+/// Eine gezeichnete Knopffläche.
+///
+/// **Warum ein Typ und nicht zwei Parameter.** Pfad und „trägt das
+/// Zeichen schon" gehören zusammen: Wer die Fläche wechselt, ohne die
+/// zweite Angabe nachzuziehen, bekommt entweder zwei Figuren übereinander
+/// oder einen leeren Kreis. Als ein Wert kann das nicht auseinanderlaufen.
+enum HubCircleImage {
+  /// Die leere Fläche. Das Zeichen des Bereichs liegt darauf.
+  plain('assets/UI/ButtonBG.png', carriesIcon: false),
+
+  /// Die Charakter-Fassung — die Figur ist schon eingezeichnet.
+  character('assets/UI/CharacterButton.png', carriesIcon: true);
+
+  const HubCircleImage(this.assetPath, {required this.carriesIcon});
+
+  final String assetPath;
+
+  /// Ob die Zeichnung ihr Zeichen selbst mitbringt.
+  final bool carriesIcon;
+}
+
+/// Der ungezeichnete Kreis — Rand, Fläche, Zeichen.
+///
+/// **Er ist beides**: die Darstellung ohne Bild und der Rückfall, wenn
+/// eine Bilddatei fehlt. Zweimal derselbe Kreis an zwei Stellen wäre
+/// genau die Sorte Verdopplung, die irgendwann nur an einer Stelle
+/// nachgezogen wird.
+class _SchlichterKreis extends StatelessWidget {
+  const _SchlichterKreis({required this.icon, required this.farbe});
+
+  final IconData icon;
+  final Color farbe;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: HubCircle.diameter,
+      height: HubCircle.diameter,
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        shape: BoxShape.circle,
+        border: Border.all(color: farbe, width: 2),
+      ),
+      child: Icon(icon, size: 30, color: farbe),
+    );
   }
 }

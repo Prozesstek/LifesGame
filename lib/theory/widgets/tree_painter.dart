@@ -48,8 +48,8 @@ class TreePainter extends CustomPainter {
 
       final paint = Paint()
         ..color = erreicht
-            ? Palette.accent.withValues(alpha: geteilt ? 0.5 : 0.75)
-            : Palette.muted.withValues(alpha: geteilt ? 0.3 : 0.45)
+            ? Palette.accentOnDark.withValues(alpha: geteilt ? 0.5 : 0.75)
+            : Palette.textOnDarkDim.withValues(alpha: geteilt ? 0.3 : 0.45)
         ..strokeWidth = erreicht ? 2.2 : 1.5
         ..style = PaintingStyle.stroke;
 

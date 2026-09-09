@@ -125,7 +125,7 @@ class _Figure extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: emphasised ? Palette.accent : Colors.white,
+              color: emphasised ? Palette.accent : Palette.text,
             ),
           ),
           const SizedBox(height: 2),

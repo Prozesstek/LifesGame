@@ -87,7 +87,7 @@ class HabitCheckTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: isChecked ? Palette.textDim : Colors.white,
+                        color: isChecked ? Palette.textDim : Palette.text,
                         decoration: isChecked
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,

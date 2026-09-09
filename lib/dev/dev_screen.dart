@@ -145,7 +145,7 @@ class DevScreen extends ConsumerWidget {
                     onYes: () => _eraseDevSave(context, ref),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Palette.enemy,
+                    foregroundColor: Palette.enemyOnDark,
                   ),
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('Dev-Stand komplett löschen'),
@@ -237,15 +237,17 @@ class _SlotBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDev ? const Color(0xFF3A2A12) : const Color(0xFF3A1218),
+        color: isDev ? const Color(0xFF3A2A12) : const Color(0xFF33150C),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: isDev ? Palette.gold : Palette.enemy),
+        border: Border.all(
+          color: isDev ? Palette.goldOnDark : Palette.enemyOnDark,
+        ),
       ),
       child: Row(
         children: <Widget>[
           Icon(
             isDev ? Icons.science_outlined : Icons.warning_amber_outlined,
-            color: isDev ? Palette.gold : Palette.enemy,
+            color: isDev ? Palette.goldOnDark : Palette.enemyOnDark,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -254,7 +256,7 @@ class _SlotBanner extends StatelessWidget {
                   ? 'Dev-Stand aktiv. Dein echter Fortschritt ist unberührt.'
                   : 'ACHTUNG: Echter Stand aktiv. Erst auf den Dev-Stand '
                         'wechseln, sonst verfälschst du den 30-Tage-Nachweis.',
-              style: const TextStyle(fontSize: 12, color: Colors.white),
+              style: const TextStyle(fontSize: 12, color: Palette.textOnDark),
             ),
           ),
         ],
@@ -318,7 +320,7 @@ class _CurrentValues extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Palette.text,
                       ),
                     ),
                   ),
@@ -346,7 +348,7 @@ class _SectionTitle extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.1,
-          color: Palette.muted,
+          color: Palette.textOnDarkDim,
         ),
       ),
     );
@@ -364,7 +366,7 @@ class _Note extends StatelessWidget {
       padding: const EdgeInsets.only(top: 6),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 11, color: Palette.muted),
+        style: const TextStyle(fontSize: 11, color: Palette.textOnDarkDim),
       ),
     );
   }

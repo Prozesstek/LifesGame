@@ -1,3 +1,5 @@
+import '../ui/pixel_art.dart';
+
 /// Welches Bild zu einem Gegner gehört.
 ///
 /// **Reine Darstellung**, wie `MoveIcons` und `GearIcons` — was ein
@@ -45,6 +47,6 @@ abstract final class EnemyIcons {
   /// jeder Bildpunkt fuenf Punkte gross. Das ist der Stil, nicht ein
   /// Fehler — wer feinere Gegner will, zeichnet sie auf 128 × 128 und
   /// legt sie als 512 ab.
-  static const int artSize = 64;
-  static const int assetSize = 256;
+  static const int artSize = PixelArt.artSize;
+  static const int assetSize = PixelArt.assetSize;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
+import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 
 /// Level, Fortschritt zur nächsten Stufe und Gold.
@@ -48,11 +49,7 @@ class LevelCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Icon(
-                      Icons.savings_outlined,
-                      size: 18,
-                      color: Palette.gold,
-                    ),
+                    const GoldIcon(),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(

@@ -44,22 +44,34 @@ void main() {
     });
   });
 
-  group('Derzeit gibt es keine Bilder', () {
+  group('Die meisten Stücke haben noch keins', () {
     // Issue #35 führt „Items" unter den Designs auf, die noch entstehen
-    // müssen. Die Prüfungen oben laufen bis dahin über eine leere Menge —
-    // sie greifen wieder, sobald jemand eine Zeile in `GearIcons`
-    // ergänzt, und genau dafür bleiben sie stehen.
-    test('kein einziges Stück trägt eins', () {
-      for (final item in GearCatalog.all) {
-        expect(
-          GearIcons.forItemId(item.id),
-          isNull,
-          reason: '${item.name} hat ein Bild, aber keins ist abgelegt.',
-        );
+    // müssen. Gezeichnet sind bisher zwei Klingen; die übrigen Kacheln
+    // tragen das Zeichen ihres Platzes.
+    test('zwei Stücke tragen eins, und beide sind Waffen', () {
+      final mitBild = GearCatalog.all
+          .where((item) => GearIcons.forItemId(item.id) != null)
+          .toList();
+
+      expect(mitBild, hasLength(2));
+      for (final item in mitBild) {
+        expect(item.slot, GearSlot.waffe);
       }
     });
 
-    test('eine unbekannte Id ebenfalls nicht', () {
+    test('keine zwei Stücke teilen sich eine Zeichnung', () {
+      // Zwei Ids auf dieselbe Datei zu legen wäre kein Fehler, den
+      // irgendetwas meldet — im Laden stünden dann zwei verschiedene
+      // Stücke mit demselben Bild nebeneinander.
+      final pfade = <String>[];
+      for (final id in GearIcons.itemIds) {
+        pfade.add(GearIcons.forItemId(id)!);
+      }
+
+      expect(pfade.toSet(), hasLength(pfade.length));
+    });
+
+    test('eine unbekannte Id hat keins', () {
       expect(GearIcons.forItemId('gibt-es-nicht'), isNull);
     });
 

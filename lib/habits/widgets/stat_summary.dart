@@ -65,7 +65,7 @@ class _StatCell extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Palette.text,
                   ),
                 ),
                 if (bonus > 0) ...<Widget>[

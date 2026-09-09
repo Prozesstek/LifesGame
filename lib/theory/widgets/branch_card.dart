@@ -46,7 +46,7 @@ class BranchCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: isUnlocked ? Colors.white : Palette.muted,
+                        color: isUnlocked ? Palette.text : Palette.muted,
                       ),
                     ),
                   ),
