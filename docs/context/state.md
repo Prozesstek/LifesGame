@@ -7,9 +7,73 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 09.09.2026 · Prozesstek (erste Zeichnungen im Spiel)
+**Zuletzt aktualisiert:** 10.09.2026 · Prozesstek (Fähigkeitsbilder, Bogen, Stab, Grundfigur)
 
 ---
+
+## Sitzung 10.09.2026: acht Fähigkeiten, zwei Waffen und die Figur
+
+Elf neue Zeichnungen, alle im 64 × 64-Stil. Alle elf sind eingebaut.
+401 App-Tests (vorher 399).
+
+| Zeichnung | Wo sie steht |
+|---|---|
+| `Faehigkeiten/` — Funkenstoß, Steinhaut, Wurzelgriff, Aurastrom, Blütentau, Klingenwirbel, Frostnebel, Prisma-Barriere | Kampfkachel, Fähigkeitsplatz auf dem Charakter, Auswahlblatt |
+| `Waffen/Boegen/Kurzbogen.png` | Kurzbogen, im Laden und am Platz |
+| `Waffen/Staebe/Kampfstab.png` | Kriegsstab, ebenso |
+| `character/Charakter.png` | die Figur auf dem Startbildschirm |
+
+**Die acht Fähigkeiten sind genau Nummer 1 bis 8 der Vorlage**, also
+alle Commons und Uncommons. Vier kamen als „Untitled" an; zugeordnet
+sind sie über das Motiv **und** die Uhrzeit im Dateinamen, die der
+Reihenfolge der Vorlage folgt.
+
+### `MoveIcons` hält jetzt Pfade
+
+Dieselbe Umstellung wie am 09.09. bei `GearIcons`: Die Datei musste
+heißen wie die Move-Id, gezeichnet wird aber „Funkenstoß" und nicht
+`funkenstoss`. Die Tabelle entscheidet, der Dateiname nicht.
+
+Auf der Kampfkachel geht das Bild jetzt über `PixelArt` statt über
+`Image.asset` mit fester Glättung. Der alte Kommentar dort sprach noch
+von Bildern in dreifacher Kachelgröße, die gibt es seit dem 64er-Format
+nicht mehr.
+
+### Drei Entscheidungen ohne Rückfrage
+
+- **Die Grundfigur ersetzt `hero.png`**, obwohl sie noch keine Kleidung
+  trägt. Sie ist die erste Figur im Stil des Rests; `hero.png` war
+  1024 × 1536 und passte nicht dazu. Die alte Datei liegt weiter unter
+  `assets/character/`, wird aber nirgends mehr gelesen. Zurück ist es
+  eine Zeile (`CharacterStage.assetPath`).
+- **Der „Kampfstab" ist der Kriegsstab**, obwohl er als Speer mit
+  Eisenspitze gezeichnet ist. Es ist der einzige Stab im Katalog.
+- **Die Namenszeile über einer Bildkachel ist kein Knopf.** Getippt wird
+  das Bild. Drei Kampftests tippten bisher auf den Namen und tun das
+  jetzt auf die Kachel.
+
+### Nicht am Bild geprüft
+
+Tests und Analyzer sind grün, wie es aussieht, muss jemand ansehen:
+
+- Ob die Energiemarke unten rechts auf der Kachel etwas Wichtiges
+  verdeckt. Die Zeichnungen haben transparenten Rand, aber nicht überall
+  gleich viel.
+- Ob die unbekleidete Figur auf dem Startbildschirm als Absicht liest.
+- Ob man im Kampf auf den Namen über der Kachel tippt und sich wundert,
+  dass nichts passiert.
+
+### Offen
+
+- **Sieben Fähigkeiten ohne Bild**: Donnerkeil bis Sternenfall.
+- **Der Streitkolben** ist die einzige Waffe ohne Zeichnung.
+- `NormalesSchwert.png` und `RustedSword.png` stellen weiter nichts dar.
+- `Icon.png` (App-Symbol-Entwurf) und `image.png` (Vorbild aus Issue #16)
+  liegen im Wurzelordner und sind **bewusst nicht** eingebaut: App-Symbole
+  stehen auf der Sperrliste in `ziele.md`, und das Vorbild ist ein
+  fremder Screenshot.
+- `assets/Gold.pxo` ist im Arbeitsverzeichnis gelöscht — nicht in dieser
+  Sitzung, und nicht mit eingecheckt.
 
 ## Sitzung 09.09.2026: die ersten Zeichnungen sind drin
 

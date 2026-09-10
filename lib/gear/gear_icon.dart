@@ -9,10 +9,11 @@ import '../ui/pixel_art.dart';
 /// hier steht nur, wie es aussieht — dieselbe Trennung wie bei
 /// [MoveIcons] für die Züge.
 ///
-/// **Zwei von siebenundzwanzig Stücken haben eins.** Beide sind Klingen;
-/// die übrigen tragen weiter das Zeichen ihres Platzes — sechs Zeichen
-/// für fünfundzwanzig Stücke, also kein Ersatz für ein Bild, aber genug,
-/// um eine Kachel als Kachel erkennbar zu machen.
+/// **Vier von siebenundzwanzig Stücken haben eins**, alle vier sind
+/// Waffen — es fehlt nur der Streitkolben. Die übrigen tragen weiter das
+/// Zeichen ihres Platzes — sechs Zeichen für dreiundzwanzig Stücke, also
+/// kein Ersatz für ein Bild, aber genug, um eine Kachel als Kachel
+/// erkennbar zu machen.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
@@ -49,6 +50,13 @@ abstract final class GearIcons {
     // Geschliffene Klinge — die schmale, scharfe. Von den vier
     // Zeichnungen ist das Katana die einzige, der man das ansieht.
     'gear-geschliffene-klinge': 'assets/Waffen/Schwerter/Katana.png',
+
+    // Kurzbogen — der einzige Bogen im Katalog.
+    'gear-kurzbogen': 'assets/Waffen/Boegen/Kurzbogen.png',
+
+    // Kriegsstab — gezeichnet als „Kampfstab", ein Schaft mit
+    // Eisenspitze. Der einzige Stab im Katalog.
+    'gear-kriegsstab': 'assets/Waffen/Staebe/Kampfstab.png',
   };
 
   /// Der Pfad zum Bild, oder `null` wenn es für dieses Stück keins gibt.

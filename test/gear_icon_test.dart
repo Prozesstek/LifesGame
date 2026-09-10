@@ -46,14 +46,14 @@ void main() {
 
   group('Die meisten Stücke haben noch keins', () {
     // Issue #35 führt „Items" unter den Designs auf, die noch entstehen
-    // müssen. Gezeichnet sind bisher zwei Klingen; die übrigen Kacheln
-    // tragen das Zeichen ihres Platzes.
-    test('zwei Stücke tragen eins, und beide sind Waffen', () {
+    // müssen. Gezeichnet sind bisher zwei Klingen, ein Bogen und ein Stab;
+    // die übrigen Kacheln tragen das Zeichen ihres Platzes.
+    test('vier Stücke tragen eins, und alle sind Waffen', () {
       final mitBild = GearCatalog.all
           .where((item) => GearIcons.forItemId(item.id) != null)
           .toList();
 
-      expect(mitBild, hasLength(2));
+      expect(mitBild, hasLength(4));
       for (final item in mitBild) {
         expect(item.slot, GearSlot.waffe);
       }

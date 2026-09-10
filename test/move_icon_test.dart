@@ -53,23 +53,29 @@ void main() {
     });
   });
 
-  group('Derzeit gibt es keine Bilder', () {
-    // Die vier Umgebungen hatten am 27.08. eines und haben es wieder
-    // verloren; das Kachelformat ist geblieben. Die Prüfungen oben laufen
-    // dadurch über eine leere Menge — sie greifen wieder, sobald jemand
-    // eine Zeile in `MoveIcons` ergänzt, und genau dafür bleiben sie
-    // stehen.
-    test('kein einziger Zug trägt eins', () {
-      for (final move in <Move>[...Moves.all, ...AbilityMoves.all]) {
-        expect(
-          MoveIcons.forMoveId(move.id),
-          isNull,
-          reason: '${move.name} hat ein Bild, aber keins ist abgelegt.',
-        );
-      }
+  group('Die ersten acht Fähigkeiten tragen eins', () {
+    // Gezeichnet sind die Commons und Uncommons aus der Vorlage. Die
+    // übrigen Züge tragen ihren Namen auf der Kachel.
+    test('acht Züge haben ein Bild', () {
+      final mitBild = <Move>[
+        ...Moves.all,
+        ...AbilityMoves.all,
+      ].where((move) => MoveIcons.forMoveId(move.id) != null).toSet();
+
+      expect(mitBild, hasLength(8));
     });
 
-    test('eine unbekannte Id ebenfalls nicht', () {
+    test('keine zwei Züge teilen sich eine Zeichnung', () {
+      // Zwei Ids auf dieselbe Datei zu legen meldet nichts — im Kampf
+      // stünden dann zwei verschiedene Züge mit demselben Bild da.
+      final pfade = <String>[
+        for (final id in MoveIcons.moveIds) MoveIcons.forMoveId(id)!,
+      ];
+
+      expect(pfade.toSet(), hasLength(pfade.length));
+    });
+
+    test('eine unbekannte Id hat keins', () {
       expect(MoveIcons.forMoveId('gibt-es-nicht'), isNull);
     });
   });

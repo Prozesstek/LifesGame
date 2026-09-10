@@ -109,8 +109,16 @@ Fenster.
 
 ### Was weiterhin auf Antwort wartet
 
-**1. Die Icon-Ideen sind nicht gebaut.** Keine der fünfzehn hat ein Icon;
-in `ziele.md` stand das von vornherein auf der Schnittliste.
+**1. Die Icons sind zur Hälfte gebaut.** Seit dem 10.09. haben die
+Nummern 1 bis 8 eine Zeichnung — alle Commons und Uncommons. Es fehlen
+Donnerkeil, Sandsturm, Seelenraub, Giftmoor, Zeitdehnung, Vulkanbruch und
+Sternenfall. Die Zuordnung steht in `lib/combat/move_icon.dart`.
+
+Die Zeichnungen folgen den Icon-Ideen oben nicht wörtlich: Blütentau ist
+ein grünes Blatt statt einer rosa Blüte, Wurzelgriff eine grüne Ranke
+statt einer braunen, Klingenwirbel zeigt Scherben in einer Windblase
+statt dreier gekreuzter Klingen. **Die Zeichnung gilt**, die Spalte oben
+war ein Vorschlag.
 
 **2. Die Animationsideen sind nicht gebaut.** `move_animation.dart` kennt
 vier Ids (`basic_attack`, `heavy_attack`, `poison_strike`, `mend`) und

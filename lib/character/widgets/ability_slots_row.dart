@@ -3,7 +3,9 @@ import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
+import '../../combat/move_icon.dart';
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 
 /// Die vier Fähigkeitsslots nebeneinander.
 ///
@@ -201,6 +203,11 @@ class _AbilityOption extends StatelessWidget {
     if (move == null) return const SizedBox.shrink();
 
     return ListTile(
+      leading: _MoveBild(
+        moveId: move.id,
+        side: 36,
+        fallback: const Icon(Icons.bolt, color: Palette.accent),
+      ),
       title: Text(move.name, style: const TextStyle(color: Palette.text)),
       subtitle: Text(
         isElsewhere
@@ -213,6 +220,35 @@ class _AbilityOption extends StatelessWidget {
           : null,
       onTap: onTap,
     );
+  }
+}
+
+/// Das Bild einer Fähigkeit — oder [fallback], solange sie keins hat.
+///
+/// Immer [side] groß, auch mit Zeichen statt Bild: Sonst stünden im
+/// Auswahlblatt die Namen nicht bündig und die Plätze wären verschieden
+/// hoch, je nachdem, was darauf liegt.
+class _MoveBild extends StatelessWidget {
+  const _MoveBild({
+    required this.moveId,
+    required this.side,
+    required this.fallback,
+  });
+
+  final String moveId;
+  final double side;
+  final Widget fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final pfad = MoveIcons.forMoveId(moveId);
+    final ersatz = SizedBox.square(
+      dimension: side,
+      child: Center(child: fallback),
+    );
+
+    if (pfad == null) return ersatz;
+    return PixelArt(assetPath: pfad, side: side, fallback: ersatz);
   }
 }
 
@@ -277,8 +313,14 @@ class _Slot extends StatelessWidget {
   final Move? move;
   final VoidCallback? onTap;
 
+  /// Kantenlänge des Bildes auf einem Platz.
+  static const double _bildSeite = 32;
+
   @override
   Widget build(BuildContext context) {
+    final belegt = move;
+    final zeichen = Icon(_icon, size: 18, color: _iconColour);
+
     return Semantics(
       button: onTap != null,
       label: _semantics,
@@ -299,7 +341,17 @@ class _Slot extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(_icon, size: 18, color: _iconColour),
+                if (isOpen && belegt != null)
+                  _MoveBild(
+                    moveId: belegt.id,
+                    side: _bildSeite,
+                    fallback: zeichen,
+                  )
+                else
+                  SizedBox.square(
+                    dimension: _bildSeite,
+                    child: Center(child: zeichen),
+                  ),
                 const SizedBox(height: 6),
                 Text(
                   _caption,

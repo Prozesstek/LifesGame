@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 import 'level_card.dart';
 
 /// Die Figur in der Mitte des Startbildschirms, mit ihren Zahlen darunter.
@@ -19,10 +20,10 @@ class CharacterStage extends StatelessWidget {
   final PlayerLevel level;
   final int gold;
 
-  /// Wo die Figur liegt. Der Dateiname ist bewusst allgemein: Kommt
-  /// später eine zweite Pose oder eine mit Rüstung dazu, ist das eine
+  /// Wo die Figur liegt: die Grundfigur im 64 × 64-Stil, noch ohne
+  /// Kleidung. Kommt später eine Fassung mit Rüstung dazu, ist das eine
   /// Datei mehr im selben Ordner und keine Änderung an `pubspec.yaml`.
-  static const String assetPath = 'assets/character/hero.png';
+  static const String assetPath = 'assets/character/Charakter.png';
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +55,14 @@ class CharacterStage extends StatelessWidget {
 class _Figur extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      CharacterStage.assetPath,
-      fit: BoxFit.contain,
-      // Pixelgrafik: hart skalieren, nicht weichzeichnen.
-      filterQuality: FilterQuality.none,
-      errorBuilder: (context, error, stack) => const _KeineFigur(),
+    // Die Zeichnung ist quadratisch und bekommt die kürzere Seite der
+    // Fläche. Ob hart oder weich skaliert wird, entscheidet `PixelArt`.
+    return LayoutBuilder(
+      builder: (context, constraints) => PixelArt(
+        assetPath: CharacterStage.assetPath,
+        side: constraints.biggest.shortestSide,
+        fallback: const _KeineFigur(),
+      ),
     );
   }
 }

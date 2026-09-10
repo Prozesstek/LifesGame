@@ -6,35 +6,43 @@ import '../ui/pixel_art.dart';
 /// steht nur, wie er aussieht — dieselbe Trennung wie bei
 /// `MoveAnimation` und `moveHelpFor`.
 ///
-/// **Derzeit hat kein Zug ein Bild.** Die vier Umgebungen hatten eines und
-/// sind am 27.08. wieder herausgenommen worden; das Kachelformat ist
-/// geblieben. Ohne Bild trägt die Kachel ihren Namen — genau so, wie es
-/// die Waffenzüge von Anfang an getan haben.
+/// **Acht von fünfzehn Fähigkeiten haben eins** — die Commons und
+/// Uncommons aus `docs/vorlagen/faehigkeiten.md`, Nummer 1 bis 8. Die
+/// übrigen und alle Waffenzüge tragen weiter ihren Namen auf der Kachel,
+/// genau so, wie es die Waffenzüge von Anfang an getan haben.
 ///
-/// **Ein Bild kommt in drei Schritten zurück:**
+/// **Ein Bild kommt in zwei Schritten dazu:**
 ///
-/// 1. Datei nach `assets/abilities/` legen, benannt wie die Move-Id, in
-///    [assetSize] Pixel Kantenlänge.
-/// 2. In `pubspec.yaml` den Ordner unter `assets:` eintragen — dort steht
-///    die Zeile auskommentiert bereit.
-/// 3. Eine Zeile in [_dateien] ergänzen.
+/// 1. Datei nach `assets/Faehigkeiten/` legen, auf 64 × 64 gezeichnet und
+///    als [assetSize] Pixel abgelegt.
+/// 2. Eine Zeile in [_dateien] ergänzen.
 ///
 /// `test/move_icon_test.dart` prüft danach von selbst mit, dass die Id in
 /// `package:combat` existiert und die Datei wirklich geladen werden kann.
+///
+/// **Hier steht ein Pfad und kein Dateiname**, wie bei `GearIcons`. Bis
+/// zum 10.09. musste die Datei heißen wie die Move-Id — aber gezeichnet
+/// wird „Funkenstoß", nicht `funkenstoss`, und die ersten vier Zeichnungen
+/// kamen als „Untitled" an. Die Zuordnung steht deshalb in dieser Tabelle
+/// und nicht im Dateinamen.
 abstract final class MoveIcons {
-  static const String _ordner = 'assets/abilities';
+  /// Move-Id → Pfad der Zeichnung.
+  static const Map<String, String> _dateien = <String, String>{
+    // Common
+    'funkenstoss': 'assets/Faehigkeiten/Funkenstoss.png',
+    'steinhaut': 'assets/Faehigkeiten/Steinhaut.png',
+    'wurzelgriff': 'assets/Faehigkeiten/Wurzelgriff.png',
+    'aurastrom': 'assets/Faehigkeiten/Aurastrom.png',
 
-  /// Move-Id → Dateiname. Leer, solange es keine Bilder gibt.
-  ///
-  /// **Die Datei heißt wie die Id.** Damit kann die Zuordnung nicht
-  /// auseinanderlaufen.
-  static const Map<String, String> _dateien = <String, String>{};
+    // Uncommon
+    'bluetentau': 'assets/Faehigkeiten/Bluetentau.png',
+    'klingenwirbel': 'assets/Faehigkeiten/Klingenwirbel.png',
+    'frostnebel': 'assets/Faehigkeiten/Frostnebel.png',
+    'prisma_barriere': 'assets/Faehigkeiten/PrismaBarriere.png',
+  };
 
   /// Der Pfad zum Bild, oder `null` wenn es für diesen Zug keins gibt.
-  static String? forMoveId(String moveId) {
-    final datei = _dateien[moveId];
-    return datei == null ? null : '$_ordner/$datei';
-  }
+  static String? forMoveId(String moveId) => _dateien[moveId];
 
   /// Alle Move-Ids, für die es ein Bild gibt.
   static Iterable<String> get moveIds => _dateien.keys;

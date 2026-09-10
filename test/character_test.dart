@@ -460,6 +460,44 @@ void main() {
       expect(find.text('leer'), findsOneWidget);
     });
 
+    testWidgets('ein belegter Platz zeigt das Bild der Fähigkeit', (
+      tester,
+    ) async {
+      // Blütentau hat eine Zeichnung, der Kurzbogen im Waffenplatz nicht.
+      // Das Bild gehört auf **seinen** Platz, nicht irgendwohin.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(
+          aufLevel(
+            3,
+            abilities: const ChosenAbilities.empty().withAt(
+              0,
+              AbilityMoves.bluetentau.id,
+            ),
+          ),
+        ),
+      );
+
+      Finder platzVon(String name) =>
+          find.ancestor(of: find.text(name), matching: find.byType(InkWell));
+
+      expect(
+        find.descendant(
+          of: platzVon(AbilityMoves.bluetentau.name).first,
+          matching: find.byType(Image),
+        ),
+        findsOneWidget,
+      );
+      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      expect(
+        find.descendant(
+          of: platzVon(rueckfall.name).first,
+          matching: find.byType(Image),
+        ),
+        findsNothing,
+      );
+    });
+
     testWidgets('nur die offenen Plätze gehen in den Kampf', (tester) async {
       // Der eigentliche Zweck der Verkabelung: Was gewählt ist, wirkt sich
       // aus — aber nur so weit, wie Plätze offen sind (ADR-0016).

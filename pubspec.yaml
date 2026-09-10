@@ -78,6 +78,12 @@ flutter:
     # Ordner je Art bedeutet: eine neue Datei ist eine Datei, keine
     # Aenderung an dieser Liste.
     - assets/Waffen/Schwerter/
+    - assets/Waffen/Boegen/
+    - assets/Waffen/Staebe/
+
+    # Die Fähigkeiten, eine Zeichnung je Fähigkeit. Welche zu welchem Zug
+    # gehört, entscheidet `MoveIcons` -- nicht der Dateiname.
+    - assets/Faehigkeiten/
 
     # Muenze, Beutel und was sonst als Gegenstand auftaucht.
     - assets/Items/
@@ -85,9 +91,3 @@ flutter:
     # Flaechen, auf denen die Oberflaeche selbst steht -- der runde Knopf
     # des Startbildschirms und seine Charakter-Fassung.
     - assets/UI/
-
-  # Fuer die Faehigkeiten gibt es derzeit keine Bilder. Sobald wieder
-  # welche dazukommen, muss hier der Ordner stehen -- siehe
-  # `lib/combat/move_icon.dart`:
-  #
-  #     - assets/abilities/

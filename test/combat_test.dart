@@ -217,18 +217,29 @@ void main() {
     testWidgets('jeder Zug ist eine antippbare Kachel mit seinem Namen', (
       tester,
     ) async {
-      // Solange es keine Bilder gibt, trägt jede Kachel ihren Namen — so,
-      // wie es der Waffenzug von Anfang an getan hat. Er ist der Zug, den
-      // man jede Runde drückt; ohne Kachel ließe sich nicht kämpfen.
+      // Mit Bild steht der Name über der Kachel, ohne Bild in ihr — so, wie
+      // es der Waffenzug von Anfang an getan hat. Er ist der Zug, den man
+      // jede Runde drückt; ohne Kachel ließe sich nicht kämpfen.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
 
       for (final move in <Move>[Moves.basicAttack, AbilityMoves.frostnebel]) {
         expect(find.text(move.name), findsOneWidget);
-        expect(
-          find.descendant(of: _kachelVon(move), matching: find.byType(Image)),
-          findsNothing,
-        );
       }
+
+      expect(
+        find.descendant(
+          of: _kachelVon(Moves.basicAttack),
+          matching: find.byType(Image),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: _kachelVon(AbilityMoves.frostnebel),
+          matching: find.byType(Image),
+        ),
+        findsOneWidget,
+      );
 
       expect(_tippflaecheVon(tester, Moves.basicAttack).onTap, isNotNull);
     });
@@ -254,7 +265,14 @@ void main() {
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.aurastrom.id));
 
       expect(find.byType(TimingBar), findsNothing);
-      await tester.tap(find.text(AbilityMoves.aurastrom.name));
+      // Getippt wird die Kachel: Mit Bild steht der Name darüber, und die
+      // Namenszeile ist kein Knopf.
+      await tester.tap(
+        find.descendant(
+          of: _kachelVon(AbilityMoves.aurastrom),
+          matching: find.byType(InkWell),
+        ),
+      );
       await tester.pump();
 
       expect(find.byType(TimingBar), findsOneWidget);
@@ -265,7 +283,14 @@ void main() {
       // läuft mit 1.3x und hat ein Fenster von 18 %.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.aurastrom.id));
 
-      await tester.tap(find.text(AbilityMoves.aurastrom.name));
+      // Getippt wird die Kachel: Mit Bild steht der Name darüber, und die
+      // Namenszeile ist kein Knopf.
+      await tester.tap(
+        find.descendant(
+          of: _kachelVon(AbilityMoves.aurastrom),
+          matching: find.byType(InkWell),
+        ),
+      );
       await tester.pump();
 
       final bar = tester.widget<TimingBar>(find.byType(TimingBar));

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import '../ui/pixel_art.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
@@ -537,6 +538,24 @@ class _Kachel extends StatelessWidget {
     final kosten = move.energyDelta >= 0
         ? '+${move.energyDelta}'
         : '${move.energyDelta}';
+    final pfad = bild;
+
+    // Ohne Bild trägt die Kachel den Namen — sonst wäre der Waffenzug ein
+    // leeres Kästchen. Derselbe Name springt ein, wenn eine Datei fehlt.
+    final name = Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          move.name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Palette.text,
+          ),
+        ),
+      ),
+    );
 
     return SizedBox(
       height: side,
@@ -551,31 +570,12 @@ class _Kachel extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                if (bild != null)
-                  Image.asset(
-                    bild!,
-                    fit: BoxFit.cover,
-                    // Das Bild liegt in dreifacher Kachelgröße vor; ohne
-                    // Glättung fräst das Verkleinern die Pixelgrafik kaputt.
-                    filterQuality: FilterQuality.medium,
-                  )
+                if (pfad != null)
+                  // Ob hart oder weich skaliert wird, entscheidet
+                  // `PixelArt` an der Kantenlänge — nicht diese Stelle.
+                  PixelArt(assetPath: pfad, side: side, fallback: name)
                 else
-                  // Ohne Bild trägt die Kachel den Namen — sonst wäre der
-                  // Waffenzug ein leeres Kästchen.
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        move.name,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.text,
-                        ),
-                      ),
-                    ),
-                  ),
+                  name,
                 Positioned(
                   right: 5,
                   bottom: 5,
