@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 08.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 11.09.2026 · Prozesstek
 
 ---
 
@@ -32,9 +32,9 @@ Instanz, die zählt.
 | # | Ziel | Quelle | Termin |
 |---|---|---|---|
 | 1 | Der Kampf lässt sich starten | Issue #15 | **26.08.** |
-| 2 | Skillbaum mit vier Wurzeln | Issue #16 | **31.08.** |
+| 2 | Skillbaum mit vier Wurzeln ✓ | Issue #16 | **31.08.** |
 | 3 | Der Laden trifft eine Entscheidung ✓ | `state.md` Punkt 1 | ~~06.09.~~ **08.09.** |
-| 4 | Die App übersteht Mitternacht | `state.md` Punkt 8 | 06.09. |
+| 4 | Die App übersteht Mitternacht ✓ | `state.md` Punkt 8 | ~~06.09.~~ **11.09.** |
 | 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
 | 6 | Die Gegnerreihe schließt den MVP-Schnitt ✓ | Issue #36 | ~~20.09.~~ **08.09.** |
 | 7 | Der Nachweis | diese Datei | 20.10. |
@@ -229,9 +229,26 @@ nichts — der ganze Waffenslot war Dekoration.
 Ein Test, der die Uhr über Mitternacht schiebt und prüft, dass die Tagesliste
 nachzieht und ein Häkchen auf dem **neuen** Tag landet.
 
+| Kriterium | Ist (11.09., Abschluss) | Soll |
+|---|---|---|
+| Tagesliste zieht um Mitternacht nach | **ja, ohne Neustart** ✓ | ohne Neustart |
+| Häkchen landet auf dem neuen Tag | **ja**, die Streak läuft weiter ✓ | neuer Tag |
+| App kommt aus dem Hintergrund zurück | **sofort** ✓ | — |
+| Uhr oder Zeitzone umgestellt | **binnen einer Minute** ✓ | — |
+
 ```bash
-flutter test test/habits_screen_test.dart
+flutter test test/day_watcher_test.dart
 ```
+
+**Ziel 4 ist erfüllt**, fünf Tage nach Termin. Gebaut ist es als
+`lib/habits/day_watcher.dart`; warum ein Widget und warum zusätzlich ein
+Minutentakt, steht in `state.md`. Der Prüfbefehl nannte hier bis dahin
+`test/habits_screen_test.dart` — die Datei hat es nie gegeben.
+
+**Nicht auf einem Gerät geprüft:** ob ein Handy nach einer Nacht im
+Hintergrund beim Aufwecken tatsächlich „zurück im Vordergrund" meldet.
+Tut es das nicht, fängt der Minutentakt den Tag spätestens eine Minute
+später.
 
 ### Erreichbar
 
@@ -419,6 +436,12 @@ Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
 
 ## Verlauf
 
+- **11.09.2026** — **Ziel 4 erfüllt**, fünf Tage nach Termin. „Heute"
+  rechnet sich jetzt um Mitternacht, jede Minute und beim Zurückkehren in
+  den Vordergrund neu, ohne Neustart. Es war das letzte nicht schneidbare
+  Ziel vor dem Teststart. Dazu hat Ziel 2 in der Übersicht den Haken
+  bekommen, der dort seit dem 24.08. fehlte — der Abschnitt nannte es
+  längst vollständig.
 - **08.09.2026, abends** — **Ziel 6 umgeschrieben und erfüllt**
   ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)). Issue #36
   beschreibt nicht den Dungeon, sondern eine Reihe aus dreißig Gegnern —

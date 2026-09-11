@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dev/dev_controller.dart';
 import 'dev/dev_screen.dart';
 import 'dev/save_slot.dart';
+import 'habits/day_watcher.dart';
 import 'home/home_screen.dart';
 import 'save/save_data.dart';
 import 'save/save_providers.dart';
@@ -50,7 +51,9 @@ Future<void> main() async {
           ),
         ],
       ],
-      child: const PhoneFrame(child: SaveWatcher(child: LifesGameApp())),
+      child: const PhoneFrame(
+        child: SaveWatcher(child: DayWatcher(child: LifesGameApp())),
+      ),
     ),
   );
 }

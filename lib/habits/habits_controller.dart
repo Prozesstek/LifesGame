@@ -5,16 +5,26 @@ import 'package:theory/theory.dart';
 import '../save/save_providers.dart';
 import '../theory/theory_controller.dart';
 
+/// Die Uhr, nach der „heute" bestimmt wird.
+///
+/// Eigener Provider, damit ein Test die Uhr über Mitternacht schieben
+/// kann. `DateTime.now` lässt sich im Test nicht verstellen — die
+/// vorgespulte Zeit von `tester.pump` bewegt nur Timer, nicht das Datum.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
 /// Der heutige Kalendertag.
 ///
 /// Eigener Provider, damit Tests einen festen Tag setzen können — sonst
 /// wäre jeder Streak-Test vom Systemdatum abhängig.
 ///
-/// Achtung: Der Wert wird nicht von selbst neu berechnet. Wer die App über
-/// Mitternacht offen lässt, sieht bis zum Neustart den gestrigen Tag —
-/// beim nächsten Start stimmt er wieder. Ein Wecker auf Mitternacht wäre
-/// die saubere Lösung und steht in `docs/context/state.md`.
-final todayProvider = Provider<Day>((ref) => Day.from(DateTime.now()));
+/// **Der Wert rechnet sich nicht von selbst neu.** Dass er nach
+/// Mitternacht stimmt, besorgt der `DayWatcher` in `day_watcher.dart`,
+/// der dafür unter dem `ProviderScope` hängen muss — wie der
+/// `SaveWatcher`. Ohne ihn sähe, wer die App über Mitternacht offen lässt,
+/// bis zum Neustart den gestrigen Tag.
+final todayProvider = Provider<Day>((ref) {
+  return Day.from(ref.watch(clockProvider)());
+});
 
 /// Bindeglied zwischen dem Gewohnheits-Modell und der Oberfläche.
 ///

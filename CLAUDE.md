@@ -89,6 +89,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
+| `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
@@ -152,7 +153,7 @@ berechnet wird, gehört sie in eines der sieben Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 401 Tests
+flutter test             # 407 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -477,6 +478,14 @@ achten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
 gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
 (`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
 nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).
+
+**„Heute" stimmt nach Mitternacht, aber auch nur über eine Stelle.**
+`todayProvider` liest die Uhr einmal. Dass der Tag wechselt, besorgt
+`lib/habits/day_watcher.dart`, und das hängt wie der `SaveWatcher` in
+`main.dart` — Tests, die `LifesGameApp` ohne ihn pumpen, bleiben auf dem
+Tag des Starts stehen, und das ist dort gewollt. Wer „heute" braucht,
+liest `todayProvider`, nie `DateTime.now()`. Wer daran dreht, lässt
+`flutter test test/day_watcher_test.dart` laufen.
 
 ## Gedächtnis-Protokoll
 

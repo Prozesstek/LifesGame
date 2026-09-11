@@ -7,9 +7,56 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 10.09.2026 · Prozesstek (Fähigkeitsbilder, Bogen, Stab, Grundfigur)
+**Zuletzt aktualisiert:** 11.09.2026 · Prozesstek (Ziel 4: Mitternacht)
 
 ---
+
+## Sitzung 11.09.2026: die App übersteht Mitternacht
+
+**Ziel 4 ist erfüllt**, fünf Tage nach Termin. 407 App-Tests (vorher 401).
+
+`todayProvider` las die Uhr einmal und behielt den Tag. Wer die App über
+Mitternacht offen ließ, hakte auf dem gestrigen Tag ab — im 30-Tage-Lauf
+passiert das garantiert, und eine grundlos gerissene Streak ist der
+schlimmste Fehler, den dieses Spiel kennt (`konzept.md` 3.7).
+
+### Was gebaut ist
+
+- **`clockProvider`** in `habits_controller.dart`: die Uhr als Provider.
+  Nur so kann ein Test sie über Mitternacht schieben — `tester.pump`
+  spult Timer vor, nicht das Datum. Die vielen
+  `todayProvider.overrideWithValue` in den Tests gelten unverändert.
+- **`lib/habits/day_watcher.dart`**: hängt in `main.dart` direkt unter dem
+  `SaveWatcher` und sieht auf die Uhr — genau um Mitternacht, sonst jede
+  Minute, und sofort, wenn die App wieder in den Vordergrund kommt.
+  Neu gerechnet wird nur, wenn wirklich ein anderer Tag anbricht.
+- **`test/day_watcher_test.dart`**, sechs Tests. Der wichtigste geht den
+  ganzen Weg: gestern abgehakt, Uhr über Mitternacht, die Kachel ist
+  wieder leer, ein Tipp landet auf dem neuen Tag, die Streak steht auf 2.
+
+### Zwei Entscheidungen
+
+**Ein Widget, kein Timer im Provider.** Ein Timer im Provider lebt so
+lange wie der Container — und `habits_test.dart`, `theory_test.dart` und
+`ability_unlock_test.dart` entsorgen ihren Container erst im `tearDown`.
+Der Timer wäre dort noch offen, wenn Flutter nach dem Test auf offene
+Timer prüft. Ein Widget endet mit dem Baum. Der Preis ist derselbe wie
+beim `SaveWatcher`: Es muss in `main.dart` hängen, sonst tut es nichts.
+
+**Jede Minute, nicht nur ein Wecker auf Mitternacht.** Ein einzelner
+Wecker verpasst zwei Fälle: Ein schlafendes Handy lässt Timer nicht
+verlässlich weiterlaufen, und wer Zeitzone oder Uhr umstellt, verschiebt
+Mitternacht, nachdem der Wecker gestellt war. Ein Blick auf die Uhr je
+Minute kostet nichts, und die Oberfläche baut dabei nur neu, wenn sich
+der Tag tatsächlich geändert hat.
+
+### Nicht auf einem Gerät geprüft
+
+Tests und Analyzer sind grün. Ob ein Android-Handy nach einer Nacht im
+Hintergrund beim Aufwecken wirklich „zurück im Vordergrund" meldet,
+zeigt erst das APK. Tut es das nicht, stimmt der Tag spätestens eine
+Minute später — ein Häkchen in genau dieser Minute landete dann noch auf
+dem alten.
 
 ## Sitzung 10.09.2026: acht Fähigkeiten, zwei Waffen und die Figur
 
@@ -1719,7 +1766,7 @@ fertig sein soll und woran das gemessen wird, steht in
 | — (Issue #15, Kampf startet nicht) | Ziel 1 | **26.08.2026** |
 | 3 — Punkteökonomie und Baumumbau (Issue #16) | Ziel 2 | **31.08.2026** |
 | 1 — Waffen als Sidegrades | Ziel 3 | 06.09.2026 |
-| 8 — Tageswechsel | Ziel 4 | 06.09.2026 |
+| 8 — Tageswechsel | Ziel 4 | ~~06.09.2026~~ **erledigt 11.09.** |
 | 2 — Fähigkeiten (Issue #17 erweitert) | Ziel 5 | 13.09.2026 |
 | 4 + 5 — Dungeon, Tränke | Ziel 6 | 20.09.2026 |
 | 6, 7, 9, 10 | **zurückgestellt** | nach dem 30-Tage-Lauf |
@@ -1794,9 +1841,9 @@ vorweggenommen.
 **7. Lebensbalken an die Zeitachse hängen** — sie springen heute
 sofort, während das Geschoss noch fliegt (ADR-0015).
 
-**8. Tageswechsel bei laufender App** — `todayProvider` rechnet
-sich nicht von selbst neu. Wer die App über Mitternacht offen lässt,
-sieht bis zum Neustart den gestrigen Tag.
+~~**8. Tageswechsel bei laufender App**~~ — **erledigt am 11.09.**
+`lib/habits/day_watcher.dart` rechnet „heute" um Mitternacht, jede
+Minute und beim Zurückkehren in den Vordergrund neu.
 
 **9. Große Schrift bricht das Layout** — bei `textScaler` 2,0
 läuft der Gewohnheiten-Bildschirm um 149 Pixel über, das
