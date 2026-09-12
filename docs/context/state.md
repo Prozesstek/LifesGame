@@ -136,6 +136,24 @@ jemand ansehen:
 - Ob „Ruhm" neben dem Gold im Kopf des Charakters als Zahl zum
   Vergleichen liest und nicht als zweite Währung.
 
+### Drei Dateien nachgezogen
+
+Sie lagen seit Tagen im Arbeitsverzeichnis und hatten mit Ziel 8 nichts
+zu tun; eingecheckt sind sie trotzdem, damit der Baum sauber ist:
+
+| Datei | Was |
+|---|---|
+| `assets/character/hero.png` | gelöscht — seit dem 10.09. von `Charakter.png` abgelöst und nirgends gelesen |
+| `assets/Gold.pxo` | gelöscht — **die einzige `.pxo` im Repo**, also die einzige Bearbeitungsdatei. `Gold.png` bleibt |
+| `Logo.png` | neu im Wurzelordner, 1,1 MB, **nirgends eingebaut** |
+
+**Zwei Vorbehalte, die bestehen bleiben.** Mit `Gold.pxo` ist die
+Pixelorama-Quelle der Goldmünze aus dem Baum verschwunden — die
+Zeichnung bleibt, das Bearbeitbare nicht (zurückholen geht über die
+Historie). Und `Logo.png` ist angemeldet, ohne dass irgendwo entschieden
+wäre, wofür es steht: App-Symbole stehen in `ziele.md` auf der
+Sperrliste.
+
 ### Offen
 
 **Die Balance ist nicht neu gerechnet worden.** `tool/balance_sim.dart`
@@ -283,9 +301,10 @@ nicht mehr.
 
 - **Die Grundfigur ersetzt `hero.png`**, obwohl sie noch keine Kleidung
   trägt. Sie ist die erste Figur im Stil des Rests; `hero.png` war
-  1024 × 1536 und passte nicht dazu. Die alte Datei liegt weiter unter
-  `assets/character/`, wird aber nirgends mehr gelesen. Zurück ist es
-  eine Zeile (`CharacterStage.assetPath`).
+  1024 × 1536 und passte nicht dazu. ~~Die alte Datei liegt weiter unter
+  `assets/character/`~~ — **am 12.09. gelöscht**; zurückholen geht über
+  die Git-Historie. Der Schalter dafür ist weiterhin eine Zeile
+  (`CharacterStage.assetPath`).
 - **Der „Kampfstab" ist der Kriegsstab**, obwohl er als Speer mit
   Eisenspitze gezeichnet ist. Es ist der einzige Stab im Katalog.
 - **Die Namenszeile über einer Bildkachel ist kein Knopf.** Getippt wird
@@ -312,8 +331,8 @@ Tests und Analyzer sind grün, wie es aussieht, muss jemand ansehen:
   liegen im Wurzelordner und sind **bewusst nicht** eingebaut: App-Symbole
   stehen auf der Sperrliste in `ziele.md`, und das Vorbild ist ein
   fremder Screenshot.
-- `assets/Gold.pxo` ist im Arbeitsverzeichnis gelöscht — nicht in dieser
-  Sitzung, und nicht mit eingecheckt.
+- ~~`assets/Gold.pxo` ist im Arbeitsverzeichnis gelöscht — nicht in dieser
+  Sitzung, und nicht mit eingecheckt.~~ — **am 12.09. eingecheckt.**
 
 ## Sitzung 09.09.2026: die ersten Zeichnungen sind drin
 
