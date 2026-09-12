@@ -308,4 +308,59 @@ class Loadout {
   }
 
   int get equippedCount => _equipped.length;
+
+  // --- Was die Errungenschaften auslesen (ADR-0033) ---
+  //
+  // Alles hier fragt „je besessen" und nicht „im Besitz". Eine
+  // Errungenschaft darf durch einen Verkauf nicht zurückgenommen werden
+  // (ADR-0033, Punkt 3) — und dass sich das überhaupt rechnen lässt,
+  // liegt an ADR-0031: [soldIds] ist eine Historie, keine Bilanz. Wäre
+  // ein Verkauf nur ein Abzug gewesen, stünde hier nichts mehr, woraus
+  // man es ableiten könnte.
+
+  /// Jede Id, die je im Besitz war — Verkauftes eingeschlossen.
+  Set<String> get everOwnedIds => <String>{..._ownedIds, ..._soldIds};
+
+  /// Wie viele **verschiedene** Stücke je besessen wurden.
+  ///
+  /// Wer dasselbe Stück zweimal gekauft und verkauft hat, steht in
+  /// [soldIds] zweimal und zählt hier trotzdem einmal.
+  int get everOwnedCount {
+    var count = 0;
+    final ids = everOwnedIds;
+    for (final item in GearCatalog.all) {
+      if (ids.contains(item.id)) count++;
+    }
+    return count;
+  }
+
+  /// Auf wie vielen der sechs Plätze je ein Stück lag.
+  int get slotsEverOwned {
+    final slots = <GearSlot>{};
+    for (final id in everOwnedIds) {
+      final item = GearCatalog.byId(id);
+      if (item != null) slots.add(item.slot);
+    }
+    return slots.length;
+  }
+
+  /// Wie viele Sets je vollständig zusammen waren.
+  ///
+  /// **Stück für Stück gezählt, nicht gleichzeitig getragen.** Das ist
+  /// bewusst nicht [activeSets]: Dort geht es darum, was *jetzt* wirkt,
+  /// hier darum, was jemand einmal beisammen hatte.
+  int get completeSetsEverOwned {
+    final ids = everOwnedIds;
+    var count = 0;
+    for (final set in GearSets.all) {
+      final pieces = GearCatalog.all.where((i) => i.setId == set.id);
+      if (pieces.isEmpty) continue;
+      if (pieces.every((i) => ids.contains(i.id))) count++;
+    }
+    return count;
+  }
+
+  /// Wie oft verkauft wurde. Mit Wiederholungen — zweimal draufgezahlt
+  /// ist zweimal verkauft.
+  int get soldCount => _soldIds.length;
 }

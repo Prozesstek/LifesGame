@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:achievements/achievements.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
+import '../achievements/achievement_stats.dart';
 import '../save/save_providers.dart';
 
 /// Bindeglied zwischen Ausrüstung und Oberfläche.
@@ -25,8 +27,19 @@ class GearController extends Notifier<Loadout> {
   /// als Zirkelbezug ab. Deshalb wird hier der reine Zufluss geholt und
   /// der eigene Stand direkt abgezogen. Das Ergebnis ist dasselbe, nur
   /// ohne Kreis.
+  ///
+  /// **Seit ADR-0033 gilt dasselbe ein zweites Mal.** Vier
+  /// Errungenschaften im Laden zahlen Gold, und ob sie verdient sind,
+  /// haengt an diesem Inventar. `spendableIncomeProvider` zeigt damit
+  /// ueber die Errungenschaften wieder hierher — deshalb wird der eigene
+  /// Anteil ebenfalls selbst gerechnet, aus dem eigenen `state`.
   PurchaseBlock? buy(String itemId) {
-    final available = ref.read(spendableIncomeProvider) - state.spentGold;
+    final ausErrungenschaften = AchievementCatalog.goldFor(
+      achievementStatsWithLoadout(ref, state),
+    );
+    final income =
+        ref.read(incomeWithoutAchievementsProvider) + ausErrungenschaften;
+    final available = income - state.spentGold;
     final block = state.blockFor(itemId, availableGold: available);
     if (block != null) return block;
 

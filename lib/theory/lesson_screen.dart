@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
 import '../character/abilities_controller.dart';
+import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
 import '../ui/palette.dart';
 import 'theory_controller.dart';
@@ -90,6 +91,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     // **Vor dem Abgeben lesen.** Danach ist der Fortschritt drin und der
     // Unterschied verschwunden — es gaebe nichts mehr zu feiern.
     final vorher = ref.read(unlockedAbilitiesProvider);
+    final vorherErrungen = achievementsBefore(ref);
 
     final result = ref
         .read(theoryProgressProvider.notifier)
@@ -101,9 +103,17 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
     // Einen Bildaufbau spaeter: Erst steht das Ergebnis da, dann kommt
     // die Feier darueber. Andersherum verdeckte sie, wofuer sie kommt.
+    // **Errungenschaften zuerst, Faehigkeiten danach.** Eine
+    // Errungenschaft kann eine Faehigkeit mitbringen (ADR-0033, Punkt 7);
+    // andersherum stuende die Faehigkeit da, bevor gesagt waere, woher
+    // sie kommt.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(showAbilityUnlocks(context, ref, before: vorher));
+      unawaited(() async {
+        await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!mounted) return;
+        await showAbilityUnlocks(context, ref, before: vorher);
+      }());
     });
   }
 

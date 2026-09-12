@@ -1,7 +1,7 @@
 # ADR-0024: Abgelöste Fähigkeiten fallen beim Laden aus dem Spielstand
 
 **Datum:** 26.08.2026
-**Status:** Aktiv
+**Status:** Aktiv — die verworfene Alternative „die vier alten wieder aufnehmen" ist mit [ADR-0033](0033-errungenschaften-aus-der-historie.md) doch gewählt, als Belohnung von Errungenschaften
 **Entschieden von:** AktivesBrett
 
 ## Kontext

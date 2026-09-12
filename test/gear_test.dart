@@ -1,3 +1,4 @@
+import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,19 @@ void main() {
     return SaveData(theory: progress);
   }
 
+  /// Wegtippen, was nach einem Kauf gefeiert wird.
+  ///
+  /// **Seit ADR-0033 legt sich ein Blatt ueber den Laden**, sobald ein
+  /// Kauf eine Errungenschaft ausloest — und der erste Kauf tut das
+  /// immer. Die Tests hier interessieren sich fuer den Laden, nicht fuer
+  /// die Feier; sie raeumen sie deshalb weg.
+  Future<void> feierWeg(WidgetTester tester) async {
+    while (find.widgetWithText(FilledButton, 'Weiter').evaluate().isNotEmpty) {
+      await tester.tap(find.widgetWithText(FilledButton, 'Weiter').last);
+      await tester.pumpAndSettle();
+    }
+  }
+
   Widget appMit(SaveData saved, Widget screen) {
     return ProviderScope(
       overrides: [savedGameProvider.overrideWithValue(saved)],
@@ -40,7 +54,12 @@ void main() {
   }
 
   group('Gold', () {
-    test('ein Kauf zieht genau den Preis ab', () {
+    // **Seit ADR-0033 zieht der erste Kauf nicht nur ab.** „Erster Kauf"
+    // ist ein Meilenstein und zahlt 10 Gold zurück — der Zufluss wächst
+    // also mit. Das ist Absicht und keine Rundungsluecke: Vier
+    // Errungenschaften haengen am Laden, zusammen 85 Gold ueber ein
+    // Spielerleben, und jede zahlt genau einmal.
+    test('ein Kauf zieht den Preis ab und zahlt den Meilenstein aus', () {
       final container = ProviderContainer(
         overrides: [savedGameProvider.overrideWithValue(mitGold())],
       );
@@ -48,12 +67,34 @@ void main() {
 
       final vorher = container.read(goldProvider);
       final preis = GearCatalog.byId(kappe)?.price ?? 0;
+      final ersterKauf = AchievementCatalog.byId('erster-kauf')!.tier.gold;
 
       container.read(loadoutProvider.notifier).buy(kappe);
 
-      expect(container.read(goldProvider), vorher - preis);
-      // Der Zufluss bleibt unberührt — nur der Abfluss ist gewachsen.
-      expect(container.read(goldEarnedProvider), vorher);
+      expect(container.read(goldProvider), vorher - preis + ersterKauf);
+      // Der Zufluss waechst um genau den Meilenstein, der Abfluss um den
+      // Preis.
+      expect(container.read(goldEarnedProvider), vorher + ersterKauf);
+      expect(container.read(loadoutProvider).spentGold, preis);
+    });
+
+    test('ein zweiter Kauf zieht nur noch ab', () {
+      // Der Meilenstein zahlt genau einmal -- dieselbe Regel wie bei
+      // einer Sprosse der Reihe (ADR-0032).
+      final container = ProviderContainer(
+        overrides: [savedGameProvider.overrideWithValue(mitGold())],
+      );
+      addTearDown(container.dispose);
+
+      container.read(loadoutProvider.notifier).buy(kappe);
+      final nachErstem = container.read(goldProvider);
+
+      final zweites = GearCatalog.all.firstWhere(
+        (i) => i.id != kappe && i.price <= nachErstem,
+      );
+      container.read(loadoutProvider.notifier).buy(zweites.id);
+
+      expect(container.read(goldProvider), nachErstem - zweites.price);
     });
 
     test('ohne Gold geht kein Kauf, und der Grund ist benannt', () {
@@ -95,14 +136,24 @@ void main() {
       final preis = GearCatalog.byId(klinge)!.price;
       final erloes = Loadout.refundFor(GearCatalog.byId(klinge)!);
 
+      // Der erste Kauf zahlt seinen Meilenstein aus (ADR-0033); er
+      // steckt in beiden Zeilen darunter und aendert an der Aussage des
+      // Tests nichts -- die Haelfte bleibt versenkt.
+      final ersterKauf = AchievementCatalog.byId('erster-kauf')!.tier.gold;
+
       container.read(loadoutProvider.notifier).buy(klinge);
-      expect(container.read(goldProvider), zufluss - preis);
+      expect(container.read(goldProvider), zufluss - preis + ersterKauf);
 
       expect(container.read(loadoutProvider.notifier).sell(klinge), erloes);
 
       // **Nicht zurück auf den Anfang.** Die Differenz ist versenkt.
-      expect(container.read(goldProvider), zufluss - preis + erloes);
-      expect(container.read(goldEarnedProvider), zufluss);
+      expect(
+        container.read(goldProvider),
+        zufluss - preis + erloes + ersterKauf,
+      );
+      // „Kein Blick zurueck" ist eine Entdeckung und zahlt kein Gold --
+      // der Zufluss waechst durch einen Verkauf also nicht.
+      expect(container.read(goldEarnedProvider), zufluss + ersterKauf);
     });
 
     test('verkaufte Ausrüstung wirkt nicht mehr', () {
@@ -394,6 +445,7 @@ void main() {
 
       await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
       await tester.pumpAndSettle();
+      await feierWeg(tester);
 
       final erloes = Loadout.refundFor(
         GearCatalog.forSlot(GearSlot.waffe).first,
@@ -419,6 +471,7 @@ void main() {
 
       await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
       await tester.pumpAndSettle();
+      await feierWeg(tester);
 
       final container = ProviderScope.containerOf(
         tester.element(find.byType(ShopScreen)),

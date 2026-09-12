@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 11.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 12.09.2026 · Prozesstek
 
 ---
 
@@ -38,6 +38,7 @@ Instanz, die zählt.
 | 5 | Fähigkeiten mit Art und Seltenheit ✓ | Issue #17 | ~~13.09.~~ **26.08.** |
 | 6 | Die Gegnerreihe schließt den MVP-Schnitt ✓ | Issue #36 | ~~20.09.~~ **08.09.** |
 | 7 | Der Nachweis | diese Datei | 20.10. |
+| 8 | Errungenschaften vor dem Teststart ✓ | Issue #41 | ~~20.09.~~ **12.09.** |
 
 ## Was **nicht** im MVP ist — und warum
 
@@ -422,6 +423,74 @@ die Produktfrage beantwortet statt einer technischen.
 
 ---
 
+## Ziel 8 — Errungenschaften vor dem Teststart
+
+**Termin: Sonntag, 20.09.2026 · Issue [#41](https://github.com/Prozesstek/LifesGame/issues/41) · [ADR-0033](../decisions/0033-errungenschaften-aus-der-historie.md)**
+
+> **Neu am 11.09.2026.** Errungenschaften standen in `konzept.md` unter
+> „Raus für später". Sie rücken vor den Teststart, weil alle sechs
+> Bauziele erreicht sind und Ziel 7 ausdrücklich „Abbrüche wegen
+> Langeweile" misst. Die Nummer ist 8, obwohl der Termin vor Ziel 7
+> liegt — die Nummern der übrigen Ziele bleiben, wie sie sind.
+
+### Spezifisch
+
+Der erste Satz aus ADR-0033 im Spiel: **19 Meilensteine und 8
+Entdeckungen** in `packages/achievements`, abgeleitet aus der Historie.
+Die Titel sind Belohnung von Errungenschaften, Kraftschlag, Zehrung,
+Sammeln und Atemzug kommen über je einen Meilenstein zurück. Zwei neue
+Spuren: Niederlagen je Sprosse, gescheiterte Versuche je Lektion. Ein
+Bildschirm vom Charakter aus, eine Feier für jede neue Errungenschaft.
+
+### Messbar
+
+| Kriterium | Ist (12.09., Abschluss) | Soll |
+|---|---|---|
+| Meilensteine im Katalog | **19** ✓ | 19 |
+| Entdeckungen im Katalog | **8** ✓ | 8 |
+| Titel aus Errungenschaften | **13** ✓ | 13 (7 bisherige + 6 neue) |
+| Fähigkeiten aus Errungenschaften | **4** ✓ | 4 |
+| Neue Spuren | **2**, überleben einen Neustart ✓ | 2 |
+| Rückwirkend | **ja**, Test weist es nach ✓ | — |
+| Entwicklermodus | **schaltet nichts frei** ✓ | Zuschläge schalten nichts frei |
+| Kurven | **rechnen mit** ✓ | `progression_test.dart` rechnet Erfahrung und Gold mit |
+| Bildschirm | **ja**, vier Reiter ✓ | vom Charakter aus, bei 390 × 844 ohne Überlauf |
+| Feier | **ja**, an vier Stellen ✓ | — |
+
+```bash
+cd packages/achievements ; dart test    # 24
+flutter test test/achievements_seam_test.dart
+flutter test test/achievements_test.dart
+flutter test test/progression_test.dart
+flutter test test/phone_layout_test.dart
+```
+
+**Ziel 8 ist erfüllt** — acht Tage vor dem Termin, und ohne dass etwas
+geschnitten werden musste: Die Entdeckungen sind mit drin. Was **nicht**
+geprüft ist, steht in `state.md`: Wie der Bildschirm auf einem Handy
+aussieht, muss jemand ansehen.
+
+### Erreichbar
+
+Die Bedingungen sind fast alle Katalogarbeit, weil sie an Zahlen hängen,
+die es schon gibt. Der Aufwand liegt in fünf Stücken, in dieser
+Reihenfolge: das Package samt Katalog, die zwei Spuren, Titel und
+Fähigkeiten umhängen, die Belohnung in den Kurven, Bildschirm und Feier.
+
+**Wird es knapp, wandern zuerst die Entdeckungen in den Testlauf** — und
+mit ihnen die sechs neuen Titel und die zwei Spuren. Weil alles abgeleitet
+wird, geht dabei niemandem etwas verloren; nur „Zweiter Anlauf" und „der
+Unbeugsame" zählen erst ab ihrem Einbau.
+
+### Relevant
+
+Die Gewohnheiten zahlen jeden Tag dasselbe, der Baum ist nach rund zwei
+Wochen offen, die Reihe hat dreißig Sprossen. Dreißig Tage brauchen
+zusätzlich etwas, das unerwartet kommt — und etwas, das zwei Spieler
+vergleichen können. Beides ist hier der Zweck.
+
+---
+
 ## Wie der Fortschritt geprüft wird
 
 **Freitags, in fünf Minuten.** Für jedes laufende Ziel die Ist-Spalte
@@ -433,9 +502,20 @@ Der 20.09. steht, weil der 30-Tage-Lauf sonst in den November rutscht. Die
 Schnittreihenfolge ist festgelegt: **zuerst Ziel 5** (Seltenheit, Icons,
 Umgebungseffekte), **dann Ziel 2** (Unterknoten über das Minimum hinaus).
 Ziel 1, 4 und 6 sind nicht schneidbar — sie sind Blocker oder MVP-Schnitt.
+**Bei Ziel 8** wandern zuerst die Entdeckungen hinter den Termin, die
+Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **12.09.2026** — **Ziel 8 erfüllt**, acht Tage vor dem Termin. Damit sind
+  alle sieben Bauziele erreicht und nur noch Ziel 7 offen, der
+  30-Tage-Lauf. Die Sperrliste ist unberührt geblieben. Nebenbei kam ein
+  Fehler ans Licht, der seit ADR-0019 im Spiel war: Eine bestandene Seite
+  schloss den halben Baum wieder (`TheoryProgress.submit`).
+- **11.09.2026, nachmittags** — **Ziel 8 neu: Errungenschaften vor dem
+  Teststart** ([ADR-0033](../decisions/0033-errungenschaften-aus-der-historie.md),
+  Issue #41). Sie standen in `konzept.md` unter „Raus für später". Die
+  Sperrliste oben ist unberührt — Errungenschaften standen dort nie.
 - **11.09.2026** — **Ziel 4 erfüllt**, fünf Tage nach Termin. „Heute"
   rechnet sich jetzt um Mitternacht, jede Minute und beim Zurückkehren in
   den Vordergrund neu, ohne Neustart. Es war das letzte nicht schneidbare

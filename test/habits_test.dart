@@ -1,3 +1,4 @@
+import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,13 +113,17 @@ void main() {
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
 
+      // **Das erste Haekchen ueberhaupt loest „Erster Schritt" aus**
+      // (ADR-0033). Der Meilenstein steht als eigener Summand da, statt
+      // die Zahl stillschweigend groesser zu machen.
+      final ersterSchritt = AchievementCatalog.byId('erster-schritt')!;
       expect(
         container.read(totalXpProvider),
-        xpVorher + HabitRewards.xpPerCheck,
+        xpVorher + HabitRewards.xpPerCheck + ersterSchritt.tier.xp,
       );
       expect(
         container.read(goldProvider),
-        goldVorher + HabitRewards.goldPerCheck,
+        goldVorher + HabitRewards.goldPerCheck + ersterSchritt.tier.gold,
       );
     });
 
@@ -288,9 +293,12 @@ void main() {
 
       final tracker = container.read(habitTrackerProvider);
       expect(tracker.isChecked(habit.id, _heute), isTrue);
+      final ersterSchritt = AchievementCatalog.byId('erster-schritt')!;
       expect(
         container.read(totalXpProvider),
-        xpVorher + HabitRewards.xpFor(1, habit.difficulty),
+        xpVorher +
+            HabitRewards.xpFor(1, habit.difficulty) +
+            ersterSchritt.tier.xp,
       );
       expect(container.read(characterStatsProvider).checksFor(habit.stat), 1);
     });

@@ -9,6 +9,7 @@ import '../ui/pixel_art.dart';
 import 'battle_game.dart';
 import 'combat_controller.dart';
 import 'event_text.dart';
+import '../achievements/show_achievement_unlock.dart';
 import 'ladder_controller.dart';
 import 'move_help.dart';
 import 'move_icon.dart';
@@ -127,10 +128,11 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     var xp = 0;
     var gold = 0;
 
-    if (gewonnen) {
-      final notifier = ref.read(ladderProvider.notifier);
-      final vorher = ref.read(ladderProvider);
+    final notifier = ref.read(ladderProvider.notifier);
+    final vorher = ref.read(ladderProvider);
+    final vorherErrungen = achievementsBefore(ref);
 
+    if (gewonnen) {
       // **Gegen die Sprosse melden, nicht gegen den Gegner im Kampf.**
       // Der Kampf kennt nur einen `Combatant` mit Namen; welche Sprosse
       // gerade dran war, weiß die Reihe. Zwei Stellen, die dieselbe Frage
@@ -140,6 +142,10 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
       final nachher = ref.read(ladderProvider);
       xp = nachher.earnedXp - vorher.earnedXp;
       gold = nachher.earnedGold - vorher.earnedGold;
+    } else {
+      // **Auch eine Niederlage wird festgehalten** (ADR-0033). Sie ändert
+      // am Fortschritt nichts; ohne sie gäbe es „der Unbeugsame" nicht.
+      notifier.recordDefeat(vorher.nextRung);
     }
 
     if (!mounted) return;
@@ -154,6 +160,13 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
         earnedGold: gold,
       ),
     );
+
+    if (!mounted) return;
+
+    // **Nach dem Blatt, nicht davor.** Erst steht da, wie der Kampf
+    // ausging; die Errungenschaft kommt darüber. Andersherum verdeckte
+    // sie, wofür sie kommt — dieselbe Reihenfolge wie bei der Lektion.
+    await showAchievementUnlocks(context, ref, before: vorherErrungen);
   }
 
   void _restart() {

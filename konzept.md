@@ -55,9 +55,9 @@ Charakter zeigt **wer ich bin**.
 > bevor die App ihre Frage stellen konnte. Wo eine Klasse sichtbar werden
 > soll, wird sie aus dem tatsächlichen Verhalten **abgeleitet**.
 
-**Fähigkeiten:** 20 Stück. Sie kommen aus dem Theoriebaum (einen Knoten
-**abschließen**, nicht öffnen), aus Streak-Marken bei 7 / 14 / 30 / 60 Tagen
-und aus Waffen; später zusätzlich aus Errungenschaften. Einmal verdient
+**Fähigkeiten:** 24 Stück. Sie kommen aus dem Theoriebaum (einen Knoten
+**abschließen**, nicht öffnen), aus Streak-Marken bei 7 / 14 / 30 / 60 Tagen,
+aus Waffen und aus Errungenschaften (vier Stück, ADR-0033). Einmal verdient
 heißt behalten — auch wenn die Streak reißt (siehe 3.7). Fähigkeitspunkte
 kommen auf jedem dritten Levelaufstieg und sind gegen Gold umverteilbar.
 
@@ -258,9 +258,31 @@ Gewohnheiten teilen sich diese fünf Plätze — anlegen und täglich verfolgen
 sind zwei verschiedene Grenzen.
 
 ### 3.8 Errungenschaften
-Offen. Sie sollen später eine dritte Quelle für Fähigkeiten sein (3.1) und
-bekommen einen eigenen Weg von der Kommandozentrale aus. Bewusst
-zurückgestellt, bis die zwanzig Fähigkeiten stehen.
+**Entschieden am 11.09.2026, gebaut am 12.09.2026**
+([ADR-0033](docs/decisions/0033-errungenschaften-aus-der-historie.md),
+Issue #41).
+
+Errungenschaften werden aus der **Historie abgeleitet**, nicht gezählt —
+wie Gold, Erfahrung und Titel. Sie wirken damit rückwirkend, und keine
+Bedingung hängt an einer Größe, die fallen kann.
+
+Es gibt **zwei Arten**:
+
+- **Meilensteine** sind sichtbar, mit Fortschritt („37 / 50"), und zahlen
+  einmalig Erfahrung, Gold und **Ruhm**. Einige geben einen Titel, vier
+  geben eine Fähigkeit (Kraftschlag, Zehrung, Sammeln, Atemzug).
+- **Entdeckungen** stehen bis zum Verdienen als ??? in ihrer Kategorie.
+  Sie zahlen **kein** Gold und **keine** Erfahrung, nur Ruhm und meist
+  einen Titel — „der Mönch", „der Stoiker", „der Stratege". Wer für ein
+  Selbstbild bezahlt wird, lernt, dass es um die Bezahlung ging.
+
+**Ruhm** ist nur ein Stand zum Vergleichen, kein Zahlungsmittel. Die
+**Titel** sind Belohnungen von Errungenschaften geworden. Sortiert wird
+nach Spielbereichen: Gewohnheiten, Theorie, Kampf, Laden. Der Weg führt
+über die Kommandozentrale.
+
+Der erste Satz hat 19 Meilensteine und 8 Entdeckungen; die Liste steht im
+ADR.
 
 ### 3.9 Freunde
 Offen, und der einzige geplante Teil, der einen **Server** braucht — alles
@@ -315,7 +337,7 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
    Dungeon
 3. Niederlagen-Regel entschärfen
 4. ~~Ersten Theoriezweig auswählen~~ — erledigt, siehe 3.3 und ADR-0005/0007
-5. Errungenschaften definieren
+5. ~~Errungenschaften definieren~~ — entschieden, siehe 3.8 und ADR-0033
 6. Gegner-Design: Move-Sets und Drop-Tabellen
 7. Timed-Hit-Fenster in Millisekunden festlegen (der Deckel selbst ist mit
    ADR-0009 entschieden)
@@ -338,8 +360,9 @@ Tränken
 den Tränken, die ohne ihn wirkungslos wären. Statt einem Theoriezweig gibt es
 fünf (ADR-0007), statt einem Gegner drei (ADR-0009).
 
-**Raus für später:** mehrere Theoriezweige · Errungenschaften ·
-Drop-Tabellen · Kosmetik · Cloud-Sync
+**Raus für später:** mehrere Theoriezweige · ~~Errungenschaften~~ (seit
+11.09.2026 vor dem Teststart, ADR-0033) · Drop-Tabellen · Kosmetik ·
+Cloud-Sync
 
 Ziel des MVP: Beantwortet die Frage, ob sich der Kampf gut genug
 anfühlt, um am nächsten Tag wieder Habits abzuhaken. Alles andere ist

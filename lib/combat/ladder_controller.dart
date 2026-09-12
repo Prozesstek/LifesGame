@@ -19,6 +19,16 @@ class LadderController extends Notifier<LadderProgress> {
     state = state.defeat(rung);
   }
 
+  /// Trägt eine Niederlage ein (ADR-0033).
+  ///
+  /// **Sie ändert am Fortschritt nichts** — die Reihe kennt nur den
+  /// höchsten Sieg. Festgehalten wird sie allein für „der Unbeugsame":
+  /// Ohne diese Spur steht eine Niederlage nirgends, und die Bedingung
+  /// wäre nicht bestimmbar.
+  void recordDefeat(int rung) {
+    state = state.recordDefeat(rung);
+  }
+
   /// Setzt die Reihe zurück. Nur der Entwicklermodus ruft das.
   void reset() {
     state = const LadderProgress.empty();

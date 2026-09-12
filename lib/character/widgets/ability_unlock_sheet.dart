@@ -136,6 +136,7 @@ class AbilityUnlockSheet extends StatelessWidget {
       FromTheory() => 'Aus der Theorie',
       FromStreak(:final days) => 'Für $days Tage am Stück',
       FromWeapon() => 'Von deiner Waffe',
+      FromAchievement() => 'Aus einer Errungenschaft',
     };
   }
 

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../progression/level_provider.dart';
 import '../ui/gold_icon.dart';
+import '../achievements/show_achievement_unlock.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
 import 'weapon_ability_line.dart';
@@ -133,6 +136,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   }
 
   void _buy(BuildContext context, WidgetRef ref, GearItem item) {
+    final vorherErrungen = achievementsBefore(ref);
     final block = ref.read(loadoutProvider.notifier).buy(item.id);
     if (!context.mounted) return;
 
@@ -144,6 +148,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     };
 
     _say(context, message);
+
+    // Vier Errungenschaften hängen am Laden (ADR-0033) — hier ist der
+    // Moment, in dem sich eine davon überschreiten lässt.
+    if (block != null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      unawaited(showAchievementUnlocks(context, ref, before: vorherErrungen));
+    });
   }
 
   /// Verkauft ein Stück — **nach Rückfrage**.
@@ -187,6 +199,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     // Nachweis (`docs/context/gotchas.md`).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
+      final vorherErrungen = achievementsBefore(ref);
       final erhalten = ref.read(loadoutProvider.notifier).sell(item.id);
 
       _say(
@@ -195,6 +208,12 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             ? 'Das besitzt du nicht.'
             : '${item.name} verkauft — $erhalten Gold zurück.',
       );
+
+      // „Kein Blick zurück" ist die einzige Errungenschaft, die ein
+      // Verkauf auslösen kann — und keine, die einer wegnimmt: Gezählt
+      // wird „je besessen" (ADR-0033, Punkt 3).
+      if (erhalten == null) return;
+      unawaited(showAchievementUnlocks(context, ref, before: vorherErrungen));
     });
   }
 

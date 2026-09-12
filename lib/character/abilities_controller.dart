@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
 
+import '../achievements/achievements_controller.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
@@ -66,6 +67,10 @@ final abilityProgressProvider = Provider<AbilityProgress>((ref) {
       for (final node in ref.watch(theoryGraphProvider).nodes)
         if (theory.isPassed(node.lesson.id)) node.id,
     },
+    // **Die vierte Quelle, seit ADR-0033.** Auch sie ist abgeleitet und
+    // kann deshalb nie kleiner werden — eine so freigeschaltete
+    // Fähigkeit bleibt.
+    earnedAchievementIds: ref.watch(earnedAchievementIdsProvider),
   );
 });
 

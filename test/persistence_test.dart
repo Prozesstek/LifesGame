@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
+import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
@@ -134,10 +135,15 @@ void main() {
       // Spielstand aus der Zeit vor ADR-0022 hält *Kraftschlag* auf einem
       // freien Platz. Der Charakterbildschirm zeigte ihn, der Kampf nahm
       // ihn nicht an — vier Plätze belegt, drei Knöpfe.
+      // **Die Beispiel-Id ist erfunden, und das ist der Punkt.** Hier
+      // stand bis ADR-0033 `heavy_attack` -- der ist seitdem wieder im
+      // Katalog, und der Test bewies damit das Gegenteil. Genau der Fall
+      // aus `gotchas.md`: In Tests keine Ids als Beispiel benutzen, die
+      // zufaellig gerade existieren.
       final alt = SaveData.fromJson(<String, Object?>{
         'abilities': <String, Object?>{
           'moves': <Object?>[
-            'heavy_attack',
+            'gibt-es-nicht-und-soll-es-nie-geben',
             AbilityMoves.steinhaut.id,
             AbilityMoves.sandsturm.id,
           ],
@@ -323,7 +329,7 @@ void main() {
       expect(identity.name, 'Frederik');
       expect(identity.chosenTitleId, 'entschlossen');
       expect(
-        identity.displayLine(zweite.read(titleStatsProvider)),
+        identity.displayLine(zweite.read(earnedTitleIdsProvider)),
         'Frederik, der Entschlossene',
       );
     });
@@ -337,11 +343,11 @@ void main() {
       );
 
       final identity = container.read(identityProvider);
-      final stats = container.read(titleStatsProvider);
+      final verdient = container.read(earnedTitleIdsProvider);
 
       expect(identity.chosenTitleId, 'unbeirrbar');
-      expect(identity.titleFor(stats), isNull);
-      expect(identity.displayLine(stats), 'Namenlos');
+      expect(identity.titleFor(verdient), isNull);
+      expect(identity.displayLine(verdient), 'Namenlos');
     });
 
     test('ohne Stand startet alles bei null', () {

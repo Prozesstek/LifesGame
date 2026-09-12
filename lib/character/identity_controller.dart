@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:identity/identity.dart';
 
-import '../habits/habits_controller.dart';
+import '../achievements/achievements_controller.dart';
 import '../save/save_providers.dart';
-import '../theory/theory_controller.dart';
 
 /// Bindeglied zwischen Identität und Oberfläche.
 ///
@@ -33,26 +32,16 @@ final identityProvider = NotifierProvider<IdentityController, Identity>(
   IdentityController.new,
 );
 
-/// Die drei Zahlen, an denen die Titel hängen.
-///
-/// **Die dritte Naht des Kern-Loops.** `package:habits` weiß nichts von
-/// Titeln, `package:theory` nichts von Streaks, und `package:identity`
-/// kennt keines von beiden. Hier laufen sie zusammen — und nur hier.
-///
-/// [HabitTracker.longestStreak] ist bewusst die längste je gelaufene
-/// Kette, nicht die laufende: Ein verdienter Titel darf beim Reißen der
-/// Streak nicht verschwinden (ADR-0013, `konzept.md` 3.7).
-final titleStatsProvider = Provider<TitleStats>((ref) {
-  final habits = ref.watch(habitTrackerProvider);
-
-  return TitleStats(
-    longestStreak: habits.longestStreak,
-    passedLessons: ref.watch(passedPagesProvider),
-    totalChecks: habits.totalChecks,
-  );
-});
-
 /// Alle Titel, die der Spieler tragen darf.
+///
+/// **Seit ADR-0033 kommt die Bedingung aus den Errungenschaften.** Hier
+/// stand bis dahin `titleStatsProvider`, der drei Zahlen zusammensetzte
+/// und sie an `package:identity` weiterreichte; dort wurde entschieden,
+/// was verdient ist. Jetzt entscheidet das der Errungenschaftskatalog,
+/// und `identity` kennt nur noch den Wortlaut.
+///
+/// Der Grund steht in `gotchas.md`: „30 Tage am Stück" hätte sonst an
+/// zwei Stellen gestanden — als Titel und als Errungenschaft.
 final earnedTitlesProvider = Provider<List<CharacterTitle>>((ref) {
-  return TitleCatalog.earnedBy(ref.watch(titleStatsProvider));
+  return TitleCatalog.forIds(ref.watch(earnedTitleIdsProvider));
 });

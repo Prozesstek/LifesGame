@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../achievements/achievements_controller.dart';
 import '../combat/ladder_controller.dart';
 import 'package:progression/progression.dart';
 
@@ -28,7 +29,12 @@ final totalXpProvider = Provider<int>((ref) {
   // wiederholbarer Sieg waere eine Dauerquelle und wuerde `konzept.md`
   // Abschnitt 2 widerlegen.
   final reihe = ref.watch(ladderProvider).earnedXp;
-  return theory + habits + reihe;
+  // **Der fuenfte Zufluss, seit ADR-0033.** Ebenfalls gedeckelt und
+  // nachrechenbar: `AchievementCatalog.lifetimeXp` steht bei 1680, weil
+  // jede Errungenschaft genau einmal zahlt und keine Bedingung wieder
+  // faellt.
+  final errungenschaften = ref.watch(achievementXpProvider);
+  return theory + habits + reihe + errungenschaften;
 });
 
 /// Erfahrung einschließlich Dev-Zuschlag.
@@ -59,7 +65,8 @@ final goldEarnedProvider = Provider<int>((ref) {
   final theory = ref.watch(theoryProgressProvider).totalGold;
   final habits = ref.watch(habitTrackerProvider).totalGold;
   final reihe = ref.watch(ladderProvider).earnedGold;
-  return theory + habits + reihe;
+  final errungenschaften = ref.watch(achievementGoldProvider);
+  return theory + habits + reihe + errungenschaften;
 });
 
 /// Verfügbares Gold: Zufluss minus Besitz.
@@ -89,4 +96,24 @@ final spendableIncomeProvider = Provider<int>((ref) {
   final int earned = ref.watch(goldEarnedProvider);
   final int granted = ref.watch(grantedGoldProvider);
   return earned + granted;
+});
+
+/// Derselbe Zufluss, aber **ohne** den Anteil aus Errungenschaften.
+///
+/// **Der zweite Umweg um denselben Kreis.** Seit ADR-0033 zahlen vier
+/// Errungenschaften im Laden Gold — und ob sie verdient sind, haengt am
+/// Inventar. Damit zeigt [spendableIncomeProvider] ueber die
+/// Errungenschaften auf `loadoutProvider`, und der `GearController`
+/// duerfte ihn beim Kauf nicht mehr lesen: Er laese sich ueber zwei Ecken
+/// selbst (`gotchas.md`).
+///
+/// Er nimmt deshalb diese Zahl und legt seinen eigenen Anteil selbst
+/// dazu, aus seinem eigenen Zustand. Dasselbe Ergebnis, kein Kreis —
+/// genau wie schon beim Abzug von `spentGold`.
+final incomeWithoutAchievementsProvider = Provider<int>((ref) {
+  final theory = ref.watch(theoryProgressProvider).totalGold;
+  final habits = ref.watch(habitTrackerProvider).totalGold;
+  final reihe = ref.watch(ladderProvider).earnedGold;
+  final int granted = ref.watch(grantedGoldProvider);
+  return theory + habits + reihe + granted;
 });

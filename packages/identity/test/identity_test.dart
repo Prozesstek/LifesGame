@@ -40,7 +40,9 @@ void main() {
   });
 
   group('Identity Titel', () {
-    const earned = TitleStats(longestStreak: 30);
+    // Was verdient ist, kommt seit ADR-0033 aus `package:achievements`
+    // herein -- hier als schlichte Menge von Ids.
+    const earned = <String>{'entschlossen', 'bestaendig'};
 
     test('ohne Wahl steht nur der Name', () {
       final identity = const Identity.empty().withName('Frederik');
@@ -71,10 +73,11 @@ void main() {
     });
 
     test('ein verdienter Titel bleibt, wenn die Kette reisst', () {
-      // longestStreak ist die laengste je gelaufene Kette, nicht die
-      // laufende -- genau deshalb.
+      // Die Bedingung haengt an der laengsten je gelaufenen Kette, nicht
+      // an der laufenden (ADR-0014, Punkt 2 -- gilt weiter). Hier zeigt
+      // sich das daran, dass die Menge der verdienten Ids nur waechst.
       final identity = const Identity.empty().withTitle('bestaendig');
-      const spaeter = TitleStats(longestStreak: 30, totalChecks: 400);
+      const spaeter = <String>{'entschlossen', 'bestaendig', 'unermuedlich'};
 
       expect(identity.titleFor(spaeter)?.id, 'bestaendig');
     });

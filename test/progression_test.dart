@@ -1,7 +1,9 @@
+import 'package:achievements/achievements.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
@@ -66,9 +68,17 @@ void main() {
       final level = container.read(playerLevelProvider);
       expect(container.read(totalXpProvider), greaterThan(0));
       expect(level.level, greaterThan(1));
+      // **Seit ADR-0033 zahlt der fuenfte Zufluss mit.** Fuenf Lektionen
+      // sind genau „der Wissbegierige"; sein Gold steht neben dem der
+      // Lektionen und nicht statt seiner.
       expect(
         container.read(goldProvider),
-        habitsBranch.lessonCount * TheoryRewards.goldForPass,
+        habitsBranch.lessonCount * TheoryRewards.goldForPass +
+            container.read(achievementGoldProvider),
+      );
+      expect(
+        container.read(earnedAchievementIdsProvider),
+        contains('wissbegierig'),
       );
     });
 
@@ -128,8 +138,20 @@ void main() {
       habits.activate(template.id);
       habits.toggle(template.id, const Day(2026, 1, 1));
 
-      expect(container.read(totalXpProvider), HabitRewards.xpPerCheck);
-      expect(container.read(goldProvider), HabitRewards.goldPerCheck);
+      // Ein einziges Haekchen loest „Erster Schritt" aus (ADR-0033) --
+      // die Errungenschaften stehen deshalb als eigener Summand da.
+      final ersterSchritt = AchievementCatalog.byId('erster-schritt')!;
+      expect(container.read(earnedAchievementIdsProvider), <String>{
+        'erster-schritt',
+      });
+      expect(
+        container.read(totalXpProvider),
+        HabitRewards.xpPerCheck + ersterSchritt.tier.xp,
+      );
+      expect(
+        container.read(goldProvider),
+        HabitRewards.goldPerCheck + ersterSchritt.tier.gold,
+      );
     });
 
     test('Erfahrung aus beiden Quellen addiert sich', () {
@@ -147,9 +169,10 @@ void main() {
       habits.activate(template.id);
       habits.toggle(template.id, const Day(2026, 1, 1));
 
+      final ersterSchritt = AchievementCatalog.byId('erster-schritt')!;
       expect(
         container.read(totalXpProvider),
-        nurTheorie + HabitRewards.xpPerCheck,
+        nurTheorie + HabitRewards.xpPerCheck + ersterSchritt.tier.xp,
       );
     });
 

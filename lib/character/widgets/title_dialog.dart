@@ -1,3 +1,4 @@
+import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:identity/identity.dart';
 
@@ -19,10 +20,15 @@ class TitleSelection {
 /// Gesperrte Titel bleiben sichtbar und nennen ihre Bedingung — dieselbe
 /// Hausregel wie beim Startbildschirm und beim Laden: „Ein Bildschirm, der
 /// nur zeigt, was schon fertig ist, verschweigt, worum es geht."
+///
+/// **Mit einer Ausnahme seit ADR-0033: Entdeckungen.** Sechs der dreizehn
+/// Titel kommen aus einer Entdeckung, und die verliert alles, wenn man sie
+/// vorher lesen kann. Sie steht deshalb als ??? da — sichtbar, dass es
+/// etwas zu finden gibt, aber nicht was.
 Future<TitleSelection?> showTitleDialog(
   BuildContext context, {
   required String? current,
-  required TitleStats stats,
+  required AchievementStats stats,
 }) {
   return showDialog<TitleSelection>(
     context: context,
@@ -34,7 +40,7 @@ class _TitleDialog extends StatelessWidget {
   const _TitleDialog({required this.current, required this.stats});
 
   final String? current;
-  final TitleStats stats;
+  final AchievementStats stats;
 
   @override
   Widget build(BuildContext context) {
@@ -105,13 +111,25 @@ class _TitleTile extends StatelessWidget {
   });
 
   final CharacterTitle title;
-  final TitleStats stats;
+  final AchievementStats stats;
   final bool isSelected;
+
+  /// Die Errungenschaft, die diesen Titel vergibt.
+  ///
+  /// Null wäre ein Titel ohne Quelle — den kann niemand verdienen.
+  /// `test/achievements_seam_test.dart` schließt das aus; hier wird der
+  /// Fall trotzdem nicht geworfen, sondern still gesperrt (ADR-0010).
+  Achievement? get _quelle {
+    for (final achievement in AchievementCatalog.all) {
+      if (achievement.titleId == title.id) return achievement;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isEarned = title.isEarnedBy(stats);
-    final missing = title.missingFor(stats);
+    final quelle = _quelle;
+    final isEarned = quelle != null && quelle.isEarnedBy(stats);
 
     return ListTile(
       enabled: isEarned,
@@ -128,19 +146,30 @@ class _TitleTile extends StatelessWidget {
             : Palette.textDim,
       ),
       title: Text(
-        title.label,
+        // Ein unverdienter Entdeckungstitel verrät nicht einmal seinen
+        // Namen -- er *ist* die Überraschung.
+        isEarned || (quelle?.isMilestone ?? false) ? title.label : '???',
         style: TextStyle(
           color: isEarned ? Palette.text : Palette.muted,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       subtitle: Text(
-        isEarned ? title.requirement : '${title.requirement} — noch $missing',
+        _untertitel(quelle, isEarned),
         style: const TextStyle(fontSize: 12, color: Palette.textDim),
       ),
       onTap: isEarned
           ? () => Navigator.of(context).pop(TitleSelection(title.id))
           : null,
     );
+  }
+
+  String _untertitel(Achievement? quelle, bool isEarned) {
+    if (quelle == null) return 'Ohne Quelle';
+    if (isEarned) return quelle.requirement;
+    if (quelle.isDiscovery) return 'Noch nicht entdeckt';
+
+    final fehlt = quelle.missingFor(stats);
+    return '${quelle.requirement} — noch $fehlt';
   }
 }

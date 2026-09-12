@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
-import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/theory/branch_screen.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
@@ -871,7 +871,7 @@ void main() {
         for (final q in knoten.lesson.questions) q.correctIndex,
       ]);
 
-      expect(container.read(titleStatsProvider).passedLessons, 1);
+      expect(container.read(achievementStatsProvider).passedLessons, 1);
     });
   });
 }

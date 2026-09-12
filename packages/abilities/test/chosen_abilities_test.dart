@@ -108,31 +108,41 @@ void main() {
   /// dem Katalog. Wer einen davon liegen hatte, sah ihn weiter auf seinem
   /// Platz -- und ging mit einem Move weniger in den Kampf, ohne Meldung.
   group('Reste aus einer frueheren Fassung (ADR-0024)', () {
+    // **Die Beispiel-Id ist bewusst erfunden.** Hier stand bis ADR-0033
+    // `heavy_attack` -- und der ist mit ADR-0033 in den Katalog
+    // zurueckgekehrt. Damit bewies der Test das Gegenteil dessen, was er
+    // meinte. Genau dieser Fall steht in `gotchas.md`: In Tests keine Ids
+    // als Beispiel benutzen, die zufaellig gerade existieren.
     test('eine Id, die es nicht mehr gibt, faellt beim Laden heraus', () {
+      const fremd = 'gibt-es-nicht-und-soll-es-nie-geben';
+      expect(AbilityCatalog.byMoveId(fremd), isNull);
+
       final gelesen = ChosenAbilities.fromJson(<String, Object?>{
-        'moves': <Object?>['heavy_attack', 'steinhaut', 'sandsturm'],
+        'moves': <Object?>[fremd, 'steinhaut', 'sandsturm'],
       });
 
       expect(gelesen.moveIds, <String>['steinhaut', 'sandsturm']);
     });
 
-    test('die vier abgeloesten aus ADR-0017 sind genau solche Reste', () {
+    test('die vier aus ADR-0017 sind seit ADR-0033 wieder waehlbar', () {
+      // ADR-0024 hatte ihre Rueckkehr verworfen; ADR-0033 hat sie
+      // gewaehlt, als Belohnung je eines Meilensteins. Der Mechanismus
+      // von ADR-0024 -- Unbekanntes faellt beim Laden heraus -- gilt
+      // unveraendert weiter und wird im Test darueber geprueft.
       for (final alt in <String>[
         'heavy_attack',
         'poison_strike',
         'mend',
         'breath',
       ]) {
-        expect(
-          AbilityCatalog.byMoveId(alt),
-          isNull,
-          reason: '$alt gilt noch als waehlbar -- dann stimmt der Test nicht.',
-        );
+        final faehigkeit = AbilityCatalog.byMoveId(alt);
+        expect(faehigkeit, isNotNull, reason: alt);
+        expect(faehigkeit!.source, isA<FromAchievement>(), reason: alt);
         expect(
           ChosenAbilities.fromJson(<String, Object?>{
             'moves': <Object?>[alt],
           }).moveIds,
-          isEmpty,
+          <String>[alt],
         );
       }
     });

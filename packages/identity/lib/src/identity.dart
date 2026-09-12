@@ -36,16 +36,21 @@ class Identity {
 
   /// Der Titel, der tatsächlich getragen wird — null, wenn keiner gewählt
   /// oder der gewählte (noch) nicht verdient ist.
-  CharacterTitle? titleFor(TitleStats stats) {
+  ///
+  /// [earnedTitleIds] kommt seit ADR-0033 aus `package:achievements`;
+  /// vorher rechnete dieses Package die Bedingung selbst aus drei Zahlen.
+  /// Die Prüfung **hier** bleibt: Ein von Hand bearbeiteter Spielstand
+  /// soll keinen unverdienten Titel einbringen.
+  CharacterTitle? titleFor(Set<String> earnedTitleIds) {
     final title = TitleCatalog.byId(chosenTitleId);
     if (title == null) return null;
-    return title.isEarnedBy(stats) ? title : null;
+    return earnedTitleIds.contains(title.id) ? title : null;
   }
 
   /// Die Zeile, die oben auf dem Charakterbildschirm steht:
   /// „Frederik, der Beständige" — oder nur „Frederik".
-  String displayLine(TitleStats stats) {
-    final title = titleFor(stats);
+  String displayLine(Set<String> earnedTitleIds) {
+    final title = titleFor(earnedTitleIds);
     return title == null ? displayName : '$displayName, ${title.label}';
   }
 
