@@ -16,17 +16,35 @@ import 'package:flutter/material.dart';
 /// [Text] wirft dort. Genau daran ist die erste Fassung gescheitert — mit
 /// einem Überlauf quer über den Bildschirm statt einer Fehlermeldung.
 class PhoneFrame extends StatelessWidget {
-  const PhoneFrame({required this.child, this.enabled = kIsWeb, super.key});
+  const PhoneFrame({required this.child, this.enabled, super.key});
 
   final Widget child;
 
-  /// Ob der Rahmen überhaupt gezeigt wird.
+  /// Ob der Rahmen gezeigt wird — `null` heißt [showsFrameByDefault].
   ///
-  /// Standard ist [kIsWeb] — auf einem echten Handy *ist* der Bildschirm
-  /// bereits das Gerät. Als Parameter und nicht als feste Abfrage, damit
-  /// ein Test den Rahmen prüfen kann; sonst bliebe genau dieses Widget
-  /// ungetestet, weil `kIsWeb` im Test immer falsch ist.
-  final bool enabled;
+  /// Als Parameter und nicht als feste Abfrage, damit ein Test den Rahmen
+  /// prüfen kann; sonst bliebe genau dieses Widget ungetestet, weil
+  /// `kIsWeb` im Test immer falsch ist (`gotchas.md`).
+  final bool? enabled;
+
+  /// Ob der Rahmen von sich aus erscheint: **im Browser am Rechner, ja —
+  /// im Browser auf einem Handy, nein.**
+  ///
+  /// `kIsWeb` allein reicht dafür nicht, und das ist seit der PWA keine
+  /// Spitzfindigkeit mehr: Auf dem Startbildschirm eines iPhones läuft
+  /// dieselbe Web-Fassung, und dort *ist* der Bildschirm bereits das
+  /// Gerät. Die Größenprüfung in [build] fängt das nicht zuverlässig ab —
+  /// ein iPhone Pro Max misst 430 × 932 Punkte, der Rahmen braucht
+  /// 406 × 860. Er passt also und würde gezeichnet: ein Handy im Handy,
+  /// mit schwarzem Rand drumherum.
+  ///
+  /// [defaultTargetPlatform] meldet im Browser das Gerät, auf dem der
+  /// Browser läuft — genau die Unterscheidung, die hier gebraucht wird.
+  static bool get showsFrameByDefault => kIsWeb && !_isHandheld;
+
+  static bool get _isHandheld =>
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.android;
 
   /// Die Maße eines gängigen Handys in logischen Pixeln.
   ///
@@ -39,7 +57,7 @@ class PhoneFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled) return child;
+    if (!(enabled ?? showsFrameByDefault)) return child;
 
     return LayoutBuilder(
       builder: (context, constraints) {

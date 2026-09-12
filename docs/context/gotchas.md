@@ -3,6 +3,50 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Git Bash macht aus `--base-href "/LifesGame/"` einen Windows-Pfad
+
+Der Befehl fuer den Pages-Build sieht harmlos aus:
+
+```bash
+flutter build web --release --base-href "/LifesGame/"
+```
+
+In Git Bash unter Windows kommt beim Werkzeug an:
+
+```
+Received a --base-href value of "C:/Program Files/Git/LifesGame/"
+--base-href should start and end with /
+```
+
+MSYS uebersetzt alles, was wie ein Unix-Pfad aussieht, in einen
+Windows-Pfad — Anfuehrungszeichen helfen nicht, weil die Uebersetzung
+nach der Shell passiert.
+
+**Das Tueckische ist nicht die Meldung, sondern was danach steht.** Der
+Build bricht ab, `build/web` bleibt aber liegen — mit dem *alten* Stand.
+Wer danach `index.html` oder `manifest.json` prueft, sieht plausible
+Inhalte und haelt den Build fuer gelungen. Genau das ist hier passiert:
+`<base href="/">` und der alte App-Name stammten aus einem Bau von vor
+Wochen.
+
+**Abhilfe:** aus PowerShell bauen, dort gibt es die Uebersetzung nicht.
+
+```powershell
+flutter build web --release --base-href "/LifesGame/"
+```
+
+Oder in Git Bash die Uebersetzung abschalten:
+
+```bash
+MSYS_NO_PATHCONV=1 flutter build web --release --base-href "/LifesGame/"
+```
+
+**Regel daraus, die ueber diesen Fall hinausgeht:** Nach einem Build, der
+gemeckert hat, `build/` loeschen statt den Inhalt zu begutachten. Ein
+liegengebliebenes Verzeichnis sieht aus wie ein Ergebnis.
+
+Die GitHub Action ist davon nicht betroffen — sie laeuft auf Ubuntu.
+
 ## Ein Standardwert im Konstruktor versteckt ein vergessenes Feld — zum zweiten Mal
 
 > **Nachtrag 12.09.2026.** Derselbe Fehler, dieselbe Bauform, achtzehn

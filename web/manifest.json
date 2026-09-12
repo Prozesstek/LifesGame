@@ -1,11 +1,11 @@
 {
-    "name": "lifes_game",
-    "short_name": "lifes_game",
+    "name": "Lifes Game",
+    "short_name": "Lifes Game",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Habit-Tracker mit rundenbasiertem RPG",
+    "background_color": "#17110A",
+    "theme_color": "#17110A",
+    "description": "Habit-Tracker, dessen Fortschritt sich in einem rundenbasierten RPG auszahlt.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

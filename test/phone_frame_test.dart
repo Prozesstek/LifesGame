@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/ui/phone_frame.dart';
@@ -78,5 +79,48 @@ void main() {
     expect(find.byType(PhoneFrame), findsOneWidget);
     expect(tester.getSize(find.byType(MaterialApp)), const Size(390, 844));
     expect(tester.takeException(), isNull);
+  });
+
+  group('Auf einem echten Handy gibt es keinen Rahmen', () {
+    // **Der Fall, den die PWA neu gemacht hat.** Auf dem Startbildschirm
+    // eines iPhones laeuft dieselbe Web-Fassung -- und dort *ist* der
+    // Bildschirm bereits das Geraet. Die Groessenpruefung faengt das
+    // nicht ab: Ein iPhone Pro Max misst 430 x 932 Punkte, der Rahmen
+    // braucht 406 x 860. Er passt also und wuerde gezeichnet.
+    // **Die Ueberschreibung muss im Testkoerper selbst zurueckgesetzt
+    // werden.** `flutter_test` prueft nach jedem Test, dass kein
+    // foundation-Debugschalter stehen geblieben ist -- ein `tearDown`
+    // laeuft dafuer zu spaet.
+    testWidgets('ein Geraet in Rahmengroesse zeigt trotzdem keinen', (
+      tester,
+    ) async {
+      // 430 x 932 -- ein iPhone Pro Max, gross genug fuer den Rahmen.
+      useDesktopView(tester, size: const Size(430, 932));
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+      await tester.pumpWidget(appImRahmen(enabled: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Inhalt'), findsOneWidget);
+      // Ohne Rahmen fuellt die App den Bildschirm; mit Rahmen waere sie
+      // auf 390 Punkte beschnitten.
+      expect(tester.getSize(find.byType(MaterialApp)).width, 430);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    test('der Standard haengt am Geraet, nicht nur am Browser', () {
+      // Im Test ist kIsWeb immer falsch -- der Standard ist hier also
+      // ohnehin `false`. Geprueft wird, dass die Entscheidung ueberhaupt
+      // an der Plattform haengt und nicht fest verdrahtet ist: Auf einem
+      // Handy bleibt sie auch dann `false`, wenn kIsWeb wahr waere.
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      expect(PhoneFrame.showsFrameByDefault, isFalse);
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      expect(PhoneFrame.showsFrameByDefault, isFalse);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
   });
 }

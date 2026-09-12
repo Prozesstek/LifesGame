@@ -1,0 +1,77 @@
+# Baut die Web-Fassung und legt sie auf GitHub Pages ab.
+#
+# **Das ist kein Server, sondern eine Dateiablage.** Die App redet mit
+# niemandem: In `lib/` gibt es keine einzige Netzwerkstelle, alles wird aus
+# der Historie gerechnet und lokal gespeichert (ADR-0008, ADR-0010,
+# ADR-0011). Hier wird nur ausgeliefert, was `flutter build web` erzeugt.
+#
+# **Warum ueberhaupt HTTPS.** Der Service Worker -- das Stueck, das die App
+# nach dem ersten Laden offline verfuegbar macht und "Zum Home-Bildschirm"
+# zu einer App statt zu einem Lesezeichen -- laeuft nur in einem sicheren
+# Kontext. Vom eigenen Rechner im WLAN auszuliefern reicht deshalb nicht:
+# `localhost` ist ausgenommen, eine LAN-Adresse nicht.
+name: Web nach Pages
+
+on:
+  push:
+    branches: [main]
+  # Von Hand ausloesbar, damit sich eine Veroeffentlichung wiederholen
+  # laesst, ohne einen leeren Commit zu bauen.
+  workflow_dispatch:
+
+# Nur lesen, plus das Noetige fuer Pages. Mehr braucht dieser Lauf nicht.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Laeuft eine Veroeffentlichung schon, wird sie nicht abgewuergt -- die
+# neuere wartet. Ein halb hochgeladener Stand waere schlimmer als ein
+# spaeterer.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Dieselbe Version wie auf Frederiks Rechner. Zwei Dart-Versionen
+          # formatieren denselben Code verschieden (`gotchas.md`) -- beim
+          # Bauen ist das harmlos, aber eine feste Version macht den
+          # Unterschied zwischen "geht hier" und "geht dort" ueberpruefbar.
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Erst pruefen, dann veroeffentlichen. Was nicht durch die Tests
+      # kommt, hat auf den Geraeten nichts verloren -- der 30-Tage-Lauf
+      # misst Abbrueche wegen Fehlern (Ziel 7).
+      - run: flutter analyze
+      - run: flutter test
+
+      # **`--base-href` ist nicht optional.** Pages liefert unter
+      # /LifesGame/ aus; ohne den Praefix sucht die App ihre Dateien in der
+      # Wurzel und zeigt eine weisse Seite. Der Wert muss mit Schraegstrich
+      # anfangen und enden.
+      - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
