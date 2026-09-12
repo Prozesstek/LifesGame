@@ -45,6 +45,31 @@ final class FromTheory extends AbilitySource {
   final String nodeId;
 }
 
+/// Kommt von einer Errungenschaft (ADR-0033, Punkt 7).
+///
+/// **Die vierte Quelle, und sie holt vier Alte zurück.** Kraftschlag,
+/// Zehrung, Sammeln und Atemzug waren die wählbaren aus ADR-0017 und
+/// fielen mit ADR-0022 aus dem Katalog. ADR-0024 hatte ihre Rückkehr
+/// ausdrücklich verworfen — mit drei Einwänden, von denen heute keiner
+/// mehr trifft: ADR-0022 bleibt unangetastet (die fünfzehn aus der
+/// Vorlage bleiben wählbar, diese kommen *dazu*), die fehlende Quelle ist
+/// jetzt da, und Timing wie Seltenheit sind Angaben, keine Mechanik.
+///
+/// **Was sie von den anderen drei Quellen unterscheidet:** Der Baum
+/// belohnt Wissen, die Streak-Marke Ausdauer, die Waffe eine Kaufwahl.
+/// Eine Errungenschaft belohnt, was jemand über alle Bereiche hinweg
+/// getan hat — je eine der vier hängt an Gewohnheiten, Theorie, Kampf und
+/// Laden.
+final class FromAchievement extends AbilitySource {
+  const FromAchievement(this.achievementId);
+
+  /// Naht zu `package:achievements`. Dass diese Id dort existiert und
+  /// dass die Errungenschaft auch wirklich diesen Move vergibt, prüft
+  /// `test/achievements_seam_test.dart` in der App — hier ist sie nur ein
+  /// Wort.
+  final String achievementId;
+}
+
 /// Eine Fähigkeit: welcher Move, und woher man ihn bekommt.
 ///
 /// **Was hier bewusst nicht steht: was die Fähigkeit tut.** Schaden,
@@ -107,6 +132,8 @@ class Ability {
       FromWeapon(:final weaponId) => progress.equippedWeaponId == weaponId,
       FromStreak(:final days) => progress.longestStreak >= days,
       FromTheory(:final nodeId) => progress.passedNodeIds.contains(nodeId),
+      FromAchievement(:final achievementId) =>
+        progress.earnedAchievementIds.contains(achievementId),
     };
   }
 }
@@ -123,6 +150,7 @@ class AbilityProgress {
     this.equippedWeaponId,
     this.longestStreak = 0,
     this.passedNodeIds = const <String>{},
+    this.earnedAchievementIds = const <String>{},
   });
 
   const AbilityProgress.empty() : this();
@@ -141,4 +169,11 @@ class AbilityProgress {
   /// Punkt gekostet; gelernt ist er erst, wenn die drei Fragen sitzen
   /// (ADR-0013, ADR-0019).
   final Set<String> passedNodeIds;
+
+  /// Errungenschaften, die verdient sind (ADR-0033).
+  ///
+  /// Kommt aus `package:achievements` und ist dort selbst abgeleitet —
+  /// deshalb kann diese Menge nie kleiner werden, und eine so
+  /// freigeschaltete Fähigkeit bleibt.
+  final Set<String> earnedAchievementIds;
 }

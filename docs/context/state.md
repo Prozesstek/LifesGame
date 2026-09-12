@@ -7,9 +7,267 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 10.09.2026 · Prozesstek (Fähigkeitsbilder, Bogen, Stab, Grundfigur)
+**Zuletzt aktualisiert:** 12.09.2026 · Prozesstek (Ziel 8: Errungenschaften gebaut)
 
 ---
+
+## Sitzung 12.09.2026: Errungenschaften sind gebaut
+
+**Ziel 8 ist erfüllt**, acht Tage vor dem Termin — und ohne Schnitt: Die
+Entdeckungen sind mit drin. Damit sind alle sieben Bauziele erreicht, und
+vor dem 30-Tage-Lauf steht nichts mehr offen.
+
+435 App-Tests (vorher 407), combat 130 (115), theory 143 (129), habits 130
+(114), gear 77 (64), identity 25 (28 — die alten prüften Bedingungen, die
+es dort nicht mehr gibt), achievements 24 (neu).
+
+### Das achte Package
+
+`packages/achievements`, reines Dart mit leerem `dependencies`-Block wie
+die anderen sieben. Es kennt keines von ihnen; die App reicht Zahlen
+herein (`AchievementStats`), genau wie bei `TitleStats` und
+`AbilityProgress`.
+
+**19 Meilensteine und 8 Entdeckungen**, die Zahlen aus ADR-0033 stimmen
+auf den Punkt: 1680 Erfahrung, 560 Gold, 385 Ruhm über ein Spielerleben.
+Das steht jetzt nicht mehr nur im ADR, sondern als Test im Katalog — wer
+eine Stufe verschiebt, sieht dort, dass der ADR nachzuziehen ist.
+
+**Eine Bedingung ist eine Messung, kein Schalter.** Jeder Eintrag nennt
+eine Zahl aus dem Stand und einen Zielwert. Der Fortschritt („37 / 50")
+fällt damit von selbst ab; eine Bedingung, die nur `true` oder `false`
+kennt, könnte einen Meilenstein nicht anzeigen, ohne die Regel ein
+zweites Mal zu formulieren.
+
+### Was sich am Bestehenden geändert hat
+
+| Vorher | Jetzt |
+|---|---|
+| `CharacterTitle` trug seine Schwellen, `TitleStats` reichte drei Zahlen | `identity` hält nur noch **Wortlaut**, die Bedingung steht in `achievements` |
+| 7 Titel | **13** — sechs neue aus Entdeckungen |
+| `AbilitySource` hatte drei Fälle | vier, mit `FromAchievement` |
+| 15 wählbare Fähigkeiten | **19** — Kraftschlag, Zehrung, Sammeln und Atemzug sind zurück |
+| `LadderProgress` hielt nur den höchsten Sieg | dazu **Niederlagen je Sprosse** |
+| `LessonRecord` hielt nur das beste Ergebnis | dazu **gescheiterte Versuche** |
+
+**Der `sealed`-Typ hat sich ausgezahlt.** `FromAchievement` dazuzunehmen
+hat den Analyzer sofort auf die eine Stelle gezeigt, die alle Quellen
+aufzählt (`ability_unlock_sheet.dart`). Ohne `sealed` hätte dort still
+„Aus der Theorie" gestanden.
+
+### Vier Entscheidungen, die im ADR offen waren
+
+**Die Seltenheit der vier Rückkehrer** steht jetzt, nach dem, was ein Zug
+tut: Kraftschlag `rare` (mit `power` 2,2 der härteste Einzelschlag im
+Spiel), Zehrung und Sammeln `uncommon` (Werkzeuge wie die übrigen),
+Atemzug `common` (er *erzeugt* Energie, statt sie zu kosten).
+
+**Die Schwellen der Bedingungen liegen in `lib/achievements/`**
+(`AchievementThresholds`), nicht in den Packages, die sie beantworten.
+„Drei Niederlagen" ist keine Kampfregel und „drei Tage Pause" keine
+Streak-Regel — `combat` und `habits` liefern nur die Frage, die Zahl
+kommt von der Errungenschaft.
+
+**Der Stoiker rechnet über alle Gewohnheiten zusammen**, nicht je
+einzelne. Die Frage dahinter ist „hat jemand aufgehört und wieder
+angefangen", und aufgehört hat man, wenn gar nichts mehr kommt — nicht,
+wenn eine von fünf Ketten reißt.
+
+**Gefeiert wird an vier Stellen**: Lektion, Häkchen, Kampfende, Kauf und
+Verkauf. Immer **Errungenschaft zuerst, Fähigkeit danach** — eine
+Errungenschaft kann eine Fähigkeit mitbringen, und andersherum stünde die
+Fähigkeit da, bevor gesagt wäre, woher sie kommt.
+
+### Der Fehler, der dabei aufgefallen ist
+
+**Eine bestandene Seite schloss den halben Baum wieder.**
+`TheoryProgress.submit` gab den zweiten Konstruktorparameter
+(`_openedNodeIds`) nicht weiter; weil er einen Standardwert hat, schwieg
+der Compiler. Wirkung im Spiel: Wer einen Knoten für einen Theoriepunkt
+öffnete und dann seine Seite bestand, bei dem ging der Knoten wieder zu.
+
+Es ist **zeichengleich** der Fallstrick, der seit dem 25.08. in
+`gotchas.md` steht — damals `CombatSession.moves`. Der Eintrag dort hat
+einen Nachtrag bekommen. Fünf Tests in
+`packages/theory/test/achievement_traces_test.dart` halten es jetzt fest.
+
+Der Fehler lag seit ADR-0019 (24.08.) im Code. Gefunden hat ihn kein
+Test, sondern das Nachlesen beim Anschließen der Errungenschaften.
+
+### Ein Zirkelbezug, der beinahe entstanden wäre
+
+Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt am
+Inventar — `goldProvider` zeigt damit über die Errungenschaften wieder
+auf `loadoutProvider`. Der `GearController` darf ihn beim Kauf deshalb
+nicht mehr lesen; das ist genau der `CircularDependencyError` aus
+`gotchas.md`, den `spendableIncomeProvider` schon einmal aufgelöst hat.
+
+Gelöst wie damals: Der Controller bringt seinen eigenen Beitrag selbst
+mit (`incomeWithoutAchievementsProvider` plus
+`achievementStatsWithLoadout(ref, state)`). Ein Test in
+`achievements_seam_test.dart` geht den Kaufweg und fiele ohne die
+Auflösung um.
+
+### Zwei Tests, die das Gegenteil dessen bewiesen, was sie meinten
+
+`chosen_abilities_test.dart` und `persistence_test.dart` benutzten
+`heavy_attack` als Beispiel für „eine Id, die es nicht mehr gibt". Mit
+ADR-0033 gibt es ihn wieder — die Tests waren grün und wertlos. Beide
+nehmen jetzt eine erfundene Id. **Das ist der zweite Eintrag aus
+`gotchas.md`, der sich in dieser Sitzung wiederholt hat**, und er stand
+dort seit dem 26.08. genau für diesen Fall.
+
+### Was der erste Kauf jetzt kostet
+
+Er zieht nicht mehr nur ab: „Erster Kauf" zahlt 10 Gold zurück. Über ein
+Spielerleben sind es 85 Gold aus den vier Laden-Errungenschaften. Das ist
+gewollt und in `progression_test.dart` sowie `gear_test.dart` als eigener
+Summand sichtbar, statt die Zahlen stillschweigend größer zu machen.
+
+### Nicht am Bild geprüft
+
+Wie immer bei Oberflächenarbeit: 435 Tests laufen, alle Layouts bei
+390 × 844 ohne Überlauf, Analyzer sauber. Wie es **aussieht**, muss
+jemand ansehen:
+
+- Ob die ???-Einträge als „da ist noch etwas" lesen oder als kaputt.
+- Ob das Feierblatt nach einem Kauf im Laden stört — es kommt jetzt über
+  den Laden, und beim ersten Kauf immer.
+- Ob „Ruhm" neben dem Gold im Kopf des Charakters als Zahl zum
+  Vergleichen liest und nicht als zweite Währung.
+
+### Drei Dateien nachgezogen
+
+Sie lagen seit Tagen im Arbeitsverzeichnis und hatten mit Ziel 8 nichts
+zu tun; eingecheckt sind sie trotzdem, damit der Baum sauber ist:
+
+| Datei | Was |
+|---|---|
+| `assets/character/hero.png` | gelöscht — seit dem 10.09. von `Charakter.png` abgelöst und nirgends gelesen |
+| `assets/Gold.pxo` | gelöscht — **die einzige `.pxo` im Repo**, also die einzige Bearbeitungsdatei. `Gold.png` bleibt |
+| `Logo.png` | neu im Wurzelordner, 1,1 MB, **nirgends eingebaut** |
+
+**Zwei Vorbehalte, die bestehen bleiben.** Mit `Gold.pxo` ist die
+Pixelorama-Quelle der Goldmünze aus dem Baum verschwunden — die
+Zeichnung bleibt, das Bearbeitbare nicht (zurückholen geht über die
+Historie). Und `Logo.png` ist angemeldet, ohne dass irgendwo entschieden
+wäre, wofür es steht: App-Symbole stehen in `ziele.md` auf der
+Sperrliste.
+
+### Offen
+
+**Die Balance ist nicht neu gerechnet worden.** `tool/balance_sim.dart`
+läuft unverändert durch, kennt die Errungenschaften aber nicht: Ihr
+simulierter Spieler bekommt weder die 1680 Erfahrung noch Kraftschlag.
+Die Tabelle ist damit weiter eine untere Schranke.
+
+**Kraftschlag ist mit `power` 2,2 stärker als die frühen Commons.** Er
+kommt erst auf Sprosse 10, wenn der Charakter ohnehin trägt — aber
+ADR-0033 nennt das selbst als unangenehmen Punkt, und er bleibt es.
+
+## Sitzung 11.09.2026, nachmittags: Errungenschaften entschieden, nicht gebaut
+
+Issue [#41](https://github.com/Prozesstek/LifesGame/issues/41) als
+Konzeptrunde durchgegangen, Ergebnis in
+[ADR-0033](../decisions/0033-errungenschaften-aus-der-historie.md) und als
+**Ziel 8** mit Termin 20.09. in `ziele.md`. Die Entscheidungen stehen
+zusätzlich als Kommentar im Issue. Keine Zeile Code.
+
+### Was entschieden ist
+
+- **Aus der Historie abgeleitet**, nicht gezählt. Wirkt rückwirkend, und
+  jede Bedingung hängt an einer Größe, die nie fällt.
+- **Zwei Arten:** Meilensteine sind sichtbar und zahlen einmalig
+  Erfahrung, Gold und Ruhm; Entdeckungen stehen als ??? da und zahlen nur
+  Ruhm und meist einen Titel.
+- **Ruhm** ist ein Stand zum Vergleichen, kein Zahlungsmittel.
+- **Die sieben Titel werden Belohnung**, sechs neue kommen dazu.
+  ADR-0014 ist damit teilweise abgelöst.
+- **Kraftschlag, Zehrung, Sammeln, Atemzug kommen zurück**, je über einen
+  Meilenstein.
+- **Zwei neue Spuren:** Niederlagen je Sprosse, gescheiterte Versuche je
+  Lektion.
+- **Sortiert nach Spielbereichen**, erreichbar vom Charakter aus.
+- Erster Satz: **19 Meilensteine, 8 Entdeckungen**, 1680 Erfahrung und
+  560 Gold über ein Spielerleben.
+
+### Drei Befunde aus dem Abgleich
+
+**Viele Beispiele aus dem Issue brauchen Daten, die es nicht gibt.** Ein
+Häkchen kennt keine Uhrzeit, Lektion und Reihe halten keine Fehlschläge,
+Bedienung wird nicht festgehalten. Frühaufsteher, Opportunist, „Shop
+geöffnet" und Mentor sind deshalb nicht im ersten Satz.
+
+**„Alles erledigt" ist rückwirkend nicht bestimmbar.**
+`HabitTracker.isDayComplete` vergleicht mit der *heutigen* Liste
+laufender Gewohnheiten. Die Bedingungen heißen deshalb „mindestens drei
+Häkchen".
+
+**ADR-0024 hatte das Zurückholen der vier alten Fähigkeiten ausdrücklich
+verworfen.** Aufgefallen ist das erst beim Aufschreiben, nach der
+Entscheidung. Die drei Einwände von dort sind in ADR-0033 einzeln
+beantwortet; ADR-0024 hat einen Vermerk im Status.
+
+### Nebenwirkung
+
+Die Namen der Entdeckungen stehen im ADR und im Issue — für uns zwei als
+Tester sind sie damit keine Überraschung mehr. Ihre Bedingungen stehen
+nur im ADR.
+
+### Als Nächstes
+
+~~Bauen in dieser Reihenfolge: `packages/achievements` mit Katalog und
+Tests → die zwei Spuren → Titel und Fähigkeiten umhängen → Belohnung in
+den Kurven → Bildschirm und Feier.~~ — **erledigt am 12.09.**, in genau
+dieser Reihenfolge. Der Bildschirm ist ohne vorherige Abstimmung
+entstanden; er folgt dem Laden (vier Reiter, Liste darunter).
+
+## Sitzung 11.09.2026: die App übersteht Mitternacht
+
+**Ziel 4 ist erfüllt**, fünf Tage nach Termin. 407 App-Tests (vorher 401).
+
+`todayProvider` las die Uhr einmal und behielt den Tag. Wer die App über
+Mitternacht offen ließ, hakte auf dem gestrigen Tag ab — im 30-Tage-Lauf
+passiert das garantiert, und eine grundlos gerissene Streak ist der
+schlimmste Fehler, den dieses Spiel kennt (`konzept.md` 3.7).
+
+### Was gebaut ist
+
+- **`clockProvider`** in `habits_controller.dart`: die Uhr als Provider.
+  Nur so kann ein Test sie über Mitternacht schieben — `tester.pump`
+  spult Timer vor, nicht das Datum. Die vielen
+  `todayProvider.overrideWithValue` in den Tests gelten unverändert.
+- **`lib/habits/day_watcher.dart`**: hängt in `main.dart` direkt unter dem
+  `SaveWatcher` und sieht auf die Uhr — genau um Mitternacht, sonst jede
+  Minute, und sofort, wenn die App wieder in den Vordergrund kommt.
+  Neu gerechnet wird nur, wenn wirklich ein anderer Tag anbricht.
+- **`test/day_watcher_test.dart`**, sechs Tests. Der wichtigste geht den
+  ganzen Weg: gestern abgehakt, Uhr über Mitternacht, die Kachel ist
+  wieder leer, ein Tipp landet auf dem neuen Tag, die Streak steht auf 2.
+
+### Zwei Entscheidungen
+
+**Ein Widget, kein Timer im Provider.** Ein Timer im Provider lebt so
+lange wie der Container — und `habits_test.dart`, `theory_test.dart` und
+`ability_unlock_test.dart` entsorgen ihren Container erst im `tearDown`.
+Der Timer wäre dort noch offen, wenn Flutter nach dem Test auf offene
+Timer prüft. Ein Widget endet mit dem Baum. Der Preis ist derselbe wie
+beim `SaveWatcher`: Es muss in `main.dart` hängen, sonst tut es nichts.
+
+**Jede Minute, nicht nur ein Wecker auf Mitternacht.** Ein einzelner
+Wecker verpasst zwei Fälle: Ein schlafendes Handy lässt Timer nicht
+verlässlich weiterlaufen, und wer Zeitzone oder Uhr umstellt, verschiebt
+Mitternacht, nachdem der Wecker gestellt war. Ein Blick auf die Uhr je
+Minute kostet nichts, und die Oberfläche baut dabei nur neu, wenn sich
+der Tag tatsächlich geändert hat.
+
+### Nicht auf einem Gerät geprüft
+
+Tests und Analyzer sind grün. Ob ein Android-Handy nach einer Nacht im
+Hintergrund beim Aufwecken wirklich „zurück im Vordergrund" meldet,
+zeigt erst das APK. Tut es das nicht, stimmt der Tag spätestens eine
+Minute später — ein Häkchen in genau dieser Minute landete dann noch auf
+dem alten.
 
 ## Sitzung 10.09.2026: acht Fähigkeiten, zwei Waffen und die Figur
 
@@ -43,9 +301,10 @@ nicht mehr.
 
 - **Die Grundfigur ersetzt `hero.png`**, obwohl sie noch keine Kleidung
   trägt. Sie ist die erste Figur im Stil des Rests; `hero.png` war
-  1024 × 1536 und passte nicht dazu. Die alte Datei liegt weiter unter
-  `assets/character/`, wird aber nirgends mehr gelesen. Zurück ist es
-  eine Zeile (`CharacterStage.assetPath`).
+  1024 × 1536 und passte nicht dazu. ~~Die alte Datei liegt weiter unter
+  `assets/character/`~~ — **am 12.09. gelöscht**; zurückholen geht über
+  die Git-Historie. Der Schalter dafür ist weiterhin eine Zeile
+  (`CharacterStage.assetPath`).
 - **Der „Kampfstab" ist der Kriegsstab**, obwohl er als Speer mit
   Eisenspitze gezeichnet ist. Es ist der einzige Stab im Katalog.
 - **Die Namenszeile über einer Bildkachel ist kein Knopf.** Getippt wird
@@ -72,8 +331,8 @@ Tests und Analyzer sind grün, wie es aussieht, muss jemand ansehen:
   liegen im Wurzelordner und sind **bewusst nicht** eingebaut: App-Symbole
   stehen auf der Sperrliste in `ziele.md`, und das Vorbild ist ein
   fremder Screenshot.
-- `assets/Gold.pxo` ist im Arbeitsverzeichnis gelöscht — nicht in dieser
-  Sitzung, und nicht mit eingecheckt.
+- ~~`assets/Gold.pxo` ist im Arbeitsverzeichnis gelöscht — nicht in dieser
+  Sitzung, und nicht mit eingecheckt.~~ — **am 12.09. eingecheckt.**
 
 ## Sitzung 09.09.2026: die ersten Zeichnungen sind drin
 
@@ -1719,9 +1978,10 @@ fertig sein soll und woran das gemessen wird, steht in
 | — (Issue #15, Kampf startet nicht) | Ziel 1 | **26.08.2026** |
 | 3 — Punkteökonomie und Baumumbau (Issue #16) | Ziel 2 | **31.08.2026** |
 | 1 — Waffen als Sidegrades | Ziel 3 | 06.09.2026 |
-| 8 — Tageswechsel | Ziel 4 | 06.09.2026 |
+| 8 — Tageswechsel | Ziel 4 | ~~06.09.2026~~ **erledigt 11.09.** |
 | 2 — Fähigkeiten (Issue #17 erweitert) | Ziel 5 | 13.09.2026 |
 | 4 + 5 — Dungeon, Tränke | Ziel 6 | 20.09.2026 |
+| — Errungenschaften (Issue #41, ADR-0033) | Ziel 8 | 20.09.2026 |
 | 6, 7, 9, 10 | **zurückgestellt** | nach dem 30-Tage-Lauf |
 
 **Punkt 3 ist am 24.08. von „zurückgestellt" nach vorne gerückt** — Issue
@@ -1794,9 +2054,9 @@ vorweggenommen.
 **7. Lebensbalken an die Zeitachse hängen** — sie springen heute
 sofort, während das Geschoss noch fliegt (ADR-0015).
 
-**8. Tageswechsel bei laufender App** — `todayProvider` rechnet
-sich nicht von selbst neu. Wer die App über Mitternacht offen lässt,
-sieht bis zum Neustart den gestrigen Tag.
+~~**8. Tageswechsel bei laufender App**~~ — **erledigt am 11.09.**
+`lib/habits/day_watcher.dart` rechnet „heute" um Mitternacht, jede
+Minute und beim Zurückkehren in den Vordergrund neu.
 
 **9. Große Schrift bricht das Layout** — bei `textScaler` 2,0
 läuft der Gewohnheiten-Bildschirm um 149 Pixel über, das

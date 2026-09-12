@@ -184,6 +184,45 @@ abstract final class AbilityCatalog {
       requirement: '60 Tage Kette',
       rarity: Rarity.legendary,
     ),
+
+    // --- Aus Errungenschaften: die vier aus ADR-0017, zurückgeholt ---
+    //
+    // **Sie ersetzen nichts.** Die fünfzehn oben bleiben, wie sie sind;
+    // diese kommen als sechzehnte bis neunzehnte Wahl dazu (ADR-0033,
+    // Punkt 7). Neue Kampfzahlen entstehen dabei keine — alle vier
+    // existieren in `package:combat` samt Werten, und die Gegner spielen
+    // sie längst.
+    //
+    // **Die Seltenheit war in ADR-0033 als offen vermerkt und ist hier
+    // entschieden**, nach dem, was ein Zug tut: Kraftschlag ist mit
+    // `power` 2,2 der härteste Einzelschlag im Spiel und damit selten;
+    // Zehrung und Sammeln sind Werkzeuge wie die übrigen Uncommons;
+    // Atemzug *erzeugt* Energie, statt sie zu kosten, und ist damit der
+    // ruhigste von allen.
+    Ability(
+      moveId: 'breath',
+      source: FromAchievement('durchatmen'),
+      requirement: 'Errungenschaft „Durchatmen"',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'poison_strike',
+      source: FromAchievement('ein-gebiet-ganz'),
+      requirement: 'Errungenschaft „Ein Gebiet ganz"',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'mend',
+      source: FromAchievement('voll-ausgeruestet'),
+      requirement: 'Errungenschaft „Voll ausgerüstet"',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'heavy_attack',
+      source: FromAchievement('zehn-sprossen'),
+      requirement: 'Errungenschaft „Zehn Sprossen"',
+      rarity: Rarity.rare,
+    ),
   ];
 
   /// Welcher Move in Slot 1 liegt.

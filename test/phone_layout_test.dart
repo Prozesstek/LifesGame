@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/achievements/achievements_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
@@ -108,6 +109,7 @@ void main() {
     'Laden': const ShopScreen(),
     'Charakter': const CharacterScreen(),
     'Gegnerreihe': const LadderScreen(),
+    'Errungenschaften': const AchievementsScreen(),
   };
 
   group('Jeder Bildschirm passt aufs Handy', () {

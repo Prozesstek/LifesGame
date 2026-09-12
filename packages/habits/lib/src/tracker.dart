@@ -687,6 +687,124 @@ class HabitTracker {
     return _checks.values.fold(0, (sum, days) => sum + days.length);
   }
 
+  // --- Was die Errungenschaften auslesen (ADR-0033) ---
+  //
+  // Alles hier ist **abgeleitet und steigt nur**. Das ist keine
+  // Nettigkeit, sondern Punkt 3 des ADR: Eine Errungenschaft, deren
+  // Bedingung wieder fallen kann, nähme jemandem etwas weg, das er schon
+  // hatte. Gezählt wird deshalb nie die laufende Kette, sondern immer,
+  // was **irgendwann einmal** stand.
+
+  /// Wie viele Häkchen an [day] gesetzt wurden — über alle Gewohnheiten,
+  /// auch über gestoppte und über die, die es nicht mehr gibt.
+  int checksOn(Day day) {
+    var count = 0;
+    for (final days in _checks.values) {
+      if (days.contains(day)) count++;
+    }
+    return count;
+  }
+
+  /// Tage, an denen mindestens [checks] Häkchen gesetzt wurden.
+  ///
+  /// **Bewusst nicht „alle erledigt".** [isDayComplete] vergleicht mit der
+  /// *heutigen* Liste laufender Gewohnheiten; welche an einem vergangenen
+  /// Tag liefen, steht nirgends. „Alles erledigt" ist damit rückwirkend
+  /// nicht bestimmbar — und rückwirkend muss es sein.
+  ///
+  /// Der Preis steht im ADR: Wer nur drei Gewohnheiten führt, erreicht
+  /// die Marke leichter als jemand mit fünf.
+  int daysWithAtLeast(int checks) {
+    if (checks < 1) return 0;
+    return _allDays().where((day) => checksOn(day) >= checks).length;
+  }
+
+  /// Die längste ununterbrochene Folge solcher Tage.
+  int longestRunWithAtLeast(int checks) {
+    if (checks < 1) return 0;
+
+    final days = _allDays().where((day) => checksOn(day) >= checks).toList();
+    return _longestRun(days);
+  }
+
+  /// Häkchen auf **eigenen** Gewohnheiten mit diesem Grad.
+  ///
+  /// Vorlagen zählen nicht mit: Sie sind immer [HabitDifficulty.mittel],
+  /// und der Grad ist die einzige Stelle, an der jemand sich selbst etwas
+  /// abverlangt hat (ADR-0028).
+  int checksOnCustomWith(HabitDifficulty difficulty) {
+    var count = 0;
+    for (final habit in _custom) {
+      if (habit.difficulty != difficulty) continue;
+      count += _checks[habit.id]?.length ?? 0;
+    }
+    return count;
+  }
+
+  /// Die längste Kette von Tagen mit Häkchen, die **nach** einer Pause
+  /// von mindestens [pauseDays] Tagen begonnen hat.
+  ///
+  /// **Gerechnet über alle Gewohnheiten zusammen, nicht je einzelne.**
+  /// Die Frage dahinter ist „hat jemand aufgehört und wieder angefangen",
+  /// und aufgehört hat man, wenn gar nichts mehr kommt — nicht, wenn eine
+  /// von fünf Ketten reißt.
+  ///
+  /// Die erste Kette zählt nie mit: Vor ihr liegt keine Pause, sondern
+  /// der Anfang.
+  int comebackStreakAfterPause(int pauseDays) {
+    if (pauseDays < 1) return 0;
+
+    final days = _allDays();
+    if (days.length < 2) return 0;
+
+    var best = 0;
+    var run = 0;
+    var counts = false;
+
+    for (var i = 0; i < days.length; i++) {
+      if (i == 0) {
+        run = 1;
+        counts = false;
+        continue;
+      }
+
+      final gap = days[i - 1].daysUntil(days[i]);
+      if (gap == 1) {
+        run++;
+      } else {
+        // Eine Lücke von `gap` Tagen Abstand bedeutet `gap - 1` Tage, an
+        // denen nichts passiert ist.
+        run = 1;
+        counts = gap - 1 >= pauseDays;
+      }
+
+      if (counts && run > best) best = run;
+    }
+
+    return best;
+  }
+
+  /// Alle Tage mit mindestens einem Häkchen, aufsteigend und ohne
+  /// Wiederholung.
+  List<Day> _allDays() {
+    final days = <Day>{for (final set in _checks.values) ...set}.toList();
+    days.sort();
+    return days;
+  }
+
+  /// Die längste ununterbrochene Folge in einer **sortierten** Liste.
+  static int _longestRun(List<Day> days) {
+    var best = 0;
+    var run = 0;
+    Day? previous;
+    for (final day in days) {
+      run = previous != null && previous.daysUntil(day) == 1 ? run + 1 : 1;
+      if (run > best) best = run;
+      previous = day;
+    }
+    return best;
+  }
+
   /// Die Kampfwerte, die sich aus der gesamten Historie ergeben.
   CharacterStats get stats {
     final counts = <HabitStat, int>{};

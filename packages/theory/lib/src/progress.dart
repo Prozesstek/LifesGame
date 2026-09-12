@@ -11,6 +11,7 @@ class LessonRecord {
     required this.questionCount,
     required this.xpAwarded,
     required this.goldAwarded,
+    this.failedAttempts = 0,
   });
 
   /// Liest einen gespeicherten Eintrag. Null, wenn er unbrauchbar ist —
@@ -30,11 +31,16 @@ class LessonRecord {
     if (bestCorrect < 0 || questionCount < 0 || bestCorrect > questionCount) {
       return null;
     }
+    // Die Spur aus ADR-0033. Nachsichtig wie alles andere hier: Ein Stand
+    // von vor ihrem Einbau hat das Feld nicht, und das ist kein Fehler,
+    // sondern der Normalfall — er zählt ab jetzt.
+    final failed = json['failedAttempts'];
     return LessonRecord(
       bestCorrect: bestCorrect,
       questionCount: questionCount,
       xpAwarded: xpAwarded,
       goldAwarded: goldAwarded,
+      failedAttempts: failed is int && failed > 0 ? failed : 0,
     );
   }
 
@@ -46,18 +52,37 @@ class LessonRecord {
   final int xpAwarded;
   final int goldAwarded;
 
+  /// Wie oft diese Lektion versucht und **nicht** bestanden wurde.
+  ///
+  /// Die zweite der beiden Spuren aus ADR-0033. Sie steht hier und nicht
+  /// neben dem Katalog, weil sie Historie ist wie alles andere in diesem
+  /// Eintrag — und weil eine Zahl, die nur steigt, nie zu einer zweiten
+  /// Wahrheit werden kann.
+  ///
+  /// **Sie wirkt nicht rückwirkend.** Wer vor dem Einbau an einer Lektion
+  /// gescheitert ist und sie danach besteht, bekommt „Zweiter Anlauf"
+  /// nicht — der Fehlversuch steht in keinem Spielstand.
+  final int failedAttempts;
+
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'bestCorrect': bestCorrect,
       'questionCount': questionCount,
       'xpAwarded': xpAwarded,
       'goldAwarded': goldAwarded,
+      // Nur schreiben, wenn etwas drinsteht: Ein Stand ohne Fehlversuche
+      // sieht aus wie vor ADR-0033. Gleiche Zurückhaltung wie bei
+      // `Loadout.soldIds`.
+      if (failedAttempts > 0) 'failedAttempts': failedAttempts,
     };
   }
 
   bool get isPassed => TheoryRewards.passes(bestCorrect, questionCount);
 
   bool get isPerfect => questionCount > 0 && bestCorrect == questionCount;
+
+  /// Bestanden, nachdem es vorher misslungen war.
+  bool get isRetried => isPassed && failedAttempts > 0;
 }
 
 /// Ergebnis eines Lektionsversuchs — inklusive des daraus folgenden
@@ -257,6 +282,68 @@ class TheoryProgress {
     return graph.nodes.where((n) => isPassed(n.lesson.id)).length;
   }
 
+  // --- Was die Errungenschaften auslesen (ADR-0033) ---
+  //
+  // Je Merkmal ein Paar aus Zweig und Graph, genau wie bei [passedCount]
+  // und [passedNodeCount]. Die App zählt beide zusammen; dass Handbuch
+  // und Graph sich nicht überschneiden, prüft `graph_content_test.dart`.
+
+  /// Seiten des Zweigs, bei denen alle Fragen saßen.
+  int perfectCount(TheoryBranch branch) {
+    return branch.lessons
+        .where((l) => _records[l.id]?.isPerfect ?? false)
+        .length;
+  }
+
+  /// Knotenseiten, bei denen alle Fragen saßen.
+  int perfectNodeCount(TheoryGraph graph) {
+    return graph.nodes
+        .where((n) => _records[n.lesson.id]?.isPerfect ?? false)
+        .length;
+  }
+
+  /// Seiten des Zweigs, die nach einem Fehlversuch bestanden wurden.
+  int retriedCount(TheoryBranch branch) {
+    return branch.lessons
+        .where((l) => _records[l.id]?.isRetried ?? false)
+        .length;
+  }
+
+  /// Knotenseiten, die nach einem Fehlversuch bestanden wurden.
+  int retriedNodeCount(TheoryGraph graph) {
+    return graph.nodes
+        .where((n) => _records[n.lesson.id]?.isRetried ?? false)
+        .length;
+  }
+
+  /// Ob jede Seite dieses Gebiets bestanden ist — die Wurzel mitgezählt.
+  ///
+  /// **Ein Gebiet ist die Wurzel samt allem, was daran hängt.** Ein
+  /// Knoten mit zwei Eltern (wie „Stress" an Körper *und* Geist) gehört
+  /// damit zu beiden Gebieten und muss für beide sitzen. Das ist
+  /// gewollt: Er ist auch in beiden zu sehen.
+  bool isAreaComplete(TheoryGraph graph, String rootId) {
+    final nodes = graph.descendantsOf(rootId, includeSelf: true);
+    if (nodes.isEmpty) return false;
+    return nodes.every((n) => isPassed(n.lesson.id));
+  }
+
+  /// Ob in diesem Gebiet überhaupt eine Seite sitzt.
+  bool hasPassedInArea(TheoryGraph graph, String rootId) {
+    final nodes = graph.descendantsOf(rootId, includeSelf: true);
+    return nodes.any((n) => isPassed(n.lesson.id));
+  }
+
+  /// Wie viele Gebiete vollständig bestanden sind.
+  int completedAreaCount(TheoryGraph graph) {
+    return graph.roots.where((r) => isAreaComplete(graph, r.id)).length;
+  }
+
+  /// In wie vielen Gebieten mindestens eine Seite sitzt.
+  int areasWithPassedNodeCount(TheoryGraph graph) {
+    return graph.roots.where((r) => hasPassedInArea(graph, r.id)).length;
+  }
+
   /// Ob ein Zweig komplett durch ist.
   bool isBranchComplete(TheoryBranch branch) {
     return branch.lessonCount > 0 && passedCount(branch) == branch.lessonCount;
@@ -301,11 +388,18 @@ class TheoryProgress {
     final xpGained = xpAwarded - (previous?.xpAwarded ?? 0);
     final goldGained = goldAwarded - (previous?.goldAwarded ?? 0);
 
+    // **Die Spur aus ADR-0033.** Gezählt wird der *Versuch*, nicht der
+    // Zustand: Wer beim dritten Anlauf besteht, hat zwei Fehlversuche
+    // stehen, und die bleiben stehen. Eine Zahl, die nur steigt, kann nie
+    // von der Historie abweichen.
+    final failedNow = TheoryRewards.passes(correct, total) ? 0 : 1;
+
     final record = LessonRecord(
       bestCorrect: bestCorrect,
       questionCount: total,
       xpAwarded: xpAwarded,
       goldAwarded: goldAwarded,
+      failedAttempts: (previous?.failedAttempts ?? 0) + failedNow,
     );
 
     return LessonResult(
@@ -315,10 +409,16 @@ class TheoryProgress {
       xpGained: xpGained,
       goldGained: goldGained,
       isNewBest: correct > (previous?.bestCorrect ?? -1),
-      progress: TheoryProgress(<String, LessonRecord>{
-        ..._records,
-        lesson.id: record,
-      }),
+      // **Die offenen Knoten gehen mit.** Ohne das zweite Argument greift
+      // der Standardwert des Konstruktors, und jede bestandene Seite
+      // schlösse den halben Baum wieder: Der Spieler hätte für den Knoten
+      // bezahlt, und die Seite selbst nähme ihn ihm wieder weg. Genau der
+      // Fallstrick aus `gotchas.md` — ein Standardwert im Konstruktor
+      // versteckt ein vergessenes Feld, damals `CombatSession.moves`.
+      progress: TheoryProgress(
+        <String, LessonRecord>{..._records, lesson.id: record},
+        _openedNodeIds,
+      ),
     );
   }
 }

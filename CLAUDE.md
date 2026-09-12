@@ -49,7 +49,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 115 Tests | nur Dart-SDK |
+| `packages/combat/` | Kampflogik, reines Dart, 130 Tests | nur Dart-SDK |
 | `packages/combat/lib/src/enemy.dart` | die **dreissig Gegner** der Reihe und ihre Kurve | nur Dart-SDK |
 | `packages/combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was ein Sieg einbringt | nur Dart-SDK |
 | `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
@@ -59,7 +59,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 129 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 143 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
@@ -67,11 +67,11 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | zwei Theoriepunkte je Aufstieg | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 114 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 130 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 64 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 77 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
@@ -79,8 +79,12 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
-| `packages/identity/` | Name und verdiente Titel, reines Dart, 28 Tests | nur Dart-SDK |
-| `packages/identity/lib/src/title_catalog.dart` | die Titel und ihre Bedingungen | nur Dart-SDK |
+| `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
+| `packages/identity/lib/src/title_catalog.dart` | die **dreizehn** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
+| `packages/achievements/` | Errungenschaften, reines Dart, 24 Tests | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
+| `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
+| `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
@@ -89,6 +93,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
+| `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
@@ -142,17 +147,20 @@ Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
 Preise, Ausrüstungsboni **und Set-Wirkungen** nur in `packages/gear`,
 Gegnerwerte und die Belohnung der Reihe nur in `packages/combat`,
-Titel und ihre
-Bedingungen nur in `packages/identity`, Freischaltbedingungen für
-Fähigkeiten nur in `packages/abilities`. Die Controller reichen durch
-und halten den laufenden Zustand. Sobald in `lib/` eine Spielzahl
-berechnet wird, gehört sie in eines der sieben Packages.
+der **Wortlaut** der Titel nur in
+`packages/identity`, Freischaltbedingungen für Fähigkeiten nur in
+`packages/abilities`, Bedingungen und Belohnungen von Errungenschaften —
+**und damit auch die Bedingungen der Titel** — nur in
+`packages/achievements` ([ADR-0033](docs/decisions/0033-errungenschaften-aus-der-historie.md)).
+Die Controller reichen durch und halten den laufenden Zustand. Sobald in
+`lib/` eine Spielzahl berechnet wird, gehört sie in eines der **acht**
+Packages.
 
 ```bash
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 401 Tests
+flutter test             # 435 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -160,21 +168,22 @@ dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
-dart test                              # 115 Tests
+dart test                              # 130 Tests
 dart run example/play.dart             # Kampf im Terminal
 dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 114 Tests
+dart test                              # 130 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 129 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 143 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 64 Tests, prüft Preise, Sets und den Verkauf
+cd packages/gear        ; dart test    # 77 Tests, prüft Preise, Sets und den Verkauf
 cd packages/abilities   ; dart test    # 36 Tests
-cd packages/identity    ; dart test    # 28 Tests, prüft auch die Titel
+cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
+cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
@@ -380,22 +389,24 @@ Gegner dort hat. Wer die Reihe anfasst, lässt
 `dart run tool/balance_sim.dart` laufen und sieht im Abschnitt „Die
 Reihe" nach.
 
-**Der Kern-Loop verbindet alle sieben Packages.** Lektion (`theory`) schaltet
+**Der Kern-Loop verbindet alle acht Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
 eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
-gehen in den Kampf (`combat`), Streaks und Lektionen verdienen Titel
-(`identity`).
+gehen in den Kampf (`combat`), und alles zusammen verdient
+Errungenschaften (`achievements`), die Titel (`identity`) und vier
+Fähigkeiten vergeben.
 
-Es gibt genau **zwölf** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
-| `totalXpProvider` | Erfahrung aus Theorie, Gewohnheiten **und der Reihe** |
+| `totalXpProvider` | Erfahrung aus Theorie, Gewohnheiten, Reihe **und Errungenschaften** |
 | `goldProvider` | Gold aus allen Quellen |
 | `equippedStatsProvider` | Kampfwerte aus Gewohnheiten und Ausrüstung |
-| `titleStatsProvider` | die drei Zahlen hinter den Titeln |
-| `abilityProgressProvider` | Waffe, Streak und Theorie für die Freischaltung |
+| `achievementStatsProvider` | **die breiteste** — alle vier Bereiche für die Errungenschaften |
+| `earnedTitleIdsProvider` | welche Titel verdient sind (ADR-0033) |
+| `abilityProgressProvider` | Waffe, Streak, Theorie **und Errungenschaft** für die Freischaltung |
 | `activeMovesProvider` | das Moveset, mit dem gekämpft wird |
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
@@ -403,6 +414,32 @@ Es gibt genau **zwölf** Stellen, an denen etwas zusammenläuft:
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Gegnerreihe gegangen ist (ADR-0032) |
 | `nextEnemyProvider` | **die einzige Stelle**, die „welcher Gegner" beantwortet |
+
+**Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
+Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt
+am Inventar — `goldProvider` zeigt damit über die Errungenschaften
+wieder auf `loadoutProvider`. Der `GearController` darf ihn beim Kauf
+deshalb nicht lesen (`gotchas.md`). Er nimmt stattdessen
+`incomeWithoutAchievementsProvider` und legt seinen eigenen Anteil über
+`achievementStatsWithLoadout` selbst dazu — dieselbe Auflösung wie
+seinerzeit beim Abzug von `spentGold`.
+
+**Errungenschaften werden abgeleitet, nie gezählt** (ADR-0033). Wer eine
+neue einträgt, bekommt sie rückwirkend: Ein Stand, der die Bedingung
+längst erfüllt, hat sie beim nächsten Start. Drei Regeln stehen deshalb
+an je einer Stelle:
+
+| Frage | Antwortet |
+|---|---|
+| Ist sie verdient? | `Achievement.isEarnedBy` — eine Messung gegen ein Ziel |
+| Welche Schwelle gilt? | `AchievementThresholds` in `lib/achievements/` |
+| Welcher Titel ist verdient? | `AchievementCatalog.earnedTitleIdsBy` |
+
+**Jede Zahl in `AchievementStats` darf nur steigen.** Eine, die fallen
+kann, macht eine Errungenschaft zurücknehmbar — deshalb steht dort die
+längste Kette statt der laufenden, „je besessen" statt „getragen", die
+höchste Sprosse statt der nächsten. Wer eine ergänzt, lässt
+`flutter test test/achievements_seam_test.dart` laufen.
 
 **`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
 ADR-0019 zu wenig zählt** — zwölf von neunundzwanzig Seiten liegen nur
@@ -477,6 +514,14 @@ achten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
 gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
 (`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
 nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).
+
+**„Heute" stimmt nach Mitternacht, aber auch nur über eine Stelle.**
+`todayProvider` liest die Uhr einmal. Dass der Tag wechselt, besorgt
+`lib/habits/day_watcher.dart`, und das hängt wie der `SaveWatcher` in
+`main.dart` — Tests, die `LifesGameApp` ohne ihn pumpen, bleiben auf dem
+Tag des Starts stehen, und das ist dort gewollt. Wer „heute" braucht,
+liest `todayProvider`, nie `DateTime.now()`. Wer daran dreht, lässt
+`flutter test test/day_watcher_test.dart` laufen.
 
 ## Gedächtnis-Protokoll
 

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
 import '../character/abilities_controller.dart';
+import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
@@ -180,13 +181,14 @@ class HabitsScreen extends ConsumerWidget {
   void _toggle(BuildContext context, WidgetRef ref, Habit habit) {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
+    final vorherErrungen = achievementsBefore(ref);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
         .toggle(habit.id, today);
     if (result == null) return;
 
-    _celebrate(context, ref, vorher);
+    _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result));
   }
 
@@ -194,6 +196,7 @@ class HabitsScreen extends ConsumerWidget {
   void _advance(BuildContext context, WidgetRef ref, Habit habit) {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
+    final vorherErrungen = achievementsBefore(ref);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
@@ -210,17 +213,30 @@ class HabitsScreen extends ConsumerWidget {
       return;
     }
 
-    _celebrate(context, ref, vorher);
+    _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result));
   }
 
   /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier
   /// reißt eine Kette weiter — und nur hier ist der Moment, in dem sich
   /// eine Marke überschreiten lässt.
-  void _celebrate(BuildContext context, WidgetRef ref, List<Ability> vorher) {
+  /// **Errungenschaften zuerst, Faehigkeiten danach.** Eine
+  /// Errungenschaft kann eine Faehigkeit mitbringen (ADR-0033, Punkt 7);
+  /// andersherum stuende die Faehigkeit da, bevor gesagt waere, woher sie
+  /// kommt.
+  void _celebrate(
+    BuildContext context,
+    WidgetRef ref,
+    List<Ability> vorher,
+    Set<String> vorherErrungen,
+  ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      unawaited(showAbilityUnlocks(context, ref, before: vorher));
+      unawaited(() async {
+        await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!context.mounted) return;
+        await showAbilityUnlocks(context, ref, before: vorher);
+      }());
     });
   }
 

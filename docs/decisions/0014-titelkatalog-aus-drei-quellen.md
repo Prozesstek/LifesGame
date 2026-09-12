@@ -1,7 +1,7 @@
 # ADR-0014: Der Titelkatalog steht, und er speist sich aus drei Quellen
 
 **Datum:** 19.08.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch [ADR-0033](0033-errungenschaften-aus-der-historie.md) — die Bedingungen der Titel (Punkt 1 und 3) wandern in die Errungenschaften; Punkt 2 und 4 gelten weiter
 **Entschieden von:** AktivesBrett
 
 ## Kontext

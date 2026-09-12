@@ -5,6 +5,7 @@ import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/character/identity_controller.dart';
@@ -613,8 +614,10 @@ void main() {
   group('Verdient bleibt verdient', () {
     test('eine gerissene Kette nimmt den Titel nicht weg', () {
       // Fünf Tage Kette, dann eine Woche Pause. Die laufende Streak ist 0,
-      // der Titel bleibt trotzdem tragbar -- das ist der Grund, warum
-      // titleStatsProvider longestStreak hereinreicht (konzept.md 3.7).
+      // der Titel bleibt trotzdem tragbar -- das ist der Grund, warum die
+      // Bedingung an longestStreak haengt und nicht an der laufenden
+      // Kette (konzept.md 3.7). Seit ADR-0033 steht sie im
+      // Errungenschaftskatalog statt in `package:identity`.
       final container = ProviderContainer(
         overrides: [
           savedGameProvider.overrideWithValue(mitStreak(5)),
@@ -623,7 +626,7 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final stats = container.read(titleStatsProvider);
+      final stats = container.read(achievementStatsProvider);
       final earned = container.read(earnedTitlesProvider);
 
       expect(

@@ -13,28 +13,38 @@ import '../../ui/palette.dart';
 class IdentityCard extends StatelessWidget {
   const IdentityCard({
     required this.identity,
-    required this.stats,
+    required this.earnedTitleIds,
     required this.level,
     required this.gold,
+    required this.fame,
     required this.onEditName,
     required this.onChooseTitle,
     super.key,
   });
 
   final Identity identity;
-  final TitleStats stats;
+
+  /// Welche Titel verdient sind. Kommt seit ADR-0033 aus den
+  /// Errungenschaften; vorher rechnete `package:identity` es selbst aus
+  /// drei Zahlen.
+  final Set<String> earnedTitleIds;
 
   /// Das ganze Level, nicht nur die Zahl: Der Balken braucht auch, wie
   /// weit es bis zum nächsten ist. Gerechnet wird das in
   /// `package:progression`, hier wird nur angezeigt.
   final PlayerLevel level;
   final int gold;
+
+  /// Der Ruhm-Stand. **Eine Zahl zum Vergleichen, kein Guthaben**
+  /// (ADR-0033, Punkt 5) — deshalb steht sie neben dem Gold und nicht
+  /// darunter mit einem Knopf daneben.
+  final int fame;
   final VoidCallback onEditName;
   final VoidCallback onChooseTitle;
 
   @override
   Widget build(BuildContext context) {
-    final title = identity.titleFor(stats);
+    final title = identity.titleFor(earnedTitleIds);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -74,13 +84,26 @@ class IdentityCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                '$gold Gold',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.gold,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    '$gold Gold',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.gold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$fame Ruhm',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Palette.textDim,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

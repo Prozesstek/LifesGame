@@ -1,9 +1,12 @@
+import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
+import '../achievements/achievements_card.dart';
+import '../achievements/achievements_controller.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
@@ -44,7 +47,8 @@ class CharacterScreen extends ConsumerWidget {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
     final identity = ref.watch(identityProvider);
-    final titleStats = ref.watch(titleStatsProvider);
+    final achievementStats = ref.watch(achievementStatsProvider);
+    final earnedTitleIds = ref.watch(earnedTitleIdsProvider);
     final habits = ref.watch(habitTrackerProvider);
     final today = ref.watch(todayProvider);
 
@@ -62,13 +66,16 @@ class CharacterScreen extends ConsumerWidget {
               children: <Widget>[
                 IdentityCard(
                   identity: identity,
-                  stats: titleStats,
+                  earnedTitleIds: earnedTitleIds,
                   level: level,
                   gold: gold,
+                  fame: ref.watch(fameProvider),
                   onEditName: () => _editName(context, ref, identity),
                   onChooseTitle: () =>
-                      _chooseTitle(context, ref, identity, titleStats),
+                      _chooseTitle(context, ref, identity, achievementStats),
                 ),
+                const SizedBox(height: 16),
+                const AchievementsCard(),
                 // Nur sichtbar, wenn wirklich etwas geschenkt wurde. Sonst
                 // stünde auf jedem Charakterbildschirm eine leere Karte
                 // über eine Funktion, die niemand benutzt hat.
@@ -189,7 +196,7 @@ class CharacterScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Identity identity,
-    TitleStats stats,
+    AchievementStats stats,
   ) async {
     final selection = await showTitleDialog(
       context,

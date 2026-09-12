@@ -1,0 +1,20 @@
+name: achievements
+description: >-
+  Errungenschaften fuer Lifes Game: Meilensteine und Entdeckungen, aus der
+  Historie abgeleitet statt gezaehlt. Reines Dart, damit sich der Katalog
+  gegen den Fortschritt durchrechnen laesst, ohne die App zu starten
+  (siehe ADR-0033).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Bewusst leer, wie bei den anderen sieben Packages. Ein Katalog aus
+# Bedingungen braucht keine Infrastruktur -- und ein leerer Block macht die
+# Schichtregel aus CLAUDE.md erzwingbar statt nur vereinbart (ADR-0003).
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0

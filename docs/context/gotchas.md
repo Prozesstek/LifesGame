@@ -3,6 +3,82 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Standardwert im Konstruktor versteckt ein vergessenes Feld — zum zweiten Mal
+
+> **Nachtrag 12.09.2026.** Derselbe Fehler, dieselbe Bauform, achtzehn
+> Tage später. Der Eintrag weiter unten (`CombatSession.moves`) stand
+> seit dem 25.08. da — geschrieben zu haben reicht offenbar nicht.
+
+`TheoryProgress` hat einen optionalen zweiten Parameter:
+
+```dart
+const TheoryProgress(this._records, [this._openedNodeIds = const <String>{}]);
+```
+
+`submit()` baute daraus einen neuen Fortschritt und gab das zweite
+Argument **nicht** weiter. Der Compiler schwieg, weil der Standardwert
+einspringt. Wirkung im Spiel: Wer einen Knoten für einen Theoriepunkt
+öffnete und dann seine Seite bestand, bei dem ging der Knoten wieder zu —
+der Baum schloss sich hinter dem Spieler.
+
+Kein Absturz, keine Meldung. Der bezahlte Punkt kam zurück (er wird aus
+den offenen Knoten *gerechnet*, ADR-0019), die Arbeit war trotzdem weg.
+Der Fehler lag seit ADR-0019 — dem 24.08. — im Code und ist durch keinen
+der 129 Theorie-Tests gefallen.
+
+**Gefunden hat ihn niemand beim Spielen**, sondern das Nachlesen beim
+Anschließen der Errungenschaften: Die Bedingung „ein Gebiet ganz" musste
+wissen, was offen ist, und beim Hinsehen stimmte die Rechnung nicht.
+
+**Die Regel bleibt dieselbe wie unten**, und sie ist offenbar zu leicht zu
+übersehen. Deshalb schärfer: Ein Konstruktor mit einem optionalen
+Parameter, der **Zustand** trägt, ist eine Falle. Entweder `required`,
+oder `copyWith` benutzen — `copyWith` kann ein Feld nicht vergessen.
+
+Praktischer Test dafür:
+
+```bash
+grep -n "return TheoryProgress(" packages/theory/lib/src/progress.dart
+```
+
+Kommt eine Zeile ohne das zweite Argument vor, ist sie verdächtig.
+
+## In Tests keine Ids benutzen, die zufällig gerade existieren — zum zweiten Mal
+
+> **Nachtrag 12.09.2026.** Der Eintrag „Einen Katalogeintrag zu streichen
+> ändert fremde Spielstände" (26.08.) endet mit genau dieser Regel. Sie
+> wurde beim Schreiben jener Tests nicht befolgt, und die Rechnung kam
+> jetzt.
+
+Zwei Tests benutzten `heavy_attack` als Beispiel für „eine Id, die es
+nicht mehr gibt":
+
+```dart
+// packages/abilities/test/chosen_abilities_test.dart
+// test/persistence_test.dart
+'moves': <Object?>['heavy_attack', 'steinhaut', 'sandsturm'],
+```
+
+Mit ADR-0033 ist Kraftschlag in den Katalog **zurückgekehrt**. Beide
+Tests waren damit grün und bewiesen das Gegenteil dessen, was sie meinten
+— sie prüften nicht mehr „Unbekanntes fällt heraus", sondern nur noch,
+dass eine gültige Id gültig ist.
+
+Aufgefallen ist es, weil sie beim Einbau umfielen. Das war Glück: Hätte
+ADR-0033 den Move an dieselbe Stelle der Liste gesetzt, wäre die
+Erwartung zufällig weiter erfüllt gewesen.
+
+**Regel, jetzt zum zweiten Mal:** Wenn ein Test „irgendeine ungültige Id"
+meint, gehört dort eine **erfundene** hin, keine ausgemusterte:
+
+```dart
+const fremd = 'gibt-es-nicht-und-soll-es-nie-geben';
+expect(AbilityCatalog.byMoveId(fremd), isNull);
+```
+
+Die erste Zeile ist nicht überflüssig — sie hält die Annahme fest, auf
+der der Rest des Tests steht.
+
 ## Einen Katalogeintrag zu streichen ändert fremde Spielstände
 
 ADR-0022 hat `AbilityCatalog.choosable` ausgetauscht: die fünfzehn aus der
@@ -152,6 +228,9 @@ Gefunden wurde es auf einem Screenshot, nicht von 189 grünen Tests.
 Konstruktor — oder jede Konstruktionsstelle muss beim Hinzufügen
 durchgegangen werden. Ein Standardwert ist bequem und macht genau diese
 Sorte Auslassung unsichtbar.
+
+> **Nachtrag 12.09.2026: Es ist wieder passiert**, mit
+> `TheoryProgress._openedNodeIds`. Siehe den Eintrag ganz oben.
 
 Praktischer Test dafür: Nach jeder Zustandsänderung, die einen neuen
 Zustand *baut* statt ihn zu kopieren, prüfen, ob `copyWith` nicht die

@@ -37,6 +37,12 @@ dependencies:
   gear:
     path: packages/gear
 
+  # Errungenschaften: Meilensteine und Entdeckungen, aus der Historie
+  # abgeleitet statt gezaehlt (ADR-0033). Reines Dart, damit sich der
+  # Katalog gegen jeden Fortschritt durchrechnen laesst.
+  achievements:
+    path: packages/achievements
+
   # Name und verdiente Titel. Reines Dart, damit sich die
   # Titelbedingungen ohne laufende App pruefen lassen (ADR-0013).
   identity:

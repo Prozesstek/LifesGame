@@ -1,65 +1,39 @@
 import 'title.dart';
 
-/// Alle Titel des Spiels an einem Ort.
+/// Alle Titel des Spiels an einem Ort — **nur ihr Wortlaut**.
 ///
-/// Gleiche Regel wie bei Preisen und Belohnungen: Steht eine dieser
-/// Schwellen irgendwo anders im Code, ist das ein Bug.
+/// Wer einen Titel verdient, steht seit ADR-0033 in
+/// `package:achievements`; hier steht, wie er heißt. Die Trennung ist
+/// keine Förmlichkeit: Ein Titel ist ein Wort, das jemand neben seinem
+/// Namen trägt, und eine Errungenschaft ist eine Leistung. Dass die
+/// meisten Errungenschaften genauso heißen wie ihr Titel, ist Absicht und
+/// kein Grund, beides zusammenzulegen — vier Titel kommen aus
+/// Entdeckungen, deren Bedingung niemand vorher lesen soll.
 ///
-/// **Drei Quellen, absichtlich.** Ein Titel nur für Streaks würde
-/// belohnen, wer lange dabei ist; einer nur für Lektionen, wer viel liest.
-/// Nebeneinander sagen sie etwas über den Stil — und genau das ist laut
-/// ADR-0013 der Sinn: Wo eine Klasse sichtbar wird, wird sie aus dem
-/// Verhalten abgeleitet, nie gewählt.
+/// **Dreizehn Titel: die sieben aus ADR-0014 und sechs neue.** Die sechs
+/// kommen aus Entdeckungen und sagen etwas über den Stil statt über die
+/// Menge — sie sind der Platz, an dem das Persönlichkeitsprofil aus
+/// Issue #41 gelandet ist (ADR-0033, Punkt 9).
 abstract final class TitleCatalog {
-  /// In der Reihenfolge, in der sie im Spiel erscheinen sollen: je Quelle
-  /// aufsteigend.
+  /// In der Reihenfolge, in der sie im Spiel erscheinen sollen: erst die
+  /// Meilensteine nach Schwelle, dann die Entdeckungen.
   static const List<CharacterTitle> all = <CharacterTitle>[
-    CharacterTitle(
-      id: 'entschlossen',
-      label: 'der Entschlossene',
-      requirement: '3 Tage am Stück',
-      requiredStreak: 3,
-    ),
-    CharacterTitle(
-      id: 'bestaendig',
-      label: 'der Beständige',
-      requirement: '30 Tage am Stück',
-      requiredStreak: 30,
-    ),
-    CharacterTitle(
-      id: 'unbeirrbar',
-      label: 'der Unbeirrbare',
-      requirement: '60 Tage am Stück',
-      requiredStreak: 60,
-    ),
-    // ADR-0013 nennt für diesen Titel „der fünfte abgeschlossene Knoten".
-    // Knoten gibt es noch nicht -- der Baum wird erst mit ADR-0012 zu
-    // einem. Bis dahin zählen Lektionen. Beim Umbau wandert die Bedingung
-    // mit, der Titel bleibt.
-    CharacterTitle(
-      id: 'wissbegierig',
-      label: 'der Wissbegierige',
-      requirement: '5 bestandene Lektionen',
-      requiredLessons: 5,
-    ),
-    CharacterTitle(
-      id: 'belesen',
-      label: 'der Belesene',
-      requirement: '12 bestandene Lektionen',
-      requiredLessons: 12,
-    ),
-    CharacterTitle(
-      id: 'verlaesslich',
-      label: 'der Verlässliche',
-      requirement: '50 Häkchen gesetzt',
-      requiredChecks: 50,
-    ),
-    CharacterTitle(
-      id: 'unermuedlich',
-      label: 'der Unermüdliche',
-      requirement: '200 Häkchen gesetzt',
-      requiredChecks: 200,
-    ),
+    // --- aus Meilensteinen (ADR-0014) ---
+    CharacterTitle(id: 'entschlossen', label: 'der Entschlossene'),
+    CharacterTitle(id: 'verlaesslich', label: 'der Verlässliche'),
+    CharacterTitle(id: 'bestaendig', label: 'der Beständige'),
+    CharacterTitle(id: 'unermuedlich', label: 'der Unermüdliche'),
+    CharacterTitle(id: 'unbeirrbar', label: 'der Unbeirrbare'),
+    CharacterTitle(id: 'wissbegierig', label: 'der Wissbegierige'),
+    CharacterTitle(id: 'belesen', label: 'der Belesene'),
+
+    // --- aus Entdeckungen (ADR-0033) ---
+    CharacterTitle(id: 'moench', label: 'der Mönch'),
+    CharacterTitle(id: 'herausforderer', label: 'der Herausforderer'),
+    CharacterTitle(id: 'stoiker', label: 'der Stoiker'),
+    CharacterTitle(id: 'alchemist', label: 'der Alchemist'),
+    CharacterTitle(id: 'unbeugsam', label: 'der Unbeugsame'),
+    CharacterTitle(id: 'stratege', label: 'der Stratege'),
   ];
 
   static CharacterTitle? byId(String? id) {
@@ -70,16 +44,19 @@ abstract final class TitleCatalog {
     return null;
   }
 
-  /// Alle Titel, die zu diesem Stand verdient sind.
-  static List<CharacterTitle> earnedBy(TitleStats stats) {
+  /// Die Titel zu einer Menge verdienter Ids, in Katalogreihenfolge.
+  ///
+  /// Unbekannte Ids werden übersprungen — ein Katalog kann sich ändern,
+  /// und ein Titel, den es nicht mehr gibt, darf nichts kosten
+  /// (ADR-0010).
+  static List<CharacterTitle> forIds(Set<String> earnedIds) {
     return List<CharacterTitle>.unmodifiable(
-      all.where((title) => title.isEarnedBy(stats)),
+      all.where((title) => earnedIds.contains(title.id)),
     );
   }
 
   /// Ob dieser Titel getragen werden darf.
-  static bool isEarned(String? id, TitleStats stats) {
-    final title = byId(id);
-    return title != null && title.isEarnedBy(stats);
+  static bool isEarned(String? id, Set<String> earnedIds) {
+    return id != null && byId(id) != null && earnedIds.contains(id);
   }
 }
