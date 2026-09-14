@@ -18,7 +18,13 @@ void main() {
   Loadout mitBesitz(List<String> ids) {
     var loadout = const Loadout.empty();
     for (final id in ids) {
-      loadout = loadout.buy(id, availableGold: 1 << 30);
+      // Reihe durch: Sonst bleiben Episches und Legendaeres draussen,
+      // und `take(15)` zaehlt drei Stuecke weniger, als es glaubt.
+      loadout = loadout.buy(
+        id,
+        availableGold: 1 << 30,
+        highestRung: GearGates.legendaryRung,
+      );
     }
     return loadout;
   }

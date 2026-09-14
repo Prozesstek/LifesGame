@@ -58,6 +58,26 @@ MoveHelp moveHelpFor(Move move, int attack) {
       perfect: 'Etwa $perfekt Schaden.',
     ),
 
+    // --- Die Waffen hinter der Gegnerreihe (ADR-0034) ---
+    'greatsword_cleave' => MoveHelp(
+      effect:
+          'Etwa $schaden Schaden — der härteste Waffenzug. Bringt fast '
+          'keine Energie.',
+      perfect: 'Etwa $perfekt Schaden.',
+    ),
+    'longbow_volley' => MoveHelp(
+      effect:
+          'Zwei Pfeile zu je etwa $schaden Schaden, zwei Tipps. Bringt '
+          'viel Energie.',
+      perfect: 'Etwa $perfekt Schaden je perfektem Pfeil.',
+    ),
+    'sunblade_flare' => MoveHelp(
+      effect: 'Etwa $schaden Schaden. Bringt Energie wie der Bogenschuss.',
+      perfect:
+          'Etwa $perfekt Schaden und entzündet den Gegner für '
+          '${_burnTurns(move)} Runden.',
+    ),
+
     // --- Common ---
     'funkenstoss' => MoveHelp(
       effect: 'Etwa $schaden Schaden.',

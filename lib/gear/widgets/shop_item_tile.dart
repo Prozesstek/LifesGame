@@ -21,6 +21,7 @@ class ShopItemTile extends StatelessWidget {
     required this.onSell,
     this.abilityLine,
     this.setPieces = 0,
+    this.requiredRung = 0,
     super.key,
   });
 
@@ -48,6 +49,11 @@ class ShopItemTile extends StatelessWidget {
   /// Wie viel Gold noch fehlt. Nur sinnvoll bei
   /// [PurchaseBlock.zuWenigGold].
   final int missingGold;
+
+  /// Welche Sprosse der Gegnerreihe dieses Stueck verlangt. 0 heisst:
+  /// keine. Nur sinnvoll bei [PurchaseBlock.gesperrt]; die Zahl kommt aus
+  /// `GearGates`, hier steht nur das Ergebnis.
+  final int requiredRung;
 
   final VoidCallback onBuy;
 
@@ -169,6 +175,20 @@ class ShopItemTile extends StatelessWidget {
                 color: Palette.textDim,
               ),
             ),
+            // **Ein gesperrtes Stueck sagt, was fehlt -- nicht, was es
+            // kostet.** Der Preis steht trotzdem daneben: Wer die Sprosse
+            // schafft, soll wissen, ob er sich das Stueck dann leisten kann.
+            if (block == PurchaseBlock.gesperrt) ...<Widget>[
+              const SizedBox(height: 6),
+              Text(
+                'Verdient ab Gegner $requiredRung der Reihe.',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.muted,
+                ),
+              ),
+            ],
             if (block == PurchaseBlock.zuWenigGold) ...<Widget>[
               const SizedBox(height: 6),
               Text(

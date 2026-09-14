@@ -69,6 +69,9 @@ void main() {
         Moves.daggerDouble,
         Moves.maceBash,
         Moves.staffGather,
+        Moves.greatswordCleave,
+        Moves.longbowVolley,
+        Moves.sunbladeFlare,
       ];
 
       for (final move in weaponMoves) {

@@ -50,18 +50,32 @@ void main() {
       }
     });
 
-    test('jeder Set-Platz führt weiter zwei freie Stücke', () {
-      // Fünf Stücke je Platz, drei davon in Sets. Wer kein Set will, soll
-      // trotzdem etwas zu wählen haben.
+    test('jeder Set-Platz führt weiter zwei freie offene Stücke', () {
+      // Fünf offene Stücke je Platz, drei davon in Sets. Wer kein Set
+      // will, soll trotzdem etwas zu wählen haben.
       for (final slot in <GearSlot>[
         GearSlot.waffe,
         GearSlot.ruestung,
         GearSlot.helm,
         GearSlot.schuhe,
       ]) {
-        final frei = GearCatalog.forSlot(slot).where((i) => !i.isSetPiece);
+        final frei = GearCatalog.forSlot(
+          slot,
+        ).where((i) => !i.isSetPiece && !i.rarity.isGated);
 
         expect(frei, hasLength(2), reason: slot.label);
+      }
+    });
+
+    test('Episches und Legendäres gehört zu keinem Set', () {
+      // **Ein Set soll in dreißig Tagen erreichbar bleiben.** Hinge ein
+      // Teil an Sprosse zwanzig, wäre das Set bis dahin unvollständig —
+      // und die 2er-Stufe, die den Anfang macht, das Einzige, was es je
+      // gibt (ADR-0034).
+      for (final item in GearCatalog.all) {
+        if (!item.rarity.isGated) continue;
+
+        expect(item.setId, isNull, reason: item.name);
       }
     });
 

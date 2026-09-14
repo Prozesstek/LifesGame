@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
+import '../combat/ladder_controller.dart';
 import '../progression/level_provider.dart';
 import '../ui/gold_icon.dart';
 import '../achievements/show_achievement_unlock.dart';
@@ -54,6 +55,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   Widget build(BuildContext context) {
     final gold = ref.watch(goldProvider);
     final loadout = ref.watch(loadoutProvider);
+    // Die höchste geschlagene Sprosse: Sie schließt Episches und
+    // Legendäres auf (ADR-0034). Beobachtet, damit ein Sieg im Kampf den
+    // Laden beim nächsten Öffnen richtig zeigt.
+    final rung = ref.watch(ladderProvider).highestDefeated;
 
     final items = GearCatalog.forSlot(_slot);
     final gewaehlt = items.firstWhere(
@@ -106,6 +111,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     items: items,
                     gewaehlteId: gewaehlt.id,
                     loadout: loadout,
+                    highestRung: rung,
                     onWaehle: (id) => setState(() => _itemId = id),
                   ),
                 ),
@@ -115,7 +121,12 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                     child: ShopItemTile(
                       item: gewaehlt,
-                      block: loadout.blockFor(gewaehlt.id, availableGold: gold),
+                      block: loadout.blockFor(
+                        gewaehlt.id,
+                        availableGold: gold,
+                        highestRung: rung,
+                      ),
+                      requiredRung: GearGates.rungFor(gewaehlt.rarity),
                       isEquipped: loadout.isEquipped(gewaehlt.id),
                       missingGold: gewaehlt.price - gold,
                       abilityLine: weaponAbilityLine(gewaehlt),
@@ -145,6 +156,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       PurchaseBlock.zuWenigGold => 'Dafür reicht das Gold noch nicht.',
       PurchaseBlock.bereitsGekauft => 'Hast du schon.',
       PurchaseBlock.unbekannt => 'Dieses Stück gibt es nicht mehr.',
+      PurchaseBlock.gesperrt =>
+        'Erst Gegner ${GearGates.rungFor(item.rarity)} der Reihe schlagen.',
     };
 
     _say(context, message);
@@ -340,12 +353,17 @@ class _ItemRaster extends StatelessWidget {
     required this.items,
     required this.gewaehlteId,
     required this.loadout,
+    required this.highestRung,
     required this.onWaehle,
   });
 
   final List<GearItem> items;
   final String gewaehlteId;
   final Loadout loadout;
+
+  /// Die hoechste geschlagene Sprosse -- entscheidet, welche Kacheln
+  /// gesperrt gezeichnet werden.
+  final int highestRung;
   final void Function(String) onWaehle;
 
   /// Höhe einer Kachel. Fest, damit sie nicht an der Fensterbreite hängt:
@@ -380,6 +398,10 @@ class _ItemRaster extends StatelessWidget {
                   isSelected: item.id == gewaehlteId,
                   isOwned: loadout.isOwned(item.id),
                   isEquipped: loadout.isEquipped(item.id),
+                  isLocked: !GearGates.isOpen(
+                    item.rarity,
+                    highestRung: highestRung,
+                  ),
                   onTap: () => onWaehle(item.id),
                 ),
               ),

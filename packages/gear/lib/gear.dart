@@ -9,6 +9,7 @@
 library;
 
 export 'src/catalog.dart';
+export 'src/gates.dart';
 export 'src/gear_set.dart';
 export 'src/item.dart';
 export 'src/loadout.dart';

@@ -1,3 +1,4 @@
+import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
@@ -63,13 +64,9 @@ void main() {
           ActiveSet(set: set, pieces: 4, perk: set.fourPiece),
       ]);
 
-      for (final waffenMove in <String>[
-        'basic_attack',
-        'sword_strike',
-        'dagger_double',
-        'mace_bash',
-        'staff_gather',
-      ]) {
+      // Aus dem Katalog, nicht aufgezaehlt: Eine neue Waffe soll hier
+      // automatisch mitgeprueft werden (`gotchas.md`, zweite Regel).
+      for (final waffenMove in AbilityCatalog.weaponMoves.values) {
         final move = Moves.byId(waffenMove)!;
 
         for (final effekt in effekte) {

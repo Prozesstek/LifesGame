@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 12.09.2026 · Prozesstek
+**Zuletzt aktualisiert:** 14.09.2026 · AktivesBrett
 
 ---
 
@@ -507,6 +507,11 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **14.09.2026** — **Kein neues Ziel**, aber Inhalt: 48 Stücke statt 27, mit
+  Episch und Legendär hinter der Gegnerreihe
+  ([ADR-0034](../decisions/0034-episch-und-legendaer-haengen-an-der-gegnerreihe.md)).
+  Die Sperrliste ist unberührt. Bewusst keine Bilder — die stehen als
+  Vorgabe bei Frederik.
 - **12.09.2026** — **Ziel 8 erfüllt**, acht Tage vor dem Termin. Damit sind
   alle sieben Bauziele erreicht und nur noch Ziel 7 offen, der
   30-Tage-Lauf. Die Sperrliste ist unberührt geblieben. Nebenbei kam ein

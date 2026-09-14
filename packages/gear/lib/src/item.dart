@@ -67,13 +67,26 @@ class GearBonus {
 /// als die eines Ausrüstungsstücks — sie hängt dort an der Quelle
 /// (Theorieknoten, Streak-Marke), hier am Preis und am Set.
 ///
-/// Drei Stufen, nicht fünf: Episch und Legendär sind in
-/// `package:abilities` der Lohn für tiefen Fortschritt. Im Laden gibt es
-/// nichts zu erreichen, nur zu kaufen — dafür reichen drei.
+/// **Fünf Stufen seit ADR-0034, vorher drei.** Der Grund für drei war:
+/// Episch und Legendär sind in `package:abilities` der Lohn für tiefen
+/// Fortschritt, und im Laden gab es nichts zu erreichen, nur zu kaufen.
+/// Seit der Gegnerreihe (ADR-0032) gibt es dort etwas zu erreichen — die
+/// beiden oberen Stufen hängen daran (`GearGates`) und sind damit
+/// **verdient**, nicht nur teurer.
 enum GearRarity {
   common('Gewöhnlich'),
   uncommon('Ungewöhnlich'),
-  rare('Selten');
+  rare('Selten'),
+  epic('Episch'),
+  legendary('Legendär');
+
+  /// Die drei Stufen, die von Anfang an kaufbar sind.
+  static const List<GearRarity> open = <GearRarity>[common, uncommon, rare];
+
+  /// Die beiden Stufen, die an der Gegnerreihe hängen.
+  static const List<GearRarity> gated = <GearRarity>[epic, legendary];
+
+  bool get isGated => gated.contains(this);
 
   const GearRarity(this.label);
 

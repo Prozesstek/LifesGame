@@ -3,10 +3,16 @@ import 'prices.dart';
 
 /// Alles, was der Shop führt.
 ///
-/// **Fünf Stücke je Platz, drei Seltenheiten** (ADR-0029): zwei
-/// gewöhnliche, zwei ungewöhnliche, ein seltenes. Der Laden soll dreißig
-/// Tage lang etwas zu entscheiden geben; mit neun Stücken war nach zwei
-/// Wochen alles gesehen.
+/// **Acht Stücke je Platz, fünf Seltenheiten.** Fünf davon sind von
+/// Anfang an kaufbar — zwei gewöhnliche, zwei ungewöhnliche, ein seltenes
+/// (ADR-0029). Der Laden soll dreißig Tage lang etwas zu entscheiden geben;
+/// mit neun Stücken war nach zwei Wochen alles gesehen.
+///
+/// **Die drei übrigen hängen an der Gegnerreihe** (ADR-0034): zwei
+/// epische ab Sprosse zehn, ein legendäres ab Sprosse zwanzig. Sie tragen
+/// keine Set-Marke — ein Set soll in dreißig Tagen erreichbar bleiben — und
+/// sind nur mäßig teurer als Selten: Die Sperre ist die Hürde, nicht der
+/// Preis.
 ///
 /// **Die Waffen sind der Sonderfall.** Jede bringt eine eigene Fähigkeit
 /// mit — `test/abilities_seam_test.dart` in der App besteht darauf, und
@@ -95,6 +101,42 @@ abstract final class GearCatalog {
           'will, ist mit der halb so teuren Übungsklinge besser bedient.',
     ),
 
+    // Hinter der Gegnerreihe (ADR-0034): keine Set-Marke, dafür je ein
+    // Rhythmus, den es unter den fünf ersten nicht gab.
+    GearItem(
+      id: 'gear-zweihaender',
+      name: 'Zweihänder',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.epic,
+      price: GearPrices.waffeEpic1,
+      bonus: GearBonus(attack: 5),
+      why: 'Der härteste Einzelschlag im Spiel — und der langsamste Weg zu '
+          'Energie. Wer ihn trägt, spielt fast nur diesen einen Zug. Ab '
+          'Sprosse zehn der Gegnerreihe.',
+    ),
+    GearItem(
+      id: 'gear-langbogen',
+      name: 'Langbogen',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.epic,
+      price: GearPrices.waffeEpic2,
+      bonus: GearBonus(attack: 5, maxHp: 10),
+      why: 'Zwei Pfeile, zwei Tipps. Jeder für sich schwach, beide zusammen '
+          'etwa ein Bogenschuss — aber mit zwei Chancen auf Perfect und '
+          'deutlich mehr Energie je Runde.',
+    ),
+    GearItem(
+      id: 'gear-sonnenklinge',
+      name: 'Sonnenklinge',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.legendary,
+      price: GearPrices.waffeLegendary,
+      bonus: GearBonus(attack: 6, maxEnergy: 1),
+      why: 'Der einzige Waffenzug mit einer Perfect-Wirkung: Ein perfekter '
+          'Treffer entzündet den Gegner, ohne Energie zu kosten. Verdient '
+          'ab dem Bergwächter, Sprosse zwanzig.',
+    ),
+
     // ---------------------------------------------------------------
     // Rüstung — Leben und Verteidigung, der Platz zum Aushalten
     // ---------------------------------------------------------------
@@ -152,6 +194,40 @@ abstract final class GearCatalog {
       why: 'Vier Punkte Verteidigung gibt es sonst auf keinem Platz. Sie '
           'senken jeden eingehenden Treffer anteilig — gegen harte Gegner '
           'wirken sie deshalb stärker als gegen weiche.',
+    ),
+
+    GearItem(
+      id: 'gear-drachenschuppenpanzer',
+      name: 'Drachenschuppenpanzer',
+      slot: GearSlot.ruestung,
+      rarity: GearRarity.epic,
+      price: GearPrices.ruestungEpic1,
+      bonus: GearBonus(maxHp: 50, defense: 4, maxEnergy: 1),
+      why: 'Der erste Panzer, der auch Energie gibt. Wer bisher zwischen '
+          'Aushalten und Zuschlagen wählen musste, bekommt hier ein Stück '
+          'von beidem. Ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-runenharnisch',
+      name: 'Runenharnisch',
+      slot: GearSlot.ruestung,
+      rarity: GearRarity.epic,
+      price: GearPrices.ruestungEpic2,
+      bonus: GearBonus(maxHp: 56, defense: 5),
+      why: 'Fünf Punkte Verteidigung — einen mehr, als der Plattenharnisch '
+          'je hatte. Gegen den Erzdämon ist das der Unterschied zwischen '
+          'zwölf und fünfzehn Runden.',
+    ),
+    GearItem(
+      id: 'gear-titanenpanzer',
+      name: 'Titanenpanzer',
+      slot: GearSlot.ruestung,
+      rarity: GearRarity.legendary,
+      price: GearPrices.ruestungLegendary,
+      bonus: GearBonus(maxHp: 64, defense: 5, maxEnergy: 1),
+      why: 'Der Panzer für die letzten zehn Sprossen. Vierundsechzig '
+          'Lebenspunkte sind mehr, als ein frischer Charakter am ersten Tag '
+          'überhaupt hat. Verdient ab dem Bergwächter.',
     ),
 
     // ---------------------------------------------------------------
@@ -213,6 +289,40 @@ abstract final class GearCatalog {
           'Runden gegen den Bergwaechter.',
     ),
 
+    GearItem(
+      id: 'gear-drachenhelm',
+      name: 'Drachenhelm',
+      slot: GearSlot.helm,
+      rarity: GearRarity.epic,
+      price: GearPrices.helmEpic1,
+      bonus: GearBonus(attack: 1, maxHp: 30, defense: 2),
+      why: 'Der erste Helm mit Angriff. Ein Punkt klingt nach wenig — aber '
+          'er wirkt auf jeden Zug, den man in den nächsten zwanzig Sprossen '
+          'drückt. Ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-runenkrone',
+      name: 'Runenkrone',
+      slot: GearSlot.helm,
+      rarity: GearRarity.epic,
+      price: GearPrices.helmEpic2,
+      bonus: GearBonus(maxHp: 30, defense: 2, maxEnergy: 1),
+      why: 'Energie auf dem Kopf, zum ersten Mal. Wer Ring und Talisman '
+          'schon auf Energie hat, kommt hier auf den Vorrat, den '
+          'Sternenfall braucht.',
+    ),
+    GearItem(
+      id: 'gear-krone-des-hochwaechters',
+      name: 'Krone des Hochwächters',
+      slot: GearSlot.helm,
+      rarity: GearRarity.legendary,
+      price: GearPrices.helmLegendary,
+      bonus: GearBonus(maxHp: 36, defense: 3, maxEnergy: 1),
+      why: 'Drei Punkte Verteidigung auf dem Kopf gab es bisher nirgends. '
+          'Zusammen mit einem Titanenpanzer stehen acht — mehr trägt kein '
+          'Charakter. Verdient ab dem Bergwächter.',
+    ),
+
     // ---------------------------------------------------------------
     // Schuhe — der Platz für Verteidigung
     // ---------------------------------------------------------------
@@ -269,6 +379,39 @@ abstract final class GearCatalog {
       why: 'Drei Punkte Verteidigung auf dem billigsten Platz des Ladens. '
           'Zusammen mit einem Panzer stehen damit sieben zusammen — mehr '
           'geht im Spiel nicht.',
+    ),
+
+    GearItem(
+      id: 'gear-windlaeufer',
+      name: 'Windläufer',
+      slot: GearSlot.schuhe,
+      rarity: GearRarity.epic,
+      price: GearPrices.schuheEpic1,
+      bonus: GearBonus(maxHp: 8, defense: 3, maxEnergy: 1),
+      why: 'Die Verteidigung der schweren Schienen, dazu ein Punkt Energie. '
+          'Der billigste Weg, einen dritten Platz auf Energie zu legen. Ab '
+          'Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-drachenschuppenstiefel',
+      name: 'Drachenschuppenstiefel',
+      slot: GearSlot.schuhe,
+      rarity: GearRarity.epic,
+      price: GearPrices.schuheEpic2,
+      bonus: GearBonus(maxHp: 14, defense: 4),
+      why: 'Vier Punkte Verteidigung auf dem Platz, der sonst höchstens '
+          'drei trägt. Gegen die harten Gegner ab Sprosse zwanzig zählt '
+          'jeder davon doppelt.',
+    ),
+    GearItem(
+      id: 'gear-stiefel-des-titanen',
+      name: 'Stiefel des Titanen',
+      slot: GearSlot.schuhe,
+      rarity: GearRarity.legendary,
+      price: GearPrices.schuheLegendary,
+      bonus: GearBonus(maxHp: 16, defense: 4, maxEnergy: 1),
+      why: 'Verteidigung, Leben und Energie auf einem Platz, der mit hundert '
+          'Gold angefangen hat. Verdient ab dem Bergwächter.',
     ),
 
     // ---------------------------------------------------------------
@@ -329,6 +472,39 @@ abstract final class GearCatalog {
           'überhaupt erst erreichbar.',
     ),
 
+    GearItem(
+      id: 'gear-sternenring',
+      name: 'Sternenring',
+      slot: GearSlot.ring,
+      rarity: GearRarity.epic,
+      price: GearPrices.ringEpic1,
+      bonus: GearBonus(attack: 1, maxHp: 10, maxEnergy: 3),
+      why: 'Der Aderring mit einem Punkt Angriff und etwas mehr Leben. Für '
+          'alle, denen die drei Energie schon reichen und die den Rest des '
+          'Platzes nicht verschenken wollen. Ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-ring-der-glut',
+      name: 'Ring der Glut',
+      slot: GearSlot.ring,
+      rarity: GearRarity.epic,
+      price: GearPrices.ringEpic2,
+      bonus: GearBonus(attack: 2, maxHp: 8, maxEnergy: 4),
+      why: 'Vier Punkte Energie auf einem Platz. Damit ist Sternenfall '
+          'nicht nur erreichbar, sondern jede dritte Runde bezahlbar.',
+    ),
+    GearItem(
+      id: 'gear-ring-des-erzdaemons',
+      name: 'Ring des Erzdämons',
+      slot: GearSlot.ring,
+      rarity: GearRarity.legendary,
+      price: GearPrices.ringLegendary,
+      bonus: GearBonus(attack: 3, maxHp: 12, maxEnergy: 4),
+      why: 'Das teuerste Stück des Ladens, und das einzige, das auf drei '
+          'Werte zugleich wirkt, ohne einen davon klein zu halten. Verdient '
+          'ab dem Bergwächter.',
+    ),
+
     // ---------------------------------------------------------------
     // Talisman — Vielseitigkeit, später die zweite Energiequelle
     // ---------------------------------------------------------------
@@ -382,6 +558,40 @@ abstract final class GearCatalog {
       why: 'Zwei Punkte Energie außerhalb des Rings. Wer beide Plätze auf '
           'Energie legt, spielt einen sichtbar anderen Kampf als jemand '
           'mit denselben Werten in Angriff.',
+    ),
+    GearItem(
+      id: 'gear-phoenixfeder',
+      name: 'Phönixfeder',
+      slot: GearSlot.talisman,
+      rarity: GearRarity.epic,
+      price: GearPrices.talismanEpic1,
+      bonus: GearBonus(attack: 2, maxHp: 14, maxEnergy: 2),
+      why: 'Das Runenamulett mit acht Lebenspunkten mehr. Für die, denen '
+          'der Kampf endet, bevor die zwei Energie sich auszahlen. Ab '
+          'Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-drachenzahn',
+      name: 'Drachenzahn',
+      slot: GearSlot.talisman,
+      rarity: GearRarity.epic,
+      price: GearPrices.talismanEpic2,
+      bonus: GearBonus(attack: 4, maxHp: 14, maxEnergy: 2),
+      why: 'Vier Punkte Angriff auf einem Platz ohne Waffe. Der Talisman '
+          'für alle, die ihre Energie in Donnerkeil und Sternenfall '
+          'stecken und jeden Treffer davon härter wollen.',
+    ),
+    GearItem(
+      id: 'gear-herz-des-titanen',
+      name: 'Herz des Titanen',
+      slot: GearSlot.talisman,
+      rarity: GearRarity.legendary,
+      price: GearPrices.talismanLegendary,
+      bonus: GearBonus(attack: 4, maxHp: 16, maxEnergy: 3),
+      why: 'Drei Punkte Energie außerhalb des Rings gab es bisher nicht. '
+          'Wer Ring und Herz zusammen trägt, hat sieben — und damit jede '
+          'Fähigkeit des Spiels jede zweite Runde. Verdient ab dem '
+          'Bergwächter.',
     ),
   ];
 

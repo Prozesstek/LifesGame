@@ -3,6 +3,7 @@ import 'package:achievements/achievements.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 
+import '../combat/ladder_controller.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../achievements/achievement_stats.dart';
@@ -40,10 +41,18 @@ class GearController extends Notifier<Loadout> {
     final income =
         ref.read(incomeWithoutAchievementsProvider) + ausErrungenschaften;
     final available = income - state.spentGold;
-    final block = state.blockFor(itemId, availableGold: available);
+    // Die hoechste geschlagene Sprosse entscheidet ueber Episches und
+    // Legendaeres (ADR-0034). Gelesen, nicht beobachtet: Ein Sieg waehrend
+    // des Einkaufens soll den Laden nicht neu aufsetzen.
+    final rung = ref.read(ladderProvider).highestDefeated;
+    final block = state.blockFor(
+      itemId,
+      availableGold: available,
+      highestRung: rung,
+    );
     if (block != null) return block;
 
-    state = state.buy(itemId, availableGold: available);
+    state = state.buy(itemId, availableGold: available, highestRung: rung);
     return null;
   }
 
@@ -56,11 +65,17 @@ class GearController extends Notifier<Loadout> {
   /// Rechnung und wird nicht zur Ausnahme (ADR-0011).
   void grant(String itemId) {
     if (state.isOwned(itemId)) return;
-    state = state.buy(itemId, availableGold: _unlimitedGold);
+    state = state.buy(
+      itemId,
+      availableGold: _unlimitedGold,
+      highestRung: GearGates.legendaryRung,
+    );
   }
 
   /// Genug, um jedes Stück im Katalog zu decken. Steht hier und nicht in
   /// `package:gear`: Es ist kein Preis, sondern das Abschalten der Prüfung.
+  /// Dieselbe Rolle hat `GearGates.legendaryRung` beim Schenken: Der
+  /// Entwicklermodus schaltet auch die Sperre der Gegnerreihe ab.
   static const int _unlimitedGold = 1 << 30;
 
   /// Verkauft ein Stück für die Hälfte seines Preises (ADR-0031).

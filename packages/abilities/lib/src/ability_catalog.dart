@@ -34,7 +34,7 @@ abstract final class AbilityCatalog {
 
   /// Welche Waffe welche Fähigkeit mitbringt.
   ///
-  /// **Fünf Waffen, fünf verschiedene Züge** — die Tabelle aus ADR-0017,
+  /// **Acht Waffen, acht verschiedene Züge** — die Tabelle aus ADR-0017,
   /// Punkt 2. Bis dahin gaben beide Klingen `sword_strike`; die Waffe
   /// bestimmte damit nichts, und der ganze Slot war Dekoration.
   ///
@@ -52,6 +52,14 @@ abstract final class AbilityCatalog {
   /// | Streitkolben | Wuchtstoß | 0,9 | +3, Verteidigung runter |
   /// | Geschliffene Klinge | Doppelstich | 0,5 | +4 |
   /// | Kriegsstab | Sammelschlag | 0,6 | +5 |
+  /// | Zweihänder | Spalter | 1,6 | +1 |
+  /// | Langbogen | Doppelschuss | 0,45 × 2 | +4 |
+  /// | Sonnenklinge | Sonnenhieb | 1,4 | +3, Perfect entzündet |
+  ///
+  /// **Die letzten drei hängen an der Gegnerreihe** (ADR-0034) und bringen
+  /// je einen Rhythmus, den es unter den fünf ersten nicht gab: den
+  /// langsamsten Schlag, den doppelten Pfeil, und den ersten Waffenzug mit
+  /// einer Perfect-Wirkung.
   ///
   /// **Der Kurzbogen trägt denselben Zug wie [fallbackMoveId]**, und das
   /// ist Absicht: Laut ADR-0017 ist er eine der fünf Waffen, und „den
@@ -64,6 +72,9 @@ abstract final class AbilityCatalog {
     'gear-streitkolben': 'mace_bash',
     'gear-geschliffene-klinge': 'dagger_double',
     'gear-kriegsstab': 'staff_gather',
+    'gear-zweihaender': 'greatsword_cleave',
+    'gear-langbogen': 'longbow_volley',
+    'gear-sonnenklinge': 'sunblade_flare',
   };
 
   /// Die fünfzehn Fähigkeiten, die der Spieler auf die freien Slots legen

@@ -21,8 +21,13 @@ String? weaponAbilityLine(GearItem item) {
   final move = Moves.byId(AbilityCatalog.weaponMoveFor(item.id));
   if (move == null) return null;
 
+  // Mehrfachtreffer stehen als solche da: „×0,45 Schaden" allein läse sich
+  // beim Langbogen wie die schwächste Waffe des Ladens.
   final teile = <String>[
-    if (move.power > 0) '×${_komma(move.power)} Schaden',
+    if (move.power > 0 && move.isMultiHit)
+      '${move.hits} Treffer à ×${_komma(move.power)} Schaden'
+    else if (move.power > 0)
+      '×${_komma(move.power)} Schaden',
     if (move.energyDelta > 0) '+${move.energyDelta} Energie je Runde',
   ];
 
