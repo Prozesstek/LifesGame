@@ -167,6 +167,15 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     // ausging; die Errungenschaft kommt darüber. Andersherum verdeckte
     // sie, wofür sie kommt — dieselbe Reihenfolge wie bei der Lektion.
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
+
+    // **Nach einem Sieg zurück zur Reihe.** Dort wartet schon der nächste
+    // Gegner. „Nochmal" setzte dagegen denselben Gegner neu auf, den man
+    // gerade geschlagen hat — und ein zweiter Sieg bringt nichts ein
+    // (ADR-0032). Nach einer Niederlage bleibt der Kampf stehen: Dort ist
+    // „Nochmal" genau der nächste Schritt.
+    if (gewonnen && mounted) {
+      await Navigator.of(context).maybePop();
+    }
   }
 
   void _restart() {
