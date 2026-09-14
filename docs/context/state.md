@@ -77,8 +77,14 @@ Drei Tests, die den ganzen Katalog kaufen, haben es sofort gemeldet —
 
 ### Offen
 
-- **Keine Bilder** für die achtzehn Stücke; die Kachel zeigt das
-  Platz-Symbol. Frederiks 64×64-Stil ist die Vorgabe.
+- ~~**Keine Bilder**~~ — **nachgeliefert am selben Tag.** Alle achtzehn
+  haben eins, **erzeugt statt gemalt**: `tool/gear_icons_gen.dart`
+  zeichnet sie aus Rechtecken, Scheiben und Linien auf 32 × 32 mit einer
+  dunklen Kontur, bewusst gröber als Frederiks 64er („ganz simpel").
+  Wer eines ändern will, ändert die Form im Werkzeug, nicht ein PNG.
+  Dabei ist ein Test gefallen, der „größer als 1000 Bytes" prüfte —
+  flache Flächen komprimieren darunter. Er prüft jetzt Signatur und
+  Kantenlänge, was er hätte von Anfang an tun sollen.
 - **Ob 10 und 20 richtig liegen**, sagt der 30-Tage-Lauf.
 - **Nicht am Bild geprüft.** „Krone des Hochwächters" ist jetzt der
   längste Name im Laden; der Layout-Test läuft bei 390 × 844 ohne Überlauf.

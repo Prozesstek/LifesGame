@@ -137,8 +137,9 @@ Gold abschaltet. Bewusst: Er ist zum Ausprobieren da.
 
 **Offen:**
 
-- **Bilder.** Die achtzehn Stücke haben keine; die Kachel zeigt das
-  Platz-Symbol. Frederiks 64×64-Stil ist die Vorgabe.
+- ~~**Bilder.**~~ Nachgeliefert am selben Tag: erzeugt aus Formen durch
+  `tool/gear_icons_gen.dart`, auf 32 × 32 statt 64 — bewusst gröber, so
+  war es gewünscht. Die Vorgabe für gemalte bleibt Frederiks Stil.
 - **Ob 10 und 20 richtig liegen**, sagt der 30-Tage-Lauf. Zu früh wäre
   erkennbar daran, dass Selten übersprungen wird; zu spät daran, dass
   niemand je Episches trägt.

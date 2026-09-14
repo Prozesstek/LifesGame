@@ -87,6 +87,14 @@ flutter:
     - assets/Waffen/Boegen/
     - assets/Waffen/Staebe/
 
+    # Die uebrigen Plaetze. Die Bilder darin sind erzeugt, nicht gemalt --
+    # `dart run tool/gear_icons_gen.dart` schreibt sie neu (ADR-0034).
+    - assets/Ruestung/
+    - assets/Helme/
+    - assets/Schuhe/
+    - assets/Ringe/
+    - assets/Talismane/
+
     # Die Fähigkeiten, eine Zeichnung je Fähigkeit. Welche zu welchem Zug
     # gehört, entscheidet `MoveIcons` -- nicht der Dateiname.
     - assets/Faehigkeiten/

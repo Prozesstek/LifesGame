@@ -9,11 +9,11 @@ import '../ui/pixel_art.dart';
 /// hier steht nur, wie es aussieht — dieselbe Trennung wie bei
 /// [MoveIcons] für die Züge.
 ///
-/// **Vier von siebenundzwanzig Stücken haben eins**, alle vier sind
-/// Waffen — es fehlt nur der Streitkolben. Die übrigen tragen weiter das
-/// Zeichen ihres Platzes — sechs Zeichen für dreiundzwanzig Stücke, also
-/// kein Ersatz für ein Bild, aber genug, um eine Kachel als Kachel
-/// erkennbar zu machen.
+/// **Zweiundzwanzig von achtundvierzig Stücken haben eins:** vier gemalte
+/// Waffen und die achtzehn verdienten Stücke aus ADR-0034, die
+/// `tool/gear_icons_gen.dart` erzeugt. Die übrigen tragen weiter das
+/// Zeichen ihres Platzes — kein Ersatz für ein Bild, aber genug, um eine
+/// Kachel als Kachel erkennbar zu machen.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
@@ -57,6 +57,33 @@ abstract final class GearIcons {
     // Kriegsstab — gezeichnet als „Kampfstab", ein Schaft mit
     // Eisenspitze. Der einzige Stab im Katalog.
     'gear-kriegsstab': 'assets/Waffen/Staebe/Kampfstab.png',
+
+    // --- Die verdienten Stücke (ADR-0034) ---
+    //
+    // **Erzeugt, nicht gemalt.** `tool/gear_icons_gen.dart` zeichnet sie
+    // aus Formen auf 32 × 32 — bewusst gröber als Frederiks 64er, „ganz
+    // simpel". Wer eines ändern will, ändert die Form dort und lässt das
+    // Werkzeug laufen. Die Dateinamen sind die Item-Namen, weil hier —
+    // anders als bei den vier oben — kein Umweg über eine fremde
+    // Zeichnung nötig war.
+    'gear-zweihaender': 'assets/Waffen/Schwerter/Zweihaender.png',
+    'gear-langbogen': 'assets/Waffen/Boegen/Langbogen.png',
+    'gear-sonnenklinge': 'assets/Waffen/Schwerter/Sonnenklinge.png',
+    'gear-drachenschuppenpanzer': 'assets/Ruestung/Drachenschuppenpanzer.png',
+    'gear-runenharnisch': 'assets/Ruestung/Runenharnisch.png',
+    'gear-titanenpanzer': 'assets/Ruestung/Titanenpanzer.png',
+    'gear-drachenhelm': 'assets/Helme/Drachenhelm.png',
+    'gear-runenkrone': 'assets/Helme/Runenkrone.png',
+    'gear-krone-des-hochwaechters': 'assets/Helme/KroneDesHochwaechters.png',
+    'gear-windlaeufer': 'assets/Schuhe/Windlaeufer.png',
+    'gear-drachenschuppenstiefel': 'assets/Schuhe/Drachenschuppenstiefel.png',
+    'gear-stiefel-des-titanen': 'assets/Schuhe/StiefelDesTitanen.png',
+    'gear-sternenring': 'assets/Ringe/Sternenring.png',
+    'gear-ring-der-glut': 'assets/Ringe/RingDerGlut.png',
+    'gear-ring-des-erzdaemons': 'assets/Ringe/RingDesErzdaemons.png',
+    'gear-phoenixfeder': 'assets/Talismane/Phoenixfeder.png',
+    'gear-drachenzahn': 'assets/Talismane/Drachenzahn.png',
+    'gear-herz-des-titanen': 'assets/Talismane/HerzDesTitanen.png',
   };
 
   /// Der Pfad zum Bild, oder `null` wenn es für dieses Stück keins gibt.
