@@ -9,8 +9,10 @@ import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/character/identity_controller.dart';
+import 'package:lifes_game/gear/gear_icon.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
+import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -584,6 +586,44 @@ void main() {
       // ADR-0017 der Name der *Fähigkeit*, nicht der der Waffe.
       expect(find.text('Übungsklinge'), findsOneWidget);
       expect(find.text('Geschliffene Klinge'), findsNothing);
+    });
+
+    testWidgets('das Auswahlblatt zeigt Bild und Set jedes Stücks', (
+      tester,
+    ) async {
+      // **Wer wählt, soll das Stück erkennen** — und wissen, ob das
+      // Ablegen ein Set kostet. Der Kurzbogen hat ein Bild und gehört zu
+      // „Ruhiger Stand"; die Geschliffene Klinge hat ein Bild und kein
+      // Set. Beides kommt aus dem Katalog, nicht aus diesem Test.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitBeidenWaffen()));
+
+      await tester.tap(find.text('Waffe'));
+      await tester.pumpAndSettle();
+
+      final mitBild = GearCatalog.all.where(
+        (i) => i.slot == GearSlot.waffe && GearIcons.forItemId(i.id) != null,
+      );
+      expect(mitBild, isNotEmpty, reason: 'Der Test braucht ein Bild');
+      expect(
+        find.byType(PixelArt),
+        findsAtLeastNWidgets(mitBild.length),
+        reason: 'Jedes Stück mit Bild zeigt es im Blatt',
+      );
+
+      final mitSet = GearCatalog.all.where(
+        (i) => i.slot == GearSlot.waffe && i.setId != null,
+      );
+      for (final item in mitSet) {
+        final set = GearSets.byId(item.setId)!;
+        expect(find.text('Teil von „${set.name}"'), findsWidgets);
+      }
+      final ohneSet = GearCatalog.all.where(
+        (i) => i.slot == GearSlot.waffe && i.setId == null,
+      );
+      expect(ohneSet, isNotEmpty);
+      // Ein Stück ohne Set bekommt keine leere Set-Zeile.
+      expect(find.text('Teil von „"'), findsNothing);
     });
 
     testWidgets('Ablegen räumt den Platz', (tester) async {

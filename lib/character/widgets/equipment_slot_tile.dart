@@ -42,6 +42,10 @@ class EquipmentSlotTile extends StatelessWidget {
   final void Function(String itemId) onEquip;
   final VoidCallback onUnequip;
 
+  /// Wie gross das Bild eines Stücks im Auswahlblatt ist. Grösser als auf
+  /// der Kachel: Dort ist es ein Zeichen, hier soll man es ansehen.
+  static const double _bildImBlatt = 32;
+
   /// Das Symbol je Platz.
   ///
   /// **Es stand hier einmal als eigene Tabelle** und war zeichengleich
@@ -141,16 +145,23 @@ class EquipmentSlotTile extends StatelessWidget {
                   ],
                 ),
               ),
+              // **Dasselbe Bild wie im Laden und auf der Kachel.** Wer hier
+              // wählt, soll das Stück erkennen, nicht nur seinen Namen
+              // lesen -- und ob es zu einem Set gehört, entscheidet die
+              // Wahl mit: Ein Teil ablegen kann eine Set-Stufe kosten.
               for (final option in owned)
                 ListTile(
+                  leading: _Zeichen(
+                    slot: slot,
+                    item: option,
+                    color: Palette.textDim,
+                    side: _bildImBlatt,
+                  ),
                   title: Text(
                     option.name,
                     style: const TextStyle(color: Palette.text),
                   ),
-                  subtitle: Text(
-                    option.bonus.labels.join(' · '),
-                    style: const TextStyle(color: Palette.textDim),
-                  ),
+                  subtitle: _Untertitel(option: option),
                   trailing: option.id == equipped?.id
                       ? const Icon(Icons.check, color: Palette.accent)
                       : null,
@@ -206,25 +217,58 @@ class _Choice {
 /// aus sechs Kacheln verträgt keine zwei Höhen — eine Kachel, die mit
 /// Bild höher wird als ohne, verschiebt die ganze Zeile.
 class _Zeichen extends StatelessWidget {
-  const _Zeichen({required this.slot, required this.item, required this.color});
+  const _Zeichen({
+    required this.slot,
+    required this.item,
+    required this.color,
+    this.side = 20,
+  });
 
   final GearSlot slot;
   final GearItem? item;
   final Color color;
 
-  static const double _seite = 20;
+  /// Kantenlänge. 20 auf der Kachel, mehr im Auswahlblatt.
+  final double side;
 
   @override
   Widget build(BuildContext context) {
     final bild = item == null ? null : GearIcons.forItemId(item!.id);
-    final ersatz = Icon(
-      GearIcons.fallbackFor(slot),
-      size: _seite,
-      color: color,
-    );
+    final ersatz = Icon(GearIcons.fallbackFor(slot), size: side, color: color);
 
     if (bild == null) return ersatz;
 
-    return PixelArt(assetPath: bild, side: _seite, fallback: ersatz);
+    return PixelArt(assetPath: bild, side: side, fallback: ersatz);
+  }
+}
+
+/// Wirkung und -- falls vorhanden -- das Set, zu dem ein Stück gehört.
+///
+/// Die Set-Zeile steht in derselben Farbe wie im Laden, damit man sie
+/// wiedererkennt. Gezählt wird hier nichts: Wie viele Teile getragen
+/// werden, sagt die Set-Karte weiter unten auf demselben Bildschirm.
+class _Untertitel extends StatelessWidget {
+  const _Untertitel({required this.option});
+
+  final GearItem option;
+
+  @override
+  Widget build(BuildContext context) {
+    final set = GearSets.byId(option.setId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          option.bonus.labels.join(' · '),
+          style: const TextStyle(color: Palette.textDim),
+        ),
+        if (set != null)
+          Text(
+            'Teil von „${set.name}"',
+            style: const TextStyle(fontSize: 12, color: Palette.accent),
+          ),
+      ],
+    );
   }
 }
