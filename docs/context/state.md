@@ -7,9 +7,44 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 14.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 14.09.2026 · Frederik
 
 ---
+
+## Sitzung 14.09.2026, abends: nach dem Sieg zurück, ein Punkt je Level
+
+Zwei kleine Änderungen, 449 App-Tests (vorher 447), progression 33.
+
+### Nach einem Sieg geht es zurück zur Reihe
+
+Das Ergebnisblatt bleibt, wie es war. Nach „OK" (und nach einer
+Errungenschafts-Feier) schließt sich der Kampf, und die Reihe zeigt schon
+den nächsten Gegner. Bis dahin stand man vor „Nochmal" — und das setzte
+**denselben** Gegner neu auf, den man gerade geschlagen hatte, gegen den
+ein zweiter Sieg nichts einbringt (ADR-0032).
+
+**Eine Niederlage bleibt im Kampf.** Dort ist „Nochmal" der richtige
+nächste Schritt. `test/combat_exit_test.dart` prüft beide Fälle und geht
+den ganzen Weg: Zug, Leiste, Blatt, Feier, zurück.
+
+### Ein Theoriepunkt je Level statt zwei
+
+[ADR-0035](../decisions/0035-ein-theoriepunkt-je-level.md), löst Punkt 3
+von ADR-0019 ab. 49 Punkte über ein Spielerleben statt 98, der Startbaum
+steht ab Level 21 offen statt ab Level 11. Der Weg zum ersten Kampf bleibt
+frei: Auf Level 3 gibt es zwei Punkte, ein Knoten mit Fähigkeit kostet
+einen (`abilities_seam_test.dart`).
+
+**Die Balance ist nicht neu gerechnet.** `tool/balance_sim.dart` gibt dem
+simulierten Spieler jetzt halb so viele Fähigkeiten aus dem Baum; die
+Tabellen weiter unten stammen noch aus der alten Rechnung.
+
+### Schon auf `main` rot
+
+`character_test.dart` → „das Auswahlblatt zeigt Bild und Set jedes
+Stücks" erwartet mindestens sieben Bilder und findet fünf. Der Test fällt
+auch ohne diese beiden Änderungen um; vermutlich passen #44 und #45 nach
+dem Merge nicht zusammen. **Nicht behoben.**
 
 ## Sitzung 14.09.2026: Episch und Legendär — verdient, nicht gekauft
 

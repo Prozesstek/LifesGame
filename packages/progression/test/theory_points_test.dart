@@ -7,10 +7,10 @@ void main() {
       expect(TheoryPoints.earnedAt(1), 0);
     });
 
-    test('jeder Aufstieg gibt zwei Punkte (ADR-0019)', () {
-      expect(TheoryPoints.earnedAt(2), 2);
-      expect(TheoryPoints.earnedAt(3), 4);
-      expect(TheoryPoints.earnedAt(10), 18);
+    test('jeder Aufstieg gibt einen Punkt (ADR-0035)', () {
+      expect(TheoryPoints.earnedAt(2), 1);
+      expect(TheoryPoints.earnedAt(3), 2);
+      expect(TheoryPoints.earnedAt(10), 9);
     });
 
     test('unter Level 1 gibt es nichts', () {
@@ -26,30 +26,32 @@ void main() {
   });
 
   group('Der Vorrat über ein Spielerleben', () {
-    test('sind 98 Punkte — 49 Aufstiege mal zwei', () {
-      expect(TheoryPoints.lifetimeTotal, 98);
+    test('sind 49 Punkte — ein Punkt je Aufstieg', () {
+      expect(TheoryPoints.lifetimeTotal, 49);
       expect(
         TheoryPoints.lifetimeTotal,
         (LevelCurve.maxLevel - 1) * TheoryPoints.perLevel,
       );
     });
 
-    test('übersteigt den Startbaum deutlich — bewusst, ADR-0019', () {
-      // Der Startbaum hat 20 kostenpflichtige Knoten. Diese Prüfung
-      // hält die unangenehme Folge fest, statt sie zu verstecken: Ab
-      // Level 11 ist jeder weitere Punkt wertlos, bis der Baum wächst.
+    test('der Startbaum steht ab Level 21 ganz offen, nicht früher', () {
+      // Der Startbaum hat 20 kostenpflichtige Knoten. Unter ADR-0019
+      // stand er ab Level 11 offen, und jeder weitere Punkt war wertlos.
+      // Mit einem Punkt je Aufstieg reicht der Vorrat erst auf Level 21 —
+      // bis dahin ist die Reihenfolge eine Wahl (ADR-0035).
       const knotenImStartbaum = 20;
-      final aufElf = TheoryPoints.earnedAt(11);
-      final aufZehn = TheoryPoints.earnedAt(10);
 
-      expect(aufElf, greaterThanOrEqualTo(knotenImStartbaum));
-      expect(aufZehn, lessThan(knotenImStartbaum));
+      expect(
+        TheoryPoints.earnedAt(21),
+        greaterThanOrEqualTo(knotenImStartbaum),
+      );
+      expect(TheoryPoints.earnedAt(20), lessThan(knotenImStartbaum));
     });
   });
 
   group('Ausgeben', () {
     test('verfügbar ist verdient minus ausgegeben', () {
-      expect(TheoryPoints.availableAt(level: 5, spent: 3), 5);
+      expect(TheoryPoints.availableAt(level: 5, spent: 3), 1);
     });
 
     test('nie negativ, auch wenn ein Spielstand mehr ausgibt als er hat', () {
@@ -57,8 +59,8 @@ void main() {
     });
 
     test('leisten kann man sich, was man übrig hat', () {
-      expect(TheoryPoints.canAfford(level: 2, spent: 0, cost: 2), isTrue);
-      expect(TheoryPoints.canAfford(level: 2, spent: 1, cost: 2), isFalse);
+      expect(TheoryPoints.canAfford(level: 2, spent: 0, cost: 1), isTrue);
+      expect(TheoryPoints.canAfford(level: 2, spent: 1, cost: 1), isFalse);
     });
 
     test('was nichts kostet, kann man immer — das Handbuch', () {

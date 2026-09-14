@@ -66,7 +66,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
-| `packages/progression/lib/src/theory_points.dart` | zwei Theoriepunkte je Aufstieg | nur Dart-SDK |
+| `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 130 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
@@ -162,7 +162,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 446 Tests
+flutter test             # 449 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

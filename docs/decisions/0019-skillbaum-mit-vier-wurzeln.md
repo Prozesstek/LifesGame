@@ -1,7 +1,7 @@
 # ADR-0019: Der Skillbaum bekommt vier Wurzeln, zwei Punkte je Level und Knoten aus einer Seite
 
 **Datum:** 24.08.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch [ADR-0035](0035-ein-theoriepunkt-je-level.md) (Punkt 3: ein Theoriepunkt je Level statt zwei)
 **Entschieden von:** Frederik (Issue [#16](https://github.com/Prozesstek/LifesGame/issues/16))
 
 ## Kontext

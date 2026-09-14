@@ -358,8 +358,8 @@ List<Move> _loadoutNach(
 ///    jeden Tag abhakt -- so entstehen auch die Charakterwerte weiter
 ///    oben. Streak-Faehigkeiten fallen ihm damit frueher zu als einem
 ///    Spieler mit Luecken.
-/// 2. *Jeder Theoriepunkt landet in einem Knoten mit Faehigkeit.* Zwei
-///    Punkte je Aufstieg (ADR-0019), und alle gehen in Kampfnutzen. Wer
+/// 2. *Jeder Theoriepunkt landet in einem Knoten mit Faehigkeit.* Ein
+///    Punkt je Aufstieg (ADR-0035), und alle gehen in Kampfnutzen. Wer
 ///    stattdessen liest, was ihn interessiert, steht schlechter da.
 ///
 /// Beides macht das Ergebnis zur **oberen** Schranke: So gut wird es

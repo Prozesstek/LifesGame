@@ -239,11 +239,11 @@ void main() {
       expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
     });
 
-    testWidgets('jeder Aufstieg gibt zwei Punkte', (tester) async {
+    testWidgets('jeder Aufstieg gibt einen Punkt (ADR-0035)', (tester) async {
       final container = _containerAtLevel(4);
       addTearDown(container.dispose);
 
-      expect(container.read(availableTheoryPointsProvider), 6);
+      expect(container.read(availableTheoryPointsProvider), 3);
     });
   });
 

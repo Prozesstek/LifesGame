@@ -7,22 +7,21 @@ import 'level_curve.dart';
 /// Knoten kostet, weiß `packages/theory`; wie viel im Beutel ist, weiß
 /// dieses Package. Die beiden treffen sich erst in der App.
 ///
-/// **Zwei Punkte je Aufstieg** (ADR-0019). ADR-0012 hatte einen
-/// vorgesehen; Issue #16 hat die Zahl verdoppelt.
+/// **Ein Punkt je Aufstieg** (ADR-0035). ADR-0012 hatte einen
+/// vorgesehen, ADR-0019 hat die Zahl auf zwei verdoppelt, ADR-0035 hat
+/// sie zurückgenommen.
 abstract final class TheoryPoints {
   /// Was ein Levelaufstieg einbringt.
   ///
   /// Steht diese Zahl irgendwo anders im Code, ist das ein Bug — dieselbe
   /// Regel wie bei der Kurve und den Slots.
-  static const int perLevel = 2;
+  static const int perLevel = 1;
 
   /// Alle Punkte, die ein Spielerleben hergibt.
   ///
-  /// **98 für einen Startbaum aus 20 kostenpflichtigen Knoten.** Der
-  /// Vorrat übersteigt den Baum damit um ein Vielfaches, und ab Level 11
-  /// ist jeder weitere Punkt wertlos. Das ist in ADR-0019 bewusst in Kauf
-  /// genommen: Ein Baum, der offensteht, ist besser als einer, der leer
-  /// ist. Zum Nachjustieren ist es ab 40 Knoten vorgemerkt.
+  /// **49 für einen Startbaum aus 20 kostenpflichtigen Knoten.** Der
+  /// Baum steht damit ab Level 21 ganz offen statt ab Level 11 — lange
+  /// genug, dass die Reihenfolge eine Wahl ist (ADR-0035).
   static const int lifetimeTotal = (LevelCurve.maxLevel - 1) * perLevel;
 
   /// Wie viele Punkte ein Charakter auf [level] insgesamt verdient hat.

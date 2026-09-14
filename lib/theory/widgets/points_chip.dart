@@ -24,7 +24,7 @@ class PointsChip extends StatelessWidget {
   /// Bildschirm, damit jede Stelle, die den Chip zeigt, dieselbe Antwort
   /// gibt.
   static const String explanation =
-      'Jeder Aufstieg gibt zwei Punkte — damit schaltest du neue Sachen '
+      'Jeder Aufstieg gibt einen Punkt — damit schaltest du neue Sachen '
       'frei.';
 
   @override
