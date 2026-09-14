@@ -56,25 +56,35 @@ void main() {
       }
     });
 
-    test('jeder Platz führt fünf Stücke', () {
-      // **Die Ausnahme für die Waffe ist mit Ziel 3 gefallen.** Sie stand
-      // hier, weil jede Waffe im Laden eine Fähigkeit mitbringen muss
-      // (`test/abilities_seam_test.dart` in der App) — jetzt tun das alle
-      // fünf.
+    test('jeder Platz führt acht Stücke: fünf offene, drei verdiente', () {
+      // Fünf von Anfang an (ADR-0029), drei hinter der Gegnerreihe
+      // (ADR-0034). Beide Zahlen einzeln, damit ein Platz nicht mit acht
+      // offenen und null verdienten durchrutscht.
       for (final slot in GearSlot.values) {
-        expect(
-          GearCatalog.forSlot(slot),
-          hasLength(5),
-          reason: 'Platz ${slot.label} führt nicht fünf Stücke',
-        );
+        final alle = GearCatalog.forSlot(slot);
+        final offen = alle.where((item) => !item.rarity.isGated);
+        final verdient = alle.where((item) => item.rarity.isGated);
+
+        expect(offen, hasLength(5), reason: slot.label);
+        expect(verdient, hasLength(3), reason: slot.label);
       }
     });
 
-    test('jeder Platz hat zwei, zwei und ein Stück', () {
-      // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes. Die Form ist
-      // überall dieselbe, damit ein Platz nicht heimlich reicher wird als
-      // ein anderer.
+    test('jeder Platz hat zwei, zwei, eins — und zwei, eins', () {
+      // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes; dahinter zwei
+      // epische und ein legendäres. Die Form ist überall dieselbe, damit
+      // ein Platz nicht heimlich reicher wird als ein anderer.
       for (final slot in GearSlot.values) {
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.epic),
+          hasLength(2),
+          reason: slot.label,
+        );
+        expect(
+          GearCatalog.forSlotAndRarity(slot, GearRarity.legendary),
+          hasLength(1),
+          reason: slot.label,
+        );
         expect(
           GearCatalog.forSlotAndRarity(slot, GearRarity.common),
           hasLength(2),
@@ -134,14 +144,49 @@ void main() {
       expect(tage, lessThan(45), reason: 'zu teuer, der Shop bleibt Deko');
     });
 
-    test('das teuerste Einzelstück ist in etwa einem Monat tragbar', () {
+    test('das teuerste offene Stück ist in etwa einem Monat tragbar', () {
+      // **Nur die Stücke, die von Anfang an kaufbar sind.** Die drei
+      // verdienten je Platz haben ihre eigene Grenze im nächsten Test.
       final teuerstes = GearCatalog.all
+          .where((item) => !item.rarity.isGated)
           .map((item) => item.price)
           .reduce((a, b) => a > b ? a : b);
       final tage = teuerstes / goldProTag;
 
       expect(tage, greaterThan(20));
       expect(tage, lessThan(45));
+    });
+
+    test('Verdientes ist teurer als Offenes, aber nicht unerreichbar', () {
+      // **Die Sperre ist die Hürde, nicht der Preis** (ADR-0034). Wer
+      // Sprosse zwanzig geschafft hat, hat das Gold der Reihe dazu — die
+      // Grenze liegt deshalb bei achtzig Tagen Gewohnheiten, nicht bei
+      // fünfundvierzig. Darüber sähe es niemand mehr, auch nicht mit der
+      // Reihe im Rücken.
+      for (final slot in GearSlot.values) {
+        final selten = GearCatalog.forSlotAndRarity(slot, GearRarity.rare);
+        final episch = GearCatalog.forSlotAndRarity(slot, GearRarity.epic);
+        final legendaer = GearCatalog.forSlotAndRarity(
+          slot,
+          GearRarity.legendary,
+        );
+
+        expect(
+          episch.first.price,
+          greaterThan(selten.single.price),
+          reason: slot.label,
+        );
+        expect(
+          legendaer.single.price,
+          greaterThan(episch.last.price),
+          reason: slot.label,
+        );
+        expect(
+          legendaer.single.price / goldProTag,
+          lessThanOrEqualTo(80),
+          reason: '${slot.label}: Legendär unerreichbar',
+        );
+      }
     });
 
     test('die ungewöhnliche Stufe kostet ein Vielfaches der gewöhnlichen', () {
@@ -184,23 +229,26 @@ void main() {
 
     test('ein Fehlkauf kostet höchstens gut eine Woche', () {
       // Der Verlust muss spürbar sein, aber ein Irrtum darf nicht den
-      // ganzen Monat kosten — sonst kauft niemand mehr etwas aus.
+      // ganzen Monat kosten — sonst kauft niemand mehr etwas aus. Gilt für
+      // die offenen Stücke; wer sich ein verdientes gerade erkämpft hat,
+      // verkauft es nicht aus Versehen.
       final teuerstes = GearCatalog.all
+          .where((item) => !item.rarity.isGated)
           .map((item) => item.price - Loadout.refundFor(item))
           .reduce((a, b) => a > b ? a : b);
 
       expect(teuerstes / goldProTag, lessThan(25));
     });
 
-    test('das seltene Stück ist auf seinem Platz das teuerste', () {
+    test('das seltene Stück ist auf seinem Platz das teuerste offene', () {
       for (final slot in GearSlot.values) {
         final selten = GearCatalog.forSlotAndRarity(slot, GearRarity.rare);
         if (selten.isEmpty) continue;
 
         expect(
           selten.single.price,
-          GearCatalog.forSlot(slot).last.price,
-          reason: 'Auf ${slot.label} ist das seltene Stück nicht das teuerste',
+          GearCatalog.forSlot(slot).where((i) => !i.rarity.isGated).last.price,
+          reason: 'Auf ${slot.label} ist Selten nicht das teuerste Offene',
         );
       }
     });

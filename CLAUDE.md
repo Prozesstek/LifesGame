@@ -71,10 +71,11 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 77 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 88 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
+| `packages/gear/lib/src/gates.dart` | ab welcher Sprosse Episch und Legendär kaufbar sind | nur Dart-SDK |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
@@ -86,6 +87,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
+| `tool/gear_icons_gen.dart` | erzeugt die Bilder der verdienten Stücke aus Formen | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
@@ -160,7 +162,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 435 Tests
+flutter test             # 446 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -180,7 +182,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 143 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 77 Tests, prüft Preise, Sets und den Verkauf
+cd packages/gear        ; dart test    # 88 Tests, prüft Preise, Sets, Verkauf und die Sperre
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -253,7 +255,7 @@ stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`
 nicht und muss den Zufluss deshalb annehmen (25 Gold am Tag); dass die
 Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
-mitgeprüft — jedes Stück muss wirken, jeder Platz führt fünf, und teurer
+mitgeprüft — jedes Stück muss wirken, jeder Platz führt acht (fünf offene, drei verdiente), und teurer
 muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
 
 **Verkauf gibt es seit [ADR-0031](docs/decisions/0031-verkauf-als-versenkte-kosten.md),
@@ -289,10 +291,20 @@ Zusage.
 
 **Die Waffe ist dabei der Sonderfall.** Sie ist der einzige Platz, dessen
 Stück eine **Fähigkeit** mitbringt, und keine zwei tragen dieselbe
-(ADR-0017, Punkt 2). Eine sechste Waffe braucht deshalb einen sechsten
+(ADR-0017, Punkt 2). Eine neunte Waffe braucht deshalb einen neunten
 Zug, der Energie *erzeugt* — sonst fällt `test/abilities_seam_test.dart`
-um. Ob die fünf Rhythmen sich wirklich unterscheiden, misst
+um. Ob die acht Rhythmen sich wirklich unterscheiden, misst
 `dart run tool/balance_sim.dart` im Abschnitt „Siegquote je Waffe".
+
+**Episch und Legendär sind verdient, nicht nur gekauft**
+([ADR-0034](docs/decisions/0034-episch-und-legendaer-haengen-an-der-gegnerreihe.md)).
+Die zwei Sprossen stehen in `GearGates` — eine Frage, eine Stelle — und
+`Loadout.blockFor` prüft sie **vor** dem Gold. Der dritte Parameter
+`highestRung` hat den Standardwert 0, und das ist die sichere Richtung:
+Wer ihn vergisst, bekommt eine Sperre, keinen Bypass. Tests, die den
+ganzen Katalog kaufen, setzen ihn auf `GearGates.legendaryRung`. Dass
+die Sprossen in der Reihe existieren, prüft
+`flutter test test/gear_gates_seam_test.dart`.
 
 **Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Engine.**
 Alle fünfzehn stehen in `packages/combat/lib/src/ability_moves.dart`, ihre

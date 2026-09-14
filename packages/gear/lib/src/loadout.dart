@@ -1,4 +1,5 @@
 import 'catalog.dart';
+import 'gates.dart';
 import 'gear_set.dart';
 import 'item.dart';
 import 'prices.dart';
@@ -14,6 +15,10 @@ enum PurchaseBlock {
 
   /// Zu teuer.
   zuWenigGold,
+
+  /// Noch nicht verdient: Die Seltenheit hängt an der Gegnerreihe
+  /// (`GearGates`), und die nötige Sprosse ist nicht geschlagen.
+  gesperrt,
 }
 
 /// Was der Spieler besitzt und was er davon trägt.
@@ -162,16 +167,37 @@ class Loadout {
   /// Gibt einen Grund statt eines bloßen `false` zurück, damit die
   /// Oberfläche sagen kann, *warum* der Knopf aus ist. „Geht nicht" ohne
   /// Grund ist die häufigste Art, einen Nutzer zu verlieren.
-  PurchaseBlock? blockFor(String itemId, {required int availableGold}) {
+  ///
+  /// [highestRung] ist die höchste geschlagene Sprosse der Gegnerreihe.
+  /// Sie entscheidet über Episches und Legendäres (ADR-0034) — und die
+  /// Sperre kommt **vor** dem Gold: Wer ein gesperrtes Stück ansieht, soll
+  /// lesen, dass es verdient werden muss, nicht dass es zu teuer ist.
+  PurchaseBlock? blockFor(
+    String itemId, {
+    required int availableGold,
+    int highestRung = 0,
+  }) {
     final item = GearCatalog.byId(itemId);
     if (item == null) return PurchaseBlock.unbekannt;
     if (isOwned(itemId)) return PurchaseBlock.bereitsGekauft;
+    if (!GearGates.isOpen(item.rarity, highestRung: highestRung)) {
+      return PurchaseBlock.gesperrt;
+    }
     if (item.price > availableGold) return PurchaseBlock.zuWenigGold;
     return null;
   }
 
-  bool canBuy(String itemId, {required int availableGold}) {
-    return blockFor(itemId, availableGold: availableGold) == null;
+  bool canBuy(
+    String itemId, {
+    required int availableGold,
+    int highestRung = 0,
+  }) {
+    final block = blockFor(
+      itemId,
+      availableGold: availableGold,
+      highestRung: highestRung,
+    );
+    return block == null;
   }
 
   /// Kauft ein Stück und legt es gleich an.
@@ -180,8 +206,17 @@ class Loadout {
   /// fragt vorher mit [blockFor] und schaltet den Knopf ab. Sofort anlegen,
   /// weil ein gekauftes Stück, das nicht wirkt, wie ein Fehler aussieht;
   /// wer die alte Wahl zurück will, kann jederzeit umrüsten.
-  Loadout buy(String itemId, {required int availableGold}) {
-    if (!canBuy(itemId, availableGold: availableGold)) return this;
+  Loadout buy(
+    String itemId, {
+    required int availableGold,
+    int highestRung = 0,
+  }) {
+    final erlaubt = canBuy(
+      itemId,
+      availableGold: availableGold,
+      highestRung: highestRung,
+    );
+    if (!erlaubt) return this;
     final item = GearCatalog.byId(itemId);
     if (item == null) return this;
 

@@ -26,14 +26,13 @@ void main() {
       }
     });
 
-    test(
-      'es sind genau drei — Episch und Legendär gehören den Fähigkeiten',
-      () {
-        // `package:abilities` hat fünf Stufen, weil dort etwas zu erreichen
-        // ist. Im Laden gibt es nur zu kaufen; drei reichen.
-        expect(GearRarity.values, hasLength(3));
-      },
-    );
+    test('es sind fünf — zwei davon verdient, nicht nur gekauft', () {
+      // Bis ADR-0034 waren es drei: Im Laden gab es nichts zu erreichen.
+      // Seit der Gegnerreihe gibt es das, und Episch und Legendär hängen
+      // daran (`GearGates`).
+      expect(GearRarity.values, hasLength(5));
+      expect(GearRarity.gated, hasLength(2));
+    });
   });
 
   group('Die Marke im Laden', () {

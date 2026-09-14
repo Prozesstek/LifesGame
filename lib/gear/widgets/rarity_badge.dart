@@ -31,6 +31,10 @@ class RarityBadge extends StatelessWidget {
       GearRarity.common => const Color(0xFF5A4E3C),
       GearRarity.uncommon => const Color(0xFF265A31),
       GearRarity.rare => const Color(0xFF2A4E86),
+      // Lila und Gold, wie in jedem Spiel, das die beiden Stufen kennt --
+      // eine Konvention, die man nicht erklaeren muss.
+      GearRarity.epic => const Color(0xFF6A2E9A),
+      GearRarity.legendary => const Color(0xFFA8781A),
     };
   }
 

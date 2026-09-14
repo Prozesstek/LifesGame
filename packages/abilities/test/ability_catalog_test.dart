@@ -38,13 +38,13 @@ void main() {
       }
     });
 
-    test('fünf Waffen, und jede bringt einen anderen Zug mit', () {
-      // ADR-0017 Punkt 2 zählt fünf Waffen auf. Dass es sie im Laden
+    test('acht Waffen, und jede bringt einen anderen Zug mit', () {
+      // ADR-0017 Punkt 2 zählt fünf Waffen auf, ADR-0034 drei dazu. Dass es sie im Laden
       // gibt, kann dieses Package nicht wissen — dass keine zwei
       // denselben Zug tragen, schon.
       final ids = AbilityCatalog.weaponMoves.values.toList();
 
-      expect(ids, hasLength(5));
+      expect(ids, hasLength(8));
       expect(
         ids.toSet(),
         hasLength(ids.length),

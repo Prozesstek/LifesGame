@@ -408,6 +408,45 @@ abstract final class Moves {
     energyDelta: 5,
   );
 
+  // --- Die drei Waffen hinter der Gegnerreihe (ADR-0034) ---
+  //
+  // Dieselbe Regel wie oben: Alle erzeugen Energie, keine kostet welche.
+  // Was sie von den fuenf ersten unterscheidet, ist nicht "mehr", sondern
+  // ein Rhythmus, den es unter den fuenf noch nicht gab: der langsamste
+  // Schlag, der doppelte Pfeil, und ein Zug mit einer Perfect-Wirkung --
+  // bisher hatte kein Waffenzug eine.
+
+  /// Zweihaender: der haerteste Einzelschlag im Spiel, und der langsamste
+  /// Weg zu Energie. Wer ihn traegt, spielt fast nur diesen Zug.
+  static const Move greatswordCleave = Move(
+    id: 'greatsword_cleave',
+    name: 'Spalter',
+    power: 1.6,
+    energyDelta: 1,
+  );
+
+  /// Langbogen: zwei Pfeile, zwei Tipps. Jeder fuer sich schwach, beide
+  /// zusammen etwa ein Bogenschuss -- aber mit zwei Chancen auf Perfect
+  /// und deutlich mehr Energie.
+  static const Move longbowVolley = Move(
+    id: 'longbow_volley',
+    name: 'Doppelschuss',
+    power: 0.45,
+    energyDelta: 4,
+    hits: 2,
+  );
+
+  /// Sonnenklinge: der einzige Waffenzug mit einer Perfect-Wirkung. Ein
+  /// perfekter Treffer entzuendet den Gegner -- das Feuer aus Funkenstoss,
+  /// nur ohne Energiekosten. Genau deshalb sitzt sie hinter Sprosse 20.
+  static const Move sunbladeFlare = Move(
+    id: 'sunblade_flare',
+    name: 'Sonnenhieb',
+    power: 1.4,
+    energyDelta: 3,
+    perfectEffects: <MoveEffect>[ApplyBurn()],
+  );
+
   /// Knoten *Erholung*: eine Runde nichts tun, dafuer Energie und etwas
   /// Heilung. Der einzige Move ausserhalb der Waffen, der Energie erzeugt.
   static const Move breath = Move(
@@ -431,6 +470,9 @@ abstract final class Moves {
     daggerDouble,
     maceBash,
     staffGather,
+    greatswordCleave,
+    longbowVolley,
+    sunbladeFlare,
     heavyAttack,
     poisonStrike,
     mend,

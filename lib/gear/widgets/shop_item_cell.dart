@@ -21,6 +21,7 @@ class ShopItemCell extends StatelessWidget {
     required this.isOwned,
     required this.isEquipped,
     required this.onTap,
+    this.isLocked = false,
     super.key,
   });
 
@@ -28,6 +29,12 @@ class ShopItemCell extends StatelessWidget {
   final bool isSelected;
   final bool isOwned;
   final bool isEquipped;
+
+  /// Noch nicht verdient: Die Seltenheit haengt an der Gegnerreihe, und
+  /// die Sprosse fehlt (ADR-0034). Die Kachel bleibt antippbar -- die
+  /// Detailflaeche sagt, was fehlt. Eine ausgegraute Kachel, die auf
+  /// nichts reagiert, saehe wie ein Fehler aus.
+  final bool isLocked;
   final VoidCallback onTap;
 
   /// Abstand zwischen zwei Kacheln.
@@ -99,7 +106,9 @@ class ShopItemCell extends StatelessWidget {
                     fontSize: 10,
                     height: 1.15,
                     fontWeight: FontWeight.bold,
-                    color: isOwned ? Palette.textDim : Palette.text,
+                    color: (isOwned || isLocked)
+                        ? Palette.textDim
+                        : Palette.text,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -114,7 +123,9 @@ class ShopItemCell extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: isEquipped
                         ? Palette.success
-                        : (isOwned ? Palette.muted : Palette.gold),
+                        : ((isOwned || isLocked)
+                              ? Palette.muted
+                              : Palette.gold),
                   ),
                 ),
               ],
@@ -128,6 +139,7 @@ class ShopItemCell extends StatelessWidget {
   String get _fussnote {
     if (isEquipped) return 'getragen';
     if (isOwned) return 'gekauft';
+    if (isLocked) return 'gesperrt';
     return '${item.price} G';
   }
 }

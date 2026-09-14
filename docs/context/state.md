@@ -7,9 +7,87 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 12.09.2026 · Prozesstek (Ziel 8: Errungenschaften gebaut)
+**Zuletzt aktualisiert:** 14.09.2026 · AktivesBrett
 
 ---
+
+## Sitzung 14.09.2026: Episch und Legendär — verdient, nicht gekauft
+
+Der Wunsch war „zwei Epics und ein Legendary je Ausrüstung". Gebaut sind
+**achtzehn Stücke, zwei neue Stufen und eine Sperre**
+([ADR-0034](../decisions/0034-episch-und-legendaer-haengen-an-der-gegnerreihe.md)).
+445 App-Tests (vorher 437), gear 88 (vorher 77), combat 130.
+
+### Was gebaut ist
+
+- **48 Stücke statt 27.** Acht je Platz: fünf offene (2 · 2 · 1, ADR-0029)
+  und drei verdiente (2 · 1). Ein Reiter trägt acht Kacheln in drei Reihen
+- **Zwei Stufen, die an der Gegnerreihe hängen:** Episch ab Sprosse 10,
+  Legendär ab Sprosse 20 (`GearGates`). Gesperrte Stücke stehen sichtbar
+  im Laden, mit Preis; die Kachel sagt „gesperrt", die Detailfläche nennt
+  die Sprosse
+- **Drei neue Waffenzüge** in `package:combat`: Spalter (1,6 / +1),
+  Doppelschuss (0,45 × 2 / +4), Sonnenhieb (1,4 / +3, Perfect entzündet).
+  Jeder ein Rhythmus, den es unter den fünf ersten nicht gab
+- **Lila und Gold** als Marke — die Konvention, die niemand erklären muss
+
+### Drei Entscheidungen, die begründet gehören
+
+**Verdient statt teurer.** `GearRarity` hatte ausdrücklich drei Stufen,
+„weil es im Laden nichts zu erreichen gibt". Seit der Gegnerreihe gibt es
+das. Der andere Weg — Legendär für 4000 Gold — hätte im 30-Tage-Lauf
+niemand gesehen, das wären 160 Tage Gewohnheiten.
+
+**Sprosse 20, nicht 30.** Die dreißigste ist der letzte Gegner; wer dort
+freischaltet, hat nichts mehr, wogegen er es trägt. Ab 20 bleiben zehn.
+
+**Die Sperre vor dem Gold.** Ein gesperrtes Stück sagt „verdient ab Gegner
+10", nicht „zu teuer" — sonst spart jemand auf einen Knopf, der danach
+immer noch aus ist.
+
+### Was die Simulation dazu sagt
+
+Der Waffenvergleich läuft jetzt über alle dreißig Gegner. Tag 30, drei
+Sprossen als Ausschnitt:
+
+| Waffe | Sprosse 20 | Sprosse 23 | Sprosse 25 |
+|---|---|---|---|
+| Übungsklinge | 96 % | 24 % | 5 % |
+| **Zweihänder** (Episch) | 100 % | **91 %** | **61 %** |
+| **Sonnenklinge** (Legendär) | 100 % | 87 % | 59 % |
+
+**Die Sonnenklinge liegt knapp unter dem Zweihänder, und das ist die
+Simulation, nicht das Spiel.** Der Bot trifft zur Hälfte perfekt, der Brand
+zündet also nur jede zweite Runde. Ein Mensch, der die Leiste trifft, hat
+den härteren Zug *und* Dauerschaden. Die erste Fassung mit Power 1,2 lag
+bei 63 % — deutlich unter dem Episch — und ist deshalb auf 1,4 gehoben.
+
+**Was auffällt:** Ein Spieler an Tag 30 mit Übungsklinge kommt bis Sprosse
+22, mit Zweihänder bis 26. Die verdienten Waffen verschieben die Grenze um
+etwa vier Sprossen — das ist die Größenordnung, die eine Sperre
+rechtfertigt, ohne die Reihe zu entwerten.
+
+### Beim Bauen gemeldet
+
+`Loadout.buy` hat einen dritten Parameter, `highestRung`, mit
+Standardwert 0. **Das ist die sichere Richtung** (`gotchas.md`, Eintrag
+zum Standardwert): Wer ihn vergisst, bekommt eine Sperre, keinen Bypass.
+Drei Tests, die den ganzen Katalog kaufen, haben es sofort gemeldet —
+`ever_owned_test` zählte plötzlich zwölf statt fünfzehn Stücke.
+
+### Offen
+
+- ~~**Keine Bilder**~~ — **nachgeliefert am selben Tag.** Alle achtzehn
+  haben eins, **erzeugt statt gemalt**: `tool/gear_icons_gen.dart`
+  zeichnet sie aus Rechtecken, Scheiben und Linien auf 32 × 32 mit einer
+  dunklen Kontur, bewusst gröber als Frederiks 64er („ganz simpel").
+  Wer eines ändern will, ändert die Form im Werkzeug, nicht ein PNG.
+  Dabei ist ein Test gefallen, der „größer als 1000 Bytes" prüfte —
+  flache Flächen komprimieren darunter. Er prüft jetzt Signatur und
+  Kantenlänge, was er hätte von Anfang an tun sollen.
+- **Ob 10 und 20 richtig liegen**, sagt der 30-Tage-Lauf.
+- **Nicht am Bild geprüft.** „Krone des Hochwächters" ist jetzt der
+  längste Name im Laden; der Layout-Test läuft bei 390 × 844 ohne Überlauf.
 
 ## Sitzung 12.09.2026: Errungenschaften sind gebaut
 

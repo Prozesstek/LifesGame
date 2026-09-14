@@ -18,14 +18,19 @@
 /// Wahl: Solange kein Set und keine Fähigkeit am Stück hängt, wäre ein
 /// teureres und schwächeres Stück nichts als eine Falle.
 ///
-/// | Platz | Gewöhnlich | Ungewöhnlich | Selten |
-/// |---|---|---|---|
-/// | Waffe | 140 · 240 | 620 · 760 | 980 |
-/// | Rüstung | 160 · 280 | 680 · 840 | 1040 |
-/// | Helm | 110 · 200 | 420 · 560 | 760 |
-/// | Schuhe | 100 · 190 | 400 · 530 | 720 |
-/// | Ring | 180 · 320 | 740 · 880 | 1050 |
-/// | Talisman | 150 · 270 | 520 · 660 | 880 |
+/// | Platz | Gewöhnlich | Ungewöhnlich | Selten | Episch | Legendär |
+/// |---|---|---|---|---|---|
+/// | Waffe | 140 · 240 | 620 · 760 | 980 | 1150 · 1350 | 1800 |
+/// | Rüstung | 160 · 280 | 680 · 840 | 1040 | 1250 · 1450 | 1950 |
+/// | Helm | 110 · 200 | 420 · 560 | 760 | 950 · 1100 | 1500 |
+/// | Schuhe | 100 · 190 | 400 · 530 | 720 | 900 · 1050 | 1450 |
+/// | Ring | 180 · 320 | 740 · 880 | 1050 | 1300 · 1500 | 2000 |
+/// | Talisman | 150 · 270 | 520 · 660 | 880 | 1100 · 1300 | 1750 |
+///
+/// **Episch und Legendär sind nicht über den Preis knapp, sondern über die
+/// Gegnerreihe** (`GearGates`, ADR-0034). Deshalb liegen sie nur mäßig
+/// über Selten: Die Sperre ist die Hürde, der Preis nur der zweite Schritt.
+/// Wären sie zusätzlich unbezahlbar, sähe sie im 30-Tage-Lauf niemand.
 ///
 /// **Die Waffen sind der eine Platz, auf dem der Preis am wenigsten sagt.**
 /// Man kauft die zweite Waffe nicht für mehr Zahlen, sondern für einen
@@ -57,6 +62,9 @@ abstract final class GearPrices {
   /// Einzelstück des Ladens — sonst wäre ein Waffenwechsel eine
   /// Lebensentscheidung statt eines Versuchs.
   static const int waffeRare = 980;
+  static const int waffeEpic1 = 1150;
+  static const int waffeEpic2 = 1350;
+  static const int waffeLegendary = 1800;
 
   // --- Rüstung ---
   static const int ruestungCommon1 = 160;
@@ -64,6 +72,9 @@ abstract final class GearPrices {
   static const int ruestungUncommon1 = 680;
   static const int ruestungUncommon2 = 840;
   static const int ruestungRare = 1040;
+  static const int ruestungEpic1 = 1250;
+  static const int ruestungEpic2 = 1450;
+  static const int ruestungLegendary = 1950;
 
   // --- Helm ---
   static const int helmCommon1 = 110;
@@ -71,6 +82,9 @@ abstract final class GearPrices {
   static const int helmUncommon1 = 420;
   static const int helmUncommon2 = 560;
   static const int helmRare = 760;
+  static const int helmEpic1 = 950;
+  static const int helmEpic2 = 1100;
+  static const int helmLegendary = 1500;
 
   // --- Schuhe ---
   static const int schuheCommon1 = 100;
@@ -78,6 +92,9 @@ abstract final class GearPrices {
   static const int schuheUncommon1 = 400;
   static const int schuheUncommon2 = 530;
   static const int schuheRare = 720;
+  static const int schuheEpic1 = 900;
+  static const int schuheEpic2 = 1050;
+  static const int schuheLegendary = 1450;
 
   // --- Ring ---
   static const int ringCommon1 = 180;
@@ -85,9 +102,16 @@ abstract final class GearPrices {
   static const int ringUncommon1 = 740;
   static const int ringUncommon2 = 880;
 
-  /// Das teuerste Stück im Laden. Bei 25 Gold am Tag sind das rund 42
-  /// Tage — knapp unter der Grenze, die `catalog_test.dart` zieht.
+  /// Das teuerste **frei zugängliche** Stück im Laden. Bei 25 Gold am Tag
+  /// sind das rund 42 Tage — knapp unter der Grenze, die
+  /// `catalog_test.dart` zieht.
   static const int ringRare = 1050;
+  static const int ringEpic1 = 1300;
+  static const int ringEpic2 = 1500;
+
+  /// Das teuerste Stück überhaupt. 80 Tage Gewohnheiten — aber wer es
+  /// kaufen darf, hat zwanzig Sprossen geschafft und deren Gold dazu.
+  static const int ringLegendary = 2000;
 
   // --- Talisman ---
   static const int talismanCommon1 = 150;
@@ -95,4 +119,7 @@ abstract final class GearPrices {
   static const int talismanUncommon1 = 520;
   static const int talismanUncommon2 = 660;
   static const int talismanRare = 880;
+  static const int talismanEpic1 = 1100;
+  static const int talismanEpic2 = 1300;
+  static const int talismanLegendary = 1750;
 }

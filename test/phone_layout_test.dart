@@ -84,9 +84,16 @@ void main() {
     // Jeder Platz belegt. Ein leeres Ausrüstungsraster zeigt sechsmal
     // „leer" -- die echten Namen sind das, was in der schmalen Kachel
     // überläuft, und „Schuppenpanzer" ist der längste davon.
+    // Mit der Reihe durch, sonst bleiben Episches und Legendaeres draussen
+    // (ADR-0034) -- und "Krone des Hochwaechters" ist jetzt der laengste
+    // Name im Laden.
     var loadout = const Loadout.empty();
     for (final item in GearCatalog.all) {
-      loadout = loadout.buy(item.id, availableGold: item.price);
+      loadout = loadout.buy(
+        item.id,
+        availableGold: item.price,
+        highestRung: GearGates.legendaryRung,
+      );
     }
 
     return SaveData(theory: progress, habits: tracker, loadout: loadout);

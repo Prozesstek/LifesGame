@@ -60,7 +60,7 @@ class MoveAnimation {
   /// Anzeigetext und dürfen sich ändern, Ids nicht.
   static MoveAnimation forId(String moveId) {
     return switch (moveId) {
-      'basic_attack' => bow,
+      'basic_attack' || 'longbow_volley' => bow,
       'heavy_attack' => heavy,
       'poison_strike' => melee,
       'mend' => support,
