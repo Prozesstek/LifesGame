@@ -536,7 +536,13 @@ void main() {
       for (final item in GearCatalog.all.where(
         (i) => i.slot == GearSlot.waffe,
       )) {
-        loadout = loadout.buy(item.id, availableGold: item.price);
+        // **Mit der höchsten Sprosse.** Ohne sie greift seit ADR-0034 die
+        // Sperre, und die drei verdienten Waffen fehlen still im Blatt.
+        loadout = loadout.buy(
+          item.id,
+          availableGold: item.price,
+          highestRung: GearGates.legendaryRung,
+        );
       }
       return SaveData(loadout: loadout);
     }

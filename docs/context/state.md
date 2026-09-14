@@ -39,12 +39,18 @@ einen (`abilities_seam_test.dart`).
 simulierten Spieler jetzt halb so viele Fähigkeiten aus dem Baum; die
 Tabellen weiter unten stammen noch aus der alten Rechnung.
 
-### Schon auf `main` rot
+### Ein roter Test hat die Web-App blockiert — behoben
 
 `character_test.dart` → „das Auswahlblatt zeigt Bild und Set jedes
-Stücks" erwartet mindestens sieben Bilder und findet fünf. Der Test fällt
-auch ohne diese beiden Änderungen um; vermutlich passen #44 und #45 nach
-dem Merge nicht zusammen. **Nicht behoben.**
+Stücks" war seit dem Merge von #45 rot, und weil `pages.yml` erst testet
+und dann baut, ist **seit #44 keine Web-Fassung mehr veröffentlicht
+worden**.
+
+Ursache: #45 entstand vor #44. Sein Aufbau `mitBeidenWaffen()` kaufte
+„alle Waffen" ohne `highestRung` — seit ADR-0034 greift dann die Sperre,
+und die drei verdienten Waffen fehlten still. Genau der Fall, vor dem
+`CLAUDE.md` bei `GearGates` warnt. Jeder PR war für sich grün; rot wurde
+erst der gemergte Stand.
 
 ## Sitzung 14.09.2026: Episch und Legendär — verdient, nicht gekauft
 
