@@ -547,7 +547,7 @@ nicht Nacharbeit:
 | `docs/context/ziele.md` | **Wohin** es geht: Ziellinie, SMART-Ziele mit Termin, und was ausdrücklich *nicht* dazugehört | freitags die Ist-Spalten; bei Zielwechsel sofort |
 | `docs/decisions/NNNN-*.md` | **Warum** eine Entscheidung so fiel | sobald eine Entscheidung fällt, die man in drei Monaten hinterfragen würde |
 | `docs/context/gotchas.md` | Fallstricke, die Zeit gekostet haben | sobald etwas unerwartet war |
-| `docs/vorlagen/` | Entwürfe, aus denen gebaut wird — Fähigkeiten, später das Kampfsystem | sobald eine Vorlage entsteht, **bevor** danach gebaut wird |
+| `docs/vorlagen/` | Entwürfe, aus denen gebaut wird — Fähigkeiten, Lernen, später das Kampfsystem | sobald eine Vorlage entsteht, **bevor** danach gebaut wird |
 
 **Eine Vorlage, die nur auf einem Rechner liegt, existiert für den anderen
 nicht.** Genau das ist bei `Kampfsystem.docx` passiert: In `state.md` steht
