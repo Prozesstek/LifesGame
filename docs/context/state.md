@@ -11,6 +11,108 @@
 
 ---
 
+## Sitzung 20.09.2026, abends: ein Echtzeit-Prototyp und eine Lern-Vorlage
+
+Nach dem Teststart. Zwei Dinge, die beide **keine Entscheidung** sind —
+ein Prototyp und ein Entwurf. 471 App-Tests (vorher 461), das neue
+Package 28.
+
+### Der Befund, der beides ausgelöst hat
+
+Die Frage war, ob sich der Kampf im Diablo-Stil besser anfühlen würde.
+Die Simulation hat zuerst etwas anderes gezeigt: **Der schwächste Gegner
+der Reihe braucht auch nach zwei Monaten noch sieben Runden.**
+
+| Runden gegen den Wegelagerer | Tag 0 | Tag 14 | Tag 30 | Tag 60 |
+|---|---|---|---|---|
+| | 10,6 | 9,4 | 7,6 | **7,1** |
+
+Über ein ganzes Spielerleben wird der erste Gegner um ein Drittel
+schneller besiegt. Die Ursache ist nicht die Rundenbasiertheit, sondern
+der **Werte-Deckel**: Der Angriff wächst von 13 auf 20, also um 54 %,
+und ist nach etwa einem Monat am Ende (ADR-0008). Dazu stimmt ADR-0009
+die Reihe bewusst so ab, dass jede Sprosse knapp bleibt — es gibt also
+per Konstruktion nichts, das man hinter sich lässt.
+
+**Daraus folgt: Kein Kampfsystem fühlt sich nach Diablo an, solange die
+Macht additiv und gedeckelt wächst.** Echtzeit löst davon genau einen
+Teil — dass zwanzig Gegner keine zwanzig Runden kosten.
+
+### `packages/action_combat` — der Prototyp
+
+Neuntes Package, reines Dart mit leerem `dependencies`-Block wie die
+anderen acht. Es steht **neben** `package:combat`, nicht an seiner
+Stelle; beide kennen einander nicht.
+
+- **Fester Zeitschritt, gesäter Zufall, keine Wanduhr.** Damit bleibt ein
+  ganzer Lauf ohne Renderer simulierbar — dieselbe Naht wie ADR-0002,
+  und der Grund, warum es ein eigenes Package ist
+- **Die Halle ist eine Textkarte** (`# . @ e B`), 46 × 34, vier Räume,
+  26 Fussvolk und ein Wächter. `Level.problems` prüft sie wie
+  `TheoryGraph.isHealthy`: geschlossen, genau ein Endgegner, **jeder
+  Gegner vom Start aus erreichbar**
+- **Wegfindung über ein Flutfeld** vom Helden aus — eine Flutfüllung für
+  alle statt einer Suche je Gegner
+- **Darstellung mit Flame, ohne Komponentenbaum**: Würfel,
+  Schachbrettboden, Lebensbalken, aufsteigende Schadenszahlen.
+  Steuerkreuz oder WASD, geschlagen wird von selbst
+- Erreichbar **nur über den Entwicklermodus**, also nur im Debug-Bau
+
+`dart run example/headless_run.dart`:
+
+| Stufe | ATK | Ausgang | Dauer | je Gegner | HP übrig |
+|---|---|---|---|---|---|
+| Tag 0 | 13 | gefallen | 32 s | 2,5 s | 0 % |
+| Decke heute | 30 | geschafft | 58 s | 2,2 s | 82 % |
+| mit Potenz | 30 | geschafft | 48 s | 1,8 s | 96 % |
+
+**„Mit Potenz" gibt es im Spiel nicht** — dieselben Werte, aber Schaden
+mal drei und kritische Treffer. Der Knopf existiert, damit sich der
+Unterschied **spüren** lässt statt nur ausrechnen.
+
+Und die Zahlen sagen schon etwas: „je Gegner" bewegt sich kaum, weil der
+Bot die meiste Zeit **läuft**. Der Machtzuwachs zeigt sich hier als
+Überleben, nicht als Tempo.
+
+### Zwei Dinge, die der kopflose Lauf gefunden hat
+
+**Ohne Wegfindung kam der Bot über zwei Gegner nicht hinaus** — alles
+blieb an der ersten Ecke stehen. Im Browser hätte man das als „fühlt
+sich komisch an" abgetan.
+
+**Der Nachhol-Deckel war zu niedrig.** Bei fünf Schritten verlor ein Bild
+von 100 ms jedes Mal einen Schritt, und die Welt lief dauerhaft langsamer
+als die Uhr. Der allererste Test des Packages hat genau das gemeldet.
+
+### `docs/vorlagen/lernen.md`
+
+Eine Konzeptrunde zum Lernen, nichts davon gebaut. Der Befund in einem
+Satz: **Eine App über Wiederholung lehrt ohne Wiederholung** — eine
+Lektion wird einmal gelesen, einmal abgefragt und nie wieder angesehen.
+
+Fünf Vorschläge, nach Kosten sortiert; zwei davon sind fast nur
+Verdrahtung („Wann machst du das?" am Lektionsende, Optionen erst nach
+dem Nachdenken). Die **Rückfrage des Tages** braucht einen ADR: Sie
+brächte zum ersten Mal wiederholbare Erfahrung ins Spiel — genau die
+Grenze, die ADR-0032 beim Kampf gezogen hat.
+
+Ausdrücklich **nicht** vorgeschlagen: mehr Belohnung aufs Lernen. Was
+fehlt, ist sichtbare **Kompetenz**, nicht sichtbarer Ertrag.
+
+### Offen
+
+- **Der Prototyp ist nicht gespielt worden.** Tests und Analyzer sind
+  grün, der Web-Build steht — wie es sich **anfühlt**, muss jemand
+  ansehen. Das ist der ganze Zweck der Sache.
+- **Kein ADR zum Echtzeit-Kampf.** Erst spielen, dann entscheiden. Fällt
+  die Antwort nein aus, ist es ein `git revert` von einem Commit.
+- **Die Potenz-Kurve ist die eigentliche Frage** und in keiner der beiden
+  Vorlagen entschieden: Soll Macht vervielfachen statt zu addieren — und
+  wird der Kampf damit zur Quelle von Macht statt zu ihrer Auszahlung
+  (`konzept.md` Abschnitt 2)?
+- Drei Feedback-Issues stehen noch: **#47 Fähigkeiten, #48 Kampf,
+  #49 Shop**.
+
 ## Sitzung 20.09.2026: das Abhaken zahlt sichtbar aus
 
 Issue [#46](https://github.com/Prozesstek/LifesGame/issues/46) („Feedback

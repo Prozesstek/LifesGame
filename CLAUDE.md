@@ -87,6 +87,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
+| `packages/action_combat/` | **Prototyp**: Echtzeit-Kampf, reines Dart, 28 Tests — steht neben `combat`, nicht an seiner Stelle | nur Dart-SDK |
+| `packages/action_combat/lib/src/level_catalog.dart` | die Hallen als **Textkarte** — hier wird geschrieben | nur Dart-SDK |
+| `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
+| `lib/action/` | die Darstellung dazu — Würfel, Steuerkreuz, nur im Entwicklermodus | Flutter |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `tool/gear_icons_gen.dart` | erzeugt die Bilder der verdienten Stücke aus Formen | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
