@@ -84,7 +84,11 @@ sich komisch an" abgetan.
 von 100 ms jedes Mal einen Schritt, und die Welt lief dauerhaft langsamer
 als die Uhr. Der allererste Test des Packages hat genau das gemeldet.
 
-### `docs/vorlagen/lernen.md`
+### `docs/vorlagen/lernen.md` — eigener Branch
+
+> Liegt auf `docs/vorlage-lernen` und hängt an nichts von hier. Sie
+> gehört zu dieser Sitzung, nicht zu diesem Prototyp.
+
 
 Eine Konzeptrunde zum Lernen, nichts davon gebaut. Der Befund in einem
 Satz: **Eine App über Wiederholung lehrt ohne Wiederholung** — eine
