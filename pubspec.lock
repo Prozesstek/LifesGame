@@ -23,6 +23,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  action_combat:
+    dependency: "direct main"
+    description:
+      path: "packages/action_combat"
+      relative: true
+    source: path
+    version: "0.1.0"
   analyzer:
     dependency: transitive
     description:

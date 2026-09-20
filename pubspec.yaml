@@ -15,6 +15,11 @@ dependencies:
   combat:
     path: packages/combat
 
+  # Echtzeit-Kampf als **Prototyp** (Issue #48). Steht neben `combat`,
+  # nicht an seiner Stelle -- erreichbar nur ueber den Entwicklermodus.
+  action_combat:
+    path: packages/action_combat
+
   # Theorie-Inhalte und Lernfortschritt. Ebenfalls reines Dart, damit
   # Lektionen ohne laufende App geschrieben und geprueft werden koennen
   # (ADR-0004).

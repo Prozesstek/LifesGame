@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 
+import '../action/action_prototype_screen.dart';
 import '../gear/gear_controller.dart';
 import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
@@ -105,6 +106,25 @@ class DevScreen extends ConsumerWidget {
                 _AbilityPicker(onPick: _grants(ref).grantAbility),
 
                 const SizedBox(height: 24),
+                const _SectionTitle('Prototypen'),
+                const _Note(
+                  'Echtzeit-Kampf in einer Halle voller Gegner. Steht '
+                  'neben dem rundenbasierten Kampf, nicht an seiner '
+                  'Stelle — nichts davon berührt einen Spielstand.',
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ActionPrototypeScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.sports_martial_arts, size: 18),
+                    label: const Text('Die Grube (Echtzeit-Prototyp)'),
+                  ),
+                ),
+
                 const _SectionTitle('Große Knöpfe'),
                 const SizedBox(height: 4),
                 FilledButton.icon(
