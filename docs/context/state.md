@@ -84,6 +84,55 @@ sich komisch an" abgetan.
 von 100 ms jedes Mal einen Schritt, und die Welt lief dauerhaft langsamer
 als die Uhr. Der allererste Test des Packages hat genau das gemeldet.
 
+### Nachgelegt: Knöpfe, Bogenschützen, Heilkugeln
+
+Nach dem ersten Spielen ausgebaut — aus Laufen-und-Draufhalten wird ein
+Kampf. 472 App-Tests, action_combat 47 (vorher 28).
+
+| | Was |
+|---|---|
+| **Sturmschritt** | Ein Satz nach vorn, viermal Tempo, **kein Schaden** — er ist der Ausweg, nicht der zweite Angriff |
+| **Rundumschlag** | ×1,5 auf alles im Umkreis, 5 Sekunden Abklingzeit |
+| **Fünf Fernkämpfer** | Bleiben auf Abstand, weichen zurück, schiessen — Geschosse bleiben an Wänden hängen |
+| **Heilkugeln** | 28 % Quote, 8 % der vollen Gesundheit, fliegen aus 64 Punkten zu |
+
+Dazu Rückstoss auf Treffer (nicht auf den Helden, nicht auf den
+Wächter), Trefferblitz, ein Ring bei Tod und Rundumschlag.
+
+**Ein Fehler, den der erste Testlauf gefunden hat:** Der Fernkämpfer
+schoss weiter, als er sah — 230 Reichweite gegen 210
+Aufmerksamkeitsradius. Er stand da und liess sich beschiessen. Jeder
+Gegner bemerkt jetzt spätestens auf seiner eigenen Reichweite.
+
+| Stufe | Ausgang | Dauer | je Gegner | Kugeln | HP übrig |
+|---|---|---|---|---|---|
+| Tag 0 | gefallen | 32 s | 2,0 s | 3 | 0 % |
+| Decke heute | geschafft | 71 s | 2,6 s | 5 | 57 % |
+| **mit Potenz** | geschafft | 53 s | 2,0 s | 7 | **89 %** |
+
+**Die Schützen haben die Halle deutlich härter gemacht** — „Decke heute"
+kam vorher mit 82 % durch. Erwartbar: Der Bot weicht keinem Pfeil aus.
+
+**Drei Zahlen sind geraten, nicht gemessen:** fünf Sekunden Abklingzeit
+auf den Rundumschlag (bei drei wird er die Dauerlösung), fünf
+Fernkämpfer, und die Position der Knöpfe unten rechts.
+
+
+Beide Fassungen sind gespielt und für gut befunden — von **einem** von
+zwei Entwicklern. Damit ist die Frage „fühlt sich das besser an"
+beantwortet und die Frage „wird das Projekt das" offen. Zwei Dinge sind
+jetzt entscheidbar und keines davon entschieden:
+
+- **Die Potenz-Kurve.** „Mit Potenz" ist die Stufe, die sich am besten
+  spielt, und die es im Spiel nicht gibt. Soll Macht vervielfachen statt
+  zu addieren? Das berührt ADR-0008 und die vier Kurven.
+- **Die Richtung.** Wird der Echtzeit-Kampf *der* Kampf, oder bleibt er
+  ein zweiter Modus neben der Gegnerreihe? Davon hängt ab, was mit
+  `packages/combat` und den dreissig Sprossen passiert.
+
+Beides gehört in einen ADR, bevor weitergebaut wird — sonst entsteht
+nebenbei eine Entscheidung, die niemand getroffen hat.
+
 ### `docs/vorlagen/lernen.md` — eigener Branch
 
 > Liegt auf `docs/vorlage-lernen` und hängt an nichts von hier. Sie
@@ -105,11 +154,14 @@ fehlt, ist sichtbare **Kompetenz**, nicht sichtbarer Ertrag.
 
 ### Offen
 
-- **Der Prototyp ist nicht gespielt worden.** Tests und Analyzer sind
-  grün, der Web-Build steht — wie es sich **anfühlt**, muss jemand
-  ansehen. Das ist der ganze Zweck der Sache.
-- **Kein ADR zum Echtzeit-Kampf.** Erst spielen, dann entscheiden. Fällt
-  die Antwort nein aus, ist es ein `git revert` von einem Commit.
+- **Gespielt hat ihn nur einer von zwei.** Beide Fassungen sind für gut
+  befunden — von Frederik. Eine Richtungsänderung am Kampf, die einer
+  allein gut findet, ist keine Entscheidung, sondern eine Vorliebe.
+- **Kein ADR zum Echtzeit-Kampf.** Fällt die Antwort am Ende nein aus,
+  ist es ein `git revert` von drei Commits.
+- **Nichts ist gepusht.** Drei Branches liegen lokal; für AktivesBrett
+  existiert bis dahin nichts davon — derselbe Fall wie
+  `Kampfsystem.docx`.
 - **Die Potenz-Kurve ist die eigentliche Frage** und in keiner der beiden
   Vorlagen entschieden: Soll Macht vervielfachen statt zu addieren — und
   wird der Kampf damit zur Quelle von Macht statt zu ihrer Auszahlung
