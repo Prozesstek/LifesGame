@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
@@ -15,6 +16,8 @@ import 'widgets/custom_habit_sheet.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
+import 'widgets/streak_freeze_card.dart';
+import 'widgets/streak_ladder_card.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
 /// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
@@ -33,6 +36,9 @@ class HabitsScreen extends ConsumerWidget {
     final slotsLeft = ref.watch(customSlotsLeftProvider);
 
     final active = tracker.activeHabitsByPriority;
+    // Der Tag, den ein Streak-Eis gerade noch retten kann. Die Regel
+    // dafür steht in `package:habits`, nicht hier.
+    final zuRetten = tracker.rescuableDay(today);
     final availableTemplates = unlocked
         .where((t) => !tracker.isActive(t.id))
         .toList(growable: false);
@@ -66,6 +72,18 @@ class HabitsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
                     children: <Widget>[
                       StatSummary(stats: stats),
+                      const SizedBox(height: 12),
+                      if (zuRetten != null) ...<Widget>[
+                        StreakFreezeCard(
+                          streakAtRisk: tracker.currentBestStreak(zuRetten),
+                          freezesLeft: tracker.freezesLeft,
+                          onUse: () => _useFreeze(context, ref, zuRetten),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      StreakLadderCard(
+                        bestStreak: tracker.currentBestStreak(today),
+                      ),
                       const SizedBox(height: 24),
                       _SectionHeader(
                         title: 'Heute',
@@ -88,6 +106,8 @@ class HabitsScreen extends ConsumerWidget {
                               habit.id,
                               today,
                             ),
+                            xpGain: tracker.xpForNextCheck(habit.id, today),
+                            goldGain: tracker.goldForNextCheck(habit.id, today),
                             progress: tracker.progressOn(habit.id, today),
                             onToggle: () => _toggle(context, ref, habit),
                             onAdvance: () => _advance(context, ref, habit),
@@ -182,14 +202,18 @@ class HabitsScreen extends ConsumerWidget {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
+    final werteVorher = ref.read(characterStatsProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
         .toggle(habit.id, today);
     if (result == null) return;
 
+    // Ein Häkchen soll sich anfühlen wie eins. Auf einem Handy ist das
+    // ein kurzer Stoß; im Browser und im Test passiert nichts.
+    unawaited(HapticFeedback.mediumImpact());
     _celebrate(context, ref, vorher, vorherErrungen);
-    _say(context, _feedback(result));
+    _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
   }
 
   /// Ein Schritt auf ein Tagesziel.
@@ -197,12 +221,14 @@ class HabitsScreen extends ConsumerWidget {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
+    final werteVorher = ref.read(characterStatsProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
         .advance(habit.id, today);
 
     if (!result.isComplete) {
+      unawaited(HapticFeedback.selectionClick());
       final goal = habit.goal;
       _say(
         context,
@@ -213,8 +239,9 @@ class HabitsScreen extends ConsumerWidget {
       return;
     }
 
+    unawaited(HapticFeedback.mediumImpact());
     _celebrate(context, ref, vorher, vorherErrungen);
-    _say(context, _feedback(result));
+    _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
   }
 
   /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier
@@ -240,30 +267,81 @@ class HabitsScreen extends ConsumerWidget {
     });
   }
 
-  static void _say(BuildContext context, String text) {
+  /// Setzt ein Streak-Eis auf [tag].
+  void _useFreeze(BuildContext context, WidgetRef ref, Day tag) {
+    final today = ref.read(todayProvider);
+    final gerettet = ref.read(habitTrackerProvider).currentBestStreak(tag);
+    final erfolg = ref
+        .read(habitTrackerProvider.notifier)
+        .useStreakFreeze(tag, today);
+    if (!erfolg) return;
+
+    unawaited(HapticFeedback.mediumImpact());
+    _say(
+      context,
+      'Gestern ist gedeckt — deine Kette von $gerettet Tagen läuft '
+      'weiter. Sie wird davon nicht länger.',
+      icon: Icons.ac_unit,
+    );
+  }
+
+  /// Die Rückmeldung unten.
+  ///
+  /// Das Zeichen ist bewusst **nicht** `Icons.check_circle`: Das trägt
+  /// die Kachel, und zwei gleiche Zeichen im selben Bild lesen sich als
+  /// dasselbe Ding. Hier steht der Ertrag, nicht das Häkchen.
+  static void _say(
+    BuildContext context,
+    String text, {
+    IconData icon = Icons.auto_awesome,
+  }) {
     final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
     messenger.showSnackBar(
       SnackBar(
-        content: Text(text),
-        duration: const Duration(seconds: 2),
+        content: Row(
+          children: <Widget>[
+            Icon(icon, size: 18, color: Palette.success),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(text, style: const TextStyle(color: Palette.text)),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 3),
         backgroundColor: Palette.surfaceRaised,
       ),
     );
+  }
+
+  /// Der Punkt, den dieses Häkchen auf einem Charakterwert gebracht hat —
+  /// oder ein leerer Text.
+  ///
+  /// **Fünf Häkchen sind ein Punkt Stärke**, das Abhaken zahlt also nur
+  /// jedes fünfte Mal sichtbar aus. Der Balken in der Kopfzeile bewegt
+  /// sich jedes Mal; wenn der Punkt fällt, soll es außerdem jemand sagen.
+  static String _statGain(WidgetRef ref, Habit habit, CharacterStats vorher) {
+    final nachher = ref.read(characterStatsProvider);
+    final zuwachs = nachher.valueFor(habit.stat) - vorher.valueFor(habit.stat);
+    if (zuwachs <= 0) return '';
+    return ' · +$zuwachs ${habit.stat.label}';
   }
 
   /// Was nach einem Häkchen in der Leiste steht.
   ///
   /// Ein erreichter Meilenstein verdrängt den Ertrag: Beides zusammen ist
   /// eine Zeile zu viel, und der Meilenstein ist die seltenere Nachricht.
-  String _feedback(CheckResult result) {
+  /// Ein gewonnener Charakterpunkt hängt sich dagegen an beides an — er
+  /// ist die Verbindung zum Kampf und damit der Grund für das Ganze.
+  String _feedback(CheckResult result, String statGain) {
     final milestone = result.reachedMilestone;
     if (milestone != null) {
       final faktor = milestone.multiplier
           .toStringAsFixed(1)
           .replaceAll('.', ',');
-      return '${milestone.days} Tage am Stück — ab jetzt x$faktor';
+      return '${milestone.days} Tage am Stück — ab jetzt x$faktor$statGain';
     }
-    return '+${result.xpGained} Erfahrung · +${result.goldGained} Gold';
+    return '+${result.xpGained} Erfahrung · +${result.goldGained} Gold'
+        '$statGain';
   }
 }
 
