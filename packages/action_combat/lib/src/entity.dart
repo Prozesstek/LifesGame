@@ -4,7 +4,18 @@ import 'vec2.dart';
 enum Faction { held, gegner }
 
 /// Welche Art Gegner. Der Held trägt [EnemyKind.keiner].
-enum EnemyKind { keiner, fussvolk, endgegner }
+enum EnemyKind {
+  keiner,
+
+  /// Läuft heran und schlägt zu.
+  fussvolk,
+
+  /// Bleibt auf Abstand und schiesst.
+  schuetze,
+
+  /// Der Wächter am Ende. Wird nicht zurückgestossen.
+  endgegner,
+}
 
 /// Eine Figur in der Halle.
 ///

@@ -12,9 +12,11 @@ import 'package:action_combat/action_combat.dart';
 /// dart run example/headless_run.dart
 /// ```
 ///
-/// Der Bot ist bewusst dumm: Er läuft auf den nächsten Gegner zu und
-/// lässt den Automatikschlag arbeiten. Er weicht nicht aus, er kitet
-/// nicht. Alles, was ein Mensch besser macht, fehlt — die Zahlen sind
+/// Der Bot ist bewusst dumm: Er läuft auf den nächsten Gegner zu, drückt
+/// den Rundumschlag, wenn drei in Reichweite stehen, und den
+/// Sturmschritt, wenn es eng wird. Er weicht keinem Pfeil aus, er kitet
+/// nicht, er sammelt Heilkugeln nur ein, wenn sie zufällig im Weg
+/// liegen. Alles, was ein Mensch besser macht, fehlt — die Zahlen sind
 /// damit eine **untere** Schranke, genau wie bei `tool/balance_sim.dart`.
 void main() {
   print('Die Grube — ${LevelCatalog.grube.spawns.length} Gegner\n');
@@ -31,6 +33,7 @@ void main() {
     '${'Ausgang'.padLeft(10)}'
     '${'Dauer'.padLeft(9)}'
     '${'je Gegner'.padLeft(11)}'
+    '${'Kugeln'.padLeft(9)}'
     '${'HP übrig'.padLeft(10)}',
   );
 
@@ -45,6 +48,7 @@ void main() {
       '${(ergebnis.gewonnen ? 'geschafft' : 'gefallen').padLeft(10)}'
       '${'${ergebnis.sekunden.toStringAsFixed(0)} s'.padLeft(9)}'
       '${'${jeGegner.toStringAsFixed(1)} s'.padLeft(11)}'
+      '${ergebnis.kugeln.toString().padLeft(9)}'
       '${'${(ergebnis.hpAnteil * 100).round()} %'.padLeft(10)}',
     );
   }
@@ -63,12 +67,14 @@ class _Ergebnis {
     required this.sekunden,
     required this.kills,
     required this.hpAnteil,
+    required this.kugeln,
   });
 
   final bool gewonnen;
   final double sekunden;
   final int kills;
   final double hpAnteil;
+  final int kugeln;
 }
 
 /// Höchstens fünf Minuten je Lauf — ein Patt darf die Ausgabe nicht
@@ -84,6 +90,7 @@ _Ergebnis _lauf(ActionStats stats) {
   );
 
   while (!welt.isOver && welt.elapsed < _zeitDeckel) {
+    _botFaehigkeiten(welt);
     welt.step(_botEingabe(welt));
   }
 
@@ -92,7 +99,33 @@ _Ergebnis _lauf(ActionStats stats) {
     sekunden: welt.elapsed,
     kills: welt.kills,
     hpAnteil: welt.heroHpRatio,
+    kugeln: welt.orbsCollected,
   );
+}
+
+/// Wann der Bot einen Knopf drückt.
+///
+/// Zwei Regeln, mehr braucht es nicht, um die Fähigkeiten überhaupt in
+/// die Messung zu bekommen: Rundumschlag gegen eine Traube, Sturmschritt
+/// wenn es eng **und** knapp wird.
+void _botFaehigkeiten(ActionWorld welt) {
+  final held = welt.heroView;
+  final spec = ActionBalance.abilities[ActionAbility.rundumschlag]!;
+
+  var nah = 0;
+  for (final sicht in welt.views) {
+    if (sicht.faction != Faction.gegner) continue;
+    final reichweite = spec.radius + sicht.radius;
+    if (held.position.distanceSquaredTo(sicht.position) <=
+        reichweite * reichweite) {
+      nah++;
+    }
+  }
+
+  if (nah >= 3) welt.useAbility(ActionAbility.rundumschlag);
+  if (nah >= 2 && welt.heroHpRatio < 0.35) {
+    welt.useAbility(ActionAbility.sturmschritt);
+  }
 }
 
 /// Lauf auf den nächsten Gegner zu. Mehr kann der Bot nicht.

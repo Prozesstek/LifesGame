@@ -42,6 +42,7 @@ class Level {
   /// | `.` | Boden |
   /// | `@` | Start des Helden |
   /// | `e` | Fussvolk |
+  /// | `s` | Fernkämpfer |
   /// | `B` | Endgegner |
   ///
   /// Kürzere Zeilen werden rechts mit Wand aufgefüllt. Ein unbekanntes
@@ -72,6 +73,9 @@ class Level {
           case 'e':
             row.add(Tile.boden);
             spawns.add(Spawn(kind: EnemyKind.fussvolk, tileX: x, tileY: y));
+          case 's':
+            row.add(Tile.boden);
+            spawns.add(Spawn(kind: EnemyKind.schuetze, tileX: x, tileY: y));
           case 'B':
             row.add(Tile.boden);
             spawns.add(Spawn(kind: EnemyKind.endgegner, tileX: x, tileY: y));
@@ -110,7 +114,11 @@ class Level {
   double get worldHeight => height * ActionBalance.tileSize;
 
   int get trashCount {
-    return spawns.where((s) => s.kind == EnemyKind.fussvolk).length;
+    return spawns.where((s) => s.kind != EnemyKind.endgegner).length;
+  }
+
+  int get archerCount {
+    return spawns.where((s) => s.kind == EnemyKind.schuetze).length;
   }
 
   Tile tileAt(int x, int y) {

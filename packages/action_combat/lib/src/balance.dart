@@ -1,3 +1,5 @@
+import 'ability.dart';
+
 /// Sämtliche Stellschrauben des Echtzeit-Kampfs an einem Ort.
 ///
 /// Gleiche Regel wie bei `combat/balance.dart` und `habits/rewards.dart`:
@@ -54,12 +56,95 @@ abstract final class ActionBalance {
   /// Der Deckel dafür. Ohne ihn wird aus einem Wert ein Exploit.
   static const double minAttackCooldown = 0.3;
 
+  // --- Fähigkeiten ---
+
+  /// Was jede Fähigkeit kostet und kann.
+  ///
+  /// **Der Sturmschritt richtet keinen Schaden an.** Er ist der Ausweg,
+  /// nicht der zweite Angriff — sonst gäbe es keinen Grund, je den
+  /// Rundumschlag zu drücken.
+  ///
+  /// Der Rundumschlag trifft weiter als ein normaler Schlag (58 gegen 34)
+  /// und härter (1,5×), kostet dafür fünf Sekunden. Fünf, weil drei ihn
+  /// zur Dauerlösung machten: Wer jede dritte Sekunde alles um sich
+  /// herum trifft, braucht keine Bewegung mehr.
+  static const Map<ActionAbility, AbilitySpec> abilities =
+      <ActionAbility, AbilitySpec>{
+    ActionAbility.sturmschritt: AbilitySpec(
+      cooldown: 3,
+      radius: 0,
+      power: 0,
+      duration: 0.18,
+      speedFactor: 4.2,
+    ),
+    ActionAbility.rundumschlag: AbilitySpec(
+      cooldown: 5,
+      radius: 58,
+      power: 1.5,
+      duration: 0,
+      speedFactor: 1,
+    ),
+  };
+
   // --- Die Gegner ---
 
   static const double trashRadius = 10;
   static const double trashSpeed = 68;
   static const double trashAttackRange = 30;
   static const double trashAttackCooldown = 1.3;
+
+  /// Der Fernkämpfer: bleibt auf Abstand und schiesst.
+  ///
+  /// **Er ist der Grund, sich zu bewegen.** Gegen Nahkämpfer allein ist
+  /// Stehenbleiben und Draufhalten die beste Antwort — genau das, was
+  /// einen Kampf nach zwei Räumen gleichförmig macht.
+  static const double archerRadius = 10;
+  static const double archerSpeed = 58;
+
+  /// Näher will er nicht heran. Kommt der Held trotzdem, weicht er zurück.
+  static const double archerPreferredRange = 175;
+
+  /// Ab wo er schiesst.
+  static const double archerShootRange = 230;
+  static const double archerCooldown = 1.9;
+
+  static const int archerHp = 26;
+  static const int archerAttack = 11;
+  static const int archerDefense = 0;
+
+  // --- Geschosse ---
+
+  static const double projectileSpeed = 215;
+  static const double projectileRadius = 5;
+
+  /// Nach so vielen Sekunden verfällt ein Geschoss, falls es nie
+  /// ankommt. Ohne das sammelt eine lange Partie Geschosse an, die
+  /// niemand mehr sieht.
+  static const double projectileLifetime = 4;
+
+  // --- Heilkugeln ---
+
+  /// Wie oft ein gefallener Gegner eine Heilkugel hinterlässt.
+  ///
+  /// **Sie macht aus 27 Einzelkämpfen einen Lauf.** Ohne sie ist die
+  /// verbliebene Gesundheit eine Zahl, die nur fällt; mit ihr wird sie
+  /// zur Ressource, über die man unterwegs entscheidet.
+  static const double orbDropChance = 0.28;
+
+  /// Wie viel eine Kugel heilt, als Anteil der vollen Gesundheit. Ein
+  /// Anteil statt einer festen Zahl, damit sie über alle Machtstufen
+  /// gleich viel wert ist.
+  static const double orbHealShare = 0.08;
+
+  static const double orbRadius = 7;
+
+  /// Ab wo sie von selbst zum Helden fliegt. Ein Prototyp soll nicht am
+  /// Pixelgenauen scheitern.
+  static const double orbMagnetRange = 64;
+  static const double orbMagnetSpeed = 260;
+
+  /// Nach so vielen Sekunden verschwindet eine liegengebliebene Kugel.
+  static const double orbLifetime = 12;
 
   static const double bossRadius = 22;
   static const double bossSpeed = 52;
@@ -98,6 +183,13 @@ abstract final class ActionBalance {
 
   /// Streuung je Schlag, als Anteil. 0,15 heisst 85 % bis 115 %.
   static const double damageSpread = 0.15;
+
+  /// Wie weit ein Treffer den Getroffenen zurückstösst.
+  ///
+  /// Klein, aber nicht null: Ohne Rückstoss fühlt sich ein Schlag an wie
+  /// eine Zahlenänderung. Der Endgegner wird **nicht** geschoben — ein
+  /// Koloss, den man durch den Raum schiebt, ist kein Koloss.
+  static const double knockback = 9;
 
   /// Was ein Schlag mindestens anrichtet. Sonst gibt es Gegner, gegen die
   /// ein Lauf nicht endet — derselbe Fall wie der Heal-Lock aus

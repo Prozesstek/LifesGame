@@ -37,6 +37,13 @@ class ActionGame extends Game {
 
   final List<DamagePopup> _popups = <DamagePopup>[];
   final List<SwingMark> _swings = <SwingMark>[];
+  final List<Burst> _bursts = <Burst>[];
+
+  /// Wer gerade getroffen wurde, und wie lange das noch aufblitzt.
+  ///
+  /// **Im Renderer, nicht in der Welt.** Ein Trefferblitz ist Anzeige;
+  /// die Simulation weiss nichts davon und soll es nicht.
+  final Map<int, double> _flashes = <int, double>{};
 
   bool _endeGemeldet = false;
 
@@ -55,6 +62,7 @@ class ActionGame extends Game {
         case HitLanded():
           final popup = DamagePopup.forHit(event);
           if (popup != null) _popups.add(popup);
+          _flashes[event.targetId] = Burst.flashTime;
         case AttackSwung():
           _swings.add(
             SwingMark(
@@ -64,8 +72,19 @@ class ActionGame extends Game {
             ),
           );
         case EntityDied():
+          _bursts.add(Burst.death(event.at, event.kind));
+          _flashes.remove(event.id);
+        case AbilityUsed():
+          if (event.ability == ActionAbility.rundumschlag) {
+            _bursts.add(Burst.cleave(event.at));
+          }
+        case OrbDropped():
         case EnemyNoticed():
           break;
+        case OrbCollected():
+          if (event.healed > 0) {
+            _popups.add(DamagePopup.forHeal(event));
+          }
         case RunEnded():
           _endeGemeldet = true;
       }
@@ -80,6 +99,16 @@ class ActionGame extends Game {
       swing.update(dt);
     }
     _swings.removeWhere((s) => !s.isAlive);
+
+    for (final burst in _bursts) {
+      burst.update(dt);
+    }
+    _bursts.removeWhere((b) => !b.isAlive);
+
+    _flashes.removeWhere((_, rest) => rest - dt <= 0);
+    for (final id in _flashes.keys.toList()) {
+      _flashes[id] = _flashes[id]! - dt;
+    }
 
     frame.value++;
     if (_endeGemeldet) {
@@ -97,8 +126,11 @@ class ActionGame extends Game {
     canvas.translate(kamera.x, kamera.y);
 
     _drawFloor(canvas, kamera);
+    _drawOrbs(canvas);
     _drawEntities(canvas);
+    _drawProjectiles(canvas);
     _drawSwings(canvas);
+    _drawBursts(canvas);
     _drawPopups(canvas);
 
     canvas.restore();
@@ -194,6 +226,20 @@ class ActionGame extends Game {
       );
 
       canvas.drawRect(rect, Paint()..color = _colorFor(view));
+
+      // Ein Treffer blitzt weiss auf. Ohne das ist ein Schlag nur eine
+      // Zahl, die irgendwo erscheint — man sieht nicht, wen es traf.
+      final flash = _flashes[view.id];
+      if (flash != null && flash > 0) {
+        canvas.drawRect(
+          rect,
+          Paint()
+            ..color = Colors.white.withValues(
+              alpha: (flash / Burst.flashTime).clamp(0.0, 1.0) * 0.8,
+            ),
+        );
+      }
+
       canvas.drawRect(
         rect,
         Paint()
@@ -225,8 +271,70 @@ class ActionGame extends Game {
     return switch (view.kind) {
       EnemyKind.keiner => Palette.goldOnDark,
       EnemyKind.fussvolk => Palette.enemyOnDark,
+      // Der Fernkämpfer hebt sich ab, weil er anders behandelt werden
+      // muss: Auf ihn zuzulaufen ist die Entscheidung, die er erzwingt.
+      EnemyKind.schuetze => Palette.accentOnDark,
       EnemyKind.endgegner => Palette.enemy,
     };
+  }
+
+  // --- Geschosse, Kugeln, Explosionen ---
+
+  void _drawProjectiles(Canvas canvas) {
+    for (final shot in sim.projectiles) {
+      final mitte = Offset(shot.position.x, shot.position.y);
+      final schweif = Offset(
+        shot.position.x - shot.direction.x * 9,
+        shot.position.y - shot.direction.y * 9,
+      );
+
+      canvas.drawLine(
+        schweif,
+        mitte,
+        Paint()
+          ..color = Palette.enemyOnDark.withValues(alpha: 0.5)
+          ..strokeWidth = 3,
+      );
+      canvas.drawCircle(
+        mitte,
+        shot.radius,
+        Paint()..color = Palette.enemyOnDark,
+      );
+    }
+  }
+
+  void _drawOrbs(Canvas canvas) {
+    for (final orb in sim.orbs) {
+      // Eine blinkende Kugel ist gleich weg. Ohne die Vorwarnung liest
+      // sich ihr Verschwinden als Fehler.
+      final sichtbar = !orb.fading || (sim.elapsed * 6).floor().isEven;
+      if (!sichtbar) continue;
+
+      final mitte = Offset(orb.position.x, orb.position.y);
+      canvas.drawCircle(
+        mitte,
+        orb.radius + 3,
+        Paint()..color = Palette.successOnDark.withValues(alpha: 0.25),
+      );
+      canvas.drawCircle(
+        mitte,
+        orb.radius,
+        Paint()..color = Palette.successOnDark,
+      );
+    }
+  }
+
+  void _drawBursts(Canvas canvas) {
+    for (final burst in _bursts) {
+      canvas.drawCircle(
+        Offset(burst.at.x, burst.at.y),
+        burst.radius,
+        Paint()
+          ..color = burst.color.withValues(alpha: burst.opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = burst.strokeWidth,
+      );
+    }
   }
 
   void _drawHpBar(Canvas canvas, EntityView view) {

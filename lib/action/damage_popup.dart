@@ -38,6 +38,19 @@ class DamagePopup {
     );
   }
 
+  /// Was eine eingesammelte Heilkugel über dem Kopf zeigt.
+  ///
+  /// Grün und mit Pluszeichen — dieselbe Regel wie im rundenbasierten
+  /// Kampf: Heilung sieht nie aus wie Schaden.
+  static DamagePopup forHeal(OrbCollected orb) {
+    return DamagePopup(
+      text: '+${orb.healed}',
+      color: Palette.successOnDark,
+      origin: orb.at,
+      scale: 1.1,
+    );
+  }
+
   final String text;
   final Color color;
   final Vec2 origin;
@@ -65,6 +78,62 @@ class DamagePopup {
     if (p < 0.5) return 1;
     return (1 - (p - 0.5) * 2).clamp(0.0, 1.0);
   }
+
+  void update(double dt) => age += dt;
+}
+
+/// Ein Ring, der aufgeht und verblasst — für alles, was knallt.
+///
+/// Drei Anlässe, drei Farben: ein gefallener Gegner, der Rundumschlag,
+/// und der Endgegner, der grösser platzt als sein Fussvolk.
+class Burst {
+  Burst({
+    required this.at,
+    required this.color,
+    required this.maxRadius,
+    required this.lifetime,
+    required this.strokeWidth,
+  });
+
+  /// Wie lange ein Treffer aufblitzt.
+  static const double flashTime = 0.12;
+
+  factory Burst.death(Vec2 at, EnemyKind kind) {
+    final gross = kind == EnemyKind.endgegner;
+    return Burst(
+      at: at,
+      color: gross ? Palette.enemy : Palette.enemyOnDark,
+      maxRadius: gross ? 90 : 26,
+      lifetime: gross ? 0.7 : 0.3,
+      strokeWidth: gross ? 5 : 3,
+    );
+  }
+
+  factory Burst.cleave(Vec2 at) {
+    return Burst(
+      at: at,
+      color: Palette.goldOnDark,
+      maxRadius: ActionBalance.abilities[ActionAbility.rundumschlag]!.radius,
+      lifetime: 0.28,
+      strokeWidth: 4,
+    );
+  }
+
+  final Vec2 at;
+  final Color color;
+  final double maxRadius;
+  final double lifetime;
+  final double strokeWidth;
+
+  double age = 0;
+
+  bool get isAlive => age < lifetime;
+
+  double get progress => (age / lifetime).clamp(0.0, 1.0);
+
+  double get radius => maxRadius * progress;
+
+  double get opacity => (1 - progress).clamp(0.0, 1.0);
 
   void update(double dt) => age += dt;
 }

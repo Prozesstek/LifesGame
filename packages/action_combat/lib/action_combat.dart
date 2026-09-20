@@ -12,12 +12,15 @@
 /// Aufräumen.
 library;
 
+export 'src/ability.dart';
 export 'src/balance.dart';
 export 'src/entity.dart';
 export 'src/events.dart';
 export 'src/flow_field.dart';
+export 'src/health_orb.dart';
 export 'src/level.dart';
 export 'src/level_catalog.dart';
+export 'src/projectile.dart';
 export 'src/stats.dart';
 export 'src/vec2.dart';
 export 'src/world.dart';

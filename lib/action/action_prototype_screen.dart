@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../gear/gear_controller.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import 'ability_buttons.dart';
 import 'action_game.dart';
 import 'action_joystick.dart';
 
@@ -96,8 +97,30 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
     game.moveInput = Vec2(x, y).normalized;
   }
 
+  /// Welche Taste welche Fähigkeit auslöst.
+  ///
+  /// Leertaste und Umschalt, weil beide erreichbar sind, ohne die linke
+  /// Hand von WASD zu nehmen.
+  /// Nicht `const`: `LogicalKeyboardKey` hat ein eigenes `==`, und
+  /// konstante Maps verlangen Schlüssel mit dem Standardvergleich.
+  static final Map<LogicalKeyboardKey, ActionAbility> _abilityKeys =
+      <LogicalKeyboardKey, ActionAbility>{
+        LogicalKeyboardKey.space: ActionAbility.rundumschlag,
+        LogicalKeyboardKey.shiftLeft: ActionAbility.sturmschritt,
+        LogicalKeyboardKey.shiftRight: ActionAbility.sturmschritt,
+      };
+
+  void _use(ActionAbility ability) {
+    _game?.sim.useAbility(ability);
+  }
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
+      final ability = _abilityKeys[event.logicalKey];
+      if (ability != null) {
+        _use(ability);
+        return KeyEventResult.handled;
+      }
       _tasten.add(event.logicalKey);
     } else if (event is KeyUpEvent) {
       _tasten.remove(event.logicalKey);
@@ -137,6 +160,15 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
                   left: 12,
                   right: 12,
                   child: _Hud(game: game),
+                ),
+                Positioned(
+                  right: 16,
+                  bottom: 24,
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: game.frame,
+                    builder: (context, _, _) =>
+                        AbilityButtons(world: game.sim, onUse: _use),
+                  ),
                 ),
               ],
               if (game == null) const _StartOverlayPlaceholder(),
@@ -202,7 +234,8 @@ class _Hud extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                   child: Text(
-                    '${sim.kills} / ${sim.totalEnemies} erledigt',
+                    '${sim.kills} / ${sim.totalEnemies} erledigt'
+                    '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
@@ -302,8 +335,12 @@ class _StartOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Sechsundzwanzig Gegner und ein Wächter. Laufen mit dem '
-                'Daumen oder WASD, geschlagen wird von selbst.\n\n'
+                'Sechsundzwanzig Gegner und ein Wächter, fünf davon mit '
+                'Bogen. Laufen mit dem Daumen oder WASD, geschlagen wird '
+                'von selbst.\n\n'
+                'Zwei Knöpfe unten rechts: Sturmschritt raus aus der '
+                'Traube, Rundumschlag mitten hinein. Auf der Tastatur '
+                'Umschalt und Leertaste.\n\n'
                 'Mit welcher Macht?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -453,6 +490,7 @@ class _EndOverlay extends StatelessWidget {
                 _Zeile('Gebraucht', '${sim.elapsed.toStringAsFixed(0)} s'),
                 _Zeile('Je Gegner', '${jeGegner.toStringAsFixed(1)} s'),
                 _Zeile('Leben übrig', '${sim.heroHp} / ${sim.heroMaxHp}'),
+                _Zeile('Heilkugeln', '${sim.orbsCollected}'),
                 if (stats != null) _Zeile('Angriff', '${stats!.attack}'),
                 const SizedBox(height: 18),
                 const Text(

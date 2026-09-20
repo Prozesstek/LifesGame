@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/action/ability_buttons.dart';
 import 'package:lifes_game/action/action_joystick.dart';
 import 'package:lifes_game/action/action_prototype_screen.dart';
 import 'package:lifes_game/action/damage_popup.dart';
@@ -45,6 +46,36 @@ void main() {
       final gegner = LevelCatalog.grube.spawns.length;
       expect(find.textContaining('/ $gegner erledigt'), findsOneWidget);
       expect(find.byType(ActionJoystick), findsOneWidget);
+      expect(find.byType(AbilityButtons), findsOneWidget);
+    });
+
+    testWidgets('die Fähigkeitsknöpfe lösen aus', (tester) async {
+      useTallView(tester);
+      await _pumpScreen(tester);
+
+      await tester.tap(find.text('Decke von heute'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Vor dem Druck ist alles bereit.
+      final game = tester
+          .widget<AbilityButtons>(find.byType(AbilityButtons))
+          .world;
+      expect(game.isReady(ActionAbility.rundumschlag), isTrue);
+
+      await tester.tap(find.bySemanticsLabel(ActionAbility.rundumschlag.label));
+      await tester.pump();
+
+      expect(
+        game.isReady(ActionAbility.rundumschlag),
+        isFalse,
+        reason: 'der Druck muss in der Welt ankommen, nicht nur im Knopf',
+      );
+      expect(
+        game.isReady(ActionAbility.sturmschritt),
+        isTrue,
+        reason: 'die andere Fähigkeit bleibt unberührt',
+      );
     });
 
     testWidgets('das Startblatt passt aufs Handy', (tester) async {

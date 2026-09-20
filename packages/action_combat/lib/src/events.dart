@@ -1,3 +1,4 @@
+import 'ability.dart';
 import 'entity.dart';
 import 'vec2.dart';
 
@@ -72,6 +73,38 @@ class EnemyNoticed extends ActionEvent {
 
   final int id;
   final Vec2 at;
+}
+
+/// Eine Fähigkeit wurde eingesetzt.
+class AbilityUsed extends ActionEvent {
+  const AbilityUsed({
+    required this.ability,
+    required this.at,
+    required this.direction,
+  });
+
+  final ActionAbility ability;
+  final Vec2 at;
+  final Vec2 direction;
+}
+
+/// Eine Heilkugel ist gefallen.
+class OrbDropped extends ActionEvent {
+  const OrbDropped({required this.id, required this.at});
+
+  final int id;
+  final Vec2 at;
+}
+
+/// Eine Heilkugel wurde eingesammelt.
+class OrbCollected extends ActionEvent {
+  const OrbCollected({required this.at, required this.healed});
+
+  final Vec2 at;
+
+  /// Was sie tatsächlich gebracht hat. Bei voller Gesundheit null — die
+  /// Kugel ist dann trotzdem weg, und genau das soll die Anzeige sagen.
+  final int healed;
 }
 
 /// Der Lauf ist vorbei.

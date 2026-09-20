@@ -1,10 +1,13 @@
 import 'dart:math' as math;
 
+import 'ability.dart';
 import 'balance.dart';
 import 'entity.dart';
+import 'health_orb.dart';
 import 'events.dart';
 import 'flow_field.dart';
 import 'level.dart';
+import 'projectile.dart';
 import 'stats.dart';
 import 'vec2.dart';
 
@@ -73,6 +76,17 @@ class ActionWorld {
   late FlowField _pathToHero;
   int _stepsSincePath = 0;
 
+  final List<Projectile> _projectiles = <Projectile>[];
+  final List<HealthOrb> _orbs = <HealthOrb>[];
+
+  /// Wie lange jede Fähigkeit noch braucht. Fehlt ein Eintrag, ist sie
+  /// bereit — ein frischer Lauf beginnt also mit allem in der Hand.
+  final Map<ActionAbility, double> _cooldowns = <ActionAbility, double>{};
+
+  /// Wie lange der Sturmschritt noch läuft, und wohin.
+  double _dashLeft = 0;
+  Vec2 _dashDirection = Vec2.zero;
+
   // --- Was die Darstellung sehen darf ---
 
   /// Kopien, keine Verweise: Die Darstellung soll zeichnen, nicht
@@ -85,6 +99,44 @@ class ActionWorld {
   }
 
   EntityView get heroView => EntityView.of(_hero);
+
+  List<ProjectileView> get projectiles {
+    return <ProjectileView>[
+      for (final p in _projectiles)
+        if (!p.spent) ProjectileView.of(p),
+    ];
+  }
+
+  List<OrbView> get orbs {
+    return <OrbView>[
+      for (final orb in _orbs)
+        if (!orb.taken)
+          OrbView.of(
+            orb,
+            fading: orb.age > ActionBalance.orbLifetime - 3,
+          ),
+    ];
+  }
+
+  /// Wie weit eine Fähigkeit noch braucht, als Anteil zwischen 0 und 1.
+  /// 0 heisst bereit.
+  double cooldownRatio(ActionAbility ability) {
+    final rest = _cooldowns[ability] ?? 0;
+    if (rest <= 0) return 0;
+    final spec = ActionBalance.abilities[ability];
+    if (spec == null || spec.cooldown <= 0) return 0;
+    return (rest / spec.cooldown).clamp(0.0, 1.0);
+  }
+
+  bool isReady(ActionAbility ability) => (_cooldowns[ability] ?? 0) <= 0;
+
+  /// Ob der Held gerade im Sturmschritt ist — für die Darstellung.
+  bool get isDashing => _dashLeft > 0;
+
+  /// Wie viele Heilkugeln eingesammelt wurden. Eine Zahl fürs Blatt am
+  /// Ende: Sie sagt, ob jemand den Lauf bestritten oder durchgehalten hat.
+  int get orbsCollected => _orbsCollected;
+  int _orbsCollected = 0;
 
   /// Der Endgegner, solange er lebt — für den Balken am oberen Rand.
   EntityView? get bossView {
@@ -152,6 +204,51 @@ class ActionWorld {
     return schritte;
   }
 
+  /// Setzt eine Fähigkeit ein. Gibt false zurück, wenn sie nicht bereit
+  /// ist — die Oberfläche fragt vorher und stellt den Knopf sonst matt.
+  ///
+  /// **Die Wirkung fällt sofort**, nicht im nächsten Schritt: Wer tippt,
+  /// soll den Schlag sehen, während sein Finger noch unten ist.
+  bool useAbility(ActionAbility ability) {
+    if (_over || !isReady(ability)) return false;
+
+    final spec = ActionBalance.abilities[ability];
+    if (spec == null) return false;
+
+    _cooldowns[ability] = spec.cooldown;
+    _events.add(
+      AbilityUsed(
+        ability: ability,
+        at: _hero.position,
+        direction: _hero.facing,
+      ),
+    );
+
+    switch (ability) {
+      case ActionAbility.sturmschritt:
+        _dashLeft = spec.duration;
+        _dashDirection =
+            _hero.facing.isZero ? const Vec2(1, 0) : _hero.facing.normalized;
+      case ActionAbility.rundumschlag:
+        _cleave(spec);
+    }
+    return true;
+  }
+
+  /// Trifft alles im Umkreis — der Moment, für den ein Haufen Gegner da
+  /// ist.
+  void _cleave(AbilitySpec spec) {
+    final reichweite = spec.radius;
+    for (final ziel in _entities) {
+      if (!ziel.isAlive || ziel.isHero) continue;
+      final abstand = reichweite + ziel.radius;
+      if (_hero.position.distanceSquaredTo(ziel.position) > abstand * abstand) {
+        continue;
+      }
+      _hit(_hero, ziel, powerFactor: spec.power);
+    }
+  }
+
   /// Ein einzelner fester Schritt. Tests rufen den direkt auf.
   void step(Vec2 moveInput) {
     if (_over) return;
@@ -164,10 +261,13 @@ class ActionWorld {
       _rebuildPath();
     }
 
+    _tickCooldowns(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
     _enemiesAct(dt);
+    _moveProjectiles(dt);
     _separate();
+    _moveOrbs(dt);
     _collectDead();
     _checkEnd();
   }
@@ -175,6 +275,20 @@ class ActionWorld {
   // --- Held ---
 
   void _moveHero(Vec2 input, double dt) {
+    // Der Sturmschritt übersteuert die Eingabe: Wer ihn drückt, will
+    // **weg**, nicht lenken. Steuerbar wäre er ein zweiter Gang, kein
+    // Ausweg.
+    if (_dashLeft > 0) {
+      _dashLeft -= dt;
+      final spec = ActionBalance.abilities[ActionAbility.sturmschritt]!;
+      _hero.position = _slide(
+        _hero.position,
+        _dashDirection * (_hero.speed * spec.speedFactor * dt),
+        _hero.radius,
+      );
+      return;
+    }
+
     final richtung = input.clampLength(1);
     if (richtung.isZero) return;
 
@@ -184,6 +298,14 @@ class ActionWorld {
       richtung * (_hero.speed * dt),
       _hero.radius,
     );
+  }
+
+  void _tickCooldowns(double dt) {
+    for (final ability in ActionAbility.values) {
+      final rest = _cooldowns[ability];
+      if (rest == null || rest <= 0) continue;
+      _cooldowns[ability] = rest - dt;
+    }
   }
 
   void _heroAttack(double dt) {
@@ -230,7 +352,11 @@ class ActionWorld {
       if (!gegner.isAlive || gegner.isHero) continue;
 
       final abstand = gegner.position.distanceTo(_hero.position);
-      if (!gegner.aggro && abstand <= ActionBalance.aggroRadius) {
+      // **Wer weiter schiesst, als er sieht, wäre blind.** Der
+      // Fernkämpfer hat eine grössere Reichweite als der Aufmerksamkeits-
+      // radius; ohne diese Zeile stünde er da und liesse sich beschiessen.
+      final merkt = math.max(ActionBalance.aggroRadius, gegner.attackRange);
+      if (!gegner.aggro && abstand <= merkt) {
         gegner.aggro = true;
         _events.add(EnemyNoticed(id: gegner.id, at: gegner.position));
       }
@@ -242,6 +368,11 @@ class ActionWorld {
       }
 
       gegner.cooldownLeft -= dt;
+
+      if (gegner.kind == EnemyKind.schuetze) {
+        _archerActs(gegner, abstand, dt);
+        continue;
+      }
 
       final reichweite = gegner.attackRange + _hero.radius;
       if (abstand > reichweite) {
@@ -271,13 +402,151 @@ class ActionWorld {
     }
   }
 
+  /// Der Fernkämpfer: auf Abstand halten, dann schiessen.
+  ///
+  /// **Er weicht zurück, wenn der Held zu nah kommt** — das ist sein
+  /// ganzer Zweck. Ein Schütze, der stehenbleibt, ist ein Nahkämpfer mit
+  /// anderer Farbe; einer, der zurückweicht, zwingt zum Nachsetzen und
+  /// damit dazu, die Traube im Rücken zu lassen.
+  void _archerActs(ActionEntity schuetze, double abstand, double dt) {
+    schuetze.facing = (_hero.position - schuetze.position).normalized;
+
+    if (abstand < ActionBalance.archerPreferredRange * 0.8) {
+      // Zu nah — rückwärts, und zwar geradewegs weg. Das Wegfeld hilft
+      // hier nicht, es zeigt ja zum Helden hin.
+      schuetze.position = _slide(
+        schuetze.position,
+        schuetze.facing * (-schuetze.speed * dt),
+        schuetze.radius,
+      );
+    } else if (abstand > ActionBalance.archerShootRange) {
+      final richtung = _chaseDirection(schuetze);
+      if (!richtung.isZero) {
+        schuetze.position = _slide(
+          schuetze.position,
+          richtung * (schuetze.speed * dt),
+          schuetze.radius,
+        );
+      }
+      return;
+    }
+
+    if (schuetze.cooldownLeft > 0) return;
+    schuetze.cooldownLeft = schuetze.attackCooldown;
+
+    _events.add(
+      AttackSwung(
+        attackerId: schuetze.id,
+        faction: Faction.gegner,
+        from: schuetze.position,
+        direction: schuetze.facing,
+      ),
+    );
+    _projectiles.add(
+      Projectile(
+        id: _nextId++,
+        faction: Faction.gegner,
+        position: schuetze.position,
+        velocity: schuetze.facing * ActionBalance.projectileSpeed,
+        damage: schuetze.attack,
+        radius: ActionBalance.projectileRadius,
+      ),
+    );
+  }
+
+  // --- Geschosse ---
+
+  void _moveProjectiles(double dt) {
+    for (final geschoss in _projectiles) {
+      if (geschoss.spent) continue;
+
+      geschoss.age += dt;
+      if (geschoss.age > ActionBalance.projectileLifetime) {
+        geschoss.spent = true;
+        continue;
+      }
+
+      geschoss.position = geschoss.position + geschoss.velocity * dt;
+
+      if (_hitsWall(geschoss.position, geschoss.radius)) {
+        geschoss.spent = true;
+        continue;
+      }
+
+      for (final ziel in _entities) {
+        if (!ziel.isAlive || ziel.faction == geschoss.faction) continue;
+        final reichweite = geschoss.radius + ziel.radius;
+        if (geschoss.position.distanceSquaredTo(ziel.position) >
+            reichweite * reichweite) {
+          continue;
+        }
+
+        geschoss.spent = true;
+        final wirklich = ziel.takeDamage(
+          math.max(ActionBalance.minDamage, geschoss.damage),
+        );
+        _events.add(
+          HitLanded(
+            targetId: ziel.id,
+            targetFaction: ziel.faction,
+            at: ziel.position,
+            amount: wirklich,
+            isCrit: false,
+          ),
+        );
+        break;
+      }
+    }
+    _projectiles.removeWhere((p) => p.spent);
+  }
+
+  // --- Heilkugeln ---
+
+  void _moveOrbs(double dt) {
+    for (final orb in _orbs) {
+      if (orb.taken) continue;
+
+      orb.age += dt;
+      if (orb.age > ActionBalance.orbLifetime) {
+        orb.taken = true;
+        continue;
+      }
+
+      final zumHelden = _hero.position - orb.position;
+      final abstand = zumHelden.length;
+
+      if (abstand <= orb.radius + _hero.radius) {
+        orb.taken = true;
+        final vorher = _hero.hp;
+        _hero.hp = math.min(_hero.maxHp, _hero.hp + orb.heal);
+        _orbsCollected++;
+        _events.add(
+          OrbCollected(at: _hero.position, healed: _hero.hp - vorher),
+        );
+        continue;
+      }
+
+      // Sie fliegt von selbst, sobald man nah genug ist. Ein Prototyp
+      // soll nicht am Pixelgenauen scheitern.
+      if (abstand <= ActionBalance.orbMagnetRange) {
+        orb.position = orb.position +
+            zumHelden.normalized * (ActionBalance.orbMagnetSpeed * dt);
+      }
+    }
+    _orbs.removeWhere((orb) => orb.taken);
+  }
+
   // --- Schaden ---
 
-  void _hit(ActionEntity attacker, ActionEntity target) {
+  void _hit(
+    ActionEntity attacker,
+    ActionEntity target, {
+    double powerFactor = 1,
+  }) {
     final kritisch =
         attacker.critChance > 0 && _rng.nextDouble() < attacker.critChance;
 
-    var roh = attacker.attack * attacker.damageMultiplier;
+    var roh = attacker.attack * attacker.damageMultiplier * powerFactor;
     if (kritisch) roh *= attacker.critFactor;
 
     final streuung =
@@ -286,6 +555,7 @@ class ActionWorld {
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
     final wirklich = target.takeDamage(schaden);
+    _knockBack(attacker, target);
 
     _events.add(
       HitLanded(
@@ -295,6 +565,24 @@ class ActionWorld {
         amount: wirklich,
         isCrit: kritisch,
       ),
+    );
+  }
+
+  /// Schiebt den Getroffenen ein Stück vom Schlag weg.
+  ///
+  /// **Der Endgegner und der Held bleiben stehen.** Ein Koloss, den man
+  /// durch den Raum schiebt, ist kein Koloss — und ein Held, den fünf
+  /// Gegner vor sich herschieben, gehört seinem Spieler nicht mehr.
+  void _knockBack(ActionEntity attacker, ActionEntity target) {
+    if (target.isHero || target.kind == EnemyKind.endgegner) return;
+
+    final richtung = (target.position - attacker.position).normalized;
+    if (richtung.isZero) return;
+
+    target.position = _slide(
+      target.position,
+      richtung * ActionBalance.knockback,
+      target.radius,
     );
   }
 
@@ -381,6 +669,7 @@ class ActionWorld {
       if (_gemeldet.contains(entity.id)) continue;
       _gemeldet.add(entity.id);
       _kills++;
+      _maybeDropOrb(entity);
       _events.add(
         EntityDied(
           id: entity.id,
@@ -393,6 +682,28 @@ class ActionWorld {
   }
 
   final Set<int> _gemeldet = <int>{};
+
+  /// Manchmal bleibt etwas liegen.
+  ///
+  /// **Der Endgegner lässt nichts fallen.** Nach ihm ist der Lauf vorbei;
+  /// eine Kugel dort wäre eine Belohnung für einen Weg, den niemand mehr
+  /// geht.
+  void _maybeDropOrb(ActionEntity gefallen) {
+    if (gefallen.kind == EnemyKind.endgegner) return;
+    if (_rng.nextDouble() >= ActionBalance.orbDropChance) return;
+
+    final orb = HealthOrb(
+      id: _nextId++,
+      position: gefallen.position,
+      heal: math.max(
+        1,
+        (_hero.maxHp * ActionBalance.orbHealShare).round(),
+      ),
+      radius: ActionBalance.orbRadius,
+    );
+    _orbs.add(orb);
+    _events.add(OrbDropped(id: orb.id, at: orb.position));
+  }
 
   void _checkEnd() {
     if (_over) return;
@@ -451,23 +762,46 @@ class ActionWorld {
   }
 
   ActionEntity _enemyFor(Spawn spawn) {
-    final istBoss = spawn.kind == EnemyKind.endgegner;
-    return ActionEntity(
-      id: _nextId++,
-      faction: Faction.gegner,
-      kind: spawn.kind,
-      position: level.centerOfSpawn(spawn),
-      maxHp: istBoss ? ActionBalance.bossHp : ActionBalance.trashHp,
-      attack: istBoss ? ActionBalance.bossAttack : ActionBalance.trashAttack,
-      defense: istBoss ? ActionBalance.bossDefense : ActionBalance.trashDefense,
-      radius: istBoss ? ActionBalance.bossRadius : ActionBalance.trashRadius,
-      speed: istBoss ? ActionBalance.bossSpeed : ActionBalance.trashSpeed,
-      attackRange: istBoss
-          ? ActionBalance.bossAttackRange
-          : ActionBalance.trashAttackRange,
-      attackCooldown: istBoss
-          ? ActionBalance.bossAttackCooldown
-          : ActionBalance.trashAttackCooldown,
-    );
+    return switch (spawn.kind) {
+      EnemyKind.endgegner => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: spawn.kind,
+          position: level.centerOfSpawn(spawn),
+          maxHp: ActionBalance.bossHp,
+          attack: ActionBalance.bossAttack,
+          defense: ActionBalance.bossDefense,
+          radius: ActionBalance.bossRadius,
+          speed: ActionBalance.bossSpeed,
+          attackRange: ActionBalance.bossAttackRange,
+          attackCooldown: ActionBalance.bossAttackCooldown,
+        ),
+      EnemyKind.schuetze => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: spawn.kind,
+          position: level.centerOfSpawn(spawn),
+          maxHp: ActionBalance.archerHp,
+          attack: ActionBalance.archerAttack,
+          defense: ActionBalance.archerDefense,
+          radius: ActionBalance.archerRadius,
+          speed: ActionBalance.archerSpeed,
+          attackRange: ActionBalance.archerShootRange,
+          attackCooldown: ActionBalance.archerCooldown,
+        ),
+      EnemyKind.fussvolk || EnemyKind.keiner => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: EnemyKind.fussvolk,
+          position: level.centerOfSpawn(spawn),
+          maxHp: ActionBalance.trashHp,
+          attack: ActionBalance.trashAttack,
+          defense: ActionBalance.trashDefense,
+          radius: ActionBalance.trashRadius,
+          speed: ActionBalance.trashSpeed,
+          attackRange: ActionBalance.trashAttackRange,
+          attackCooldown: ActionBalance.trashAttackCooldown,
+        ),
+    };
   }
 }
