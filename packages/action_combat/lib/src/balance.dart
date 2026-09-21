@@ -147,6 +147,9 @@ abstract final class ActionBalance {
   static const double heroBoltSpeed = 330;
   static const double heroBoltRadius = 6;
 
+  /// Wie lange der Brand einer Waffe nachglüht (Sonnenhieb).
+  static const double weaponBurnSeconds = 2;
+
   // --- Heilkugeln ---
 
   /// Wie oft ein gefallener Gegner eine Heilkugel hinterlässt.
@@ -245,11 +248,11 @@ abstract final class ActionBalance {
 
   /// Faktor auf die Lebenspunkte auf Stufe 1 und Stufe 30.
   static const double stageHpFactorFirst = 0.5;
-  static const double stageHpFactorLast = 2.1;
+  static const double stageHpFactorLast = 3.4;
 
   /// Faktor auf den Angriff auf Stufe 1 und Stufe 30.
   static const double stageAttackFactorFirst = 0.6;
-  static const double stageAttackFactorLast = 1.8;
+  static const double stageAttackFactorLast = 2.5;
 
   /// Was auf Stufe 30 zur Verteidigung jedes Gegners dazukommt.
   static const int stageDefenseBonusLast = 8;

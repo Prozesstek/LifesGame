@@ -24,6 +24,13 @@ class Vec2 {
 
   Vec2 operator *(double factor) => Vec2(x * factor, y * factor);
 
+  /// Um [radians] gedreht, gegen den Uhrzeigersinn.
+  Vec2 rotated(double radians) {
+    final c = math.cos(radians);
+    final s = math.sin(radians);
+    return Vec2(x * c - y * s, x * s + y * c);
+  }
+
   double get length => math.sqrt(x * x + y * y);
 
   /// Länge ohne Wurzel — für Vergleiche, die nur wissen wollen, was näher

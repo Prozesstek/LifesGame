@@ -79,6 +79,26 @@ class ActionEntity {
   /// Wohin die Figur zuletzt gesehen hat — nur für die Darstellung.
   Vec2 facing = const Vec2(0, 1);
 
+  // --- Zustände aus Fähigkeiten (ADR-0039) ---
+
+  /// Tempo-Faktor, solange [slowLeft] läuft: Laufen und Zuschlagen.
+  double slowFactor = 1;
+  double slowLeft = 0;
+
+  /// Schaden je Sekunde, solange [dotLeft] läuft — Gift, Brand, Frost.
+  double dotPerSecond = 0;
+  double dotLeft = 0;
+
+  /// Zeit seit dem letzten Dauerschaden-Tick.
+  double dotTick = 0;
+
+  /// Mit welchem Anteil seines Tempos diese Figur gerade handelt.
+  double get tempo => slowLeft > 0 ? slowFactor : 1;
+
+  bool get isSlowed => slowLeft > 0;
+
+  bool get isBurning => dotLeft > 0;
+
   bool get isAlive => hp > 0;
 
   bool get isHero => faction == Faction.held;
@@ -109,6 +129,8 @@ class EntityView {
     required this.hpRatio,
     required this.facing,
     required this.isAlive,
+    this.isSlowed = false,
+    this.isBurning = false,
   });
 
   factory EntityView.of(ActionEntity entity) {
@@ -121,6 +143,8 @@ class EntityView {
       hpRatio: entity.hpRatio,
       facing: entity.facing,
       isAlive: entity.isAlive,
+      isSlowed: entity.isSlowed,
+      isBurning: entity.isBurning,
     );
   }
 
@@ -132,4 +156,8 @@ class EntityView {
   final double hpRatio;
   final Vec2 facing;
   final bool isAlive;
+
+  /// Verlangsamt oder unter Dauerschaden — für eine Tönung im Renderer.
+  final bool isSlowed;
+  final bool isBurning;
 }

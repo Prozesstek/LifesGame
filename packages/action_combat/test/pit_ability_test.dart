@@ -27,9 +27,16 @@ ActionWorld _welt({
 
 void main() {
   group('Der Katalog', () {
-    test('jede Fähigkeit kostet Mana, klingt ab und wirkt', () {
+    test('jede kostet Mana oder bringt welches, klingt ab und wirkt', () {
+      // Umsonst ist nur, was Mana zurückgibt — sonst wäre sie eine
+      // Fähigkeit ohne Preis, und man drückte sie jede Abklingzeit blind.
       for (final ability in PitAbilities.all) {
-        expect(ability.manaCost, greaterThan(0), reason: ability.id);
+        final bringtMana = ability.effects.any((e) => e is GainMana);
+        expect(
+          ability.manaCost > 0 || bringtMana,
+          isTrue,
+          reason: ability.id,
+        );
         expect(ability.cooldown, greaterThan(0), reason: ability.id);
         expect(ability.effects, isNotEmpty, reason: ability.id);
       }

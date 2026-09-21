@@ -11,6 +11,60 @@
 
 ---
 
+## Sitzung 21.09.2026, nachts: alle Fähigkeiten, die Waffe, die Kurve
+
+Schritt 2 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
+ist damit ganz. Eigener Branch über #67. 491 App-Tests (vorher 489),
+action_combat 89 (vorher 73).
+
+**Alle neunzehn Fähigkeiten wirken in der Grube**, gebaut aus neun
+Arten von Wirkung: Geschoss (mit Lebensraub), Nahschlag, Rundumschlag,
+Heilung, Mana, Schadensminderung, Zurückwerfen, Verlangsamen,
+Dauerschaden. Vulkanbruch ist zum Beispiel Rundumschlag plus
+Dauerschaden, Wurzelgriff Rundumschlag plus Verlangsamen.
+Gegner zeigen es an: blauer Ring verlangsamt, oranger Punkt brennt.
+
+**Die Waffe ist der Grundangriff** (`PitWeapons`):
+
+| Waffe | Grube |
+|---|---|
+| Kurzbogen | schiesst, schwach, Reichweite 190 |
+| Übungsklinge | Hieb, ×1,25 |
+| Streitkolben | ×1,6, langsam |
+| Geschliffene Klinge | zwei Stiche |
+| Kriegsstab | +3 Mana je Treffer |
+| Zweihänder | trifft **alles** in Reichweite, langsam |
+| Langbogen | zwei Pfeile, Reichweite 230 |
+| Sonnenklinge | jeder Treffer brennt nach |
+
+**Sichtlinie**: Funken, Blitze und Pfeile zielen nur auf Gegner, die man
+sieht. Der offene Punkt aus der letzten Sitzung (Funke verpufft an der
+Wand) ist damit erledigt.
+
+**Die Stufen sind neu abgestimmt**, wie in ADR-0039 für diesen Moment
+vorgesehen. Vorher räumte ein ausgerüsteter Bot mit dem richtigen
+Waffenzug Stufe 30 auch ohne Fähigkeiten zu 90 %. Jetzt
+(`dart run tool/pit_sim.dart 10`):
+
+| | Tag 0 | Tag 14 | Tag 30 | Tag 30 + 3 F. | Tag 60 + Gear | + 3 F. |
+|---|---|---|---|---|---|---|
+| Stufe 1 | 70 % | 100 % | 100 % | 100 % | 100 % | 100 % |
+| Stufe 10 | 0 % | 0 % | 70 % | 100 % | 90 % | 100 % |
+| Stufe 13 | 0 % | 0 % | 0 % | 50 % | 100 % | 100 % |
+| Stufe 25 | 0 % | 0 % | 0 % | 0 % | 20 % | 100 % |
+| Stufe 30 | 0 % | 0 % | 0 % | 0 % | 0 % | 20 % |
+
+**Die Spitze braucht beides, Ausrüstung und Fähigkeiten.** Leben ×3,4
+und Angriff ×2,5 auf Stufe 30 statt ×2,1 und ×1,8.
+
+### Offen
+
+- **Tag 0 ist mit dem Kurzbogen schwächer als mit der Faust** (Stufe 3:
+  20 % statt 50 %). Ein frischer Spieler hat Stufe 1 und 2; das reicht
+  für den Anfang, ist aber eine gemessene Verschiebung.
+- **Energie tut weiter zweierlei** (Mana und Schlagtempo).
+- **Nicht am Handy gespielt**, wie alles aus dieser Nacht.
+
 ## Sitzung 21.09.2026, spät: Mana und die ersten drei Fähigkeiten
 
 Schritt 2 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),
