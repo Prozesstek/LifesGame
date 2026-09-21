@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'ability.dart';
 import 'balance.dart';
 import 'entity.dart';
 import 'health_orb.dart';
@@ -126,14 +125,6 @@ class ActionWorld {
   final List<Projectile> _projectiles = <Projectile>[];
   final List<HealthOrb> _orbs = <HealthOrb>[];
 
-  /// Wie lange jede Fähigkeit noch braucht. Fehlt ein Eintrag, ist sie
-  /// bereit — ein frischer Lauf beginnt also mit allem in der Hand.
-  final Map<ActionAbility, double> _cooldowns = <ActionAbility, double>{};
-
-  /// Wie lange der Sturmschritt noch läuft, und wohin.
-  double _dashLeft = 0;
-  Vec2 _dashDirection = Vec2.zero;
-
   // --- Was die Darstellung sehen darf ---
 
   /// Kopien, keine Verweise: Die Darstellung soll zeichnen, nicht
@@ -164,18 +155,6 @@ class ActionWorld {
           ),
     ];
   }
-
-  /// Wie weit eine Fähigkeit noch braucht, als Anteil zwischen 0 und 1.
-  /// 0 heisst bereit.
-  double cooldownRatio(ActionAbility ability) {
-    final rest = _cooldowns[ability] ?? 0;
-    if (rest <= 0) return 0;
-    final spec = ActionBalance.abilities[ability];
-    if (spec == null || spec.cooldown <= 0) return 0;
-    return (rest / spec.cooldown).clamp(0.0, 1.0);
-  }
-
-  bool isReady(ActionAbility ability) => (_cooldowns[ability] ?? 0) <= 0;
 
   // --- Mana und Plätze (ADR-0039) ---
 
@@ -380,9 +359,6 @@ class ActionWorld {
     return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
   }
 
-  /// Ob der Held gerade im Sturmschritt ist — für die Darstellung.
-  bool get isDashing => _dashLeft > 0;
-
   /// Wie viele Heilkugeln eingesammelt wurden. Eine Zahl fürs Blatt am
   /// Ende: Sie sagt, ob jemand den Lauf bestritten oder durchgehalten hat.
   int get orbsCollected => _orbsCollected;
@@ -454,51 +430,6 @@ class ActionWorld {
     return schritte;
   }
 
-  /// Setzt eine Fähigkeit ein. Gibt false zurück, wenn sie nicht bereit
-  /// ist — die Oberfläche fragt vorher und stellt den Knopf sonst matt.
-  ///
-  /// **Die Wirkung fällt sofort**, nicht im nächsten Schritt: Wer tippt,
-  /// soll den Schlag sehen, während sein Finger noch unten ist.
-  bool useAbility(ActionAbility ability) {
-    if (_over || !isReady(ability)) return false;
-
-    final spec = ActionBalance.abilities[ability];
-    if (spec == null) return false;
-
-    _cooldowns[ability] = spec.cooldown;
-    _events.add(
-      AbilityUsed(
-        ability: ability,
-        at: _hero.position,
-        direction: _hero.facing,
-      ),
-    );
-
-    switch (ability) {
-      case ActionAbility.sturmschritt:
-        _dashLeft = spec.duration;
-        _dashDirection =
-            _hero.facing.isZero ? const Vec2(1, 0) : _hero.facing.normalized;
-      case ActionAbility.rundumschlag:
-        _cleave(spec);
-    }
-    return true;
-  }
-
-  /// Trifft alles im Umkreis — der Moment, für den ein Haufen Gegner da
-  /// ist.
-  void _cleave(AbilitySpec spec) {
-    final reichweite = spec.radius;
-    for (final ziel in _entities) {
-      if (!ziel.isAlive || ziel.isHero) continue;
-      final abstand = reichweite + ziel.radius;
-      if (_hero.position.distanceSquaredTo(ziel.position) > abstand * abstand) {
-        continue;
-      }
-      _hit(_hero, ziel, powerFactor: spec.power);
-    }
-  }
-
   /// Ein einzelner fester Schritt. Tests rufen den direkt auf.
   void step(Vec2 moveInput) {
     if (_over) return;
@@ -511,7 +442,6 @@ class ActionWorld {
       _rebuildPath();
     }
 
-    _tickCooldowns(dt);
     _tickMana(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
@@ -527,20 +457,6 @@ class ActionWorld {
   // --- Held ---
 
   void _moveHero(Vec2 input, double dt) {
-    // Der Sturmschritt übersteuert die Eingabe: Wer ihn drückt, will
-    // **weg**, nicht lenken. Steuerbar wäre er ein zweiter Gang, kein
-    // Ausweg.
-    if (_dashLeft > 0) {
-      _dashLeft -= dt;
-      final spec = ActionBalance.abilities[ActionAbility.sturmschritt]!;
-      _hero.position = _slide(
-        _hero.position,
-        _dashDirection * (_hero.speed * spec.speedFactor * dt),
-        _hero.radius,
-      );
-      return;
-    }
-
     final richtung = input.clampLength(1);
     if (richtung.isZero) return;
 
@@ -550,14 +466,6 @@ class ActionWorld {
       richtung * (_hero.speed * dt),
       _hero.radius,
     );
-  }
-
-  void _tickCooldowns(double dt) {
-    for (final ability in ActionAbility.values) {
-      final rest = _cooldowns[ability];
-      if (rest == null || rest <= 0) continue;
-      _cooldowns[ability] = rest - dt;
-    }
   }
 
   void _tickMana(double dt) {

@@ -12,7 +12,6 @@
 /// ihm hängt.
 library;
 
-export 'src/ability.dart';
 export 'src/balance.dart';
 export 'src/bot.dart';
 export 'src/entity.dart';

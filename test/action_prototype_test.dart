@@ -57,25 +57,38 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      // Vor dem Druck ist alles bereit.
-      final game = tester
+      final welt = tester
           .widget<AbilityButtons>(find.byType(AbilityButtons))
           .world;
-      expect(game.isReady(ActionAbility.rundumschlag), isTrue);
+      // Blütentau braucht kein Ziel und wirkt deshalb immer.
+      expect(welt.slotCooldownRatio('bluetentau'), 0);
 
-      await tester.tap(find.bySemanticsLabel(ActionAbility.rundumschlag.label));
+      await tester.tap(find.bySemanticsLabel('Blütentau'));
       await tester.pump();
 
       expect(
-        game.isReady(ActionAbility.rundumschlag),
-        isFalse,
+        welt.slotCooldownRatio('bluetentau'),
+        greaterThan(0),
         reason: 'der Druck muss in der Welt ankommen, nicht nur im Knopf',
       );
       expect(
-        game.isReady(ActionAbility.sturmschritt),
-        isTrue,
-        reason: 'die andere Fähigkeit bleibt unberührt',
+        welt.slotCooldownRatio('klingenwirbel'),
+        0,
+        reason: 'die anderen Plätze bleiben unberührt',
       );
+    });
+
+    testWidgets('Sturmschritt und Rundumschlag gibt es nicht mehr', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await _pumpScreen(tester);
+      await tester.tap(find.text('Decke von heute'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.bySemanticsLabel('Sturmschritt'), findsNothing);
+      expect(find.bySemanticsLabel('Rundumschlag'), findsNothing);
     });
 
     testWidgets('das Startblatt passt aufs Handy', (tester) async {

@@ -1,5 +1,3 @@
-import 'ability.dart';
-
 /// Sämtliche Stellschrauben des Echtzeit-Kampfs an einem Ort.
 ///
 /// Gleiche Regel wie bei `combat/balance.dart` und `habits/rewards.dart`:
@@ -55,36 +53,6 @@ abstract final class ActionBalance {
 
   /// Der Deckel dafür. Ohne ihn wird aus einem Wert ein Exploit.
   static const double minAttackCooldown = 0.3;
-
-  // --- Fähigkeiten ---
-
-  /// Was jede Fähigkeit kostet und kann.
-  ///
-  /// **Der Sturmschritt richtet keinen Schaden an.** Er ist der Ausweg,
-  /// nicht der zweite Angriff — sonst gäbe es keinen Grund, je den
-  /// Rundumschlag zu drücken.
-  ///
-  /// Der Rundumschlag trifft weiter als ein normaler Schlag (58 gegen 34)
-  /// und härter (1,5×), kostet dafür fünf Sekunden. Fünf, weil drei ihn
-  /// zur Dauerlösung machten: Wer jede dritte Sekunde alles um sich
-  /// herum trifft, braucht keine Bewegung mehr.
-  static const Map<ActionAbility, AbilitySpec> abilities =
-      <ActionAbility, AbilitySpec>{
-    ActionAbility.sturmschritt: AbilitySpec(
-      cooldown: 3,
-      radius: 0,
-      power: 0,
-      duration: 0.18,
-      speedFactor: 4.2,
-    ),
-    ActionAbility.rundumschlag: AbilitySpec(
-      cooldown: 5,
-      radius: 58,
-      power: 1.5,
-      duration: 0,
-      speedFactor: 1,
-    ),
-  };
 
   // --- Mana (ADR-0039) ---
   //

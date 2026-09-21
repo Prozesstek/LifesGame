@@ -41,12 +41,13 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
 
   void _start(ActionStats stats) {
     _game?.frame.dispose();
-    // Im Entwicklermodus liegen alle Fähigkeiten auf den Plätzen, die in
-    // der Grube schon wirken — zum Ausprobieren, nicht als Regel.
+    // Im Entwicklermodus liegen drei Fähigkeiten fest auf den Plätzen —
+    // Schaden auf Entfernung, Fläche, Heilung. Zum Ausprobieren, nicht
+    // als Regel; im Spiel liegt dort, was der Charakter angelegt hat.
     final sim = ActionWorld(
       level: LevelCatalog.grube,
       heroStats: stats,
-      abilityIds: PitAbilities.all.map((a) => a.id).toList(),
+      abilityIds: const <String>['funkenstoss', 'klingenwirbel', 'bluetentau'],
     );
     setState(() {
       _gewaehlt = stats;
@@ -152,9 +153,8 @@ class _StartOverlay extends StatelessWidget {
                 'Sechsundzwanzig Gegner und ein Wächter, fünf davon mit '
                 'Bogen. Laufen mit dem Daumen oder WASD, geschlagen wird '
                 'von selbst.\n\n'
-                'Zwei Knöpfe unten rechts: Sturmschritt raus aus der '
-                'Traube, Rundumschlag mitten hinein. Auf der Tastatur '
-                'Umschalt und Leertaste.\n\n'
+                'Unten rechts liegen drei Fähigkeiten: Funkenstoß, '
+                'Klingenwirbel, Blütentau — auf der Tastatur 1, 2, 3.\n\n'
                 'Mit welcher Macht?',
                 textAlign: TextAlign.center,
                 style: TextStyle(

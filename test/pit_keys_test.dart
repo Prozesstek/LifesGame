@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_game.dart';
 import 'package:lifes_game/action/pit_run_view.dart';
 
-/// Auf dem Rechner liegen die Angriffe auf der Zahlenreihe: 1–3 die
-/// Plätze, 4 der Rundumschlag.
+/// Auf dem Rechner liegen die Fähigkeiten auf der Zahlenreihe: 1–3 die
+/// Plätze.
 void main() {
   /// Ein Lauf mit drei Plätzen, die kein Ziel brauchen — so wirkt jede
   /// Taste sofort, egal wo die Gegner stehen.
@@ -48,29 +48,31 @@ void main() {
     }
   });
 
-  testWidgets('4 ist der Rundumschlag', (tester) async {
+  testWidgets('4, Leertaste und Umschalt tun nichts mehr', (tester) async {
+    // Sturmschritt und Rundumschlag sind entfernt; nichts darf still an
+    // ihre Stelle treten.
     final game = await zeige(tester);
+    final vorher = game.sim.mana;
 
-    expect(game.sim.isReady(ActionAbility.rundumschlag), isTrue);
-    await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
-    expect(game.sim.isReady(ActionAbility.rundumschlag), isFalse);
+    for (final taste in <LogicalKeyboardKey>[
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.space,
+      LogicalKeyboardKey.shiftLeft,
+    ]) {
+      await tester.sendKeyEvent(taste);
+    }
+
+    for (final id in <String>['steinhaut', 'bluetentau', 'aurastrom']) {
+      expect(game.sim.slotCooldownRatio(id), 0, reason: id);
+    }
+    expect(game.sim.mana, vorher);
   });
 
   testWidgets('der Nummernblock tut dasselbe', (tester) async {
     final game = await zeige(tester);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.numpad1);
-    await tester.sendKeyEvent(LogicalKeyboardKey.numpad4);
 
     expect(game.sim.slotCooldownRatio('steinhaut'), greaterThan(0));
-    expect(game.sim.isReady(ActionAbility.rundumschlag), isFalse);
-  });
-
-  testWidgets('Sturmschritt bleibt auf Umschalt', (tester) async {
-    final game = await zeige(tester);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft);
-
-    expect(game.sim.isReady(ActionAbility.sturmschritt), isFalse);
   });
 }

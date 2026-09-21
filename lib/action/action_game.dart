@@ -114,11 +114,6 @@ class ActionGame extends Game {
             ),
           );
           _figuren.remove(event.id);
-        case AbilityUsed():
-          if (event.ability == ActionAbility.rundumschlag) {
-            _bursts.add(Burst.cleave(event.at));
-            _figuren[sim.heroView.id]?.swing(Pose.attack2);
-          }
         case OrbDropped():
         case EnemyNoticed():
           break;
@@ -128,6 +123,14 @@ class ActionGame extends Game {
           }
         case AbilityCast():
           _figuren[sim.heroView.id]?.swing(Pose.attack2);
+          // Ein Flächentreffer bekommt den goldenen Ring, so gross wie
+          // seine Reichweite — sonst sähe man nicht, was er erfasst hat.
+          for (final effect
+              in PitAbilities.byId(event.id)?.effects ?? const <PitEffect>[]) {
+            if (effect is StrikeAround) {
+              _bursts.add(Burst.cleave(event.at, effect.radius));
+            }
+          }
         case HeroHealed():
           if (event.amount > 0) {
             _popups.add(DamagePopup.forHeal(event.amount, event.at));
