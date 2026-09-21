@@ -12,6 +12,7 @@ import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
+import 'package:lifes_game/ui/holz.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -273,7 +274,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.byType(HolzBalken), findsOneWidget);
     });
 
     testWidgets('ein frischer Charakter hat einen leeren Balken', (
@@ -282,9 +283,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      final bar = tester.widget<LinearProgressIndicator>(
-        find.byType(LinearProgressIndicator),
-      );
+      final bar = tester.widget<HolzBalken>(find.byType(HolzBalken));
 
       expect(bar.value, 0.0);
     });

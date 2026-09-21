@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
 import '../../ui/gold_icon.dart';
+import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
 /// Level, Fortschritt zur nächsten Stufe und Gold.
@@ -69,15 +70,7 @@ class LevelCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: level.ratio,
-              minHeight: 7,
-              backgroundColor: Palette.surfaceRaised,
-              valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
-            ),
-          ),
+          HolzBalken(value: level.ratio, color: Palette.accent),
           const SizedBox(height: 7),
           Text(
             level.isMaxLevel

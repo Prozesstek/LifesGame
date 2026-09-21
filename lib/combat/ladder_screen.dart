@@ -2,6 +2,7 @@ import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'combat_controller.dart';
 import 'combat_screen.dart';
@@ -107,16 +108,9 @@ class _Fortschritt extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: stand.highestDefeated / Enemies.rungs,
-            minHeight: 7,
-            backgroundColor: Palette.trackOnDark,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              Palette.accentOnDark,
-            ),
-          ),
+        HolzBalken(
+          value: stand.highestDefeated / Enemies.rungs,
+          color: Palette.accentOnDark,
         ),
       ],
     );

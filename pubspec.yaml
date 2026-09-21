@@ -105,3 +105,4 @@ flutter:
     # Flaechen, auf denen die Oberflaeche selbst steht -- der runde Knopf
     # des Startbildschirms und seine Charakter-Fassung.
     - assets/UI/
+    - assets/UI/Holz/

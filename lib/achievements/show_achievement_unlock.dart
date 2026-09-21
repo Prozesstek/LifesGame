@@ -2,7 +2,7 @@ import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../ui/palette.dart';
+import '../ui/holz.dart';
 import 'achievements_controller.dart';
 import 'widgets/achievement_unlock_sheet.dart';
 
@@ -37,11 +37,18 @@ Future<void> showAchievementUnlocks(
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      // Die Feier hängt im Holzrahmen; das Blatt selbst ist durchsichtig.
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      // **So hoch, wie der Rahmen braucht.** Ohne das kappt das Blatt bei
+      // neun Sechzehnteln der Höhe, und „Weiter" liegt unter der Kante.
+      isScrollControlled: true,
+      builder: (_) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        child: HolzRahmen(
+          child: AchievementUnlockSheet(achievement: achievement),
+        ),
       ),
-      builder: (_) => AchievementUnlockSheet(achievement: achievement),
     );
   }
 }

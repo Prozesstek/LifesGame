@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
@@ -92,15 +93,7 @@ class _ProgressBar extends StatelessWidget {
           style: const TextStyle(fontSize: 13, color: Palette.textOnDarkDim),
         ),
         const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: ratio,
-            minHeight: 6,
-            backgroundColor: Palette.surface,
-            valueColor: const AlwaysStoppedAnimation<Color>(Palette.success),
-          ),
-        ),
+        HolzBalken(value: ratio, color: Palette.success),
       ],
     );
   }

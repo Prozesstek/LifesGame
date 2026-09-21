@@ -1,6 +1,7 @@
 import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 
+import '../../ui/holz.dart';
 import '../event_text.dart';
 import '../../ui/palette.dart';
 
@@ -40,7 +41,6 @@ class FighterStatus extends StatelessWidget {
               : combatant.energy / combatant.maxEnergy,
           color: Palette.goldOnDark,
           label: 'EN ${combatant.energy}',
-          height: 5,
         ),
         if (combatant.statuses.isNotEmpty) ...<Widget>[
           const SizedBox(height: 5),
@@ -57,45 +57,31 @@ class FighterStatus extends StatelessWidget {
 }
 
 class _Bar extends StatelessWidget {
-  const _Bar({
-    required this.value,
-    required this.color,
-    required this.label,
-    this.height = 12,
-  });
+  const _Bar({required this.value, required this.color, required this.label});
 
   final double value;
   final Color color;
   final String label;
-  final double height;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: value, end: value.clamp(0, 1)),
-            duration: const Duration(milliseconds: 320),
-            builder: (context, animated, _) => LinearProgressIndicator(
-              value: animated,
-              minHeight: height,
-              backgroundColor: Palette.trackOnDark,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: value, end: value.clamp(0, 1)),
+          duration: const Duration(milliseconds: 320),
+          builder: (context, animated, _) =>
+              HolzBalken(value: animated, color: color),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Palette.textOnDark,
           ),
         ),
-        if (height >= 10)
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: Palette.textOnDark,
-            ),
-          ),
       ],
     );
   }
