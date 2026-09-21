@@ -14,6 +14,7 @@ class Projectile {
     required this.velocity,
     required this.damage,
     required this.radius,
+    this.heroPower,
   });
 
   final int id;
@@ -26,6 +27,11 @@ class Projectile {
   final Vec2 velocity;
   final int damage;
   final double radius;
+
+  /// Gesetzt, wenn der Held es geschossen hat: Dann rechnet der Einschlag
+  /// wie ein Schlag des Helden (`Angriff × heroPower`, minus
+  /// Verteidigung), und [damage] wird nicht gelesen.
+  final double? heroPower;
 
   Vec2 position;
   double age = 0;

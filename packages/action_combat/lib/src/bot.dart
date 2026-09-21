@@ -1,6 +1,7 @@
 import 'ability.dart';
 import 'balance.dart';
 import 'entity.dart';
+import 'pit_ability.dart';
 import 'vec2.dart';
 import 'world.dart';
 
@@ -45,6 +46,25 @@ abstract final class PitBot {
     if (nah >= 3) welt.useAbility(ActionAbility.rundumschlag);
     if (nah >= 2 && welt.heroHpRatio < 0.35) {
       welt.useAbility(ActionAbility.sturmschritt);
+    }
+
+    _slots(welt, nah);
+  }
+
+  /// Die Plätze, nach der Art ihrer Wirkung — nicht nach Namen, damit
+  /// eine neue Fähigkeit ohne Änderung hier mitgespielt wird.
+  static void _slots(ActionWorld welt, int nah) {
+    for (final ability in welt.slots) {
+      if (!welt.canCast(ability.id)) continue;
+      final lohnt = ability.effects.any(
+        (effect) => switch (effect) {
+          BoltAtNearest() => true,
+          StrikeAround() => nah >= 2,
+          HealSelf() => welt.heroHpRatio < 0.5,
+          ReduceIncoming() => nah >= 3 || welt.heroHpRatio < 0.4,
+        },
+      );
+      if (lohnt) welt.cast(ability.id);
     }
   }
 

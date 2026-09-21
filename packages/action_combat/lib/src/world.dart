@@ -7,6 +7,7 @@ import 'health_orb.dart';
 import 'events.dart';
 import 'flow_field.dart';
 import 'level.dart';
+import 'pit_ability.dart';
 import 'projectile.dart';
 import 'stage.dart';
 import 'stats.dart';
@@ -29,8 +30,16 @@ class ActionWorld {
     required this.level,
     required this.heroStats,
     this.stage,
+    List<String> abilityIds = const <String>[],
     int seed = 1,
-  }) : _rng = math.Random(seed) {
+  })  : _rng = math.Random(seed),
+        _mana = heroStats.maxMana.toDouble(),
+        slots = List<PitAbility>.unmodifiable(
+          abilityIds
+              .map(PitAbilities.byId)
+              .whereType<PitAbility>()
+              .take(ActionBalance.maxAbilitySlots),
+        ) {
     _hero = ActionEntity(
       id: _nextId++,
       faction: Faction.held,
@@ -64,6 +73,21 @@ class ActionWorld {
   /// sind die Tests geschrieben, die eine Mechanik prüfen statt einer
   /// Stufe.
   final PitStage? stage;
+
+  /// Die Fähigkeiten, die in diesen Lauf mitgehen, in Platzreihenfolge.
+  ///
+  /// **Ids, die die Grube noch nicht kennt, fallen hier heraus** — sie
+  /// liegen auf dem Platz des Charakters und tun erst etwas, wenn sie in
+  /// [PitAbilities] stehen. Ein Knopf ohne Wirkung wäre schlimmer als
+  /// keiner.
+  final List<PitAbility> slots;
+
+  double _mana;
+  final Map<String, double> _slotCooldowns = <String, double>{};
+
+  /// Wie lange eine Schadensminderung noch hält, und wie stark sie ist.
+  double _wardLeft = 0;
+  double _wardFactor = 1;
 
   final math.Random _rng;
   final List<ActionEntity> _entities = <ActionEntity>[];
@@ -137,6 +161,133 @@ class ActionWorld {
   }
 
   bool isReady(ActionAbility ability) => (_cooldowns[ability] ?? 0) <= 0;
+
+  // --- Mana und Plätze (ADR-0039) ---
+
+  int get mana => _mana.floor();
+
+  int get maxMana => heroStats.maxMana;
+
+  double get manaRatio => maxMana == 0 ? 0 : _mana / maxMana;
+
+  /// Ob gerade eine Schadensminderung liegt — für die Darstellung.
+  bool get isWarded => _wardLeft > 0;
+
+  /// Abklingzeit einer Platz-Fähigkeit als Anteil, 0 heisst bereit.
+  double slotCooldownRatio(String id) {
+    final rest = _slotCooldowns[id] ?? 0;
+    final ability = PitAbilities.byId(id);
+    if (rest <= 0 || ability == null || ability.cooldown <= 0) return 0;
+    return (rest / ability.cooldown).clamp(0.0, 1.0);
+  }
+
+  /// Ob [id] jetzt gewirkt werden kann: auf einem Platz, abgeklungen,
+  /// genug Mana.
+  bool canCast(String id) {
+    if (_over) return false;
+    final ability = _slotFor(id);
+    if (ability == null) return false;
+    if ((_slotCooldowns[id] ?? 0) > 0) return false;
+    return _mana >= ability.manaCost;
+  }
+
+  PitAbility? _slotFor(String id) {
+    for (final ability in slots) {
+      if (ability.id == id) return ability;
+    }
+    return null;
+  }
+
+  /// Wirkt eine Fähigkeit von einem Platz. Gibt false zurück, wenn sie
+  /// nicht geht — nicht auf einem Platz, nicht abgeklungen, zu wenig Mana.
+  ///
+  /// **Kein Ziel, kein Mana.** Ein Funke ohne Gegner in Reichweite kostet
+  /// nichts und klingt nicht ab: Wer ins Leere tippt, soll nicht bestraft
+  /// werden, sondern es gleich noch einmal versuchen können.
+  bool cast(String id) {
+    if (!canCast(id)) return false;
+    final ability = _slotFor(id);
+    if (ability == null) return false;
+
+    for (final effect in ability.effects) {
+      if (effect is BoltAtNearest &&
+          _nearestEnemyWithin(effect.range) == null) {
+        return false;
+      }
+    }
+
+    _mana -= ability.manaCost;
+    _slotCooldowns[id] = ability.cooldown;
+    _events.add(AbilityCast(id: id, at: _hero.position));
+
+    for (final effect in ability.effects) {
+      _apply(effect);
+    }
+    return true;
+  }
+
+  /// Die eine Stelle, die jede Art von [PitEffect] ausführt.
+  void _apply(PitEffect effect) {
+    switch (effect) {
+      case BoltAtNearest(:final power, :final range):
+        final ziel = _nearestEnemyWithin(range);
+        if (ziel == null) return;
+        final richtung = (ziel.position - _hero.position).normalized;
+        _hero.facing = richtung;
+        _projectiles.add(
+          Projectile(
+            id: _nextId++,
+            faction: Faction.held,
+            position: _hero.position,
+            velocity: richtung * ActionBalance.heroBoltSpeed,
+            damage: 0,
+            radius: ActionBalance.heroBoltRadius,
+            heroPower: power,
+          ),
+        );
+      case StrikeAround(:final power, :final radius):
+        for (final ziel in _entities) {
+          if (!ziel.isAlive || ziel.isHero) continue;
+          final abstand = radius + ziel.radius;
+          if (_hero.position.distanceSquaredTo(ziel.position) >
+              abstand * abstand) {
+            continue;
+          }
+          _hit(_hero, ziel, powerFactor: power);
+        }
+      case HealSelf(:final share):
+        final vorher = _hero.hp;
+        _hero.hp = math.min(
+          _hero.maxHp,
+          _hero.hp + (_hero.maxHp * share).round(),
+        );
+        _events.add(HeroHealed(at: _hero.position, amount: _hero.hp - vorher));
+      case ReduceIncoming(:final factor, :final seconds):
+        _wardFactor = _wardLeft > 0 ? math.min(_wardFactor, factor) : factor;
+        _wardLeft = seconds;
+    }
+  }
+
+  /// Der nächste lebende Gegner in Luftlinie, höchstens [range] entfernt.
+  ActionEntity? _nearestEnemyWithin(double range) {
+    ActionEntity? bester;
+    var besteDistanz = range * range;
+    for (final ziel in _entities) {
+      if (!ziel.isAlive || ziel.isHero) continue;
+      final d = _hero.position.distanceSquaredTo(ziel.position);
+      if (d <= besteDistanz) {
+        besteDistanz = d;
+        bester = ziel;
+      }
+    }
+    return bester;
+  }
+
+  /// Schaden am Helden nach seiner Schadensminderung.
+  int _mitigate(ActionEntity target, int schaden) {
+    if (!target.isHero || _wardLeft <= 0) return schaden;
+    return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
+  }
 
   /// Ob der Held gerade im Sturmschritt ist — für die Darstellung.
   bool get isDashing => _dashLeft > 0;
@@ -270,6 +421,7 @@ class ActionWorld {
     }
 
     _tickCooldowns(dt);
+    _tickMana(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
     _enemiesAct(dt);
@@ -314,6 +466,17 @@ class ActionWorld {
       if (rest == null || rest <= 0) continue;
       _cooldowns[ability] = rest - dt;
     }
+  }
+
+  void _tickMana(double dt) {
+    _mana = math.min(
+      heroStats.maxMana.toDouble(),
+      _mana + heroStats.manaRegen * dt,
+    );
+    for (final id in _slotCooldowns.keys.toList()) {
+      _slotCooldowns[id] = (_slotCooldowns[id] ?? 0) - dt;
+    }
+    if (_wardLeft > 0) _wardLeft -= dt;
   }
 
   void _heroAttack(double dt) {
@@ -490,8 +653,13 @@ class ActionWorld {
         }
 
         geschoss.spent = true;
+        final heldenKraft = geschoss.heroPower;
+        if (heldenKraft != null) {
+          _hit(_hero, ziel, powerFactor: heldenKraft);
+          break;
+        }
         final wirklich = ziel.takeDamage(
-          math.max(ActionBalance.minDamage, geschoss.damage),
+          _mitigate(ziel, math.max(ActionBalance.minDamage, geschoss.damage)),
         );
         _events.add(
           HitLanded(
@@ -562,7 +730,7 @@ class ActionWorld {
     roh = roh * streuung - target.defense / ActionBalance.defenseDivisor;
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
-    final wirklich = target.takeDamage(schaden);
+    final wirklich = target.takeDamage(_mitigate(target, schaden));
     _knockBack(attacker, target);
 
     _events.add(

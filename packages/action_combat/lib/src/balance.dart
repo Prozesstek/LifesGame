@@ -86,6 +86,26 @@ abstract final class ActionBalance {
     ),
   };
 
+  // --- Mana (ADR-0039) ---
+  //
+  // Der Energiewert des Charakters wird in der Grube zu Mana. Er bleibt
+  // damit, was er im Rundenkampf war: der Wert, der Fähigkeiten bezahlt.
+
+  /// Mana je Punkt Energie. Tag 0 hat 8 Energie, also 40 Mana.
+  static const int manaPerEnergy = 5;
+
+  /// Mana je Sekunde, unabhängig von der Energie.
+  static const double manaRegenBase = 4;
+
+  /// Mana je Sekunde zusätzlich, je Punkt Energie. Bei 8 Energie sind das
+  /// 2 — zusammen 6 je Sekunde.
+  static const double manaRegenPerEnergy = 0.25;
+
+  /// Wie viele Fähigkeitsplätze ein Lauf höchstens mitnimmt — die drei
+  /// freien des Charakters (ADR-0016). Der Waffenplatz ist der
+  /// Grundangriff, nicht ein Knopf.
+  static const int maxAbilitySlots = 3;
+
   // --- Die Gegner ---
 
   static const double trashRadius = 10;
@@ -121,6 +141,11 @@ abstract final class ActionBalance {
   /// ankommt. Ohne das sammelt eine lange Partie Geschosse an, die
   /// niemand mehr sieht.
   static const double projectileLifetime = 4;
+
+  /// Wie schnell ein Geschoss des Helden fliegt — schneller als ein
+  /// Pfeil, damit ein Funke auf einen fliehenden Schützen ankommt.
+  static const double heroBoltSpeed = 330;
+  static const double heroBoltRadius = 6;
 
   // --- Heilkugeln ---
 

@@ -70,8 +70,22 @@ class _PitRunViewState extends State<PitRunView> {
     widget.game.moveInput = Vec2(x, y).normalized;
   }
 
+  /// Die Plätze auf 1, 2, 3 — in der Reihenfolge, in der sie auf dem
+  /// Charakter liegen.
+  static final List<LogicalKeyboardKey> _slotKeys = <LogicalKeyboardKey>[
+    LogicalKeyboardKey.digit1,
+    LogicalKeyboardKey.digit2,
+    LogicalKeyboardKey.digit3,
+  ];
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
+      final platz = _slotKeys.indexOf(event.logicalKey);
+      final slots = widget.game.sim.slots;
+      if (platz >= 0) {
+        if (platz < slots.length) widget.game.sim.cast(slots[platz].id);
+        return KeyEventResult.handled;
+      }
       final ability = _abilityKeys[event.logicalKey];
       if (ability != null) {
         _use(ability);
@@ -108,8 +122,11 @@ class _PitRunViewState extends State<PitRunView> {
             bottom: 24,
             child: ValueListenableBuilder<int>(
               valueListenable: game.frame,
-              builder: (context, _, _) =>
-                  AbilityButtons(world: game.sim, onUse: _use),
+              builder: (context, _, _) => AbilityButtons(
+                world: game.sim,
+                onUse: _use,
+                onCast: (id) => game.sim.cast(id),
+              ),
             ),
           ),
         ],
@@ -140,6 +157,17 @@ class _Hud extends StatelessWidget {
               color: Palette.successOnDark,
               label: '${sim.heroHp} / ${sim.heroMaxHp}',
             ),
+            // Nur wenn etwas auf den Plätzen liegt: Ohne Fähigkeit ist
+            // Mana eine Zahl, die man nicht ausgeben kann.
+            if (sim.slots.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 4),
+              PitBar(
+                ratio: sim.manaRatio,
+                color: Palette.manaOnDark,
+                label: '${sim.mana} / ${sim.maxMana} Mana',
+                height: 10,
+              ),
+            ],
             const SizedBox(height: 6),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,11 +219,13 @@ class PitBar extends StatelessWidget {
     required this.ratio,
     required this.color,
     required this.label,
+    this.height = 14,
   });
 
   final double ratio;
   final Color color;
   final String label;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -206,15 +236,15 @@ class PitBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: ratio,
-            minHeight: 14,
+            minHeight: height,
             backgroundColor: Palette.trackOnDark,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
+          style: TextStyle(
+            fontSize: height < 14 ? 8 : 10,
             fontWeight: FontWeight.bold,
             color: Palette.textOnDark,
           ),

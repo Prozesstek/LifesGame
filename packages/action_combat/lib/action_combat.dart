@@ -22,6 +22,7 @@ export 'src/health_orb.dart';
 export 'src/level.dart';
 export 'src/level_builder.dart';
 export 'src/level_catalog.dart';
+export 'src/pit_ability.dart';
 export 'src/projectile.dart';
 export 'src/room_catalog.dart';
 export 'src/stage.dart';

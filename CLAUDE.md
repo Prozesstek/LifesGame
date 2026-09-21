@@ -87,8 +87,9 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 58 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 73 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
+| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
 | `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen | nur Dart-SDK |
@@ -178,7 +179,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 485 Tests
+flutter test             # 489 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -217,6 +218,13 @@ Grube stehen an je einer Stelle:
 | Wie hart ist eine Stufe? | `PitStage` — die Zahlen in `ActionBalance` |
 | Wie sieht die Grube aus? | `LevelBuilder.build(stage, seed)` aus `RoomCatalog`, **gesät** |
 | Was bringt ein Lauf ein? | `LadderController.recordRun` — einmal je Stufe |
+| Was tut eine Fähigkeit in der Grube? | `PitAbilities` — **dieselbe Id** wie in `abilities`, sonst wirkt sie nicht |
+| Welche Plätze gehen mit? | `activeMovesProvider`, gefiltert in `ActionWorld` — was die Grube nicht kennt, fällt heraus |
+
+Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
+Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine
+Stelle in `world.dart`, die sie ausführt. Das ist die Naht, an der Sets
+und Legendäre später eine Fähigkeit verändern.
 
 Ein neuer Raum kommt nach `room_catalog.dart`, genau 14 × 10, und
 `level_builder_test.dart` baut danach jede Stufe mit vierzig Startwerten
