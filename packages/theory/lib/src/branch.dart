@@ -2,32 +2,24 @@ import 'lesson.dart';
 
 /// Ein Theoriezweig: eine geordnete Folge von Lektionen zu einem Thema.
 ///
-/// Zwei Sperren liegen übereinander. Der Zweig als Ganzes öffnet sich mit dem
-/// Charakterlevel ([unlockLevel]), innerhalb des Zweigs ist die Reihenfolge
-/// verbindlich — Lektion n+1 erst nach bestandener n
-/// (`TheoryProgress.isUnlocked`).
+/// Innerhalb des Zweigs ist die Reihenfolge verbindlich — Lektion n+1 erst
+/// nach bestandener n (`TheoryProgress.isUnlocked`).
+///
+/// Eine Levelsperre für den Zweig als Ganzes gab es bis ADR-0019. Seitdem
+/// öffnet der Graph über Theoriepunkte, und die flachen Zweige tragen nur
+/// noch das Handbuch und die Lektionen, auf die der Graph zeigt.
 class TheoryBranch {
   const TheoryBranch({
     required this.id,
     required this.name,
     required this.description,
     required this.lessons,
-    this.unlockLevel = 1,
   });
 
   final String id;
   final String name;
   final String description;
   final List<Lesson> lessons;
-
-  /// Ab welchem Charakterlevel der Zweig offen ist.
-  ///
-  /// 1 heißt: von Anfang an. Siehe ADR-0007.
-  final int unlockLevel;
-
-  bool get isFreeFromStart => unlockLevel <= 1;
-
-  bool isUnlockedAt(int playerLevel) => playerLevel >= unlockLevel;
 
   int get lessonCount => lessons.length;
 
