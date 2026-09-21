@@ -53,6 +53,14 @@ Der Laden nennt die Kraft unter dem Stück, und die Waffenzeile
 beschreibt jetzt den Grundangriff in der Grube („Grundangriff: Hieb —
 ×1,25 Schaden") statt der Energie im Rundenkampf.
 
+### Nachgereicht: Tasten
+
+Auf dem Rechner liegen die Angriffe jetzt auf der Zahlenreihe: **1–3
+die Plätze, 4 der Rundumschlag**, auch im Nummernblock. Leertaste und
+Umschalt (Sturmschritt) bleiben. Dabei kam heraus, dass **bis dahin
+keine Taste außer WASD angekommen war** — Flames Spielfeld hat sie
+verschluckt (`gotchas.md`). `test/pit_keys_test.dart` hält alle fest.
+
 ### Offen
 
 - **Mit allen sechs Kräften wird Stufe 30 leicht**: 90 % statt 20 %

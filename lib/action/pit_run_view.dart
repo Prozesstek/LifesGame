@@ -31,14 +31,20 @@ class _PitRunViewState extends State<PitRunView> {
   /// ein Steuerkreuz zu ziehen ist zum Ausprobieren zu mühsam.
   final Set<LogicalKeyboardKey> _tasten = <LogicalKeyboardKey>{};
 
-  /// Welche Taste welche Fähigkeit auslöst.
+  /// Welche Taste welche feste Fähigkeit auslöst.
   ///
-  /// Leertaste und Umschalt, weil beide erreichbar sind, ohne die linke
-  /// Hand von WASD zu nehmen. Nicht `const`: `LogicalKeyboardKey` hat ein
-  /// eigenes `==`, und konstante Maps verlangen Schlüssel mit dem
-  /// Standardvergleich.
+  /// **Der Rundumschlag liegt auf 4**, neben den drei Plätzen auf 1–3:
+  /// Angegriffen wird mit der Zahlenreihe, ohne nachzudenken, welcher
+  /// Knopf fest und welcher ein Platz ist. Die Leertaste bleibt als
+  /// zweite Belegung. Der Sturmschritt bleibt auf Umschalt — wer
+  /// ausweicht, soll die Hand nicht von WASD nehmen müssen.
+  ///
+  /// Nicht `const`: `LogicalKeyboardKey` hat ein eigenes `==`, und
+  /// konstante Maps verlangen Schlüssel mit dem Standardvergleich.
   static final Map<LogicalKeyboardKey, ActionAbility> _abilityKeys =
       <LogicalKeyboardKey, ActionAbility>{
+        LogicalKeyboardKey.digit4: ActionAbility.rundumschlag,
+        LogicalKeyboardKey.numpad4: ActionAbility.rundumschlag,
         LogicalKeyboardKey.space: ActionAbility.rundumschlag,
         LogicalKeyboardKey.shiftLeft: ActionAbility.sturmschritt,
         LogicalKeyboardKey.shiftRight: ActionAbility.sturmschritt,
@@ -71,16 +77,27 @@ class _PitRunViewState extends State<PitRunView> {
   }
 
   /// Die Plätze auf 1, 2, 3 — in der Reihenfolge, in der sie auf dem
-  /// Charakter liegen.
+  /// Charakter liegen. Oben auf der Tastatur oder im Nummernblock.
   static final List<LogicalKeyboardKey> _slotKeys = <LogicalKeyboardKey>[
     LogicalKeyboardKey.digit1,
     LogicalKeyboardKey.digit2,
     LogicalKeyboardKey.digit3,
   ];
+  static final List<LogicalKeyboardKey> _slotKeysNumpad = <LogicalKeyboardKey>[
+    LogicalKeyboardKey.numpad1,
+    LogicalKeyboardKey.numpad2,
+    LogicalKeyboardKey.numpad3,
+  ];
+
+  /// Welcher Platz zu [key] gehört, oder -1.
+  static int _platzFuer(LogicalKeyboardKey key) {
+    final oben = _slotKeys.indexOf(key);
+    return oben >= 0 ? oben : _slotKeysNumpad.indexOf(key);
+  }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
-      final platz = _slotKeys.indexOf(event.logicalKey);
+      final platz = _platzFuer(event.logicalKey);
       final slots = widget.game.sim.slots;
       if (platz >= 0) {
         if (platz < slots.length) widget.game.sim.cast(slots[platz].id);
@@ -110,7 +127,11 @@ class _PitRunViewState extends State<PitRunView> {
       onKeyEvent: _onKey,
       child: Stack(
         children: <Widget>[
-          Positioned.fill(child: GameWidget(game: game)),
+          // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
+          // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
+          // keine Tasten kennt — keine davon käme dann hier oben an. So
+          // war es bis zu diesem Kommentar: 1–4 und Umschalt taten nichts.
+          Positioned.fill(child: GameWidget(game: game, autofocus: false)),
           Positioned.fill(
             child: ActionJoystick(
               onChanged: (richtung) => game.moveInput = richtung,
