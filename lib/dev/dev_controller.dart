@@ -6,13 +6,24 @@ import '../save/save_providers.dart';
 import 'debug_grants.dart';
 import 'save_slot.dart';
 
+/// Ob dies die **Entwicklerfassung** ist — ein Release-Build mit
+/// Entwicklermodus, gebaut mit `--dart-define=ENTWICKLERFASSUNG=true`
+/// (ADR-0038). Im Web liegt sie unter `/LifesGame/dev/`, damit sich
+/// Prototypen auch am Handy ausprobieren lassen.
+///
+/// Sie hat einen **eigenen Speicher** (`main.dart`): Was dort passiert,
+/// erreicht den echten Stand der normalen Fassung nie.
+const bool isDevBuild = bool.fromEnvironment('ENTWICKLERFASSUNG');
+
 /// Ob der Entwicklermodus überhaupt existiert.
 ///
-/// **Im Release-Build ist er nicht vorhanden**, nicht bloß versteckt: Jede
-/// Stelle, die ihn anbietet, fragt diesen Wert ab, und der Baumschnitt von
-/// Dart entfernt den Rest. Damit kann er den 30-Tage-Nachweis aus
-/// `ziele.md` nicht beeinflussen, auch nicht versehentlich.
-const bool devModeAvailable = kDebugMode;
+/// **Im normalen Release-Build ist er nicht vorhanden**, nicht bloß
+/// versteckt: Jede Stelle, die ihn anbietet, fragt diesen Wert ab, und der
+/// Baumschnitt von Dart entfernt den Rest. Damit kann er den
+/// 30-Tage-Nachweis aus `ziele.md` nicht beeinflussen, auch nicht
+/// versehentlich. Die Ausnahme ist [isDevBuild] — eine eigene Fassung mit
+/// eigenem Speicher.
+const bool devModeAvailable = kDebugMode || isDevBuild;
 
 /// Welcher Spielstand geladen ist. Wird in `main.dart` überschrieben.
 final activeSlotProvider = Provider<SaveSlot>((ref) => SaveSlot.real);

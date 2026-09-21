@@ -500,6 +500,9 @@ Auf Level 1 ist nur der Waffenslot offen
 
 **Der Entwicklermodus ist nur im Debug-Build vorhanden** und arbeitet auf
 einem **eigenen Spielstand** ([ADR-0021](docs/decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)).
+Die Ausnahme ist die **Entwicklerfassung** unter `/LifesGame/dev/` — ein
+Release-Build mit Entwicklermodus und eigenem Speicher, damit sich
+Prototypen am Handy ausprobieren lassen ([ADR-0038](docs/decisions/0038-entwicklerfassung-im-web.md)).
 Er schenkt Zuschläge als benannten Summanden, statt Lektionen oder Häkchen
 zu erfinden. Wer an einer abgeleiteten Zahl dreht, lässt
 `flutter test test/dev_mode_test.dart` laufen — dort steht die Zusage, dass
