@@ -1,7 +1,5 @@
 import 'package:action_combat/action_combat.dart';
 import 'package:abilities/abilities.dart';
-// Der Rundenkampf hat eine eigene Wirkung gleichen Namens.
-import 'package:combat/combat.dart' hide HealSelf;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,14 +13,6 @@ import 'package:lifes_game/combat/ladder_screen.dart';
 /// Die Grube als Kampf des Spiels (ADR-0039).
 void main() {
   group('Die Naht zur Reihe', () {
-    test('die Grube hat genau so viele Stufen wie die Reihe Sprossen', () {
-      // An dieser Zahl hängen die Sperren im Laden (ADR-0034), die
-      // Errungenschaften (ADR-0033) und die einmalige Belohnung (ADR-0032).
-      // Zählten beide verschieden, gäbe es Stufen ohne Belohnung oder
-      // Belohnungen ohne Stufe.
-      expect(PitStage.count, Enemies.rungs);
-    });
-
     test('eine geräumte Stufe zahlt einmal, eine zweite Räumung nichts', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -81,15 +71,6 @@ void main() {
       );
     });
 
-    testWidgets('kein Gegner der alten Reihe steht mehr da', (tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: LadderScreen())),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text(Enemies.atRung(1).name), findsNothing);
-    });
-
     testWidgets('„Hinab" führt in die Grube der nächsten Stufe', (
       tester,
     ) async {
@@ -141,17 +122,6 @@ void main() {
       };
       for (final zug in zuege) {
         expect(PitWeapons.byMoveId(zug), isNotNull, reason: zug);
-      }
-    });
-
-    // Sets wirken auf eine Art von Fähigkeit (ADR-0030). Hätte eine
-    // Fähigkeit in der Grube eine andere Art als im Rundenkampf, wirkte
-    // dasselbe Set auf sie im einen Kampf und im anderen nicht.
-    test('jede hat dieselbe Art wie im Rundenkampf', () {
-      for (final ability in PitAbilities.all) {
-        final zug = Moves.byId(ability.id);
-        expect(zug, isNotNull, reason: ability.id);
-        expect(ability.kind.name, zug?.kind.name, reason: ability.id);
       }
     });
 
@@ -213,17 +183,9 @@ void main() {
       );
     });
 
-    test('jede trägt denselben Namen wie im Rundenkampf', () {
-      for (final ability in PitAbilities.all) {
-        expect(Moves.byId(ability.id)?.name, ability.name, reason: ability.id);
-      }
-    });
-
     testWidgets('was auf den Plätzen liegt, wird ein Knopf', (tester) async {
-      final plaetze = <Move>[
-        Moves.byId('funkenstoss')!,
-        Moves.byId('steinhaut')!,
-      ];
+      // Der erste Platz ist immer der Waffenzug.
+      const plaetze = <String>['basic_attack', 'funkenstoss', 'steinhaut'];
 
       await tester.pumpWidget(
         ProviderScope(
@@ -243,7 +205,7 @@ void main() {
     testWidgets('ohne Fähigkeit kein Mana-Balken', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [activeMovesProvider.overrideWithValue(<Move>[])],
+          overrides: [activeMovesProvider.overrideWithValue(<String>[])],
           child: MaterialApp(home: PitScreen(stage: PitStage(1))),
         ),
       );

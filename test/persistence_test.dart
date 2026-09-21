@@ -1,5 +1,5 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
@@ -79,7 +79,7 @@ void main() {
       );
       container
           .read(chosenAbilitiesProvider.notifier)
-          .choose(0, AbilityMoves.steinhaut.id);
+          .choose(0, PitAbilities.steinhaut.id);
       await tester.pump();
 
       // Der eigentliche Test: SaveWatcher hat den fünften Bereich
@@ -87,7 +87,7 @@ void main() {
       // nichts.
       final gespeichert = await store.read();
       expect(gespeichert.abilities.moveIds, <String>[
-        AbilityMoves.steinhaut.id,
+        PitAbilities.steinhaut.id,
       ]);
     });
 
@@ -110,7 +110,7 @@ void main() {
         tester.element(find.byType(LifesGameApp)),
       );
       final notifier = container.read(chosenAbilitiesProvider.notifier);
-      notifier.choose(0, AbilityMoves.funkenstoss.id);
+      notifier.choose(0, PitAbilities.funkenstoss.id);
       await tester.pump();
       notifier.clear(0);
       await tester.pump();
@@ -144,15 +144,15 @@ void main() {
         'abilities': <String, Object?>{
           'moves': <Object?>[
             'gibt-es-nicht-und-soll-es-nie-geben',
-            AbilityMoves.steinhaut.id,
-            AbilityMoves.sandsturm.id,
+            PitAbilities.steinhaut.id,
+            PitAbilities.sandsturm.id,
           ],
         },
       });
 
       expect(alt.abilities.moveIds, <String>[
-        AbilityMoves.steinhaut.id,
-        AbilityMoves.sandsturm.id,
+        PitAbilities.steinhaut.id,
+        PitAbilities.sandsturm.id,
       ]);
     });
 
@@ -167,11 +167,8 @@ void main() {
 
       final move = container.read(weaponMoveProvider);
 
-      expect(move.id, AbilityCatalog.fallbackMoveId);
-      expect(
-        container.read(chosenAbilitiesProvider).contains(move.id),
-        isFalse,
-      );
+      expect(move, AbilityCatalog.fallbackMoveId);
+      expect(container.read(chosenAbilitiesProvider).contains(move), isFalse);
     });
   });
 

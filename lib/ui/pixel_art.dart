@@ -41,7 +41,7 @@ class PixelArt extends StatelessWidget {
   final Widget fallback;
 
   /// **Gezeichnet auf 64 × 64, abgelegt als 256 × 256.** Ein Format für
-  /// das ganze Projekt — `MoveIcons`, `GearIcons` und `EnemyIcons` lesen
+  /// das ganze Projekt — `MoveIcons` und `GearIcons` lesen
   /// beide Zahlen hier.
   static const int artSize = 64;
   static const int assetSize = 256;

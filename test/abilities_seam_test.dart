@@ -1,5 +1,5 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
@@ -17,26 +17,26 @@ import 'package:theory/theory.dart';
 /// `Lesson.unlocksHabit` ↔ `HabitTemplate.name`.
 void main() {
   group('Jede Fähigkeit findet ihren Move', () {
-    test('jede wählbare Fähigkeit zeigt auf einen echten Move', () {
+    test('jede wählbare Fähigkeit wirkt in der Grube', () {
       for (final ability in AbilityCatalog.choosable) {
         expect(
-          Moves.byId(ability.moveId),
+          PitAbilities.byId(ability.moveId),
           isNotNull,
           reason:
               'Fähigkeit "${ability.moveId}" steht im Katalog, aber '
-              '`package:combat` kennt diesen Move nicht.',
+              'die Grube kennt sie nicht.',
         );
       }
     });
 
-    test('jede Waffenfähigkeit zeigt auf einen echten Move', () {
+    test('jeder Waffenzug ist ein Grundangriff der Grube', () {
       for (final entry in AbilityCatalog.weaponMoves.entries) {
         expect(
-          Moves.byId(entry.value),
+          PitWeapons.byMoveId(entry.value),
           isNotNull,
           reason:
               'Waffe "${entry.key}" bringt "${entry.value}" mit, aber '
-              '`package:combat` kennt diesen Move nicht.',
+              'die Grube kennt diesen Grundangriff nicht.',
         );
       }
     });
@@ -44,7 +44,7 @@ void main() {
     test('der Rückfall zeigt auf einen echten Move', () {
       // Der wichtigste Fall: Ohne ihn stünde ein frischer Charakter im
       // Kampf ohne einen einzigen Knopf.
-      expect(Moves.byId(AbilityCatalog.fallbackMoveId), isNotNull);
+      expect(PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId), isNotNull);
     });
   });
 
@@ -111,8 +111,11 @@ void main() {
       final profile = <String>{};
 
       for (final waffe in waffen) {
-        final move = Moves.byId(AbilityCatalog.weaponMoveFor(waffe.id))!;
-        profile.add('${move.power}/${move.energyDelta}');
+        final w = PitWeapons.byMoveId(AbilityCatalog.weaponMoveFor(waffe.id))!;
+        profile.add(
+          '${w.power}/${w.cooldownFactor}/${w.range}/${w.ranged}/'
+          '${w.hits}/${w.cleave}/${w.manaOnHit}/${w.burnPerSecond}',
+        );
       }
 
       expect(profile, hasLength(waffen.length));
@@ -128,11 +131,10 @@ void main() {
         AbilityCatalog.fallbackMoveId,
         ...AbilityCatalog.weaponMoves.values,
       ]) {
-        final move = Moves.byId(moveId);
-
-        expect(move, isNotNull, reason: moveId);
-        expect(move!.energyCost, 0, reason: moveId);
-        expect(move.energyDelta, greaterThan(0), reason: moveId);
+        // In der Grube ist der Waffenzug der Grundangriff, kein Knopf:
+        // Er darf keine Fähigkeit sein, sonst läge er doppelt da.
+        expect(PitWeapons.byMoveId(moveId), isNotNull, reason: moveId);
+        expect(PitAbilities.byId(moveId), isNull, reason: moveId);
       }
     });
   });

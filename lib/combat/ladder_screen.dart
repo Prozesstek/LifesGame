@@ -1,5 +1,4 @@
 import 'package:action_combat/action_combat.dart';
-import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,9 +1,8 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../gear/gear_controller.dart';
 import '../progression/level_provider.dart';
 import '../ui/holz.dart';
 import 'abilities_controller.dart';
@@ -31,11 +30,11 @@ Future<void> showAbilityUnlocks(
   );
 
   for (final ability in neu) {
-    final move = Moves.byId(ability.moveId);
-    // Eine Id ohne Move ist ein Fehler im Katalog, den
-    // `abilities_seam_test.dart` findet. Hier ist Schweigen die richtige
-    // Antwort: eine leere Feier wäre schlimmer als keine.
-    if (move == null) continue;
+    final pit = PitAbilities.byId(ability.moveId);
+    // Eine Id, die die Grube nicht kennt, ist ein Fehler im Katalog, den
+    // `pit_test.dart` findet. Hier ist Schweigen die richtige Antwort:
+    // eine leere Feier wäre schlimmer als keine.
+    if (pit == null) continue;
     if (!context.mounted) return;
 
     final slot = firstFreeSlot(
@@ -56,8 +55,7 @@ Future<void> showAbilityUnlocks(
         child: HolzRahmen(
           child: AbilityUnlockSheet(
             ability: ability,
-            move: move,
-            attack: ref.read(equippedStatsProvider).attack,
+            pit: pit,
             hasFreeSlot: slot != null,
             nextSlotLevel: nextSlotLevel(ref.read(playerLevelProvider).level),
           ),

@@ -1,8 +1,8 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 
-import '../../combat/move_help.dart';
+import '../../action/pit_text.dart';
 import '../../ui/palette.dart';
 
 /// Was mit der frisch freigeschalteten Fähigkeit geschehen soll.
@@ -23,18 +23,16 @@ enum UnlockChoice { equip, inventory }
 class AbilityUnlockSheet extends StatelessWidget {
   const AbilityUnlockSheet({
     required this.ability,
-    required this.move,
-    required this.attack,
+    required this.pit,
     required this.hasFreeSlot,
     required this.nextSlotLevel,
     super.key,
   });
 
   final Ability ability;
-  final Move move;
 
-  /// Der Angriffswert, mit dem die Zahlen im Hilfetext gerechnet werden.
-  final int attack;
+  /// Was sie in der Grube tut (ADR-0039).
+  final PitAbility pit;
 
   final bool hasFreeSlot;
 
@@ -83,7 +81,7 @@ class AbilityUnlockSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Du hast ${move.name} freigeschaltet',
+              'Du hast ${pit.name} freigeschaltet',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Palette.text,
@@ -92,11 +90,11 @@ class AbilityUnlockSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Dieselben Sätze wie der Tooltip im Kampf, mit denselben
-            // echten Zahlen — keine zweite Beschreibung, die davon
+            // Dieselbe Zeile wie auf dem Charakterbildschirm
+            // (`pitAbilitySummary`) — keine zweite Beschreibung, die davon
             // auseinanderläuft.
             Text(
-              moveHelpFor(move, attack).effect,
+              pitAbilitySummary(pit),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Palette.textDim,
@@ -104,19 +102,6 @@ class AbilityUnlockSheet extends StatelessWidget {
                 height: 1.4,
               ),
             ),
-            if (moveHelpFor(move, attack).perfect case final String perfekt)
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  perfekt,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Palette.accent,
-                    fontSize: 12.5,
-                    height: 1.35,
-                  ),
-                ),
-              ),
             const SizedBox(height: 22),
             ..._actions(context),
           ],

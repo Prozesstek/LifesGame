@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';

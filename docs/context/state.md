@@ -11,6 +11,35 @@
 
 ---
 
+## Sitzung 21.09.2026, zuletzt: der Rundenkampf ist gelöscht
+
+Schritt 5 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),
+auf Frederiks Ansage „Alles, was den Rundenkampf betrifft, kann raus".
+#66 bis #69 sind auf `main`, die Web-Fassung ist gebaut.
+
+**Weg:** `packages/combat` (Engine, 30 Gegner, Umgebungen, Timing),
+Kampfbildschirm, Timing-Leiste, Umgebungsbanner, Flame-Darstellung der
+Kämpfer, Zughilfe, Gegnerbilder-Tabelle, `tool/balance_sim.dart` und
+rund 90 Tests, die nur ihn prüften. **PR #60 und #62 geschlossen** —
+beide bauten am Rundenkampf.
+
+**Umgezogen:** `LadderProgress` und `LadderRewards` nach
+`packages/action_combat` (samt Tests), die Kampfsperre nach
+`lib/action/pit_gate.dart`. `activeMovesProvider` liefert jetzt Ids statt
+Züge; Namen und Beschreibungen kommen aus `lib/action/pit_text.dart`.
+
+| | vorher | jetzt |
+|---|---|---|
+| App-Tests | 502 | **408** |
+| action_combat | 101 | **111** (Reihe dazu) |
+| Packages | 9 | **8** |
+
+**ADR-0003, 0009, 0015 und 0023** stehen auf „Abgelöst durch ADR-0039",
+**0022 und 0030** auf „teilweise" — ihre Ids und Arten gelten weiter.
+
+**Stehen gelassen:** #61 (Laden graut aus) — betrifft nicht den
+Rundenkampf.
+
 ## Sitzung 21.09.2026, später: Sets und legendäre Kräfte
 
 Schritt 3 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md).

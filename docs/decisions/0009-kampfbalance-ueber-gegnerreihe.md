@@ -1,7 +1,7 @@
 # ADR-0009: Balance über eine Gegnerreihe statt über einen Gegner
 
 **Datum:** 17.08.2026
-**Status:** Aktiv
+**Status:** Abgelöst durch [ADR-0039](0039-die-grube-ersetzt-den-rundenkampf.md) — der Rundenkampf ist gelöscht
 **Entschieden von:** Frederik
 
 ## Kontext

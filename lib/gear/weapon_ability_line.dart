@@ -2,6 +2,8 @@ import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 
+import '../action/pit_text.dart';
+
 /// Was eine Waffe aus dem Grundangriff in der Grube macht, als eine Zeile
 /// für den Laden (ADR-0039).
 ///
@@ -18,20 +20,7 @@ String? weaponAbilityLine(GearItem item) {
   final waffe = PitWeapons.byMoveId(zug);
   if (waffe == null) return null;
 
-  final teile = <String>[
-    if (waffe.ranged) 'schießt',
-    if (waffe.hits > 1)
-      '${waffe.hits} Treffer à ×${_zahl(waffe.power)}'
-    else
-      '×${_zahl(waffe.power)} Schaden',
-    if (waffe.cleave) 'trifft alle in Reichweite',
-    if (waffe.cooldownFactor > 1) 'langsam',
-    if (waffe.cooldownFactor < 1) 'schnell',
-    if (waffe.manaOnHit > 0) '+${waffe.manaOnHit} Mana je Treffer',
-    if (waffe.burnPerSecond > 0) 'lässt brennen',
-  ];
-
-  return 'Grundangriff: ${waffe.name} — ${teile.join(', ')}';
+  return 'Grundangriff: ${waffe.name} — ${pitWeaponSummary(waffe)}';
 }
 
 /// Die legendäre Kraft eines Stücks, als Zeile für den Laden.
@@ -48,14 +37,4 @@ String? legendaryPowerLine(GearItem item) {
 String? itemAbilityText(GearItem item) {
   final zeilen = <String>[?weaponAbilityLine(item), ?legendaryPowerLine(item)];
   return zeilen.isEmpty ? null : zeilen.join('\n');
-}
-
-/// Eine Zahl mit Komma und ohne überflüssige Nullen: 1,25 · 0,8 · 2.
-String _zahl(double value) {
-  var text = value.toStringAsFixed(2);
-  while (text.endsWith('0')) {
-    text = text.substring(0, text.length - 1);
-  }
-  if (text.endsWith('.')) text = text.substring(0, text.length - 1);
-  return text.replaceAll('.', ',');
 }

@@ -111,7 +111,7 @@ abstract final class MoveIcons {
   ///
   /// **Gezeichnet wird auf 64 × 64, abgelegt wird auf 256 × 256** — also
   /// jeder Bildpunkt der Zeichnung als 4 × 4 Block. Beides zusammen ist
-  /// die Vorgabe fuer das ganze Projekt (`GearIcons`, `EnemyIcons`).
+  /// die Vorgabe fuer das ganze Projekt (`GearIcons`).
   ///
   /// **Warum 256 und nicht mehr.** Die Kachel ist hoechstens 88 Punkte
   /// breit, auf einem Handy mit dreifacher Pixeldichte also 264 echte

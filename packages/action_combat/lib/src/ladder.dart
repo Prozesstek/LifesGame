@@ -1,4 +1,4 @@
-import 'enemy.dart';
+import 'stage.dart';
 
 /// Was ein erstmals besiegter Gegner einbringt.
 ///
@@ -42,7 +42,7 @@ abstract final class LadderRewards {
 
   static int _summe(int Function(int) je) {
     var summe = 0;
-    for (var rung = 1; rung <= Enemies.rungs; rung++) {
+    for (var rung = 1; rung <= PitStage.count; rung++) {
       summe += je(rung);
     }
     return summe;
@@ -89,12 +89,10 @@ class LadderProgress {
   /// so gibt es immer einen Kampf, auch am Ende.
   int get nextRung {
     final naechste = highestDefeated + 1;
-    return naechste > Enemies.rungs ? Enemies.rungs : naechste;
+    return naechste > PitStage.count ? PitStage.count : naechste;
   }
 
-  EnemyBlueprint get nextEnemy => Enemies.atRung(nextRung);
-
-  bool get isComplete => highestDefeated >= Enemies.rungs;
+  bool get isComplete => highestDefeated >= PitStage.count;
 
   /// Ob ein Sieg gegen [rung] noch etwas einbringt.
   bool isNewGround(int rung) => rung > highestDefeated;
@@ -111,7 +109,7 @@ class LadderProgress {
   /// "Belohnung" keine Dauerquelle wird.
   LadderProgress defeat(int rung) {
     if (!isNewGround(rung)) return this;
-    if (rung > Enemies.rungs) return this;
+    if (rung > PitStage.count) return this;
 
     // Sprossen lassen sich nicht ueberspringen: Wer Sprosse 9 meldet,
     // ohne 8 geschlagen zu haben, hat einen Fehler im Aufrufer -- nicht
@@ -129,7 +127,7 @@ class LadderProgress {
   /// und ein spaeterer Verlust kann die Bedingung nur leichter machen,
   /// nie schwerer.
   LadderProgress recordDefeat(int rung) {
-    if (rung < 1 || rung > Enemies.rungs) return this;
+    if (rung < 1 || rung > PitStage.count) return this;
 
     return LadderProgress(
       highestDefeated: highestDefeated,
@@ -190,15 +188,16 @@ class LadderProgress {
         final key = entry.key;
         final rung = key is int ? key : int.tryParse('$key');
         final count = entry.value;
-        if (rung == null || rung < 1 || rung > Enemies.rungs) continue;
+        if (rung == null || rung < 1 || rung > PitStage.count) continue;
         if (count is! int || count <= 0) continue;
         gezaehlt[rung] = count;
       }
     }
 
     final roh = json['defeated'];
-    final hoechste =
-        roh is int && roh > 0 ? (roh > Enemies.rungs ? Enemies.rungs : roh) : 0;
+    final hoechste = roh is int && roh > 0
+        ? (roh > PitStage.count ? PitStage.count : roh)
+        : 0;
 
     return LadderProgress(highestDefeated: hoechste, defeats: gezaehlt);
   }

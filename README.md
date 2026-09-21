@@ -33,25 +33,24 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 502 Tests
+flutter test                       # 408 Tests
 flutter analyze                    # muss sauber sein
 
-# Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
-dart run tool/balance_sim.dart
+# Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
+dart run tool/pit_sim.dart
 
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
-cd packages/combat
-dart test                          # 130 Tests
-dart run example/play.dart         # Kampf im Terminal spielen
-dart run example/balance_sim.dart  # prüft die Engine, nicht das Spiel
+cd packages/action_combat
+dart test                          # 111 Tests
+dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
-dart test                          # 130 Tests
+dart test                          # 161 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear
-dart test                          # 77 Tests, prüft Preise, Sets und Verkauf
+dart test                          # 88 Tests, prüft Preise, Sets und Verkauf
 
 cd packages/theory
 dart test                          # 136 Tests, prüft auch den Inhalt
@@ -82,33 +81,33 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, 30 Gegner | 130 |
+| `packages/action_combat` | die Grube: 30 Stufen, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 111 |
 | `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 136 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 161 |
-| `packages/gear` | 30 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Preise, Verkauf | 77 |
+| `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Preise, Verkauf | 88 |
 | `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 36 |
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |
 | `packages/achievements` | 19 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
-| `tool/balance_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Kampf, Laden, Charakter, Errungenschaften | 435 |
+| `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 408 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl
 berechnet, gehört sie in eines der acht Packages — Begründung in
 [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md) und
-[ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md).
+[ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md).
 
 **Balance ändern heißt simulieren, nicht raten.** Jedes Package hat seine
 Zahlen an einer Stelle (`balance.dart`, `rewards.dart`, `level_curve.dart`,
-`prices.dart`). Eine Zahl ändern, `dart run tool/balance_sim.dart` laufen
+`prices.dart`). Eine Zahl ändern, `dart run tool/pit_sim.dart` laufen
 lassen, Ergebnis vergleichen.
 
-Wichtig dabei: `tool/balance_sim.dart` ist die maßgebliche Simulation, weil
+Wichtig dabei: `tool/pit_sim.dart` ist die maßgebliche Simulation, weil
 sie als einzige mehrere Packages zugleich sieht und deshalb mit dem echten
-Werte-Pfad rechnet. Die Simulation im Combat-Package bewegt einen Wert und
-hält die übrigen fest — das tut das Spiel nie, und genau diese Verwechslung
-hat den ersten Balance-Befund des Projekts falsch gedeutet
+Werte-Pfad rechnet. Eine Simulation, die einen Wert bewegt und die übrigen
+festhält, tut etwas, das das Spiel nie tut — genau diese Verwechslung hat
+den ersten Balance-Befund des Projekts falsch gedeutet
 ([ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md)).
 
 ## Wer hier arbeitet

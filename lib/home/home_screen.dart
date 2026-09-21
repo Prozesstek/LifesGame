@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
-import '../combat/combat_controller.dart';
+import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_screen.dart';

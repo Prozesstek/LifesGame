@@ -1,5 +1,4 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +9,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:lifes_game/action/pit_text.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 
@@ -125,8 +125,8 @@ void main() {
       expect(find.byType(AbilityUnlockSheet), findsOneWidget);
       expect(find.text('Herzlichen Glückwunsch'), findsOneWidget);
 
-      final move = Moves.byId(knoten.unlocksAbility!)!;
-      expect(find.text('Du hast ${move.name} freigeschaltet'), findsOneWidget);
+      final name = pitNameOf(knoten.unlocksAbility!)!;
+      expect(find.text('Du hast $name freigeschaltet'), findsOneWidget);
     });
 
     testWidgets('auf Level 1 ist kein Platz frei — er feiert trotzdem', (
