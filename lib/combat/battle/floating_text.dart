@@ -260,3 +260,79 @@ DamageReadout? damageReadoutFor(CombatEvent event) {
     _ => null,
   };
 }
+
+/// Farben der Timing-Wertung über dem eigenen Kämpfer.
+///
+/// Alle drei stehen auf dem dunklen Grund der Arena. Perfekt ist Gold,
+/// weil es die Auszahlung ist; daneben ist so grau wie „Geblockt" — eine
+/// Auskunft, kein Tadel.
+abstract final class TimingColors {
+  static const Color perfect = Color(0xFFFFD34D);
+  static const Color good = Color(0xFFE8E0C8);
+  static const Color miss = DamageColors.blocked;
+}
+
+/// Was über dem eigenen Kämpfer steht, nachdem getippt wurde (Issue #47).
+/// `null` heisst: nichts, weil nicht getippt wurde.
+///
+/// **Eine Wertung je Zug, nicht je Treffer.** Klingenwirbel fragt dreimal;
+/// drei Wörter über dem Kopf lägen auf den drei Schadenszahlen, die gleich
+/// danach kommen. Bei mehreren Tipps zählt die Zeile deshalb die Perfekten
+/// („Perfekt 2/3") — oder, wenn keiner perfekt war, die Getroffenen.
+///
+/// Gewertet hat die Engine (`TimingSpec.judgeAt`); hier wird nur benannt.
+DamageReadout? timingReadoutFor(List<TimedHit> hits) {
+  if (hits.isEmpty) return null;
+
+  final perfekt = hits.where((h) => h == TimedHit.perfect).length;
+  final gut = hits.where((h) => h == TimedHit.good).length;
+  final anzahl = hits.length;
+
+  if (anzahl == 1) {
+    return switch (hits.single) {
+      TimedHit.perfect => const DamageReadout(
+        target: Side.player,
+        text: 'Perfekt!',
+        color: TimingColors.perfect,
+        fontSize: 22,
+        sparkle: true,
+      ),
+      TimedHit.good => const DamageReadout(
+        target: Side.player,
+        text: 'Gut',
+        color: TimingColors.good,
+        fontSize: 17,
+      ),
+      TimedHit.none => const DamageReadout(
+        target: Side.player,
+        text: 'Daneben',
+        color: TimingColors.miss,
+        fontSize: 15,
+      ),
+    };
+  }
+
+  if (perfekt > 0) {
+    return DamageReadout(
+      target: Side.player,
+      text: 'Perfekt $perfekt/$anzahl',
+      color: TimingColors.perfect,
+      fontSize: perfekt == anzahl ? 22 : 19,
+      sparkle: perfekt == anzahl,
+    );
+  }
+  if (gut > 0) {
+    return DamageReadout(
+      target: Side.player,
+      text: 'Gut $gut/$anzahl',
+      color: TimingColors.good,
+      fontSize: 17,
+    );
+  }
+  return const DamageReadout(
+    target: Side.player,
+    text: 'Daneben',
+    color: TimingColors.miss,
+    fontSize: 15,
+  );
+}

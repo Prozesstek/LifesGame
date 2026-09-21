@@ -84,7 +84,14 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
 
     // Die Runde ist bereits ausgerechnet — das Abspielen holt sie nur ein.
     // Freigegeben wird erst, wenn die letzte Bewegung durch ist.
-    _game.playEvents(events, onDone: _onAnimationDone);
+    // Die Wertung nur, wenn wirklich getippt wurde. Ein Zug ohne Leiste
+    // kommt mit `TimedHit.none` hier an — „Daneben" stünde dann über
+    // einem Zug, bei dem es nichts zu treffen gab.
+    _game.playEvents(
+      events,
+      timing: move.hasTimingWindow ? hits : const <TimedHit>[],
+      onDone: _onAnimationDone,
+    );
 
     setState(() {
       _pendingMove = null;

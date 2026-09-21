@@ -71,8 +71,22 @@ class BattleGame extends FlameGame {
   ///
   /// [onDone] meldet, wann wieder Ruhe ist — der Bildschirm gibt daraufhin
   /// die Knöpfe frei.
-  void playEvents(List<CombatEvent> events, {VoidCallback? onDone}) {
+  ///
+  /// [timing] ist, was der Spieler getippt hat — leer, wenn der Zug keine
+  /// Leiste hatte. Die Wertung steht vor allem anderen, damit sie beim
+  /// Tipp ankommt und nicht erst mit dem Treffer (Issue #47).
+  void playEvents(
+    List<CombatEvent> events, {
+    List<TimedHit> timing = const <TimedHit>[],
+    VoidCallback? onDone,
+  }) {
     _cursor = _beats.isEmpty ? _now : _beats.last.at;
+
+    final wertung = timingReadoutFor(timing);
+    if (wertung != null) {
+      _at(0, () => _show(wertung));
+      _advance(0.25);
+    }
 
     for (final event in events) {
       switch (event) {

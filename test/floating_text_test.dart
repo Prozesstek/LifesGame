@@ -172,4 +172,59 @@ void main() {
       );
     });
   });
+
+  group('Die Timing-Wertung über dem eigenen Kämpfer (Issue #47)', () {
+    test('ohne Tipp steht nichts da', () {
+      expect(timingReadoutFor(const <TimedHit>[]), isNull);
+    });
+
+    test('ein Tipp nennt Perfekt, Gut oder Daneben', () {
+      expect(
+        timingReadoutFor(const <TimedHit>[TimedHit.perfect])?.text,
+        'Perfekt!',
+      );
+      expect(timingReadoutFor(const <TimedHit>[TimedHit.good])?.text, 'Gut');
+      expect(
+        timingReadoutFor(const <TimedHit>[TimedHit.none])?.text,
+        'Daneben',
+      );
+    });
+
+    test('sie steht immer über dem Spieler, nie über dem Gegner', () {
+      for (final hit in TimedHit.values) {
+        expect(timingReadoutFor(<TimedHit>[hit])?.target, Side.player);
+      }
+    });
+
+    test('Perfekt ist größer und heller als Daneben', () {
+      final perfekt = timingReadoutFor(const <TimedHit>[TimedHit.perfect]);
+      final daneben = timingReadoutFor(const <TimedHit>[TimedHit.none]);
+      expect(perfekt?.fontSize, greaterThan(daneben?.fontSize ?? 0));
+      expect(perfekt?.color, TimingColors.perfect);
+      expect(daneben?.color, isNot(TimingColors.perfect));
+    });
+
+    test('mehrere Tipps ergeben eine Zeile, nicht drei', () {
+      expect(
+        timingReadoutFor(const <TimedHit>[
+          TimedHit.perfect,
+          TimedHit.good,
+          TimedHit.perfect,
+        ])?.text,
+        'Perfekt 2/3',
+      );
+      expect(
+        timingReadoutFor(const <TimedHit>[
+          TimedHit.good,
+          TimedHit.none,
+          TimedHit.none,
+        ])?.text,
+        'Gut 1/3',
+      );
+      expect(
+        timingReadoutFor(const <TimedHit>[TimedHit.none, TimedHit.none])?.text,
+        'Daneben',
+      );
+    });
+  });
 }
