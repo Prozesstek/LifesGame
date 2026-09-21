@@ -29,6 +29,27 @@ class LadderController extends Notifier<LadderProgress> {
     state = state.recordDefeat(rung);
   }
 
+  /// Trägt einen Lauf durch die Grube ein und sagt, was er eingebracht
+  /// hat (ADR-0039).
+  ///
+  /// **Eine Stelle für Sieg und Niederlage**, damit der Bildschirm nicht
+  /// selbst entscheidet, welche der beiden Methoden oben gilt, und die
+  /// Differenz nicht selbst ausrechnet. Ob etwas herauskommt, entscheidet
+  /// weiterhin `LadderProgress` allein: Eine zweite Räumung derselben
+  /// Stufe ändert den Stand nicht, die Differenz ist dann von selbst null.
+  ({int xp, int gold}) recordRun(int stage, {required bool won}) {
+    final vorher = state;
+    if (won) {
+      defeat(stage);
+    } else {
+      recordDefeat(stage);
+    }
+    return (
+      xp: state.earnedXp - vorher.earnedXp,
+      gold: state.earnedGold - vorher.earnedGold,
+    );
+  }
+
   /// Setzt die Reihe zurück. Nur der Entwicklermodus ruft das.
   void reset() {
     state = const LadderProgress.empty();

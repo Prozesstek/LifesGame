@@ -87,13 +87,19 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **Prototyp**: Echtzeit-Kampf, reines Dart, 47 Tests — steht neben `combat`, nicht an seiner Stelle | nur Dart-SDK |
-| `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben des Prototyps, Fähigkeiten eingeschlossen | nur Dart-SDK |
-| `packages/action_combat/lib/src/level_catalog.dart` | die Hallen als **Textkarte** — hier wird geschrieben | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 58 Tests | nur Dart-SDK |
+| `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
+| `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
+| `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
+| `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen | nur Dart-SDK |
+| `packages/action_combat/lib/src/level_catalog.dart` | die feste Halle des Prototyps, nur noch im Entwicklermodus | nur Dart-SDK |
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
-| `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, nur im Entwicklermodus | Flutter |
+| `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
+| `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
+| `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile — geteilt mit dem Prototyp | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
-| `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
+| `tool/balance_sim.dart` | prüft den **alten Rundenkampf** gegen den echten Werte-Pfad | nur Dart-SDK |
+| `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
@@ -134,7 +140,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/combat/battle/floating_text.dart` | Schadens- und Heilungszahlen über den Kämpfern | Flutter |
 | `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | die Reihe: „17 / 30", Gegner, Kampf-Knopf | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: „17 / 30", Stufe, „Hinab" | Flutter |
 | `lib/combat/enemy_icon.dart` | welches Bild zu einem Gegner gehört | Flutter |
 | `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
 | `lib/combat/combat_screen.dart` | HUD: Statusleisten, Kachelleiste, Timing | Flutter |
@@ -172,11 +178,12 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 481 Tests
+flutter test             # 485 Tests
 flutter analyze          # muss sauber sein
 
-# Balance des Spiels prüfen -- die maßgebliche Simulation
-dart run tool/balance_sim.dart         # Gegner gegen echten Werte-Pfad
+# Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
+dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
+dart run tool/balance_sim.dart         # der alte Rundenkampf
 
 # Kampflogik allein, ohne Flutter
 cd packages/combat
@@ -197,6 +204,24 @@ cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
+
+**Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
+die Grube.** Der Rundenkampf in `packages/combat` ist nicht mehr
+erreichbar und wird gelöscht, sobald nichts mehr an ihm hängt — bis
+dahin wohnen dort noch `LadderProgress` und `LadderRewards`, und die
+Absätze unten zu Zügen, Timing und Sets beschreiben ihn. Drei Regeln der
+Grube stehen an je einer Stelle:
+
+| Frage | Antwortet |
+|---|---|
+| Wie hart ist eine Stufe? | `PitStage` — die Zahlen in `ActionBalance` |
+| Wie sieht die Grube aus? | `LevelBuilder.build(stage, seed)` aus `RoomCatalog`, **gesät** |
+| Was bringt ein Lauf ein? | `LadderController.recordRun` — einmal je Stufe |
+
+Ein neuer Raum kommt nach `room_catalog.dart`, genau 14 × 10, und
+`level_builder_test.dart` baut danach jede Stufe mit vierzig Startwerten
+und prüft jede Karte. Wer an den Stufen dreht, lässt
+`dart run tool/pit_sim.dart` laufen.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
 `packages/combat/lib/src/balance.dart`, die Gegnerwerte in `enemy.dart`. Eine

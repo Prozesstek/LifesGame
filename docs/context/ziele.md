@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 14.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 21.09.2026 · Frederik
 
 ---
 
@@ -507,6 +507,13 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **21.09.2026** — **Kein neues Ziel, aber ein neuer Kampf**
+  ([ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md)).
+  Die Grube ersetzt den Rundenkampf; die dreissig Sprossen aus Ziel 6
+  sind jetzt dreissig Stufen der Grube, und die Kriterien dort gelten
+  für sie unverändert (Stufe 30 voll ausgerüstet: 20 % statt 62 %).
+  Der Punkt „Kampfsystem-Umbau" auf der Sperrliste ist damit erledigt —
+  anders als dort gedacht.
 - **14.09.2026** — **Kein neues Ziel**, aber Inhalt: 48 Stücke statt 27, mit
   Episch und Legendär hinter der Gegnerreihe
   ([ADR-0034](../decisions/0034-episch-und-legendaer-haengen-an-der-gegnerreihe.md)).

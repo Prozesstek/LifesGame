@@ -7,9 +7,59 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.09.2026 · Frederik
+**Zuletzt aktualisiert:** 21.09.2026, abends · Frederik
 
 ---
+
+## Sitzung 21.09.2026, abends: die Grube ist der Kampf
+
+**Entschieden und gebaut, Schritt 1 von 5**
+([ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),
+Issue [#65](https://github.com/Prozesstek/LifesGame/issues/65)). Der
+Kampf-Kreis führt jetzt in die Grube, der Rundenkampf ist nicht mehr
+erreichbar. 485 App-Tests (vorher 481), action_combat 58 (vorher 47).
+
+Vier Entscheidungen, jede mit der Empfehlung getroffen:
+
+| Frage | Antwort |
+|---|---|
+| Was wird aus den 30 Sprossen? | **30 Stufen der Grube** — `LadderProgress` bleibt, damit auch Laden-Sperren, Errungenschaften und Belohnung |
+| Wie entstehen die Hallen? | **Räume, gesät zusammengesteckt** — sieben Räume, zwei Wächterräume |
+| Was wird aus den Fähigkeiten? | **Id, Icon, Freischaltung bleiben**, die Wirkung wird für Mana und Abklingzeit neu gebaut |
+| Übergang? | **Sofort ersetzen**, `packages/combat` später löschen |
+
+| Was | Wo |
+|---|---|
+| Dreissig Stufen: Leben, Angriff, Verteidigung, Räume | `PitStage`, Zahlen in `ActionBalance` |
+| Jede Grube neu, aus Räumen | `RoomCatalog`, `LevelBuilder` — 1200 Karten im Test geprüft |
+| Ein Lauf trägt sich ein | `LadderController.recordRun`, gerufen nur aus `PitScreen` |
+| Eingang „N / 30", Stufe, „Hinab" | `LadderScreen` |
+| Simulation über alle Stufen mit echter Werte-Kurve | `dart run tool/pit_sim.dart` |
+
+**Was die Simulation sagt:** Tag 0 schafft Stufe 1 zu 70 %, Tag 30 kommt
+bis etwa Stufe 15, voll ausgerüstet an Tag 60 steht Stufe 30 bei 20 %.
+Das ist die Form der alten Reihe, unten gnädiger und oben härter.
+**Nicht abgestimmt** — die Fähigkeiten werden es verschieben.
+
+### Offen, und bewusst so
+
+- **Die fünfzehn Fähigkeiten tun in der Grube nichts.** Dort gibt es nur
+  Sturmschritt und Rundumschlag. Sie sind Schritt 2.
+- **Waffenzug und Sets wirken nicht.** Die Waffe zählt nur mit ihren
+  Werten.
+- **Die Kampfsperre (ADR-0020) bleibt**, obwohl Stufe 1 mit Tag-0-Werten
+  schlagbar ist. Entschieden wird das, wenn die Fähigkeiten wirken.
+- **Die Potenz-Kurve** ist weiter offen.
+- **Nicht am Handy gespielt.** Tests und Layout bei 390 × 844 sind
+  grün; wie sich eine gesteckte Grube spielt, muss jemand ansehen.
+
+### Als Nächstes
+
+1. Mana und ein Fähigkeiten-Katalog in `action_combat`, die ersten drei
+2. Die übrigen Fähigkeiten, Waffe = Grundangriff
+3. Sets und Legendäre als Veränderung einer Fähigkeit
+4. Der Endgegner mit eigenen Angriffen
+5. `package:combat` auflösen
 
 ## Sitzung 21.09.2026: alles auf main — Bilder, Klänge, Holz
 

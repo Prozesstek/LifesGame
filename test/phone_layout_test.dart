@@ -1,9 +1,11 @@
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_screen.dart';
+import 'package:lifes_game/action/pit_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
@@ -259,6 +261,17 @@ void main() {
       // den Timeout (`docs/context/gotchas.md`).
       usePhoneView(tester);
       await tester.pumpWidget(appMit(const CombatScreen()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('die Grube läuft im Hochformat nicht über', (tester) async {
+      // Seit ADR-0039 der Kampf des Spiels. Kopfzeile mit Wächter-Balken,
+      // Steuerkreuz und Knöpfe liegen übereinander auf dem Spielfeld.
+      usePhoneView(tester);
+      await tester.pumpWidget(appMit(PitScreen(stage: PitStage(30))));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 

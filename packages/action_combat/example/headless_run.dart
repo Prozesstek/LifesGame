@@ -12,12 +12,9 @@ import 'package:action_combat/action_combat.dart';
 /// dart run example/headless_run.dart
 /// ```
 ///
-/// Der Bot ist bewusst dumm: Er läuft auf den nächsten Gegner zu, drückt
-/// den Rundumschlag, wenn drei in Reichweite stehen, und den
-/// Sturmschritt, wenn es eng wird. Er weicht keinem Pfeil aus, er kitet
-/// nicht, er sammelt Heilkugeln nur ein, wenn sie zufällig im Weg
-/// liegen. Alles, was ein Mensch besser macht, fehlt — die Zahlen sind
-/// damit eine **untere** Schranke, genau wie bei `tool/balance_sim.dart`.
+/// Gespielt wird von [PitBot] — bewusst dumm, die Zahlen sind damit eine
+/// **untere** Schranke. Wie hart die dreissig Stufen sind, misst
+/// `tool/pit_sim.dart` in der App, mit der echten Werte-Kurve.
 void main() {
   print('Die Grube — ${LevelCatalog.grube.spawns.length} Gegner\n');
 
@@ -77,11 +74,6 @@ class _Ergebnis {
   final int kugeln;
 }
 
-/// Höchstens fünf Minuten je Lauf — ein Patt darf die Ausgabe nicht
-/// aufhängen. Dieselbe Vorsichtsmassnahme wie `_rundenDeckel` in
-/// `tool/balance_sim.dart`.
-const double _zeitDeckel = 300;
-
 _Ergebnis _lauf(ActionStats stats) {
   final welt = ActionWorld(
     level: LevelCatalog.grube,
@@ -89,10 +81,7 @@ _Ergebnis _lauf(ActionStats stats) {
     seed: 7,
   );
 
-  while (!welt.isOver && welt.elapsed < _zeitDeckel) {
-    _botFaehigkeiten(welt);
-    welt.step(_botEingabe(welt));
-  }
+  PitBot.play(welt);
 
   return _Ergebnis(
     gewonnen: welt.isWon,
@@ -101,56 +90,4 @@ _Ergebnis _lauf(ActionStats stats) {
     hpAnteil: welt.heroHpRatio,
     kugeln: welt.orbsCollected,
   );
-}
-
-/// Wann der Bot einen Knopf drückt.
-///
-/// Zwei Regeln, mehr braucht es nicht, um die Fähigkeiten überhaupt in
-/// die Messung zu bekommen: Rundumschlag gegen eine Traube, Sturmschritt
-/// wenn es eng **und** knapp wird.
-void _botFaehigkeiten(ActionWorld welt) {
-  final held = welt.heroView;
-  final spec = ActionBalance.abilities[ActionAbility.rundumschlag]!;
-
-  var nah = 0;
-  for (final sicht in welt.views) {
-    if (sicht.faction != Faction.gegner) continue;
-    final reichweite = spec.radius + sicht.radius;
-    if (held.position.distanceSquaredTo(sicht.position) <=
-        reichweite * reichweite) {
-      nah++;
-    }
-  }
-
-  if (nah >= 3) welt.useAbility(ActionAbility.rundumschlag);
-  if (nah >= 2 && welt.heroHpRatio < 0.35) {
-    welt.useAbility(ActionAbility.sturmschritt);
-  }
-}
-
-/// Lauf auf den nächsten Gegner zu. Mehr kann der Bot nicht.
-///
-/// „Nächster" heisst **am Weg entlang**, nicht Luftlinie: Sonst rennt er
-/// gegen die Wand, hinter der jemand steht. Die Halle hat vier Räume —
-/// der erste Versuch ohne Wegfindung kam über zwei Gegner nicht hinaus.
-Vec2 _botEingabe(ActionWorld welt) {
-  final held = welt.heroView;
-  Vec2? ziel;
-  var beste = 1 << 29;
-
-  for (final sicht in welt.views) {
-    if (sicht.faction != Faction.gegner) continue;
-    final distanz = welt.pathDistanceTo(sicht.position);
-    if (distanz == null || distanz >= beste) continue;
-    beste = distanz;
-    ziel = sicht.position;
-  }
-
-  if (ziel == null) return Vec2.zero;
-
-  final direkt = ziel - held.position;
-  if (direkt.length <= ActionBalance.tileSize * 1.5) {
-    return direkt.normalized;
-  }
-  return welt.fieldTo(ziel).directionFrom(held.position);
 }
