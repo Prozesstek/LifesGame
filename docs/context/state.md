@@ -57,9 +57,11 @@ beschreibt jetzt den Grundangriff in der Grube („Grundangriff: Hieb —
 
 Auf dem Rechner liegen die Angriffe jetzt auf der Zahlenreihe: **1–3
 die Plätze, 4 der Rundumschlag**, auch im Nummernblock. Leertaste und
-Umschalt (Sturmschritt) bleiben. Dabei kam heraus, dass **bis dahin
-keine Taste außer WASD angekommen war** — Flames Spielfeld hat sie
-verschluckt (`gotchas.md`). `test/pit_keys_test.dart` hält alle fest.
+Umschalt (Sturmschritt) bleiben. Dabei kam heraus, dass **Flames
+Spielfeld Tasten verschlucken konnte**, sobald es den Fokus hatte
+(`gotchas.md`). Wann es ihn hatte, ist nicht geklärt — WASD ging beim
+Spielen offenbar, im Test ging gar nichts. `test/pit_keys_test.dart`
+hält die Belegung jetzt fest.
 
 ### Offen
 

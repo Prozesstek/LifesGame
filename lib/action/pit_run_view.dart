@@ -129,8 +129,8 @@ class _PitRunViewState extends State<PitRunView> {
         children: <Widget>[
           // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
           // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
-          // keine Tasten kennt — keine davon käme dann hier oben an. So
-          // war es bis zu diesem Kommentar: 1–4 und Umschalt taten nichts.
+          // keine Tasten kennt — keine davon käme dann hier oben an
+          // (`gotchas.md`).
           Positioned.fill(child: GameWidget(game: game, autofocus: false)),
           Positioned.fill(
             child: ActionJoystick(
