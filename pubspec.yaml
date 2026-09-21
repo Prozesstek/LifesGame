@@ -69,6 +69,7 @@ dependencies:
   flame: ^1.34.0
 
   cupertino_icons: ^1.0.8
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -91,9 +92,10 @@ flutter:
     - assets/Waffen/Schwerter/
     - assets/Waffen/Boegen/
     - assets/Waffen/Staebe/
+    - assets/Waffen/Kolben/
 
-    # Die uebrigen Plaetze. Die Bilder darin sind erzeugt, nicht gemalt --
-    # `dart run tool/gear_icons_gen.dart` schreibt sie neu (ADR-0034).
+    # Die uebrigen Plaetze. Alle Bilder stammen aus dem Raven-Paket
+    # (`assets/RAVEN.md`).
     - assets/Ruestung/
     - assets/Helme/
     - assets/Schuhe/
@@ -110,6 +112,11 @@ flutter:
     # Flaechen, auf denen die Oberflaeche selbst steht -- der runde Knopf
     # des Startbildschirms und seine Charakter-Fassung.
     - assets/UI/
+    - assets/UI/Holz/
+
+    # Klaenge. Welche Datei zu welchem Anlass gehoert, entscheidet
+    # `SoundEffect` in `lib/audio/sound_effects.dart`.
+    - assets/Sound/
 
     # Die Figuren der Grube (Echtzeit-Prototyp): Held, Fussvolk, Schuetze,
     # Waechter als Streifen. Welcher Streifen zu wem gehoert, entscheidet

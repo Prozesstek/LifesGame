@@ -2,60 +2,6 @@ import 'package:test/test.dart';
 import 'package:theory/theory.dart';
 
 void main() {
-  group('Levelsperre', () {
-    test('auf Level 1 ist nur der Wurzelzweig offen', () {
-      final open = theoryTree.unlockedAt(1);
-
-      expect(open.length, 1);
-      expect(open.first.id, habitsBranch.id);
-      expect(theoryTree.lockedAt(1).length, theoryTree.branchCount - 1);
-    });
-
-    test('jeder Zweig öffnet sich genau auf seiner Stufe', () {
-      for (final branch in theoryTree.branches) {
-        expect(
-          branch.isUnlockedAt(branch.unlockLevel),
-          isTrue,
-          reason: branch.id,
-        );
-        if (!branch.isFreeFromStart) {
-          expect(
-            branch.isUnlockedAt(branch.unlockLevel - 1),
-            isFalse,
-            reason: branch.id,
-          );
-        }
-      }
-    });
-
-    test('höheres Level öffnet nie weniger als ein niedrigeres', () {
-      for (var level = 1; level < 10; level++) {
-        expect(
-          theoryTree.unlockedAt(level + 1).length,
-          greaterThanOrEqualTo(theoryTree.unlockedAt(level).length),
-          reason: 'Level $level',
-        );
-      }
-    });
-
-    test('ab der höchsten Sperre ist alles offen', () {
-      final highest = theoryTree.branches
-          .map((b) => b.unlockLevel)
-          .reduce((a, b) => a > b ? a : b);
-
-      expect(theoryTree.unlockedAt(highest).length, theoryTree.branchCount);
-      expect(theoryTree.lockedAt(highest), isEmpty);
-    });
-
-    test('nextUnlock zeigt auf den nächstniedrigeren gesperrten Zweig', () {
-      expect(theoryTree.nextUnlock(1)?.id, koerperBranch.id);
-      expect(theoryTree.nextUnlock(2)?.id, geistBranch.id);
-      expect(theoryTree.nextUnlock(3)?.id, wissenschaftBranch.id);
-      expect(theoryTree.nextUnlock(4)?.id, gesellschaftBranch.id);
-      expect(theoryTree.nextUnlock(99), isNull);
-    });
-  });
-
   group('Nachschlagen', () {
     test('Zweig über die Id finden', () {
       expect(theoryTree.branchById('geist')?.name, 'Geist');

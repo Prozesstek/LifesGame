@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
@@ -100,6 +101,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       _result = result;
       _stage = _Stage.result;
     });
+    if (result.isPassed) {
+      ref.read(soundPlayerProvider).play(SoundEffect.lektion);
+    }
 
     // Einen Bildaufbau spaeter: Erst steht das Ergebnis da, dann kommt
     // die Feier darueber. Andersherum verdeckte sie, wofuer sie kommt.

@@ -11,9 +11,9 @@ import '../theory/theory_controller.dart';
 
 /// Gesamte Erfahrung des Spielers.
 ///
-/// Speist sich aus Theorie **und** Gewohnheiten. Erst damit wirkt die
-/// Levelsperre des Skillbaums so, wie ADR-0007 sie gemeint hat: Solange
-/// nur Lesen Erfahrung brachte, öffnete sich der Baum durchs Lesen.
+/// Speist sich aus Theorie **und** Gewohnheiten. Das Level gibt
+/// Theoriepunkte (ADR-0035): Solange nur Lesen Erfahrung brächte, öffnete
+/// sich der Baum durchs Lesen.
 ///
 /// **Kämpfe zahlen seit ADR-0032 ein, aber nur einmal je Gegner.** Das
 /// Konzept nennt den Kampf als Ausgabe und nicht als Einnahme — der

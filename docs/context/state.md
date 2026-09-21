@@ -11,6 +11,44 @@
 
 ---
 
+## Sitzung 21.09.2026: alles auf main — Bilder, Klänge, Holz
+
+Acht PRs an einem Tag gemergt, in dieser Reihenfolge: #52 Lern-Vorlage,
+#58 ADR-0037, #53 Levelsperre raus, #50 Ertrag sichtbar, #55 Raven-Icons,
+#56 Klänge, #57 Holz-Stil, #51 die Grube. **481 App-Tests.**
+
+| Was | Wo |
+|---|---|
+| **Jeder Zug und jedes Ausrüstungsstück hat ein Bild** — 27 + 48, alle aus dem Raven-Paket (64 × 64) | `assets/RAVEN.md` sagt, welche Nummer hinter welcher Datei steht |
+| **Vier Klänge**: Häkchen, Lektion, Sieg, Errungenschaft | `SoundEffect` in `lib/audio/sound_effects.dart`; in Tests stumm |
+| **Holz-Stil**: Planke, Holzknopf, Balken, hängender Rahmen | `lib/ui/holz.dart`, über das Theme |
+| **Levelsperre der Zweige entfernt** — `unlockLevel` wurde nirgends mehr gelesen | — |
+| **Neuer Knoten „Was ist Psychologie"** unter Aufmerksamkeit, der erste auf Ebene 2 | Startbaum ab Level 22 ganz offen statt 21 |
+| **ADR-0037**: der Wissensbaum als Endziel (Issue #54) | gebaut wird nach dem Test |
+
+**Entfernt:** `tool/gear_icons_gen.dart` (hätte die Raven-Bilder
+überschrieben) und fünf alte Waffenzeichnungen, die nirgends mehr
+eingetragen waren.
+
+**Neue Abhängigkeit:** `audioplayers` — nach dem Pull einmal
+`flutter pub get`.
+
+**Push aus der Claude-Sitzung geht jetzt**: mit `gh` als
+Credential-Helper je Befehl, ohne die globale Git-Konfiguration zu ändern.
+
+### Offen
+
+- **Die Grube ist gemergt, aber nicht entschieden.** Sie bleibt im
+  Entwicklermodus. Der ADR zur Richtung fehlt, und AktivesBrett hat sie
+  noch nicht gespielt.
+- **Quelle und Urheber** der drei Pakete (Raven, UI-Bundle, Kampf-Figuren)
+  fehlen in den HERKUNFT-Dateien — die Lizenzen hat Frederik geprüft, für
+  den anderen nachprüfbar sind sie so nicht.
+- **Nicht am Gerät angehört**: die Klänge. Nicht am Handy angesehen: der
+  Holz-Stil — nur in der lokalen Vorschau im Browser und als Testbild.
+- **ADR-0037** hat fünf offene Punkte, darunter die Belohnung fürs
+  Vertiefen und wer ~340 Seiten schreibt.
+
 ## Sitzung 21.09.2026: die Grube bekommt Figuren
 
 Die Würfel sind Figuren geworden — aus Frederiks Download-Paket, Lizenz

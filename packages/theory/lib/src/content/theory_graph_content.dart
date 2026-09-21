@@ -122,6 +122,12 @@ final TheoryGraph theoryGraph = TheoryGraph(<TheoryNode>[
     parentIds: const <String>['geist'],
   ),
   const TheoryNode(
+    id: 'geist-psychologie',
+    lesson: psychologiePage,
+    iconId: 'psyche',
+    parentIds: <String>['geist-aufmerksamkeit'],
+  ),
+  const TheoryNode(
     id: 'geist-motivation',
     lesson: motivationPage,
     iconId: 'spark',

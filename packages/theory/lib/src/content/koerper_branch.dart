@@ -3,8 +3,7 @@ import '../lesson.dart';
 
 /// Zweig „Körper" — Schlaf, Bewegung, Essen.
 ///
-/// Erster Zweig hinter einer Levelsperre (ADR-0007). Bewusst der
-/// niedrigschwelligste der vier: Die Inhalte lassen sich sofort in tägliche
+/// Bewusst der niedrigschwelligste der vier: Die Inhalte lassen sich sofort in tägliche
 /// Habits übersetzen.
 const TheoryBranch koerperBranch = TheoryBranch(
   id: 'koerper',
@@ -13,7 +12,6 @@ const TheoryBranch koerperBranch = TheoryBranch(
       'Schlaf, Bewegung, Essen. Drei Bereiche, in denen kleine Änderungen '
       'am meisten tragen — und in denen fast jeder das Falsche für '
       'entscheidend hält.',
-  unlockLevel: 2,
   lessons: <Lesson>[_schlaf, _bewegung, _umgebung],
 );
 

@@ -34,18 +34,19 @@ void main() {
       );
     });
 
-    test('der Startbaum steht ab Level 21 ganz offen, nicht früher', () {
-      // Der Startbaum hat 20 kostenpflichtige Knoten. Unter ADR-0019
-      // stand er ab Level 11 offen, und jeder weitere Punkt war wertlos.
-      // Mit einem Punkt je Aufstieg reicht der Vorrat erst auf Level 21 —
-      // bis dahin ist die Reihenfolge eine Wahl (ADR-0035).
-      const knotenImStartbaum = 20;
+    test('der Startbaum steht ab Level 22 ganz offen, nicht früher', () {
+      // Der Startbaum hat 21 kostenpflichtige Knoten (ADR-0035 rechnete
+      // noch mit 20 und Level 21; seit dem 21.09. hängt *Psychologie*
+      // dazu). Unter ADR-0019 stand er ab Level 11 offen, und jeder
+      // weitere Punkt war wertlos. Mit einem Punkt je Aufstieg ist die
+      // Reihenfolge bis dahin eine Wahl.
+      const knotenImStartbaum = 21;
 
       expect(
-        TheoryPoints.earnedAt(21),
+        TheoryPoints.earnedAt(22),
         greaterThanOrEqualTo(knotenImStartbaum),
       );
-      expect(TheoryPoints.earnedAt(20), lessThan(knotenImStartbaum));
+      expect(TheoryPoints.earnedAt(21), lessThan(knotenImStartbaum));
     });
   });
 

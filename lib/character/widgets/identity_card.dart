@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:identity/identity.dart';
 import 'package:progression/progression.dart';
 
+import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
 /// Der Kopf des Charakterbildschirms: wer der Charakter ist.
@@ -169,15 +170,7 @@ class _LevelBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: anteil,
-            minHeight: 7,
-            backgroundColor: Palette.surface,
-            valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
-          ),
-        ),
+        HolzBalken(value: anteil, color: Palette.accent),
         const SizedBox(height: 5),
         Text(
           '${level.xpIntoLevel} / ${level.xpForLevel} bis Level '

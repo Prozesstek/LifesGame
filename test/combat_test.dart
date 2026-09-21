@@ -217,29 +217,19 @@ void main() {
     testWidgets('jeder Zug ist eine antippbare Kachel mit seinem Namen', (
       tester,
     ) async {
-      // Mit Bild steht der Name über der Kachel, ohne Bild in ihr — so, wie
-      // es der Waffenzug von Anfang an getan hat. Er ist der Zug, den man
-      // jede Runde drückt; ohne Kachel ließe sich nicht kämpfen.
+      // Seit dem 21.09. trägt jeder Zug ein Bild, der Waffenzug
+      // eingeschlossen; der Name steht über der Kachel. Er ist der Zug,
+      // den man jede Runde drückt — ohne Kachel ließe sich nicht kämpfen.
       await pumpScreen(tester, saved: _mitSlot2(AbilityMoves.frostnebel.id));
 
       for (final move in <Move>[Moves.basicAttack, AbilityMoves.frostnebel]) {
         expect(find.text(move.name), findsOneWidget);
+        expect(
+          find.descendant(of: _kachelVon(move), matching: find.byType(Image)),
+          findsOneWidget,
+          reason: move.name,
+        );
       }
-
-      expect(
-        find.descendant(
-          of: _kachelVon(Moves.basicAttack),
-          matching: find.byType(Image),
-        ),
-        findsNothing,
-      );
-      expect(
-        find.descendant(
-          of: _kachelVon(AbilityMoves.frostnebel),
-          matching: find.byType(Image),
-        ),
-        findsOneWidget,
-      );
 
       expect(_tippflaecheVon(tester, Moves.basicAttack).onTap, isNotNull);
     });
@@ -468,7 +458,14 @@ void _tippflaeche() {
       await tester.pump();
 
       // Der Waffenmove richtet Schaden an und öffnet damit das Fenster.
-      await tester.tap(find.text(Moves.basicAttack.name));
+      // Getippt wird die Kachel — seit auch er ein Bild trägt, steht sein
+      // Name darüber und ist kein Knopf.
+      await tester.tap(
+        find.descendant(
+          of: _kachelVon(Moves.basicAttack),
+          matching: find.byType(InkWell),
+        ),
+      );
       await tester.pump();
     }
 

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'audio/sound_effects.dart';
 import 'dev/dev_controller.dart';
 import 'dev/dev_screen.dart';
 import 'dev/save_slot.dart';
@@ -13,6 +14,7 @@ import 'save/save_data.dart';
 import 'save/save_providers.dart';
 import 'save/save_store.dart';
 import 'save/save_watcher.dart';
+import 'ui/holz.dart';
 import 'ui/palette.dart';
 import 'ui/phone_frame.dart';
 
@@ -40,6 +42,8 @@ Future<void> main() async {
         saveStoreProvider.overrideWithValue(store),
         savedGameProvider.overrideWithValue(saved),
         activeSlotProvider.overrideWithValue(slot),
+        // Der einzige Ort mit echtem Ton — Tests bleiben still.
+        soundPlayerProvider.overrideWithValue(AssetSoundPlayer()),
         // Ohne Typangabe: Riverpod 3 exportiert `Override` nicht
         // (`gotchas.md`). Der Typ wird korrekt abgeleitet.
         if (prefs != null) ...[
@@ -170,12 +174,21 @@ class LifesGameApp extends StatelessWidget {
       appBarTheme: const AppBarTheme(
         backgroundColor: Palette.surface,
         foregroundColor: Palette.text,
+        // Die Symbole stehen auf dem Holzknopf, nicht auf Pergament —
+        // deshalb hell, auch wenn der Titel daneben Tinte ist.
+        iconTheme: IconThemeData(color: Palette.textOnDark),
+        actionsIconTheme: IconThemeData(color: Palette.textOnDark),
         elevation: 0,
       ),
 
       // Blätter und Dialoge sind Pergament wie alles andere. Material
       // würde sie sonst aus dem Schema tönen und dabei leicht daneben
       // liegen.
+      // **Hauptknöpfe als Holzplanke, Symbolknöpfe als Holzknopf** — über
+      // das Theme, damit keine der Aufrufstellen es wissen muss
+      // (`lib/ui/holz.dart`).
+      filledButtonTheme: FilledButtonThemeData(style: Holz.buttonStyle()),
+      iconButtonTheme: IconButtonThemeData(style: Holz.iconButtonStyle()),
       dialogTheme: const DialogThemeData(backgroundColor: Palette.surface),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Palette.surface,

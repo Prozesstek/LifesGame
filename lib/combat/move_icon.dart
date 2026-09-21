@@ -6,15 +6,15 @@ import '../ui/pixel_art.dart';
 /// steht nur, wie er aussieht — dieselbe Trennung wie bei
 /// `MoveAnimation` und `moveHelpFor`.
 ///
-/// **Acht von fünfzehn Fähigkeiten haben eins** — die Commons und
-/// Uncommons aus `docs/vorlagen/faehigkeiten.md`, Nummer 1 bis 8. Die
-/// übrigen und alle Waffenzüge tragen weiter ihren Namen auf der Kachel,
-/// genau so, wie es die Waffenzüge von Anfang an getan haben.
+/// **Jeder Zug hat eins** — alle neunzehn Fähigkeiten und alle acht
+/// Waffenzüge. Seit dem 21.09. stammen sie aus dem Raven-Fantasy-Paket
+/// (64 × 64, Frederiks Download); welche Nummer dahintersteht, hält
+/// `assets/RAVEN.md` fest.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
 /// 1. Datei nach `assets/Faehigkeiten/` legen, auf 64 × 64 gezeichnet und
-///    als [assetSize] Pixel abgelegt.
+///    als [PixelArt.assetSize] Pixel abgelegt.
 /// 2. Eine Zeile in [_dateien] ergänzen.
 ///
 /// `test/move_icon_test.dart` prüft danach von selbst mit, dass die Id in
@@ -39,6 +39,31 @@ abstract final class MoveIcons {
     'klingenwirbel': 'assets/Faehigkeiten/Klingenwirbel.png',
     'frostnebel': 'assets/Faehigkeiten/Frostnebel.png',
     'prisma_barriere': 'assets/Faehigkeiten/PrismaBarriere.png',
+
+    // Rare bis Legendär
+    'donnerkeil': 'assets/Faehigkeiten/Donnerkeil.png',
+    'sandsturm': 'assets/Faehigkeiten/Sandsturm.png',
+    'seelenraub': 'assets/Faehigkeiten/Seelenraub.png',
+    'giftmoor': 'assets/Faehigkeiten/Giftmoor.png',
+    'zeitdehnung': 'assets/Faehigkeiten/Zeitdehnung.png',
+    'vulkanbruch': 'assets/Faehigkeiten/Vulkanbruch.png',
+    'sternenfall': 'assets/Faehigkeiten/Sternenfall.png',
+
+    // Aus Errungenschaften (ADR-0033)
+    'heavy_attack': 'assets/Faehigkeiten/Kraftschlag.png',
+    'poison_strike': 'assets/Faehigkeiten/Zehrung.png',
+    'mend': 'assets/Faehigkeiten/Sammeln.png',
+    'breath': 'assets/Faehigkeiten/Atemzug.png',
+
+    // Waffenzüge
+    'basic_attack': 'assets/Faehigkeiten/Bogenschuss.png',
+    'sword_strike': 'assets/Faehigkeiten/Hieb.png',
+    'mace_bash': 'assets/Faehigkeiten/Wuchtstoss.png',
+    'dagger_double': 'assets/Faehigkeiten/Doppelstich.png',
+    'staff_gather': 'assets/Faehigkeiten/Sammelschlag.png',
+    'greatsword_cleave': 'assets/Faehigkeiten/Spalter.png',
+    'longbow_volley': 'assets/Faehigkeiten/Doppelschuss.png',
+    'sunblade_flare': 'assets/Faehigkeiten/Sonnenhieb.png',
   };
 
   /// Der Pfad zum Bild, oder `null` wenn es für diesen Zug keins gibt.
