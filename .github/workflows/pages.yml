@@ -61,10 +61,16 @@ jobs:
       # Wurzel und zeigt eine weisse Seite. Der Wert muss mit Schraegstrich
       # anfangen und enden.
       - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      - run: mv build/web _site
+
+      # Entwicklerfassung unter /dev/ (ADR-0038)
+      - run: flutter build web --release --dart-define=ENTWICKLERFASSUNG=true --base-href "/${{ github.event.repository.name }}/dev/"
+      - run: mv build/web _site/dev
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/web
+          path: _site
+
 
   deploy:
     needs: build
