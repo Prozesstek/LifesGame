@@ -46,8 +46,16 @@ abstract final class GearSets {
     id: 'set-ruhiger-stand',
     name: 'Ruhiger Stand',
     target: SetTarget.schutz,
-    twoPiece: SetPerk(timingSpeedFactor: 0.85, timingWindowFactor: 1.25),
-    fourPiece: SetPerk(timingSpeedFactor: 0.7, timingWindowFactor: 1.6),
+    twoPiece: SetPerk(
+      timingSpeedFactor: 0.85,
+      timingWindowFactor: 1.25,
+      protectionFactor: 1.25,
+    ),
+    fourPiece: SetPerk(
+      timingSpeedFactor: 0.7,
+      timingWindowFactor: 1.6,
+      protectionFactor: 1.6,
+    ),
     why: 'Steinhaut und Prisma-Barriere leben von ihrer Perfect-Wirkung — '
         'und die verfehlt man ausgerechnet dann, wenn es eng wird. Eine '
         'breitere, langsamere Leiste macht Schutz verlässlich statt stark.',

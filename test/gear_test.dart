@@ -1,3 +1,4 @@
+import 'package:abilities/abilities.dart';
 import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,13 +247,31 @@ void main() {
       }
     });
 
-    test('sie nennt Zug, Schadensfaktor und Energie', () {
+    test('sie nennt den Grundangriff in der Grube und seine Zahl', () {
       final zeile = weaponAbilityLine(GearCatalog.byId(klinge)!);
 
-      // Die Übungsklinge trägt den Hieb: ×1,3 Schaden, +2 Energie
-      // (ADR-0017, Punkt 2). Steht die Zahl hier falsch, steht sie im
-      // Laden falsch.
-      expect(zeile, 'Bringt Hieb mit — ×1,3 Schaden, +2 Energie je Runde');
+      // Die Übungsklinge schlägt in der Grube den Hieb mit ×1,25
+      // (`PitWeapons`, ADR-0039). Steht die Zahl hier falsch, steht sie
+      // im Laden falsch.
+      expect(zeile, 'Grundangriff: Hieb — ×1,25 Schaden');
+    });
+
+    test('ein Bogen sagt, dass er schiesst', () {
+      final bogen = GearCatalog.forSlot(
+        GearSlot.waffe,
+      ).firstWhere((w) => AbilityCatalog.weaponMoveFor(w.id) == 'basic_attack');
+      expect(weaponAbilityLine(bogen), contains('schießt'));
+    });
+
+    test('nur legendäre Stücke nennen eine legendäre Kraft', () {
+      for (final item in GearCatalog.all) {
+        final zeile = legendaryPowerLine(item);
+        if (item.rarity == GearRarity.legendary) {
+          expect(zeile, startsWith('Legendär: '), reason: item.name);
+        } else {
+          expect(zeile, isNull, reason: item.name);
+        }
+      }
     });
 
     test('keine zwei Waffen bekommen dieselbe Zeile', () {
@@ -320,7 +339,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text(zeile!), findsOneWidget, reason: waffe.name);
+        // Bei der Sonnenklinge steht die legendäre Kraft in derselben
+        // Fläche darunter — deshalb `textContaining`.
+        expect(find.textContaining(zeile!), findsOneWidget, reason: waffe.name);
       }
     });
 

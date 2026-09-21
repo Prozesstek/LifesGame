@@ -35,8 +35,18 @@ void main(List<String> args) {
     'Tag 14': _Spalte(_statsNach(14), bogen),
     'Tag 30': _Spalte(_statsNach(30), bogen),
     'Tag 30+F': _Spalte(_statsNach(30), bogen, drei),
-    'Tag 60+G': _Spalte(_statsNach(60, bonus: _bestesGear()), gut),
-    'T60+G+F': _Spalte(_statsNach(60, bonus: _bestesGear()), gut, drei),
+    'Tag 60+G': _Spalte(
+      _statsNach(60, bonus: _bestesGear()),
+      gut,
+      const <String>[],
+      _legendaereKraefte(),
+    ),
+    'T60+G+F': _Spalte(
+      _statsNach(60, bonus: _bestesGear()),
+      gut,
+      drei,
+      _legendaereKraefte(),
+    ),
   };
 
   print('Die Grube — $laeufe Läufe je Feld, jede Karte neu gebaut\n');
@@ -64,11 +74,19 @@ void main(List<String> args) {
 }
 
 class _Spalte {
-  const _Spalte(this.stats, this.weapon, [this.abilities = const <String>[]]);
+  const _Spalte(
+    this.stats,
+    this.weapon, [
+    this.abilities = const <String>[],
+    this.modifiers = const <PitModifier>[],
+  ]);
 
   final ActionStats stats;
   final String weapon;
   final List<String> abilities;
+
+  /// Die legendären Kräfte der getragenen Stücke.
+  final List<PitModifier> modifiers;
 }
 
 int _quote(int stufe, _Spalte spalte, int laeufe) {
@@ -81,6 +99,7 @@ int _quote(int stufe, _Spalte spalte, int laeufe) {
       stage: stage,
       abilityIds: spalte.abilities,
       weaponMoveId: spalte.weapon,
+      modifiers: spalte.modifiers,
       seed: seed,
     );
     PitBot.play(welt);
@@ -121,32 +140,17 @@ ActionStats _statsNach(int tage, {GearBonus bonus = const GearBonus()}) {
 
 /// Das beste Stück je Platz — dieselbe grobe Rechnung wie in
 /// `tool/balance_sim.dart`.
-GearBonus _bestesGear() {
-  var summe = const GearBonus();
-  for (final slot in GearSlot.values) {
-    GearItem? bestes;
-    var besteSumme = -1;
-    for (final item in GearCatalog.forSlot(slot)) {
-      final wert =
-          item.bonus.attack * 8 +
-          item.bonus.maxHp +
-          item.bonus.defense * 8 +
-          item.bonus.maxEnergy * 8;
-      if (wert > besteSumme) {
-        besteSumme = wert;
-        bestes = item;
-      }
-    }
-    if (bestes != null) summe = summe + bestes.bonus;
-  }
-  return summe;
+/// Das beste Stück je Platz — dieselbe grobe Rechnung wie in
+/// `tool/balance_sim.dart`: die grösste Summe aus den vier Werten.
+List<GearItem> _besteStuecke() {
+  return <GearItem>[for (final slot in GearSlot.values) _bestesIn(slot)];
 }
 
-/// Der Waffenzug der Waffe, die `_bestesGear` auf den Waffenplatz legt.
-String _besteWaffe() {
-  GearItem? beste;
+GearItem _bestesIn(GearSlot slot) {
+  final stuecke = GearCatalog.forSlot(slot);
+  var bestes = stuecke.first;
   var besteSumme = -1;
-  for (final item in GearCatalog.forSlot(GearSlot.waffe)) {
+  for (final item in stuecke) {
     final wert =
         item.bonus.attack * 8 +
         item.bonus.maxHp +
@@ -154,8 +158,30 @@ String _besteWaffe() {
         item.bonus.maxEnergy * 8;
     if (wert > besteSumme) {
       besteSumme = wert;
-      beste = item;
+      bestes = item;
     }
   }
-  return AbilityCatalog.weaponMoveFor(beste?.id);
+  return bestes;
+}
+
+GearBonus _bestesGear() {
+  var summe = const GearBonus();
+  for (final item in _besteStuecke()) {
+    summe = summe + item.bonus;
+  }
+  return summe;
+}
+
+/// Die legendären Kräfte der besten Stücke. Sets rechnet die Simulation
+/// nicht: Die besten Stücke je Platz sind kein Set.
+List<PitModifier> _legendaereKraefte() {
+  return <PitModifier>[
+    for (final item in _besteStuecke())
+      ...?PitLegendaries.byId(item.legendaryPower)?.modifiers,
+  ];
+}
+
+/// Der Waffenzug der Waffe, die `_besteStuecke` auf den Waffenplatz legt.
+String _besteWaffe() {
+  return AbilityCatalog.weaponMoveFor(_bestesIn(GearSlot.waffe).id);
 }

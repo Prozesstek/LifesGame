@@ -11,6 +11,68 @@
 
 ---
 
+## Sitzung 21.09.2026, später: Sets und legendäre Kräfte
+
+Schritt 3 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md).
+Eigener Branch über #68. 498 App-Tests (vorher 491), action_combat 101
+(vorher 89), gear 88.
+
+**Wie es gebaut ist:** Eine Veränderung (`PitModifier`, `sealed`) nimmt
+eine Fähigkeit und gibt eine neue zurück — mehr Schaden, mehr
+Dauerschaden, billiger, stärkerer Schutz, kürzere Abklingzeit oder
+zusätzliche Wirkungen. Die Welt sieht nur das Ergebnis und braucht für
+Sets keine Zeile.
+
+**Die drei Sets in der Grube:**
+
+| Set | wirkt auf | 2 Teile | 4 Teile |
+|---|---|---|---|
+| Eiserner Wille | Angriff | +10 % Schaden | +25 % |
+| Sturmruf | Umgebung | −5 Mana | −10 Mana |
+| Ruhiger Stand | Schutz | +25 % Heilung, Schutz hält länger | +60 % |
+
+Sturmruf rechnet seinen Energie-Rabatt zum selben Kurs um wie der
+Vorrat (1 Energie = 5 Mana, `ActionBalance.manaPerEnergy`). Ruhiger
+Stand hat ein neues Feld `SetPerk.protectionFactor` bekommen — seine
+Timing-Werte bedeuten in Echtzeit nichts. Der Laden zeigt beim Set jetzt
+„Schutz und Heilung 60 % stärker" statt der Leiste.
+
+**Die sechs legendären Kräfte**, je eine am Stück
+(`GearItem.legendaryPower`), die Wirkung in `PitLegendaries`:
+
+| Stück | Kraft | tut |
+|---|---|---|
+| Sonnenklinge | Sonnenglut | jeder Dauerschaden ×1,5 |
+| Titanenpanzer | Steinerne Haut | Steinhaut und Sammeln werfen ein Drittel zurück |
+| Krone des Hochwächters | Weitblick | alle Abklingzeiten −20 % |
+| Stiefel des Titanen | Beben | Kraftschlag und Wurzelgriff treffen und bremsen alles in der Nähe |
+| Ring des Erzdämons | Erzhunger | jede Fähigkeit ein Drittel billiger |
+| Herz des Titanen | Lebensquell | Heilung und Schutz ×1,5 |
+
+Der Laden nennt die Kraft unter dem Stück, und die Waffenzeile
+beschreibt jetzt den Grundangriff in der Grube („Grundangriff: Hieb —
+×1,25 Schaden") statt der Energie im Rundenkampf.
+
+### Nachgereicht: Tasten
+
+Auf dem Rechner liegen die Angriffe jetzt auf der Zahlenreihe: **1–3
+die Plätze, 4 der Rundumschlag**, auch im Nummernblock. Leertaste und
+Umschalt (Sturmschritt) bleiben. Dabei kam heraus, dass **Flames
+Spielfeld Tasten verschlucken konnte**, sobald es den Fokus hatte
+(`gotchas.md`). Wann es ihn hatte, ist nicht geklärt — WASD ging beim
+Spielen offenbar, im Test ging gar nichts. `test/pit_keys_test.dart`
+hält die Belegung jetzt fest.
+
+### Offen
+
+- **Mit allen sechs Kräften wird Stufe 30 leicht**: 90 % statt 20 %
+  (`pit_sim`, Spalte „T60+G+F", der Bot trägt dort sechs legendäre
+  Stücke). Das ist der Endstand des Spiels und darf leichter sein — ob
+  so viel, ist eine Frage, keine Messung. Der wahrscheinliche Hebel ist
+  Erzhunger zusammen mit Weitblick.
+- **Die Simulation rechnet keine Sets**, weil die besten Stücke je Platz
+  keines bilden.
+
 ## Sitzung 21.09.2026, nachts: alle Fähigkeiten, die Waffe, die Kurve
 
 Schritt 2 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md)

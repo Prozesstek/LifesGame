@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Flames `GameWidget` verschluckt jede Taste
+
+Die Grube hört auf Tasten über ein `Focus` um das Spielfeld herum
+(`lib/action/pit_run_view.dart`). Das `GameWidget` darin hat einen
+eigenen `Focus` mit `autofocus: true` — und dessen Handler meldet
+**jede** Taste als erledigt, wenn das Spiel das Mixin `KeyboardEvents`
+nicht trägt:
+
+```dart
+// flame-1.38.0, game_widget.dart
+if (game is KeyboardEvents) { ... }
+return KeyEventResult.handled;
+```
+
+Eine erledigte Taste steigt nicht weiter auf. Hatte das Spielfeld den
+Fokus, bekam unser `Focus` darüber nichts — nicht die Plätze, nicht
+Umschalt, nicht WASD. Wann das im Browser so war, ist nicht geklärt
+(beim Spielen ging WASD offenbar, vermutlich nach einem Klick); im
+Widget-Test war es immer so. Es gab keine Fehlermeldung, und die Knöpfe
+auf dem Bildschirm gingen ja.
+
+Aufgefallen ist es erst, als ein Test Tasten schickte: `sendKeyEvent`
+gab `true` zurück (erledigt), und trotzdem war nichts gewirkt.
+
+**Abhilfe:** `GameWidget(game: game, autofocus: false)`. Wer dem Spiel
+selbst Tasten geben will, gibt ihm `KeyboardEvents` — dann aber alle,
+nicht die Hälfte.
+
 ## Ein Widget, das nur bei einem Wert > 0 gebaut wird, ist ungetestet
 
 `phone_layout_test.dart` baut jeden Bildschirm mit einem Stand voller

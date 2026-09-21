@@ -104,6 +104,7 @@ class GearItem {
     required this.bonus,
     required this.why,
     this.setId,
+    this.legendaryPower,
   });
 
   /// Stabiler Bezeichner für Speicherstände und Tests.
@@ -146,4 +147,13 @@ class GearItem {
   final String? setId;
 
   bool get isSetPiece => setId != null;
+
+  /// Was dieses Stück an Fähigkeiten verändert — nur bei legendären
+  /// (ADR-0039).
+  ///
+  /// **Hier steht nur die Id**, die Wirkung steht in
+  /// `package:action_combat` (`PitLegendaries`). Dieses Package kennt die
+  /// Grube nicht, dieselbe Trennung wie bei den Waffenzügen. Dass jede Id
+  /// dort ankommt, prüft `test/pit_test.dart` in der App.
+  final String? legendaryPower;
 }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
+import 'package:gear/gear.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../achievements/show_achievement_unlock.dart';
@@ -10,6 +11,7 @@ import '../character/abilities_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/result_dialog.dart';
 import '../gear/gear_controller.dart';
+import '../gear/set_effects.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'action_game.dart';
@@ -64,6 +66,11 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final plaetze = <String>[
       for (final move in ref.read(activeMovesProvider)) move.id,
     ];
+    final loadout = ref.read(loadoutProvider);
+    final veraenderungen = pitModifiersFor(
+      ref.read(activeSetsProvider),
+      <GearItem>[for (final slot in GearSlot.values) ?loadout.equippedIn(slot)],
+    );
     final waffe = plaetze.firstWhere(
       (id) => PitWeapons.byMoveId(id) != null,
       orElse: () => '',
@@ -80,6 +87,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       stage: widget.stage,
       abilityIds: plaetze,
       weaponMoveId: waffe,
+      modifiers: veraenderungen,
       seed: seed,
     );
 

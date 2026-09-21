@@ -8,6 +8,7 @@ import 'events.dart';
 import 'flow_field.dart';
 import 'level.dart';
 import 'pit_ability.dart';
+import 'pit_modifier.dart';
 import 'pit_weapon.dart';
 import 'projectile.dart';
 import 'stage.dart';
@@ -33,15 +34,19 @@ class ActionWorld {
     this.stage,
     List<String> abilityIds = const <String>[],
     String? weaponMoveId,
+    List<PitModifier> modifiers = const <PitModifier>[],
     int seed = 1,
   })  : _rng = math.Random(seed),
         weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
         _mana = heroStats.maxMana.toDouble(),
+        // Sets und legendäre Kräfte werden hier einmal angewendet; die
+        // Welt sieht danach nur noch die veränderten Fähigkeiten.
         slots = List<PitAbility>.unmodifiable(
           abilityIds
               .map(PitAbilities.byId)
               .whereType<PitAbility>()
-              .take(ActionBalance.maxAbilitySlots),
+              .take(ActionBalance.maxAbilitySlots)
+              .map((a) => PitModifiers.apply(a, modifiers)),
         ) {
     _hero = ActionEntity(
       id: _nextId++,
@@ -186,7 +191,7 @@ class ActionWorld {
   /// Abklingzeit einer Platz-Fähigkeit als Anteil, 0 heisst bereit.
   double slotCooldownRatio(String id) {
     final rest = _slotCooldowns[id] ?? 0;
-    final ability = PitAbilities.byId(id);
+    final ability = _slotFor(id);
     if (rest <= 0 || ability == null || ability.cooldown <= 0) return 0;
     return (rest / ability.cooldown).clamp(0.0, 1.0);
   }
