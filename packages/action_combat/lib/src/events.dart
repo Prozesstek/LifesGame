@@ -121,3 +121,18 @@ class RunEnded extends ActionEvent {
   final double seconds;
   final int kills;
 }
+
+/// Ein Treffer des Bodenstosses, für einen Ring im Renderer.
+class BossSlammed extends ActionEvent {
+  const BossSlammed({required this.at, required this.radius});
+
+  final Vec2 at;
+  final double radius;
+}
+
+/// Der Wächter ist wütend geworden — einmal je Lauf.
+class BossEnraged extends ActionEvent {
+  const BossEnraged({required this.at});
+
+  final Vec2 at;
+}

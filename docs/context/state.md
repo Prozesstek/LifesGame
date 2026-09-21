@@ -11,6 +11,39 @@
 
 ---
 
+## Sitzung 21.09.2026, noch später: der Wächter kann etwas
+
+Schritt 4 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),
+auf Frederiks Wunsch („den Boss im Endraum alleine haben und mit coolen
+Fähigkeiten"). Baut auf #73 auf. action_combat 121 (vorher 109), App 412.
+
+**Allein im Endraum** — beide Wächterräume ohne Leibwächter und Schützen.
+
+| Angriff | ab Stufe | Ankündigung | Wirkung |
+|---|---|---|---|
+| **Bodenstoss** | 1 | roter Ring füllt sich, 1,0 s | wer drinsteht: Angriff × 1,8 |
+| **Felswurf** | 4 | der Brocken selbst — gross und langsam | Angriff × 1,2, ausweichen seitlich |
+| **Ansturm** | 8, nur bei Wut | rote Linie, 0,8 s | rennt bis zur Wand, Angriff × 1,8 |
+| **Wut** | immer | Balken „Der Wächter · wütend" | unter halbem Leben: Abklingzeiten × 1/1,5 |
+
+**Jeder Angriff lässt sich durch Laufen umgehen** — seit #73 gibt es
+keinen Sturmschritt. Der Ring füllt sich länger, als der Held braucht, um
+aus ihm herauszulaufen; ein Test hält das fest. Der Bot läuft aus
+angekündigten Zonen heraus, einem Felswurf weicht er nicht aus.
+
+**Warum er mit der Tiefe dazulernt:** Mit allen drei Angriffen von
+Anfang an schaffte ein frischer Charakter Stufe 1 nur noch zu 40 % statt
+90 % — sein allererster Kampf. Jetzt wieder 90 %.
+
+**Was die Simulation sagt** (`pit_sim`, gegenüber #73): Die Mitte ist
+härter (Tag 30 auf Stufe 10: 10 % statt 50 %), **die Spitze nicht mehr
+geschenkt**: voll ausgerüstet mit Fähigkeiten und allen Legendären Stufe
+30 zu 50 % statt 100 %. Die offene Frage von #69 („Legendäre machen die
+Spitze zu leicht") ist damit nebenbei beantwortet.
+
+**Nicht gebaut:** eigene Bilder für die Angriffe — der Zyklop hat nur
+einen Streifen „steht". Ring, Linie und Welle zeichnet der Code.
+
 ## Sitzung 21.09.2026, ganz zum Schluss: keine Grundfähigkeiten mehr
 
 Auf Frederiks Ansage: „Der Rundumschlag und der Dash sollten nicht als

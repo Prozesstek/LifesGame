@@ -14,6 +14,8 @@ import 'stage.dart';
 import 'stats.dart';
 import 'vec2.dart';
 
+part 'boss.dart';
+
 /// Ein Lauf durch eine Halle.
 ///
 /// **Fester Zeitschritt, gesäter Zufall, keine Wanduhr.** Das ist die
@@ -98,6 +100,10 @@ class ActionWorld {
 
   double _mana;
   final Map<String, double> _slotCooldowns = <String, double>{};
+
+  /// Der Wächter zwischen zwei Schritten — erst angelegt, wenn er handelt.
+  _BossState? _bossState;
+  bool _bossEnraged = false;
 
   /// Wie lange eine Schadensminderung noch hält, und wie stark sie ist.
   double _wardLeft = 0;
@@ -359,6 +365,13 @@ class ActionWorld {
     return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
   }
 
+  /// Was der Wächter gerade ankündigt — ein Ring oder eine Linie, die
+  /// sich füllt. Leer, wenn er nichts vorhat.
+  List<TelegraphView> get telegraphs => _bossTelegraphs();
+
+  /// Ob der Wächter wütend ist (unter halbem Leben).
+  bool get isBossEnraged => _bossEnraged;
+
   /// Wie viele Heilkugeln eingesammelt wurden. Eine Zahl fürs Blatt am
   /// Ende: Sie sagt, ob jemand den Lauf bestritten oder durchgehalten hat.
   int get orbsCollected => _orbsCollected;
@@ -615,33 +628,43 @@ class ActionWorld {
         _archerActs(gegner, abstand, takt);
         continue;
       }
-
-      final reichweite = gegner.attackRange + _hero.radius;
-      if (abstand > reichweite) {
-        final richtung = _chaseDirection(gegner);
-        if (richtung.isZero) continue;
-        gegner.facing = richtung;
-        gegner.position = _slide(
-          gegner.position,
-          richtung * (gegner.speed * takt),
-          gegner.radius,
-        );
+      if (gegner.kind == EnemyKind.endgegner) {
+        _bossActs(gegner, abstand, takt);
         continue;
       }
 
-      if (gegner.cooldownLeft > 0) continue;
-      gegner.cooldownLeft = gegner.attackCooldown;
-      gegner.facing = (_hero.position - gegner.position).normalized;
-      _events.add(
-        AttackSwung(
-          attackerId: gegner.id,
-          faction: Faction.gegner,
-          from: gegner.position,
-          direction: gegner.facing,
-        ),
-      );
-      _hit(gegner, _hero);
+      _meleeActs(gegner, abstand, takt);
     }
+  }
+
+  /// Heranlaufen und zuschlagen — Fussvolk, Kobold, Troll, und der
+  /// Wächter, wenn er gerade nichts Besonderes vorhat.
+  void _meleeActs(ActionEntity gegner, double abstand, double takt) {
+    final reichweite = gegner.attackRange + _hero.radius;
+    if (abstand > reichweite) {
+      final richtung = _chaseDirection(gegner);
+      if (richtung.isZero) return;
+      gegner.facing = richtung;
+      gegner.position = _slide(
+        gegner.position,
+        richtung * (gegner.speed * takt),
+        gegner.radius,
+      );
+      return;
+    }
+
+    if (gegner.cooldownLeft > 0) return;
+    gegner.cooldownLeft = gegner.attackCooldown;
+    gegner.facing = (_hero.position - gegner.position).normalized;
+    _events.add(
+      AttackSwung(
+        attackerId: gegner.id,
+        faction: Faction.gegner,
+        from: gegner.position,
+        direction: gegner.facing,
+      ),
+    );
+    _hit(gegner, _hero);
   }
 
   /// Der Fernkämpfer: auf Abstand halten, dann schiessen.

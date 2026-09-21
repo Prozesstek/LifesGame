@@ -166,32 +166,37 @@ abstract final class RoomCatalog {
   ];
 
   /// Die Räume des Wächters. Immer der letzte Raum eines Laufs.
+  ///
+  /// **Er ist dort allein.** Seine Angriffe sind angekündigt und wollen
+  /// umlaufen werden; Leibwächter dazwischen machten aus der Aufgabe
+  /// Gedränge. Viel freie Fläche, damit Ring und Ansturm Platz haben —
+  /// die Säulen sind Deckung gegen den Felswurf.
   static const List<List<String>> bossRooms = <List<String>>[
-    // Die Arena: vier Leibwächter, vier Säulen.
+    // Die Arena: vier Säulen in den Ecken, die Mitte frei.
     <String>[
       '..............',
       '.#..........#.',
       '..............',
-      '....e....e....',
+      '..............',
       '......B.......',
       '..............',
-      '....e....e....',
+      '..............',
       '..............',
       '.#..........#.',
       '..............',
     ],
-    // Der Thronsaal: Schützen an den Wänden, der Wächter hinten.
+    // Der Thronsaal: zwei Säulenpaare, der Wächter hinten.
     <String>[
-      '.s..........s.',
+      '..............',
       '..............',
       '..##......##..',
       '..............',
       '.......B......',
       '..............',
       '..##......##..',
-      '..e........e..',
       '..............',
-      '.s..........s.',
+      '..............',
+      '..............',
     ],
   ];
 
