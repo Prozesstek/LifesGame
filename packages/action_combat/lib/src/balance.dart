@@ -212,6 +212,27 @@ abstract final class ActionBalance {
   static const int bossAttack = 22;
   static const int bossDefense = 6;
 
+  // --- Die Stufen (ADR-0039) ---
+  //
+  // Die Werte oben sind die **Grundwerte**; jede Stufe setzt einen Faktor
+  // darauf (`PitStage`). Gemessen mit `dart run tool/pit_sim.dart`, nicht
+  // geschätzt — wer hier dreht, lässt die Simulation laufen.
+
+  /// Faktor auf die Lebenspunkte auf Stufe 1 und Stufe 30.
+  static const double stageHpFactorFirst = 0.5;
+  static const double stageHpFactorLast = 2.1;
+
+  /// Faktor auf den Angriff auf Stufe 1 und Stufe 30.
+  static const double stageAttackFactorFirst = 0.6;
+  static const double stageAttackFactorLast = 1.8;
+
+  /// Was auf Stufe 30 zur Verteidigung jedes Gegners dazukommt.
+  static const int stageDefenseBonusLast = 8;
+
+  /// Räume vor dem Wächter: drei auf Stufe 1, zwei mehr auf Stufe 30.
+  static const int stageBaseRooms = 3;
+  static const int stageExtraRooms = 2;
+
   // --- Trennung ---
 
   /// Wie hart sich zwei Figuren auseinanderschieben, die sich

@@ -1,0 +1,119 @@
+// Die Grube über alle dreissig Stufen, gespielt mit der echten
+// Werte-Kurve (ADR-0039).
+//
+// Das Gegenstück zum Abschnitt „Die Reihe" in `tool/balance_sim.dart`:
+// Dort stand, welche Sprosse ein Charakter nach N Tagen schlägt. Hier
+// steht dasselbe für die Stufen der Grube. Der Spieler ist `PitBot` —
+// bewusst dumm, die Quoten sind also eine **untere** Schranke.
+//
+// Reines Dart trotz Flutter-Projekt: kein Import zieht Flutter herein.
+//
+//     dart run tool/pit_sim.dart          # 12 Läufe je Feld
+//     dart run tool/pit_sim.dart 40
+
+import 'package:action_combat/action_combat.dart';
+import 'package:gear/gear.dart';
+import 'package:habits/habits.dart';
+
+void main(List<String> args) {
+  final laeufe = args.isEmpty ? 12 : int.parse(args.first);
+
+  final spalten = <String, ActionStats>{
+    'Tag 0': _statsNach(0),
+    'Tag 14': _statsNach(14),
+    'Tag 30': _statsNach(30),
+    'Tag 60+G': _statsNach(60, bonus: _bestesGear()),
+  };
+
+  print('Die Grube — $laeufe Läufe je Feld, jede Karte neu gebaut\n');
+  for (final e in spalten.entries) {
+    final s = e.value;
+    print(
+      '  ${e.key.padRight(9)} ATK ${s.attack}  HP ${s.maxHp}  '
+      'DEF ${s.defense}  EN ${s.energy}',
+    );
+  }
+  print('');
+
+  print(
+    '  ${'Stufe'.padRight(7)}'
+    '${spalten.keys.map((k) => k.padLeft(10)).join()}',
+  );
+
+  for (var stufe = 1; stufe <= PitStage.count; stufe++) {
+    final zeile = StringBuffer('  ${stufe.toString().padRight(7)}');
+    for (final stats in spalten.values) {
+      zeile.write('${_quote(stufe, stats, laeufe)} %'.padLeft(10));
+    }
+    print(zeile);
+  }
+}
+
+int _quote(int stufe, ActionStats stats, int laeufe) {
+  var siege = 0;
+  for (var seed = 0; seed < laeufe; seed++) {
+    final stage = PitStage(stufe);
+    final welt = ActionWorld(
+      level: LevelBuilder.build(stage: stage, seed: seed),
+      heroStats: stats,
+      stage: stage,
+      seed: seed,
+    );
+    PitBot.play(welt);
+    if (welt.isWon) siege++;
+  }
+  return (siege * 100 / laeufe).round();
+}
+
+/// Derselbe Aufbau wie in `tool/balance_sim.dart`: die ersten fünf
+/// Vorlagen, jeden Tag abgehakt.
+ActionStats _statsNach(int tage, {GearBonus bonus = const GearBonus()}) {
+  final gewaehlt = HabitCatalog.all
+      .take(HabitRewards.maxActiveHabits)
+      .map((t) => t.id)
+      .toList();
+
+  var tracker = const HabitTracker.empty();
+  for (final id in gewaehlt) {
+    tracker = tracker.activate(id);
+  }
+
+  var tag = const Day(2026, 1, 1);
+  for (var i = 0; i < tage; i++) {
+    for (final id in gewaehlt) {
+      tracker = tracker.check(id, tag).tracker;
+    }
+    tag = tag.next;
+  }
+
+  final s = tracker.stats;
+  return ActionStats(
+    attack: s.attack + bonus.attack,
+    maxHp: s.maxHp + bonus.maxHp,
+    defense: s.defense + bonus.defense,
+    energy: s.maxEnergy + bonus.maxEnergy,
+  );
+}
+
+/// Das beste Stück je Platz — dieselbe grobe Rechnung wie in
+/// `tool/balance_sim.dart`.
+GearBonus _bestesGear() {
+  var summe = const GearBonus();
+  for (final slot in GearSlot.values) {
+    GearItem? bestes;
+    var besteSumme = -1;
+    for (final item in GearCatalog.forSlot(slot)) {
+      final wert =
+          item.bonus.attack * 8 +
+          item.bonus.maxHp +
+          item.bonus.defense * 8 +
+          item.bonus.maxEnergy * 8;
+      if (wert > besteSumme) {
+        besteSumme = wert;
+        bestes = item;
+      }
+    }
+    if (bestes != null) summe = summe + bestes.bonus;
+  }
+  return summe;
+}

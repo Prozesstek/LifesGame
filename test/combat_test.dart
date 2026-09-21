@@ -10,7 +10,6 @@ import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/widgets/timing_bar.dart';
-import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -327,65 +326,6 @@ void main() {
           greaterThanOrEqualTo(leichter.attack + leichter.defense),
         );
       }
-    });
-  });
-
-  group('LadderScreen', () {
-    // Die Gegnerwahl ist mit Issue #36 entfallen: Es gibt genau einen
-    // naechsten Gegner.
-    testWidgets('zeigt Sprosse und Gegner', (tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: LadderScreen())),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('0 / ${Enemies.rungs}'), findsOneWidget);
-      expect(find.text(Enemies.atRung(1).name), findsOneWidget);
-    });
-
-    testWidgets('und sagt nicht voraus, wie es ausgeht', (tester) async {
-      // Die Einschaetzung stammte aus der Gegnerwahl, wo sie eine
-      // Entscheidung stuetzte. In der Reihe gibt es nichts zu
-      // entscheiden -- eine Vorhersage, die man nicht befolgen kann,
-      // ist Reibung.
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: LadderScreen())),
-      );
-      await tester.pumpAndSettle();
-
-      for (final satz in <String>[
-        'wird knapp',
-        'sollte gut ausgehen',
-        'vermutlich noch zu stark',
-      ]) {
-        expect(find.text(satz), findsNothing, reason: satz);
-      }
-    });
-
-    testWidgets('nennt die Belohnung vor dem Kampf', (tester) async {
-      // Eine Belohnung, von der man erst hinterher erfaehrt, motiviert
-      // den Kampf nicht, den man gerade ueberlegt.
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: LadderScreen())),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        find.textContaining('+${LadderRewards.xpFor(1)} Erfahrung'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('nur der naechste Gegner steht da', (tester) async {
-      // Der Entwurf zeigt einen Gegner und einen Knopf. Stuenden alle
-      // dreissig da, waere es wieder eine Liste.
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: LadderScreen())),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text(Enemies.atRung(2).name), findsNothing);
-      expect(find.text(Enemies.atRung(20).name), findsNothing);
     });
   });
 }

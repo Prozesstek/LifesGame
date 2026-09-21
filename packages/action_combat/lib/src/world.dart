@@ -8,6 +8,7 @@ import 'events.dart';
 import 'flow_field.dart';
 import 'level.dart';
 import 'projectile.dart';
+import 'stage.dart';
 import 'stats.dart';
 import 'vec2.dart';
 
@@ -27,6 +28,7 @@ class ActionWorld {
   ActionWorld({
     required this.level,
     required this.heroStats,
+    this.stage,
     int seed = 1,
   }) : _rng = math.Random(seed) {
     _hero = ActionEntity(
@@ -56,6 +58,12 @@ class ActionWorld {
 
   final Level level;
   final ActionStats heroStats;
+
+  /// Wie hart die Gegner sind (ADR-0039). `null` heisst Grundwerte aus
+  /// [ActionBalance] — so läuft der Prototyp im Entwicklermodus, und so
+  /// sind die Tests geschrieben, die eine Mechanik prüfen statt einer
+  /// Stufe.
+  final PitStage? stage;
 
   final math.Random _rng;
   final List<ActionEntity> _entities = <ActionEntity>[];
@@ -761,6 +769,20 @@ class ActionWorld {
     );
   }
 
+  int _hp(int base) {
+    final stufe = stage;
+    if (stufe == null) return base;
+    return math.max(1, (base * stufe.hpFactor).round());
+  }
+
+  int _attack(int base) {
+    final stufe = stage;
+    if (stufe == null) return base;
+    return math.max(1, (base * stufe.attackFactor).round());
+  }
+
+  int _defense(int base) => base + (stage?.defenseBonus ?? 0);
+
   ActionEntity _enemyFor(Spawn spawn) {
     return switch (spawn.kind) {
       EnemyKind.endgegner => ActionEntity(
@@ -768,9 +790,9 @@ class ActionWorld {
           faction: Faction.gegner,
           kind: spawn.kind,
           position: level.centerOfSpawn(spawn),
-          maxHp: ActionBalance.bossHp,
-          attack: ActionBalance.bossAttack,
-          defense: ActionBalance.bossDefense,
+          maxHp: _hp(ActionBalance.bossHp),
+          attack: _attack(ActionBalance.bossAttack),
+          defense: _defense(ActionBalance.bossDefense),
           radius: ActionBalance.bossRadius,
           speed: ActionBalance.bossSpeed,
           attackRange: ActionBalance.bossAttackRange,
@@ -781,9 +803,9 @@ class ActionWorld {
           faction: Faction.gegner,
           kind: spawn.kind,
           position: level.centerOfSpawn(spawn),
-          maxHp: ActionBalance.archerHp,
-          attack: ActionBalance.archerAttack,
-          defense: ActionBalance.archerDefense,
+          maxHp: _hp(ActionBalance.archerHp),
+          attack: _attack(ActionBalance.archerAttack),
+          defense: _defense(ActionBalance.archerDefense),
           radius: ActionBalance.archerRadius,
           speed: ActionBalance.archerSpeed,
           attackRange: ActionBalance.archerShootRange,
@@ -794,9 +816,9 @@ class ActionWorld {
           faction: Faction.gegner,
           kind: EnemyKind.fussvolk,
           position: level.centerOfSpawn(spawn),
-          maxHp: ActionBalance.trashHp,
-          attack: ActionBalance.trashAttack,
-          defense: ActionBalance.trashDefense,
+          maxHp: _hp(ActionBalance.trashHp),
+          attack: _attack(ActionBalance.trashAttack),
+          defense: _defense(ActionBalance.trashDefense),
           radius: ActionBalance.trashRadius,
           speed: ActionBalance.trashSpeed,
           attackRange: ActionBalance.trashAttackRange,

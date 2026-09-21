@@ -19,6 +19,8 @@ class CombatResultDialog extends StatelessWidget {
     required this.enemyName,
     this.earnedXp = 0,
     this.earnedGold = 0,
+    this.summary,
+    this.perStage = false,
   });
 
   final bool won;
@@ -29,6 +31,16 @@ class CombatResultDialog extends StatelessWidget {
   /// einem Gegner, der schon geschlagen war.
   final int earnedXp;
   final int earnedGold;
+
+  /// Der erste Satz, wenn er nicht aus Runden besteht.
+  ///
+  /// Die Grube kennt keine Runden (ADR-0039); sie reicht ihren Satz
+  /// fertig herein. Ohne ihn steht da, was der Rundenkampf sagt.
+  final String? summary;
+
+  /// Ob die Belohnung an einer Stufe der Grube hängt statt an einem
+  /// Gegner — ändert nur den Wortlaut der Fussnote, nicht die Regel.
+  final bool perStage;
 
   bool get _hatBelohnung => won && (earnedXp > 0 || earnedGold > 0);
 
@@ -67,9 +79,10 @@ class CombatResultDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            won
-                ? '$enemyName besiegt — nach $rounds Runden.'
-                : 'Du bist nach $rounds Runden gefallen.',
+            summary ??
+                (won
+                    ? '$enemyName besiegt — nach $rounds Runden.'
+                    : 'Du bist nach $rounds Runden gefallen.'),
             style: const TextStyle(fontSize: 15, height: 1.4),
           ),
           if (_hatBelohnung) ...<Widget>[
@@ -106,6 +119,7 @@ class CombatResultDialog extends StatelessWidget {
   /// Der Satz, der die Frage „und was habe ich jetzt davon?" beantwortet,
   /// statt sie offenzulassen.
   String get _fussnote {
+    if (perStage) return _fussnoteStufe;
     if (!won) {
       return 'Das kostet nichts außer diesem Kampf. Werte wachsen über '
           'Häkchen und Lektionen, nicht über Siege.';
@@ -117,5 +131,19 @@ class CombatResultDialog extends StatelessWidget {
     }
     return 'Den hattest du schon. Ein erneuter Sieg bringt nichts ein — '
         'Erfahrung und Gold gibt es nur beim ersten Mal.';
+  }
+
+  String get _fussnoteStufe {
+    if (!won) {
+      return 'Das kostet nichts außer diesem Lauf. Werte wachsen über '
+          'Häkchen und Lektionen, nicht über Siege.';
+    }
+    if (_hatBelohnung) {
+      return 'Einmal je Stufe — wer sie noch einmal räumt, bekommt nichts '
+          'mehr. Der größere Teil deiner Werte kommt weiterhin aus '
+          'Gewohnheiten und Theorie.';
+    }
+    return 'Diese Stufe hattest du schon. Erfahrung und Gold gibt es nur '
+        'beim ersten Mal.';
   }
 }

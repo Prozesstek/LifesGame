@@ -82,6 +82,13 @@ Entscheidung. „+3 Angriff" nicht.
 > zu besitzen und zu wechseln.
 
 ### 3.2 Kampfsystem
+
+> **Abgelöst am 21.09.2026 durch die Grube** — Echtzeit, dreissig Stufen,
+> jede Halle aus Räumen neu gesteckt
+> ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)).
+> Der Abschnitt beschreibt den Rundenkampf, wie er bis dahin galt, und
+> bleibt stehen, bis `packages/combat` gelöscht ist.
+
 Rundenbasiert, 4 Moves, keine Typen-Effektivität. Timed Hits als
 Skill-Element: Tap im richtigen Moment → Schadensbonus, gedeckelt bei
 **+20 %**.
@@ -174,6 +181,9 @@ Thema ohne tägliche Handlung ist ein Essay, kein Knoten.
 > für ihn wurde ein Punkt bezahlt.
 
 ### 3.4 Gegnerreihe
+
+> **Seit ADR-0039 sind die dreissig Sprossen dreissig Stufen der Grube.**
+> Die Regel darunter gilt unverändert: jede Stufe zahlt einmal.
 
 **Dreißig Gegner, aufsteigend, einer nach dem anderen.** Der Bildschirm
 zeigt „17 / 30", den nächsten Gegner und einen Knopf. Ein erstmals

@@ -1,26 +1,25 @@
+import 'package:action_combat/action_combat.dart';
 import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../action/pit_screen.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
-import 'combat_controller.dart';
-import 'combat_screen.dart';
-import 'enemy_icon.dart';
 import 'ladder_controller.dart';
 
-/// Die Gegnerreihe — dreißig Stufen, eine nach der anderen.
+/// Der Eingang zur Grube — dreissig Stufen, eine nach der anderen.
 ///
-/// **Sie ersetzt die Gegnerwahl** (Issue #36, ADR-0032). Vorher standen
-/// drei Gegner zur Auswahl; jetzt gibt es genau einen nächsten. Das ist
-/// weniger Freiheit und mehr Aussage: Die Zahl oben ist das, was zwei
-/// Spieler im Teststart miteinander vergleichen.
+/// **Seit ADR-0039 führt er in die Grube statt in den Rundenkampf.** Die
+/// Zahl oben ist dieselbe geblieben, weil an ihr die Sperren im Laden,
+/// die Errungenschaften und die einmalige Belohnung hängen; aus der
+/// Sprosse ist eine Stufe geworden. Der Klassenname bleibt, bis
+/// `package:combat` gelöscht wird — er ist der Ort, auf den Startbildschirm
+/// und Tests zeigen.
 ///
-/// **Warum kein Blättern durch die geschlagenen.** Der Entwurf zeigt
-/// einen Gegner und einen Knopf. Wer hängenbleibt, hat damit genau einen
-/// Kampf im Spiel — das ist der bewusste Preis dafür, dass der Bildschirm
-/// keine zweite Frage stellt. Ein erneuter Sieg gegen einen längst
-/// geschlagenen Gegner brächte ohnehin nichts (ADR-0032).
+/// **Kein Gegnerbild mehr.** Eine Stufe hat keinen einen Gegner, sondern
+/// eine Grube voller, die bei jedem Lauf anders liegt. Was sich zwischen
+/// den Stufen ändert, steht als Zahl darunter.
 class LadderScreen extends ConsumerWidget {
   const LadderScreen({super.key});
 
@@ -29,10 +28,10 @@ class LadderScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stand = ref.watch(ladderProvider);
-    final gegner = ref.watch(nextEnemyProvider);
+    final stufe = PitStage(stand.nextRung);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kampf')),
+      appBar: AppBar(title: const Text('Die Grube')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -43,16 +42,20 @@ class LadderScreen extends ConsumerWidget {
                 children: <Widget>[
                   _Fortschritt(stand: stand),
                   const SizedBox(height: 14),
-                  Expanded(child: _GegnerBild(enemy: gegner)),
+                  const Expanded(child: _GrubenBild()),
                   const SizedBox(height: 14),
-                  _Namensleiste(enemy: gegner),
+                  _Stufenleiste(stage: stufe),
                   const SizedBox(height: 10),
                   _Belohnung(stand: stand),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () => _start(context, ref, gegner),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => PitScreen(stage: stufe),
+                        ),
+                      ),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         textStyle: const TextStyle(
@@ -60,7 +63,7 @@ class LadderScreen extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      child: const Text('Kampf'),
+                      child: const Text('Hinab'),
                     ),
                   ),
                 ],
@@ -70,19 +73,6 @@ class LadderScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _start(BuildContext context, WidgetRef ref, EnemyBlueprint enemy) {
-    // **Erst wählen, dann neu aufsetzen, dann öffnen.** `restart()` baut
-    // die Sitzung samt Engine neu — und die Engine muss den Gegner schon
-    // kennen. Die umgekehrte Reihenfolge hatte den Kampf einmal ohne
-    // einen einzigen Move-Knopf hinterlassen (`docs/context/gotchas.md`).
-    ref.read(selectedEnemyProvider.notifier).select(enemy);
-    ref.read(combatControllerProvider.notifier).restart();
-
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const CombatScreen()));
   }
 }
 
@@ -97,7 +87,7 @@ class _Fortschritt extends StatelessWidget {
     return Column(
       children: <Widget>[
         Text(
-          '${stand.highestDefeated} / ${Enemies.rungs}',
+          '${stand.highestDefeated} / ${PitStage.count}',
           // Die Zahl steht auf dem Leder, nicht auf einer Fläche — und
           // sie ist die Überschrift des Bildschirms.
           style: const TextStyle(
@@ -109,7 +99,7 @@ class _Fortschritt extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         HolzBalken(
-          value: stand.highestDefeated / Enemies.rungs,
+          value: stand.highestDefeated / PitStage.count,
           color: Palette.accentOnDark,
         ),
       ],
@@ -117,85 +107,53 @@ class _Fortschritt extends StatelessWidget {
   }
 }
 
-/// Die Bildfläche des Gegners — oder ein Platzhalter, solange es keine
-/// Bilder gibt.
-class _GegnerBild extends StatelessWidget {
-  const _GegnerBild({required this.enemy});
-
-  final EnemyBlueprint enemy;
-
-  @override
-  Widget build(BuildContext context) {
-    final bild = EnemyIcons.forEnemyId(enemy.id);
-
-    // **Quadratisch, weil die Bilder es sind.** Der Entwurf zeigt eine
-    // hochkante Flaeche; gezeichnet wird aber auf 64 x 64. Ein
-    // quadratisches Bild in einer hochkanten Flaeche liesse rund 144
-    // Punkte Rahmen leer, und das sieht aus wie ein Fehler. Der Rahmen
-    // richtet sich deshalb nach dem Bild, nicht umgekehrt -- der
-    // uebrige Platz wird zu Luft darum herum.
-    return Center(
-      child: AspectRatio(aspectRatio: 1, child: _Rahmen(bild: bild)),
-    );
-  }
-}
-
-class _Rahmen extends StatelessWidget {
-  const _Rahmen({required this.bild});
-
-  final String? bild;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Palette.surfaceRaised, width: 2),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: bild == null
-          ? const _KeinBild()
-          : Image.asset(
-              bild!,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.none,
-              errorBuilder: (context, error, stack) => const _KeinBild(),
-            ),
-    );
-  }
-}
-
-class _KeinBild extends StatelessWidget {
-  const _KeinBild();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Icon(
-        Icons.sports_martial_arts,
-        size: 72,
-        color: Palette.surfaceRaised,
-      ),
-    );
-  }
-}
-
-/// Name und Werte des Gegners.
+/// Die Bildfläche über der Stufe.
 ///
-/// **Ohne Einschätzung.** Bis Issue #36 stand hier „wird knapp" oder
-/// „vermutlich noch zu stark" — geerbt von der Gegnerwahl, wo sie eine
-/// Entscheidung stützte. In der Reihe gibt es nichts zu entscheiden: Es
-/// steht genau ein Gegner an, und ob er zu stark ist, sagt der Kampf.
-/// Eine Vorhersage, die man ohnehin nicht befolgen kann, ist Reibung.
-class _Namensleiste extends StatelessWidget {
-  const _Namensleiste({required this.enemy});
-
-  final EnemyBlueprint enemy;
+/// Ein Platzhalter, bis es ein Bild der Grube gibt — dieselbe Fläche, auf
+/// der vorher der Gegner der Sprosse stand.
+class _GrubenBild extends StatelessWidget {
+  const _GrubenBild();
 
   @override
   Widget build(BuildContext context) {
+    return Center(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Palette.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Palette.surfaceRaised, width: 2),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.stairs_outlined,
+              size: 72,
+              color: Palette.surfaceRaised,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Welche Stufe ansteht und was sie von der ersten unterscheidet.
+///
+/// **Gerechnet in `package:action_combat`**, hier nur abgelesen: Die
+/// Faktoren stehen in `PitStage`, der Bildschirm rundet sie für die
+/// Anzeige.
+class _Stufenleiste extends StatelessWidget {
+  const _Stufenleiste({required this.stage});
+
+  final PitStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final leben = stage.hpFactor.toStringAsFixed(1).replaceAll('.', ',');
+    final angriff = stage.attackFactor.toStringAsFixed(1).replaceAll('.', ',');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -206,7 +164,7 @@ class _Namensleiste extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Text(
-            enemy.name,
+            'Stufe ${stage.number}',
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -218,10 +176,10 @@ class _Namensleiste extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${enemy.maxHp} HP · ${enemy.attack} Angriff · '
-            '${enemy.defense} Verteidigung',
+            '${stage.roomCount} Räume vor dem Wächter · '
+            'Leben ×$leben · Angriff ×$angriff',
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12, color: Palette.textDim),
           ),
@@ -248,9 +206,9 @@ class _Belohnung extends StatelessWidget {
 
     return Text(
       neu
-          ? 'Erster Sieg: +${LadderRewards.xpFor(rung)} Erfahrung, '
+          ? 'Erste Räumung: +${LadderRewards.xpFor(rung)} Erfahrung, '
                 '+${LadderRewards.goldFor(rung)} Gold'
-          : 'Schon geschlagen — bringt nichts mehr ein.',
+          : 'Alle Stufen geräumt — ein Lauf bringt nichts mehr ein.',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 12,
