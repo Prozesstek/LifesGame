@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
 /// Was am Ende eines Kampfes dasteht.
@@ -33,8 +34,21 @@ class CombatResultDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Der hängende Holzrahmen trägt das Blatt; innen bleibt Pergament.
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: HolzRahmen(child: _blatt(context)),
+    );
+  }
+
+  Widget _blatt(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Palette.surfaceRaised,
+      backgroundColor: Palette.surface,
+      elevation: 0,
+      insetPadding: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(),
       title: Row(
         children: <Widget>[
           Icon(

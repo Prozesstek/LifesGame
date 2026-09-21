@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../gear/gear_controller.dart';
 import '../progression/level_provider.dart';
-import '../ui/palette.dart';
+import '../ui/holz.dart';
 import 'abilities_controller.dart';
 import 'ability_unlock.dart';
 import 'widgets/ability_unlock_sheet.dart';
@@ -45,16 +45,23 @@ Future<void> showAbilityUnlocks(
 
     final choice = await showModalBottomSheet<UnlockChoice>(
       context: context,
-      backgroundColor: Palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => AbilityUnlockSheet(
-        ability: ability,
-        move: move,
-        attack: ref.read(equippedStatsProvider).attack,
-        hasFreeSlot: slot != null,
-        nextSlotLevel: nextSlotLevel(ref.read(playerLevelProvider).level),
+      // Die Feier hängt im Holzrahmen; das Blatt selbst ist durchsichtig.
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      // **So hoch, wie der Rahmen braucht.** Ohne das kappt das Blatt bei
+      // neun Sechzehnteln der Höhe, und „Weiter" liegt unter der Kante.
+      isScrollControlled: true,
+      builder: (_) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        child: HolzRahmen(
+          child: AbilityUnlockSheet(
+            ability: ability,
+            move: move,
+            attack: ref.read(equippedStatsProvider).attack,
+            hasFreeSlot: slot != null,
+            nextSlotLevel: nextSlotLevel(ref.read(playerLevelProvider).level),
+          ),
+        ),
       ),
     );
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:identity/identity.dart';
 
+import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'achievements_controller.dart';
 
@@ -296,15 +297,7 @@ class _Fortschritt extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: anteil,
-              minHeight: 6,
-              backgroundColor: Palette.surfaceSunken,
-              valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
-            ),
-          ),
+          child: HolzBalken(value: anteil, color: Palette.accent),
         ),
         const SizedBox(width: 10),
         Text(
