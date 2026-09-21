@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Was eine Kette wert ist — als Leiter, nicht als Versprechen.
 ///
@@ -31,12 +32,8 @@ class StreakLadderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

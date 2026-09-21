@@ -6,6 +6,7 @@ import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/holz.dart';
 
 /// Die vier Fähigkeitsslots nebeneinander.
 ///
@@ -112,56 +113,59 @@ class AbilitySlotsRow extends StatelessWidget {
 
     final result = await showModalBottomSheet<_Pick>(
       context: context,
-      backgroundColor: Palette.surface,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       builder: (sheetContext) {
-        return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Text(
-                  'Fähigkeit wählen',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
-              ),
-              if (unlocked.isEmpty)
+        return HolzBlatt(
+          child: SafeArea(
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 4, 20, 16),
+                  padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
                   child: Text(
-                    'Noch nichts freigeschaltet.',
-                    style: TextStyle(color: Palette.muted),
+                    'Fähigkeit wählen',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.text,
+                    ),
                   ),
                 ),
-              for (final ability in unlocked)
-                _AbilityOption(
-                  ability: ability,
-                  isChosen: ability.moveId == current,
-                  // Was anderswo liegt, wird nicht versteckt: Antippen
-                  // schiebt es hierher. Erst aufräumen zu müssen, bevor man
-                  // umstellen kann, wäre ein Umweg ohne Gewinn.
-                  isElsewhere:
-                      ability.moveId != current &&
-                      chosen.contains(ability.moveId),
-                  onTap: () =>
-                      Navigator.of(sheetContext).pop(_Pick(ability.moveId)),
-                ),
-              if (current != null)
-                ListTile(
-                  leading: const Icon(Icons.close, color: Palette.muted),
-                  title: const Text(
-                    'Platz räumen',
-                    style: TextStyle(color: Palette.textDim),
+                if (unlocked.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 4, 20, 16),
+                    child: Text(
+                      'Noch nichts freigeschaltet.',
+                      style: TextStyle(color: Palette.muted),
+                    ),
                   ),
-                  onTap: () =>
-                      Navigator.of(sheetContext).pop(const _Pick(null)),
-                ),
-              const SizedBox(height: 8),
-            ],
+                for (final ability in unlocked)
+                  _AbilityOption(
+                    ability: ability,
+                    isChosen: ability.moveId == current,
+                    // Was anderswo liegt, wird nicht versteckt: Antippen
+                    // schiebt es hierher. Erst aufräumen zu müssen, bevor man
+                    // umstellen kann, wäre ein Umweg ohne Gewinn.
+                    isElsewhere:
+                        ability.moveId != current &&
+                        chosen.contains(ability.moveId),
+                    onTap: () =>
+                        Navigator.of(sheetContext).pop(_Pick(ability.moveId)),
+                  ),
+                if (current != null)
+                  ListTile(
+                    leading: const Icon(Icons.close, color: Palette.muted),
+                    title: const Text(
+                      'Platz räumen',
+                      style: TextStyle(color: Palette.textDim),
+                    ),
+                    onTap: () =>
+                        Navigator.of(sheetContext).pop(const _Pick(null)),
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         );
       },
@@ -268,6 +272,7 @@ class _Slot extends StatelessWidget {
   final int slot;
   final bool isOpen;
   final bool isWeaponSlot;
+
   /// Die Id auf diesem Platz, oder null.
   final String? move;
   final VoidCallback? onTap;
@@ -301,11 +306,7 @@ class _Slot extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 if (isOpen && belegt != null)
-                  _MoveBild(
-                    moveId: belegt,
-                    side: _bildSeite,
-                    fallback: zeichen,
-                  )
+                  _MoveBild(moveId: belegt, side: _bildSeite, fallback: zeichen)
                 else
                   SizedBox.square(
                     dimension: _bildSeite,

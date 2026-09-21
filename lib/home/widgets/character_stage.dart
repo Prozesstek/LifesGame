@@ -4,6 +4,7 @@ import 'package:progression/progression.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import 'level_card.dart';
+import '../../ui/holz.dart';
 
 /// Die Figur in der Mitte des Startbildschirms, mit ihren Zahlen darunter.
 ///
@@ -27,12 +28,7 @@ class CharacterStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Palette.surfaceRaised, width: 2),
-      ),
+    return HolzKarte(
       padding: const EdgeInsets.all(12),
       child: Column(
         children: <Widget>[

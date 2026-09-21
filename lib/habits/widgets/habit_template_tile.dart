@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Eine freigeschaltete Vorlage, die noch nicht läuft.
 ///
@@ -29,12 +30,8 @@ class HabitTemplateTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

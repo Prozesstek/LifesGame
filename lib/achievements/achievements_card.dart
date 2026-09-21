@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../ui/palette.dart';
 import 'achievements_controller.dart';
 import 'achievements_screen.dart';
+import '../ui/holz.dart';
 
 /// Der Weg zu den Errungenschaften, vom Charakter aus.
 ///
@@ -22,11 +23,10 @@ class AchievementsCard extends ConsumerWidget {
     final gesamt = AchievementCatalog.all.length;
     final fame = ref.watch(fameProvider);
 
-    return Material(
+    return HolzKarte(
+      padding: EdgeInsets.zero,
       color: Palette.surfaceRaised,
-      borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const AchievementsScreen()),
         ),

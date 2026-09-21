@@ -220,13 +220,10 @@ class _Eintrag extends StatelessWidget {
     // Eine unverdiente Entdeckung verrät weder Namen noch Bedingung.
     final versteckt = !verdient && achievement.isDiscovery;
 
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: verdient ? Palette.surfaceRaised : Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: verdient ? Border.all(color: Palette.accent, width: 1.5) : null,
-      ),
+      color: verdient ? Palette.surfaceRaised : Palette.surface,
+      edgeColor: verdient ? Palette.accent : Holz.kante,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

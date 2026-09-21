@@ -3,6 +3,7 @@ import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
 import 'node_state.dart';
+import '../../ui/holz.dart';
 
 /// Was mit dem Startknoten geschehen soll.
 enum NodeAction { read, open }
@@ -40,13 +41,8 @@ class NodeActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Palette.surfaceRaised),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

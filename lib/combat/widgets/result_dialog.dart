@@ -47,12 +47,7 @@ class CombatResultDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Der hängende Holzrahmen trägt das Blatt; innen bleibt Pergament.
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: HolzRahmen(child: _blatt(context)),
-    );
+    return HolzDialog(child: _blatt(context));
   }
 
   Widget _blatt(BuildContext context) {

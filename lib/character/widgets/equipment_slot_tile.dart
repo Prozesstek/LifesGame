@@ -4,6 +4,7 @@ import 'package:gear/gear.dart';
 import '../../gear/gear_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/holz.dart';
 
 /// Ein Ausrüstungsplatz als Kachel im 6er-Raster.
 ///
@@ -122,67 +123,71 @@ class EquipmentSlotTile extends StatelessWidget {
   Future<void> _pick(BuildContext context) async {
     final chosen = await showModalBottomSheet<_Choice>(
       context: context,
-      backgroundColor: Palette.surface,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Row(
-                  children: <Widget>[
-                    Icon(_iconFor(slot), size: 18, color: Palette.accent),
-                    const SizedBox(width: 10),
-                    Text(
-                      slot.label,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.text,
+        return HolzBlatt(
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(_iconFor(slot), size: 18, color: Palette.accent),
+                      const SizedBox(width: 10),
+                      Text(
+                        slot.label,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.text,
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                // **Dasselbe Bild wie im Laden und auf der Kachel.** Wer hier
+                // wählt, soll das Stück erkennen, nicht nur seinen Namen
+                // lesen -- und ob es zu einem Set gehört, entscheidet die
+                // Wahl mit: Ein Teil ablegen kann eine Set-Stufe kosten.
+                for (final option in owned)
+                  ListTile(
+                    leading: _Zeichen(
+                      slot: slot,
+                      item: option,
+                      color: Palette.textDim,
+                      side: _bildImBlatt,
                     ),
-                  ],
-                ),
-              ),
-              // **Dasselbe Bild wie im Laden und auf der Kachel.** Wer hier
-              // wählt, soll das Stück erkennen, nicht nur seinen Namen
-              // lesen -- und ob es zu einem Set gehört, entscheidet die
-              // Wahl mit: Ein Teil ablegen kann eine Set-Stufe kosten.
-              for (final option in owned)
-                ListTile(
-                  leading: _Zeichen(
-                    slot: slot,
-                    item: option,
-                    color: Palette.textDim,
-                    side: _bildImBlatt,
+                    title: Text(
+                      option.name,
+                      style: const TextStyle(color: Palette.text),
+                    ),
+                    subtitle: _Untertitel(option: option),
+                    trailing: option.id == equipped?.id
+                        ? const Icon(Icons.check, color: Palette.accent)
+                        : null,
+                    onTap: () => Navigator.of(
+                      sheetContext,
+                    ).pop(_Choice.equip(option.id)),
                   ),
-                  title: Text(
-                    option.name,
-                    style: const TextStyle(color: Palette.text),
+                // Das Ablegen ist von der Kachel hierher gewandert: Im
+                // Raster ist kein Platz für einen zweiten Knopf, und hier
+                // steht es neben dem, was es ersetzt.
+                if (equipped != null)
+                  ListTile(
+                    leading: const Icon(Icons.close, color: Palette.muted),
+                    title: const Text(
+                      'Ablegen',
+                      style: TextStyle(color: Palette.textDim),
+                    ),
+                    onTap: () =>
+                        Navigator.of(sheetContext).pop(const _Choice.unequip()),
                   ),
-                  subtitle: _Untertitel(option: option),
-                  trailing: option.id == equipped?.id
-                      ? const Icon(Icons.check, color: Palette.accent)
-                      : null,
-                  onTap: () =>
-                      Navigator.of(sheetContext).pop(_Choice.equip(option.id)),
-                ),
-              // Das Ablegen ist von der Kachel hierher gewandert: Im
-              // Raster ist kein Platz für einen zweiten Knopf, und hier
-              // steht es neben dem, was es ersetzt.
-              if (equipped != null)
-                ListTile(
-                  leading: const Icon(Icons.close, color: Palette.muted),
-                  title: const Text(
-                    'Ablegen',
-                    style: TextStyle(color: Palette.textDim),
-                  ),
-                  onTap: () =>
-                      Navigator.of(sheetContext).pop(const _Choice.unequip()),
-                ),
-              const SizedBox(height: 8),
-            ],
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         );
       },

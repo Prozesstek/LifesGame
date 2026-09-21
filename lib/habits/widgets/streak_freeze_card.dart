@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Der Knopf, der eine Kette rettet — und nur dann da ist, wenn es etwas
 /// zu retten gibt.
@@ -35,13 +36,10 @@ class StreakFreezeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: Palette.surfaceRaised,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Palette.accent, width: 1.5),
-      ),
+      color: Palette.surfaceRaised,
+      edgeColor: Palette.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

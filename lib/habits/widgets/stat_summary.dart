@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Die vier Charakterwerte nebeneinander.
 ///
@@ -42,12 +43,8 @@ class _StatCell extends StatelessWidget {
 
     return Semantics(
       label: '${stat.label} ${stats.valueFor(stat)}, ${stat.combatLabel}',
-      child: Container(
+      child: HolzKarte(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: BoxDecoration(
-          color: Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

@@ -4,6 +4,7 @@ import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
 import 'rarity_badge.dart';
+import '../../ui/holz.dart';
 
 /// Ein Ausrüstungsstück im Laden.
 ///
@@ -76,15 +77,8 @@ class ShopItemTile extends StatelessWidget {
     return Semantics(
       button: block == null,
       enabled: block == null,
-      child: Container(
+      child: HolzKarte(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(
-          color: Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: isEquipped
-              ? Border.all(color: Palette.accent, width: 1.5)
-              : null,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

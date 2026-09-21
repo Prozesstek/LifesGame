@@ -47,12 +47,9 @@ class IdentityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = identity.titleFor(earnedTitleIds);
 
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      decoration: BoxDecoration(
-        color: Palette.surfaceRaised,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      color: Palette.surfaceRaised,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -119,18 +116,18 @@ class IdentityCard extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: OutlinedButton.icon(
+                child: _Knopf(
                   onPressed: onEditName,
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: Text(identity.hasName ? 'Name ändern' : 'Name geben'),
+                  icon: Icons.edit_outlined,
+                  label: identity.hasName ? 'Name ändern' : 'Name geben',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: OutlinedButton.icon(
+                child: _Knopf(
                   onPressed: onChooseTitle,
-                  icon: const Icon(Icons.military_tech_outlined, size: 18),
-                  label: const Text('Titel'),
+                  icon: Icons.military_tech_outlined,
+                  label: 'Titel',
                 ),
               ),
             ],
@@ -178,6 +175,42 @@ class _LevelBar extends StatelessWidget {
           style: const TextStyle(fontSize: 11, color: Palette.textDim),
         ),
       ],
+    );
+  }
+}
+
+/// Ein Knopf mit Symbol, dessen Text schrumpfen darf.
+///
+/// **`OutlinedButton.icon` lässt ihn nicht schrumpfen** — Symbol und Text
+/// stehen dort in einer Zeile ohne `Flexible`. Seit die Karte im
+/// Holzrahmen liegt, ist sie 24 Punkte schmaler, und in der halben Breite
+/// wird „Name ändern" bei grösserer Schrift knapp. Vorbeugend: Zwei Dinge
+/// nebeneinander brauchen `Flexible` (`gotchas.md`).
+class _Knopf extends StatelessWidget {
+  const _Knopf({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+  });
+
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 18),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
     );
   }
 }
