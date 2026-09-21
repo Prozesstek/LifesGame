@@ -107,6 +107,15 @@ Vorgeschlagene Move-Archetypen mit kleiner Energieleiste:
 | 4 | Utility (Heilung, Schild) | mittel |
 
 ### 3.3 Theorie / Skilltree
+
+> **Zielbild ([ADR-0037](docs/decisions/0037-der-wissensbaum-als-endziel.md)):
+> ein Wissensbaum, der größer ist als ein Spielerleben.** Rund 340 Themen
+> in den vier Gebieten (Issue #54). Man kann nicht alles lernen — man
+> wählt, was einen interessiert, und wird darin immer besser. Lernen
+> zählt dabei so viel wie Gewohnheiten und bringt entsprechend Erfahrung
+> und Gold. Gebaut wird nach dem 30-Tage-Lauf; der Abschnitt unten
+> beschreibt den heutigen Stand.
+
 Text plus Multiple-Choice-Fragen, verknüpft mit Habit-Vorlagen. Innerhalb
 eines Knotens ist die Reihenfolge der Lektionen verbindlich: Lektion n+1
 öffnet sich mit bestandener Lektion n.
@@ -133,6 +142,10 @@ Körper                          Geist
 Ein Knoten ist ein **Thema mit Lektionen**, keine Einzellektion; innerhalb
 bleibt die Reihenfolge verbindlich. Ein Knoten braucht seinen Elternknoten.
 Ein Knoten erscheint erst, wenn sein Inhalt geschrieben ist.
+
+> **Abgelöst durch ADR-0037:** Die Bedingung „mindestens eine täglich
+> abhakbare Gewohnheit" gilt nicht mehr — Lernen zählt für sich. Ein
+> Knoten *darf* eine Vorlage freischalten, er *muss* es nicht.
 
 **Ein Knoten verdient seinen Platz nur**, wenn er drei Lektionen trägt,
 mindestens eine täglich abhakbare Gewohnheit hervorbringt und auf einen der
