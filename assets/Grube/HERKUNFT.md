@@ -10,6 +10,8 @@ erlaubt die Verwendung im Spiel.
 | `Orc_*.png` | `Characters/Orc/Orc/` — das Fussvolk |
 | `BloodshotEye.png` | `Characters/Basic Monster Animations/Bloodshot Eye/` — der Schütze |
 | `CrushingCyclops.png` | `Characters/Basic Monster Animations/Crushing Cyclops/` — der Wächter |
+| `RedCap.png` | `Characters/Basic Monster Animations/Red Cap/` — der Kobold (schnell) |
+| `StoneTroll.png` | `Characters/Basic Monster Animations/Stone Troll/` — der Troll (gross) |
 
 Offen: **Quelle und Urheber** als Link nachtragen, damit die Lizenz auch
 für den anderen nachprüfbar ist. Im Paket liegt keine Lizenzdatei.

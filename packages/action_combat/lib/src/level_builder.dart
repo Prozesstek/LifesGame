@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'balance.dart';
 import 'level.dart';
 import 'room_catalog.dart';
 import 'stage.dart';
@@ -45,7 +46,7 @@ abstract final class LevelBuilder {
           ? RoomCatalog.startRoom
           : i == pfad.length - 1
               ? _pick(rng, RoomCatalog.bossRooms)
-              : _pick(rng, RoomCatalog.rooms);
+              : _mitTroll(rng, _pick(rng, RoomCatalog.rooms), stage);
       _stamp(feld, raum, pfad[i]);
     }
 
@@ -102,6 +103,41 @@ abstract final class LevelBuilder {
     if (c.x < gridColumns - 1) yield _Cell(c.x + 1, c.y);
     if (c.y > 0) yield _Cell(c.x, c.y - 1);
     if (c.y < gridRows - 1) yield _Cell(c.x, c.y + 1);
+  }
+
+  /// Setzt mit einer Wahrscheinlichkeit, die mit der Stufe wächst, einen
+  /// Troll an die Stelle eines Fussvolks.
+  ///
+  /// **Er ersetzt, statt dazuzukommen:** Die Zahl der Gegner hängt so
+  /// weiter nur an den Räumen, und ein Raum mit Troll ist härter, nicht
+  /// voller. Ein Raum, der schon einen hat, bekommt keinen zweiten.
+  static List<String> _mitTroll(
+    math.Random rng,
+    List<String> raum,
+    PitStage stage,
+  ) {
+    final chance = ActionBalance.brockenChanceFirst +
+        (ActionBalance.brockenChanceLast - ActionBalance.brockenChanceFirst) *
+            stage.progress;
+    // Immer würfeln, auch wenn nichts daraus wird — sonst verschöbe ein
+    // Raum ohne Fussvolk alle folgenden Würfe, und ein Startwert ergäbe
+    // je nach Katalog eine andere Grube.
+    final wurf = rng.nextDouble();
+    final platz = rng.nextInt(1 << 16);
+    if (wurf >= chance || raum.join().contains('t')) return raum;
+
+    final plaetze = <(int, int)>[
+      for (var y = 0; y < raum.length; y++)
+        for (var x = 0; x < raum[y].length; x++)
+          if (raum[y][x] == 'e') (x, y),
+    ];
+    if (plaetze.isEmpty) return raum;
+
+    final (x, y) = plaetze[platz % plaetze.length];
+    return <String>[
+      for (var i = 0; i < raum.length; i++)
+        i == y ? raum[i].replaceRange(x, x + 1, 't') : raum[i],
+    ];
   }
 
   static List<String> _pick(math.Random rng, List<List<String>> auswahl) {

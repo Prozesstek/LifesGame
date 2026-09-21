@@ -944,7 +944,11 @@ class ActionWorld {
   /// durch den Raum schiebt, ist kein Koloss — und ein Held, den fünf
   /// Gegner vor sich herschieben, gehört seinem Spieler nicht mehr.
   void _knockBack(ActionEntity attacker, ActionEntity target) {
-    if (target.isHero || target.kind == EnemyKind.endgegner) return;
+    if (target.isHero ||
+        target.kind == EnemyKind.endgegner ||
+        target.kind == EnemyKind.brocken) {
+      return;
+    }
 
     final richtung = (target.position - attacker.position).normalized;
     if (richtung.isZero) return;
@@ -1057,10 +1061,11 @@ class ActionWorld {
   ///
   /// **Der Endgegner lässt nichts fallen.** Nach ihm ist der Lauf vorbei;
   /// eine Kugel dort wäre eine Belohnung für einen Weg, den niemand mehr
-  /// geht.
+  /// geht. **Ein Troll lässt immer eine fallen** — er hat gekostet.
   void _maybeDropOrb(ActionEntity gefallen) {
     if (gefallen.kind == EnemyKind.endgegner) return;
-    if (_rng.nextDouble() >= ActionBalance.orbDropChance) return;
+    final sicher = gefallen.kind == EnemyKind.brocken;
+    if (!sicher && _rng.nextDouble() >= ActionBalance.orbDropChance) return;
 
     final orb = HealthOrb(
       id: _nextId++,
@@ -1172,6 +1177,32 @@ class ActionWorld {
           speed: ActionBalance.archerSpeed,
           attackRange: ActionBalance.archerShootRange,
           attackCooldown: ActionBalance.archerCooldown,
+        ),
+      EnemyKind.flink => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: spawn.kind,
+          position: level.centerOfSpawn(spawn),
+          maxHp: _hp(ActionBalance.flinkHp),
+          attack: _attack(ActionBalance.flinkAttack),
+          defense: _defense(ActionBalance.flinkDefense),
+          radius: ActionBalance.flinkRadius,
+          speed: ActionBalance.flinkSpeed,
+          attackRange: ActionBalance.flinkAttackRange,
+          attackCooldown: ActionBalance.flinkAttackCooldown,
+        ),
+      EnemyKind.brocken => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: spawn.kind,
+          position: level.centerOfSpawn(spawn),
+          maxHp: _hp(ActionBalance.brockenHp),
+          attack: _attack(ActionBalance.brockenAttack),
+          defense: _defense(ActionBalance.brockenDefense),
+          radius: ActionBalance.brockenRadius,
+          speed: ActionBalance.brockenSpeed,
+          attackRange: ActionBalance.brockenAttackRange,
+          attackCooldown: ActionBalance.brockenAttackCooldown,
         ),
       EnemyKind.fussvolk || EnemyKind.keiner => ActionEntity(
           id: _nextId++,

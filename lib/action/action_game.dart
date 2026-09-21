@@ -435,6 +435,8 @@ class ActionGame extends Game {
       // muss: Auf ihn zuzulaufen ist die Entscheidung, die er erzwingt.
       EnemyKind.schuetze => Palette.accentOnDark,
       EnemyKind.endgegner => Palette.enemy,
+      EnemyKind.flink => Palette.enemyOnDark,
+      EnemyKind.brocken => Palette.enemy,
     };
   }
 

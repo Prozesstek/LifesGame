@@ -27,7 +27,9 @@ String? pitSummaryOf(String id) {
 
 /// „12 Mana · 1,5 s — Ein Funke fliegt auf den nächsten Gegner."
 String pitAbilitySummary(PitAbility ability) {
-  final kosten = ability.manaCost == 0 ? 'kein Mana' : '${ability.manaCost} Mana';
+  final kosten = ability.manaCost == 0
+      ? 'kein Mana'
+      : '${ability.manaCost} Mana';
   return '$kosten · ${pitNumber(ability.cooldown)} s — ${ability.description}';
 }
 
