@@ -115,6 +115,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
+| `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
@@ -164,7 +165,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 455 Tests
+flutter test             # 458 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

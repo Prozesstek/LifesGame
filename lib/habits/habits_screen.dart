@@ -6,8 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
-import '../character/abilities_controller.dart';
 import '../achievements/show_achievement_unlock.dart';
+import '../audio/sound_effects.dart';
+import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
@@ -212,6 +213,7 @@ class HabitsScreen extends ConsumerWidget {
     // Ein Häkchen soll sich anfühlen wie eins. Auf einem Handy ist das
     // ein kurzer Stoß; im Browser und im Test passiert nichts.
     unawaited(HapticFeedback.mediumImpact());
+    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
   }
@@ -240,6 +242,7 @@ class HabitsScreen extends ConsumerWidget {
     }
 
     unawaited(HapticFeedback.mediumImpact());
+    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
   }

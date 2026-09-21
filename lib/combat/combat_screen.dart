@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../audio/sound_effects.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
@@ -150,6 +151,7 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
 
     if (!mounted) return;
 
+    if (gewonnen) ref.read(soundPlayerProvider).play(SoundEffect.sieg);
     await showDialog<void>(
       context: context,
       builder: (context) => CombatResultDialog(
