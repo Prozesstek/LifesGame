@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/combat_controller.dart';
 import 'package:lifes_game/combat/combat_screen.dart';
+import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/combat/widgets/result_dialog.dart';
 import 'package:lifes_game/combat/widgets/timing_bar.dart';
 
@@ -14,8 +15,9 @@ import 'package:lifes_game/combat/widgets/timing_bar.dart';
 /// man gerade geschlagen hat — und ein zweiter Sieg gegen ihn bringt
 /// nichts ein (ADR-0032).
 ///
-/// **Eine Niederlage bleibt im Kampf.** Dort ist „Nochmal" genau der
-/// richtige nächste Schritt.
+/// **Eine Niederlage führt ebenfalls zurück** (Issue #48). Dort steht
+/// derselbe Gegner wieder, und „Kampf" setzt ihn neu auf — das frühere
+/// „Nochmal", nur mit der Reihe und der Ausrüstung dazwischen.
 void main() {
   /// Ein Gegner, der beim ersten Treffer fällt.
   const strohpuppe = EnemyBlueprint(
@@ -128,7 +130,7 @@ void main() {
     expect(find.text('Zur Reihe'), findsOneWidget);
   });
 
-  testWidgets('nach einer Niederlage bleibt der Kampf mit „Nochmal"', (
+  testWidgets('nach einer Niederlage geht es ebenfalls zurück zur Reihe', (
     tester,
   ) async {
     await oeffneKampf(tester, uebermacht);
@@ -145,7 +147,27 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
     }
 
-    expect(find.byType(CombatScreen), findsOneWidget);
-    expect(find.text('Nochmal'), findsOneWidget);
+    expect(find.byType(CombatScreen), findsNothing);
+    expect(find.text('Zur Reihe'), findsOneWidget);
+  });
+
+  testWidgets('eine Niederlage wird trotzdem festgehalten', (tester) async {
+    final container = await oeffneKampf(tester, uebermacht);
+    await spieleBisZumBlatt(tester);
+
+    await tester.tap(find.text('OK'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    while (find.text('Weiter').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Weiter').first);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    // Wer zurückgeht, darf die Spur für „der Unbeugsame" nicht verlieren
+    // (ADR-0033) — und der nächste Gegner bleibt derselbe.
+    final reihe = container.read(ladderProvider);
+    expect(reihe.highestDefeated, 0);
+    expect(reihe.defeats[reihe.nextRung], 1);
   });
 }

@@ -210,22 +210,6 @@ class BattleGame extends FlameGame {
     );
   }
 
-  void reset() {
-    _beats.clear();
-    _cursor = _now;
-    _textCount = 0;
-    _hero.reset();
-    _enemy.reset();
-    for (final shot in children.whereType<Projectile>().toList()) {
-      shot.removeFromParent();
-    }
-    // Auch die Zahlen: Ein „Nochmal" soll nicht mit dem letzten Treffer
-    // des verlorenen Kampfes über dem Kopf beginnen.
-    for (final text in children.whereType<FloatingText>().toList()) {
-      text.removeFromParent();
-    }
-  }
-
   // --- Zeitachse ---
 
   /// Plant eine Bewegung [offset] Sekunden nach dem aktuellen Cursor ein.

@@ -172,7 +172,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 481 Tests
+flutter test             # 482 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

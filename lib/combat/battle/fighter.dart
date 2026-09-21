@@ -99,16 +99,6 @@ class Fighter extends PositionComponent {
 
   void fall() => _down = true;
 
-  void reset() {
-    _down = false;
-    _pose = Pose.idle;
-    _poseTime = 0;
-    _lunge = 0;
-    _flash = 0;
-    _shield = 0;
-    _recoil = 0;
-  }
-
   /// Wo ein Pfeil die Figur verlässt — Höhe der vorderen Hand.
   Vector2 get handAnchor => _worldPointOf(Vector2(size.x * 0.78, 38));
 

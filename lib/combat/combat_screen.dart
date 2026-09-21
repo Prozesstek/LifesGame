@@ -170,24 +170,13 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
     // sie, wofür sie kommt — dieselbe Reihenfolge wie bei der Lektion.
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
 
-    // **Nach einem Sieg zurück zur Reihe.** Dort wartet schon der nächste
-    // Gegner. „Nochmal" setzte dagegen denselben Gegner neu auf, den man
-    // gerade geschlagen hat — und ein zweiter Sieg bringt nichts ein
-    // (ADR-0032). Nach einer Niederlage bleibt der Kampf stehen: Dort ist
-    // „Nochmal" genau der nächste Schritt.
-    if (gewonnen && mounted) {
-      await Navigator.of(context).maybePop();
-    }
-  }
-
-  void _restart() {
-    ref.read(combatControllerProvider.notifier).restart();
-    _game.reset();
-    setState(() {
-      _pendingMove = null;
-      _phase = _Phase.chooseMove;
-      _resultShown = false;
-    });
+    // **Zurück zur Reihe, ob gewonnen oder verloren** (Issue #48). Nach
+    // einem Sieg wartet dort der nächste Gegner; „Nochmal" hätte denselben
+    // neu aufgesetzt, und ein zweiter Sieg bringt nichts ein (ADR-0032).
+    // Nach einer Niederlage steht dort derselbe Gegner wieder — ein Tipp
+    // auf „Kampf" ist also genau das alte „Nochmal", nur mit Blick auf
+    // die Reihe und die Ausrüstung dazwischen.
+    if (mounted) await Navigator.of(context).maybePop();
   }
 
   @override
@@ -333,8 +322,6 @@ class _CombatScreenState extends ConsumerState<CombatScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
-              FilledButton(onPressed: _restart, child: const Text('Nochmal')),
             ],
           ),
         ),
