@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
+import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
@@ -188,6 +189,7 @@ class HabitsScreen extends ConsumerWidget {
         .toggle(habit.id, today);
     if (result == null) return;
 
+    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result));
   }
@@ -213,6 +215,7 @@ class HabitsScreen extends ConsumerWidget {
       return;
     }
 
+    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(context, _feedback(result));
   }
