@@ -89,10 +89,10 @@ abstract final class AbilityCatalog {
   /// gibt die Werkzeuge, Durchhalten gibt die Wucht. Sternenfall — die
   /// einzige legendäre — kommt ausschließlich über sechzig Tage Kette.
   ///
-  /// **Warum nach Gebiet und nicht nach Tiefe.** Der Baum ist genau eine
-  /// Ebene tief: Alle zwanzig Unterknoten hängen direkt an den vier
-  /// Wurzeln und kosten je einen Punkt (ADR-0019). Eine Staffelung nach
-  /// Tiefe gibt es also nicht zu holen. Was die frühen von den späten
+  /// **Warum nach Gebiet und nicht nach Tiefe.** Fast alle Knoten hängen
+  /// direkt an den vier Wurzeln und kosten je einen Punkt (ADR-0019); der
+  /// einzige tiefere (*Psychologie*) trägt keine Fähigkeit. Eine
+  /// Staffelung nach Tiefe gibt es also nicht zu holen. Was die frühen von den späten
   /// Fähigkeiten trennt, ist die **Energie**: Vulkanbruch kostet 8,
   /// Sternenfall 10 — und das Maximum kommt aus Klarheit, also aus
   /// Häkchen.

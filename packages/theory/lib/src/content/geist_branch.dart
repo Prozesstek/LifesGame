@@ -8,7 +8,6 @@ const TheoryBranch geistBranch = TheoryBranch(
   description:
       'Aufmerksamkeit, Gedanken, Impulse. Was im Kopf passiert, bevor eine '
       'Handlung überhaupt zur Debatte steht.',
-  unlockLevel: 3,
   lessons: <Lesson>[_aufmerksamkeit, _gedanken, _unbehagen],
 );
 

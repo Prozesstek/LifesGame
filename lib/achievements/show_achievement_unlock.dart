@@ -2,6 +2,7 @@ import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../audio/sound_effects.dart';
 import '../ui/holz.dart';
 import 'achievements_controller.dart';
 import 'widgets/achievement_unlock_sheet.dart';
@@ -35,6 +36,7 @@ Future<void> showAchievementUnlocks(
   for (final achievement in neu) {
     if (!context.mounted) return;
 
+    ref.read(soundPlayerProvider).play(SoundEffect.errungenschaft);
     await showModalBottomSheet<void>(
       context: context,
       // Die Feier hängt im Holzrahmen; das Blatt selbst ist durchsichtig.

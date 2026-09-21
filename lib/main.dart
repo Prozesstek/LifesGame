@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'audio/sound_effects.dart';
 import 'dev/dev_controller.dart';
 import 'dev/dev_screen.dart';
 import 'dev/save_slot.dart';
@@ -41,6 +42,8 @@ Future<void> main() async {
         saveStoreProvider.overrideWithValue(store),
         savedGameProvider.overrideWithValue(saved),
         activeSlotProvider.overrideWithValue(slot),
+        // Der einzige Ort mit echtem Ton — Tests bleiben still.
+        soundPlayerProvider.overrideWithValue(AssetSoundPlayer()),
         // Ohne Typangabe: Riverpod 3 exportiert `Override` nicht
         // (`gotchas.md`). Der Typ wird korrekt abgeleitet.
         if (prefs != null) ...[

@@ -14,24 +14,21 @@ const Lesson erholungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Belastung allein macht nicht stärker',
-      body:
-          'Ein Muskel wächst nicht während des Trainings, sondern danach. '
+      body: 'Ein Muskel wächst nicht während des Trainings, sondern danach. '
           'Dasselbe gilt für fast alles, was man üben kann: Der Reiz setzt '
           'etwas in Gang, die Anpassung passiert in der Ruhe. Wer nur Reize '
           'setzt und nie erholt, sammelt Belastung ohne Ertrag.',
     ),
     LessonSection(
       heading: 'Erschöpfung sieht aus wie Faulheit',
-      body:
-          'Wer über Wochen zu wenig erholt, verliert zuerst die Lust, dann '
+      body: 'Wer über Wochen zu wenig erholt, verliert zuerst die Lust, dann '
           'die Konzentration, dann die Leistung. Von außen — und oft auch '
           'von innen — sieht das nach mangelnder Disziplin aus. Die Antwort '
           '„streng dich mehr an" macht es dann zuverlässig schlimmer.',
     ),
     LessonSection(
       heading: 'Pausen muss man planen',
-      body:
-          'Eine Pause, die erst kommt, wenn nichts mehr geht, ist keine '
+      body: 'Eine Pause, die erst kommt, wenn nichts mehr geht, ist keine '
           'Erholung, sondern ein Zusammenbruch. Nützlich sind Pausen, die '
           'im Plan stehen, bevor sie nötig sind — ein freier Tag pro Woche, '
           'eine leichtere Woche pro Monat.',
@@ -84,24 +81,21 @@ const Lesson stressPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Wofür die Reaktion gebaut ist',
-      body:
-          'Die Stressreaktion stellt kurzfristig Energie bereit, schärft '
+      body: 'Die Stressreaktion stellt kurzfristig Energie bereit, schärft '
           'die Aufmerksamkeit und stellt anderes hintan — Verdauung, '
           'Reparatur, langfristiges Denken. Für eine Bedrohung, die in '
           'Minuten vorbei ist, ist das eine ausgezeichnete Antwort.',
     ),
     LessonSection(
       heading: 'Das Problem ist die Dauer',
-      body:
-          'Moderne Belastungen hören selten nach Minuten auf. Läuft die '
+      body: 'Moderne Belastungen hören selten nach Minuten auf. Läuft die '
           'Reaktion über Wochen, bleiben genau die Dinge liegen, die sie '
           'hintanstellt. Schlaf wird schlechter, die Geduld kürzer, die '
           'Anfälligkeit größer — und all das erzeugt neuen Stress.',
     ),
     LessonSection(
       heading: 'Was die Schleife unterbricht',
-      body:
-          'Wirksam ist alles, was dem Körper ein Ende signalisiert: '
+      body: 'Wirksam ist alles, was dem Körper ein Ende signalisiert: '
           'Bewegung, langsames Ausatmen, Schlaf, ein erledigter Punkt auf '
           'einer Liste. Der gemeinsame Nenner ist nicht Entspannung, '
           'sondern ein Abschluss.',
@@ -154,24 +148,21 @@ const Lesson motivationPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die Reihenfolge ist meist andersherum',
-      body:
-          'Der verbreitete Glaube lautet: erst Motivation, dann Handlung. '
+      body: 'Der verbreitete Glaube lautet: erst Motivation, dann Handlung. '
           'In der Praxis kommt die Lust häufiger nach den ersten Minuten '
           'als davor. Wer wartet, bis er Lust hat, wartet auf etwas, das '
           'das Anfangen erst erzeugt.',
     ),
     LessonSection(
       heading: 'Gefühle schwanken, Systeme nicht',
-      body:
-          'Motivation hängt an Schlaf, Wetter, Nachrichten und Zufall. '
+      body: 'Motivation hängt an Schlaf, Wetter, Nachrichten und Zufall. '
           'Etwas, das an einer so schwankenden Größe hängt, taugt nicht als '
           'Fundament. Ein fester Zeitpunkt, ein vorbereiteter Platz und '
           'eine lächerlich kleine erste Handlung schwanken nicht.',
     ),
     LessonSection(
       heading: 'Was trotzdem hilft',
-      body:
-          'Motivation ist nicht wertlos — sie ist nur kein Werkzeug für '
+      body: 'Motivation ist nicht wertlos — sie ist nur kein Werkzeug für '
           'schlechte Tage. Nutze sie an guten Tagen für das, was das System '
           'stabiler macht: einkaufen, vorbereiten, aufräumen. So arbeitet '
           'die gute Laune für den Tag, an dem keine da ist.',
@@ -223,24 +214,21 @@ const Lesson wiederholungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Lesen fühlt sich nach Lernen an',
-      body:
-          'Etwas zum dritten Mal zu lesen erzeugt ein starkes Gefühl von '
+      body: 'Etwas zum dritten Mal zu lesen erzeugt ein starkes Gefühl von '
           'Vertrautheit — und Vertrautheit wird zuverlässig mit Können '
           'verwechselt. Beim Abrufen ohne Vorlage bricht dieses Gefühl '
           'regelmäßig zusammen.',
     ),
     LessonSection(
       heading: 'Abrufen ist der Vorgang',
-      body:
-          'Sich an etwas zu erinnern, ohne nachzusehen, ist anstrengender '
+      body: 'Sich an etwas zu erinnern, ohne nachzusehen, ist anstrengender '
           'als Lesen und dabei deutlich wirksamer. Die Anstrengung ist kein '
           'Nebeneffekt, sondern der Lernvorgang selbst: Was mühsam '
           'hervorgeholt wird, liegt danach näher an der Oberfläche.',
     ),
     LessonSection(
       heading: 'Der beste Zeitpunkt ist kurz vor dem Vergessen',
-      body:
-          'Zu früh wiederholt ist verschwendete Mühe, zu spät ist neu '
+      body: 'Zu früh wiederholt ist verschwendete Mühe, zu spät ist neu '
           'lernen. Am meisten bringt der Moment, in dem es gerade noch '
           'geht — deshalb werden die Abstände mit jeder gelungenen '
           'Wiederholung länger.',
@@ -282,6 +270,77 @@ const Lesson wiederholungPage = Lesson(
       explanation:
           'Zu früh ist verschwendet, zu spät ist neu lernen. Deshalb werden '
           'die Abstände mit jedem Erfolg länger.',
+    ),
+  ],
+);
+
+/// Der erste Knoten auf der **zweiten** Ebene: Er hängt nicht an der
+/// Wurzel, sondern an *Aufmerksamkeit*.
+const Lesson psychologiePage = Lesson(
+  id: 'geist-06-psychologie',
+  title: 'Was ist Psychologie',
+  summary: 'Warum wir sind, wie wir sind.',
+  sections: <LessonSection>[
+    LessonSection(
+      heading: 'Erleben und Verhalten',
+      body: 'Psychologie ist die Wissenschaft vom Erleben und Verhalten des '
+          'Menschen. Erleben ist, was innen passiert — Gedanken, Gefühle, '
+          'Wahrnehmung. Verhalten ist, was man von außen sehen kann. '
+          'Interessant wird es dort, wo beides auseinanderfällt.',
+    ),
+    LessonSection(
+      heading: 'Der eigene Eindruck ist kein Messgerät',
+      body: 'Menschen sind erstaunlich schlecht darin, die Ursachen ihres '
+          'eigenen Verhaltens zu benennen. Hinterher findet sich fast immer '
+          'eine Begründung, die plausibel klingt — auch wenn in Wahrheit '
+          'etwas anderes gewirkt hat. Deshalb beobachtet und misst die '
+          'Psychologie, statt nur zu fragen.',
+    ),
+    LessonSection(
+      heading: 'Anlage, Umfeld und Übung',
+      body: 'Warum jemand ist, wie er ist, hat selten nur eine Ursache. Die '
+          'Veranlagung steckt einen Rahmen ab, Umfeld und Erfahrungen '
+          'bestimmen, wo man darin landet. Am leichtesten ändern lässt sich '
+          'der Teil, den man täglich wiederholt — genau dort setzen '
+          'Gewohnheiten an.',
+    ),
+  ],
+  questions: <Question>[
+    Question(
+      prompt: 'Womit beschäftigt sich die Psychologie?',
+      options: <String>[
+        'Mit Erleben und Verhalten des Menschen',
+        'Nur mit psychischen Krankheiten',
+        'Mit dem Aufbau des Gehirns allein',
+      ],
+      correctIndex: 0,
+      explanation:
+          'Krankheiten und das Gehirn gehören dazu, aber nicht allein. Der '
+          'Gegenstand ist beides: was innen passiert und was man tut.',
+    ),
+    Question(
+      prompt: 'Warum reicht es nicht, Menschen nach ihren Gründen zu fragen?',
+      options: <String>[
+        'Weil sie ihre Gründe absichtlich verschweigen',
+        'Weil sie hinterher plausible Gründe erfinden',
+        'Weil Gründe für das Verhalten keine Rolle spielen',
+      ],
+      correctIndex: 1,
+      explanation: 'Niemand lügt dabei absichtlich. Der Kopf liefert eine '
+          'Erklärung, die passt — ob sie stimmt, prüft er nicht.',
+    ),
+    Question(
+      prompt: 'Welcher Teil davon, wer wir sind, lässt sich am leichtesten '
+          'ändern?',
+      options: <String>[
+        'Die eigene Veranlagung',
+        'Das Umfeld der Kindheit',
+        'Was man täglich wiederholt',
+      ],
+      correctIndex: 2,
+      explanation:
+          'Veranlagung und Kindheit stehen fest. Was man jeden Tag tut, '
+          'entscheidet man jeden Tag neu.',
     ),
   ],
 );
