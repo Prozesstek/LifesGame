@@ -112,6 +112,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     gewaehlteId: gewaehlt.id,
                     loadout: loadout,
                     highestRung: rung,
+                    gold: gold,
                     onWaehle: (id) => setState(() => _itemId = id),
                   ),
                 ),
@@ -354,6 +355,7 @@ class _ItemRaster extends StatelessWidget {
     required this.gewaehlteId,
     required this.loadout,
     required this.highestRung,
+    required this.gold,
     required this.onWaehle,
   });
 
@@ -364,6 +366,10 @@ class _ItemRaster extends StatelessWidget {
   /// Die hoechste geschlagene Sprosse -- entscheidet, welche Kacheln
   /// gesperrt gezeichnet werden.
   final int highestRung;
+
+  /// Das Gold, das gerade da ist -- entscheidet, welche Kacheln
+  /// ausgegraut werden (Issue #49).
+  final int gold;
   final void Function(String) onWaehle;
 
   /// Höhe einer Kachel. Fest, damit sie nicht an der Fensterbreite hängt:
@@ -398,8 +404,13 @@ class _ItemRaster extends StatelessWidget {
                   isSelected: item.id == gewaehlteId,
                   isOwned: loadout.isOwned(item.id),
                   isEquipped: loadout.isEquipped(item.id),
-                  isLocked: !GearGates.isOpen(
-                    item.rarity,
+                  // **Dieselbe Frage wie beim Kaufknopf.** Stünde die
+                  // Bedingung hier ein zweites Mal, zeigte die Kachel
+                  // irgendwann „kaufbar" und der Knopf „zu teuer"
+                  // (`gotchas.md`, „Zwei Stellen").
+                  block: loadout.blockFor(
+                    item.id,
+                    availableGold: gold,
                     highestRung: highestRung,
                   ),
                   onTap: () => onWaehle(item.id),

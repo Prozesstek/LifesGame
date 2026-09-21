@@ -21,7 +21,7 @@ class ShopItemCell extends StatelessWidget {
     required this.isOwned,
     required this.isEquipped,
     required this.onTap,
-    this.isLocked = false,
+    this.block,
     super.key,
   });
 
@@ -30,12 +30,30 @@ class ShopItemCell extends StatelessWidget {
   final bool isOwned;
   final bool isEquipped;
 
-  /// Noch nicht verdient: Die Seltenheit haengt an der Gegnerreihe, und
-  /// die Sprosse fehlt (ADR-0034). Die Kachel bleibt antippbar -- die
-  /// Detailflaeche sagt, was fehlt. Eine ausgegraute Kachel, die auf
-  /// nichts reagiert, saehe wie ein Fehler aus.
-  final bool isLocked;
+  /// Warum das Stück gerade nicht zu kaufen ist, oder `null`, wenn es
+  /// geht — die Antwort von [Loadout.blockFor], nicht nachgerechnet.
+  ///
+  /// Gesperrt (ADR-0034) und zu teuer werden beide ausgegraut
+  /// (Issue #49). Die Kachel bleibt dabei antippbar — die Detailfläche
+  /// sagt, was fehlt. Eine Kachel, die auf nichts reagiert, sähe wie ein
+  /// Fehler aus.
+  final PurchaseBlock? block;
   final VoidCallback onTap;
+
+  /// Wie stark ein Stück verblasst, das gerade nicht zu kaufen ist.
+  ///
+  /// Derselbe Weg wie beim gesperrten Bereichskreis: Eine Zeichnung
+  /// lässt sich nicht grau färben, ohne sie zu ruinieren, sie wird
+  /// deshalb blasser.
+  static const double outOfReachOpacity = 0.4;
+
+  bool get isLocked => block == PurchaseBlock.gesperrt;
+
+  /// Gesperrt oder zu teuer — was man mit einem Tipp nicht kaufen kann.
+  /// Was schon gehört, fällt nicht darunter: Es hat einen Zustand, keinen
+  /// Preis.
+  bool get isOutOfReach =>
+      block == PurchaseBlock.gesperrt || block == PurchaseBlock.zuWenigGold;
 
   /// Abstand zwischen zwei Kacheln.
   static const double gap = 10;
@@ -79,22 +97,25 @@ class ShopItemCell extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Expanded(
-                  child: bild == null
-                      ? Icon(
-                          GearIcons.fallbackFor(item.slot),
-                          size: 30,
-                          color: isOwned ? Palette.muted : Palette.textDim,
-                        )
-                      : Image.asset(
-                          bild,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.none,
-                          errorBuilder: (context, error, stack) => Icon(
+                  child: Opacity(
+                    opacity: isOutOfReach ? outOfReachOpacity : 1,
+                    child: bild == null
+                        ? Icon(
                             GearIcons.fallbackFor(item.slot),
                             size: 30,
-                            color: Palette.muted,
+                            color: isOwned ? Palette.muted : Palette.textDim,
+                          )
+                        : Image.asset(
+                            bild,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.none,
+                            errorBuilder: (context, error, stack) => Icon(
+                              GearIcons.fallbackFor(item.slot),
+                              size: 30,
+                              color: Palette.muted,
+                            ),
                           ),
-                        ),
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -106,7 +127,7 @@ class ShopItemCell extends StatelessWidget {
                     fontSize: 10,
                     height: 1.15,
                     fontWeight: FontWeight.bold,
-                    color: (isOwned || isLocked)
+                    color: (isOwned || isOutOfReach)
                         ? Palette.textDim
                         : Palette.text,
                   ),
@@ -123,7 +144,7 @@ class ShopItemCell extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: isEquipped
                         ? Palette.success
-                        : ((isOwned || isLocked)
+                        : ((isOwned || isOutOfReach)
                               ? Palette.muted
                               : Palette.gold),
                   ),
