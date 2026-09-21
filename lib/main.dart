@@ -99,6 +99,12 @@ Future<void> _lockPortrait() async {
 /// eine, die diese eine Sitzung nichts behält. Der Fehler wird gemeldet,
 /// nicht verschluckt.
 Future<SharedPreferences?> _openPrefs() async {
+  // **Die Entwicklerfassung hat ihren eigenen Speicher.** Im Web liegen
+  // beide Fassungen auf derselben Adresse und damit im selben
+  // `localStorage`; ohne eigenen Präfix könnte die Umschaltung des
+  // Entwicklermodus den echten Stand der normalen Fassung umstellen
+  // (ADR-0038). Muss vor `getInstance` stehen.
+  if (isDevBuild) SharedPreferences.setPrefix('lifes_game_entwickler.');
   try {
     return await SharedPreferences.getInstance();
   } on Exception catch (error) {
@@ -128,6 +134,16 @@ class LifesGameApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _theme(),
       home: const HomeScreen(),
+      // Die Entwicklerfassung sieht man ihr an — sonst hält man am Handy
+      // den eigenen Spielstand für verloren, weil man im falschen Fenster
+      // ist.
+      builder: isDevBuild
+          ? (context, child) => Banner(
+              message: 'DEV',
+              location: BannerLocation.topEnd,
+              child: child ?? const SizedBox.shrink(),
+            )
+          : null,
     );
   }
 
