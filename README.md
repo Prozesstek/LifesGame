@@ -83,7 +83,7 @@ Danach `flutter doctor` bis alles grün ist.
 | Pfad | Inhalt | Tests |
 |---|---|---|
 | `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, 30 Gegner | 130 |
-| `packages/theory` | Skillbaum-Graph: 29 Seiten, 87 Fragen, Lernfortschritt | 136 |
+| `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 136 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 130 |
 | `packages/gear` | 30 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Preise, Verkauf | 77 |
