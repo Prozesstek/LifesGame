@@ -59,11 +59,15 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     // **Die Plätze kommen aus `activeMovesProvider`** — der einzigen
     // Stelle, an der die Freischaltung einer Fähigkeit gilt. Eine
     // gelernte, aber abgelaufene Fähigkeit fällt dort heraus, nicht hier.
-    // Der Waffenzug steht mit darin; die Grube kennt ihn nicht und lässt
-    // ihn fallen, genau wie jede Fähigkeit, die noch nicht umgebaut ist.
+    // Der Waffenzug steht mit darin: Als Fähigkeit kennt die Grube ihn
+    // nicht, als Waffe schon — er wird zum Grundangriff.
     final plaetze = <String>[
       for (final move in ref.read(activeMovesProvider)) move.id,
     ];
+    final waffe = plaetze.firstWhere(
+      (id) => PitWeapons.byMoveId(id) != null,
+      orElse: () => '',
+    );
 
     final welt = ActionWorld(
       level: LevelBuilder.build(stage: widget.stage, seed: seed),
@@ -75,6 +79,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       ),
       stage: widget.stage,
       abilityIds: plaetze,
+      weaponMoveId: waffe,
       seed: seed,
     );
 

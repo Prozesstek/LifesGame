@@ -59,9 +59,14 @@ abstract final class PitBot {
       final lohnt = ability.effects.any(
         (effect) => switch (effect) {
           BoltAtNearest() => true,
+          StrikeNearest() => nah >= 1,
           StrikeAround() => nah >= 2,
           HealSelf() => welt.heroHpRatio < 0.5,
+          GainMana() => welt.manaRatio < 0.3,
           ReduceIncoming() => nah >= 3 || welt.heroHpRatio < 0.4,
+          ReflectIncoming() => nah >= 3,
+          SlowAround() => nah >= 2,
+          DamageOverTime() => nah >= 2,
         },
       );
       if (lohnt) welt.cast(ability.id);

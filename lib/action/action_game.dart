@@ -187,6 +187,7 @@ class ActionGame extends Game {
       _drawCorpses(canvas, bilder);
       _drawFigures(canvas, bilder);
     }
+    _drawStatus(canvas);
     _drawProjectiles(canvas);
     _drawWard(canvas, held);
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
@@ -438,6 +439,35 @@ class ActionGame extends Game {
   }
 
   // --- Geschosse, Kugeln, Explosionen ---
+
+  /// Was an einem Gegner hängt: blau verlangsamt, orange unter
+  /// Dauerschaden.
+  ///
+  /// Ohne die Marke sähe man nicht, ob Frost und Gift noch wirken — und
+  /// damit nicht, wann man sie erneuern muss.
+  void _drawStatus(Canvas canvas) {
+    for (final view in sim.views) {
+      if (view.faction != Faction.gegner) continue;
+      final mitte = Offset(view.position.x, view.position.y);
+      if (view.isSlowed) {
+        canvas.drawCircle(
+          mitte,
+          view.radius + 4,
+          Paint()
+            ..color = Palette.manaOnDark.withValues(alpha: 0.7)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+      }
+      if (view.isBurning) {
+        canvas.drawCircle(
+          Offset(mitte.dx, mitte.dy - view.radius - 6),
+          3,
+          Paint()..color = Palette.accentOnDark,
+        );
+      }
+    }
+  }
 
   /// Der Ring der Steinhaut, solange sie hält.
   ///

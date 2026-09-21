@@ -8,6 +8,7 @@ import 'events.dart';
 import 'flow_field.dart';
 import 'level.dart';
 import 'pit_ability.dart';
+import 'pit_weapon.dart';
 import 'projectile.dart';
 import 'stage.dart';
 import 'stats.dart';
@@ -31,8 +32,10 @@ class ActionWorld {
     required this.heroStats,
     this.stage,
     List<String> abilityIds = const <String>[],
+    String? weaponMoveId,
     int seed = 1,
   })  : _rng = math.Random(seed),
+        weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
         _mana = heroStats.maxMana.toDouble(),
         slots = List<PitAbility>.unmodifiable(
           abilityIds
@@ -50,8 +53,8 @@ class ActionWorld {
       defense: heroStats.defense,
       radius: ActionBalance.heroRadius,
       speed: ActionBalance.heroSpeed,
-      attackRange: ActionBalance.heroAttackRange,
-      attackCooldown: heroStats.attackCooldown,
+      attackRange: weapon.range,
+      attackCooldown: heroStats.attackCooldown * weapon.cooldownFactor,
       damageMultiplier: heroStats.damageMultiplier,
       critChance: heroStats.critChance,
       critFactor: heroStats.critFactor,
@@ -81,6 +84,13 @@ class ActionWorld {
   /// [PitAbilities] stehen. Ein Knopf ohne Wirkung wäre schlimmer als
   /// keiner.
   final List<PitAbility> slots;
+
+  /// Was den Grundangriff bestimmt. Ohne bekannte Waffe die Faust.
+  final PitWeapon weapon;
+
+  /// Wie lange die Prisma-Barriere noch hält, und wie viel sie zurückwirft.
+  double _reflectLeft = 0;
+  double _reflectShare = 0;
 
   double _mana;
   final Map<String, double> _slotCooldowns = <String, double>{};
@@ -211,6 +221,10 @@ class ActionWorld {
 
     for (final effect in ability.effects) {
       if (effect is BoltAtNearest &&
+          _nearestEnemyWithin(effect.range, needsSight: true) == null) {
+        return false;
+      }
+      if (effect is StrikeNearest &&
           _nearestEnemyWithin(effect.range) == null) {
         return false;
       }
@@ -229,58 +243,130 @@ class ActionWorld {
   /// Die eine Stelle, die jede Art von [PitEffect] ausführt.
   void _apply(PitEffect effect) {
     switch (effect) {
-      case BoltAtNearest(:final power, :final range):
+      case BoltAtNearest(:final power, :final range, :final leech):
+        final ziel = _nearestEnemyWithin(range, needsSight: true);
+        if (ziel == null) return;
+        _shoot(ziel, power: power, leech: leech);
+      case StrikeNearest(:final power, :final range):
         final ziel = _nearestEnemyWithin(range);
         if (ziel == null) return;
-        final richtung = (ziel.position - _hero.position).normalized;
-        _hero.facing = richtung;
-        _projectiles.add(
-          Projectile(
-            id: _nextId++,
-            faction: Faction.held,
-            position: _hero.position,
-            velocity: richtung * ActionBalance.heroBoltSpeed,
-            damage: 0,
-            radius: ActionBalance.heroBoltRadius,
-            heroPower: power,
-          ),
-        );
+        _hero.facing = (ziel.position - _hero.position).normalized;
+        _hit(_hero, ziel, powerFactor: power);
       case StrikeAround(:final power, :final radius):
-        for (final ziel in _entities) {
-          if (!ziel.isAlive || ziel.isHero) continue;
-          final abstand = radius + ziel.radius;
-          if (_hero.position.distanceSquaredTo(ziel.position) >
-              abstand * abstand) {
-            continue;
-          }
+        for (final ziel in _enemiesWithin(radius)) {
           _hit(_hero, ziel, powerFactor: power);
         }
       case HealSelf(:final share):
-        final vorher = _hero.hp;
-        _hero.hp = math.min(
-          _hero.maxHp,
-          _hero.hp + (_hero.maxHp * share).round(),
-        );
-        _events.add(HeroHealed(at: _hero.position, amount: _hero.hp - vorher));
+        _healHero((_hero.maxHp * share).round());
+      case GainMana(:final amount):
+        _mana = math.min(heroStats.maxMana.toDouble(), _mana + amount);
       case ReduceIncoming(:final factor, :final seconds):
         _wardFactor = _wardLeft > 0 ? math.min(_wardFactor, factor) : factor;
         _wardLeft = seconds;
+      case ReflectIncoming(:final share, :final seconds):
+        _reflectShare =
+            _reflectLeft > 0 ? math.max(_reflectShare, share) : share;
+        _reflectLeft = seconds;
+      case SlowAround(:final radius, :final factor, :final seconds):
+        for (final ziel in _enemiesWithin(radius)) {
+          ziel.slowFactor =
+              ziel.slowLeft > 0 ? math.min(ziel.slowFactor, factor) : factor;
+          ziel.slowLeft = math.max(ziel.slowLeft, seconds);
+        }
+      case DamageOverTime(:final radius, :final perSecond, :final seconds):
+        final jeSekunde = _hero.attack * _hero.damageMultiplier * perSecond;
+        for (final ziel in _enemiesWithin(radius)) {
+          _applyDot(ziel, jeSekunde, seconds);
+        }
     }
   }
 
-  /// Der nächste lebende Gegner in Luftlinie, höchstens [range] entfernt.
-  ActionEntity? _nearestEnemyWithin(double range) {
+  /// Ein Geschoss des Helden auf [ziel].
+  void _shoot(
+    ActionEntity ziel, {
+    required double power,
+    double leech = 0,
+    bool fromWeapon = false,
+    double angle = 0,
+  }) {
+    var richtung = (ziel.position - _hero.position).normalized;
+    if (angle != 0) richtung = richtung.rotated(angle);
+    _hero.facing = richtung;
+    _projectiles.add(
+      Projectile(
+        id: _nextId++,
+        faction: Faction.held,
+        position: _hero.position,
+        velocity: richtung * ActionBalance.heroBoltSpeed,
+        damage: 0,
+        radius: ActionBalance.heroBoltRadius,
+        heroPower: power,
+        heroLeech: leech,
+        fromWeapon: fromWeapon,
+      ),
+    );
+  }
+
+  void _healHero(int menge) {
+    final vorher = _hero.hp;
+    _hero.hp = math.min(_hero.maxHp, _hero.hp + menge);
+    _events.add(HeroHealed(at: _hero.position, amount: _hero.hp - vorher));
+  }
+
+  /// Dauerschaden: Bei zweien gilt der stärkere, die Dauer die längere.
+  /// Sie addieren sich nicht — sonst wäre das Stapeln von Gift die beste
+  /// Antwort auf alles.
+  void _applyDot(ActionEntity ziel, double jeSekunde, double sekunden) {
+    if (jeSekunde >= ziel.dotPerSecond || ziel.dotLeft <= 0) {
+      ziel.dotPerSecond = jeSekunde;
+    }
+    ziel.dotLeft = math.max(ziel.dotLeft, sekunden);
+  }
+
+  /// Alle lebenden Gegner, die den Kreis um den Helden berühren.
+  List<ActionEntity> _enemiesWithin(double radius) {
+    return <ActionEntity>[
+      for (final ziel in _entities)
+        if (ziel.isAlive &&
+            !ziel.isHero &&
+            _hero.position.distanceSquaredTo(ziel.position) <=
+                (radius + ziel.radius) * (radius + ziel.radius))
+          ziel,
+    ];
+  }
+
+  /// Der nächste lebende Gegner, höchstens [range] entfernt — mit
+  /// [needsSight] nur einer, den der Held auch sieht.
+  ///
+  /// **Sichtlinie für alles, was fliegt.** Ein Funke auf einen Gegner
+  /// hinter der Wand bleibt an der Wand hängen und kostet trotzdem
+  /// Mana — bis zu diesem Schritt stand das als offener Fehler in
+  /// `state.md`.
+  ActionEntity? _nearestEnemyWithin(double range, {bool needsSight = false}) {
     ActionEntity? bester;
-    var besteDistanz = range * range;
+    var besteDistanz = double.infinity;
     for (final ziel in _entities) {
       if (!ziel.isAlive || ziel.isHero) continue;
+      final reichweite = range + ziel.radius;
       final d = _hero.position.distanceSquaredTo(ziel.position);
-      if (d <= besteDistanz) {
-        besteDistanz = d;
-        bester = ziel;
-      }
+      if (d > reichweite * reichweite || d >= besteDistanz) continue;
+      if (needsSight && !_canSee(_hero.position, ziel.position)) continue;
+      besteDistanz = d;
+      bester = ziel;
     }
     return bester;
+  }
+
+  /// Ob zwischen [a] und [b] keine Wand steht, in Vierteln eines Feldes
+  /// abgetastet.
+  bool _canSee(Vec2 a, Vec2 b) {
+    final weg = b - a;
+    final schritte = (weg.length / (ActionBalance.tileSize / 4)).ceil();
+    for (var i = 1; i < schritte; i++) {
+      final punkt = a + weg * (i / schritte);
+      if (level.isWallAtPoint(punkt)) return false;
+    }
+    return true;
   }
 
   /// Schaden am Helden nach seiner Schadensminderung.
@@ -425,6 +511,7 @@ class ActionWorld {
     _moveHero(moveInput, dt);
     _heroAttack(dt);
     _enemiesAct(dt);
+    _tickStatus(dt);
     _moveProjectiles(dt);
     _separate();
     _moveOrbs(dt);
@@ -477,13 +564,47 @@ class ActionWorld {
       _slotCooldowns[id] = (_slotCooldowns[id] ?? 0) - dt;
     }
     if (_wardLeft > 0) _wardLeft -= dt;
+    if (_reflectLeft > 0) _reflectLeft -= dt;
   }
 
+  /// Verlangsamung und Dauerschaden der Gegner.
+  ///
+  /// **Dauerschaden fällt in halben Sekunden**, nicht in jedem Schritt:
+  /// Sechzig Zahlen je Sekunde über einem Kopf liest niemand.
+  void _tickStatus(double dt) {
+    const takt = 0.5;
+    for (final ziel in _entities) {
+      if (!ziel.isAlive || ziel.isHero) continue;
+      if (ziel.slowLeft > 0) ziel.slowLeft -= dt;
+      if (ziel.dotLeft <= 0) continue;
+
+      ziel.dotLeft -= dt;
+      ziel.dotTick += dt;
+      if (ziel.dotTick < takt) continue;
+      ziel.dotTick -= takt;
+
+      final menge = math.max(1, (ziel.dotPerSecond * takt).round());
+      final wirklich = ziel.takeDamage(menge);
+      _events.add(
+        HitLanded(
+          targetId: ziel.id,
+          targetFaction: ziel.faction,
+          at: ziel.position,
+          amount: wirklich,
+          isCrit: false,
+        ),
+      );
+    }
+  }
+
+  /// Der Grundangriff — wie er fällt, bestimmt die [weapon].
   void _heroAttack(double dt) {
     _hero.cooldownLeft -= dt;
     if (_hero.cooldownLeft > 0) return;
 
-    final ziel = _nearestEnemyInRange(_hero);
+    final ziel = weapon.ranged
+        ? _nearestEnemyWithin(weapon.range, needsSight: true)
+        : _nearestEnemyInRange(_hero);
     if (ziel == null) return;
 
     _hero.cooldownLeft = _hero.attackCooldown;
@@ -496,7 +617,42 @@ class ActionWorld {
         direction: _hero.facing,
       ),
     );
-    _hit(_hero, ziel);
+
+    if (weapon.ranged) {
+      // Mehrere Pfeile fächern leicht auf, damit sie nicht als einer
+      // aussehen.
+      for (var i = 0; i < weapon.hits; i++) {
+        final versatz = (i - (weapon.hits - 1) / 2) * 0.12;
+        _shoot(ziel, power: weapon.power, fromWeapon: true, angle: versatz);
+      }
+      return;
+    }
+
+    final ziele =
+        weapon.cleave ? _enemiesWithin(weapon.range) : <ActionEntity>[ziel];
+    for (final getroffen in ziele) {
+      for (var i = 0; i < weapon.hits && getroffen.isAlive; i++) {
+        _weaponLanded(getroffen);
+      }
+    }
+  }
+
+  /// Ein Treffer der Waffe, samt dem, was sie mitbringt.
+  void _weaponLanded(ActionEntity ziel, {double? power}) {
+    _hit(_hero, ziel, powerFactor: power ?? weapon.power);
+    if (weapon.manaOnHit > 0) {
+      _mana = math.min(
+        heroStats.maxMana.toDouble(),
+        _mana + weapon.manaOnHit,
+      );
+    }
+    if (weapon.burnPerSecond > 0 && ziel.isAlive) {
+      _applyDot(
+        ziel,
+        _hero.attack * _hero.damageMultiplier * weapon.burnPerSecond,
+        ActionBalance.weaponBurnSeconds,
+      );
+    }
   }
 
   ActionEntity? _nearestEnemyInRange(ActionEntity attacker) {
@@ -538,10 +694,12 @@ class ActionWorld {
         continue;
       }
 
-      gegner.cooldownLeft -= dt;
+      // Verlangsamt heisst: Laufen **und** Zuschlagen im selben Takt.
+      final takt = dt * gegner.tempo;
+      gegner.cooldownLeft -= takt;
 
       if (gegner.kind == EnemyKind.schuetze) {
-        _archerActs(gegner, abstand, dt);
+        _archerActs(gegner, abstand, takt);
         continue;
       }
 
@@ -552,7 +710,7 @@ class ActionWorld {
         gegner.facing = richtung;
         gegner.position = _slide(
           gegner.position,
-          richtung * (gegner.speed * dt),
+          richtung * (gegner.speed * takt),
           gegner.radius,
         );
         continue;
@@ -655,7 +813,16 @@ class ActionWorld {
         geschoss.spent = true;
         final heldenKraft = geschoss.heroPower;
         if (heldenKraft != null) {
-          _hit(_hero, ziel, powerFactor: heldenKraft);
+          if (geschoss.fromWeapon) {
+            _weaponLanded(ziel, power: heldenKraft);
+          } else {
+            _hit(
+              _hero,
+              ziel,
+              powerFactor: heldenKraft,
+              leech: geschoss.heroLeech,
+            );
+          }
           break;
         }
         final wirklich = ziel.takeDamage(
@@ -714,10 +881,13 @@ class ActionWorld {
 
   // --- Schaden ---
 
-  void _hit(
+  /// Ein Schlag von [attacker] auf [target]. Gibt zurück, was wirklich
+  /// abgezogen wurde.
+  int _hit(
     ActionEntity attacker,
     ActionEntity target, {
     double powerFactor = 1,
+    double leech = 0,
   }) {
     final kritisch =
         attacker.critChance > 0 && _rng.nextDouble() < attacker.critChance;
@@ -742,6 +912,25 @@ class ActionWorld {
         isCrit: kritisch,
       ),
     );
+
+    if (leech > 0 && attacker.isHero && wirklich > 0) {
+      _healHero((wirklich * leech).round());
+    }
+    if (target.isHero && !attacker.isHero && _reflectLeft > 0) {
+      final zurueck = attacker.takeDamage(
+        math.max(1, (wirklich * _reflectShare).round()),
+      );
+      _events.add(
+        HitLanded(
+          targetId: attacker.id,
+          targetFaction: attacker.faction,
+          at: attacker.position,
+          amount: zurueck,
+          isCrit: false,
+        ),
+      );
+    }
+    return wirklich;
   }
 
   /// Schiebt den Getroffenen ein Stück vom Schlag weg.

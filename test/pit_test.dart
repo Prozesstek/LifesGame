@@ -119,6 +119,28 @@ void main() {
       }
     });
 
+    // Umgekehrt: Jede Fähigkeit, die man lernen kann, tut in der Grube
+    // etwas. Sonst läge sie auf einem Platz und bekäme keinen Knopf.
+    test('jede lernbare Fähigkeit wirkt in der Grube', () {
+      for (final ability in AbilityCatalog.choosable) {
+        expect(
+          PitAbilities.byId(ability.moveId),
+          isNotNull,
+          reason: ability.moveId,
+        );
+      }
+    });
+
+    test('jede Waffe im Laden wird ein Grundangriff', () {
+      final zuege = <String>{
+        ...AbilityCatalog.weaponMoves.values,
+        AbilityCatalog.fallbackMoveId,
+      };
+      for (final zug in zuege) {
+        expect(PitWeapons.byMoveId(zug), isNotNull, reason: zug);
+      }
+    });
+
     test('jede trägt denselben Namen wie im Rundenkampf', () {
       for (final ability in PitAbilities.all) {
         expect(Moves.byId(ability.id)?.name, ability.name, reason: ability.id);

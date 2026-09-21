@@ -15,6 +15,8 @@ class Projectile {
     required this.damage,
     required this.radius,
     this.heroPower,
+    this.heroLeech = 0,
+    this.fromWeapon = false,
   });
 
   final int id;
@@ -32,6 +34,12 @@ class Projectile {
   /// wie ein Schlag des Helden (`Angriff × heroPower`, minus
   /// Verteidigung), und [damage] wird nicht gelesen.
   final double? heroPower;
+
+  /// Anteil des Schadens, der den Helden heilt (Seelenraub).
+  final double heroLeech;
+
+  /// Ob es ein Pfeil der Waffe ist — dann gelten deren Nebenwirkungen.
+  final bool fromWeapon;
 
   Vec2 position;
   double age = 0;

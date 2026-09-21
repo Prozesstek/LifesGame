@@ -11,6 +11,7 @@
 //     dart run tool/pit_sim.dart          # 12 Läufe je Feld
 //     dart run tool/pit_sim.dart 40
 
+import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
@@ -18,16 +19,24 @@ import 'package:habits/habits.dart';
 void main(List<String> args) {
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
 
-  // „+F" heisst: alle Fähigkeiten, die in der Grube schon wirken, auf den
+  // „+F" heisst: drei Fähigkeiten auf den Plätzen — Funkenstoß,
+  // Steinhaut, Blütentau, also Schaden, Schutz und Heilung, alle drei über
+  // den Baum früh erreichbar. Der Vergleich zur Spalte links daneben ist
+  // ihr Beitrag.
+  //
+  // Die Waffe: ohne Laden der Kurzbogen, den jeder trägt (ADR-0016);
+  // ausgerüstet die Waffe des besten Satzes.
   // Plätzen. Der Vergleich zur Spalte links daneben ist ihr Beitrag.
-  final alle = PitAbilities.all.map((a) => a.id).toList();
+  const drei = <String>['funkenstoss', 'steinhaut', 'bluetentau'];
+  const bogen = 'basic_attack';
+  final gut = _besteWaffe();
   final spalten = <String, _Spalte>{
-    'Tag 0': _Spalte(_statsNach(0)),
-    'Tag 14': _Spalte(_statsNach(14)),
-    'Tag 30': _Spalte(_statsNach(30)),
-    'Tag 30+F': _Spalte(_statsNach(30), alle),
-    'Tag 60+G': _Spalte(_statsNach(60, bonus: _bestesGear())),
-    'T60+G+F': _Spalte(_statsNach(60, bonus: _bestesGear()), alle),
+    'Tag 0': _Spalte(_statsNach(0), bogen),
+    'Tag 14': _Spalte(_statsNach(14), bogen),
+    'Tag 30': _Spalte(_statsNach(30), bogen),
+    'Tag 30+F': _Spalte(_statsNach(30), bogen, drei),
+    'Tag 60+G': _Spalte(_statsNach(60, bonus: _bestesGear()), gut),
+    'T60+G+F': _Spalte(_statsNach(60, bonus: _bestesGear()), gut, drei),
   };
 
   print('Die Grube — $laeufe Läufe je Feld, jede Karte neu gebaut\n');
@@ -55,9 +64,10 @@ void main(List<String> args) {
 }
 
 class _Spalte {
-  const _Spalte(this.stats, [this.abilities = const <String>[]]);
+  const _Spalte(this.stats, this.weapon, [this.abilities = const <String>[]]);
 
   final ActionStats stats;
+  final String weapon;
   final List<String> abilities;
 }
 
@@ -70,6 +80,7 @@ int _quote(int stufe, _Spalte spalte, int laeufe) {
       heroStats: spalte.stats,
       stage: stage,
       abilityIds: spalte.abilities,
+      weaponMoveId: spalte.weapon,
       seed: seed,
     );
     PitBot.play(welt);
@@ -129,4 +140,22 @@ GearBonus _bestesGear() {
     if (bestes != null) summe = summe + bestes.bonus;
   }
   return summe;
+}
+
+/// Der Waffenzug der Waffe, die `_bestesGear` auf den Waffenplatz legt.
+String _besteWaffe() {
+  GearItem? beste;
+  var besteSumme = -1;
+  for (final item in GearCatalog.forSlot(GearSlot.waffe)) {
+    final wert =
+        item.bonus.attack * 8 +
+        item.bonus.maxHp +
+        item.bonus.defense * 8 +
+        item.bonus.maxEnergy * 8;
+    if (wert > besteSumme) {
+      besteSumme = wert;
+      beste = item;
+    }
+  }
+  return AbilityCatalog.weaponMoveFor(beste?.id);
 }
