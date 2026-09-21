@@ -12,7 +12,6 @@ const TheoryBranch wissenschaftBranch = TheoryBranch(
   description:
       'Wie man erkennt, ob eine Behauptung trägt — und wie man am eigenen '
       'Leben sauber ausprobiert, was wirklich wirkt.',
-  unlockLevel: 4,
   lessons: <Lesson>[_evidenz, _korrelation, _selbstversuch],
 );
 

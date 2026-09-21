@@ -12,7 +12,6 @@ const TheoryBranch gesellschaftBranch = TheoryBranch(
   description:
       'Umfeld, Zugehörigkeit, Grenzen. Der Teil des Fortschritts, der nicht '
       'im Kopf des Einzelnen entschieden wird.',
-  unlockLevel: 5,
   lessons: <Lesson>[_umfeld, _zugehoerigkeit, _grenzen],
 );
 

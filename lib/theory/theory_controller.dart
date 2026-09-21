@@ -116,7 +116,7 @@ final handbookRemainingProvider = Provider<int>((ref) {
   return branch.lessons.length - progress.passedCount(branch);
 });
 
-/// Der Theoriegraph aus ADR-0019 — vier Wurzeln, zwanzig Unterknoten.
+/// Der Theoriegraph aus ADR-0019 — vier Wurzeln, einundzwanzig Knoten darunter.
 ///
 /// Als Provider und nicht als Konstante, damit Tests einen kleineren
 /// Graphen unterschieben können.
