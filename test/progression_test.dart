@@ -15,34 +15,6 @@ List<int?> _perfect(Lesson lesson) {
   return lesson.questions.map<int?>((q) => q.correctIndex).toList();
 }
 
-/// Antworten, die gerade so zum Bestehen reichen: die letzte Frage falsch.
-List<int?> _barelyPassing(Lesson lesson) {
-  final answers = _perfect(lesson);
-  final last = lesson.questions.last;
-  answers[answers.length - 1] = (last.correctIndex + 1) % last.options.length;
-  return answers;
-}
-
-/// Spielt alle offenen Lektionen durch und gibt den neuen Stand zurück.
-({TheoryProgress progress, bool didSomething}) _clearOpenLessons(
-  TheoryProgress progress,
-  int level,
-  List<int?> Function(Lesson) answersFor,
-) {
-  var current = progress;
-  var didSomething = false;
-
-  for (final branch in theoryTree.unlockedAt(level)) {
-    for (final lesson in branch.lessons) {
-      if (current.isPassed(lesson.id)) continue;
-      current = current.submit(lesson, answersFor(lesson)).progress;
-      didSomething = true;
-    }
-  }
-
-  return (progress: current, didSomething: didSomething);
-}
-
 void main() {
   _goldZuflussPasstZuDenPreisen();
 
@@ -79,48 +51,6 @@ void main() {
       expect(
         container.read(earnedAchievementIdsProvider),
         contains('wissbegierig'),
-      );
-    });
-
-    test('der Wurzelzweig allein öffnet mindestens einen weiteren', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final controller = container.read(theoryProgressProvider.notifier);
-
-      for (final lesson in habitsBranch.lessons) {
-        controller.submit(lesson, _perfect(lesson));
-      }
-
-      final level = container.read(playerLevelProvider).level;
-      expect(theoryTree.unlockedAt(level).length, greaterThan(1));
-    });
-  });
-
-  // Diese Gruppe prüft, was keines der beiden Packages allein prüfen kann:
-  // ob Belohnungskurve (`theory`) und Levelkurve (`progression`) so
-  // zusammenpassen, dass der Baum spielbar bleibt.
-  group('Belohnung und Levelkurve passen zusammen', () {
-    test('mit perfekten Antworten öffnet sich der ganze Baum', () {
-      _expectTreeOpensCompletely(_perfect);
-    });
-
-    test('auch knapp bestandene Lektionen reichen aus', () {
-      _expectTreeOpensCompletely(_barelyPassing);
-    });
-
-    test('der ganze Baum bringt mehr XP, als alle Sperren kosten', () {
-      final highestUnlock = _highestUnlock;
-
-      var progress = const TheoryProgress.empty();
-      for (final branch in theoryTree.branches) {
-        for (final lesson in branch.lessons) {
-          progress = progress.submit(lesson, _barelyPassing(lesson)).progress;
-        }
-      }
-
-      expect(
-        progress.totalXp,
-        greaterThanOrEqualTo(LevelCurve.totalXpFor(highestUnlock)),
       );
     });
   });
@@ -176,22 +106,6 @@ void main() {
       );
     });
 
-    test('der Baum öffnet sich in Tagen, nicht in Monaten', () {
-      // Das Tempo ist eine Produktentscheidung, keine Nebenwirkung. Wer an
-      // `habits/rewards.dart` oder `progression/level_curve.dart` dreht,
-      // soll hier merken, wenn es kippt.
-      final tage = _daysToLevel(_highestUnlock);
-
-      expect(tage, greaterThan(0), reason: 'Der Baum öffnet sich nie.');
-      expect(
-        tage,
-        inInclusiveRange(3, 21),
-        reason:
-            'Mit voller täglicher Liste braucht der letzte Zweig $tage Tage. '
-            'Unter 3 ist die Levelsperre Deko, über 21 sperrt sie Inhalt weg.',
-      );
-    });
-
     test('das Maximallevel bleibt ein Fernziel', () {
       // Die Kurve ist laut ADR-0006 bewusst linear, damit späte Stufen
       // erreichbar bleiben — aber nicht in einem Monat.
@@ -244,13 +158,6 @@ void main() {
   });
 }
 
-/// Der höchste Level, den irgendein Zweig verlangt.
-int get _highestUnlock {
-  return theoryTree.branches
-      .map((b) => b.unlockLevel)
-      .reduce((a, b) => a > b ? a : b);
-}
-
 /// Wie viele Tage tägliches Abhaken bis zum Level [target] brauchen.
 ///
 /// [difficulty] ist der schnellste denkbare Weg seit ADR-0028: Die
@@ -293,35 +200,6 @@ int _daysToLevel(int target, {HabitDifficulty? difficulty}) {
     day = day.next;
   }
   return -1;
-}
-
-/// Spielt den Baum Stufe für Stufe durch und stellt sicher, dass er sich
-/// nie festfährt: Wer alles Offene bestanden hat, muss dadurch genug
-/// Erfahrung haben, um den nächsten Zweig zu öffnen.
-void _expectTreeOpensCompletely(List<int?> Function(Lesson) answersFor) {
-  var progress = const TheoryProgress.empty();
-  var level = LevelCurve.levelFor(0).level;
-  var rounds = 0;
-
-  while (theoryTree.lockedAt(level).isNotEmpty) {
-    final step = _clearOpenLessons(progress, level, answersFor);
-
-    expect(
-      step.didSomething,
-      isTrue,
-      reason:
-          'Auf Level $level ist alles Offene bestanden, aber es öffnet '
-          'sich nichts Neues — der Baum ist eine Sackgasse.',
-    );
-
-    progress = step.progress;
-    level = LevelCurve.levelFor(progress.totalXp).level;
-
-    rounds++;
-    expect(rounds, lessThan(20), reason: 'Endlosschleife im Testaufbau');
-  }
-
-  expect(theoryTree.lockedAt(level), isEmpty);
 }
 
 /// Der vierte Fadenschluss: Passen die Preise im Laden zum Gold, das
@@ -436,13 +314,6 @@ void _goldZuflussPasstZuDenPreisen() {
             'Wenn schon vier Lektionen für Level 3 reichen, ist die '
             'Sperre auf den ganzen Zweig unnötig streng.',
       );
-    });
-
-    test('das Handbuch kostet keinen Theoriepunkt', () {
-      // ADR-0012: Der Zweig erklärt, wie die App funktioniert -- das
-      // Handbuch gehört nicht hinter eine Sperre. Seit ADR-0018 hängt
-      // zusätzlich der Zugang zum Kampf daran, also erst recht nicht.
-      expect(handbuch.unlockLevel, LevelCurve.minLevel);
     });
   });
 }

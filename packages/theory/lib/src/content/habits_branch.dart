@@ -1,13 +1,12 @@
 import '../branch.dart';
 import 'habits_lessons.dart';
 
-/// Der Wurzelzweig des Skillbaums — ohne Levelsperre.
+/// Das Handbuch — der Zweig, der erklärt, wie die App funktioniert.
 ///
 /// Warum ausgerechnet Gewohnheiten: siehe ADR-0005. Kurz — dieser Zweig
 /// erklärt genau das, was der Tracker verlangt. Theorie und Anwendung
-/// fallen zusammen, statt nebeneinanderzustehen. Genau deshalb bleibt er
-/// von Anfang an offen, während die vier Themenzweige ein Level brauchen
-/// (ADR-0007).
+/// fallen zusammen, statt nebeneinanderzustehen. Genau deshalb ist er
+/// von Anfang an offen und kostet keinen Theoriepunkt.
 const TheoryBranch habitsBranch = TheoryBranch(
   id: 'habits',
   name: 'Gewohnheiten',

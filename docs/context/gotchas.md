@@ -3,6 +3,39 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Widget, das nur bei einem Wert > 0 gebaut wird, ist ungetestet
+
+`phone_layout_test.dart` baut jeden Bildschirm mit einem Stand voller
+Inhalt — Lektionen bestanden, Gewohnheiten laufend, jedes Ausrüstungsstück
+gekauft. Nur **abgehakt war nie etwas**. Der Stand hatte damit keinen
+einzigen Charakterwert-Zugewinn, und die zweite Zahl in der Wertekachel
+
+```dart
+if (bonus > 0) ...<Widget>[
+  const SizedBox(width: 3),
+  Text('+$bonus', ...),
+],
+```
+
+wurde nie gebaut. Was nicht gebaut wird, kann nicht überlaufen — dieselbe
+Lücke wie damals bei der `ListView` unterhalb der Falz, nur eine Ebene
+tiefer: nicht „außerhalb des Sichtbereichs", sondern „hinter einem `if`".
+
+Aufgefallen ist es erst, als der Stand für Issue #46 zwei Tage Häkchen
+bekam: Sofort lief die Wertekachel um 18 Pixel über, `224` neben `+64` in
+einem Viertel der Bildschirmbreite. Der Fehler lag seit dem 12.08. im
+Code und wäre auf einem echten Gerät nach etwa einer Woche Spielen
+erschienen.
+
+**Regel:** Eine Testvorlage muss jeden bedingten Zweig der Oberfläche
+einmal auslösen. Wer einen Stand „mit Inhalt" baut, prüfe die `if`s im
+Widgetbaum gegen ihn — jedes `if (x > 0)` ohne passenden Wert in der
+Vorlage ist eine ungeprüfte Stelle.
+
+Und die alte Regel gilt unverändert: **zwei Texte nebeneinander in einer
+`Row` brauchen beide `Flexible` und `overflow`.** Das ist jetzt der dritte
+Fall (`LevelCard`, `HubTile`, `_StatCell`).
+
 ## Git Bash macht aus `--base-href "/LifesGame/"` einen Windows-Pfad
 
 Der Befehl fuer den Pages-Build sieht harmlos aus:

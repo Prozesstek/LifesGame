@@ -35,6 +35,7 @@ const Map<String, IconData> _icons = <String, IconData>{
   'endure': Icons.shield_moon_outlined,
   'spark': Icons.bolt_outlined,
   'repeat': Icons.repeat_rounded,
+  'psyche': Icons.psychology_alt_outlined,
 
   // Wissenschaft
   'question': Icons.help_outline,

@@ -9,8 +9,8 @@ import 'widgets/lesson_tile.dart';
 
 /// Übersicht eines Theoriezweigs: welche Lektionen es gibt, wo man steht.
 ///
-/// Die Levelsperre des Zweigs wird eine Ebene höher geprüft
-/// ([SkillTreeScreen]) — hier geht es nur um die Reihenfolge der Lektionen.
+/// Hier geht es nur um die Reihenfolge der Lektionen — eine Levelsperre
+/// für den Zweig gibt es seit ADR-0019 nicht mehr.
 class BranchScreen extends ConsumerWidget {
   const BranchScreen({required this.branch, super.key});
 

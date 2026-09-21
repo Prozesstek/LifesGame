@@ -203,15 +203,15 @@ void main() {
   });
 
   group('Der Startbaum in Zahlen', () {
-    test('24 Knoten — vier Wurzeln und zwanzig Unterknoten', () {
-      expect(theoryGraph.nodeCount, 24);
+    test('25 Knoten — vier Wurzeln und einundzwanzig darunter', () {
+      expect(theoryGraph.nodeCount, 25);
       expect(theoryGraph.roots.length, 4);
     });
 
-    test('kostet zwanzig Theoriepunkte', () {
+    test('kostet einundzwanzig Theoriepunkte', () {
       final gesamt = nodes.fold(0, (sum, n) => sum + n.cost);
 
-      expect(gesamt, 20);
+      expect(gesamt, 21);
     });
   });
 
@@ -223,8 +223,8 @@ void main() {
       expect(imGraph.intersection(imHandbuch), isEmpty);
     });
 
-    test('zusammen sind es 29 Seiten', () {
-      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 29);
+    test('zusammen sind es 30 Seiten', () {
+      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 30);
     });
 
     test('ein bestandener Knoten wird gezählt', () {
