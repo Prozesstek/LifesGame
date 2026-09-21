@@ -13,6 +13,7 @@ import '../ui/palette.dart';
 import 'dev_actions.dart';
 import 'dev_controller.dart';
 import 'save_slot.dart';
+import '../ui/holz.dart';
 
 /// Die Werkbank: Erfahrung, Gold, Punkte und Sachen per Knopfdruck.
 ///
@@ -189,23 +190,25 @@ class DevScreen extends ConsumerWidget {
   }) async {
     final yes = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Palette.surfaceRaised,
-        title: Text(title),
-        content: Text(body),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: danger
-                ? FilledButton.styleFrom(backgroundColor: Palette.enemy)
-                : null,
-            child: const Text('Ja'),
-          ),
-        ],
+      builder: (context) => HolzDialog(
+        child: AlertDialog(
+          backgroundColor: Palette.surfaceRaised,
+          title: Text(title),
+          content: Text(body),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Abbrechen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: danger
+                  ? FilledButton.styleFrom(backgroundColor: Palette.enemy)
+                  : null,
+              child: const Text('Ja'),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -307,12 +310,8 @@ class _CurrentValues extends ConsumerWidget {
           '${ref.watch(passedPagesProvider)} / ${ref.watch(totalPagesProvider)}',
     };
 
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-      ),
       child: Column(
         children: <Widget>[
           for (final zeile in zeilen.entries)

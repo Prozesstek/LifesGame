@@ -11,6 +11,36 @@
 
 ---
 
+## Sitzung 21.09.2026, zum Schluss: Holzrahmen um alles
+
+Auf Frederiks Wunsch („beim UI um alles so einen Holzrahmen, dass das
+einheitlich aussieht"). 412 App-Tests, unverändert.
+
+Drei Bauteile in `lib/ui/holz.dart`, alle aus demselben Rahmenbild:
+
+| | wofür | wo |
+|---|---|---|
+| `HolzKarte` | jede Pergamentfläche | 21 Karten: Charakter, Gewohnheiten, Laden, Theorie, Start, Grube, Errungenschaften, Entwicklermodus |
+| `HolzDialog` | jeder Dialog, hängend am Seil | Name, Titel, Verkaufen, Entwicklermodus, Ergebnisblatt |
+| `HolzBlatt` | jedes Blatt von unten | Fähigkeit wählen, Ausrüstung wählen, eigene Gewohnheit |
+
+`HolzKarte` kann ihre Kante färben — grün beim Abhaken, Akzent bei einer
+verdienten Errungenschaft und beim Streak-Eis. **Ausgenommen** sind
+Kacheln in Rastern, Knöpfe und Kreise.
+
+**Zwei Dinge, die dabei aufgefallen sind:**
+
+- Ein `AlertDialog` im hängenden Rahmen bekam unbegrenzte Höhe und brach
+  mit einer Liste darin ab („does not support returning intrinsic
+  dimensions"). `HolzDialog` begrenzt die Höhe — aus dem Platz, nicht
+  aus `MediaQuery`: Im Browser meldet die das ganze Fenster, `PhoneFrame`
+  zeigt aber nur 844 Punkte, und der Rahmen lief dort um 256 über.
+- Der Rahmen kostet 24 Punkte Breite. Die Kampfwert-Zeilen im Charakter
+  liefen darum über und dürfen jetzt schrumpfen.
+
+**Angesehen** als gerendertes Testbild (Charakter, Gewohnheiten, Start),
+mit Ersatzschrift und ohne App-Theme. **Nicht am Handy angesehen.**
+
 ## Sitzung 21.09.2026, danach: zwei neue Gegnerarten
 
 Auf Frederiks Wunsch („Fledermäuse, die schneller sind, und mal

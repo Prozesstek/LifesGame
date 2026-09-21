@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Was nach der letzten Frage steht: Ergebnis, Ertrag, nächster Schritt.
 class LessonResultView extends StatelessWidget {
@@ -147,12 +148,8 @@ class _HabitUnlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

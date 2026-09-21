@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:identity/identity.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Fragt nach dem Namen des Charakters.
 ///
@@ -15,7 +16,7 @@ Future<String?> showNameDialog(
 }) {
   return showDialog<String>(
     context: context,
-    builder: (context) => _NameDialog(current: current),
+    builder: (context) => HolzDialog(child: _NameDialog(current: current)),
   );
 }
 

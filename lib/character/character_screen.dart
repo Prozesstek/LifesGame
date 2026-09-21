@@ -22,6 +22,7 @@ import 'widgets/identity_card.dart';
 import 'widgets/name_dialog.dart';
 import 'widgets/set_card.dart';
 import 'widgets/title_dialog.dart';
+import '../ui/holz.dart';
 
 /// Der Charakterbildschirm: Werte, Ausrüstung, Herkunft der Zahlen.
 ///
@@ -225,12 +226,8 @@ class _StatRow extends StatelessWidget {
       label:
           '${stat.label} $total, davon $base aus Gewohnheiten und '
           '$bonus aus Ausrüstung',
-      child: Container(
+      child: HolzKarte(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Row(
           children: <Widget>[
             Expanded(
@@ -256,26 +253,35 @@ class _StatRow extends StatelessWidget {
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  '$total',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
+            const SizedBox(width: 8),
+            // **Darf schrumpfen.** Seit die Karte im Holzrahmen liegt, ist
+            // sie 24 Punkte schmaler, und „18 Alltag · +12 Ausrüstung"
+            // passte nicht mehr neben den Namen des Werts.
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    '$total',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.text,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  bonus > 0 ? '$base Alltag · +$bonus Ausrüstung' : 'Alltag',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: bonus > 0 ? Palette.success : Palette.muted,
+                  const SizedBox(height: 2),
+                  Text(
+                    bonus > 0 ? '$base Alltag · +$bonus Ausrüstung' : 'Alltag',
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: bonus > 0 ? Palette.success : Palette.muted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

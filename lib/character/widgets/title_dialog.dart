@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:identity/identity.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Das Ergebnis der Titelwahl.
 ///
@@ -32,7 +33,9 @@ Future<TitleSelection?> showTitleDialog(
 }) {
   return showDialog<TitleSelection>(
     context: context,
-    builder: (context) => _TitleDialog(current: current, stats: stats),
+    builder: (context) => HolzDialog(
+      child: _TitleDialog(current: current, stats: stats),
+    ),
   );
 }
 

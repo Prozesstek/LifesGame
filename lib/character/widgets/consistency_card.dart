@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Beständigkeit: was die Gewohnheiten über den Charakter sagen.
 ///
@@ -38,12 +39,8 @@ class ConsistencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

@@ -39,6 +39,15 @@ abstract final class Holz {
   /// Wie weit der Inhalt vom Außenrand des Rahmens wegbleibt.
   static const double rahmenRand = 12 * pixel;
 
+  /// Derselbe Rand um eine Karte — der Rahmen in einfacher statt doppelter
+  /// Größe. Doppelt wären es 24 Punkte Holz um jede Karte, und auf einem
+  /// Handy mit sieben Karten untereinander bliebe für den Inhalt zu wenig.
+  static const double kartenRand = 12;
+
+  /// Die dunkle Kante zwischen Holz und Pergament — dieselbe wie beim
+  /// hängenden Rahmen, damit beide aus einem Satz wirken.
+  static const Color kante = Color(0xFF3A1F0C);
+
   /// Das Seil über dem Rahmen, 61 × 23.
   static const Size seilGroesse = Size(61 * pixel, 23 * pixel);
 
@@ -311,7 +320,7 @@ class HolzRahmen extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Palette.surface,
-                  border: Border.all(color: const Color(0xFF3A1F0C), width: 2),
+                  border: Border.all(color: Holz.kante, width: 2),
                 ),
                 child: child,
               ),
@@ -319,6 +328,154 @@ class HolzRahmen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Eine Karte im Holzrahmen — **die** Fläche für alles, was auf dem Leder
+/// liegt (Wunsch vom 21.09.2026: „um alles so einen Holzrahmen, dass es
+/// einheitlich aussieht").
+///
+/// Derselbe Rahmen wie beim hängenden [HolzRahmen], nur ohne Seil und in
+/// einfacher Größe. Innen Pergament, damit die Schrift auf dem Untergrund
+/// steht, für den die Palette gemacht ist.
+///
+/// **Wer eine Pergamentfläche baut, nimmt diese.** Ein `Container` mit
+/// `Palette.surface` und runden Ecken ist die Form von vorher; stünden
+/// beide nebeneinander, sähe man genau den Bruch, den diese Klasse
+/// schliesst.
+///
+/// Ausgenommen sind Kacheln in Rastern und Knöpfe (Ladenraster,
+/// Ausrüstungs- und Fähigkeitsplätze, Antworten, Baumknoten): Zwölf Punkte
+/// Holz um eine Kachel von fünfzig wären dicker als ihr Inhalt. Sie liegen
+/// in einer gerahmten Karte oder auf einer gerahmten Fläche.
+class HolzKarte extends StatelessWidget {
+  const HolzKarte({
+    required this.child,
+    this.padding = const EdgeInsets.all(14),
+    this.color = Palette.surface,
+    this.edgeColor = Holz.kante,
+    super.key,
+  });
+
+  final Widget child;
+
+  /// Abstand des Inhalts vom Pergamentrand.
+  final EdgeInsetsGeometry padding;
+
+  /// Das Pergament. Nur für die wenigen Flächen, die bewusst anders
+  /// getönt sind — etwa ein verdienter oder abgehakter Eintrag.
+  final Color color;
+
+  /// Die Kante zwischen Holz und Pergament. Eine andere Farbe hebt eine
+  /// Karte hervor — grün, wenn eine Gewohnheit abgehakt ist.
+  final Color edgeColor;
+
+  /// Wie lange ein Wechsel von [color] oder [edgeColor] dauert. Abhaken
+  /// soll sichtbar *passieren*, nicht nur umspringen.
+  static const Duration wechsel = Duration(milliseconds: 220);
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: Holz._gedehnt(Holz.rahmen, Holz.rahmenMitte, zoom: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(Holz.kartenRand),
+        child: AnimatedContainer(
+          duration: wechsel,
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: edgeColor, width: 1.5),
+          ),
+          // **Ein durchsichtiges Material auf dem Pergament.** Listeneinträge
+          // und Knöpfe malen ihre Tipp-Welle auf das nächste Material
+          // darüber; ohne dieses hier läge die Pergamentfarbe dazwischen
+          // und verdeckte sie. Flutter meldet das bei `ListTile` sogar.
+          child: Material(
+            type: MaterialType.transparency,
+            child: Padding(padding: padding, child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Ein Dialog im hängenden Holzrahmen — für `showDialog`.
+///
+/// Die Hülle, die das Ergebnisblatt schon trug, als eine Stelle: Der
+/// Dialog selbst wird durchsichtig, der Rahmen trägt ihn, innen bleibt
+/// ein gewöhnlicher [AlertDialog] mit seinen Knöpfen.
+class HolzDialog extends StatelessWidget {
+  const HolzDialog({required this.child, super.key});
+
+  /// Meist ein [AlertDialog]. Er wird auf Pergament gelegt und verliert
+  /// seine eigenen Ecken und seinen Schatten.
+  final Widget child;
+
+  static const EdgeInsets _abstand = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 24,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    // **Die Höhe begrenzen, bevor der Rahmen sie verliert.** Der hängende
+    // Rahmen ist eine Spalte mit `min` — darin bekäme ein `AlertDialog`
+    // unbegrenzte Höhe. Er misst seine Breite aber über die Höhe seines
+    // Inhalts, und eine Liste darin (Titelwahl) darf das nicht: Flutter
+    // bricht mit „does not support returning intrinsic dimensions" ab.
+    //
+    // **Aus dem Platz, nicht aus dem Bildschirm.** `MediaQuery` meldet im
+    // Browser das ganze Fenster, `PhoneFrame` zeigt aber nur 844 Punkte
+    // davon — mit der Fenstergrösse lief der Rahmen dort um 256 über.
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: _abstand,
+      child: LayoutBuilder(
+        builder: (context, platz) {
+          final hoehe =
+              platz.maxHeight - Holz.seilGroesse.height - 2 * Holz.rahmenRand;
+          return HolzRahmen(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: hoehe > 0 ? hoehe : 0),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  dialogTheme: const DialogThemeData(
+                    backgroundColor: Palette.surface,
+                    elevation: 0,
+                    insetPadding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(),
+                  ),
+                ),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Ein Blatt von unten im Holzrahmen — für `showModalBottomSheet` mit
+/// durchsichtigem Hintergrund.
+///
+/// Ohne Seil: Ein Blatt kommt von unten, es hängt nicht.
+class HolzBlatt extends StatelessWidget {
+  const HolzBlatt({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+      child: HolzKarte(padding: EdgeInsets.zero, child: child),
     );
   }
 }

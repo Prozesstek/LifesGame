@@ -19,6 +19,7 @@ import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/streak_ladder_card.dart';
+import '../ui/holz.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
 /// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
@@ -429,12 +430,8 @@ class _RestingCustomTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

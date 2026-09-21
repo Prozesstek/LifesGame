@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Welche Ausrüstungs-Sets gerade wirken — und was daran noch fehlt.
 ///
@@ -33,12 +34,8 @@ class SetCard extends StatelessWidget {
     if (!loadout.wearsAnySetPiece) return const SizedBox.shrink();
     final rows = _rows;
 
-    return Container(
+    return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

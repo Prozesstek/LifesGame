@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Was das Formular liefert, wenn es geschlossen wird.
 ///
@@ -40,11 +41,9 @@ class CustomHabitSheet extends StatefulWidget {
     return showModalBottomSheet<CustomHabitDraft>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (_) => const CustomHabitSheet(),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      builder: (_) => const HolzBlatt(child: CustomHabitSheet()),
     );
   }
 

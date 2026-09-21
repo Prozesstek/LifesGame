@@ -126,7 +126,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
-| `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf | Flutter |
+| `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
@@ -497,6 +497,15 @@ Er schenkt Zuschläge als benannten Summanden, statt Lektionen oder Häkchen
 zu erfinden. Wer an einer abgeleiteten Zahl dreht, lässt
 `flutter test test/dev_mode_test.dart` laufen — dort steht die Zusage, dass
 **ohne** Zuschläge jede Formel unverändert ist.
+
+**Jede Pergamentfläche liegt im Holzrahmen** (`HolzKarte`), jeder
+Dialog in `HolzDialog`, jedes Blatt von unten in `HolzBlatt`. Ein
+`Container` mit `Palette.surface` und runden Ecken ist die Form von vorher
+— stünden beide nebeneinander, sähe man genau den Bruch, den das
+schliesst. Ausgenommen sind Kacheln in Rastern, Knöpfe und Kreise: Zwölf
+Punkte Holz wären dort dicker als der Inhalt. Der Rahmen kostet eine
+Karte 24 Punkte Breite; wer eine Zeile hineinlegt, gibt ihren Texten
+`Flexible` (`gotchas.md`).
 
 **Die App hat zwei Untergründe, und jede Bedeutung hat für beide einen
 Wert.** Pergamentflächen (`Palette.surface`) liegen auf dunklem Leder

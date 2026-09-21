@@ -118,18 +118,16 @@ class _GrubenBild extends StatelessWidget {
     return Center(
       child: AspectRatio(
         aspectRatio: 1,
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: Palette.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Palette.surfaceRaised, width: 2),
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.stairs_outlined,
-              size: 72,
-              color: Palette.surfaceRaised,
+          child: HolzKarte(
+            padding: EdgeInsets.zero,
+            child: const Center(
+              child: Icon(
+                Icons.stairs_outlined,
+                size: 72,
+                color: Palette.surfaceRaised,
+              ),
             ),
           ),
         ),
@@ -153,36 +151,34 @@ class _Stufenleiste extends StatelessWidget {
     final leben = stage.hpFactor.toStringAsFixed(1).replaceAll('.', ',');
     final angriff = stage.attackFactor.toStringAsFixed(1).replaceAll('.', ',');
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: <Widget>[
-          Text(
-            'Stufe ${stage.number}',
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Palette.text,
+      child: HolzKarte(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          children: <Widget>[
+            Text(
+              'Stufe ${stage.number}',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Palette.text,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${stage.roomCount} Räume vor dem Wächter · '
-            'Leben ×$leben · Angriff ×$angriff',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12, color: Palette.textDim),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              '${stage.roomCount} Räume vor dem Wächter · '
+              'Leben ×$leben · Angriff ×$angriff',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: Palette.textDim),
+            ),
+          ],
+        ),
       ),
     );
   }

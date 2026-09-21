@@ -13,6 +13,7 @@ import 'gear_controller.dart';
 import 'weapon_ability_line.dart';
 import 'widgets/shop_item_cell.dart';
 import 'widgets/shop_item_tile.dart';
+import '../ui/holz.dart';
 
 /// Der Laden — der einzige Ort, an dem Gold wieder verschwindet.
 ///
@@ -183,23 +184,25 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
     final bestaetigt = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: Palette.surface,
-        title: Text('${item.name} verkaufen?'),
-        content: Text(
-          'Das bringt $erloes Gold. Zurückkaufen kostet wieder '
-          '${item.price} Gold.',
+      builder: (dialogContext) => HolzDialog(
+        child: AlertDialog(
+          backgroundColor: Palette.surface,
+          title: Text('${item.name} verkaufen?'),
+          content: Text(
+            'Das bringt $erloes Gold. Zurückkaufen kostet wieder '
+            '${item.price} Gold.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Behalten'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Verkaufen'),
+            ),
+          ],
         ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Behalten'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Verkaufen'),
-          ),
-        ],
       ),
     );
 

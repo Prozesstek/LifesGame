@@ -3,6 +3,7 @@ import 'package:habits/habits.dart';
 
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
+import '../../ui/holz.dart';
 
 /// Eine laufende Gewohnheit: abhaken, Streak sehen, ein Tagesziel füllen.
 ///
@@ -79,23 +80,14 @@ class HabitCheckTile extends StatelessWidget {
     final zeigtPlus = goal != null && !isChecked;
     final zeigtBalken = goal != null && !isChecked;
 
-    return AnimatedContainer(
-      duration: checkDuration,
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: isChecked ? Palette.surfaceRaised : Palette.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isChecked ? Palette.success : Colors.transparent,
-          width: 1.5,
-        ),
-      ),
+    return HolzKarte(
+      padding: EdgeInsets.zero,
+      color: isChecked ? Palette.surfaceRaised : Palette.surface,
+      edgeColor: isChecked ? Palette.success : Holz.kante,
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onToggle,
-          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
             child: Row(
