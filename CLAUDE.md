@@ -87,6 +87,12 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
+| `packages/action_combat/` | **Prototyp**: Echtzeit-Kampf, reines Dart, 47 Tests — steht neben `combat`, nicht an seiner Stelle | nur Dart-SDK |
+| `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben des Prototyps, Fähigkeiten eingeschlossen | nur Dart-SDK |
+| `packages/action_combat/lib/src/level_catalog.dart` | die Hallen als **Textkarte** — hier wird geschrieben | nur Dart-SDK |
+| `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
+| `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, nur im Entwicklermodus | Flutter |
+| `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
@@ -166,7 +172,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 458 Tests
+flutter test             # 481 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

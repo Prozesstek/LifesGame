@@ -7,9 +7,230 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 20.09.2026 · Frederik
+**Zuletzt aktualisiert:** 21.09.2026 · Frederik
 
 ---
+
+## Sitzung 21.09.2026: alles auf main — Bilder, Klänge, Holz
+
+Acht PRs an einem Tag gemergt, in dieser Reihenfolge: #52 Lern-Vorlage,
+#58 ADR-0037, #53 Levelsperre raus, #50 Ertrag sichtbar, #55 Raven-Icons,
+#56 Klänge, #57 Holz-Stil, #51 die Grube. **481 App-Tests.**
+
+| Was | Wo |
+|---|---|
+| **Jeder Zug und jedes Ausrüstungsstück hat ein Bild** — 27 + 48, alle aus dem Raven-Paket (64 × 64) | `assets/RAVEN.md` sagt, welche Nummer hinter welcher Datei steht |
+| **Vier Klänge**: Häkchen, Lektion, Sieg, Errungenschaft | `SoundEffect` in `lib/audio/sound_effects.dart`; in Tests stumm |
+| **Holz-Stil**: Planke, Holzknopf, Balken, hängender Rahmen | `lib/ui/holz.dart`, über das Theme |
+| **Levelsperre der Zweige entfernt** — `unlockLevel` wurde nirgends mehr gelesen | — |
+| **Neuer Knoten „Was ist Psychologie"** unter Aufmerksamkeit, der erste auf Ebene 2 | Startbaum ab Level 22 ganz offen statt 21 |
+| **ADR-0037**: der Wissensbaum als Endziel (Issue #54) | gebaut wird nach dem Test |
+
+**Entfernt:** `tool/gear_icons_gen.dart` (hätte die Raven-Bilder
+überschrieben) und fünf alte Waffenzeichnungen, die nirgends mehr
+eingetragen waren.
+
+**Neue Abhängigkeit:** `audioplayers` — nach dem Pull einmal
+`flutter pub get`.
+
+**Push aus der Claude-Sitzung geht jetzt**: mit `gh` als
+Credential-Helper je Befehl, ohne die globale Git-Konfiguration zu ändern.
+
+### Offen
+
+- **Die Grube ist gemergt, aber nicht entschieden.** Sie bleibt im
+  Entwicklermodus. Der ADR zur Richtung fehlt, und AktivesBrett hat sie
+  noch nicht gespielt.
+- **Quelle und Urheber** der drei Pakete (Raven, UI-Bundle, Kampf-Figuren)
+  fehlen in den HERKUNFT-Dateien — die Lizenzen hat Frederik geprüft, für
+  den anderen nachprüfbar sind sie so nicht.
+- **Nicht am Gerät angehört**: die Klänge. Nicht am Handy angesehen: der
+  Holz-Stil — nur in der lokalen Vorschau im Browser und als Testbild.
+- **ADR-0037** hat fünf offene Punkte, darunter die Belohnung fürs
+  Vertiefen und wer ~340 Seiten schreibt.
+
+## Sitzung 21.09.2026: die Grube bekommt Figuren
+
+Die Würfel sind Figuren geworden — aus Frederiks Download-Paket, Lizenz
+von ihm geprüft (`assets/Grube/HERKUNFT.md`). 484 App-Tests.
+
+| Wer | Bild | Bewegt sich |
+|---|---|---|
+| Held | Soldat | steht, läuft, zwei Schläge, zuckt, fällt |
+| Fussvolk | Ork | dasselbe |
+| Schütze | Blutauge | schwebt (ein Streifen) |
+| Wächter | Zyklop, fünffach | schwebt (ein Streifen) |
+
+**Die Simulation ist unberührt.** Pose und Blickrichtung entstehen im
+Renderer aus dem, was die Welt ohnehin meldet — Bewegung, `AttackSwung`,
+`HitLanded`, `EntityDied` (`lib/action/figure_state.dart`). Solange die
+Bilder laden, stehen dort die alten Würfel; ein Lauf wartet nicht darauf.
+
+**Die Richtung ist weiter nicht entschieden.** Frederik neigt zur Grube
+als *dem* Kampf; die Gegnerbilder für die Reihe sind deshalb
+zurückgestellt. Der ADR steht aus, und AktivesBrett hat noch nicht
+gespielt.
+
+**Nicht gebaut:** Boden und Wände sind weiter gezeichnet — das Paket hat
+keine Kacheln. Die Geschosse des Auges sind Punkte, keine Bilder.
+
+## Sitzung 20.09.2026, abends: ein Echtzeit-Prototyp und eine Lern-Vorlage
+
+Nach dem Teststart. Zwei Dinge, die beide **keine Entscheidung** sind —
+ein Prototyp und ein Entwurf. 471 App-Tests (vorher 461), das neue
+Package 28.
+
+### Der Befund, der beides ausgelöst hat
+
+Die Frage war, ob sich der Kampf im Diablo-Stil besser anfühlen würde.
+Die Simulation hat zuerst etwas anderes gezeigt: **Der schwächste Gegner
+der Reihe braucht auch nach zwei Monaten noch sieben Runden.**
+
+| Runden gegen den Wegelagerer | Tag 0 | Tag 14 | Tag 30 | Tag 60 |
+|---|---|---|---|---|
+| | 10,6 | 9,4 | 7,6 | **7,1** |
+
+Über ein ganzes Spielerleben wird der erste Gegner um ein Drittel
+schneller besiegt. Die Ursache ist nicht die Rundenbasiertheit, sondern
+der **Werte-Deckel**: Der Angriff wächst von 13 auf 20, also um 54 %,
+und ist nach etwa einem Monat am Ende (ADR-0008). Dazu stimmt ADR-0009
+die Reihe bewusst so ab, dass jede Sprosse knapp bleibt — es gibt also
+per Konstruktion nichts, das man hinter sich lässt.
+
+**Daraus folgt: Kein Kampfsystem fühlt sich nach Diablo an, solange die
+Macht additiv und gedeckelt wächst.** Echtzeit löst davon genau einen
+Teil — dass zwanzig Gegner keine zwanzig Runden kosten.
+
+### `packages/action_combat` — der Prototyp
+
+Neuntes Package, reines Dart mit leerem `dependencies`-Block wie die
+anderen acht. Es steht **neben** `package:combat`, nicht an seiner
+Stelle; beide kennen einander nicht.
+
+- **Fester Zeitschritt, gesäter Zufall, keine Wanduhr.** Damit bleibt ein
+  ganzer Lauf ohne Renderer simulierbar — dieselbe Naht wie ADR-0002,
+  und der Grund, warum es ein eigenes Package ist
+- **Die Halle ist eine Textkarte** (`# . @ e B`), 46 × 34, vier Räume,
+  26 Fussvolk und ein Wächter. `Level.problems` prüft sie wie
+  `TheoryGraph.isHealthy`: geschlossen, genau ein Endgegner, **jeder
+  Gegner vom Start aus erreichbar**
+- **Wegfindung über ein Flutfeld** vom Helden aus — eine Flutfüllung für
+  alle statt einer Suche je Gegner
+- **Darstellung mit Flame, ohne Komponentenbaum**: Würfel,
+  Schachbrettboden, Lebensbalken, aufsteigende Schadenszahlen.
+  Steuerkreuz oder WASD, geschlagen wird von selbst
+- Erreichbar **nur über den Entwicklermodus**, also nur im Debug-Bau
+
+`dart run example/headless_run.dart`:
+
+| Stufe | ATK | Ausgang | Dauer | je Gegner | HP übrig |
+|---|---|---|---|---|---|
+| Tag 0 | 13 | gefallen | 32 s | 2,5 s | 0 % |
+| Decke heute | 30 | geschafft | 58 s | 2,2 s | 82 % |
+| mit Potenz | 30 | geschafft | 48 s | 1,8 s | 96 % |
+
+**„Mit Potenz" gibt es im Spiel nicht** — dieselben Werte, aber Schaden
+mal drei und kritische Treffer. Der Knopf existiert, damit sich der
+Unterschied **spüren** lässt statt nur ausrechnen.
+
+Und die Zahlen sagen schon etwas: „je Gegner" bewegt sich kaum, weil der
+Bot die meiste Zeit **läuft**. Der Machtzuwachs zeigt sich hier als
+Überleben, nicht als Tempo.
+
+### Zwei Dinge, die der kopflose Lauf gefunden hat
+
+**Ohne Wegfindung kam der Bot über zwei Gegner nicht hinaus** — alles
+blieb an der ersten Ecke stehen. Im Browser hätte man das als „fühlt
+sich komisch an" abgetan.
+
+**Der Nachhol-Deckel war zu niedrig.** Bei fünf Schritten verlor ein Bild
+von 100 ms jedes Mal einen Schritt, und die Welt lief dauerhaft langsamer
+als die Uhr. Der allererste Test des Packages hat genau das gemeldet.
+
+### Nachgelegt: Knöpfe, Bogenschützen, Heilkugeln
+
+Nach dem ersten Spielen ausgebaut — aus Laufen-und-Draufhalten wird ein
+Kampf. 472 App-Tests, action_combat 47 (vorher 28).
+
+| | Was |
+|---|---|
+| **Sturmschritt** | Ein Satz nach vorn, viermal Tempo, **kein Schaden** — er ist der Ausweg, nicht der zweite Angriff |
+| **Rundumschlag** | ×1,5 auf alles im Umkreis, 5 Sekunden Abklingzeit |
+| **Fünf Fernkämpfer** | Bleiben auf Abstand, weichen zurück, schiessen — Geschosse bleiben an Wänden hängen |
+| **Heilkugeln** | 28 % Quote, 8 % der vollen Gesundheit, fliegen aus 64 Punkten zu |
+
+Dazu Rückstoss auf Treffer (nicht auf den Helden, nicht auf den
+Wächter), Trefferblitz, ein Ring bei Tod und Rundumschlag.
+
+**Ein Fehler, den der erste Testlauf gefunden hat:** Der Fernkämpfer
+schoss weiter, als er sah — 230 Reichweite gegen 210
+Aufmerksamkeitsradius. Er stand da und liess sich beschiessen. Jeder
+Gegner bemerkt jetzt spätestens auf seiner eigenen Reichweite.
+
+| Stufe | Ausgang | Dauer | je Gegner | Kugeln | HP übrig |
+|---|---|---|---|---|---|
+| Tag 0 | gefallen | 32 s | 2,0 s | 3 | 0 % |
+| Decke heute | geschafft | 71 s | 2,6 s | 5 | 57 % |
+| **mit Potenz** | geschafft | 53 s | 2,0 s | 7 | **89 %** |
+
+**Die Schützen haben die Halle deutlich härter gemacht** — „Decke heute"
+kam vorher mit 82 % durch. Erwartbar: Der Bot weicht keinem Pfeil aus.
+
+**Drei Zahlen sind geraten, nicht gemessen:** fünf Sekunden Abklingzeit
+auf den Rundumschlag (bei drei wird er die Dauerlösung), fünf
+Fernkämpfer, und die Position der Knöpfe unten rechts.
+
+
+Beide Fassungen sind gespielt und für gut befunden — von **einem** von
+zwei Entwicklern. Damit ist die Frage „fühlt sich das besser an"
+beantwortet und die Frage „wird das Projekt das" offen. Zwei Dinge sind
+jetzt entscheidbar und keines davon entschieden:
+
+- **Die Potenz-Kurve.** „Mit Potenz" ist die Stufe, die sich am besten
+  spielt, und die es im Spiel nicht gibt. Soll Macht vervielfachen statt
+  zu addieren? Das berührt ADR-0008 und die vier Kurven.
+- **Die Richtung.** Wird der Echtzeit-Kampf *der* Kampf, oder bleibt er
+  ein zweiter Modus neben der Gegnerreihe? Davon hängt ab, was mit
+  `packages/combat` und den dreissig Sprossen passiert.
+
+Beides gehört in einen ADR, bevor weitergebaut wird — sonst entsteht
+nebenbei eine Entscheidung, die niemand getroffen hat.
+
+### `docs/vorlagen/lernen.md` — eigener Branch
+
+> Liegt auf `docs/vorlage-lernen` und hängt an nichts von hier. Sie
+> gehört zu dieser Sitzung, nicht zu diesem Prototyp.
+
+
+Eine Konzeptrunde zum Lernen, nichts davon gebaut. Der Befund in einem
+Satz: **Eine App über Wiederholung lehrt ohne Wiederholung** — eine
+Lektion wird einmal gelesen, einmal abgefragt und nie wieder angesehen.
+
+Fünf Vorschläge, nach Kosten sortiert; zwei davon sind fast nur
+Verdrahtung („Wann machst du das?" am Lektionsende, Optionen erst nach
+dem Nachdenken). Die **Rückfrage des Tages** braucht einen ADR: Sie
+brächte zum ersten Mal wiederholbare Erfahrung ins Spiel — genau die
+Grenze, die ADR-0032 beim Kampf gezogen hat.
+
+Ausdrücklich **nicht** vorgeschlagen: mehr Belohnung aufs Lernen. Was
+fehlt, ist sichtbare **Kompetenz**, nicht sichtbarer Ertrag.
+
+### Offen
+
+- **Gespielt hat ihn nur einer von zwei.** Beide Fassungen sind für gut
+  befunden — von Frederik. Eine Richtungsänderung am Kampf, die einer
+  allein gut findet, ist keine Entscheidung, sondern eine Vorliebe.
+- **Kein ADR zum Echtzeit-Kampf.** Fällt die Antwort am Ende nein aus,
+  ist es ein `git revert` von drei Commits.
+- **Nichts ist gepusht.** Drei Branches liegen lokal; für AktivesBrett
+  existiert bis dahin nichts davon — derselbe Fall wie
+  `Kampfsystem.docx`.
+- **Die Potenz-Kurve ist die eigentliche Frage** und in keiner der beiden
+  Vorlagen entschieden: Soll Macht vervielfachen statt zu addieren — und
+  wird der Kampf damit zur Quelle von Macht statt zu ihrer Auszahlung
+  (`konzept.md` Abschnitt 2)?
+- Drei Feedback-Issues stehen noch: **#47 Fähigkeiten, #48 Kampf,
+  #49 Shop**.
 
 ## Sitzung 20.09.2026: das Abhaken zahlt sichtbar aus
 
