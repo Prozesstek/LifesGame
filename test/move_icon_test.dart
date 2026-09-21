@@ -1,3 +1,4 @@
+import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,16 +24,6 @@ void main() {
         );
       }
     });
-
-    test('und jedes gehört zu einer wählbaren Fähigkeit', () {
-      for (final id in MoveIcons.moveIds) {
-        expect(
-          AbilityMoves.all.any((m) => m.id == id),
-          isTrue,
-          reason: '"$id" ist keine Faehigkeit aus dem Set.',
-        );
-      }
-    });
   });
 
   group('Jede eingetragene Datei ist wirklich da', () {
@@ -53,16 +44,28 @@ void main() {
     });
   });
 
-  group('Die ersten acht Fähigkeiten tragen eins', () {
-    // Gezeichnet sind die Commons und Uncommons aus der Vorlage. Die
-    // übrigen Züge tragen ihren Namen auf der Kachel.
-    test('acht Züge haben ein Bild', () {
-      final mitBild = <Move>[
-        ...Moves.all,
-        ...AbilityMoves.all,
-      ].where((move) => MoveIcons.forMoveId(move.id) != null).toSet();
+  group('Jeder spielbare Zug trägt eins', () {
+    // Seit dem 21.09. hat jede Fähigkeit und jeder Waffenzug ein Bild.
+    // Kommt ein Zug dazu, fällt dieser Test um, bis er eins bekommt —
+    // sonst stünde er als einzige Kachel mit Namen statt Bild im Kampf.
+    test('jede wählbare Fähigkeit', () {
+      for (final ability in AbilityCatalog.choosable) {
+        expect(
+          MoveIcons.forMoveId(ability.moveId),
+          isNotNull,
+          reason: ability.moveId,
+        );
+      }
+    });
 
-      expect(mitBild, hasLength(8));
+    test('jeder Waffenzug, der Rückfall eingeschlossen', () {
+      final ids = <String>{
+        ...AbilityCatalog.weaponMoves.values,
+        AbilityCatalog.fallbackMoveId,
+      };
+      for (final id in ids) {
+        expect(MoveIcons.forMoveId(id), isNotNull, reason: id);
+      }
     });
 
     test('keine zwei Züge teilen sich eine Zeichnung', () {

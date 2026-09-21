@@ -88,7 +88,6 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
-| `tool/gear_icons_gen.dart` | erzeugt die Bilder der verdienten Stücke aus Formen | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
