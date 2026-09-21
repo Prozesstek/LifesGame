@@ -72,11 +72,4 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
-
-  test('gemalte Bilder werden immer weich skaliert', () {
-    // Auch dort, wo Pixelkunst hart bliebe: 88 Punkte bei dreifacher
-    // Dichte sind 264 echte Pixel, weit über der Zeichengröße.
-    expect(PixelArt.qualityFor(88, 3), FilterQuality.none);
-    expect(PixelArt.qualityFor(88, 3, smooth: true), FilterQuality.medium);
-  });
 }

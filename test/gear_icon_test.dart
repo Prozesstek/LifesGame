@@ -28,11 +28,9 @@ void main() {
 
   group('Jede eingetragene Datei ist wirklich da', () {
     test('sie ist ein PNG in der vereinbarten Größe', () async {
-      // **Früher stand hier „größer als 1000 Bytes".** Die erzeugten
-      // Bilder aus `tool/gear_icons_gen.dart` sind flache Flächen und
-      // komprimieren auf unter 1000 — die Sonnenklinge auf 990. Die
-      // Grenze hat also nichts über das Bild gesagt, nur über den
-      // Zufall. Signatur und Kantenlänge sagen etwas.
+      // **Früher stand hier „größer als 1000 Bytes".** Flache Pixelbilder
+      // komprimieren darunter — die Grenze hat nichts über das Bild
+      // gesagt, nur über den Zufall. Signatur und Kantenlänge sagen etwas.
       for (final id in GearIcons.itemIds) {
         final pfad = GearIcons.forItemId(id)!;
 
@@ -44,11 +42,16 @@ void main() {
           daten.lengthInBytes,
         );
 
-        expect(
-          bytes.sublist(0, 8),
-          <int>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
-          reason: '$pfad ist kein PNG.',
-        );
+        expect(bytes.sublist(0, 8), <int>[
+          0x89,
+          0x50,
+          0x4E,
+          0x47,
+          0x0D,
+          0x0A,
+          0x1A,
+          0x0A,
+        ], reason: '$pfad ist kein PNG.');
         // IHDR: Breite und Höhe als Big-Endian-Zahlen ab Byte 16.
         final breite = daten.getUint32(16);
         final hoehe = daten.getUint32(20);
@@ -59,16 +62,14 @@ void main() {
   });
 
   group('Wer ein Bild hat und wer nicht', () {
-    // Issue #35 führt „Items" unter den Designs auf, die noch entstehen
-    // müssen. Gemalt sind zwei Klingen, ein Bogen und ein Stab; die
-    // achtzehn verdienten Stücke (ADR-0034) sind erzeugt. Die übrigen
-    // Kacheln tragen das Zeichen ihres Platzes.
-    test('vier gemalte Waffen und alle verdienten Stücke', () {
-      final mitBild = GearCatalog.all
-          .where((item) => GearIcons.forItemId(item.id) != null)
-          .toList();
-
-      expect(mitBild, hasLength(4 + 18));
+    // Seit dem 21.09. hat jedes Stück ein Bild aus dem Raven-Paket
+    // (`assets/RAVEN.md`). Kommt ein Stück dazu, fällt dieser Test um,
+    // bis es eins bekommt — sonst stünde es als einziges mit dem
+    // Platz-Zeichen im Laden.
+    test('jedes Stück im Katalog hat eins', () {
+      for (final item in GearCatalog.all) {
+        expect(GearIcons.forItemId(item.id), isNotNull, reason: item.name);
+      }
     });
 
     test('jedes verdiente Stück hat eins', () {

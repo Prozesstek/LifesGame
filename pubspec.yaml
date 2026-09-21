@@ -86,9 +86,10 @@ flutter:
     - assets/Waffen/Schwerter/
     - assets/Waffen/Boegen/
     - assets/Waffen/Staebe/
+    - assets/Waffen/Kolben/
 
-    # Die uebrigen Plaetze. Die Bilder darin sind erzeugt, nicht gemalt --
-    # `dart run tool/gear_icons_gen.dart` schreibt sie neu (ADR-0034).
+    # Die uebrigen Plaetze. Alle Bilder stammen aus dem Raven-Paket
+    # (`assets/RAVEN.md`).
     - assets/Ruestung/
     - assets/Helme/
     - assets/Schuhe/

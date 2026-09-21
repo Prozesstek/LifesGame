@@ -7,13 +7,14 @@ import '../ui/pixel_art.dart';
 /// `MoveAnimation` und `moveHelpFor`.
 ///
 /// **Jeder Zug hat eins** — alle neunzehn Fähigkeiten und alle acht
-/// Waffenzüge. Seit dem 21.09. stammen sie aus einem gemalten Paket
-/// (256 × 256, Frederiks Download), nicht mehr aus eigenen 64er-Zeichnungen;
-/// deshalb werden sie **weich** skaliert ([smooth]).
+/// Waffenzüge. Seit dem 21.09. stammen sie aus dem Raven-Fantasy-Paket
+/// (64 × 64, Frederiks Download); welche Nummer dahintersteht, hält
+/// `assets/RAVEN.md` fest.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
-/// 1. Datei nach `assets/Faehigkeiten/` legen.
+/// 1. Datei nach `assets/Faehigkeiten/` legen, auf 64 × 64 gezeichnet und
+///    als [PixelArt.assetSize] Pixel abgelegt.
 /// 2. Eine Zeile in [_dateien] ergänzen.
 ///
 /// `test/move_icon_test.dart` prüft danach von selbst mit, dass die Id in
@@ -64,10 +65,6 @@ abstract final class MoveIcons {
     'longbow_volley': 'assets/Faehigkeiten/Doppelschuss.png',
     'sunblade_flare': 'assets/Faehigkeiten/Sonnenhieb.png',
   };
-
-  /// Die Bilder sind gemalt, nicht gepixelt: Hart skaliert zerfielen
-  /// ihre weichen Kanten in Treppen. Siehe [PixelArt.smooth].
-  static const bool smooth = true;
 
   /// Der Pfad zum Bild, oder `null` wenn es für diesen Zug keins gibt.
   static String? forMoveId(String moveId) => _dateien[moveId];

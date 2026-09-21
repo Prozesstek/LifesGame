@@ -248,12 +248,7 @@ class _MoveBild extends StatelessWidget {
     );
 
     if (pfad == null) return ersatz;
-    return PixelArt(
-      assetPath: pfad,
-      side: side,
-      fallback: ersatz,
-      smooth: MoveIcons.smooth,
-    );
+    return PixelArt(assetPath: pfad, side: side, fallback: ersatz);
   }
 }
 
