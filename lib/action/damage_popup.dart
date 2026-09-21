@@ -116,11 +116,12 @@ class Burst {
     );
   }
 
-  factory Burst.cleave(Vec2 at) {
+  /// Der goldene Ring eines Flächentreffers, so gross wie sein [radius].
+  factory Burst.cleave(Vec2 at, double radius) {
     return Burst(
       at: at,
       color: Palette.goldOnDark,
-      maxRadius: ActionBalance.abilities[ActionAbility.rundumschlag]!.radius,
+      maxRadius: radius,
       lifetime: 0.28,
       strokeWidth: 4,
     );

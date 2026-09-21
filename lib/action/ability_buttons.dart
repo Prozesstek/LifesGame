@@ -7,8 +7,12 @@ import '../combat/move_icon.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 
-/// Die Knöpfe unten rechts: oben die Plätze, unten Sturmschritt und
-/// Rundumschlag.
+/// Die Knöpfe unten rechts: die Fähigkeiten auf den Plätzen.
+///
+/// **Nur die Plätze, keine festen Knöpfe.** Sturmschritt und Rundumschlag
+/// gab es bis zum 21.09. als Grundfähigkeiten für jeden; sie sind
+/// entfernt, damit der Kampf an dem hängt, was man sich im Baum und über
+/// Streaks verdient hat.
 ///
 /// **Rechts unten, wo die zweite Hand liegt.** Der Daumen links läuft,
 /// der Daumen rechts drückt — auf einem Handy im Hochformat ist das die
@@ -18,82 +22,35 @@ import '../ui/pixel_art.dart';
 /// herunterzuzählen: Im Kampf liest niemand Ziffern, aber jeder sieht
 /// einen vollen Kreis.
 class AbilityButtons extends StatelessWidget {
-  const AbilityButtons({
-    required this.world,
-    required this.onUse,
-    required this.onCast,
-    super.key,
-  });
+  const AbilityButtons({required this.world, required this.onCast, super.key});
 
   final ActionWorld world;
-  final void Function(ActionAbility) onUse;
 
   /// Wirkt eine Fähigkeit von einem Platz (ADR-0039).
   final void Function(String id) onCast;
 
-  static const double size = 62;
-
-  /// Die Plätze etwas kleiner: Sie liegen über den festen Knöpfen, und
-  /// drei davon müssen neben das Steuerkreuz passen.
-  static const double slotSize = 52;
+  /// Drei davon müssen neben das Steuerkreuz passen.
+  static const double slotSize = 58;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    if (world.slots.isEmpty) return const SizedBox.shrink();
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        if (world.slots.isNotEmpty) ...<Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              for (final ability in world.slots) ...<Widget>[
-                _RoundButton(
-                  size: slotSize,
-                  label: ability.name,
-                  ratio: world.slotCooldownRatio(ability.id),
-                  ready: world.canCast(ability.id),
-                  onTap: () => onCast(ability.id),
-                  child: _SlotIcon(ability: ability),
-                ),
-                if (ability != world.slots.last) const SizedBox(width: 10),
-              ],
-            ],
+        for (final ability in world.slots) ...<Widget>[
+          _RoundButton(
+            size: slotSize,
+            label: ability.name,
+            ratio: world.slotCooldownRatio(ability.id),
+            ready: world.canCast(ability.id),
+            onTap: () => onCast(ability.id),
+            child: _SlotIcon(ability: ability),
           ),
-          const SizedBox(height: 12),
+          if (ability != world.slots.last) const SizedBox(width: 10),
         ],
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (final ability in ActionAbility.values) ...<Widget>[
-              _RoundButton(
-                size: size,
-                label: ability.label,
-                ratio: world.cooldownRatio(ability),
-                ready: world.isReady(ability),
-                onTap: () => onUse(ability),
-                child: Icon(
-                  _iconFor(ability),
-                  size: 26,
-                  color: world.isReady(ability)
-                      ? Palette.textOnDark
-                      : Palette.textOnDarkDim,
-                ),
-              ),
-              if (ability != ActionAbility.values.last)
-                const SizedBox(width: 12),
-            ],
-          ],
-        ),
       ],
     );
-  }
-
-  static IconData _iconFor(ActionAbility ability) {
-    return switch (ability) {
-      ActionAbility.sturmschritt => Icons.double_arrow,
-      ActionAbility.rundumschlag => Icons.cyclone,
-    };
   }
 }
 

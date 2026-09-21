@@ -80,7 +80,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 120 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 109 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -173,7 +173,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 120 Tests
+dart test                              # 109 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -203,7 +203,7 @@ Stelle:
 | Was tut eine Fähigkeit in der Grube? | `PitAbilities` — **dieselbe Id** wie in `abilities`, sonst wirkt sie nicht |
 | Welche Plätze gehen mit? | `activeMovesProvider`, gefiltert in `ActionWorld` — was die Grube nicht kennt, fällt heraus |
 | Wie schlägt der Held? | `PitWeapons` — über den **Waffenzug** (`AbilityCatalog.weaponMoves`), nicht die Item-Id |
-| Auf welchen Tasten liegen die Angriffe? | `PitRunView` — 1–3 die Plätze, 4 Rundumschlag, Umschalt Sturmschritt |
+| Was kann der Held im Kampf? | Grundangriff der Waffe (von selbst) und die drei Plätze — **keine** Grundfähigkeiten; auf der Tastatur 1–3 (`PitRunView`) |
 | Was ändern Sets und Legendäre? | `pitModifiersFor` in `lib/gear/set_effects.dart` — rechnet nichts, übersetzt nur |
 | Welche Kraft trägt ein legendäres Stück? | `GearItem.legendaryPower` (Id) → `PitLegendaries` (Wirkung) |
 

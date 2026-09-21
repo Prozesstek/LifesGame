@@ -1,4 +1,3 @@
-import 'ability.dart';
 import 'entity.dart';
 import 'vec2.dart';
 
@@ -73,19 +72,6 @@ class EnemyNoticed extends ActionEvent {
 
   final int id;
   final Vec2 at;
-}
-
-/// Eine Fähigkeit wurde eingesetzt.
-class AbilityUsed extends ActionEvent {
-  const AbilityUsed({
-    required this.ability,
-    required this.at,
-    required this.direction,
-  });
-
-  final ActionAbility ability;
-  final Vec2 at;
-  final Vec2 direction;
 }
 
 /// Eine Heilkugel ist gefallen.

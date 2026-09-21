@@ -20,7 +20,7 @@ enum EnemyKind {
   ///
   /// **Er ist der Grund, dass Weglaufen nicht immer geht.** Gegen Fussvolk
   /// und Schützen ist Abstand die sichere Antwort; der Kobold holt einen
-  /// ein, und man muss sich stellen oder den Sturmschritt nehmen.
+  /// ein, und man muss sich stellen.
   flink,
 
   /// Gross, langsam, zäh — ein Gegner zwischendurch, kein Endgegner.

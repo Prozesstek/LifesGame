@@ -189,8 +189,8 @@ abstract final class PitAbilities {
     description: 'Ein Funke fliegt auf den nächsten Gegner.',
   );
 
-  /// **Ein Wert ändert sich.** Die Antwort auf die Traube, wenn der
-  /// Sturmschritt gerade abklingt.
+  /// **Ein Wert ändert sich.** Die Antwort auf die Traube, wenn man sich
+  /// nicht mehr herauslaufen kann.
   static const PitAbility steinhaut = PitAbility(
     id: 'steinhaut',
     name: 'Steinhaut',
@@ -241,7 +241,7 @@ abstract final class PitAbilities {
     description: 'Heilt ein Viertel der vollen Gesundheit.',
   );
 
-  /// Der Rundumschlag in gross — häufiger zu haben als Sternenfall, und
+  /// Ein Schlag rundum — häufiger zu haben als Sternenfall, und
   /// der Grund, in die Traube hineinzulaufen.
   static const PitAbility klingenwirbel = PitAbility(
     id: 'klingenwirbel',

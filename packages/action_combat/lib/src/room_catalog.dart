@@ -150,7 +150,7 @@ abstract final class RoomCatalog {
       '#......e......',
       '##............',
     ],
-    // Die Wachstube: dicht gedrängt, der Raum für den Rundumschlag.
+    // Die Wachstube: dicht gedrängt, der Raum für Klingenwirbel und Co.
     <String>[
       '..............',
       '..e.e....e.e..',

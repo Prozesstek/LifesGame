@@ -31,29 +31,6 @@ class _PitRunViewState extends State<PitRunView> {
   /// ein Steuerkreuz zu ziehen ist zum Ausprobieren zu mühsam.
   final Set<LogicalKeyboardKey> _tasten = <LogicalKeyboardKey>{};
 
-  /// Welche Taste welche feste Fähigkeit auslöst.
-  ///
-  /// **Der Rundumschlag liegt auf 4**, neben den drei Plätzen auf 1–3:
-  /// Angegriffen wird mit der Zahlenreihe, ohne nachzudenken, welcher
-  /// Knopf fest und welcher ein Platz ist. Die Leertaste bleibt als
-  /// zweite Belegung. Der Sturmschritt bleibt auf Umschalt — wer
-  /// ausweicht, soll die Hand nicht von WASD nehmen müssen.
-  ///
-  /// Nicht `const`: `LogicalKeyboardKey` hat ein eigenes `==`, und
-  /// konstante Maps verlangen Schlüssel mit dem Standardvergleich.
-  static final Map<LogicalKeyboardKey, ActionAbility> _abilityKeys =
-      <LogicalKeyboardKey, ActionAbility>{
-        LogicalKeyboardKey.digit4: ActionAbility.rundumschlag,
-        LogicalKeyboardKey.numpad4: ActionAbility.rundumschlag,
-        LogicalKeyboardKey.space: ActionAbility.rundumschlag,
-        LogicalKeyboardKey.shiftLeft: ActionAbility.sturmschritt,
-        LogicalKeyboardKey.shiftRight: ActionAbility.sturmschritt,
-      };
-
-  void _use(ActionAbility ability) {
-    widget.game.sim.useAbility(ability);
-  }
-
   void _tastenGeaendert() {
     var x = 0.0;
     var y = 0.0;
@@ -103,11 +80,6 @@ class _PitRunViewState extends State<PitRunView> {
         if (platz < slots.length) widget.game.sim.cast(slots[platz].id);
         return KeyEventResult.handled;
       }
-      final ability = _abilityKeys[event.logicalKey];
-      if (ability != null) {
-        _use(ability);
-        return KeyEventResult.handled;
-      }
       _tasten.add(event.logicalKey);
     } else if (event is KeyUpEvent) {
       _tasten.remove(event.logicalKey);
@@ -145,7 +117,6 @@ class _PitRunViewState extends State<PitRunView> {
               valueListenable: game.frame,
               builder: (context, _, _) => AbilityButtons(
                 world: game.sim,
-                onUse: _use,
                 onCast: (id) => game.sim.cast(id),
               ),
             ),

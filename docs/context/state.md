@@ -11,6 +11,34 @@
 
 ---
 
+## Sitzung 21.09.2026, ganz zum Schluss: keine Grundfähigkeiten mehr
+
+Auf Frederiks Ansage: „Der Rundumschlag und der Dash sollten nicht als
+Grundfähigkeiten im Kampf verfügbar sein." Im Kampf gibt es jetzt nur
+noch den **Grundangriff der Waffe** und die **drei Plätze** (1–3).
+
+**Ganz entfernt**, nicht nur ausgeblendet: `ActionAbility`,
+`AbilitySpec`, die Abklingzeiten, die Sturmschritt-Bewegung, der
+Rundum-Treffer, das Ereignis `AbilityUsed`, die zwei festen Knöpfe und
+die Tasten 4, Leertaste und Umschalt. Ein Test hält fest, dass diese
+Tasten nichts mehr tun. action_combat 109 (vorher 120 — die Tests der
+beiden Fähigkeiten), App 412.
+
+**Geblieben**: der goldene Ring. Er erscheint jetzt bei jeder Fähigkeit
+mit Flächentreffer (Klingenwirbel, Wurzelgriff, Vulkanbruch, Sternenfall),
+so gross wie ihre Reichweite — dort fehlte bisher jede Rückmeldung.
+
+Der Prototyp im Entwicklermodus trägt jetzt drei feste Fähigkeiten
+(Funkenstoß, Klingenwirbel, Blütentau) statt „alle".
+
+**Die Grube wird dadurch in der Mitte etwas härter** (`pit_sim`): Tag 30
+auf Stufe 10 von 70 auf 50 %, mit drei Fähigkeiten auf Stufe 13 von 40
+auf 10 %. Anfang und Spitze bleiben. Nicht nachgestellt.
+
+**Offen**: Ausweichen gibt es jetzt nicht mehr. Wer es wieder will,
+bekommt es als lernbare Fähigkeit — eine neue Wirkung in `PitEffect`,
+kein fester Knopf.
+
 ## Sitzung 21.09.2026, zum Schluss: Holzrahmen um alles
 
 Auf Frederiks Wunsch („beim UI um alles so einen Holzrahmen, dass das
