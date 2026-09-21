@@ -18,16 +18,21 @@ import 'package:habits/habits.dart';
 void main(List<String> args) {
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
 
-  final spalten = <String, ActionStats>{
-    'Tag 0': _statsNach(0),
-    'Tag 14': _statsNach(14),
-    'Tag 30': _statsNach(30),
-    'Tag 60+G': _statsNach(60, bonus: _bestesGear()),
+  // „+F" heisst: alle Fähigkeiten, die in der Grube schon wirken, auf den
+  // Plätzen. Der Vergleich zur Spalte links daneben ist ihr Beitrag.
+  final alle = PitAbilities.all.map((a) => a.id).toList();
+  final spalten = <String, _Spalte>{
+    'Tag 0': _Spalte(_statsNach(0)),
+    'Tag 14': _Spalte(_statsNach(14)),
+    'Tag 30': _Spalte(_statsNach(30)),
+    'Tag 30+F': _Spalte(_statsNach(30), alle),
+    'Tag 60+G': _Spalte(_statsNach(60, bonus: _bestesGear())),
+    'T60+G+F': _Spalte(_statsNach(60, bonus: _bestesGear()), alle),
   };
 
   print('Die Grube — $laeufe Läufe je Feld, jede Karte neu gebaut\n');
   for (final e in spalten.entries) {
-    final s = e.value;
+    final s = e.value.stats;
     print(
       '  ${e.key.padRight(9)} ATK ${s.attack}  HP ${s.maxHp}  '
       'DEF ${s.defense}  EN ${s.energy}',
@@ -42,21 +47,29 @@ void main(List<String> args) {
 
   for (var stufe = 1; stufe <= PitStage.count; stufe++) {
     final zeile = StringBuffer('  ${stufe.toString().padRight(7)}');
-    for (final stats in spalten.values) {
-      zeile.write('${_quote(stufe, stats, laeufe)} %'.padLeft(10));
+    for (final spalte in spalten.values) {
+      zeile.write('${_quote(stufe, spalte, laeufe)} %'.padLeft(10));
     }
     print(zeile);
   }
 }
 
-int _quote(int stufe, ActionStats stats, int laeufe) {
+class _Spalte {
+  const _Spalte(this.stats, [this.abilities = const <String>[]]);
+
+  final ActionStats stats;
+  final List<String> abilities;
+}
+
+int _quote(int stufe, _Spalte spalte, int laeufe) {
   var siege = 0;
   for (var seed = 0; seed < laeufe; seed++) {
     final stage = PitStage(stufe);
     final welt = ActionWorld(
       level: LevelBuilder.build(stage: stage, seed: seed),
-      heroStats: stats,
+      heroStats: spalte.stats,
       stage: stage,
+      abilityIds: spalte.abilities,
       seed: seed,
     );
     PitBot.play(welt);

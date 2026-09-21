@@ -40,6 +40,13 @@ class ActionStats {
 
   final double critFactor;
 
+  /// Wie viel Mana in den Lauf mitgeht (ADR-0039).
+  int get maxMana => energy * ActionBalance.manaPerEnergy;
+
+  /// Mana je Sekunde.
+  double get manaRegen =>
+      ActionBalance.manaRegenBase + energy * ActionBalance.manaRegenPerEnergy;
+
   /// Sekunden zwischen zwei Schlägen.
   double get attackCooldown {
     final gespart = (energy - ActionBalance.energyReference) *

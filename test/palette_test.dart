@@ -87,6 +87,7 @@ void main() {
         Palette.enemyOnDark,
         Palette.successOnDark,
         Palette.goldOnDark,
+        Palette.manaOnDark,
       ]) {
         expect(kontrast(farbe, grund), greaterThanOrEqualTo(fuerText));
       }

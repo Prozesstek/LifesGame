@@ -103,6 +103,10 @@ abstract final class Palette {
   static const Color successOnDark = Color(0xFF7FBE6A);
   static const Color goldOnDark = Color(0xFFE0B65B);
 
+  /// Mana in der Grube (ADR-0039). Ein gedecktes Blau, das einzige im
+  /// Spiel — Mana ist die einzige Grösse, die es nur auf Leder gibt.
+  static const Color manaOnDark = Color(0xFF7FA8D9);
+
   // ---------------------------------------------------------------
   // Die Arena
   // ---------------------------------------------------------------

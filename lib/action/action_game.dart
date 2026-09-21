@@ -124,7 +124,13 @@ class ActionGame extends Game {
           break;
         case OrbCollected():
           if (event.healed > 0) {
-            _popups.add(DamagePopup.forHeal(event));
+            _popups.add(DamagePopup.forHeal(event.healed, event.at));
+          }
+        case AbilityCast():
+          _figuren[sim.heroView.id]?.swing(Pose.attack2);
+        case HeroHealed():
+          if (event.amount > 0) {
+            _popups.add(DamagePopup.forHeal(event.amount, event.at));
           }
         case RunEnded():
           _endeGemeldet = true;
@@ -182,6 +188,7 @@ class ActionGame extends Game {
       _drawFigures(canvas, bilder);
     }
     _drawProjectiles(canvas);
+    _drawWard(canvas, held);
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
     if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
@@ -432,8 +439,29 @@ class ActionGame extends Game {
 
   // --- Geschosse, Kugeln, Explosionen ---
 
+  /// Der Ring der Steinhaut, solange sie hält.
+  ///
+  /// Ohne ihn wüsste man nicht, ob die Fähigkeit noch wirkt — die
+  /// Schadenszahlen werden nur kleiner, und das sieht niemand im Gewühl.
+  void _drawWard(Canvas canvas, EntityView held) {
+    if (!sim.isWarded) return;
+    canvas.drawCircle(
+      Offset(held.position.x, held.position.y),
+      held.radius + 7,
+      Paint()
+        ..color = Palette.goldOnDark.withValues(alpha: 0.7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5,
+    );
+  }
+
   void _drawProjectiles(Canvas canvas) {
     for (final shot in sim.projectiles) {
+      // Die eigenen Funken golden, die fremden Pfeile rot: Wer ausweichen
+      // will, muss auf einen Blick sehen, was ihm gilt.
+      final farbe = shot.faction == Faction.held
+          ? Palette.goldOnDark
+          : Palette.enemyOnDark;
       final mitte = Offset(shot.position.x, shot.position.y);
       final schweif = Offset(
         shot.position.x - shot.direction.x * 9,
@@ -444,14 +472,10 @@ class ActionGame extends Game {
         schweif,
         mitte,
         Paint()
-          ..color = Palette.enemyOnDark.withValues(alpha: 0.5)
+          ..color = farbe.withValues(alpha: 0.5)
           ..strokeWidth = 3,
       );
-      canvas.drawCircle(
-        mitte,
-        shot.radius,
-        Paint()..color = Palette.enemyOnDark,
-      );
+      canvas.drawCircle(mitte, shot.radius, Paint()..color = farbe);
     }
   }
 

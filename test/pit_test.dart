@@ -1,9 +1,11 @@
 import 'package:action_combat/action_combat.dart';
+import 'package:abilities/abilities.dart';
 import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/pit_screen.dart';
+import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 
@@ -101,6 +103,60 @@ void main() {
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
       expect(grube.stage.number, 1);
       expect(find.text('Die Grube · Stufe 1'), findsOneWidget);
+    });
+  });
+
+  group('Die Fähigkeiten der Grube', () {
+    // ADR-0039, Punkt 3: Id, Icon und Freischaltung bleiben. Eine Id, die
+    // nur hier stünde, wäre in der Grube wirksam und nirgends zu lernen.
+    test('jede hat eine Freischaltung in package:abilities', () {
+      for (final ability in PitAbilities.all) {
+        expect(
+          AbilityCatalog.byMoveId(ability.id),
+          isNotNull,
+          reason: ability.id,
+        );
+      }
+    });
+
+    test('jede trägt denselben Namen wie im Rundenkampf', () {
+      for (final ability in PitAbilities.all) {
+        expect(Moves.byId(ability.id)?.name, ability.name, reason: ability.id);
+      }
+    });
+
+    testWidgets('was auf den Plätzen liegt, wird ein Knopf', (tester) async {
+      final plaetze = <Move>[
+        Moves.byId('funkenstoss')!,
+        Moves.byId('steinhaut')!,
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [activeMovesProvider.overrideWithValue(plaetze)],
+          child: MaterialApp(home: PitScreen(stage: PitStage(1))),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.bySemanticsLabel('Funkenstoß'), findsOneWidget);
+      expect(find.bySemanticsLabel('Steinhaut'), findsOneWidget);
+      expect(find.bySemanticsLabel('Blütentau'), findsNothing);
+      expect(find.textContaining('Mana'), findsOneWidget);
+    });
+
+    testWidgets('ohne Fähigkeit kein Mana-Balken', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [activeMovesProvider.overrideWithValue(<Move>[])],
+          child: MaterialApp(home: PitScreen(stage: PitStage(1))),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.textContaining('Mana'), findsNothing);
     });
   });
 }

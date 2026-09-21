@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
+import '../character/abilities_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/result_dialog.dart';
 import '../gear/gear_controller.dart';
@@ -55,6 +56,15 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final seed = _wuerfel.nextInt(1 << 30);
     final werte = ref.read(equippedStatsProvider);
 
+    // **Die Plätze kommen aus `activeMovesProvider`** — der einzigen
+    // Stelle, an der die Freischaltung einer Fähigkeit gilt. Eine
+    // gelernte, aber abgelaufene Fähigkeit fällt dort heraus, nicht hier.
+    // Der Waffenzug steht mit darin; die Grube kennt ihn nicht und lässt
+    // ihn fallen, genau wie jede Fähigkeit, die noch nicht umgebaut ist.
+    final plaetze = <String>[
+      for (final move in ref.read(activeMovesProvider)) move.id,
+    ];
+
     final welt = ActionWorld(
       level: LevelBuilder.build(stage: widget.stage, seed: seed),
       heroStats: ActionStats(
@@ -64,6 +74,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         energy: werte.maxEnergy,
       ),
       stage: widget.stage,
+      abilityIds: plaetze,
       seed: seed,
     );
 

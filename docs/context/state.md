@@ -11,6 +11,43 @@
 
 ---
 
+## Sitzung 21.09.2026, spät: Mana und die ersten drei Fähigkeiten
+
+Schritt 2 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),
+auf eigenem Branch über #66. 489 App-Tests (vorher 485), action_combat
+73 (vorher 58).
+
+| Fähigkeit | Art | Mana | Abklingzeit | Wirkung |
+|---|---|---|---|---|
+| Funkenstoß | Schaden | 12 | 1,5 s | Geschoss auf den nächsten Gegner, Angriff × 1,2 |
+| Steinhaut | Wert | 20 | 12 s | 5 s lang 40 % weniger Schaden, goldener Ring |
+| Blütentau | Heilung | 30 | 14 s | ein Viertel der vollen Gesundheit |
+
+**Mana kommt aus der Energie**: 5 je Punkt (Tag 0: 40), dazu 4 + 0,25 je
+Punkt pro Sekunde. **Eine Wirkung ist ein Datum** (`PitEffect`), damit
+Sets und Legendäre sie später verändern können, statt Sonderfälle in die
+Welt zu schreiben. Die Plätze kommen aus `activeMovesProvider`;
+Fähigkeiten, die die Grube noch nicht kennt, fallen still heraus.
+Auf der Tastatur 1, 2, 3.
+
+**Was die Simulation dazu sagt** (`tool/pit_sim.dart`, Spalten „+F"):
+Tag 30 kommt mit allen dreien bis etwa Stufe 17 statt 15. **Voll
+ausgerüstet mit allen dreien räumt der Bot jede Stufe, auch 30** — ohne
+Fähigkeiten waren es dort 20 %. Einmal nachgeregelt (Funkenstoß
+schwächer), ohne dass sich das oben bewegt hat. Die Stufenkurve wird neu
+abgestimmt, wenn mehr Fähigkeiten drin sind — jetzt wäre es Tarieren an
+einem halben Katalog.
+
+### Offen
+
+- **Energie tut zweierlei**: Mana *und* weiterhin Schlagtempo. Das war
+  vorher schon so und ist nicht angefasst; entschieden werden sollte es
+  mit der Potenz-Kurve.
+- **Der Funke zielt in Luftlinie** und bleibt an Wänden hängen. Hinter
+  einer Wand verpufft er samt Mana.
+- **Nicht am Handy gespielt.** Drei Platzknöpfe über den zwei festen —
+  ob das neben dem Steuerkreuz Platz hat, sagt erst ein Gerät.
+
 ## Sitzung 21.09.2026, abends: die Grube ist der Kampf
 
 **Entschieden und gebaut, Schritt 1 von 5**

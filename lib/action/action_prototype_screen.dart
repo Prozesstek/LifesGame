@@ -41,7 +41,13 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
 
   void _start(ActionStats stats) {
     _game?.frame.dispose();
-    final sim = ActionWorld(level: LevelCatalog.grube, heroStats: stats);
+    // Im Entwicklermodus liegen alle Fähigkeiten auf den Plätzen, die in
+    // der Grube schon wirken — zum Ausprobieren, nicht als Regel.
+    final sim = ActionWorld(
+      level: LevelCatalog.grube,
+      heroStats: stats,
+      abilityIds: PitAbilities.all.map((a) => a.id).toList(),
+    );
     setState(() {
       _gewaehlt = stats;
       _fertig = false;

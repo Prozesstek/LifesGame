@@ -89,6 +89,22 @@ class AbilityUsed extends ActionEvent {
 }
 
 /// Eine Heilkugel ist gefallen.
+/// Eine Fähigkeit aus einem Platz wurde gewirkt (ADR-0039).
+class AbilityCast extends ActionEvent {
+  const AbilityCast({required this.id, required this.at});
+
+  final String id;
+  final Vec2 at;
+}
+
+/// Der Held wurde geheilt — von einer Fähigkeit, nicht von einer Kugel.
+class HeroHealed extends ActionEvent {
+  const HeroHealed({required this.at, required this.amount});
+
+  final Vec2 at;
+  final int amount;
+}
+
 class OrbDropped extends ActionEvent {
   const OrbDropped({required this.id, required this.at});
 

@@ -38,15 +38,16 @@ class DamagePopup {
     );
   }
 
-  /// Was eine eingesammelte Heilkugel über dem Kopf zeigt.
+  /// Was eine Heilung über dem Kopf zeigt — von einer Kugel oder von
+  /// einer Fähigkeit.
   ///
   /// Grün und mit Pluszeichen — dieselbe Regel wie im rundenbasierten
   /// Kampf: Heilung sieht nie aus wie Schaden.
-  static DamagePopup forHeal(OrbCollected orb) {
+  static DamagePopup forHeal(int amount, Vec2 at) {
     return DamagePopup(
-      text: '+${orb.healed}',
+      text: '+$amount',
       color: Palette.successOnDark,
-      origin: orb.at,
+      origin: at,
       scale: 1.1,
     );
   }
