@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
@@ -5,7 +6,9 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import '../ui/palette.dart';
+import 'action_sprites.dart';
 import 'damage_popup.dart';
+import 'figure_state.dart';
 
 /// Die Halle, gezeichnet.
 ///
@@ -47,6 +50,33 @@ class ActionGame extends Game {
 
   bool _endeGemeldet = false;
 
+  /// Die Bilder der Figuren — `null`, solange sie laden oder wenn sie
+  /// fehlen. Dann stehen dort die Würfel des ersten Prototyps; ein Lauf
+  /// bleibt spielbar, auch ohne ein einziges Bild.
+  GrubeBilder? _bilder;
+
+  /// Was jede Figur gerade tut, je Id. Anzeige, nicht Simulation.
+  final Map<int, FigureState> _figuren = <int, FigureState>{};
+
+  /// Wer gefallen ist und gerade umkippt.
+  final List<FallenFigure> _leichen = <FallenFigure>[];
+
+  @override
+  Future<void> onLoad() async {
+    // **Nicht abwarten.** Mit `await` zeigte das Spiel bis zum Ende des
+    // Ladens gar nichts — und in Widget-Tests, in denen Bilder nie fertig
+    // entpackt werden, bliebe es für immer leer. So läuft der Lauf sofort
+    // mit Würfeln los, und die Figuren erscheinen, sobald sie da sind.
+    unawaited(
+      GrubeBilder.load().then(
+        (bilder) => _bilder = bilder,
+        onError: (Object fehler) {
+          debugPrint('Die Grube läuft ohne Bilder: $fehler');
+        },
+      ),
+    );
+  }
+
   /// Nur für Tests: was gerade an Zahlen in der Luft steht.
   int get popupCount => _popups.length;
 
@@ -63,7 +93,9 @@ class ActionGame extends Game {
           final popup = DamagePopup.forHit(event);
           if (popup != null) _popups.add(popup);
           _flashes[event.targetId] = Burst.flashTime;
+          _figuren[event.targetId]?.hit();
         case AttackSwung():
+          _figuren[event.attackerId]?.swing(Pose.attack);
           _swings.add(
             SwingMark(
               origin: event.from,
@@ -74,9 +106,18 @@ class ActionGame extends Game {
         case EntityDied():
           _bursts.add(Burst.death(event.at, event.kind));
           _flashes.remove(event.id);
+          _leichen.add(
+            FallenFigure(
+              figure: GrubeFiguren.forKind(event.kind),
+              at: event.at,
+              facesLeft: _figuren[event.id]?.facesLeft ?? false,
+            ),
+          );
+          _figuren.remove(event.id);
         case AbilityUsed():
           if (event.ability == ActionAbility.rundumschlag) {
             _bursts.add(Burst.cleave(event.at));
+            _figuren[sim.heroView.id]?.swing(Pose.attack2);
           }
         case OrbDropped():
         case EnemyNoticed():
@@ -105,6 +146,12 @@ class ActionGame extends Game {
     }
     _bursts.removeWhere((b) => !b.isAlive);
 
+    _updateFiguren(dt);
+    for (final leiche in _leichen) {
+      leiche.age += dt;
+    }
+    _leichen.removeWhere((l) => !l.isAlive);
+
     _flashes.removeWhere((_, rest) => rest - dt <= 0);
     for (final id in _flashes.keys.toList()) {
       _flashes[id] = _flashes[id]! - dt;
@@ -127,9 +174,16 @@ class ActionGame extends Game {
 
     _drawFloor(canvas, kamera);
     _drawOrbs(canvas);
-    _drawEntities(canvas);
+    final bilder = _bilder;
+    if (bilder == null) {
+      _drawEntities(canvas);
+    } else {
+      _drawCorpses(canvas, bilder);
+      _drawFigures(canvas, bilder);
+    }
     _drawProjectiles(canvas);
-    _drawSwings(canvas);
+    // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
+    if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
     _drawPopups(canvas);
 
@@ -203,7 +257,105 @@ class ActionGame extends Game {
     }
   }
 
-  // --- Figuren ---
+  // --- Figuren mit Bildern ---
+
+  void _updateFiguren(double dt) {
+    final lebend = <int>{};
+    for (final view in sim.views) {
+      lebend.add(view.id);
+      _figuren
+          .putIfAbsent(
+            view.id,
+            () => FigureState(
+              view.position,
+              figure: GrubeFiguren.forKind(view.kind),
+            ),
+          )
+          .update(view, dt);
+    }
+    _figuren.removeWhere((id, _) => !lebend.contains(id));
+  }
+
+  /// Wo die Füsse stehen: an der Unterkante des Kreises, auf dem Schatten.
+  static Offset _fussVon(Vec2 position, double radius) {
+    return Offset(position.x, position.y + radius * 0.8);
+  }
+
+  void _drawFigures(Canvas canvas, GrubeBilder bilder) {
+    final schatten = Paint()..color = Colors.black.withValues(alpha: 0.35);
+
+    // Von oben nach unten zeichnen, damit vorn steht, wer weiter unten
+    // steht — sonst läuft ein Ork über den Kopf des Helden.
+    final views = sim.views
+      ..sort((a, b) => a.position.y.compareTo(b.position.y));
+
+    for (final view in views) {
+      final zustand = _figuren[view.id];
+      if (zustand == null) continue;
+      final figur = GrubeFiguren.forKind(view.kind);
+      final fuss = _fussVon(view.position, view.radius);
+
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: fuss,
+          width: view.radius * 1.8,
+          height: view.radius * 0.7,
+        ),
+        schatten,
+      );
+
+      final blitz = _flashes[view.id] ?? 0;
+      bilder.draw(
+        canvas,
+        figure: figur,
+        pose: zustand.pose,
+        time: zustand.poseTime,
+        foot: fuss,
+        faceLeft: zustand.facesLeft,
+        loop: !zustand.pose.playsOnce,
+        flash: blitz > 0 ? (blitz / Burst.flashTime) * 0.8 : 0,
+      );
+
+      if (view.faction == Faction.gegner && view.hpRatio < 1) {
+        _drawHpBarAt(canvas, view, fuss.dy - figur.visibleHeight - 6);
+      }
+    }
+  }
+
+  void _drawCorpses(Canvas canvas, GrubeBilder bilder) {
+    for (final leiche in _leichen) {
+      final figur = leiche.figure;
+      final kippt = figur.has(Pose.death);
+      bilder.draw(
+        canvas,
+        figure: figur,
+        pose: kippt ? Pose.death : Pose.idle,
+        time: leiche.age,
+        foot: leiche.foot,
+        faceLeft: leiche.facesLeft,
+        loop: !kippt,
+        opacity: leiche.opacity,
+        // Wer keinen Sterbe-Streifen hat, schrumpft stattdessen weg.
+        sizeFactor: kippt ? 1 : 1 - leiche.progress * 0.6,
+      );
+    }
+  }
+
+  void _drawHpBarAt(Canvas canvas, EntityView view, double oben) {
+    final breite = view.radius * 2.2;
+    final links = view.position.x - breite / 2;
+
+    canvas.drawRect(
+      Rect.fromLTWH(links, oben, breite, 3),
+      Paint()..color = Palette.trackOnDark,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(links, oben, breite * view.hpRatio, 3),
+      Paint()..color = Palette.successOnDark,
+    );
+  }
+
+  // --- Figuren als Würfel, solange keine Bilder da sind ---
 
   void _drawEntities(Canvas canvas) {
     final schatten = Paint()..color = Colors.black.withValues(alpha: 0.35);

@@ -91,7 +91,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben des Prototyps, Fähigkeiten eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/level_catalog.dart` | die Hallen als **Textkarte** — hier wird geschrieben | nur Dart-SDK |
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
-| `lib/action/` | die Darstellung dazu — Würfel, Steuerkreuz, nur im Entwicklermodus | Flutter |
+| `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, nur im Entwicklermodus | Flutter |
+| `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
 | `tool/gear_icons_gen.dart` | erzeugt die Bilder der verdienten Stücke aus Formen | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
@@ -170,7 +171,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 461 Tests
+flutter test             # 484 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation

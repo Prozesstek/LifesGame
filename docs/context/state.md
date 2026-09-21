@@ -7,9 +7,34 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 20.09.2026 · Frederik
+**Zuletzt aktualisiert:** 21.09.2026 · Frederik
 
 ---
+
+## Sitzung 21.09.2026: die Grube bekommt Figuren
+
+Die Würfel sind Figuren geworden — aus Frederiks Download-Paket, Lizenz
+von ihm geprüft (`assets/Grube/HERKUNFT.md`). 484 App-Tests.
+
+| Wer | Bild | Bewegt sich |
+|---|---|---|
+| Held | Soldat | steht, läuft, zwei Schläge, zuckt, fällt |
+| Fussvolk | Ork | dasselbe |
+| Schütze | Blutauge | schwebt (ein Streifen) |
+| Wächter | Zyklop, fünffach | schwebt (ein Streifen) |
+
+**Die Simulation ist unberührt.** Pose und Blickrichtung entstehen im
+Renderer aus dem, was die Welt ohnehin meldet — Bewegung, `AttackSwung`,
+`HitLanded`, `EntityDied` (`lib/action/figure_state.dart`). Solange die
+Bilder laden, stehen dort die alten Würfel; ein Lauf wartet nicht darauf.
+
+**Die Richtung ist weiter nicht entschieden.** Frederik neigt zur Grube
+als *dem* Kampf; die Gegnerbilder für die Reihe sind deshalb
+zurückgestellt. Der ADR steht aus, und AktivesBrett hat noch nicht
+gespielt.
+
+**Nicht gebaut:** Boden und Wände sind weiter gezeichnet — das Paket hat
+keine Kacheln. Die Geschosse des Auges sind Punkte, keine Bilder.
 
 ## Sitzung 20.09.2026, abends: ein Echtzeit-Prototyp und eine Lern-Vorlage
 
