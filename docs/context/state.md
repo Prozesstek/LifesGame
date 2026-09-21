@@ -11,6 +11,30 @@
 
 ---
 
+## Sitzung 21.09.2026, danach: zwei neue Gegnerarten
+
+Auf Frederiks Wunsch („Fledermäuse, die schneller sind, und mal
+zwischendurch größere, stärkere Gegner"). action_combat 120 (vorher 111).
+
+| | Kobold `k` | Troll `t` |
+|---|---|---|
+| Bild | Red Cap aus dem Paket | Stone Troll aus dem Paket |
+| Tempo | **155** — schneller als der Held (120) | 44 |
+| Leben / Angriff | 16 / 6 | 180 / 18 |
+| Besonderes | kommt im Rudel | lässt sich nicht stossen, lässt **immer** eine Heilkugel |
+| Wo | zwei Bausteine („Nest", „Höhle"), einer in der „Halle" | ersetzt Fussvolk: 15 % je Raum auf Stufe 1, 60 % auf Stufe 30 |
+
+**Eine Fledermaus gibt es im Paket nicht** — der Kobold steht an ihrer
+Stelle. Kommt eine Zeichnung, ist es eine Zeile in `GrubeFiguren`.
+
+**Was der erste Test gefunden hat:** Bei Tempo 135 holte der Kobold
+einen weglaufenden Helden nie ein. Der Held schlägt im Laufen von selbst,
+und der Rückstoss (9 Punkte je Schlag) frass den Vorsprung von 15 Punkten
+je Sekunde auf. Jetzt 155.
+
+**Die Kurve bleibt, wo sie war** (`pit_sim`): Tag 14 kommt etwas weniger
+weit, der Rest liegt im Rauschen von zehn Läufen je Feld.
+
 ## Sitzung 21.09.2026, zuletzt: der Rundenkampf ist gelöscht
 
 Schritt 5 aus [ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md),

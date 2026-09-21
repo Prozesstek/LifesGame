@@ -138,16 +138,54 @@ abstract final class GrubeFiguren {
     scale: 5,
   );
 
+  /// Der Kobold — der Red Cap aus dem Paket. Kleiner als der Ork, damit
+  /// man ihn im Rudel als das erkennt, was er ist: viele, schnell, schwach.
+  ///
+  /// Eine Fledermaus war gewünscht; das Paket hat keine. Kommt eine, ist
+  /// es eine Zeile hier.
+  static const Figure flink = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('RedCap.png', 4, fps: 10),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 2,
+    scale: 2,
+  );
+
+  /// Der Troll — der Stone Troll aus dem Paket. Grau und breit, damit er
+  /// nicht mit dem rosa Wächter verwechselt wird; eine Stufe kleiner.
+  static const Figure brocken = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('StoneTroll.png', 4, fps: 5),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 0,
+    scale: 4,
+  );
+
   static Figure forKind(EnemyKind kind) {
     return switch (kind) {
       EnemyKind.keiner => held,
       EnemyKind.fussvolk => fussvolk,
       EnemyKind.schuetze => schuetze,
       EnemyKind.endgegner => endgegner,
+      EnemyKind.flink => flink,
+      EnemyKind.brocken => brocken,
     };
   }
 
-  static const List<Figure> all = <Figure>[held, fussvolk, schuetze, endgegner];
+  static const List<Figure> all = <Figure>[
+    held,
+    fussvolk,
+    schuetze,
+    endgegner,
+    flink,
+    brocken,
+  ];
 
   /// Alle Dateien, die geladen werden müssen.
   static Set<String> get files => <String>{

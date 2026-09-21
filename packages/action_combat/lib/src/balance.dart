@@ -174,6 +174,39 @@ abstract final class ActionBalance {
   /// Nach so vielen Sekunden verschwindet eine liegengebliebene Kugel.
   static const double orbLifetime = 12;
 
+  /// Der Kobold: **schneller als der Held** (120), dafür nach zwei, drei
+  /// Schlägen erledigt. Die Zahl, auf die es ankommt, ist das Tempo —
+  /// wer an ihr dreht, prüft, dass er den Helden noch einholt.
+  ///
+  /// **Knapp schneller reicht nicht.** Bei 135 holte er einen
+  /// weglaufenden Helden nie ein: Der schlägt im Laufen von selbst, und
+  /// jeder Schlag stösst 9 Punkte zurück — mehr, als 15 Punkte Vorsprung
+  /// je Sekunde bis zum nächsten Schlag gutmachen. `enemy_kinds_test.dart`
+  /// hat es gemeldet.
+  static const double flinkRadius = 8;
+  static const double flinkSpeed = 155;
+  static const double flinkAttackRange = 26;
+  static const double flinkAttackCooldown = 0.8;
+  static const int flinkHp = 16;
+  static const int flinkAttack = 6;
+  static const int flinkDefense = 0;
+
+  /// Der Troll: fünfmal so viel Leben wie Fussvolk, doppelter Schlag,
+  /// halbes Tempo. Ein Brocken, kein Endgegner — ein Drittel des Wächters.
+  static const double brockenRadius = 18;
+  static const double brockenSpeed = 44;
+  static const double brockenAttackRange = 42;
+  static const double brockenAttackCooldown = 2.0;
+  static const int brockenHp = 180;
+  static const int brockenAttack = 18;
+  static const int brockenDefense = 4;
+
+  /// Wie wahrscheinlich ein gewöhnlicher Raum einen Troll bekommt — auf
+  /// Stufe 1 und auf Stufe 30. Er ersetzt dort einen Fussvolk-Platz, die
+  /// Zahl der Gegner bleibt also gleich.
+  static const double brockenChanceFirst = 0.15;
+  static const double brockenChanceLast = 0.6;
+
   static const double bossRadius = 22;
   static const double bossSpeed = 52;
   static const double bossAttackRange = 46;

@@ -44,6 +44,8 @@ class Level {
   /// | `e` | Fussvolk |
   /// | `s` | Fernkämpfer |
   /// | `B` | Endgegner |
+  /// | `k` | Kobold — schnell, schwach |
+  /// | `t` | Troll — gross, zäh |
   ///
   /// Kürzere Zeilen werden rechts mit Wand aufgefüllt. Ein unbekanntes
   /// Zeichen wirft — anders als beim Spielstand ist das hier kein fremdes
@@ -79,6 +81,12 @@ class Level {
           case 'B':
             row.add(Tile.boden);
             spawns.add(Spawn(kind: EnemyKind.endgegner, tileX: x, tileY: y));
+          case 'k':
+            row.add(Tile.boden);
+            spawns.add(Spawn(kind: EnemyKind.flink, tileX: x, tileY: y));
+          case 't':
+            row.add(Tile.boden);
+            spawns.add(Spawn(kind: EnemyKind.brocken, tileX: x, tileY: y));
           default:
             throw ArgumentError(
               'Unbekanntes Zeichen "$zeichen" in "$name" bei $x,$y.',

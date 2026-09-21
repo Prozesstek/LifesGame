@@ -15,6 +15,20 @@ enum EnemyKind {
 
   /// Der Wächter am Ende. Wird nicht zurückgestossen.
   endgegner,
+
+  /// Klein, schnell, schwach — schneller als der Held. Kommt im Rudel.
+  ///
+  /// **Er ist der Grund, dass Weglaufen nicht immer geht.** Gegen Fussvolk
+  /// und Schützen ist Abstand die sichere Antwort; der Kobold holt einen
+  /// ein, und man muss sich stellen oder den Sturmschritt nehmen.
+  flink,
+
+  /// Gross, langsam, zäh — ein Gegner zwischendurch, kein Endgegner.
+  ///
+  /// **Er ist der Grund, eine Fähigkeit aufzuheben.** Wer alles in die
+  /// Traube davor verbrannt hat, steht vor ihm mit leerem Mana. Wird nicht
+  /// zurückgestossen und lässt immer eine Heilkugel fallen.
+  brocken,
 }
 
 /// Eine Figur in der Halle.

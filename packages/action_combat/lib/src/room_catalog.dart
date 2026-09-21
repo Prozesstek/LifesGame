@@ -11,6 +11,8 @@
 /// | `e` | Fussvolk |
 /// | `s` | Fernkämpfer |
 /// | `B` | Endgegner — nur in [bossRooms] |
+/// | `k` | Kobold — schnell, schwach, im Rudel |
+/// | `t` | Troll — gross, zäh; setzt meist der Zufallsbau |
 ///
 /// **Zwei Regeln, die ein Raum einhalten muss**, und die
 /// `level_builder_test.dart` über hunderte gebaute Gruben prüft:
@@ -50,7 +52,7 @@ abstract final class RoomCatalog {
       '.....e..e.....',
       '..............',
       '..............',
-      '.....e..e.....',
+      '.....e..k.....',
       '..............',
       '..e........s..',
       '..............',
@@ -119,6 +121,34 @@ abstract final class RoomCatalog {
       '......##......',
       '..s...##...e..',
       '......##......',
+    ],
+    // Das Nest: ein Rudel Kobolde, das von allen Seiten kommt. Wer hier
+    // wegläuft, wird eingeholt.
+    <String>[
+      '..............',
+      '.k..........k.',
+      '..............',
+      '....k....k....',
+      '..............',
+      '..............',
+      '....k....k....',
+      '..............',
+      '.k..........k.',
+      '..............',
+    ],
+    // Die Höhle des Trolls: ein Brocken, zwei Kobolde als Vorhut. Der
+    // eine Raum, in dem er fest steht — sonst setzt ihn der Zufallsbau.
+    <String>[
+      '##............',
+      '#.....k.......',
+      '..............',
+      '......##......',
+      '..k...##...t..',
+      '..............',
+      '......##......',
+      '..............',
+      '#......e......',
+      '##............',
     ],
     // Die Wachstube: dicht gedrängt, der Raum für den Rundumschlag.
     <String>[

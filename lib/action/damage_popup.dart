@@ -100,13 +100,19 @@ class Burst {
   static const double flashTime = 0.12;
 
   factory Burst.death(Vec2 at, EnemyKind kind) {
-    final gross = kind == EnemyKind.endgegner;
+    // Der Troll fällt grösser als Fussvolk, aber kleiner als der Wächter —
+    // sein Tod soll sich anfühlen wie ein Etappensieg, nicht wie das Ende.
+    final (farbe, radius, dauer, strich) = switch (kind) {
+      EnemyKind.endgegner => (Palette.enemy, 90.0, 0.7, 5.0),
+      EnemyKind.brocken => (Palette.enemy, 55.0, 0.5, 4.0),
+      _ => (Palette.enemyOnDark, 26.0, 0.3, 3.0),
+    };
     return Burst(
       at: at,
-      color: gross ? Palette.enemy : Palette.enemyOnDark,
-      maxRadius: gross ? 90 : 26,
-      lifetime: gross ? 0.7 : 0.3,
-      strokeWidth: gross ? 5 : 3,
+      color: farbe,
+      maxRadius: radius,
+      lifetime: dauer,
+      strokeWidth: strich,
     );
   }
 
