@@ -1,11 +1,14 @@
 import 'package:action_combat/action_combat.dart';
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+// Der Rundenkampf hat eine eigene Wirkung gleichen Namens.
+import 'package:combat/combat.dart' hide HealSelf;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gear/gear.dart';
 import 'package:lifes_game/action/pit_screen.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
+import 'package:lifes_game/gear/set_effects.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 
@@ -139,6 +142,75 @@ void main() {
       for (final zug in zuege) {
         expect(PitWeapons.byMoveId(zug), isNotNull, reason: zug);
       }
+    });
+
+    // Sets wirken auf eine Art von Fähigkeit (ADR-0030). Hätte eine
+    // Fähigkeit in der Grube eine andere Art als im Rundenkampf, wirkte
+    // dasselbe Set auf sie im einen Kampf und im anderen nicht.
+    test('jede hat dieselbe Art wie im Rundenkampf', () {
+      for (final ability in PitAbilities.all) {
+        final zug = Moves.byId(ability.id);
+        expect(zug, isNotNull, reason: ability.id);
+        expect(ability.kind.name, zug?.kind.name, reason: ability.id);
+      }
+    });
+
+    test('jedes legendäre Stück trägt eine Kraft, die es gibt', () {
+      final legendaer = GearCatalog.all.where(
+        (i) => i.rarity == GearRarity.legendary,
+      );
+      expect(legendaer, isNotEmpty);
+      for (final item in legendaer) {
+        expect(
+          PitLegendaries.byId(item.legendaryPower),
+          isNotNull,
+          reason: item.name,
+        );
+      }
+    });
+
+    test('keine Kraft liegt auf zwei Stücken, keine auf keinem', () {
+      final vergeben = GearCatalog.all
+          .map((i) => i.legendaryPower)
+          .whereType<String>()
+          .toList();
+      expect(vergeben.toSet(), hasLength(vergeben.length));
+      expect(vergeben.toSet(), PitLegendaries.all.map((l) => l.id).toSet());
+    });
+
+    test('ein getragenes Set kommt als Veränderung in der Grube an', () {
+      // Ruhiger Stand, vier Teile: Schutz 60 % stärker.
+      final set = GearSets.ruhigerStand;
+      final teile = GearCatalog.all.where((i) => i.setId == set.id);
+      final aktiv = ActiveSet(
+        set: set,
+        pieces: teile.length,
+        perk: set.fourPiece,
+      );
+
+      final mods = pitModifiersFor(<ActiveSet>[aktiv], teile);
+      final tau = PitModifiers.apply(PitAbilities.bluetentau, mods);
+
+      expect(
+        (tau.effects.single as HealSelf).share,
+        closeTo(0.25 * set.fourPiece.protectionFactor, 1e-9),
+      );
+    });
+
+    test('Sturmruf verbilligt Umgebungen um Energie mal Mana-Kurs', () {
+      final set = GearSets.sturmruf;
+      final aktiv = ActiveSet(set: set, pieces: 2, perk: set.twoPiece);
+      final mods = pitModifiersFor(<ActiveSet>[aktiv], const <GearItem>[]);
+
+      expect(
+        PitModifiers.apply(PitAbilities.giftmoor, mods).manaCost,
+        PitAbilities.giftmoor.manaCost -
+            set.twoPiece.energyDiscount * ActionBalance.manaPerEnergy,
+      );
+      expect(
+        PitModifiers.apply(PitAbilities.funkenstoss, mods).manaCost,
+        PitAbilities.funkenstoss.manaCost,
+      );
     });
 
     test('jede trägt denselben Namen wie im Rundenkampf', () {

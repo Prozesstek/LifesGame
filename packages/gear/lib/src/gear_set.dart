@@ -27,6 +27,7 @@ class SetPerk {
     this.energyDiscount = 0,
     this.timingSpeedFactor = 1.0,
     this.timingWindowFactor = 1.0,
+    this.protectionFactor = 1.0,
   });
 
   /// Vielfaches auf den Schaden. 1.25 heißt 25 % mehr.
@@ -41,11 +42,21 @@ class SetPerk {
   /// Vielfaches auf die Breite der Perfect-Zone. Größer ist leichter.
   final double timingWindowFactor;
 
+  /// Wie viel stärker Schutz und Heilung in der Grube wirken: Heilung
+  /// mal diesem Faktor, Schadensminderung und Zurückwerfen halten so viel
+  /// länger (ADR-0039).
+  ///
+  /// **Das Echtzeit-Gegenstück zur Leiste.** Die beiden Timing-Felder
+  /// darüber bedeuten in der Grube nichts — es gibt dort keine Leiste. Sie
+  /// bleiben, bis `package:combat` gelöscht ist.
+  final double protectionFactor;
+
   bool get isEmpty =>
       damageFactor == 1.0 &&
       energyDiscount == 0 &&
       timingSpeedFactor == 1.0 &&
-      timingWindowFactor == 1.0;
+      timingWindowFactor == 1.0 &&
+      protectionFactor == 1.0;
 
   /// Die Wirkung als kurze Liste, wie sie auf einer Kachel steht.
   ///
@@ -55,10 +66,8 @@ class SetPerk {
     return <String>[
       if (damageFactor != 1.0) '+${_prozent(damageFactor)} Schaden',
       if (energyDiscount != 0) '$energyDiscount Energie günstiger',
-      if (timingSpeedFactor != 1.0)
-        'Leiste ${_prozent(1 / timingSpeedFactor)} langsamer',
-      if (timingWindowFactor != 1.0)
-        'Fenster ${_prozent(timingWindowFactor)} breiter',
+      if (protectionFactor != 1.0)
+        'Schutz und Heilung ${_prozent(protectionFactor)} stärker',
     ];
   }
 

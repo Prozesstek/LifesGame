@@ -129,7 +129,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                       requiredRung: GearGates.rungFor(gewaehlt.rarity),
                       isEquipped: loadout.isEquipped(gewaehlt.id),
                       missingGold: gewaehlt.price - gold,
-                      abilityLine: weaponAbilityLine(gewaehlt),
+                      abilityLine: itemAbilityText(gewaehlt),
                       setPieces: gewaehlt.setId == null
                           ? 0
                           : loadout.equippedPiecesOf(gewaehlt.setId ?? ''),

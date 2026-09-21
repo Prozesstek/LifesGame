@@ -130,6 +130,7 @@ abstract final class GearCatalog {
       name: 'Sonnenklinge',
       slot: GearSlot.waffe,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-sonnenglut',
       price: GearPrices.waffeLegendary,
       bonus: GearBonus(attack: 6, maxEnergy: 1),
       why: 'Der einzige Waffenzug mit einer Perfect-Wirkung: Ein perfekter '
@@ -223,6 +224,7 @@ abstract final class GearCatalog {
       name: 'Titanenpanzer',
       slot: GearSlot.ruestung,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-steinerne-haut',
       price: GearPrices.ruestungLegendary,
       bonus: GearBonus(maxHp: 64, defense: 5, maxEnergy: 1),
       why: 'Der Panzer für die letzten zehn Sprossen. Vierundsechzig '
@@ -316,6 +318,7 @@ abstract final class GearCatalog {
       name: 'Krone des Hochwächters',
       slot: GearSlot.helm,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-weitblick',
       price: GearPrices.helmLegendary,
       bonus: GearBonus(maxHp: 36, defense: 3, maxEnergy: 1),
       why: 'Drei Punkte Verteidigung auf dem Kopf gab es bisher nirgends. '
@@ -408,6 +411,7 @@ abstract final class GearCatalog {
       name: 'Stiefel des Titanen',
       slot: GearSlot.schuhe,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-beben',
       price: GearPrices.schuheLegendary,
       bonus: GearBonus(maxHp: 16, defense: 4, maxEnergy: 1),
       why: 'Verteidigung, Leben und Energie auf einem Platz, der mit hundert '
@@ -498,6 +502,7 @@ abstract final class GearCatalog {
       name: 'Ring des Erzdämons',
       slot: GearSlot.ring,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-erzhunger',
       price: GearPrices.ringLegendary,
       bonus: GearBonus(attack: 3, maxHp: 12, maxEnergy: 4),
       why: 'Das teuerste Stück des Ladens, und das einzige, das auf drei '
@@ -586,6 +591,7 @@ abstract final class GearCatalog {
       name: 'Herz des Titanen',
       slot: GearSlot.talisman,
       rarity: GearRarity.legendary,
+      legendaryPower: 'legendaer-lebensquell',
       price: GearPrices.talismanLegendary,
       bonus: GearBonus(attack: 4, maxHp: 16, maxEnergy: 3),
       why: 'Drei Punkte Energie außerhalb des Rings gab es bisher nicht. '

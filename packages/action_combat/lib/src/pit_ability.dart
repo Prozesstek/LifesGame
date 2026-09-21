@@ -14,6 +14,8 @@
 /// neun Arten gebaut.
 library;
 
+import 'pit_modifier.dart';
+
 /// Was eine Fähigkeit bewirkt. Neue Arten kommen hier dazu, und der
 /// Analyzer zeigt danach auf die eine Stelle in der Welt, die sie
 /// ausführen muss — dafür ist die Klasse `sealed`.
@@ -136,6 +138,7 @@ class PitAbility {
   const PitAbility({
     required this.id,
     required this.name,
+    required this.kind,
     required this.manaCost,
     required this.cooldown,
     required this.effects,
@@ -145,6 +148,9 @@ class PitAbility {
   /// Dieselbe Id wie in `package:combat` und `package:abilities`.
   final String id;
   final String name;
+
+  /// Worauf ein Set wirkt (ADR-0030).
+  final PitKind kind;
 
   /// 0 bei den Fähigkeiten, die Mana **bringen** statt es zu kosten.
   final int manaCost;
@@ -176,6 +182,7 @@ abstract final class PitAbilities {
   static const PitAbility funkenstoss = PitAbility(
     id: 'funkenstoss',
     name: 'Funkenstoß',
+    kind: PitKind.angriff,
     manaCost: 12,
     cooldown: 1.5,
     effects: <PitEffect>[BoltAtNearest(power: 1.2, range: 260)],
@@ -187,6 +194,7 @@ abstract final class PitAbilities {
   static const PitAbility steinhaut = PitAbility(
     id: 'steinhaut',
     name: 'Steinhaut',
+    kind: PitKind.schutz,
     manaCost: 20,
     cooldown: 12,
     effects: <PitEffect>[ReduceIncoming(factor: 0.6, seconds: 5)],
@@ -197,6 +205,7 @@ abstract final class PitAbilities {
   static const PitAbility wurzelgriff = PitAbility(
     id: 'wurzelgriff',
     name: 'Wurzelgriff',
+    kind: PitKind.angriff,
     manaCost: 15,
     cooldown: 8,
     effects: <PitEffect>[
@@ -211,6 +220,7 @@ abstract final class PitAbilities {
   static const PitAbility aurastrom = PitAbility(
     id: 'aurastrom',
     name: 'Aurastrom',
+    kind: PitKind.schutz,
     manaCost: 0,
     cooldown: 15,
     effects: <PitEffect>[GainMana(amount: 30)],
@@ -224,6 +234,7 @@ abstract final class PitAbilities {
   static const PitAbility bluetentau = PitAbility(
     id: 'bluetentau',
     name: 'Blütentau',
+    kind: PitKind.schutz,
     manaCost: 30,
     cooldown: 14,
     effects: <PitEffect>[HealSelf(share: 0.25)],
@@ -235,6 +246,7 @@ abstract final class PitAbilities {
   static const PitAbility klingenwirbel = PitAbility(
     id: 'klingenwirbel',
     name: 'Klingenwirbel',
+    kind: PitKind.angriff,
     manaCost: 18,
     cooldown: 4,
     effects: <PitEffect>[StrikeAround(power: 2.0, radius: 70)],
@@ -245,6 +257,7 @@ abstract final class PitAbilities {
   static const PitAbility frostnebel = PitAbility(
     id: 'frostnebel',
     name: 'Frostnebel',
+    kind: PitKind.umgebung,
     manaCost: 25,
     cooldown: 14,
     effects: <PitEffect>[
@@ -259,6 +272,7 @@ abstract final class PitAbilities {
   static const PitAbility prismaBarriere = PitAbility(
     id: 'prisma_barriere',
     name: 'Prisma-Barriere',
+    kind: PitKind.schutz,
     manaCost: 20,
     cooldown: 14,
     effects: <PitEffect>[ReflectIncoming(share: 0.5, seconds: 6)],
@@ -272,6 +286,7 @@ abstract final class PitAbilities {
   static const PitAbility donnerkeil = PitAbility(
     id: 'donnerkeil',
     name: 'Donnerkeil',
+    kind: PitKind.angriff,
     manaCost: 25,
     cooldown: 6,
     effects: <PitEffect>[BoltAtNearest(power: 3.0, range: 300)],
@@ -282,6 +297,7 @@ abstract final class PitAbilities {
   static const PitAbility sandsturm = PitAbility(
     id: 'sandsturm',
     name: 'Sandsturm',
+    kind: PitKind.umgebung,
     manaCost: 30,
     cooldown: 16,
     effects: <PitEffect>[
@@ -296,6 +312,7 @@ abstract final class PitAbilities {
   static const PitAbility seelenraub = PitAbility(
     id: 'seelenraub',
     name: 'Seelenraub',
+    kind: PitKind.angriff,
     manaCost: 22,
     cooldown: 6,
     effects: <PitEffect>[
@@ -308,6 +325,7 @@ abstract final class PitAbilities {
   static const PitAbility giftmoor = PitAbility(
     id: 'giftmoor',
     name: 'Giftmoor',
+    kind: PitKind.umgebung,
     manaCost: 28,
     cooldown: 14,
     effects: <PitEffect>[
@@ -320,6 +338,7 @@ abstract final class PitAbilities {
   static const PitAbility zeitdehnung = PitAbility(
     id: 'zeitdehnung',
     name: 'Zeitdehnung',
+    kind: PitKind.schutz,
     manaCost: 35,
     cooldown: 20,
     effects: <PitEffect>[SlowAround(radius: 600, factor: 0.4, seconds: 5)],
@@ -331,6 +350,7 @@ abstract final class PitAbilities {
   static const PitAbility vulkanbruch = PitAbility(
     id: 'vulkanbruch',
     name: 'Vulkanbruch',
+    kind: PitKind.umgebung,
     manaCost: 38,
     cooldown: 14,
     effects: <PitEffect>[
@@ -346,6 +366,7 @@ abstract final class PitAbilities {
   static const PitAbility sternenfall = PitAbility(
     id: 'sternenfall',
     name: 'Sternenfall',
+    kind: PitKind.angriff,
     manaCost: 40,
     cooldown: 20,
     effects: <PitEffect>[StrikeAround(power: 4.0, radius: 220)],
@@ -357,6 +378,7 @@ abstract final class PitAbilities {
   static const PitAbility kraftschlag = PitAbility(
     id: 'heavy_attack',
     name: 'Kraftschlag',
+    kind: PitKind.angriff,
     manaCost: 18,
     cooldown: 4,
     effects: <PitEffect>[StrikeNearest(power: 3.2, range: 50)],
@@ -366,6 +388,7 @@ abstract final class PitAbilities {
   static const PitAbility zehrung = PitAbility(
     id: 'poison_strike',
     name: 'Zehrung',
+    kind: PitKind.angriff,
     manaCost: 12,
     cooldown: 5,
     effects: <PitEffect>[
@@ -379,6 +402,7 @@ abstract final class PitAbilities {
   static const PitAbility sammeln = PitAbility(
     id: 'mend',
     name: 'Sammeln',
+    kind: PitKind.schutz,
     manaCost: 25,
     cooldown: 14,
     effects: <PitEffect>[
@@ -391,6 +415,7 @@ abstract final class PitAbilities {
   static const PitAbility atemzug = PitAbility(
     id: 'breath',
     name: 'Atemzug',
+    kind: PitKind.schutz,
     manaCost: 0,
     cooldown: 12,
     effects: <PitEffect>[GainMana(amount: 20), HealSelf(share: 0.08)],
