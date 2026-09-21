@@ -7,9 +7,131 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 14.09.2026 · Frederik
+**Zuletzt aktualisiert:** 20.09.2026 · Frederik
 
 ---
+
+## Sitzung 20.09.2026: das Abhaken zahlt sichtbar aus
+
+Issue [#46](https://github.com/Prozesstek/LifesGame/issues/46) („Feedback
+Gewohnheiten") gebaut — drei von vier Punkten vollständig, der vierte als
+Gegenstand ohne Quelle. 461 App-Tests (vorher 449), habits 161 (vorher
+130).
+
+Es ist das erste von **vier** Feedback-Issues vom 20.09. (#46
+Gewohnheiten, #47 Fähigkeiten, #48 Kampf, #49 Shop). Sie sind kein
+MVP-Schnitt mehr, sondern Material für den Testlauf.
+
+### Was die Kachel jetzt sagt
+
+Bis heute stand auf einer Gewohnheits-Kachel der Multiplikator („3 ·
+x1,2") und sonst nichts über den Ertrag. Richtig, aber ohne Maßstab: Was
+x1,2 in Erfahrung bedeutet, stand nirgends.
+
+Jetzt steht unter jedem Namen eine Zeile mit zwei Zahlen — **vor** dem
+Tippen, was es bringt, danach, was es gebracht hat („Heute +18 · +5").
+Gerechnet wird das in `HabitTracker.xpForNextCheck`, nicht im Bildschirm;
+die Kachel bekommt fertige Zahlen.
+
+Dazu poppt der Kreis beim Abhaken auf, die Kachel bekommt einen grünen
+Rand, und auf dem Handy gibt es einen kurzen Stoß. Die Rückmeldung unten
+trägt jetzt ein Zeichen und drei Sekunden statt zwei.
+
+### „Stats sofort erhöhen" — der Balken, nicht die Kurve
+
+Ein Punkt Stärke kostet fünf Häkchen (`StatCurve`). Vier von fünf Malen
+bewegte sich die Zahl über der Liste also nicht, und der Zusammenhang
+zwischen Abhaken und Charakter war unsichtbar.
+
+Jede Wertekachel hat jetzt einen Balken, der sich bei **jedem** Häkchen
+bewegt, und wenn der Punkt fällt, sagt es die Leiste: „+15 Erfahrung ·
++5 Gold · +1 Stärke".
+
+**Die Kurve selbst ist unangetastet.** Sie feiner zu machen ginge auch
+gar nicht: Stärke hat über ein Spielerleben sieben Punkte zu vergeben,
+und an dieser Spanne hängt die Balance-Simulation. Die Änderung ist
+Anzeige, keine Zahl — `progression_test.dart` läuft unverändert.
+
+### Die Beständigkeits-Leiter
+
+Über der Tagesliste steht jetzt eine Karte mit allen fünf Meilensteinen:
+erreichte in Gold, der nächste umrandet, dazu ein Satz mit echten Zahlen
+— „Noch 3 Tage bis x1,2 — dann bringt jedes Häkchen 18 statt 15
+Erfahrung. Gold bleibt gleich."
+
+Dieselbe Regel wie bei den Hilfetexten im Kampf: Was sich ausrechnen
+lässt, wird ausgerechnet. „20 % mehr" ist eine Behauptung, „18 statt 15"
+eine Zahl.
+
+Sie rechnet mit der **besten laufenden Kette** über alle Gewohnheiten.
+Je Gewohnheit wäre genauer und stünde fünfmal untereinander.
+
+### Das Streak-Eis — gebaut, Quelle offen
+
+[ADR-0036](../decisions/0036-streak-eis-als-gegenstand.md). Ein
+Gegenstand, kein Nachlass: Er deckt **einen Kalendertag für alle
+Gewohnheiten**, die Kette läuft darüber hinweg und wird dabei **nicht
+länger**. Eine Kette über dreißig Kalendertage mit einem Eis darin ist
+neunundzwanzig lang.
+
+| | |
+|---|---|
+| Wann sichtbar | nur, wenn gestern nichts steht und vorgestern eine Kette endet |
+| Was es kostet | ein Eis; der Vorrat wird aus der Historie gerechnet, nicht gespeichert |
+| Was es **nicht** gibt | Erfahrung, Gold, Charakterwerte — die hängen weiter nur an Häkchen |
+| Wie viele es gibt | **eines**, über das ganze Spiel — die offene Zahl |
+
+**Woher die Eis kommen, ist bewusst nicht entschieden** („mach den
+Gegenstand, die Quelle überlegen wir dann"). Sie steht als eine Zahl da,
+`StreakFreeze.lifetimeStock`. Eine echte Quelle — Laden, Errungenschaft,
+Meilenstein — ändert vier Kurven und gehört in eine eigene Runde.
+
+**Eine Regel steht an genau einer Stelle:** Ob eine Kette über eine Lücke
+läuft, beantwortet `HabitTracker._continues`. `streakEndingAt`,
+`longestStreak` und `totalXp` fragen alle dort — stünde sie dreimal da,
+zeigte die Kachel irgendwann eine andere Kette an, als die Erfahrung
+unterstellt.
+
+Die Errungenschaften bleiben monoton (ADR-0033): Ein Eis kann den
+Bestwert nur heben. Und die, die auf Aktivität zählen, sehen es gar
+nicht — „Der Unbeugsame" ist mit Eis nicht zu kaufen.
+
+### Ein Layout-Fehler, der seit dem 12.08. im Code lag
+
+`phone_layout_test.dart` baute seinen Stand mit allem — nur abgehakt war
+nie etwas. Damit war der Zugewinn auf jedem Charakterwert null, die
+zweite Zahl in der Wertekachel (`if (bonus > 0)`) wurde nie gebaut, und
+was nicht gebaut wird, kann nicht überlaufen.
+
+Sobald der Stand zwei Tage Häkchen bekam, lief sie über: `224` neben
+`+64` in einem Viertel der Bildschirmbreite, 18 Pixel zu viel. Es ist
+der dritte Fall derselben Sorte (`LevelCard`, `HubTile`, jetzt
+`_StatCell`) und steht in `gotchas.md` — samt der allgemeineren Lehre:
+Eine Testvorlage muss jeden bedingten Zweig der Oberfläche einmal
+auslösen.
+
+### Nicht am Bild geprüft
+
+Wie immer bei Oberflächenarbeit: 461 Tests laufen, alle Layouts bei
+390 × 844 ohne Überlauf, Analyzer sauber. Wie es **aussieht**, muss
+jemand ansehen:
+
+- Ob die Ertragszeile auf fünf Kacheln untereinander als Information
+  liest oder als Lärm — die Untertexte sind aus genau diesem Grund
+  einmal geflogen (Issue #35).
+- Ob die Leiter mit fünf Sprossen auf 390 Pixeln noch lesbar ist.
+- Ob die Streak-Eis-Karte am richtigen Tag auftaucht. Sie erscheint nur
+  bei einer echten Lücke, und die entsteht im Test nur künstlich.
+
+### Offen
+
+- **Drei Feedback-Issues stehen noch**: #47 Fähigkeiten, #48 Kampf, #49
+  Shop.
+- **Die Quelle der Streak-Eis.** Bis dahin ist das Eis nach einmaligem
+  Gebrauch weg — das ist im 30-Tage-Lauf sichtbar und genau die
+  Rückmeldung, die die Entscheidung braucht.
+- **Die Balance ist nicht neu gerechnet.** Es gibt keine neue Zahl, die
+  sie berührt: Das Eis erzeugt nichts, die Stat-Kurve ist unverändert.
 
 ## Sitzung 14.09.2026, abends: nach dem Sieg zurück, ein Punkt je Level
 

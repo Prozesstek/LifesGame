@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 443 Tests
+flutter test                       # 455 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance des Spiels nachrechnen (Gegner gegen echten Werte-Pfad):
@@ -85,7 +85,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/combat` | Kampfregeln, 15 Fähigkeiten, vier Umgebungen, 30 Gegner | 130 |
 | `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 136 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte | 33 |
-| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 130 |
+| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 161 |
 | `packages/gear` | 30 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Preise, Verkauf | 77 |
 | `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 36 |
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |

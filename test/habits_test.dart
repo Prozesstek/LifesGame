@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
+import 'package:lifes_game/habits/widgets/stat_summary.dart';
+import 'package:lifes_game/habits/widgets/streak_freeze_card.dart';
+import 'package:lifes_game/habits/widgets/streak_ladder_card.dart';
 import 'package:lifes_game/habits/widgets/custom_habit_sheet.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
@@ -417,7 +421,15 @@ void main() {
       // Tagesziels am Balken. Ohne sie waere aus einer Layout-Aenderung
       // eine Produktaenderung geworden.
       expect(find.text('Wasser trinken'), findsOneWidget);
-      expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+      // Nur die Marke auf der Kachel — die Flamme steht seit Issue #46
+      // auch über der Beständigkeits-Leiter.
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.byIcon(Icons.local_fire_department),
+        ),
+        findsOneWidget,
+      );
       expect(find.textContaining('2'), findsWidgets);
       expect(find.textContaining('Gläser'), findsOneWidget);
     });
@@ -437,7 +449,13 @@ void main() {
       await tester.pump();
 
       expect(find.text('Frisch angelegt'), findsOneWidget);
-      expect(find.byIcon(Icons.local_fire_department), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.byIcon(Icons.local_fire_department),
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('mehr als die Plätze hergeben, kommt nicht hinzu', (
@@ -461,6 +479,251 @@ void main() {
         container.read(habitTrackerProvider).customHabits,
         hasLength(slots),
       );
+    });
+  });
+
+  group('Was ein Häkchen einbringt (Issue #46)', () {
+    testWidgets('die Kachel nennt Erfahrung und Gold, bevor getippt wird', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await tester.pump();
+
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
+      expect(find.text('+${HabitRewards.goldPerCheck}'), findsOneWidget);
+    });
+
+    testWidgets('nach dem Häkchen steht dort, was es gebracht hat', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await tester.pump();
+      await tester.tap(find.byType(HabitCheckTile).first);
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // „Heute" steht auch als Abschnitts-Überschrift da — gemeint ist
+      // die Zeile auf der Kachel.
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.text('Heute'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
+    });
+
+    testWidgets('mit laufender Kette steht dort mehr', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      // Zwei Tage stehen: Das nächste Häkchen erreicht x1,2.
+      final controller = container.read(habitTrackerProvider.notifier);
+      final vorlage = container.read(unlockedHabitsProvider).first;
+      controller.activate(vorlage.id);
+      controller.toggle(vorlage.id, _heute.previous.previous);
+      controller.toggle(vorlage.id, _heute.previous);
+      await tester.pump();
+
+      expect(
+        find.text('+${HabitRewards.xpFor(3)}'),
+        findsOneWidget,
+        reason: 'die Kachel muss den Multiplikator in Erfahrung umrechnen',
+      );
+      expect(HabitRewards.xpFor(3), greaterThan(HabitRewards.xpPerCheck));
+    });
+
+    testWidgets('ein gewonnener Charakterpunkt wird gemeldet', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      // Fünf Häkchen auf Stärke sind ein Punkt (`StatCurve`). Vier
+      // liegen hinter uns, das fünfte fällt jetzt.
+      final controller = container.read(habitTrackerProvider.notifier);
+      final habit = controller.addCustom(
+        name: 'Liegestütze',
+        stat: HabitStat.staerke,
+        difficulty: HabitDifficulty.mittel,
+      );
+      var tag = _heute;
+      for (var i = 0; i < 4; i++) {
+        tag = tag.previous;
+      }
+      for (var i = 0; i < 4; i++) {
+        controller.toggle(habit!.id, tag);
+        tag = tag.next;
+      }
+      await tester.pump();
+      expect(
+        container.read(characterStatsProvider).bonusFor(HabitStat.staerke),
+        0,
+        reason: 'vier Häkchen sind noch kein Punkt',
+      );
+
+      await tester.tap(find.text('Liegestütze'));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.textContaining('+1 Stärke'), findsOneWidget);
+    });
+
+    testWidgets('der Balken eines Werts füllt sich mit jedem Häkchen', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      double anteilVon(HabitStat stat) {
+        final bars = tester.widgetList<StatPointBar>(find.byType(StatPointBar));
+        return bars.firstWhere((bar) => bar.stat == stat).fraction;
+      }
+
+      final controller = container.read(habitTrackerProvider.notifier);
+      final habit = controller.addCustom(
+        name: 'Laufen',
+        stat: HabitStat.staerke,
+        difficulty: HabitDifficulty.mittel,
+      );
+      await tester.pump();
+      final vorher = anteilVon(HabitStat.staerke);
+
+      controller.toggle(habit!.id, _heute);
+      await tester.pump();
+
+      expect(
+        anteilVon(HabitStat.staerke),
+        greaterThan(vorher),
+        reason:
+            'ein Punkt kostet fünf Häkchen — der Balken muss sich trotzdem '
+            'bei jedem bewegen',
+      );
+    });
+  });
+
+  group('Was Beständigkeit bringt (Issue #46)', () {
+    testWidgets('die Leiter steht über der Liste und rechnet in Erfahrung', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      expect(find.byType(StreakLadderCard), findsOneWidget);
+      expect(
+        find.textContaining(
+          '${HabitRewards.xpFor(3)} statt ${HabitRewards.xpPerCheck}',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sie zeigt alle fünf Meilensteine', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      for (final milestone in HabitRewards.streakMilestones) {
+        expect(
+          find.descendant(
+            of: find.byType(StreakLadderCard),
+            matching: find.text('${milestone.days}'),
+          ),
+          findsOneWidget,
+          reason: '${milestone.days} Tage',
+        );
+      }
+    });
+
+    testWidgets('sie folgt der besten laufenden Kette', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      final controller = container.read(habitTrackerProvider.notifier);
+      final vorlage = container.read(unlockedHabitsProvider).first;
+      controller.activate(vorlage.id);
+      controller.toggle(vorlage.id, _heute.previous);
+      controller.toggle(vorlage.id, _heute);
+      await tester.pump();
+
+      expect(find.text('2 Tage'), findsOneWidget);
+    });
+  });
+
+  group('Streak-Eis (Issue #46)', () {
+    /// Gestern fehlt, vorgestern steht — genau der Fall, den das Eis
+    /// abdeckt.
+    void mitLuecke(ProviderContainer container) {
+      final controller = container.read(habitTrackerProvider.notifier);
+      final vorlage = container.read(unlockedHabitsProvider).first;
+      controller.activate(vorlage.id);
+      controller.toggle(vorlage.id, _heute.previous.previous.previous);
+      controller.toggle(vorlage.id, _heute.previous.previous);
+    }
+
+    testWidgets('ohne Lücke steht die Karte nicht da', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      expect(find.byType(StreakFreezeCard), findsNothing);
+    });
+
+    testWidgets('mit Lücke bietet sie das Eis an', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+      mitLuecke(container);
+      await tester.pump();
+
+      expect(find.byType(StreakFreezeCard), findsOneWidget);
+      expect(find.textContaining(StreakFreeze.name), findsWidgets);
+    });
+
+    testWidgets('der Knopf rettet die Kette, ohne sie zu verlängern', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+      mitLuecke(container);
+      await tester.pump();
+
+      final vorlage = container.read(unlockedHabitsProvider).first;
+      final vorher = container.read(habitTrackerProvider);
+      expect(vorher.currentStreak(vorlage.id, _heute), 0);
+
+      await tester.tap(find.byType(FilledButton).first);
+      await tester.pump();
+
+      final nachher = container.read(habitTrackerProvider);
+      expect(nachher.currentStreak(vorlage.id, _heute), 2);
+      expect(nachher.totalChecks, vorher.totalChecks);
+      expect(nachher.totalXp, vorher.totalXp);
+      expect(nachher.freezesLeft, vorher.freezesLeft - 1);
+    });
+
+    testWidgets('danach verschwindet die Karte', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+      mitLuecke(container);
+      await tester.pump();
+
+      await tester.tap(find.byType(FilledButton).first);
+      await tester.pump();
+
+      expect(find.byType(StreakFreezeCard), findsNothing);
     });
   });
 }

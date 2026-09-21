@@ -34,6 +34,9 @@ import 'test_view.dart';
 /// reichen für den längsten (Laden) mit Abstand.
 const int _scrollSchritte = 10;
 
+/// Der Tag, an dem der Test spielt.
+const Day _heute = Day(2026, 8, 21);
+
 void main() {
   /// Ein Stand mit Fortschritt — leere Bildschirme haben nichts, was
   /// überlaufen könnte, und würden nichts beweisen.
@@ -81,11 +84,22 @@ void main() {
         )
         .activate('eigen-1');
 
+    // **Zwei Tage abgehakt, gestern nichts.** Das ist die vollste
+    // Fassung des Bildschirms: Die Kacheln tragen ihre Streak-Marke, die
+    // Beständigkeits-Leiter steht auf einer laufenden Kette, und die
+    // Streak-Eis-Karte bietet an, gestern zu decken (Issue #46). Ohne
+    // Häkchen wäre keins der drei gebaut — und was nicht gebaut wird,
+    // kann nicht überlaufen.
+    for (final id in tracker.activeIds.toList()) {
+      tracker = tracker.check(id, _heute.previous.previous.previous).tracker;
+      tracker = tracker.check(id, _heute.previous.previous).tracker;
+    }
+
     // Jeder Platz belegt. Ein leeres Ausrüstungsraster zeigt sechsmal
     // „leer" -- die echten Namen sind das, was in der schmalen Kachel
     // überläuft, und „Schuppenpanzer" ist der längste davon.
     // Mit der Reihe durch, sonst bleiben Episches und Legendaeres draussen
-    // (ADR-0034) -- und "Krone des Hochwaechters" ist jetzt der laengste
+    // (ADR-0034) -- und "Krone des Hochwaechters" ist jetzt der längste
     // Name im Laden.
     var loadout = const Loadout.empty();
     for (final item in GearCatalog.all) {
@@ -103,7 +117,7 @@ void main() {
     return ProviderScope(
       overrides: [
         savedGameProvider.overrideWithValue(mitInhalt()),
-        todayProvider.overrideWithValue(const Day(2026, 8, 21)),
+        todayProvider.overrideWithValue(_heute),
       ],
       child: MaterialApp(home: screen),
     );
@@ -217,7 +231,7 @@ void main() {
         ProviderScope(
           overrides: [
             savedGameProvider.overrideWithValue(const SaveData.empty()),
-            todayProvider.overrideWithValue(const Day(2026, 8, 21)),
+            todayProvider.overrideWithValue(_heute),
           ],
           child: const MaterialApp(home: CharacterScreen()),
         ),
