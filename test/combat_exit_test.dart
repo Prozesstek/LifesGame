@@ -77,7 +77,16 @@ void main() {
 
   /// Eine Runde mit dem Waffenzug, bis das Ergebnisblatt aufgeht.
   Future<void> spieleBisZumBlatt(WidgetTester tester) async {
-    await tester.tap(find.text(Moves.basicAttack.name));
+    // Getippt wird die Kachel; der Name darüber ist kein Knopf.
+    await tester.tap(
+      find.descendant(
+        of: find.ancestor(
+          of: find.text(Moves.basicAttack.name),
+          matching: find.byType(Tooltip),
+        ),
+        matching: find.byType(InkWell),
+      ),
+    );
     await tester.pump();
     // Die Tippfläche liegt über der Leiste und fängt den Tipp ab — genau
     // so ist es gewollt (`combat_test.dart`, „Tippen im Zeitfenster").

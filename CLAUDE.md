@@ -59,7 +59,7 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
 | `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
 | `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 143 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 136 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
@@ -67,9 +67,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 130 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 161 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
+| `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 88 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
@@ -87,7 +88,6 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `tool/balance_sim.dart` | prüft das **Spiel**: Gegner gegen echten Werte-Pfad | nur Dart-SDK |
-| `tool/gear_icons_gen.dart` | erzeugt die Bilder der verdienten Stücke aus Formen | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
@@ -100,6 +100,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
+| `lib/habits/widgets/streak_ladder_card.dart` | was eine Kette einbringt, als Leiter | Flutter |
+| `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: Reiter je Platz, Raster, Detailfläche | Flutter |
 | `lib/gear/widgets/shop_item_cell.dart` | ein Stück als Kachel im Raster — wählt, kauft nicht | Flutter |
@@ -163,7 +165,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 452 Tests
+flutter test             # 458 Tests
 flutter analyze          # muss sauber sein
 
 # Balance des Spiels prüfen -- die maßgebliche Simulation
@@ -177,11 +179,11 @@ dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 130 Tests
+dart test                              # 161 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 143 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 136 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 33 Tests
 cd packages/gear        ; dart test    # 88 Tests, prüft Preise, Sets, Verkauf und die Sperre
 cd packages/abilities   ; dart test    # 36 Tests
@@ -245,6 +247,20 @@ stehen und dort bleiben müssen:
 | Wie viele eigene darf jemand anlegen? | `HabitRewards.customSlotsFor` — ein Platz je freigeschalteter Vorlage |
 | Was ändert der Schwierigkeitsgrad? | `HabitDifficulty.xpFactor` — nur Erfahrung, nie Gold |
 | Was darf sich nachträglich ändern? | `CustomHabit.editable` — nur, was keine Zahl erzeugt |
+
+**Das Streak-Eis deckt einen Tag, verlängert die Kette aber nicht**
+([ADR-0036](docs/decisions/0036-streak-eis-als-gegenstand.md)). Drei
+Regeln stehen an je einer Stelle:
+
+| Frage | Antwortet |
+|---|---|
+| Läuft die Kette über diese Lücke? | `HabitTracker._continues` — die einzige Stelle; `streakEndingAt`, `longestStreak` und `totalXp` fragen dort |
+| Wie viele Eis hat jemand? | `StreakFreeze.lifetimeStock` minus die Historie der gedeckten Tage |
+| Welcher Tag lässt sich noch retten? | `HabitTracker.rescuableDay` — immer nur gestern, und nur wenn dort eine Kette endet |
+
+Die Quelle der Eis ist **noch nicht entschieden** (Issue #46): Es gibt
+eines über das ganze Spiel. Wer sie entscheidet, ändert
+`StreakFreeze.lifetimeStock` und nichts in `lib/`.
 
 Der Grad ist gemessen, nicht geschätzt: Fünf „schwere" eigene
 Gewohnheiten erreichen Level 50 in 188 Tagen statt in 240. Wer an
@@ -548,7 +564,7 @@ nicht Nacharbeit:
 | `docs/context/ziele.md` | **Wohin** es geht: Ziellinie, SMART-Ziele mit Termin, und was ausdrücklich *nicht* dazugehört | freitags die Ist-Spalten; bei Zielwechsel sofort |
 | `docs/decisions/NNNN-*.md` | **Warum** eine Entscheidung so fiel | sobald eine Entscheidung fällt, die man in drei Monaten hinterfragen würde |
 | `docs/context/gotchas.md` | Fallstricke, die Zeit gekostet haben | sobald etwas unerwartet war |
-| `docs/vorlagen/` | Entwürfe, aus denen gebaut wird — Fähigkeiten, später das Kampfsystem | sobald eine Vorlage entsteht, **bevor** danach gebaut wird |
+| `docs/vorlagen/` | Entwürfe, aus denen gebaut wird — Fähigkeiten, Lernen, später das Kampfsystem | sobald eine Vorlage entsteht, **bevor** danach gebaut wird |
 
 **Eine Vorlage, die nur auf einem Rechner liegt, existiert für den anderen
 nicht.** Genau das ist bei `Kampfsystem.docx` passiert: In `state.md` steht

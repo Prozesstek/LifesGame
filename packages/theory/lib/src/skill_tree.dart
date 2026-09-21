@@ -6,11 +6,11 @@ import 'content/koerper_branch.dart';
 import 'content/wissenschaft_branch.dart';
 import 'lesson.dart';
 
-/// Alle Theoriezweige zusammen — der Skillbaum.
+/// Alle flachen Theoriezweige zusammen.
 ///
-/// Die Sperre liegt beim Charakterlevel, nicht beim Fortschritt im Baum:
-/// Zweige öffnen sich durch das, was der Spieler im Leben tut, nicht durch
-/// das, was er im Baum bereits gelesen hat (ADR-0007).
+/// Seit ADR-0019 ist das nicht mehr der Skillbaum — der ist `theoryGraph`.
+/// Hier stehen noch das Handbuch und die Lektionen, auf die Knoten im
+/// Graphen zeigen. Eine Levelsperre gibt es nicht mehr.
 class SkillTree {
   const SkillTree(this.branches);
 
@@ -44,38 +44,13 @@ class SkillTree {
     }
     return null;
   }
-
-  List<TheoryBranch> unlockedAt(int playerLevel) {
-    return List<TheoryBranch>.unmodifiable(
-      branches.where((b) => b.isUnlockedAt(playerLevel)),
-    );
-  }
-
-  List<TheoryBranch> lockedAt(int playerLevel) {
-    return List<TheoryBranch>.unmodifiable(
-      branches.where((b) => !b.isUnlockedAt(playerLevel)),
-    );
-  }
-
-  /// Der nächste Zweig, der sich öffnen wird — für die Anzeige „ab Level X“.
-  /// Null, wenn alles offen ist.
-  TheoryBranch? nextUnlock(int playerLevel) {
-    TheoryBranch? next;
-    for (final branch in branches) {
-      if (branch.isUnlockedAt(playerLevel)) continue;
-      if (next == null || branch.unlockLevel < next.unlockLevel) {
-        next = branch;
-      }
-    }
-    return next;
-  }
 }
 
 /// Der Baum, wie er im Spiel steht.
 ///
-/// „Gewohnheiten" steht ohne Sperre vorn: Der Zweig erklärt, wie die App
-/// selbst funktioniert (ADR-0005). Ihn hinter ein Level zu legen hieße, das
-/// Handbuch wegzusperren.
+/// „Gewohnheiten" steht vorn: Der Zweig erklärt, wie die App selbst
+/// funktioniert (ADR-0005), und ist das Handbuch, an dem seit ADR-0018 der
+/// Kampf hängt.
 const SkillTree theoryTree = SkillTree(<TheoryBranch>[
   habitsBranch,
   koerperBranch,

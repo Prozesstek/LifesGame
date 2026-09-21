@@ -466,8 +466,8 @@ void main() {
     testWidgets('ein belegter Platz zeigt das Bild der Fähigkeit', (
       tester,
     ) async {
-      // Blütentau hat eine Zeichnung, der Kurzbogen im Waffenplatz nicht.
-      // Das Bild gehört auf **seinen** Platz, nicht irgendwohin.
+      // Blütentau und der Kurzbogen im Waffenplatz tragen je ein Bild —
+      // jeder auf **seinem** Platz, nicht irgendwohin.
       useTallView(tester);
       await tester.pumpWidget(
         appMit(
@@ -497,7 +497,7 @@ void main() {
           of: platzVon(rueckfall.name).first,
           matching: find.byType(Image),
         ),
-        findsNothing,
+        findsOneWidget,
       );
     });
 

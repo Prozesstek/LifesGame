@@ -9,11 +9,11 @@ import '../ui/pixel_art.dart';
 /// hier steht nur, wie es aussieht — dieselbe Trennung wie bei
 /// [MoveIcons] für die Züge.
 ///
-/// **Zweiundzwanzig von achtundvierzig Stücken haben eins:** vier gemalte
-/// Waffen und die achtzehn verdienten Stücke aus ADR-0034, die
-/// `tool/gear_icons_gen.dart` erzeugt. Die übrigen tragen weiter das
-/// Zeichen ihres Platzes — kein Ersatz für ein Bild, aber genug, um eine
-/// Kachel als Kachel erkennbar zu machen.
+/// **Jedes der achtundvierzig Stücke hat eins** — seit dem 21.09. alle
+/// aus dem Raven-Fantasy-Paket (64 × 64, Frederiks Download), damit Laden,
+/// Charakter und Fähigkeiten einen Stil haben. Davor waren es vier gemalte
+/// Waffen und achtzehn erzeugte Stücke; das Werkzeug dafür ist entfallen,
+/// es hätte die Raven-Bilder beim nächsten Lauf überschrieben.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
@@ -36,51 +36,56 @@ import '../ui/pixel_art.dart';
 abstract final class GearIcons {
   /// Item-Id → Pfad der Zeichnung.
   ///
-  /// **Vier Klingen liegen im Repo, zwei sind hier eingetragen.** Für
-  /// `NormalesSchwert.png` und `RustedSword.png` gibt es noch kein
-  /// passendes Stück: Von den fünf Waffen des Katalogs sind nur zwei
-  /// Klingen, die drei anderen sind Bogen, Streitkolben und Stab. Sie
-  /// einer davon zu geben hieße, im Laden etwas anderes zu zeigen, als
-  /// man kauft.
+  /// Nach Platz sortiert, innerhalb eines Platzes nach Seltenheit — so,
+  /// wie der Katalog sie führt. Welche Nummer aus dem Raven-Paket hinter
+  /// welcher Datei steht, hält `assets/RAVEN.md` fest.
   static const Map<String, String> _dateien = <String, String>{
-    // Übungsklinge — die billigste Klinge, aus Holz. Die Zuordnung
-    // ergibt sich aus dem Namen und nicht aus dem Preis.
-    'gear-uebungsklinge': 'assets/Waffen/Schwerter/WoodenSword.png',
-
-    // Geschliffene Klinge — die schmale, scharfe. Von den vier
-    // Zeichnungen ist das Katana die einzige, der man das ansieht.
-    'gear-geschliffene-klinge': 'assets/Waffen/Schwerter/Katana.png',
-
-    // Kurzbogen — der einzige Bogen im Katalog.
     'gear-kurzbogen': 'assets/Waffen/Boegen/Kurzbogen.png',
-
-    // Kriegsstab — gezeichnet als „Kampfstab", ein Schaft mit
-    // Eisenspitze. Der einzige Stab im Katalog.
-    'gear-kriegsstab': 'assets/Waffen/Staebe/Kampfstab.png',
-
-    // --- Die verdienten Stücke (ADR-0034) ---
-    //
-    // **Erzeugt, nicht gemalt.** `tool/gear_icons_gen.dart` zeichnet sie
-    // aus Formen auf 32 × 32 — bewusst gröber als Frederiks 64er, „ganz
-    // simpel". Wer eines ändern will, ändert die Form dort und lässt das
-    // Werkzeug laufen. Die Dateinamen sind die Item-Namen, weil hier —
-    // anders als bei den vier oben — kein Umweg über eine fremde
-    // Zeichnung nötig war.
+    'gear-uebungsklinge': 'assets/Waffen/Schwerter/Uebungsklinge.png',
+    'gear-streitkolben': 'assets/Waffen/Kolben/Streitkolben.png',
+    'gear-geschliffene-klinge':
+        'assets/Waffen/Schwerter/GeschliffeneKlinge.png',
+    'gear-kriegsstab': 'assets/Waffen/Staebe/Kriegsstab.png',
     'gear-zweihaender': 'assets/Waffen/Schwerter/Zweihaender.png',
     'gear-langbogen': 'assets/Waffen/Boegen/Langbogen.png',
     'gear-sonnenklinge': 'assets/Waffen/Schwerter/Sonnenklinge.png',
+    'gear-lederwams': 'assets/Ruestung/Lederwams.png',
+    'gear-gestepptes-wams': 'assets/Ruestung/GesteppteWams.png',
+    'gear-schuppenpanzer': 'assets/Ruestung/Schuppenpanzer.png',
+    'gear-kettenpanzer': 'assets/Ruestung/Kettenpanzer.png',
+    'gear-plattenharnisch': 'assets/Ruestung/Plattenharnisch.png',
     'gear-drachenschuppenpanzer': 'assets/Ruestung/Drachenschuppenpanzer.png',
     'gear-runenharnisch': 'assets/Ruestung/Runenharnisch.png',
     'gear-titanenpanzer': 'assets/Ruestung/Titanenpanzer.png',
+    'gear-lederkappe': 'assets/Helme/Lederkappe.png',
+    'gear-eisenhaube': 'assets/Helme/Eisenhaube.png',
+    'gear-schuppenhaube': 'assets/Helme/Schuppenhaube.png',
+    'gear-visierhelm': 'assets/Helme/Visierhelm.png',
+    'gear-turnierhelm': 'assets/Helme/Turnierhelm.png',
     'gear-drachenhelm': 'assets/Helme/Drachenhelm.png',
     'gear-runenkrone': 'assets/Helme/Runenkrone.png',
     'gear-krone-des-hochwaechters': 'assets/Helme/KroneDesHochwaechters.png',
+    'gear-feste-stiefel': 'assets/Schuhe/FesteStiefel.png',
+    'gear-genagelte-stiefel': 'assets/Schuhe/GenagelteStiefel.png',
+    'gear-schienbeinschutz': 'assets/Schuhe/Schienbeinschutz.png',
+    'gear-stahlbeinlinge': 'assets/Schuhe/Stahlbeinlinge.png',
+    'gear-schwere-schienen': 'assets/Schuhe/SchwereSchienen.png',
     'gear-windlaeufer': 'assets/Schuhe/Windlaeufer.png',
     'gear-drachenschuppenstiefel': 'assets/Schuhe/Drachenschuppenstiefel.png',
     'gear-stiefel-des-titanen': 'assets/Schuhe/StiefelDesTitanen.png',
+    'gear-schlichter-ring': 'assets/Ringe/SchlichterRing.png',
+    'gear-kupferring': 'assets/Ringe/Kupferring.png',
+    'gear-taktring': 'assets/Ringe/Taktring.png',
+    'gear-siegelring': 'assets/Ringe/Siegelring.png',
+    'gear-aderring': 'assets/Ringe/Aderring.png',
     'gear-sternenring': 'assets/Ringe/Sternenring.png',
     'gear-ring-der-glut': 'assets/Ringe/RingDerGlut.png',
     'gear-ring-des-erzdaemons': 'assets/Ringe/RingDesErzdaemons.png',
+    'gear-glasperle': 'assets/Talismane/Glasperle.png',
+    'gear-flusskiesel': 'assets/Talismane/Flusskiesel.png',
+    'gear-bernsteinamulett': 'assets/Talismane/Bernsteinamulett.png',
+    'gear-silberamulett': 'assets/Talismane/Silberamulett.png',
+    'gear-runenamulett': 'assets/Talismane/Runenamulett.png',
     'gear-phoenixfeder': 'assets/Talismane/Phoenixfeder.png',
     'gear-drachenzahn': 'assets/Talismane/Drachenzahn.png',
     'gear-herz-des-titanen': 'assets/Talismane/HerzDesTitanen.png',

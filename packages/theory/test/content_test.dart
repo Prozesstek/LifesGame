@@ -30,25 +30,6 @@ void main() {
       expect(names.toSet().length, names.length);
     });
 
-    test('genau ein Zweig ist von Anfang an offen', () {
-      final free = theoryTree.branches.where((b) => b.isFreeFromStart);
-
-      expect(free.length, 1);
-      expect(free.first.id, 'habits');
-    });
-
-    test('jeder gesperrte Zweig öffnet sich auf einer eigenen Stufe', () {
-      final levels = theoryTree.branches
-          .where((b) => !b.isFreeFromStart)
-          .map((b) => b.unlockLevel)
-          .toList();
-
-      expect(levels.toSet().length, levels.length);
-      for (final level in levels) {
-        expect(level, greaterThan(1));
-      }
-    });
-
     test('alle Lektions-Ids im Baum sind eindeutig', () {
       final ids = <String>[
         for (final branch in theoryTree.branches)
@@ -189,7 +170,7 @@ void main() {
       }
     });
 
-    test('der ganze Baum bringt genug Erfahrung für alle Sperren', () {
+    test('jede Lektion im Baum zahlt ihre Erfahrung aus', () {
       var progress = const TheoryProgress.empty();
       for (final lesson in _allLessons) {
         final answers = lesson.questions.map((q) => q.correctIndex).toList();

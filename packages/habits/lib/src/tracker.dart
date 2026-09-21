@@ -3,6 +3,7 @@ import 'character_stats.dart';
 import 'day.dart';
 import 'habit.dart';
 import 'rewards.dart';
+import 'streak_freeze.dart';
 
 /// Was ein Häkchen eingebracht hat — inklusive des daraus folgenden
 /// neuen Standes.
@@ -72,16 +73,19 @@ class HabitTracker {
     Map<String, Set<Day>> checks = const <String, Set<Day>>{},
     Map<String, Map<Day, int>> progress = const <String, Map<Day, int>>{},
     List<CustomHabit> custom = const <CustomHabit>[],
+    Set<Day> frozenDays = const <Day>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
-        _custom = List<CustomHabit>.unmodifiable(custom);
+        _custom = List<CustomHabit>.unmodifiable(custom),
+        _frozenDays = Set<Day>.unmodifiable(frozenDays);
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
         _checks = const <String, Set<Day>>{},
         _progress = const <String, Map<Day, int>>{},
-        _custom = const <CustomHabit>[];
+        _custom = const <CustomHabit>[],
+        _frozenDays = const <Day>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -165,6 +169,21 @@ class HabitTracker {
       }
     }
 
+    final frozen = <Day>{};
+    final rawFrozen = json['frozen'];
+    if (rawFrozen is List) {
+      for (final entry in rawFrozen) {
+        if (entry is! String) continue;
+        final day = Day.tryParse(entry);
+        // Ein abgehakter Tag braucht keine Deckung. Die Invariante wird
+        // beim Laden erzwungen, nicht nur beim Setzen — sonst zählte ein
+        // älterer Stand ein Eis, das nichts tut.
+        if (day == null) continue;
+        if (checks.values.any((days) => days.contains(day))) continue;
+        frozen.add(day);
+      }
+    }
+
     // Die Obergrenze wird beim Laden erzwungen, nicht nur beim Anlegen:
     // Ein Stand aus einer Version mit anderer Grenze darf sie nicht
     // unterlaufen.
@@ -177,6 +196,7 @@ class HabitTracker {
       checks: checks,
       progress: progress,
       custom: custom,
+      frozenDays: frozen,
     );
   }
 
@@ -196,6 +216,14 @@ class HabitTracker {
 
   /// Die selbst angelegten Gewohnheiten, in der Reihenfolge des Anlegens.
   final List<CustomHabit> _custom;
+
+  /// Die Tage, die mit einem Streak-Eis gedeckt sind.
+  ///
+  /// Eine **Historie**, kein Bestand — dieselbe Bauform wie die Häkchen
+  /// und wie `Loadout.soldIds`. Wie viele Eis noch da sind, wird daraus
+  /// gerechnet ([freezesLeft]); ein gespeicherter Bestand könnte von der
+  /// Historie abweichen, eine Historie *ist* der Bestand.
+  final Set<Day> _frozenDays;
 
   /// Der Stand als JSON.
   ///
@@ -224,6 +252,10 @@ class HabitTracker {
         },
       if (_custom.isNotEmpty)
         'custom': <Object?>[for (final habit in _custom) habit.toJson()],
+      if (_frozenDays.isNotEmpty)
+        'frozen': <Object?>[
+          for (final day in _frozenDays.toList()..sort()) day.toString(),
+        ],
     };
   }
 
@@ -477,6 +509,13 @@ class HabitTracker {
       },
       // Der angefangene Tag ist erledigt, sein Zähler damit erledigt.
       progress: _withoutProgress(habitId, day),
+      // Ein Tag, an dem etwas steht, braucht keine Deckung — das Eis
+      // kommt zurück. Im Spiel kann der Fall nicht eintreten (gedeckt
+      // wird nur die Vergangenheit, abgehakt nur heute); die Invariante
+      // steht hier trotzdem, weil sie sonst nur in der Oberfläche stünde.
+      frozenDays: _frozenDays.contains(day)
+          ? (<Day>{..._frozenDays}..remove(day))
+          : null,
     );
 
     final streak = next.streakEndingAt(habitId, day);
@@ -560,12 +599,14 @@ class HabitTracker {
     Map<String, Set<Day>>? checks,
     Map<String, Map<Day, int>>? progress,
     List<CustomHabit>? custom,
+    Set<Day>? frozenDays,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
       checks: checks ?? _checks,
       progress: progress ?? _progress,
       custom: custom ?? _custom,
+      frozenDays: frozenDays ?? _frozenDays,
     );
   }
 
@@ -579,15 +620,24 @@ class HabitTracker {
   // --- Streaks ---
 
   /// Länge der ununterbrochenen Kette, die an [day] endet. 0, wenn an
-  /// [day] nicht abgehakt wurde.
+  /// [day] weder abgehakt noch ein Streak-Eis gelegt wurde.
+  ///
+  /// **Ein gedeckter Tag trägt die Kette, verlängert sie aber nicht**
+  /// ([StreakFreeze]). Eine Kette über dreißig Kalendertage mit einem Eis
+  /// darin ist neunundzwanzig lang — das Eis bewahrt, was da war, und
+  /// schenkt nichts dazu.
   int streakEndingAt(String habitId, Day day) {
     final days = _checks[habitId];
     if (days == null || days.isEmpty) return 0;
 
     var streak = 0;
     var cursor = day;
-    while (days.contains(cursor)) {
-      streak++;
+    while (true) {
+      if (days.contains(cursor)) {
+        streak++;
+      } else if (!_frozenDays.contains(cursor)) {
+        break;
+      }
       cursor = cursor.previous;
     }
     return streak;
@@ -610,6 +660,127 @@ class HabitTracker {
       return HabitRewards.multiplierFor(streakEndingAt(habitId, today));
     }
     return HabitRewards.multiplierFor(currentStreak(habitId, today) + 1);
+  }
+
+  /// Ob die Kette von [previous] nach [day] durchläuft.
+  ///
+  /// Entweder folgen die Tage direkt aufeinander, oder jeder Tag
+  /// dazwischen ist mit einem Streak-Eis gedeckt. **Die einzige Stelle,
+  /// die das entscheidet** — [streakEndingAt], [longestStreak] und
+  /// [totalXp] fragen alle hier. Stünde die Regel dreimal da, zeigte die
+  /// Kachel irgendwann eine andere Kette an, als die Erfahrung unterstellt.
+  bool _continues(Day previous, Day day) {
+    final gap = previous.daysUntil(day);
+    if (gap == 1) return true;
+    if (gap < 1) return false;
+
+    var cursor = previous.next;
+    while (cursor < day) {
+      if (!_frozenDays.contains(cursor)) return false;
+      cursor = cursor.next;
+    }
+    return true;
+  }
+
+  // --- Streak-Eis (Issue #46) ---
+
+  /// Die Tage, die mit einem Streak-Eis gedeckt sind.
+  Set<Day> get frozenDays => _frozenDays;
+
+  bool isFrozen(Day day) => _frozenDays.contains(day);
+
+  /// Wie viele Eis schon verbraucht sind.
+  int get usedFreezes => _frozenDays.length;
+
+  /// Wie viele noch da sind. Gerechnet, nicht gespeichert.
+  int get freezesLeft => StreakFreeze.remaining(usedFreezes);
+
+  /// Ob sich [day] decken lässt.
+  ///
+  /// Nur vergangene Tage, an denen nichts steht: Heute ist noch nicht
+  /// vorbei, und ein Tag mit Häkchen braucht keine Deckung. Dass der Tag
+  /// tatsächlich eine Kette rettet, prüft die Oberfläche — das Modell
+  /// verbietet es nicht, ein Eis zu verschwenden, es zeigt nur nirgends
+  /// einen Knopf dafür.
+  bool canFreeze(Day day, {required Day today}) {
+    if (freezesLeft <= 0) return false;
+    if (_frozenDays.contains(day)) return false;
+    if (!(day < today)) return false;
+    return checksOn(day) == 0;
+  }
+
+  /// Legt ein Streak-Eis auf [day].
+  ///
+  /// Gibt unverändert zurück, wenn [canFreeze] false ist — die
+  /// Oberfläche fragt vorher und zeigt den Knopf sonst gar nicht.
+  HabitTracker freeze(Day day, {required Day today}) {
+    if (!canFreeze(day, today: today)) return this;
+    return _copyWith(frozenDays: <Day>{..._frozenDays, day});
+  }
+
+  /// Der Tag, den ein Streak-Eis gerade noch retten kann — oder null.
+  ///
+  /// **Immer nur gestern.** Wer heute merkt, dass gestern nichts steht,
+  /// soll reagieren können; wer nach zwei Wochen zurückkommt, soll seine
+  /// Kette nicht rückwirkend zusammenkaufen. Das Eis verzeiht einen
+  /// Aussetzer, es ersetzt kein Aufhören.
+  ///
+  /// Gibt nur dann einen Tag zurück, wenn dort auch etwas zu retten ist:
+  /// Vorgestern muss eine Kette enden. Bei zwei Fehltagen hintereinander
+  /// ist sie ohnehin gerissen, und ein Eis dort wäre verschenkt.
+  Day? rescuableDay(Day today) {
+    final gestern = today.previous;
+    if (!canFreeze(gestern, today: today)) return null;
+
+    final vorgestern = gestern.previous;
+    for (final habitId in _checks.keys) {
+      if (streakEndingAt(habitId, vorgestern) > 0) return gestern;
+    }
+    return null;
+  }
+
+  /// Nimmt ein Eis wieder herunter — der Vorrat wächst dadurch zurück.
+  ///
+  /// Dasselbe Zugeständnis wie bei [uncheck]: Ein Fehlgriff auf einem
+  /// Handy ist ein Fehlgriff, keine Entscheidung.
+  HabitTracker unfreeze(Day day) {
+    if (!_frozenDays.contains(day)) return this;
+    return _copyWith(frozenDays: <Day>{..._frozenDays}..remove(day));
+  }
+
+  // --- Was das nächste Häkchen einbringt (Issue #46) ---
+  //
+  // Die Oberfläche soll den Ertrag **vor** dem Tippen zeigen können und
+  // ihn dafür nicht selbst ausrechnen. Was ein Häkchen wert ist, ist eine
+  // Regel; Regeln stehen in diesem Package.
+
+  /// Erfahrung für das nächste Häkchen an [today] — oder die, die das
+  /// heutige schon gebracht hat.
+  int xpForNextCheck(String habitId, Day today) {
+    final difficulty =
+        definitionFor(habitId)?.difficulty ?? HabitDifficulty.mittel;
+    if (isChecked(habitId, today)) {
+      return HabitRewards.xpFor(streakEndingAt(habitId, today), difficulty);
+    }
+    return HabitRewards.xpFor(currentStreak(habitId, today) + 1, difficulty);
+  }
+
+  /// Gold für das nächste Häkchen. Ohne Streak-Multiplikator (ADR-0008).
+  int goldForNextCheck(String habitId, Day today) {
+    return HabitRewards.goldFor(1);
+  }
+
+  /// Der nächste Meilenstein dieser Gewohnheit. Null am Deckel.
+  StreakMilestone? nextMilestoneFor(String habitId, Day today) {
+    return HabitRewards.nextMilestoneAfter(currentStreak(habitId, today));
+  }
+
+  /// Wie viele Häkchen noch bis dahin fehlen. 0 am Deckel.
+  int checksToNextMilestone(String habitId, Day today) {
+    final milestone = nextMilestoneFor(habitId, today);
+    if (milestone == null) return 0;
+    final fehlt = milestone.days - currentStreak(habitId, today);
+    return fehlt < 1 ? 1 : fehlt;
   }
 
   /// Die längste Kette, die **gerade** läuft — über alle Gewohnheiten.
@@ -646,8 +817,7 @@ class HabitTracker {
       var streak = 0;
       Day? previous;
       for (final day in sorted) {
-        streak =
-            previous != null && previous.daysUntil(day) == 1 ? streak + 1 : 1;
+        streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
         if (streak > best) best = streak;
         previous = day;
       }
@@ -672,8 +842,7 @@ class HabitTracker {
       var streak = 0;
       Day? previous;
       for (final day in sorted) {
-        streak =
-            previous != null && previous.daysUntil(day) == 1 ? streak + 1 : 1;
+        streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
         sum += HabitRewards.xpFor(streak, difficulty);
         previous = day;
       }

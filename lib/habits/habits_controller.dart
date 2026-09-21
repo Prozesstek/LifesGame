@@ -76,6 +76,18 @@ class HabitsController extends Notifier<HabitTracker> {
     return result;
   }
 
+  /// Deckt einen verpassten Tag mit einem Streak-Eis ab.
+  ///
+  /// Gibt false zurück, wenn es nichts zu decken gibt oder der Vorrat
+  /// leer ist — die Oberfläche fragt vorher über
+  /// `HabitTracker.rescuableDay` und zeigt den Knopf sonst gar nicht.
+  bool useStreakFreeze(Day day, Day today) {
+    final next = state.freeze(day, today: today);
+    if (identical(next, state)) return false;
+    state = next;
+    return true;
+  }
+
   /// Legt eine eigene Gewohnheit an und nimmt sie gleich in die
   /// Tagesliste auf, wenn dort noch Platz ist.
   ///
