@@ -2,7 +2,7 @@
 ///
 /// Reines Dart: kein Flutter, keine Dependencies. Inhalte lassen sich
 /// schreiben und prüfen, ohne die App zu starten (ADR-0004). Der Aufbau als
-/// Skillbaum mit levelgebundenen Zweigen steht in ADR-0007.
+/// Graph mit vier Wurzeln und Theoriepunkten steht in ADR-0019.
 library;
 
 export 'src/branch.dart';
