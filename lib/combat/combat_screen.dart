@@ -595,7 +595,12 @@ class _Kachel extends StatelessWidget {
                 if (pfad != null)
                   // Ob hart oder weich skaliert wird, entscheidet
                   // `PixelArt` an der Kantenlänge — nicht diese Stelle.
-                  PixelArt(assetPath: pfad, side: side, fallback: name)
+                  PixelArt(
+                    assetPath: pfad,
+                    side: side,
+                    fallback: name,
+                    smooth: MoveIcons.smooth,
+                  )
                 else
                   name,
                 Positioned(

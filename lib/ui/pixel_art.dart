@@ -24,6 +24,7 @@ class PixelArt extends StatelessWidget {
     required this.assetPath,
     required this.side,
     required this.fallback,
+    this.smooth = false,
     super.key,
   });
 
@@ -40,6 +41,13 @@ class PixelArt extends StatelessWidget {
   /// nicht erscheint, wäre der teuerste denkbare Preis dafür.
   final Widget fallback;
 
+  /// Für **gemalte** Bilder statt Pixelkunst: immer weich skalieren.
+  ///
+  /// Die Regel oben gilt für Zeichnungen auf 64er-Raster. Ein gemaltes
+  /// Bild mit weichen Kanten hat kein Raster, das hart erhalten bliebe —
+  /// dort erzeugt [FilterQuality.none] nur Treppen.
+  final bool smooth;
+
   /// **Gezeichnet auf 64 × 64, abgelegt als 256 × 256.** Ein Format für
   /// das ganze Projekt — `MoveIcons`, `GearIcons` und `EnemyIcons` lesen
   /// beide Zahlen hier.
@@ -50,7 +58,12 @@ class PixelArt extends StatelessWidget {
   /// skaliert werden soll.
   ///
   /// Reine Funktion, damit die Regel prüfbar ist, ohne ein Bild zu laden.
-  static FilterQuality qualityFor(double side, double devicePixelRatio) {
+  static FilterQuality qualityFor(
+    double side,
+    double devicePixelRatio, {
+    bool smooth = false,
+  }) {
+    if (smooth) return FilterQuality.medium;
     final echtePixel = side * devicePixelRatio;
     return echtePixel >= artSize ? FilterQuality.none : FilterQuality.medium;
   }
@@ -61,7 +74,11 @@ class PixelArt extends StatelessWidget {
       assetPath,
       width: side,
       height: side,
-      filterQuality: qualityFor(side, MediaQuery.devicePixelRatioOf(context)),
+      filterQuality: qualityFor(
+        side,
+        MediaQuery.devicePixelRatioOf(context),
+        smooth: smooth,
+      ),
       errorBuilder: (context, error, stack) => fallback,
     );
   }
