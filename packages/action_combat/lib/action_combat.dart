@@ -19,6 +19,7 @@ export 'src/entity.dart';
 export 'src/events.dart';
 export 'src/flow_field.dart';
 export 'src/health_orb.dart';
+export 'src/ladder.dart';
 export 'src/level.dart';
 export 'src/level_builder.dart';
 export 'src/level_catalog.dart';

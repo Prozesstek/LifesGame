@@ -228,19 +228,13 @@ void _geschenkteFaehigkeitImKampf() {
       // Kampf fehlt sie.
       final container = mitZuschlag('sandsturm');
 
-      expect(
-        container.read(activeMovesProvider).map((m) => m.id),
-        contains('sandsturm'),
-      );
+      expect(container.read(activeMovesProvider), contains('sandsturm'));
     });
 
     test('das gilt auch für die legendäre', () {
       final container = mitZuschlag('sternenfall');
 
-      expect(
-        container.read(activeMovesProvider).map((m) => m.id),
-        contains('sternenfall'),
-      );
+      expect(container.read(activeMovesProvider), contains('sternenfall'));
     });
 
     test('ohne Zuschlag bleibt sie draußen', () {
@@ -259,10 +253,7 @@ void _geschenkteFaehigkeitImKampf() {
       );
       addTearDown(container.dispose);
 
-      expect(
-        container.read(activeMovesProvider).map((m) => m.id),
-        isNot(contains('sandsturm')),
-      );
+      expect(container.read(activeMovesProvider), isNot(contains('sandsturm')));
     });
   });
 }

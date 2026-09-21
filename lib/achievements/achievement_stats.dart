@@ -1,5 +1,5 @@
 import 'package:achievements/achievements.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';

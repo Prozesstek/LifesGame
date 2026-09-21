@@ -1,5 +1,5 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
@@ -101,11 +101,9 @@ final unlockedAbilitiesProvider = Provider<List<Ability>>((ref) {
 ///
 /// Nie null: Ohne Waffe greift der Kurzbogen. Slot 1 ist auf Level 1 der
 /// einzige offene, er darf nicht leer sein (ADR-0016, ADR-0017).
-final weaponMoveProvider = Provider<Move>((ref) {
+final weaponMoveProvider = Provider<String>((ref) {
   final weaponId = ref.watch(abilityProgressProvider).equippedWeaponId;
-  final moveId = AbilityCatalog.weaponMoveFor(weaponId);
-
-  return Moves.byId(moveId) ?? Moves.basicAttack;
+  return AbilityCatalog.weaponMoveFor(weaponId);
 });
 
 /// Das Moveset, mit dem der Spieler tatsächlich in den Kampf geht.
@@ -116,9 +114,13 @@ final weaponMoveProvider = Provider<Move>((ref) {
 /// 1. Was nicht mehr verdient ist, kommt nicht mit.
 /// 2. Was über die offenen Plätze hinausgeht, kommt nicht mit — die Zahl
 ///    steht in `package:progression` (ADR-0016).
-/// 3. Was es als Move nicht gibt, kommt nicht mit. Eine Id kann veralten;
-///    ein Kampf ohne Knöpfe wäre die schlechtere Antwort darauf.
-final activeMovesProvider = Provider<List<Move>>((ref) {
+/// 3. Was die Grube nicht kennt, kommt nicht mit. Eine Id kann veralten;
+///    ein Knopf ohne Wirkung wäre die schlechtere Antwort darauf.
+///
+/// **Ids, keine Züge** (ADR-0039): Was eine Id in der Grube tut, steht in
+/// `PitAbilities` und `PitWeapons`. Der erste Eintrag ist immer der
+/// Waffenzug.
+final activeMovesProvider = Provider<List<String>>((ref) {
   final chosen = ref.watch(chosenAbilitiesProvider);
   final level = ref.watch(playerLevelProvider);
 
@@ -137,14 +139,12 @@ final activeMovesProvider = Provider<List<Move>>((ref) {
   // Slot 1 gehört der Waffe, die übrigen sind gewählt.
   final freeSlots = AbilitySlots.openAt(level.level) - 1;
 
-  final moves = <Move>[ref.watch(weaponMoveProvider)];
+  final moves = <String>[ref.watch(weaponMoveProvider)];
   for (final moveId in chosen.moveIds) {
     if (moves.length > freeSlots) break;
     if (!unlocked.contains(moveId)) continue;
-
-    final move = Moves.byId(moveId);
-    if (move != null) moves.add(move);
+    if (PitAbilities.byId(moveId) != null) moves.add(moveId);
   }
 
-  return List<Move>.unmodifiable(moves);
+  return List<String>.unmodifiable(moves);
 });

@@ -1,7 +1,7 @@
 # ADR-0030: Ein Set wirkt auf eine Art von Fähigkeit, nicht auf alles
 
 **Datum:** 08.09.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch [ADR-0039](0039-die-grube-ersetzt-den-rundenkampf.md) — Ids und Arten gelten weiter, die Wirkung steht in der Grube
 **Entschieden von:** AktivesBrett
 
 ## Kontext

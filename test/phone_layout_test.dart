@@ -7,7 +7,6 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_screen.dart';
 import 'package:lifes_game/action/pit_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
-import 'package:lifes_game/combat/combat_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
@@ -252,18 +251,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('ab Level 10'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('Kampf läuft im Hochformat nicht über', (tester) async {
-      // Eigener Fall: Wo ein Flame-Widget im Baum hängt, gibt es nie einen
-      // Frame, nach dem nichts mehr aussteht — `pumpAndSettle` liefe in
-      // den Timeout (`docs/context/gotchas.md`).
-      usePhoneView(tester);
-      await tester.pumpWidget(appMit(const CombatScreen()));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
       expect(tester.takeException(), isNull);
     });
 

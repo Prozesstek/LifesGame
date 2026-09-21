@@ -70,7 +70,7 @@ class Figure {
 
 /// Wer in der Grube wie aussieht.
 ///
-/// **Eine Tabelle, eine Stelle** — wie `EnemyIcons` für die Reihe. Die
+/// **Eine Tabelle, eine Stelle** — wie `GearIcons` für den Laden. Die
 /// Simulation kennt nur [EnemyKind]; welches Bild dazugehört, steht hier.
 /// Die Bilder stammen aus Frederiks Download-Paket (siehe
 /// `assets/Grube/HERKUNFT.md`).

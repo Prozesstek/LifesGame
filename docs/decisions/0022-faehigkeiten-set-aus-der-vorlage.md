@@ -1,7 +1,7 @@
 # ADR-0022: Das Fähigkeiten-Set kommt als Multiplikatoren ins Spiel, mit eigenem Timing je Fähigkeit
 
 **Datum:** 26.08.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch [ADR-0039](0039-die-grube-ersetzt-den-rundenkampf.md) — Ids und Arten gelten weiter, die Wirkung steht in der Grube
 **Entschieden von:** AktivesBrett
 
 ## Kontext

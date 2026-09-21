@@ -1,4 +1,4 @@
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:test/test.dart';
 
 /// Der Fortschritt in der Gegnerreihe und was er einbringt.
@@ -15,7 +15,6 @@ void main() {
 
       expect(stand.highestDefeated, 0);
       expect(stand.nextRung, 1);
-      expect(stand.nextEnemy.id, Enemies.wegelagerer.id);
       expect(stand.earnedXp, 0);
       expect(stand.earnedGold, 0);
       expect(stand.isComplete, isFalse);
@@ -53,25 +52,25 @@ void main() {
 
     test('und die Reihe endet oben', () {
       var stand = const LadderProgress.empty();
-      for (var rung = 1; rung <= Enemies.rungs; rung++) {
+      for (var rung = 1; rung <= PitStage.count; rung++) {
         stand = stand.defeat(rung);
       }
 
-      expect(stand.highestDefeated, Enemies.rungs);
+      expect(stand.highestDefeated, PitStage.count);
       expect(stand.isComplete, isTrue);
       expect(stand.earnedXp, LadderRewards.lifetimeXp);
       expect(stand.earnedGold, LadderRewards.lifetimeGold);
 
       // Oben angekommen bleibt der letzte Gegner stehen, statt ins Leere
       // zu zeigen -- so gibt es immer einen Kampf.
-      expect(stand.nextRung, Enemies.rungs);
-      expect(stand.defeat(Enemies.rungs + 1), stand);
+      expect(stand.nextRung, PitStage.count);
+      expect(stand.defeat(PitStage.count + 1), stand);
     });
   });
 
   group('Die Belohnung waechst mit der Sprosse', () {
     test('spaeter ist mehr wert als frueher', () {
-      for (var rung = 2; rung <= Enemies.rungs; rung++) {
+      for (var rung = 2; rung <= PitStage.count; rung++) {
         expect(
           LadderRewards.xpFor(rung),
           greaterThan(LadderRewards.xpFor(rung - 1)),
@@ -121,7 +120,7 @@ void main() {
         'defeated': 999,
       });
 
-      expect(gelesen.highestDefeated, Enemies.rungs);
+      expect(gelesen.highestDefeated, PitStage.count);
     });
   });
 }

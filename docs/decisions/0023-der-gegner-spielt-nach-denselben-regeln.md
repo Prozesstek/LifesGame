@@ -1,7 +1,7 @@
 # ADR-0023: Der Gegner spielt nach denselben Regeln wie der Spieler
 
 **Datum:** 26.08.2026
-**Status:** Aktiv
+**Status:** Abgelöst durch [ADR-0039](0039-die-grube-ersetzt-den-rundenkampf.md) — der Rundenkampf ist gelöscht
 **Entschieden von:** AktivesBrett
 
 ## Kontext

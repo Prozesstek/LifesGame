@@ -110,7 +110,7 @@ abstract final class GearIcons {
   }
 
   /// **Gezeichnet auf 64 × 64, abgelegt als 256 × 256** — dieselbe
-  /// Vorgabe wie bei [MoveIcons] und [EnemyIcons].
+  /// Vorgabe wie bei [MoveIcons].
   ///
   /// Die Zahlen standen hier dreimal, wortgleich. Seit `PixelArt` daraus
   /// eine Entscheidung ableitet — hart skalieren oder weich — darf es sie

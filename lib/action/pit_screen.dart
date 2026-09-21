@@ -63,9 +63,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     // gelernte, aber abgelaufene Fähigkeit fällt dort heraus, nicht hier.
     // Der Waffenzug steht mit darin: Als Fähigkeit kennt die Grube ihn
     // nicht, als Waffe schon — er wird zum Grundangriff.
-    final plaetze = <String>[
-      for (final move in ref.read(activeMovesProvider)) move.id,
-    ];
+    final plaetze = ref.read(activeMovesProvider);
     final loadout = ref.read(loadoutProvider);
     final veraenderungen = pitModifiersFor(
       ref.read(activeSetsProvider),

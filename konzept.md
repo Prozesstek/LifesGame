@@ -84,10 +84,11 @@ Entscheidung. „+3 Angriff" nicht.
 ### 3.2 Kampfsystem
 
 > **Abgelöst am 21.09.2026 durch die Grube** — Echtzeit, dreissig Stufen,
-> jede Halle aus Räumen neu gesteckt
-> ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)).
-> Der Abschnitt beschreibt den Rundenkampf, wie er bis dahin galt, und
-> bleibt stehen, bis `packages/combat` gelöscht ist.
+> jede Halle aus Räumen neu gesteckt, Fähigkeiten über Mana und
+> Abklingzeit ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)).
+> Der Rundenkampf ist gelöscht. Der Abschnitt bleibt als Geschichte
+> stehen: Er erklärt, woher die Arten der Fähigkeiten und die dreissig
+> Stufen kommen.
 
 Rundenbasiert, 4 Moves, keine Typen-Effektivität. Timed Hits als
 Skill-Element: Tap im richtigen Moment → Schadensbonus, gedeckelt bei

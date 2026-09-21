@@ -1,7 +1,7 @@
 # ADR-0003: Kampflogik als eigenes Dart-Package statt als Ordner
 
 **Datum:** 11.08.2026
-**Status:** Aktiv
+**Status:** Abgelöst durch [ADR-0039](0039-die-grube-ersetzt-den-rundenkampf.md) — der Rundenkampf ist gelöscht
 **Entschieden von:** Frederik
 
 ## Kontext

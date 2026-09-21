@@ -1,8 +1,8 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
+import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
@@ -31,8 +31,8 @@ class AbilitySlotsRow extends StatelessWidget {
 
   final int level;
 
-  /// Was in Slot 1 liegt. Nie null: Ohne Waffe greift der Kurzbogen.
-  final Move weaponMove;
+  /// Der Waffenzug in Slot 1. Nie leer: Ohne Waffe greift der Kurzbogen.
+  final String weaponMove;
 
   /// Was auf den freien Slots liegt.
   final ChosenAbilities chosen;
@@ -79,14 +79,11 @@ class AbilitySlotsRow extends StatelessWidget {
     );
   }
 
-  /// Was auf [slot] liegt. Null heisst leer — bei Slot 1 kommt das nicht
+  /// Die Id auf [slot]. Null heisst leer — bei Slot 1 kommt das nicht
   /// vor.
-  Move? _moveIn(int slot) {
+  String? _moveIn(int slot) {
     if (slot == 1) return weaponMove;
-
-    final moveId = chosen.at(slot - 2);
-    if (moveId == null) return null;
-    return Moves.byId(moveId);
+    return chosen.at(slot - 2);
   }
 
   /// Der Satz unter den Slots.
@@ -199,20 +196,19 @@ class _AbilityOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final move = Moves.byId(ability.moveId);
-    if (move == null) return const SizedBox.shrink();
+    final name = pitNameOf(ability.moveId);
+    final zeile = pitSummaryOf(ability.moveId);
+    if (name == null || zeile == null) return const SizedBox.shrink();
 
     return ListTile(
       leading: _MoveBild(
-        moveId: move.id,
+        moveId: ability.moveId,
         side: 36,
         fallback: const Icon(Icons.bolt, color: Palette.accent),
       ),
-      title: Text(move.name, style: const TextStyle(color: Palette.text)),
+      title: Text(name, style: const TextStyle(color: Palette.text)),
       subtitle: Text(
-        isElsewhere
-            ? '${moveSummary(move)} · liegt auf einem anderen Platz'
-            : moveSummary(move),
+        isElsewhere ? '$zeile · liegt auf einem anderen Platz' : zeile,
         style: TextStyle(color: isElsewhere ? Palette.gold : Palette.textDim),
       ),
       trailing: isChosen
@@ -252,44 +248,6 @@ class _MoveBild extends StatelessWidget {
   }
 }
 
-/// Was ein Move kostet und bringt, in einer Zeile.
-///
-/// Reine Darstellung — die Zahlen selbst stehen in `package:combat`. Hier
-/// wird nur vorgelesen, was dort steht.
-String moveSummary(Move move) {
-  final teile = <String>[
-    if (move.dealsDamage) 'Schaden ${move.power.toStringAsFixed(1)}',
-    move.energyDelta >= 0
-        ? '+${move.energyDelta} Energie'
-        : '${move.energyDelta} Energie',
-    for (final effect in move.effects) _effectLabel(effect),
-  ];
-
-  return teile.join(' · ');
-}
-
-String _effectLabel(MoveEffect effect) => switch (effect) {
-  ApplyPoison() => 'vergiftet',
-  ApplyDefenseDown() => 'senkt Verteidigung',
-  HealSelf() => 'heilt',
-  ShieldSelf() => 'schützt',
-  HealSelfBy() => 'heilt',
-  ApplyBurn() => 'entzündet',
-  ReduceIncoming() => 'mindert Schaden',
-  ReflectIncoming() => 'wirft Schaden zurück',
-  ShrinkEnemyWindow() => 'verengt gegnerisches Timing',
-  DilateTime() => 'dehnt die Zeit',
-  LockEnemyTiming() => 'sperrt gegnerisches Timing',
-  CheapenNext() => 'verbilligt den nächsten Zug',
-  LifeSteal() => 'saugt Leben',
-  StealEnergy() => 'stiehlt Energie',
-  CleanseSelf() => 'reinigt',
-  SetEnvironment(:final environmentId) =>
-    Environments.byId(environmentId)?.name ?? 'verändert das Feld',
-  GainEnergy() => 'gibt Energie',
-  IgnoreProtection() => 'ignoriert Schutz',
-};
-
 /// Was das Auswahlblatt zurückgibt. Eigener Typ, weil Abbrechen (null vom
 /// Blatt) und Räumen (moveId null) zwei verschiedene Antworten sind.
 class _Pick {
@@ -310,7 +268,8 @@ class _Slot extends StatelessWidget {
   final int slot;
   final bool isOpen;
   final bool isWeaponSlot;
-  final Move? move;
+  /// Die Id auf diesem Platz, oder null.
+  final String? move;
   final VoidCallback? onTap;
 
   /// Kantenlänge des Bildes auf einem Platz.
@@ -343,7 +302,7 @@ class _Slot extends StatelessWidget {
               children: <Widget>[
                 if (isOpen && belegt != null)
                   _MoveBild(
-                    moveId: belegt.id,
+                    moveId: belegt,
                     side: _bildSeite,
                     fallback: zeichen,
                   )
@@ -384,7 +343,8 @@ class _Slot extends StatelessWidget {
 
   String get _caption {
     if (!isOpen) return 'ab Level ${AbilitySlots.levelForSlot(slot)}';
-    return move?.name ?? 'leer';
+    final id = move;
+    return id == null ? 'leer' : (pitNameOf(id) ?? id);
   }
 
   String get _semantics {
@@ -392,8 +352,8 @@ class _Slot extends StatelessWidget {
       return 'Platz $slot gesperrt, ab Level ${AbilitySlots.levelForSlot(slot)}';
     }
     if (isWeaponSlot) {
-      return 'Platz $slot, kommt von der Waffe: ${move?.name}';
+      return 'Platz $slot, kommt von der Waffe: $_caption';
     }
-    return move == null ? 'Platz $slot, leer' : 'Platz $slot, ${move?.name}';
+    return move == null ? 'Platz $slot, leer' : 'Platz $slot, $_caption';
   }
 }

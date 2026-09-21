@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
@@ -352,7 +352,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
       expect(find.text(rueckfall.name), findsOneWidget);
     });
 
@@ -370,7 +370,7 @@ void main() {
 
       await tester.pumpWidget(appMit(aufLevel(1, loadout: loadout)));
 
-      final move = Moves.byId(AbilityCatalog.weaponMoves[klinge.id]!)!;
+      final move = PitWeapons.byMoveId(AbilityCatalog.weaponMoves[klinge.id]!)!;
       // Der Waffenname steht auf dem Ausrüstungsplatz, der Move-Name im
       // Fähigkeitsslot — zwei verschiedene Dinge.
       expect(find.text(move.name), findsOneWidget);
@@ -414,7 +414,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
       await tester.tap(find.text(rueckfall.name));
       await tester.pumpAndSettle();
 
@@ -431,10 +431,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Fähigkeit wählen'), findsOneWidget);
 
-      await tester.tap(find.text(AbilityMoves.funkenstoss.name).last);
+      await tester.tap(find.text(PitAbilities.funkenstoss.name).last);
       await tester.pumpAndSettle();
 
-      expect(find.text(AbilityMoves.funkenstoss.name), findsOneWidget);
+      expect(find.text(PitAbilities.funkenstoss.name), findsOneWidget);
       expect(find.text('leer'), findsNothing);
     });
 
@@ -446,15 +446,15 @@ void main() {
             3,
             abilities: const ChosenAbilities.empty().withAt(
               0,
-              AbilityMoves.bluetentau.id,
+              PitAbilities.bluetentau.id,
             ),
           ),
         ),
       );
 
-      expect(find.text(AbilityMoves.bluetentau.name), findsOneWidget);
+      expect(find.text(PitAbilities.bluetentau.name), findsOneWidget);
 
-      await tester.tap(find.text(AbilityMoves.bluetentau.name));
+      await tester.tap(find.text(PitAbilities.bluetentau.name));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Platz räumen'));
       await tester.pumpAndSettle();
@@ -474,7 +474,7 @@ void main() {
             3,
             abilities: const ChosenAbilities.empty().withAt(
               0,
-              AbilityMoves.bluetentau.id,
+              PitAbilities.bluetentau.id,
             ),
           ),
         ),
@@ -485,12 +485,12 @@ void main() {
 
       expect(
         find.descendant(
-          of: platzVon(AbilityMoves.bluetentau.name).first,
+          of: platzVon(PitAbilities.bluetentau.name).first,
           matching: find.byType(Image),
         ),
         findsOneWidget,
       );
-      final rueckfall = Moves.byId(AbilityCatalog.fallbackMoveId)!;
+      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
       expect(
         find.descendant(
           of: platzVon(rueckfall.name).first,
@@ -507,8 +507,8 @@ void main() {
       final saved = aufLevel(
         3,
         abilities: const ChosenAbilities.empty()
-            .withAt(0, AbilityMoves.funkenstoss.id)
-            .withAt(1, AbilityMoves.bluetentau.id),
+            .withAt(0, PitAbilities.funkenstoss.id)
+            .withAt(1, PitAbilities.bluetentau.id),
       );
 
       final container = ProviderContainer(
@@ -523,7 +523,7 @@ void main() {
 
       // Level 3: Waffenslot plus genau ein freier Platz.
       expect(moves, hasLength(2));
-      expect(moves.last.id, AbilityMoves.funkenstoss.id);
+      expect(moves.last, PitAbilities.funkenstoss.id);
     });
   });
 

@@ -1,4 +1,4 @@
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../save/save_providers.dart';
@@ -59,16 +59,6 @@ class LadderController extends Notifier<LadderProgress> {
 final ladderProvider = NotifierProvider<LadderController, LadderProgress>(
   LadderController.new,
 );
-
-/// Der Gegner, der als Nächstes ansteht.
-///
-/// **Die einzige Stelle, an der „welcher Gegner" beantwortet wird.** Der
-/// Bildschirm zeigt ihn, der Kampf tritt gegen ihn an, und das Blatt am
-/// Ende meldet ihn zurück — alle drei fragen hier. Zwei Stellen, die
-/// dieselbe Frage beantworten, driften auseinander (`gotchas.md`).
-final nextEnemyProvider = Provider<EnemyBlueprint>((ref) {
-  return ref.watch(ladderProvider).nextEnemy;
-});
 
 /// Auf welcher Sprosse der nächste Kampf stattfindet, gezählt ab 1.
 final nextRungProvider = Provider<int>((ref) {

@@ -2,10 +2,10 @@ import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:combat/combat.dart';
 import 'package:gear/gear.dart';
 
 import '../action/action_prototype_screen.dart';
+import '../action/pit_text.dart';
 import '../gear/gear_controller.dart';
 import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
@@ -514,7 +514,7 @@ class _AbilityPicker extends StatelessWidget {
           for (final ability in AbilityCatalog.choosable)
             ActionChip(
               label: Text(
-                Moves.byId(ability.moveId)?.name ?? ability.moveId,
+                pitNameOf(ability.moveId) ?? ability.moveId,
                 style: const TextStyle(fontSize: 11),
               ),
               onPressed: () => onPick(ability.moveId),

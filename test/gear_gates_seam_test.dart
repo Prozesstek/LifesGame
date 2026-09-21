@@ -1,4 +1,4 @@
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,14 +62,14 @@ void main() {
       // **Die Richtung, die leicht auseinanderläuft.** Würde die Reihe
       // auf zwanzig gekürzt, stünde Legendär hinter dem letzten Gegner —
       // sichtbar im Laden, für immer gesperrt, und niemand merkt es.
-      expect(GearGates.epicRung, inInclusiveRange(1, Enemies.rungs));
-      expect(GearGates.legendaryRung, inInclusiveRange(1, Enemies.rungs));
+      expect(GearGates.epicRung, inInclusiveRange(1, PitStage.count));
+      expect(GearGates.legendaryRung, inInclusiveRange(1, PitStage.count));
     });
 
     test('nach Legendär bleibt noch etwas zu kämpfen', () {
       // Sonst schaltete der letzte Sieg Ausrüstung frei, die gegen nichts
       // mehr getragen werden kann.
-      expect(GearGates.legendaryRung, lessThan(Enemies.rungs));
+      expect(GearGates.legendaryRung, lessThan(PitStage.count));
     });
   });
 

@@ -34,7 +34,7 @@ committed ist, existiert für den anderen nicht.
 | Ebene | Technologie | Regel |
 |---|---|---|
 | App-Shell, alle Tracker-Screens | Flutter / Dart | — |
-| Kampfbildschirm | Flame | nur als eingebettetes Widget |
+| Kampf (die Grube) | Flame | nur als eingebettetes Widget |
 | Persistenz | `SaveStore` + shared_preferences | offline-first, Drift verschoben ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)) |
 | State | Riverpod | — |
 | Animationen | Rive | Skills und Treffer |
@@ -42,23 +42,16 @@ committed ist, existiert für den anderen nicht.
 **Architektur-Kernregel:** Kampflogik ist reines Dart **ohne Flame-Imports**.
 Die Logik gibt Events aus, Flame spielt sie nur ab. Begründung: [ADR-0002](docs/decisions/0002-kampflogik-ohne-flame.md)
 
-Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
-`dependencies`-Block, ein Flame-Import schlägt dort schlicht fehl ([ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md)).
+Diese Regel ist nicht nur Vereinbarung: `packages/action_combat` hat einen
+leeren `dependencies`-Block, ein Flame-Import schlägt dort schlicht fehl.
+Sie galt vorher für den Rundenkampf in `packages/combat` ([ADR-0003](docs/decisions/0003-combat-als-eigenes-package.md));
+der ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
+durch die Grube ersetzt und gelöscht.
 
 ## Aufbau
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/combat/` | Kampflogik, reines Dart, 130 Tests | nur Dart-SDK |
-| `packages/combat/lib/src/enemy.dart` | die **dreissig Gegner** der Reihe und ihre Kurve | nur Dart-SDK |
-| `packages/combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was ein Sieg einbringt | nur Dart-SDK |
-| `packages/combat/lib/src/ability_moves.dart` | die **fünfzehn Fähigkeiten** und ihre Zahlen | nur Dart-SDK |
-| `packages/combat/lib/src/environment.dart` | die vier Umgebungen | nur Dart-SDK |
-| `packages/combat/lib/src/timing_rules.dart` | welche Timing-Werte gerade gelten | nur Dart-SDK |
-| `packages/combat/lib/src/set_effect.dart` | was ein Ausrüstungs-Set im Kampf ändert | nur Dart-SDK |
-| `packages/combat/lib/src/enemy_policy.dart` | wie der Gegner waehlt, samt Utility-Quote | nur Dart-SDK |
-| `packages/combat/example/play.dart` | spielbarer Kampf im Terminal | nur Dart-SDK |
-| `packages/combat/example/balance_sim.dart` | prüft die **Engine** — siehe Warnung unten | nur Dart-SDK |
 | `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 136 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
@@ -87,7 +80,8 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 101 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 111 Tests | nur Dart-SDK |
+| `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
@@ -99,9 +93,10 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
 | `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
-| `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile — geteilt mit dem Prototyp | Flutter |
+| `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
+| `lib/action/pit_gate.dart` | ob die Grube offensteht, und warum nicht | Flutter |
+| `lib/action/pit_text.dart` | Name und Beschreibung einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
-| `tool/balance_sim.dart` | prüft den **alten Rundenkampf** gegen den echten Werte-Pfad | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
@@ -137,22 +132,11 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
-| `lib/combat/battle/fighter.dart` | die beiden gezeichneten Kämpfer | Flutter |
-| `lib/combat/battle/projectile.dart` | fliegende Geschosse, z. B. der Pfeil | Flutter |
-| `lib/combat/battle/move_animation.dart` | wie ein Move **aussieht** (nicht was er tut) | Flutter |
-| `lib/combat/battle/floating_text.dart` | Schadens- und Heilungszahlen über den Kämpfern | Flutter |
-| `lib/combat/combat_controller.dart` | Riverpod-Brücke Logik ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_screen.dart` | der Eingang zur Grube: „17 / 30", Stufe, „Hinab" | Flutter |
-| `lib/combat/enemy_icon.dart` | welches Bild zu einem Gegner gehört | Flutter |
-| `lib/combat/battle_game.dart` | Flame-Darstellung, spielt nur Events ab | Flutter |
-| `lib/combat/combat_screen.dart` | HUD: Statusleisten, Kachelleiste, Timing | Flutter |
-| `lib/combat/move_help.dart` | was ein Zug tut, in Worten und echten Zahlen | Flutter |
-| `lib/combat/move_icon.dart` | welches Bild zu einem Zug gehoert | Flutter |
+| `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
-| `lib/combat/widgets/timing_bar.dart` | Timed Hit als Eingabe (misst nur, wertet nicht) | Flutter |
-| `lib/combat/widgets/environment_banner.dart` | die liegende Umgebung mit Restrunden | Flutter |
-| `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Kampfes | Flutter |
+| `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Laufs | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile, Handbuch davor | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
@@ -163,11 +147,11 @@ Diese Regel ist nicht nur Vereinbarung: `packages/combat` hat einen leeren
 | `lib/theory/branch_screen.dart` | nur noch das Handbuch: Reihenfolge statt Graph | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
 
-**Schichtregel:** Kampfregeln und Gegnerwerte nur in `packages/combat`,
+**Schichtregel:** Kampfregeln, Gegnerwerte, Fähigkeiten- und Waffenwirkung
+und die Belohnung der Stufen nur in `packages/action_combat`,
 Inhalte und Belohnungszahlen nur in `packages/theory`, die Levelkurve nur in
 `packages/progression`, Streaks und Charakterwerte nur in `packages/habits`,
 Preise, Ausrüstungsboni **und Set-Wirkungen** nur in `packages/gear`,
-Gegnerwerte und die Belohnung der Reihe nur in `packages/combat`,
 der **Wortlaut** der Titel nur in
 `packages/identity`, Freischaltbedingungen für Fähigkeiten nur in
 `packages/abilities`, Bedingungen und Belohnungen von Errungenschaften —
@@ -181,18 +165,16 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 502 Tests
+flutter test             # 408 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
-dart run tool/balance_sim.dart         # der alte Rundenkampf
 
-# Kampflogik allein, ohne Flutter
-cd packages/combat
-dart test                              # 130 Tests
-dart run example/play.dart             # Kampf im Terminal
-dart run example/balance_sim.dart      # nur die Engine, siehe Warnung unten
+# Die Grube allein, ohne Flutter
+cd packages/action_combat
+dart test                              # 111 Tests
+dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
@@ -209,11 +191,9 @@ cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
 
 **Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
-die Grube.** Der Rundenkampf in `packages/combat` ist nicht mehr
-erreichbar und wird gelöscht, sobald nichts mehr an ihm hängt — bis
-dahin wohnen dort noch `LadderProgress` und `LadderRewards`, und die
-Absätze unten zu Zügen, Timing und Sets beschreiben ihn. Drei Regeln der
-Grube stehen an je einer Stelle:
+die Grube.** Echtzeit, dreissig Stufen, jede Karte neu gesteckt. Der
+Rundenkampf ist gelöscht. Die Regeln der Grube stehen an je einer
+Stelle:
 
 | Frage | Antwortet |
 |---|---|
@@ -223,15 +203,15 @@ Grube stehen an je einer Stelle:
 | Was tut eine Fähigkeit in der Grube? | `PitAbilities` — **dieselbe Id** wie in `abilities`, sonst wirkt sie nicht |
 | Welche Plätze gehen mit? | `activeMovesProvider`, gefiltert in `ActionWorld` — was die Grube nicht kennt, fällt heraus |
 | Wie schlägt der Held? | `PitWeapons` — über den **Waffenzug** (`AbilityCatalog.weaponMoves`), nicht die Item-Id |
+| Auf welchen Tasten liegen die Angriffe? | `PitRunView` — 1–3 die Plätze, 4 Rundumschlag, Umschalt Sturmschritt |
 | Was ändern Sets und Legendäre? | `pitModifiersFor` in `lib/gear/set_effects.dart` — rechnet nichts, übersetzt nur |
 | Welche Kraft trägt ein legendäres Stück? | `GearItem.legendaryPower` (Id) → `PitLegendaries` (Wirkung) |
 
 **Ein Set oder eine Kraft verändert Daten, nicht die Welt.**
 `PitModifiers.apply` nimmt eine Fähigkeit und gibt eine neue zurück;
 `world.dart` sieht nur das Ergebnis. Die Art einer Fähigkeit
-(`PitKind`) steht am Eintrag und muss der des Rundenkampfs gleichen,
-sonst wirkte ein Set in einem Kampf und im anderen nicht —
-`test/pit_test.dart` prüft das, solange es `package:combat` gibt.
+(`PitKind`: Angriff, Umgebung, Schutz) steht am Eintrag — auf sie
+wirken die Sets.
 
 Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
 Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine
@@ -245,25 +225,19 @@ Ein neuer Raum kommt nach `room_catalog.dart`, genau 14 × 10, und
 und prüft jede Karte. Wer an den Stufen dreht, lässt
 `dart run tool/pit_sim.dart` laufen.
 
-**Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben stehen in
-`packages/combat/lib/src/balance.dart`, die Gegnerwerte in `enemy.dart`. Eine
-Zahl ändern, `dart run tool/balance_sim.dart` laufen lassen, Siegquoten
-vergleichen. Steht eine Zahl im Kampfcode statt in `balance.dart`, ist das ein
-Bug.
+**Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
+Grube stehen in `packages/action_combat/lib/src/balance.dart`, die Zahlen
+einer Fähigkeit oder Waffe an ihrem Eintrag. Eine Zahl ändern,
+`dart run tool/pit_sim.dart` laufen lassen, die Siegquoten je Stufe
+vergleichen. Der Bot dort ist dumm — die Quoten sind eine **untere**
+Schranke. Steht eine Zahl in `world.dart` statt in `balance.dart`, ist das
+ein Bug.
 
-**Es gibt zwei Simulationen, und sie beantworten verschiedene Fragen.**
-`tool/balance_sim.dart` ist die maßgebliche: Sie sieht `combat` **und**
-`habits` und spielt die echte Werte-Kurve gegen alle Gegner. Die Simulation
-im Combat-Package bewegt dagegen einen Wert und hält die übrigen fest — das
-tut das Spiel nie, und genau diese Verwechslung hat den ersten
-Balance-Befund des Projekts falsch gedeutet ([ADR-0009](docs/decisions/0009-kampfbalance-ueber-gegnerreihe.md)).
-Sie bleibt nützlich für Fragen an die Engine allein.
-
-**Ein Kampf muss enden.** `packages/combat/test/termination_test.dart` prüft
-das über Wertebereiche, die kein Beispielkampf abdeckt. Der Anlass war real:
-Heilung als Anteil der maximalen HP wuchs mit dem HP-Pool mit, während der
-Schaden gleich blieb — ab einer bestimmten Größe endete kein Kampf mehr.
-Details in `docs/context/gotchas.md`.
+**Ein Lauf muss enden.** `effects_and_weapons_test.dart` spielt jede Waffe
+und jede Fähigkeit einmal durch. Der Anlass stammt aus dem Rundenkampf:
+Heilung, die mit dem Leben wuchs, liess dort keinen Kampf mehr enden
+(`gotchas.md`). Heilung ist deshalb auch in der Grube ein Anteil, und
+Dauerschaden ein Vielfaches des Angriffs.
 
 **Theorie schreiben heißt testen lassen.** Eine neue Seite kommt nach
 `packages/theory/lib/src/content/`, ein neuer Knoten zusätzlich in
@@ -350,22 +324,18 @@ Drei Regeln bleiben an je einer Stelle:
 
 | Frage | Antwortet |
 |---|---|
-| Welche Art von Zug ist das? | `Move.kind` — abgeleitet, nie gesetzt |
-| Auf welche Züge wirkt ein Set? | `SetEffect.appliesTo` — passende Art **und** Energiekosten > 0 |
+| Welche Art von Fähigkeit ist das? | `PitAbility.kind` |
+| Was ändert ein Set in der Grube? | `pitModifiersFor` — übersetzt `SetPerk` in `PitModifier` |
 | Welche Sets liegen an? | `Loadout.activeSets` — gezählt, nie gespeichert |
 
-Die zweite Regel nimmt den **Waffenzug** aus, obwohl er als Angriff zählt.
-Das ist ADR-0009 ein zweites Mal: Ein Faktor auf den Zug, den man jede
-Runde drückt, entscheidet den Kampf allein. Wer daran dreht, lässt
-`flutter test test/gear_sets_seam_test.dart` laufen — dort steht es als
-Zusage.
+Ein Set wirkt nie auf den **Grundangriff**: Der ist keine Fähigkeit,
+sondern die Waffe. Ein Faktor auf das, was jede halbe Sekunde fällt,
+entschiede den Kampf allein (ADR-0009, einmal im Rundenkampf gemessen).
 
 **Die Waffe ist dabei der Sonderfall.** Sie ist der einzige Platz, dessen
-Stück eine **Fähigkeit** mitbringt, und keine zwei tragen dieselbe
-(ADR-0017, Punkt 2). Eine neunte Waffe braucht deshalb einen neunten
-Zug, der Energie *erzeugt* — sonst fällt `test/abilities_seam_test.dart`
-um. Ob die acht Rhythmen sich wirklich unterscheiden, misst
-`dart run tool/balance_sim.dart` im Abschnitt „Siegquote je Waffe".
+Stück den **Grundangriff** bestimmt (`PitWeapons`), und keine zwei
+schlagen gleich. Eine neunte Waffe braucht deshalb einen neunten Zug in
+`PitWeapons` — sonst fällt `test/abilities_seam_test.dart` um.
 
 **Episch und Legendär sind verdient, nicht nur gekauft**
 ([ADR-0034](docs/decisions/0034-episch-und-legendaer-haengen-an-der-gegnerreihe.md)).
@@ -377,54 +347,33 @@ ganzen Katalog kaufen, setzen ihn auf `GearGates.legendaryRung`. Dass
 die Sprossen in der Reihe existieren, prüft
 `flutter test test/gear_gates_seam_test.dart`.
 
-**Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Engine.**
-Alle fünfzehn stehen in `packages/combat/lib/src/ability_moves.dart`, ihre
-Bedingungen in `packages/abilities` ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md)).
-Feste Zahlen aus einer Vorlage werden mit `power = Wert / 16` umgerechnet —
-sonst hängt die Fähigkeit nicht mehr am Angriffswert und damit nicht mehr
-an den Gewohnheiten. Dauerschaden ist immer ein Vielfaches des
-Angriffswerts, nie eine feste HP-Zahl.
+**Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Welt.**
+Alle neunzehn stehen in `packages/action_combat/lib/src/pit_ability.dart`,
+ihre Bedingungen in `packages/abilities` ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md), ADR-0039).
+Schaden ist immer `Angriff × power` — sonst hängt die Fähigkeit nicht mehr
+am Angriffswert und damit nicht mehr an den Gewohnheiten. Dauerschaden ist
+ein Vielfaches des Angriffs, Heilung ein Anteil des Lebens, nie eine
+feste Zahl.
 
 Die Vorlage selbst liegt seit dem 26.08. im Repo:
 [`docs/vorlagen/faehigkeiten.md`](docs/vorlagen/faehigkeiten.md). Sie sagt,
-was eine Fähigkeit **sein soll** — Wirkung, Timing, Icon, Animation. Sie ist
-nicht die Quelle der Wahrheit für die Zahlen (das ist der Katalog), aber sie
-hält fest, was davon noch fehlt und warum drei Umrechnungen dazwischen
-liegen.
+was eine Fähigkeit **sein soll** — Wirkung, Icon, Animation. Sie wurde für
+den Rundenkampf geschrieben; ihre Timing-Angaben gelten in der Grube
+nicht. Quelle der Wahrheit für die Zahlen ist der Katalog.
 
-**Der eigene Perfect-Faktor gilt nur für Fähigkeiten.** Basisangriff und
-Waffenmoves lassen `perfectFactor` auf `null` und bleiben beim Deckel aus
-`balance.dart` — dort galt die Messung aus ADR-0009. Wer das ändert, lässt
-`cd packages/combat ; dart test` laufen; ein Test hält es fest.
+**Ein Feld, das Verhalten steuern soll, braucht einen Test auf das
+Verhalten.** Im Rundenkampf wurde `EnemyBlueprint.loadout` lange gepflegt
+und nirgends gelesen (`gotchas.md`). Deshalb prüft `pit_test.dart`, dass
+eine Stufe die Gegner **wirklich** härter macht, nicht nur, dass der
+Faktor steigt.
 
-**Der Gegner spielt nach denselben Regeln wie der Spieler**
-([ADR-0023](docs/decisions/0023-der-gegner-spielt-nach-denselben-regeln.md)).
-Er tippt (eine zufällige Stelle, gewertet mit denselben Fenstern), er kann
-perfekt treffen, und er greift manchmal zu Schutz oder Umgebung — mit einer
-Quote je Gegner in `enemy.dart`. Zwei Regeln stehen deshalb an genau einer
-Stelle, und dort müssen sie bleiben:
-
-| Frage | Antwortet |
-|---|---|
-| Wird bei diesem Zug getippt? | `Move.hasTimingWindow` |
-| Was ist eine Stelle auf der Leiste wert? | `TimingSpec.judgeAt` |
-
-`hasTimingWindow` ist **abgeleitet**, nicht gesetzt: Wer einer Fähigkeit
-eine Perfect-Wirkung gibt, gibt ihr damit auch die Leiste. Wer eine ohne
-Perfect-Wirkung baut, bekommt bewusst keine — *Sammeln* und *Atemzug* sind
-genau dieser Fall.
-
-**Ein Feld am Gegner, das Verhalten steuern soll, braucht einen Test auf
-das Verhalten.** `EnemyBlueprint.loadout` wurde jahrelang gepflegt und
-nirgends gelesen; jeder Gegner kämpfte mit dem Standard-Moveset, und die
-Staffelung aus ADR-0022 galt im Code nicht. Details in `gotchas.md`.
-
-**Der Kampf hängt am Moveset, und das ist eine gemessene Zahl.**
-Mit nur einem Move ist der erste Gegner unschlagbar (0 % in der
-Simulation), mit zweien sicher (100 %). Seit
-[ADR-0025](docs/decisions/0025-handbuch-sperrt-den-baum.md) ist das die
-**einzige** Bedingung: `combatUnlockedProvider` fragt nur noch das
-Moveset.
+**Die Grube hängt am Moveset** — Waffe plus eine Fähigkeit
+(`lib/action/pit_gate.dart`). Gemessen wurde die Zahl im Rundenkampf, wo
+ein einzelner Zug den ersten Gegner unschlagbar machte. In der Grube ist
+Stufe 1 auch ohne Fähigkeit schlagbar; die Sperre bleibt, weil sie die
+Kette trägt, und ADR-0039 vermerkt sie als offen. Seit
+[ADR-0025](docs/decisions/0025-handbuch-sperrt-den-baum.md) ist sie die
+**einzige** Bedingung.
 
 **Das Handbuch sperrt dafür den Baum.** Solange es offen ist, *ist* es
 der Theorie-Bildschirm. Die Kette greift damit unverändert — ohne
@@ -455,32 +404,24 @@ wird. `flutter test test/progression_test.dart` spielt alles durch und meldet
 genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 
 **Der Kampf zahlt seit [ADR-0032](docs/decisions/0032-gegnerreihe-statt-dungeon.md)
-ein — aber genau einmal je Gegner.** Bis dahin gab er ausdrücklich
+ein — aber genau einmal je Stufe.** Bis dahin gab er ausdrücklich
 nichts: `konzept.md` Abschnitt 2 macht ihn zur Auszahlung des
 Fortschritts, nicht zu seiner Quelle. Der Einwand galt jedoch nur
-*wiederholbarer* Belohnung. Die Reihe hat dreißig Sprossen, jede zahlt
+*wiederholbarer* Belohnung. Die Grube hat dreißig Stufen, jede zahlt
 einmal, und der Gesamtbetrag steht deshalb als Zahl fest
 (`LadderRewards.lifetimeXp`). Wer daran dreht, lässt
 `flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
 mit in den vier Kurven.
 
-**Die Reihe steigt in ihren Werten stetig, in der Siegquote nicht.**
-`enemy_ladder_test.dart` prüft das Erste und kann das Zweite nicht: Wo
-das Gegner-Moveset von Uncommon auf Rare wechselt (Sprosse 17), wird der
-Kampf gemessen *leichter*, weil Rare-Züge mehr Energie kosten, als der
-Gegner dort hat. Wer die Reihe anfasst, lässt
-`dart run tool/balance_sim.dart` laufen und sieht im Abschnitt „Die
-Reihe" nach.
-
 **Der Kern-Loop verbindet alle acht Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
-eine Fähigkeit mit (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
-gehen in den Kampf (`combat`), und alles zusammen verdient
+den Grundangriff mit, der Baum die Fähigkeiten (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
+gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und vier
 Fähigkeiten vergeben.
 
-Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -490,13 +431,12 @@ Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
 | `achievementStatsProvider` | **die breiteste** — alle vier Bereiche für die Errungenschaften |
 | `earnedTitleIdsProvider` | welche Titel verdient sind (ADR-0033) |
 | `abilityProgressProvider` | Waffe, Streak, Theorie **und Errungenschaft** für die Freischaltung |
-| `activeMovesProvider` | das Moveset, mit dem gekämpft wird |
+| `activeMovesProvider` | die Ids, mit denen in die Grube gegangen wird — Waffenzug zuerst |
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
-| `combatUnlockedProvider` | ob der Kampf offensteht (ADR-0020) |
+| `combatUnlockedProvider` | ob die Grube offensteht (ADR-0020) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
-| `ladderProvider` | wie weit die Gegnerreihe gegangen ist (ADR-0032) |
-| `nextEnemyProvider` | **die einzige Stelle**, die „welcher Gegner" beantwortet |
+| `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt
@@ -521,7 +461,7 @@ an je einer Stelle:
 **Jede Zahl in `AchievementStats` darf nur steigen.** Eine, die fallen
 kann, macht eine Errungenschaft zurücknehmbar — deshalb steht dort die
 längste Kette statt der laufenden, „je besessen" statt „getragen", die
-höchste Sprosse statt der nächsten. Wer eine ergänzt, lässt
+höchste Stufe statt der nächsten. Wer eine ergänzt, lässt
 `flutter test test/achievements_seam_test.dart` laufen.
 
 **`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
@@ -531,18 +471,16 @@ nicht den Baum.
 
 `activeMovesProvider` ist die einzige Stelle, an der die Freischaltbedingung
 für Fähigkeiten **gilt** — der Spielstand hält eine Wahl, geprüft wird
-beim Zusammenstellen. In den Kampf gehen sie ausschließlich über
-`_freshFight()` in `combat_controller.dart`, und das Moveset friert dort
-beim Start ein.
+beim Zusammenstellen. In die Grube gehen sie ausschließlich über
+`PitScreen._neuerLauf`, und die Plätze frieren dort beim Betreten ein.
 
 **Fähigkeiten hängen an Ids, und Ids können ins Leere zeigen.**
-`packages/abilities` kennt weder `combat` noch `gear` — es hält nur
-Move-Ids und Waffen-Ids. Was daraus wird, prüft
-`test/abilities_seam_test.dart` in der App: jede Move-Id kommt in
-`combat` an, jede Waffe im Laden bringt eine Fähigkeit mit, **keine zwei
-Waffen dieselbe**, und jeder Waffenmove **erzeugt** Energie. Der letzte
-Punkt ist keine Kosmetik:
-Auf Level 1 ist nur der Waffenslot offen
+`packages/abilities` kennt weder `action_combat` noch `gear` — es hält nur
+Move-Ids und Waffen-Ids. Was daraus wird, prüfen
+`test/abilities_seam_test.dart` und `test/pit_test.dart` in der App: jede
+lernbare Id wirkt in der Grube, jede Waffe im Laden wird ein
+Grundangriff, **keine zwei schlagen gleich**, und kein Waffenzug ist
+zugleich eine Fähigkeit. Auf Level 1 ist nur der Waffenplatz offen
 ([ADR-0017](docs/decisions/0017-faehigkeitskatalog-aus-drei-quellen.md)).
 
 **Der Entwicklermodus ist nur im Debug-Build vorhanden** und arbeitet auf
@@ -572,8 +510,8 @@ Text, und der meldet sich nie. Wer eine Farbe ändert, lässt
 Kontrastgrenzen als Zusage.
 
 **Alles Gezeichnete liegt auf 64 × 64 und wird als 256 × 256 abgelegt.**
-Die beiden Zahlen stehen in `PixelArt`; `MoveIcons`, `GearIcons` und
-`EnemyIcons` lesen sie dort. Eine Zeichnung fester Größe kommt über
+Die beiden Zahlen stehen in `PixelArt`; `MoveIcons` und `GearIcons`
+lesen sie dort. Eine Zeichnung fester Größe kommt über
 `PixelArt` ins Bild und nicht über `Image.asset` — dort hängt die
 Entscheidung „hart oder weich skalieren" an einer Zahl, und unterhalb der
 Zeichengröße ist hart der schlimmere Fall: Bildpunkte fallen dann einfach
@@ -586,7 +524,6 @@ Welche Datei zu welchem Ding gehört, steht in je einer Tabelle:
 |---|---|
 | Welches Bild trägt ein Ausrüstungsstück? | `GearIcons` — Item-Id → **Pfad** |
 | Welches Bild trägt ein Zug? | `MoveIcons` |
-| Welches Bild trägt ein Gegner? | `EnemyIcons` |
 | Welche Fläche trägt ein Bereichskreis? | `HubCircleImage` |
 
 **Die Zeichnungen liegen nach Art sortiert** (`assets/Waffen/Schwerter/`,

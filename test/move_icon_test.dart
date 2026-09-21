@@ -1,8 +1,8 @@
 import 'package:abilities/abilities.dart';
-import 'package:combat/combat.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/move_icon.dart';
+import 'package:lifes_game/action/pit_text.dart';
 
 /// Die Bilder auf den Move-Knöpfen im Kampf.
 ///
@@ -18,9 +18,10 @@ void main() {
     test('kein Bild zeigt auf einen Zug, den es nicht gibt', () {
       for (final id in MoveIcons.moveIds) {
         expect(
-          Moves.byId(id),
+          pitNameOf(id),
           isNotNull,
-          reason: 'Fuer "$id" gibt es ein Bild, aber keinen Move.',
+          reason:
+              'Fuer "$id" gibt es ein Bild, aber die Grube kennt die Id nicht.',
         );
       }
     });

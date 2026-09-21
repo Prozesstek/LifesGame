@@ -1,6 +1,6 @@
 import 'package:abilities/abilities.dart';
 import 'package:achievements/achievements.dart';
-import 'package:combat/combat.dart';
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
@@ -72,7 +72,7 @@ void main() {
       for (final achievement in AchievementCatalog.all) {
         final id = achievement.moveId;
         if (id == null) continue;
-        expect(Moves.byId(id), isNotNull, reason: achievement.id);
+        expect(PitAbilities.byId(id), isNotNull, reason: achievement.id);
       }
     });
 
@@ -230,10 +230,7 @@ void main() {
       // Platz — sonst fiele der Move hier still heraus, und der Test
       // prüfte nichts.
       expect(container.read(playerLevelProvider).level, greaterThan(2));
-      expect(
-        container.read(activeMovesProvider).map((m) => m.id),
-        contains('heavy_attack'),
-      );
+      expect(container.read(activeMovesProvider), contains('heavy_attack'));
     });
   });
 

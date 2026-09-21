@@ -10,13 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Kampflogik. Reines Dart, ohne Flutter- oder Flame-Abhaengigkeit.
-  # Siehe ADR-0002 und ADR-0003.
-  combat:
-    path: packages/combat
-
-  # Echtzeit-Kampf als **Prototyp** (Issue #48). Steht neben `combat`,
-  # nicht an seiner Stelle -- erreichbar nur ueber den Entwicklermodus.
+  # Die Grube -- der Kampf des Spiels (ADR-0039). Reines Dart, ohne
+  # Flutter- oder Flame-Abhaengigkeit, dieselbe Naht wie ADR-0002.
   action_combat:
     path: packages/action_combat
 
