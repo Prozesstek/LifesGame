@@ -135,6 +135,10 @@ class ActionGame extends Game {
           if (event.amount > 0) {
             _popups.add(DamagePopup.forHeal(event.amount, event.at));
           }
+        case BossSlammed():
+          _bursts.add(Burst.slam(event.at, event.radius));
+        case BossEnraged():
+          _bursts.add(Burst.slam(event.at, 60));
         case RunEnded():
           _endeGemeldet = true;
       }
@@ -193,6 +197,7 @@ class ActionGame extends Game {
     _drawStatus(canvas);
     _drawProjectiles(canvas);
     _drawWard(canvas, held);
+    _drawTelegraphs(canvas);
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
     if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
@@ -478,6 +483,59 @@ class ActionGame extends Game {
   ///
   /// Ohne ihn wüsste man nicht, ob die Fähigkeit noch wirkt — die
   /// Schadenszahlen werden nur kleiner, und das sieht niemand im Gewühl.
+  /// Was der Wächter ankündigt: ein Ring oder eine Linie, rot, die sich
+  /// füllt, bis es trifft.
+  ///
+  /// **Deutlich, nicht hübsch.** Die ganze Fairness der Angriffe hängt
+  /// daran, dass man sie sieht — ein dezenter Ring im Gewühl wäre so gut
+  /// wie keiner.
+  void _drawTelegraphs(Canvas canvas) {
+    for (final zone in sim.telegraphs) {
+      final mitte = Offset(zone.origin.x, zone.origin.y);
+      final fuellung = Paint()
+        ..color = Palette.enemy.withValues(alpha: 0.12 + 0.28 * zone.progress);
+      final kante = Paint()
+        ..color = Palette.enemyOnDark
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+
+      if (zone.isRing) {
+        canvas.drawCircle(mitte, zone.radius, fuellung);
+        canvas.drawCircle(mitte, zone.radius, kante);
+        // Der innere Kreis wächst bis zum Rand — dann trifft es.
+        canvas.drawCircle(
+          mitte,
+          zone.radius * zone.progress,
+          Paint()
+            ..color = Palette.enemyOnDark.withValues(alpha: 0.5)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+        continue;
+      }
+
+      final ende = Offset(
+        zone.origin.x + zone.direction.x * zone.length,
+        zone.origin.y + zone.direction.y * zone.length,
+      );
+      canvas.drawLine(
+        mitte,
+        ende,
+        Paint()
+          ..color = Palette.enemy.withValues(alpha: 0.15 + 0.3 * zone.progress)
+          ..strokeWidth = zone.radius * 2
+          ..strokeCap = StrokeCap.round,
+      );
+      canvas.drawLine(
+        mitte,
+        Offset.lerp(mitte, ende, zone.progress) ?? mitte,
+        Paint()
+          ..color = Palette.enemyOnDark.withValues(alpha: 0.6)
+          ..strokeWidth = 3,
+      );
+    }
+  }
+
   void _drawWard(Canvas canvas, EntityView held) {
     if (!sim.isWarded) return;
     canvas.drawCircle(

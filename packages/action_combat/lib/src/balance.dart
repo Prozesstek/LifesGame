@@ -180,6 +180,52 @@ abstract final class ActionBalance {
   static const double bossAttackRange = 46;
   static const double bossAttackCooldown = 1.6;
 
+  // --- Die Angriffe des Wächters (ADR-0039, Schritt 4) ---
+  //
+  // **Jeder ist angekündigt.** Seit es keinen Sturmschritt mehr gibt, muss
+  // man jedem durch Laufen entkommen können: Die Ankündigung dauert länger,
+  // als der Held braucht, um aus dem Ring zu laufen (95 Punkte bei 120 je
+  // Sekunde sind 0,8 s — der Ring füllt sich in 1,0 s).
+
+  /// Bodenstoss: ein Ring um den Wächter, der sich füllt, dann trifft.
+  static const double bossSlamRadius = 95;
+  static const double bossSlamWindup = 1.0;
+  static const double bossSlamPower = 1.8;
+  static const double bossSlamCooldown = 5.5;
+
+  /// Felswurf: ein grosser, langsamer Brocken — seitlich ausweichen.
+  static const double bossThrowCooldown = 5.0;
+  static const double bossThrowPower = 1.2;
+  static const double bossBoulderSpeed = 150;
+  static const double bossBoulderRadius = 12;
+
+  /// Wann nach dem Bemerken der erste Wurf kommt.
+  static const double bossFirstThrow = 0.5;
+
+  /// Ab welchem Abstand er wirft statt zu laufen — näher dran stampft er.
+  static const double bossThrowMinRange = 110;
+
+  /// Ansturm: erst ab halbem Leben. Eine Linie zeigt die Richtung, dann
+  /// rennt er los, bis zur Wand oder bis die Zeit um ist.
+  static const double bossChargeWindup = 0.8;
+  static const double bossChargeSpeed = 330;
+  static const double bossChargeDuration = 0.6;
+  static const double bossChargePower = 1.8;
+  static const double bossChargeCooldown = 7;
+
+  /// **Er lernt mit der Tiefe dazu.** Auf Stufe 1 stampft er nur; ab
+  /// diesen Stufen kommen Felswurf und Ansturm hinzu. Mit allen dreien
+  /// schaffte ein frischer Charakter Stufe 1 nur noch zu 40 % statt 90 %
+  /// — und das wäre sein allererster Kampf. So wird der Wächter auf dem
+  /// Weg nach unten sichtbar gefährlicher, statt es von Anfang an zu sein.
+  static const int bossThrowFromStage = 4;
+  static const int bossChargeFromStage = 8;
+
+  /// Unter diesem Anteil seines Lebens wird er wütend: Ansturm kommt dazu,
+  /// und alle Abklingzeiten laufen so viel schneller ab.
+  static const double bossEnrageAt = 0.5;
+  static const double bossEnrageTempo = 1.5;
+
   /// Ab welcher Entfernung ein Gegner den Helden bemerkt.
   ///
   /// Kein ganzer Raum: Die Halle soll sich in Wellen anfühlen, nicht als

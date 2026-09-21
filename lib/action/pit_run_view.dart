@@ -194,7 +194,11 @@ class _Hud extends StatelessWidget {
               PitBar(
                 ratio: boss.hpRatio,
                 color: Palette.enemyOnDark,
-                label: 'Der Wächter',
+                // Wut ändert, was er tut — das soll man lesen können, nicht
+                // erst merken, wenn er anstürmt.
+                label: sim.isBossEnraged
+                    ? 'Der Wächter · wütend'
+                    : 'Der Wächter',
               ),
             ],
           ],

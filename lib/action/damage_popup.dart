@@ -116,6 +116,17 @@ class Burst {
     );
   }
 
+  /// Die rote Welle des Bodenstosses — der Moment, in dem es trifft.
+  factory Burst.slam(Vec2 at, double radius) {
+    return Burst(
+      at: at,
+      color: Palette.enemy,
+      maxRadius: radius,
+      lifetime: 0.4,
+      strokeWidth: 6,
+    );
+  }
+
   /// Der goldene Ring eines Flächentreffers, so gross wie sein [radius].
   factory Burst.cleave(Vec2 at, double radius) {
     return Burst(

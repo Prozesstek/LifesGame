@@ -80,11 +80,12 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 109 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 121 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
+| `packages/action_combat/lib/src/boss.dart` | **der Wächter**: Bodenstoss, Felswurf, Ansturm, Wut — und was er ankündigt | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
@@ -173,7 +174,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 109 Tests
+dart test                              # 121 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -222,7 +223,15 @@ lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 
 **Fünf Gegnerarten** (`EnemyKind`): Fussvolk `e`, Schütze `s`, Kobold `k`
 (schneller als der Held), Troll `t` (gross, zäh, setzt meist der
-Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`. Ihre Zahlen
+Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
+seinem Raum**.
+
+**Jeder Angriff des Wächters ist angekündigt** (`TelegraphView`: ein Ring
+oder eine Linie, die sich füllt) und lässt sich durch Laufen umgehen — es
+gibt keinen Sturmschritt mehr. Wer einen Angriff dazubaut, gibt ihm eine
+Ankündigung, die länger dauert als der Weg hinaus; `boss_test.dart` prüft
+das für den Bodenstoss. Welche Angriffe er kennt, hängt an der Stufe
+(`bossThrowFromStage`, `bossChargeFromStage`). Ihre Zahlen
 stehen in `ActionBalance`, ihr Bild in `GrubeFiguren`.
 
 Ein neuer Raum kommt nach `room_catalog.dart`, genau 14 × 10, und

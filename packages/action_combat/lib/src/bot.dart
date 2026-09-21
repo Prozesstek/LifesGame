@@ -8,7 +8,8 @@ import 'world.dart';
 ///
 /// **Bewusst dumm.** Er läuft auf den nächsten Gegner zu und drückt seine
 /// Plätze nach der Art ihrer Wirkung — Fläche bei einer Traube, Heilung
-/// bei wenig Leben. Er weicht keinem Pfeil aus, er kitet
+/// bei wenig Leben. Aus einer Ankündigung des Wächters läuft er heraus;
+/// einem Felswurf weicht er nicht aus. Er weicht keinem Pfeil aus, er kitet
 /// nicht, er sammelt Heilkugeln nur ein, wenn sie zufällig im Weg liegen.
 /// Alles, was ein Mensch besser macht, fehlt — Zahlen aus seinen Läufen
 /// sind eine **untere** Schranke, genau wie bei `tool/balance_sim.dart`.
@@ -74,6 +75,24 @@ abstract final class PitBot {
   /// nicht hinaus.
   static Vec2 _input(ActionWorld welt) {
     final held = welt.heroView;
+
+    // **Zuerst raus aus jeder Ankündigung des Wächters** — das Einzige,
+    // was dieser Bot vorausschauend tut. Ohne das misst die Simulation
+    // einen Spieler, der jeden Bodenstoss voll nimmt, und der Wächter
+    // wäre für sie viel härter, als er für einen Menschen ist.
+    for (final zone in welt.telegraphs) {
+      if (!zone.covers(held.position, held.radius)) continue;
+      if (zone.isRing) {
+        final weg = held.position - zone.origin;
+        return weg.isZero ? const Vec2(1, 0) : weg.normalized;
+      }
+      // Zur Seite, auf die kürzere.
+      final quer = Vec2(-zone.direction.y, zone.direction.x);
+      final seite = (held.position - zone.origin).x * quer.x +
+          (held.position - zone.origin).y * quer.y;
+      return seite >= 0 ? quer : quer * -1;
+    }
+
     Vec2? ziel;
     var beste = 1 << 29;
 

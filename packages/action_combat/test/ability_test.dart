@@ -109,7 +109,20 @@ void main() {
     });
 
     test('eine eingesammelte Kugel heilt', () {
-      final welt = _welt(_traube, stats: ActionStats.frisch);
+      // Der Wächter steht hier weit hinten: Mit Bodenstoss und Felswurf
+      // (ADR-0039, Schritt 4) machte er einen frischen Helden sonst
+      // nieder, bevor der eine Kugel aufsammelt — und dieser Test prüft
+      // Kugeln, nicht den Wächter.
+      final welt = _welt(
+        Level.parse('Traube, Wächter hinten', const <String>[
+          '##############################',
+          '#....ee......................#',
+          '#@...ee......................#',
+          '#....e......................B#',
+          '##############################',
+        ]),
+        stats: ActionStats.frisch,
+      );
       // Erst Schaden nehmen, sonst gibt es nichts zu heilen.
       while (!welt.isOver && welt.heroHpRatio > 0.7 && welt.elapsed < 60) {
         welt.step(_zumNaechstenGegner(welt));
