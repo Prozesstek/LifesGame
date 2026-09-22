@@ -3,6 +3,31 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Achsen getrennt prüfen bleibt an Ecken hängen
+
+`_slide` in der Grube prüfte x und y getrennt und verwarf eine Achse, die
+in eine Wand lief. An einer glatten Wand ist das Entlanggleiten — an einer
+**Ecke** nicht: Ein Kreis, der schräg auf eine Kante zuläuft, wird in
+beiden Achsen gestoppt oder in einer, und schieben ihn im Gedränge die
+Nachbarn dagegen, kommt er nie wieder los.
+
+Gemeldet war „Gegner bleiben an Ecken hängen". Gesehen hat man es erst
+mit einer Messung: ein Held, den nichts umbringt, läuft durch gebaute
+Gruben, und gezählt wird, wer ihm folgt und eine Sekunde lang nicht
+vorankommt.
+
+**Abhilfe:** erst bewegen, dann den Kreis aus jeder geschnittenen Wand
+herausdrücken — entlang der Richtung vom nächsten Wandpunkt zur Mitte.
+An einer Ecke zeigt sie schräg, und die Figur rutscht um die Kante. In
+Teilschritten von einem halben Radius, damit nichts durch eine Ecke
+tunnelt.
+
+**Und die zweite Lehre daraus:** Ein Wegfeld in Feldern kennt keine
+Körperbreite. Der Troll ist 36 Punkte breit, ein Feld 32 — das Feld
+schickte ihn durch Gänge, durch die er nicht passt. Wer eine Figur
+breiter als ein Feld baut, braucht ein Wegfeld, das nur Felder in
+freien 2 × 2-Blöcken kennt (`FlowField.from(wide: true)`).
+
 ## Flames `GameWidget` verschluckt jede Taste
 
 Die Grube hört auf Tasten über ein `Focus` um das Spielfeld herum

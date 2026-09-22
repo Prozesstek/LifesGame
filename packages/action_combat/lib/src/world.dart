@@ -501,6 +501,7 @@ class ActionWorld {
     const takt = 0.5;
     for (final ziel in _entities) {
       if (!ziel.isAlive || ziel.isHero) continue;
+      if (ziel.ghostLeft > 0) ziel.ghostLeft -= dt;
       if (ziel.slowLeft > 0) ziel.slowLeft -= dt;
       if (ziel.dotLeft <= 0) continue;
 
@@ -650,6 +651,7 @@ class ActionWorld {
         richtung * (gegner.speed * takt),
         gegner.radius,
       );
+      _trackProgress(gegner, takt);
       return;
     }
 
@@ -692,6 +694,7 @@ class ActionWorld {
           richtung * (schuetze.speed * dt),
           schuetze.radius,
         );
+        _trackProgress(schuetze, dt);
       }
       return;
     }
@@ -895,10 +898,68 @@ class ActionWorld {
 
   /// Verschiebt [from] um [delta] und bleibt dabei aus Wänden heraus.
   ///
-  /// Die beiden Achsen werden getrennt geprüft. Das kostet nichts und
-  /// erledigt das Entlanggleiten an einer Wand nebenbei — ohne es rutscht
-  /// man an jeder Ecke fest, und ein Gang wird unpassierbar.
+  /// **Erst bewegen, dann aus der Wand drücken** — entlang der Richtung
+  /// vom nächsten Wandpunkt zur Mitte. An einer glatten Wand ist das
+  /// Entlanggleiten, an einer **Ecke** zeigt diese Richtung schräg, und
+  /// die Figur rutscht um die Kante herum.
+  ///
+  /// Vorher wurden die Achsen getrennt geprüft und eine blockierte einfach
+  /// verworfen. An einer Ecke hiess das: stehen bleiben, und im Gedränge
+  /// vor einer Tür nie wieder loskommen. Ein Troll, breiter als ein Feld,
+  /// hing so an jedem Durchgang, dessen Feldmitte zu nah an der Wand lag.
+  ///
+  /// In Teilschritten von höchstens einem halben Radius, damit nichts
+  /// durch eine Ecke tunnelt; wo sich eine Überlappung nicht auflösen
+  /// lässt (ein Durchgang schmaler als die Figur), gilt die alte Regel.
   Vec2 _slide(Vec2 from, Vec2 delta, double radius) {
+    final laenge = delta.length;
+    if (laenge == 0) return from;
+    final schritte = math.max(1, (laenge / (radius * 0.5)).ceil());
+    final teil = delta * (1 / schritte);
+
+    var position = from;
+    for (var i = 0; i < schritte; i++) {
+      position = _pushOut(position + teil, radius) ??
+          _slideAxes(position, teil, radius);
+    }
+    return position;
+  }
+
+  /// Drückt einen Kreis aus allen Wänden, die er schneidet. Null, wenn
+  /// das nicht gelingt — dann steckt er fest oder wäre eingeklemmt.
+  Vec2? _pushOut(Vec2 center, double radius) {
+    const size = ActionBalance.tileSize;
+    var p = center;
+    for (var runde = 0; runde < 4; runde++) {
+      var geschoben = false;
+      final vonX = ((p.x - radius) / size).floor();
+      final bisX = ((p.x + radius) / size).floor();
+      final vonY = ((p.y - radius) / size).floor();
+      final bisY = ((p.y + radius) / size).floor();
+      for (var y = vonY; y <= bisY; y++) {
+        for (var x = vonX; x <= bisX; x++) {
+          if (!_level.isWallAt(x, y)) continue;
+          final nah = Vec2(
+            p.x.clamp(x * size, (x + 1) * size),
+            p.y.clamp(y * size, (y + 1) * size),
+          );
+          final weg = p - nah;
+          final abstand = weg.length;
+          if (abstand >= radius) continue;
+          // Die Mitte liegt in der Wand: keine Richtung, nach der man
+          // drücken könnte.
+          if (abstand == 0) return null;
+          p = p + weg * ((radius - abstand) / abstand);
+          geschoben = true;
+        }
+      }
+      if (!geschoben) return p;
+    }
+    return _hitsWall(p, radius - 0.01) ? null : p;
+  }
+
+  /// Die alte Regel: Achsen getrennt, eine blockierte fällt aus.
+  Vec2 _slideAxes(Vec2 from, Vec2 delta, double radius) {
     var position = from;
 
     final nachX = Vec2(position.x + delta.x, position.y);
