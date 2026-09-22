@@ -1,7 +1,7 @@
 # ADR-0008: Gewohnheiten als eigenes Package, Erfahrung abgeleitet statt gezählt
 
 **Datum:** 12.08.2026
-**Status:** Aktiv
+**Status:** Aktiv — ergänzt durch [ADR-0042](0042-macht-vervielfacht.md): Die Werte bleiben additiv und gedeckelt, im Kampf vervielfachen sie Level und Seltenheit
 **Entschieden von:** Frederik
 
 ## Kontext

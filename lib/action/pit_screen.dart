@@ -15,6 +15,7 @@ import '../gear/set_effects.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'action_game.dart';
+import 'hero_power.dart';
 import 'pit_run_view.dart';
 
 /// Ein Lauf durch eine Stufe der Grube — der Kampf des Spiels (ADR-0039).
@@ -56,7 +57,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
   ActionGame _neuerLauf() {
     final seed = _wuerfel.nextInt(1 << 30);
-    final werte = ref.read(equippedStatsProvider);
+    final werte = ref.read(heroPowerProvider).stats;
 
     // **Die Plätze kommen aus `activeMovesProvider`** — der einzigen
     // Stelle, an der die Freischaltung einer Fähigkeit gilt. Eine
@@ -76,12 +77,12 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
     final welt = ActionWorld(
       level: LevelBuilder.build(stage: widget.stage, seed: seed),
-      heroStats: ActionStats(
-        attack: werte.attack,
-        maxHp: werte.maxHp,
-        defense: werte.defense,
-        energy: werte.maxEnergy,
-      ),
+      // Der Rest des Topfs — je Gegner ein Teil, der Wächter den Rest
+      // (ADR-0041).
+      rewardPot: ref.read(ladderProvider.notifier).potFor(widget.stage.number),
+      // Werte, Level und Seltenheit — zusammengesetzt an einer Stelle
+      // (ADR-0042).
+      heroStats: werte,
       stage: widget.stage,
       abilityIds: plaetze,
       weaponMoveId: waffe,

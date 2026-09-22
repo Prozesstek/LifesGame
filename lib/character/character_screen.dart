@@ -5,6 +5,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
+import '../action/hero_power.dart';
 import '../achievements/achievements_card.dart';
 import '../achievements/achievements_controller.dart';
 import '../dev/dev_controller.dart';
@@ -95,6 +96,8 @@ class CharacterScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 const _SectionTitle('Werte im Kampf'),
                 const SizedBox(height: 10),
+                const _PowerCard(),
+                const SizedBox(height: 8),
                 for (final stat in HabitStat.values) ...<Widget>[
                   _StatRow(stat: stat, stats: stats),
                   const SizedBox(height: 8),
@@ -207,6 +210,73 @@ class CharacterScreen extends ConsumerWidget {
     if (selection == null) return;
 
     ref.read(identityProvider.notifier).chooseTitle(selection.titleId);
+  }
+}
+
+/// Womit der Held in die Grube geht — die Zahlen, die der Kampf führt,
+/// und die Faktoren dahinter (ADR-0042). Darunter stehen die Werte, aus
+/// denen sie wachsen.
+class _PowerCard extends ConsumerWidget {
+  const _PowerCard();
+
+  static String _faktor(double f) =>
+      '×${f.toStringAsFixed(2).replaceAll('.', ',')}';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final macht = ref.watch(heroPowerProvider);
+    final s = macht.stats;
+
+    return HolzKarte(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              for (final (name, wert) in <(String, int)>[
+                ('Angriff', s.combatAttack),
+                ('Leben', s.combatMaxHp),
+                ('Abwehr', s.combatDefense),
+              ])
+                Expanded(
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        '$wert',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.text,
+                        ),
+                      ),
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Palette.textDim,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Level ${_faktor(macht.levelFactor)} · '
+            'Waffe ${_faktor(macht.weaponFactor)} · '
+            'Rüstung ${_faktor(macht.armorFactor)}',
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, color: Palette.textDim),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -57,15 +57,17 @@ class ActionWorld {
       faction: Faction.held,
       kind: EnemyKind.keiner,
       position: level.heroStart,
-      maxHp: heroStats.maxHp,
-      attack: heroStats.attack,
-      defense: heroStats.defense,
+      // Die Zahlen, wie die Grube sie führt (ADR-0042): mal zehn und mal
+      // Level und Seltenheit. Der Schaden rechnet danach mit dem blossen
+      // Angriff weiter, der Faktor steckt schon darin.
+      maxHp: heroStats.combatMaxHp,
+      attack: heroStats.combatAttack,
+      defense: heroStats.combatDefense,
       radius: ActionBalance.heroRadius,
       speed: ActionBalance.heroSpeed,
       attackRange: weapon.range,
       attackCooldown: heroStats.attackCooldown * weapon.cooldownFactor,
-      damageMultiplier: heroStats.damageMultiplier,
-      critChance: heroStats.critChance,
+      critChance: heroStats.critChance + ActionBalance.heroBaseCritChance,
       critFactor: heroStats.critFactor,
     );
     _entities.add(_hero);
@@ -1502,19 +1504,24 @@ class ActionWorld {
     );
   }
 
+  /// Die Gegnerwerte — mal der Stufe und immer mal [ActionBalance.powerScale],
+  /// auch ohne Stufe: Held und Gegner müssen im selben Massstab stehen.
   int _hp(int base) {
-    final stufe = stage;
-    if (stufe == null) return base;
-    return math.max(1, (base * stufe.hpFactor).round());
+    final faktor = stage?.hpFactor ?? 1;
+    return math.max(1, (base * faktor * ActionBalance.powerScale).round());
   }
 
   int _attack(int base) {
-    final stufe = stage;
-    if (stufe == null) return base;
-    return math.max(1, (base * stufe.attackFactor).round());
+    final faktor = stage?.attackFactor ?? 1;
+    return math.max(1, (base * faktor * ActionBalance.powerScale).round());
   }
 
-  int _defense(int base) => base + (stage?.defenseBonus ?? 0);
+  int _defense(int base) {
+    final stufe = stage;
+    final roh = base + (stufe?.defenseBonus ?? 0);
+    final faktor = stufe?.powerFactor ?? 1;
+    return (roh * faktor * ActionBalance.powerScale).round();
+  }
 
   ActionEntity _enemyFor(Spawn spawn) {
     return switch (spawn.kind) {

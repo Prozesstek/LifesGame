@@ -74,11 +74,11 @@ class GearBonus {
 /// beiden oberen Stufen hängen daran (`GearGates`) und sind damit
 /// **verdient**, nicht nur teurer.
 enum GearRarity {
-  common('Gewöhnlich'),
-  uncommon('Ungewöhnlich'),
-  rare('Selten'),
-  epic('Episch'),
-  legendary('Legendär');
+  common('Gewöhnlich', 1.0),
+  uncommon('Ungewöhnlich', 1.15),
+  rare('Selten', 1.35),
+  epic('Episch', 1.7),
+  legendary('Legendär', 2.2);
 
   /// Die drei Stufen, die von Anfang an kaufbar sind.
   static const List<GearRarity> open = <GearRarity>[common, uncommon, rare];
@@ -88,9 +88,17 @@ enum GearRarity {
 
   bool get isGated => gated.contains(this);
 
-  const GearRarity(this.label);
+  const GearRarity(this.label, this.powerFactor);
 
   final String label;
+
+  /// Was die Seltenheit im Kampf **vervielfacht** (ADR-0042): die der
+  /// Waffe den Angriff, die der Rüstung das Leben. Ein legendäres Stück
+  /// ist damit nicht „+6 Angriff", sondern „doppelt so hart".
+  ///
+  /// Nur Waffe und Rüstung, nicht jeder Platz: Sechs Faktoren
+  /// übereinander wüchsen schneller, als jede Stufe nachkommt.
+  final double powerFactor;
 }
 
 /// Ein kaufbares Ausrüstungsstück.

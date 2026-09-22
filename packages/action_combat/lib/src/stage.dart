@@ -32,17 +32,26 @@ class PitStage {
   /// Wo die Stufe zwischen der ersten und der letzten liegt, 0 bis 1.
   double get progress => (number - 1) / (count - 1);
 
-  /// Faktor auf die Lebenspunkte aller Gegner.
-  double get hpFactor => _geometric(
+  /// Faktor auf die Lebenspunkte aller Gegner — mit [powerFactor].
+  double get hpFactor =>
+      _geometric(
         ActionBalance.stageHpFactorFirst,
         ActionBalance.stageHpFactorLast,
-      );
+      ) *
+      powerFactor;
 
-  /// Faktor auf den Angriff aller Gegner.
-  double get attackFactor => _geometric(
+  /// Faktor auf den Angriff aller Gegner — mit [powerFactor].
+  double get attackFactor =>
+      _geometric(
         ActionBalance.stageAttackFactorFirst,
         ActionBalance.stageAttackFactorLast,
-      );
+      ) *
+      powerFactor;
+
+  /// Was die Gegner zusätzlich vervielfacht, weil der Held vervielfacht
+  /// (ADR-0042): ×1 auf Stufe 1, [ActionBalance.stagePowerLast] auf 30.
+  /// Wirkt auf Leben, Angriff **und** Verteidigung.
+  double get powerFactor => _geometric(1, ActionBalance.stagePowerLast);
 
   /// Was zur Verteidigung aller Gegner **dazukommt**.
   ///

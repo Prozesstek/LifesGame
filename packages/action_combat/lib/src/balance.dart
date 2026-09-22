@@ -346,6 +346,18 @@ abstract final class ActionBalance {
   // geschätzt — wer hier dreht, lässt die Simulation laufen.
 
   /// Faktor auf die Lebenspunkte auf Stufe 1 und Stufe 30.
+  /// **Alle Kampfzahlen mal zehn** (ADR-0042) — für Held und Gegner
+  /// gleich, das Verhältnis bleibt. Ein Schlag trifft mit 180 statt 18,
+  /// ein Level mehr ist dann +7 statt +1, und die Streuung von 60 bis
+  /// 140 % ist als Zahl zu sehen statt als 11 oder 12.
+  static const int powerScale = 10;
+
+  /// Um wie viel die Gegner auf Stufe 30 **zusätzlich** vervielfacht
+  /// sind — Leben, Angriff und Verteidigung (ADR-0042). Geometrisch, von
+  /// ×1 auf Stufe 1 bis hierher. Das Gegenstück zu Level und Seltenheit
+  /// des Helden: Ohne es wäre ab der Mitte alles geschenkt.
+  static const double stagePowerLast = 5.0;
+
   static const double stageHpFactorFirst = 0.5;
   static const double stageHpFactorLast = 3.4;
 
