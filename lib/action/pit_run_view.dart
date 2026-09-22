@@ -190,18 +190,127 @@ class _Hud extends StatelessWidget {
               ],
             ),
             if (boss != null) ...<Widget>[
-              const SizedBox(height: 8),
-              PitBar(
-                ratio: boss.hpRatio,
-                color: Palette.enemyOnDark,
+              const SizedBox(height: 10),
+              BossBar(
+                name: 'Der Wächter',
+                ratio: boss.hpRatio * sim.bossBarFill,
                 // Wut ändert, was er tut — das soll man lesen können, nicht
                 // erst merken, wenn er anstürmt.
-                label: sim.isBossEnraged
-                    ? 'Der Wächter · wütend'
-                    : 'Der Wächter',
+                enraged: sim.isBossEnraged,
               ),
             ],
           ],
+        );
+      },
+    );
+  }
+}
+
+/// Der Balken des Wächters, wie in Dark Souls: der Name darüber, klein
+/// und links, darunter ein langer, schmaler Balken ohne Zahl.
+///
+/// Er erscheint erst, wenn der Wächter gelandet ist
+/// (`ActionWorld.bossView`), und läuft dann voll
+/// (`ActionWorld.bossBarFill`).
+class BossBar extends StatelessWidget {
+  const BossBar({
+    super.key,
+    required this.name,
+    required this.ratio,
+    this.enraged = false,
+  });
+
+  final String name;
+  final double ratio;
+  final bool enraged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          enraged ? '$name · wütend' : name,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 13,
+            letterSpacing: 1.2,
+            color: Palette.textOnDark,
+            shadows: <Shadow>[Shadow(blurRadius: 4)],
+          ),
+        ),
+        const SizedBox(height: 3),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(color: Palette.textOnDarkDim),
+          ),
+          child: LinearProgressIndicator(
+            value: ratio,
+            minHeight: 6,
+            backgroundColor: Palette.trackOnDark,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              Palette.enemyOnDark,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Der Schriftzug in der Mitte, während der Wächter auftritt: blendet mit
+/// der Landung ein und zum Ende des Auftritts wieder aus.
+class _BossTitle extends StatelessWidget {
+  const _BossTitle({required this.game});
+
+  final ActionGame game;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: game.frame,
+      builder: (context, _, _) {
+        final auftritt = game.sim.bossEntrance;
+        if (auftritt == null) return const SizedBox.shrink();
+
+        const landet = ActionBalance.bossLandsShare;
+        final deckkraft = auftritt < landet
+            ? 0.0
+            : auftritt < 0.8
+            ? ((auftritt - landet) / 0.15).clamp(0.0, 1.0)
+            : ((1 - auftritt) / 0.2).clamp(0.0, 1.0);
+
+        return Align(
+          alignment: const Alignment(0, -0.35),
+          child: Opacity(
+            opacity: deckkraft,
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'DER WÄCHTER',
+                  style: TextStyle(
+                    fontSize: 30,
+                    letterSpacing: 6,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.textOnDark,
+                    shadows: <Shadow>[Shadow(blurRadius: 12)],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Hüter der Tiefe',
+                  style: TextStyle(
+                    fontSize: 14,
+                    letterSpacing: 2,
+                    color: Palette.enemyOnDark,
+                    shadows: <Shadow>[Shadow(blurRadius: 8)],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

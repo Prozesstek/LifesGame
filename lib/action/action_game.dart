@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
@@ -184,8 +185,18 @@ class ActionGame extends Game {
 
     canvas.save();
     canvas.translate(kamera.x, kamera.y);
+    if (_beben > 0) {
+      // Abklingend, und aus der Zeit statt aus dem Zufall — derselbe
+      // Lauf bebt jedes Mal gleich.
+      final staerke = _bebenStaerke * _beben / _bebenDauer;
+      canvas.translate(
+        math.sin(_beben * 90) * staerke,
+        math.cos(_beben * 70) * staerke,
+      );
+    }
 
     _drawFloor(canvas, kamera);
+    _drawZones(canvas);
     _drawOrbs(canvas);
     final bilder = _bilder;
     if (bilder == null) {
@@ -238,6 +249,9 @@ class ActionGame extends Game {
   static final Paint _bodenDunkel = Paint()..color = Palette.background;
   static final Paint _wand = Paint()..color = Palette.surfaceSunken;
   static final Paint _wandOben = Paint()..color = Palette.surfaceRaised;
+  static final Paint _gitter = Paint()
+    ..color = Palette.textOnDarkDim
+    ..strokeWidth = 3;
 
   void _drawFloor(Canvas canvas, Vec2 kamera) {
     const feld = ActionBalance.tileSize;
@@ -256,7 +270,9 @@ class ActionGame extends Game {
         }
         final rect = Rect.fromLTWH(x * feld, y * feld, feld, feld);
 
-        if (sim.level.isWallAt(x, y)) {
+        if (sim.level.gatesClosed && sim.level.isGateAt(x, y)) {
+          _drawGate(canvas, rect);
+        } else if (sim.level.isWallAt(x, y)) {
           canvas.drawRect(rect, _wand);
           // Ein heller Streifen oben macht aus dem Quadrat einen Klotz.
           canvas.drawRect(
@@ -271,6 +287,23 @@ class ActionGame extends Game {
         }
       }
     }
+  }
+
+  /// Ein geschlossenes Tor: Gitterstäbe auf dunklem Grund. Es soll nach
+  /// Absicht aussehen, nicht nach einem Stück Fels, das plötzlich da ist.
+  void _drawGate(Canvas canvas, Rect rect) {
+    canvas.drawRect(rect, _bodenDunkel);
+    const staebe = 4;
+    for (var i = 0; i < staebe; i++) {
+      final x = rect.left + rect.width * (i + 0.5) / staebe;
+      canvas.drawLine(Offset(x, rect.top), Offset(x, rect.bottom), _gitter);
+    }
+    final mitte = rect.top + rect.height / 2;
+    canvas.drawLine(
+      Offset(rect.left, mitte),
+      Offset(rect.right, mitte),
+      _gitter,
+    );
   }
 
   // --- Figuren mit Bildern ---

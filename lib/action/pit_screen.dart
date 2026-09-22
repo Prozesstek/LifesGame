@@ -131,7 +131,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         earnedGold: ertrag.gold,
         perStage: true,
         summary: gewonnen
-            ? 'Stufe $stufe geräumt — ${welt.kills} Gegner in $sekunden s.'
+            ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in $sekunden s.'
             : 'Gefallen auf Stufe $stufe, nach ${welt.kills} von '
                   '${welt.totalEnemies} Gegnern.',
       ),

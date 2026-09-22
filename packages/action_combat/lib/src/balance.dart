@@ -177,6 +177,18 @@ abstract final class ActionBalance {
 
   static const double bossRadius = 22;
   static const double bossSpeed = 52;
+
+  /// **Der Auftritt**, sobald das Tor hinter dem Helden zufällt: So lange
+  /// fällt der Wächter herab und brüllt, unverwundbar und untätig.
+  static const double bossEntranceSeconds = 2.4;
+
+  /// Nach diesem Anteil des Auftritts landet er — erst dann erscheinen
+  /// Name und Balken, und der Balken füllt sich im Rest.
+  static const double bossLandsShare = 0.35;
+
+  /// Aus dieser Höhe fällt er, in Punkten über seinem Platz. Mehr als
+  /// ein halber Bildschirm: Er soll von oben ins Bild kommen.
+  static const double bossDropHeight = 420;
   static const double bossAttackRange = 46;
   static const double bossAttackCooldown = 1.6;
 

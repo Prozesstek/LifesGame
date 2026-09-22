@@ -104,6 +104,8 @@ abstract final class PitBot {
       ziel = sicht.position;
     }
 
+    // Niemand zu sehen: dann zum Wächter, der in seinem Raum schläft.
+    ziel ??= welt.sleepingBossAt;
     if (ziel == null) return Vec2.zero;
 
     final direkt = ziel - held.position;
