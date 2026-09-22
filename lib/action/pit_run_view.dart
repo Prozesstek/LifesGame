@@ -195,6 +195,7 @@ class _Hud extends StatelessWidget {
                 Flexible(
                   child: Text(
                     '${sim.kills} / ${sim.totalEnemies} erledigt'
+                    '${sim.runXp > 0 || sim.runGold > 0 ? ' · +${sim.runXp} EP +${sim.runGold} G' : ''}'
                     '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

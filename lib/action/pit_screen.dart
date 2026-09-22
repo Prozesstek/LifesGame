@@ -116,7 +116,11 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final vorherErrungen = achievementsBefore(ref);
     final ertrag = ref
         .read(ladderProvider.notifier)
-        .recordRun(stufe, won: gewonnen);
+        .recordRun(
+          stufe,
+          won: gewonnen,
+          collected: (xp: welt.runXp, gold: welt.runGold),
+        );
     if (gewonnen) ref.read(soundPlayerProvider).play(SoundEffect.sieg);
 
     final sekunden = welt.elapsed.round();

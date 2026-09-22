@@ -176,8 +176,12 @@ void main() {
     });
 
     test('unter halbem Leben wird er wütend und stürmt an', () {
-      // Ein einziger harter Schlag bringt ihn unter die Hälfte, dann läuft
+      // Ein paar harte Schläge bringen ihn unter die Hälfte, dann läuft
       // der Held davon. Auf Abstand und wütend muss er anstürmen.
+      //
+      // Seit der Held breit streut (60–140 %) reicht ein einziger Schlag
+      // nicht mehr sicher — und einer, der sicher reicht, könnte mit
+      // einem kritischen Treffer den Wächter gleich ganz fällen.
       final welt = ActionWorld(
         level: Level.parse('Halle', <String>[
           '#' * 42,
@@ -187,15 +191,21 @@ void main() {
           '#' * 42,
         ]),
         heroStats: const ActionStats(
-          attack: 300,
+          attack: 150,
           maxHp: 99999,
           defense: 0,
           energy: 8,
         ),
       );
 
-      welt.step(Vec2.zero);
-      final ereignisse = <ActionEvent>[...welt.drainEvents()];
+      final ereignisse = <ActionEvent>[];
+      for (var i = 0;
+          i < 60 * 3 &&
+              (welt.bossView?.hpRatio ?? 0) >= ActionBalance.bossEnrageAt;
+          i++) {
+        welt.step(Vec2.zero);
+        ereignisse.addAll(welt.drainEvents());
+      }
       expect(welt.bossView?.hpRatio, lessThan(ActionBalance.bossEnrageAt));
 
       var linie = false;

@@ -31,21 +31,43 @@ class LadderController extends Notifier<LadderProgress> {
     state = state.recordDefeat(rung);
   }
 
+  /// Was ein Lauf auf [stage] heute noch einbringen kann — der Rest des
+  /// Topfs (ADR-0041). Geht in die Welt, die ihn je Gegner ausschüttet.
+  Payout potFor(int stage) {
+    final tag = dayNumberOf(ref.read(todayProvider));
+    return state.potFor(
+      tag,
+      stage,
+      dailyAllowed: ref.read(dailiesUnlockedProvider),
+    );
+  }
+
   /// Trägt einen Lauf durch die Grube ein und sagt, was er eingebracht
   /// hat (ADR-0039).
   ///
   /// **Eine Stelle für Sieg und Niederlage**, damit der Bildschirm nicht
-  /// selbst entscheidet, welche der beiden Methoden oben gilt, und die
-  /// Differenz nicht selbst ausrechnet. Ob etwas herauskommt, entscheidet
-  /// weiterhin `LadderProgress` allein: Eine zweite Räumung derselben
-  /// Stufe ändert den Stand nicht, die Differenz ist dann von selbst null.
-  ({int xp, int gold}) recordRun(int stage, {required bool won}) {
+  /// selbst entscheidet und die Differenz nicht selbst ausrechnet. Was
+  /// zählt, entscheidet `LadderProgress.bookRun` allein:
+  ///
+  /// - [collected] ist, was die Welt je Gegner ausgeschüttet hat. Ein
+  ///   verlorener Lauf behält es (ADR-0041), ein gewonnener bekommt den
+  ///   ganzen Topf.
+  /// - Ein Sieg auf geschaffter Stufe zählt als Daily (ADR-0040), wenn
+  ///   sie heute dazugehört und heute abgehakt wurde. Die vier des Tages
+  ///   werden dabei eingefroren — sonst verschöbe ein Erstsieg sie.
+  Payout recordRun(
+    int stage, {
+    required bool won,
+    Payout collected = (xp: 0, gold: 0),
+  }) {
     final vorher = state;
-    if (won) {
-      defeat(stage);
-    } else {
-      recordDefeat(stage);
-    }
+    state = state.bookRun(
+      dayNumberOf(ref.read(todayProvider)),
+      stage,
+      won: won,
+      collected: collected,
+      dailyAllowed: ref.read(dailiesUnlockedProvider),
+    );
     return (
       xp: state.earnedXp - vorher.earnedXp,
       gold: state.earnedGold - vorher.earnedGold,

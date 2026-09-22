@@ -289,30 +289,37 @@ class _Stufenleiste extends StatelessWidget {
   }
 }
 
-/// Was dieser Sieg einbringt — oder dass er nichts mehr einbringt.
+/// Was die nächste Stufe noch einbringt — oder dass sie nichts mehr
+/// einbringt.
 ///
 /// **Die Zeile gehört vor den Kampf, nicht nur danach.** Eine Belohnung,
 /// von der man erst hinterher erfährt, motiviert den Kampf nicht, den man
-/// gerade überlegt.
-class _Belohnung extends StatelessWidget {
+/// gerade überlegt. Seit ADR-0041 ist es der **Rest** des Topfs: Was ein
+/// verlorener Lauf schon eingesammelt hat, ist abgezogen.
+class _Belohnung extends ConsumerWidget {
   const _Belohnung({required this.stand});
 
   final LadderProgress stand;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final rung = stand.nextRung;
-    final neu = stand.isNewGround(rung);
+    final topf = stand.isNewGround(rung)
+        ? ref.read(ladderProvider.notifier).potFor(rung)
+        : (xp: 0, gold: 0);
+    final zahlt = topf.xp > 0 || topf.gold > 0;
+    final angebrochen = zahlt && topf.xp < LadderRewards.xpFor(rung);
 
     return Text(
-      neu
-          ? 'Erste Räumung: +${LadderRewards.xpFor(rung)} Erfahrung, '
-                '+${LadderRewards.goldFor(rung)} Gold'
-          : 'Alle Stufen geräumt — ein Lauf bringt nichts mehr ein.',
+      zahlt
+          ? '${angebrochen ? 'Noch' : 'Erste Räumung:'} '
+                '+${topf.xp} Erfahrung, +${topf.gold} Gold — '
+                'ein Teil je Gegner, der Rest beim Wächter'
+          : 'Alle Stufen geräumt — nur die Stufen des Tages zahlen noch.',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 12,
-        color: neu ? Palette.goldOnDark : Palette.textOnDarkDim,
+        color: zahlt ? Palette.goldOnDark : Palette.textOnDarkDim,
       ),
     );
   }

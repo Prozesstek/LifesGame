@@ -31,14 +31,16 @@ part 'boss.dart';
 /// Klasse, nicht er.
 class ActionWorld {
   ActionWorld({
-    required this.level,
+    required Level level,
     required this.heroStats,
     this.stage,
     List<String> abilityIds = const <String>[],
     String? weaponMoveId,
     List<PitModifier> modifiers = const <PitModifier>[],
+    this.rewardPot = const (xp: 0, gold: 0),
     int seed = 1,
-  })  : _rng = math.Random(seed),
+  })  : _level = level,
+        _rng = math.Random(seed),
         weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
         _mana = heroStats.maxMana.toDouble(),
         // Sets und legendäre Kräfte werden hier einmal angewendet; die
@@ -1005,8 +1007,10 @@ class ActionWorld {
     var roh = attacker.attack * attacker.damageMultiplier * powerFactor;
     if (kritisch) roh *= attacker.critFactor;
 
-    final streuung =
-        1 + (_rng.nextDouble() * 2 - 1) * ActionBalance.damageSpread;
+    final breite = attacker.isHero
+        ? ActionBalance.heroDamageSpread
+        : ActionBalance.damageSpread;
+    final streuung = 1 + (_rng.nextDouble() * 2 - 1) * breite;
     roh = roh * streuung - target.defense / ActionBalance.defenseDivisor;
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
@@ -1216,6 +1220,7 @@ class ActionWorld {
       _gemeldet.add(entity.id);
       _kills++;
       _maybeDropOrb(entity);
+      _dropLoot(entity);
       _events.add(
         EntityDied(
           id: entity.id,
@@ -1228,6 +1233,115 @@ class ActionWorld {
   }
 
   final Set<int> _gemeldet = <int>{};
+
+  /// Zahlt den Teil des Topfs, der an [gefallen] hängt.
+  ///
+  /// **Gerechnet als Stand, nicht als Häppchen:** Nach k von n Gegnern ist
+  /// genau `k/n` des Fussvolk-Anteils gezahlt, abgerundet. So gehen durch
+  /// Rundung keine Punkte verloren und keine kommen dazu. **Der Wächter
+  /// füllt den Topf auf** — mit ihm ist die Grube geschafft, und wer ihn
+  /// fällt, bekommt alles, auch den Teil der Gegner, die noch stehen.
+  void _dropLoot(ActionEntity gefallen) {
+    if (rewardPot.xp <= 0 && rewardPot.gold <= 0) return;
+
+    final int zielXp;
+    final int zielGold;
+    if (gefallen == _boss) {
+      zielXp = rewardPot.xp;
+      zielGold = rewardPot.gold;
+    } else {
+      final alle = level.trashCount;
+      if (alle <= 0) return;
+      _fussvolkGefallen++;
+      const anteil = 1 - ActionBalance.bossLootShare;
+      final stand = _fussvolkGefallen / alle * anteil;
+      zielXp = (rewardPot.xp * stand).floor();
+      zielGold = (rewardPot.gold * stand).floor();
+    }
+
+    final xp = zielXp - _runXp;
+    final gold = zielGold - _runGold;
+    if (xp <= 0 && gold <= 0) return;
+    _runXp = zielXp;
+    _runGold = zielGold;
+    _events.add(LootDropped(at: gefallen.position, xp: xp, gold: gold));
+  }
+
+  // --- Das Tor zum Wächterraum ---
+
+  /// Schliesst das Tor hinter dem Helden — und weckt den Wächter.
+  ///
+  /// **Zu erst, wenn der Held ganz drin ist und niemand im Tor steht.**
+  /// Wer im Durchgang stünde, steckte danach in der Wand. Wer ihm folgt,
+  /// wartet also vor dem Tor mit — oder kommt eben noch hinein.
+  ///
+  /// **Es geht nicht wieder auf.** Fällt der Wächter, ist der Lauf
+  /// gewonnen, ob draussen noch jemand steht oder nicht.
+  void _updateGate() {
+    if (!_level.hasGates || _level.gatesClosed) return;
+    if (!_insideArena(_hero)) return;
+    for (final entity in _entities) {
+      if (!entity.isAlive || entity.untouchable) continue;
+      if (_touches(entity.position, entity.radius, _level.isGateAt)) return;
+    }
+
+    _level = _level.withGates(closed: true);
+    _rebuildPath();
+    _events.add(GateClosed(at: _gateCenter()));
+    if (_bossPhase == _BossPhase.schlaeft) {
+      _bossPhase = _BossPhase.auftritt;
+      _entranceTime = 0;
+    }
+  }
+
+  /// Der Auftritt: fallen, aufschlagen, brüllen — dann ist er wach.
+  void _tickEntrance(double dt) {
+    final boss = _boss;
+    if (_bossPhase != _BossPhase.auftritt || boss == null) return;
+
+    final warGelandet = _bossLanded;
+    _entranceTime += dt;
+    if (!warGelandet && _bossLanded) {
+      _events.add(BossLanded(at: boss.position));
+    }
+    if (_entranceTime < ActionBalance.bossEntranceSeconds) return;
+
+    _bossPhase = _BossPhase.wach;
+    boss.untouchable = false;
+    boss.aggro = true;
+  }
+
+  /// Ob [entity] mit ihrem ganzen Umriss im Wächterraum steht.
+  bool _insideArena(ActionEntity entity) {
+    const size = ActionBalance.tileSize;
+    final p = entity.position;
+    final r = entity.radius;
+    for (var y = ((p.y - r) / size).floor();
+        y <= ((p.y + r) / size).floor();
+        y++) {
+      for (var x = ((p.x - r) / size).floor();
+          x <= ((p.x + r) / size).floor();
+          x++) {
+        if (!_level.isArenaAt(x, y)) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Die Mitte aller Tor-Felder.
+  Vec2 _gateCenter() {
+    const size = ActionBalance.tileSize;
+    var summe = Vec2.zero;
+    var anzahl = 0;
+    for (var y = 0; y < _level.height; y++) {
+      for (var x = 0; x < _level.width; x++) {
+        if (!_level.isGateAt(x, y)) continue;
+        summe = summe + Vec2(x * size + size / 2, y * size + size / 2);
+        anzahl++;
+      }
+    }
+    return anzahl == 0 ? Vec2.zero : summe * (1 / anzahl);
+  }
 
   /// Manchmal bleibt etwas liegen.
   ///

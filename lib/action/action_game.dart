@@ -216,6 +216,16 @@ class ActionGame extends Game {
           _bursts.add(Burst.slam(event.at, event.radius));
         case BossEnraged():
           _bursts.add(Burst.slam(event.at, 60));
+        case GateClosed():
+          // Staub, wo das Gitter fällt.
+          _bursts.add(Burst.slam(event.at, ActionBalance.tileSize * 1.5));
+        case LootDropped():
+          final popup = DamagePopup.forLoot(event);
+          if (popup != null) _popups.add(popup);
+        case BossLanded():
+          // Er schlägt auf: ein grosser Ring und ein Beben.
+          _bursts.add(Burst.slam(event.at, 110));
+          _beben = _bebenDauer;
         case RunEnded():
           _endeGemeldet = true;
       }

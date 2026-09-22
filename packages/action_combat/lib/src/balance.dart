@@ -292,8 +292,24 @@ abstract final class ActionBalance {
   /// ohne dass sie einen Schlag ganz verschluckt.
   static const double defenseDivisor = 2;
 
-  /// Streuung je Schlag, als Anteil. 0,15 heisst 85 % bis 115 %.
+  /// Streuung je Schlag der **Gegner**, als Anteil. 0,15 heisst 85 % bis
+  /// 115 %. Schmal, damit Sterben nicht zur Lotterie wird.
   static const double damageSpread = 0.15;
+
+  /// Streuung je Schlag des **Helden**: 60 % bis 140 %. Breit wie in
+  /// Diablo — ein Treffer soll sich vom nächsten unterscheiden, und ein
+  /// hoher soll auffallen. Im Mittel bleibt der Schaden derselbe.
+  static const double heroDamageSpread = 0.4;
+
+  /// Wie oft ein Schlag des Helden kritisch trifft, ohne jede Ausrüstung —
+  /// und mit welchem Faktor ([ActionStats.critFactor], 2). Dazu kommt, was
+  /// die Werte mitbringen.
+  static const double heroBaseCritChance = 0.08;
+
+  /// Welcher Anteil des Topfs einer Stufe beim **Wächter** liegt. Der Rest
+  /// verteilt sich gleich auf alle anderen Gegner der Grube — jeder Kill
+  /// zahlt sofort seinen Teil (ADR-0041).
+  static const double bossLootShare = 0.3;
 
   /// Wie weit ein Treffer den Getroffenen zurückstösst.
   ///
