@@ -72,14 +72,33 @@ class _PitRunViewState extends State<PitRunView> {
     return oben >= 0 ? oben : _slotKeysNumpad.indexOf(key);
   }
 
+  /// Wo die Maus zuletzt stand — am Rechner zielt sie.
+  Offset? _maus;
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent) {
-      final platz = _platzFuer(event.logicalKey);
-      final slots = widget.game.sim.slots;
-      if (platz >= 0) {
-        if (platz < slots.length) widget.game.sim.cast(slots[platz].id);
-        return KeyEventResult.handled;
+    final game = widget.game;
+    final platz = _platzFuer(event.logicalKey);
+    final slots = game.sim.slots;
+    if (platz >= 0) {
+      if (platz >= slots.length) return KeyEventResult.handled;
+      final ability = slots[platz];
+      // **Taste halten, mit der Maus zielen, loslassen wirkt** — wie der
+      // Daumen am Knopf. Was nichts zu zielen hat, wirkt beim Drücken.
+      if (event is KeyDownEvent) {
+        if (ability.aim == PitAim.selbst) {
+          game.sim.cast(ability.id);
+        } else {
+          game.beginAim(ability.id);
+          final maus = _maus;
+          if (maus != null) game.aimAtScreen(maus);
+        }
+      } else if (event is KeyUpEvent && game.aimingId == ability.id) {
+        game.releaseAim();
       }
+      return KeyEventResult.handled;
+    }
+
+    if (event is KeyDownEvent) {
       _tasten.add(event.logicalKey);
     } else if (event is KeyUpEvent) {
       _tasten.remove(event.logicalKey);
@@ -97,31 +116,40 @@ class _PitRunViewState extends State<PitRunView> {
     return Focus(
       autofocus: true,
       onKeyEvent: _onKey,
-      child: Stack(
-        children: <Widget>[
-          // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
-          // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
-          // keine Tasten kennt — keine davon käme dann hier oben an
-          // (`gotchas.md`).
-          Positioned.fill(child: GameWidget(game: game, autofocus: false)),
-          Positioned.fill(
-            child: ActionJoystick(
-              onChanged: (richtung) => game.moveInput = richtung,
-            ),
-          ),
-          Positioned(top: 8, left: 12, right: 12, child: _Hud(game: game)),
-          Positioned(
-            right: 16,
-            bottom: 24,
-            child: ValueListenableBuilder<int>(
-              valueListenable: game.frame,
-              builder: (context, _, _) => AbilityButtons(
-                world: game.sim,
-                onCast: (id) => game.sim.cast(id),
+      // Um den ganzen Stapel: Das Steuerkreuz liegt über dem Spielfeld
+      // und finge die Maus sonst ab. Die Koordinaten sind dieselben wie
+      // die des Spielfelds, es füllt den Stapel.
+      child: MouseRegion(
+        onHover: (event) {
+          _maus = event.localPosition;
+          game.aimAtScreen(event.localPosition);
+        },
+        child: Stack(
+          children: <Widget>[
+            // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
+            // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
+            // keine Tasten kennt — keine davon käme dann hier oben an
+            // (`gotchas.md`).
+            Positioned.fill(child: GameWidget(game: game, autofocus: false)),
+            Positioned.fill(
+              child: ActionJoystick(
+                onChanged: (richtung) => game.moveInput = richtung,
               ),
             ),
-          ),
-        ],
+            Positioned(top: 8, left: 12, right: 12, child: _Hud(game: game)),
+            Positioned.fill(
+              child: IgnorePointer(child: _BossTitle(game: game)),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 24,
+              child: ValueListenableBuilder<int>(
+                valueListenable: game.frame,
+                builder: (context, _, _) => AbilityButtons(game: game),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

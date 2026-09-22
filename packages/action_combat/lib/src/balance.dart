@@ -261,6 +261,30 @@ abstract final class ActionBalance {
   /// zucken.
   static const double directChaseRange = 46;
 
+  /// So viele Felder am Wegfeld entlang schaut ein Gegner voraus, um den
+  /// weitesten frei erreichbaren Punkt anzusteuern. Mehr macht Wege um
+  /// lange Ecken glatter und kostet je Gegner und Schritt mehr Prüfungen.
+  static const int chaseLookaheadTiles = 8;
+
+  /// So lange darf ein Verfolger auf der Stelle treten, bevor er für
+  /// [ghostSeconds] durch Verbündete hindurchgeht. Ohne das verkeilten
+  /// sich ein Troll und zwei Fussvolk in einem Durchgang für immer: Jeder
+  /// wollte zum selben Wegpunkt, und das Wegschieben hielt alle fest.
+  static const double stuckSeconds = 0.6;
+
+  /// Wie weit ein gezielter Schlag neben seine Richtung reicht, zu jeder
+  /// Seite, im Bogenmass (etwa 52°). Breit genug, dass ein Daumen trifft,
+  /// schmal genug, dass hinter dem Helden niemand getroffen wird.
+  static const double strikeHalfAngle = 0.9;
+
+  /// So lange wirkt eine liegende Fläche nach, wenn man sie verlässt —
+  /// knapp über dem Takt, damit Bremsen und Brennen nicht flackern.
+  static const double zoneLinger = 0.35;
+  static const double ghostSeconds = 0.8;
+
+  /// Weniger Bewegung als das gilt als „auf der Stelle".
+  static const double stuckDistance = 4;
+
   // --- Schaden ---
 
   /// Schaden ist `Angriff * power - Verteidigung / 2`, wie im

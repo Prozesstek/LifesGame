@@ -14,6 +14,7 @@ import 'stage.dart';
 import 'stats.dart';
 import 'vec2.dart';
 
+part 'aim.dart';
 part 'boss.dart';
 
 /// Ein Lauf durch eine Halle.
@@ -157,9 +158,15 @@ class ActionWorld {
   /// Richtung ab — eine Flutfüllung für alle statt einer Suche je
   /// Gegner.
   late FlowField _pathToHero;
+
+  /// Dasselbe für Figuren, die breiter sind als ein Feld.
+  late FlowField _widePathToHero;
   int _stepsSincePath = 0;
 
   final List<Projectile> _projectiles = <Projectile>[];
+
+  /// Abgesetzte Flächen, die noch liegen.
+  final List<_Zone> _zones = <_Zone>[];
   final List<HealthOrb> _orbs = <HealthOrb>[];
 
   // --- Was die Darstellung sehen darf ---
@@ -219,6 +226,19 @@ class ActionWorld {
     ];
   }
 
+  /// Die liegenden Flächen — Eisfeld, Giftboden, Sturm.
+  List<ZoneView> get zones {
+    return <ZoneView>[
+      for (final zone in _zones)
+        ZoneView(
+          center: zone.center,
+          radius: zone.radius,
+          tint: zone.tint,
+          remaining: (zone.secondsLeft / zone.seconds).clamp(0.0, 1.0),
+        ),
+    ];
+  }
+
   List<OrbView> get orbs {
     return <OrbView>[
       for (final orb in _orbs)
@@ -266,52 +286,85 @@ class ActionWorld {
     return null;
   }
 
-  /// Wirkt eine Fähigkeit von einem Platz. Gibt false zurück, wenn sie
-  /// nicht geht — nicht auf einem Platz, nicht abgeklungen, zu wenig Mana.
+  /// Wirkt eine Fähigkeit von einem Platz — **kurz getippt**: Sie zielt
+  /// selbst, auf den nächsten Gegner, den der Held sieht. Gibt false
+  /// zurück, wenn sie nicht geht — nicht auf einem Platz, nicht
+  /// abgeklungen, zu wenig Mana, oder niemand da, worauf sie zielen könnte.
   ///
-  /// **Kein Ziel, kein Mana.** Ein Funke ohne Gegner in Reichweite kostet
-  /// nichts und klingt nicht ab: Wer ins Leere tippt, soll nicht bestraft
+  /// **Kein Ziel, kein Mana.** Wer ins Leere tippt, soll nicht bestraft
   /// werden, sondern es gleich noch einmal versuchen können.
-  bool cast(String id) {
+  bool cast(String id) => _castWith(id, null);
+
+  /// Wirkt eine Fähigkeit von einem Platz — **gezielt**, nach dem Halten:
+  /// in Richtung [target] oder, bei einem Bereich, an [target] (höchstens
+  /// so weit, wie sie reicht, und nicht hinter eine Wand).
+  ///
+  /// Anders als [cast] kostet sie hier **immer**: Ein Skillshot, der
+  /// danebengeht, ist ein verfehlter Skillshot.
+  bool castAt(String id, Vec2 target) => _castWith(id, target);
+
+  /// Was [castAt] mit [target] täte — für die Vorschau beim Halten. Null
+  /// bei einer Fähigkeit ohne Ziel (Heilung, Schutz, Mana), und null
+  /// [target] zeigt, wohin kurzes Tippen zielen würde.
+  AimPreview? aimPreview(String id, Vec2? target) {
+    final ability = _slotFor(id);
+    if (ability == null) return null;
+    return _preview(ability, target);
+  }
+
+  bool _castWith(String id, Vec2? zielpunkt) {
     if (!canCast(id)) return false;
     final ability = _slotFor(id);
     if (ability == null) return false;
-
-    for (final effect in ability.effects) {
-      if (effect is BoltAtNearest &&
-          _nearestEnemyWithin(effect.range, needsSight: true) == null) {
-        return false;
-      }
-      if (effect is StrikeNearest &&
-          _nearestEnemyWithin(effect.range) == null) {
-        return false;
-      }
-    }
+    final plan = _plan(ability, zielpunkt);
+    if (plan == null) return false;
 
     _mana -= ability.manaCost;
     _slotCooldowns[id] = ability.cooldown;
-    _events.add(AbilityCast(id: id, at: _hero.position));
+    _events.add(AbilityCast(id: id, at: plan.center));
 
+    final flaechen = <double, _Zone>{};
     for (final effect in ability.effects) {
-      _apply(effect);
+      _apply(effect, ability, plan, flaechen);
     }
+    // Eine Fläche greift schon beim Aufschlagen, nicht erst im nächsten
+    // Schritt.
+    for (final zone in flaechen.values) {
+      _affect(zone);
+    }
+    _zones.addAll(flaechen.values);
     return true;
   }
 
-  /// Die eine Stelle, die jede Art von [PitEffect] ausführt.
-  void _apply(PitEffect effect) {
+  /// Die eine Stelle, die jede Art von [PitEffect] ausführt — dorthin,
+  /// wohin [plan] zeigt.
+  void _apply(
+    PitEffect effect,
+    PitAbility ability,
+    _CastPlan plan,
+    Map<double, _Zone> flaechen,
+  ) {
     switch (effect) {
       case BoltAtNearest(:final power, :final range, :final leech):
+        final richtung = plan.direction;
+        if (richtung != null) {
+          _shootAlong(richtung, power: power, weite: range, leech: leech);
+          return;
+        }
         final ziel = _nearestEnemyWithin(range, needsSight: true);
         if (ziel == null) return;
         _shoot(ziel, power: power, leech: leech);
       case StrikeNearest(:final power, :final range):
-        final ziel = _nearestEnemyWithin(range);
+        final richtung = plan.direction;
+        final ziel = richtung != null
+            ? _nearestInCone(richtung, range)
+            : _nearestEnemyWithin(range);
+        if (richtung != null) _hero.facing = richtung;
         if (ziel == null) return;
         _hero.facing = (ziel.position - _hero.position).normalized;
         _hit(_hero, ziel, powerFactor: power);
       case StrikeAround(:final power, :final radius):
-        for (final ziel in _enemiesWithin(radius)) {
+        for (final ziel in _enemiesAround(plan.center, radius)) {
           _hit(_hero, ziel, powerFactor: power);
         }
       case HealSelf(:final share):
@@ -326,6 +379,11 @@ class ActionWorld {
             _reflectLeft > 0 ? math.max(_reflectShare, share) : share;
         _reflectLeft = seconds;
       case SlowAround(:final radius, :final factor, :final seconds):
+        if (plan.placed) {
+          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
+          zone.slowFactor = math.min(zone.slowFactor, factor);
+          return;
+        }
         for (final ziel in _enemiesWithin(radius)) {
           ziel.slowFactor =
               ziel.slowLeft > 0 ? math.min(ziel.slowFactor, factor) : factor;
@@ -333,6 +391,11 @@ class ActionWorld {
         }
       case DamageOverTime(:final radius, :final perSecond, :final seconds):
         final jeSekunde = _hero.attack * _hero.damageMultiplier * perSecond;
+        if (plan.placed) {
+          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
+          zone.dotPerSecond = math.max(zone.dotPerSecond, jeSekunde);
+          return;
+        }
         for (final ziel in _enemiesWithin(radius)) {
           _applyDot(ziel, jeSekunde, seconds);
         }
@@ -561,12 +624,15 @@ class ActionWorld {
     _tickMana(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
+    _tickZones(dt);
     _enemiesAct(dt);
     _tickStatus(dt);
     _moveProjectiles(dt);
     _separate();
     _moveOrbs(dt);
     _collectDead();
+    _updateGate();
+    _tickEntrance(dt);
     _checkEnd();
   }
 
@@ -833,7 +899,7 @@ class ActionWorld {
       if (geschoss.spent) continue;
 
       geschoss.age += dt;
-      if (geschoss.age > ActionBalance.projectileLifetime) {
+      if (geschoss.age > geschoss.maxAge) {
         geschoss.spent = true;
         continue;
       }

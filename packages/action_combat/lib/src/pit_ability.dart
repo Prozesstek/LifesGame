@@ -23,7 +23,8 @@ sealed class PitEffect {
   const PitEffect();
 }
 
-/// Ein Geschoss auf den nächsten **sichtbaren** Gegner in [range].
+/// Ein Geschoss, das [range] weit fliegt — gezielt in eine Richtung, oder
+/// beim kurzen Tippen auf den nächsten **sichtbaren** Gegner.
 ///
 /// Der Schaden fällt beim Einschlag und rechnet wie ein Schlag des
 /// Helden: `Angriff × power`, minus Verteidigung, mit Streuung und
@@ -44,7 +45,8 @@ final class BoltAtNearest extends PitEffect {
   final double leech;
 }
 
-/// Ein Schlag auf den nächsten Gegner in Nahkampfreichweite [range].
+/// Ein Schlag in Nahkampfreichweite [range] — gezielt auf den nächsten
+/// Gegner im Kegel davor, beim kurzen Tippen auf den nächsten überhaupt.
 final class StrikeNearest extends PitEffect {
   const StrikeNearest({required this.power, required this.range});
 
@@ -52,7 +54,8 @@ final class StrikeNearest extends PitEffect {
   final double range;
 }
 
-/// Trifft alles im Umkreis [radius] um den Helden.
+/// Trifft alles im Umkreis [radius] — um den Helden, oder um den
+/// Punkt, an dem ein [PitAim.bereich] abgesetzt wurde.
 final class StrikeAround extends PitEffect {
   const StrikeAround({required this.power, required this.radius});
 
@@ -133,6 +136,50 @@ final class DamageOverTime extends PitEffect {
   final double seconds;
 }
 
+/// Wie eine Fähigkeit gezielt wird.
+///
+/// **Kurz tippen zielt von selbst, halten zielt von Hand** — bei allen
+/// Arten gleich, nur was gezeigt und wohin gewirkt wird, unterscheidet
+/// sich. Die Welt zeigt es vorher (`ActionWorld.aimPreview`) und wirkt
+/// danach genau dorthin (`ActionWorld.castAt`).
+enum PitAim {
+  /// Wirkt auf den Helden selbst — Heilung, Mana, Schutz. Nichts zu zielen.
+  selbst,
+
+  /// Eine Richtung: ein Geschoss fliegt geradeaus bis zu seiner
+  /// Reichweite, ein Schlag trifft, wer davor steht. **Daneben ist
+  /// daneben** — das Mana ist dann trotzdem weg.
+  richtung,
+
+  /// Ein Kreis um den Helden. Zu zielen gibt es nichts, aber man sieht
+  /// vorher, was er erfasst.
+  umDenHelden,
+
+  /// Ein Kreis, den man bis [PitAbility.castRange] entfernt absetzt. Was
+  /// darin bremst oder brennt, **bleibt liegen** und wirkt auf jeden,
+  /// der hineinläuft — das Eisfeld, der Giftboden.
+  bereich,
+}
+
+/// Welche Farbe die Fläche einer Fähigkeit trägt — beim Zielen und, wo
+/// sie liegen bleibt, am Boden. **Rot ist dem Wächter vorbehalten**:
+/// Seine Ankündigungen müssen von allem zu unterscheiden sein, was der
+/// Held selbst auslöst.
+enum PitTint {
+  funke,
+  blitz,
+  seele,
+  klinge,
+  natur,
+  eis,
+  sand,
+  gift,
+  zeit,
+  lava,
+  stern,
+  schutz
+}
+
 /// Eine Fähigkeit, wie die Grube sie kennt.
 class PitAbility {
   const PitAbility({
@@ -143,6 +190,9 @@ class PitAbility {
     required this.cooldown,
     required this.effects,
     required this.description,
+    required this.aim,
+    required this.castRange,
+    required this.tint,
   });
 
   /// Dieselbe Id wie in `package:combat` und `package:abilities`.
@@ -162,6 +212,47 @@ class PitAbility {
 
   /// Was sie tut, in einem Satz — für das Blatt, das sie erklärt.
   final String description;
+
+  /// Wie sie gezielt wird.
+  final PitAim aim;
+
+  /// Wie weit vom Helden ein [PitAim.bereich] abgesetzt werden darf. Bei
+  /// allen anderen Arten 0 — ihre Reichweite steht an der Wirkung.
+  final double castRange;
+
+  /// Die Farbe ihrer Fläche.
+  final PitTint tint;
+
+  /// Wie weit sie reicht: die Wurfweite eines Bereichs, sonst die
+  /// grösste Reichweite ihrer Geschosse und Schläge.
+  double get reach {
+    if (aim == PitAim.bereich) return castRange;
+    var weiteste = 0.0;
+    for (final effect in effects) {
+      final weite = switch (effect) {
+        BoltAtNearest(:final range) => range,
+        StrikeNearest(:final range) => range,
+        _ => 0.0,
+      };
+      if (weite > weiteste) weiteste = weite;
+    }
+    return weiteste;
+  }
+
+  /// Der grösste Umkreis ihrer Flächen-Wirkungen, 0 wenn sie keine hat.
+  double get areaRadius {
+    var groesste = 0.0;
+    for (final effect in effects) {
+      final r = switch (effect) {
+        StrikeAround(:final radius) => radius,
+        SlowAround(:final radius) => radius,
+        DamageOverTime(:final radius) => radius,
+        _ => 0.0,
+      };
+      if (r > groesste) groesste = r;
+    }
+    return groesste;
+  }
 }
 
 /// Die Fähigkeiten, die in der Grube wirken.
@@ -186,7 +277,10 @@ abstract final class PitAbilities {
     manaCost: 12,
     cooldown: 1.5,
     effects: <PitEffect>[BoltAtNearest(power: 1.2, range: 260)],
-    description: 'Ein Funke fliegt auf den nächsten Gegner.',
+    description: 'Ein Funke fliegt geradeaus.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.funke,
   );
 
   /// **Ein Wert ändert sich.** Die Antwort auf die Traube, wenn man sich
@@ -199,6 +293,9 @@ abstract final class PitAbilities {
     cooldown: 12,
     effects: <PitEffect>[ReduceIncoming(factor: 0.6, seconds: 5)],
     description: 'Fünf Sekunden lang 40 % weniger Schaden.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   /// Hält die Traube fest, statt sie zu töten.
@@ -212,8 +309,11 @@ abstract final class PitAbilities {
       StrikeAround(power: 0.6, radius: 90),
       SlowAround(radius: 90, factor: 0.35, seconds: 4),
     ],
-    description: 'Wurzeln treffen alles in der Nähe und halten es vier '
-        'Sekunden lang fest.',
+    description: 'Wurzeln brechen, wo man sie hinsetzt, aus dem Boden und '
+        'halten vier Sekunden lang fest.',
+    aim: PitAim.bereich,
+    castRange: 220,
+    tint: PitTint.natur,
   );
 
   /// Kostet nichts, bringt Mana — der Zug, der die anderen bezahlt.
@@ -225,6 +325,9 @@ abstract final class PitAbilities {
     cooldown: 15,
     effects: <PitEffect>[GainMana(amount: 30)],
     description: 'Bringt 30 Mana zurück.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   // --- Ungewöhnlich ---
@@ -239,6 +342,9 @@ abstract final class PitAbilities {
     cooldown: 14,
     effects: <PitEffect>[HealSelf(share: 0.25)],
     description: 'Heilt ein Viertel der vollen Gesundheit.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   /// Ein Schlag rundum — häufiger zu haben als Sternenfall, und
@@ -251,6 +357,9 @@ abstract final class PitAbilities {
     cooldown: 4,
     effects: <PitEffect>[StrikeAround(power: 2.0, radius: 70)],
     description: 'Klingen treffen alles im Umkreis doppelt hart.',
+    aim: PitAim.umDenHelden,
+    castRange: 0,
+    tint: PitTint.klinge,
   );
 
   /// Das Eisfeld: langsamer und blutend.
@@ -264,8 +373,10 @@ abstract final class PitAbilities {
       SlowAround(radius: 160, factor: 0.5, seconds: 5),
       DamageOverTime(radius: 160, perSecond: 0.15, seconds: 5),
     ],
-    description: 'Nebel verlangsamt alles in weitem Umkreis und lässt es '
-        'frieren.',
+    description: 'Ein Eisfeld: Wer hineinläuft, wird langsam und friert.',
+    aim: PitAim.bereich,
+    castRange: 260,
+    tint: PitTint.eis,
   );
 
   /// Wer zuschlägt, trifft sich selbst.
@@ -278,6 +389,9 @@ abstract final class PitAbilities {
     effects: <PitEffect>[ReflectIncoming(share: 0.5, seconds: 6)],
     description: 'Sechs Sekunden lang trifft jeder Nahkampfschlag zur Hälfte '
         'seinen Schläger.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   // --- Selten ---
@@ -290,7 +404,10 @@ abstract final class PitAbilities {
     manaCost: 25,
     cooldown: 6,
     effects: <PitEffect>[BoltAtNearest(power: 3.0, range: 300)],
-    description: 'Ein Blitz auf den nächsten Gegner, dreifache Wucht.',
+    description: 'Ein Blitz geradeaus, dreifache Wucht.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.blitz,
   );
 
   /// Der Sturm: weiter und länger als der Frost, aber schwächer im Biss.
@@ -304,8 +421,11 @@ abstract final class PitAbilities {
       SlowAround(radius: 220, factor: 0.6, seconds: 7),
       DamageOverTime(radius: 220, perSecond: 0.2, seconds: 7),
     ],
-    description: 'Sand bremst und schleift alles in weitem Umkreis, sieben '
-        'Sekunden lang.',
+    description: 'Ein Sturmfeld, sieben Sekunden lang: Wer darin steht, wird '
+        'gebremst und geschliffen.',
+    aim: PitAim.bereich,
+    castRange: 260,
+    tint: PitTint.sand,
   );
 
   /// Schaden, der heilt — in voller Höhe, wie im Rundenkampf.
@@ -319,6 +439,9 @@ abstract final class PitAbilities {
       BoltAtNearest(power: 1.8, range: 240, leech: 1),
     ],
     description: 'Ein Geschoss, das so viel heilt, wie es anrichtet.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.seele,
   );
 
   /// Der Giftboden: kein Treffer, aber der stärkste Dauerschaden.
@@ -331,19 +454,28 @@ abstract final class PitAbilities {
     effects: <PitEffect>[
       DamageOverTime(radius: 180, perSecond: 0.5, seconds: 6),
     ],
-    description: 'Gift frisst sechs Sekunden lang an allem in der Nähe.',
+    description: 'Ein Giftboden, sechs Sekunden lang: Er frisst an allem, '
+        'was darin steht.',
+    aim: PitAim.bereich,
+    castRange: 240,
+    tint: PitTint.gift,
   );
 
-  /// Alles in der Halle wird langsam.
+  /// Die Zeit dehnt sich, wo man sie hinsetzt. Bis zum 22.09. traf sie
+  /// alles in 600 Punkten Umkreis — als abgesetzte Fläche wäre das der
+  /// ganze Bildschirm und nichts mehr zu zielen.
   static const PitAbility zeitdehnung = PitAbility(
     id: 'zeitdehnung',
     name: 'Zeitdehnung',
     kind: PitKind.schutz,
     manaCost: 35,
     cooldown: 20,
-    effects: <PitEffect>[SlowAround(radius: 600, factor: 0.4, seconds: 5)],
-    description: 'Fünf Sekunden lang bewegt sich jeder Gegner in Sichtweite '
-        'mit weniger als halber Geschwindigkeit.',
+    effects: <PitEffect>[SlowAround(radius: 170, factor: 0.4, seconds: 5)],
+    description: 'Fünf Sekunden lang bewegt sich jeder Gegner im Feld mit '
+        'weniger als halber Geschwindigkeit.',
+    aim: PitAim.bereich,
+    castRange: 260,
+    tint: PitTint.zeit,
   );
 
   /// Ein Ausbruch mit Nachglühen.
@@ -357,7 +489,10 @@ abstract final class PitAbilities {
       StrikeAround(power: 2.5, radius: 110),
       DamageOverTime(radius: 110, perSecond: 0.4, seconds: 4),
     ],
-    description: 'Lava bricht um den Helden aus und brennt nach.',
+    description: 'Lava bricht aus, wo man sie hinsetzt, und brennt nach.',
+    aim: PitAim.bereich,
+    castRange: 220,
+    tint: PitTint.lava,
   );
 
   // --- Legendär ---
@@ -370,7 +505,10 @@ abstract final class PitAbilities {
     manaCost: 40,
     cooldown: 20,
     effects: <PitEffect>[StrikeAround(power: 4.0, radius: 220)],
-    description: 'Sterne fallen auf alles in weitem Umkreis, vierfache Wucht.',
+    description: 'Sterne fallen, wo man sie hinsetzt — vierfache Wucht.',
+    aim: PitAim.bereich,
+    castRange: 260,
+    tint: PitTint.stern,
   );
 
   // --- Aus Errungenschaften (ADR-0033) ---
@@ -383,6 +521,9 @@ abstract final class PitAbilities {
     cooldown: 4,
     effects: <PitEffect>[StrikeNearest(power: 3.2, range: 50)],
     description: 'Ein einzelner Schlag mit dreifacher Wucht.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.klinge,
   );
 
   static const PitAbility zehrung = PitAbility(
@@ -397,6 +538,9 @@ abstract final class PitAbilities {
     ],
     description: 'Ein vergifteter Schlag, das Gift frisst fünf Sekunden '
         'lang weiter.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.gift,
   );
 
   static const PitAbility sammeln = PitAbility(
@@ -410,6 +554,9 @@ abstract final class PitAbilities {
       ReduceIncoming(factor: 0.7, seconds: 4),
     ],
     description: 'Heilt ein wenig und schützt vier Sekunden lang.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   static const PitAbility atemzug = PitAbility(
@@ -420,6 +567,9 @@ abstract final class PitAbilities {
     cooldown: 12,
     effects: <PitEffect>[GainMana(amount: 20), HealSelf(share: 0.08)],
     description: 'Bringt 20 Mana zurück und heilt ein wenig.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
   );
 
   static const List<PitAbility> all = <PitAbility>[

@@ -1,3 +1,4 @@
+import 'balance.dart';
 import 'entity.dart';
 import 'vec2.dart';
 
@@ -17,6 +18,7 @@ class Projectile {
     this.heroPower,
     this.heroLeech = 0,
     this.fromWeapon = false,
+    this.maxAge = ActionBalance.projectileLifetime,
   });
 
   final int id;
@@ -40,6 +42,11 @@ class Projectile {
 
   /// Ob es ein Pfeil der Waffe ist — dann gelten deren Nebenwirkungen.
   final bool fromWeapon;
+
+  /// Nach so vielen Sekunden verlischt es. Ein Skillshot fliegt genau
+  /// seine Reichweite weit, nicht weiter — sonst zeigte die Vorschau eine
+  /// kürzere Bahn, als der Funke dann fliegt.
+  final double maxAge;
 
   Vec2 position;
   double age = 0;

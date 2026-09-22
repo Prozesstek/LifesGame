@@ -108,6 +108,29 @@ abstract final class Palette {
   static const Color manaOnDark = Color(0xFF7FA8D9);
 
   // ---------------------------------------------------------------
+  // Die Flächen der Fähigkeiten — nur auf dem dunklen Boden der Grube
+  // ---------------------------------------------------------------
+  //
+  // Beim Zielen und wo eine Fläche liegen bleibt. **Kein Rot**: Rot ist
+  // die Ankündigung des Wächters ([enemy], [enemyOnDark]), und die muss
+  // man von allem unterscheiden, was der Held selbst auslöst. Die Lava
+  // ist deshalb orange, nicht rot. Welche Fähigkeit welche Farbe trägt,
+  // steht in `lib/action/pit_tints.dart`.
+
+  static const Color tintFunke = Color(0xFFF2B35B);
+  static const Color tintBlitz = Color(0xFFE8E27A);
+  static const Color tintSeele = Color(0xFFB48CE0);
+  static const Color tintKlinge = Color(0xFFD9D2C3);
+  static const Color tintNatur = Color(0xFF8CC46A);
+  static const Color tintEis = Color(0xFF8FD3F0);
+  static const Color tintSand = Color(0xFFD9B46A);
+  static const Color tintGift = Color(0xFF9BD65A);
+  static const Color tintZeit = Color(0xFF9FA8F0);
+  static const Color tintLava = Color(0xFFF08A3C);
+  static const Color tintStern = Color(0xFFF5E9A8);
+  static const Color tintSchutz = Color(0xFFE0B65B);
+
+  // ---------------------------------------------------------------
   // Die Arena
   // ---------------------------------------------------------------
 

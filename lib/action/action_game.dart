@@ -10,6 +10,7 @@ import '../ui/palette.dart';
 import 'action_sprites.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
+import 'pit_tints.dart';
 
 /// Die Halle, gezeichnet.
 ///
@@ -78,15 +79,90 @@ class ActionGame extends Game {
     );
   }
 
+  // --- Zielen ---
+
+  /// Welche Fähigkeit gerade gehalten wird, oder null.
+  String? get aimingId => _zielId;
+  String? _zielId;
+
+  /// Wohin gezielt wird, in Weltkoordinaten. Null heisst: Die Fähigkeit
+  /// zielt selbst, wie beim kurzen Tippen.
+  Vec2? _zielPunkt;
+
+  /// Wie weit der Daumen gezogen werden muss, damit der Skillshot seine
+  /// volle Reichweite hat. Näher als [_totzone] gilt als Tippen.
+  static const double _vollerZug = 80;
+  static const double _totzone = 12;
+
+  /// Ein Platz wird gehalten. Ab jetzt zeigt das Bild die Vorschau.
+  void beginAim(String id) {
+    _zielId = id;
+    _zielPunkt = null;
+  }
+
+  /// Der Daumen ist um [zug] Bildpunkte vom Knopf weggezogen: Richtung
+  /// und Länge werden auf die Reichweite der Fähigkeit umgelegt.
+  void aimDrag(Vec2 zug) {
+    final id = _zielId;
+    if (id == null) return;
+    if (zug.length < _totzone) {
+      _zielPunkt = null;
+      return;
+    }
+    final weite = _reachOf(id);
+    final anteil = (zug.length / _vollerZug).clamp(0.0, 1.0);
+    _zielPunkt = sim.heroView.position + zug.normalized * (weite * anteil);
+  }
+
+  /// Gezielt wird auf einen Punkt im Bild — die Maus am Rechner.
+  void aimAtScreen(Offset punkt) {
+    if (_zielId == null) return;
+    _zielPunkt = screenToWorld(punkt);
+  }
+
+  /// Losgelassen: kurz getippt zielt selbst, gezogen wirkt dorthin.
+  bool releaseAim() {
+    final id = _zielId;
+    final punkt = _zielPunkt;
+    _zielId = null;
+    _zielPunkt = null;
+    if (id == null) return false;
+    return punkt == null ? sim.cast(id) : sim.castAt(id, punkt);
+  }
+
+  void cancelAim() {
+    _zielId = null;
+    _zielPunkt = null;
+  }
+
+  double _reachOf(String id) {
+    for (final ability in sim.slots) {
+      if (ability.id == id) return ability.reach;
+    }
+    return 0;
+  }
+
+  /// Ein Punkt im Bild als Punkt in der Grube.
+  Vec2 screenToWorld(Offset punkt) {
+    final kamera = _cameraOffset(sim.heroView.position);
+    return Vec2(punkt.dx - kamera.x, punkt.dy - kamera.y);
+  }
+
   /// Nur für Tests: was gerade an Zahlen in der Luft steht.
   int get popupCount => _popups.length;
 
   @override
   Color backgroundColor() => Palette.background;
 
+  /// Wie lange das Bild nach der Landung des Wächters noch bebt.
+  double _beben = 0;
+  static const double _bebenDauer = 0.45;
+  static const double _bebenStaerke = 7;
+
   @override
   void update(double dt) {
     sim.advance(dt, moveInput);
+    if (_beben > 0) _beben -= dt;
 
     for (final event in sim.drainEvents()) {
       switch (event) {
@@ -209,6 +285,7 @@ class ActionGame extends Game {
     _drawProjectiles(canvas);
     _drawWard(canvas, held);
     _drawTelegraphs(canvas);
+    _drawAim(canvas);
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
     if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
@@ -522,6 +599,92 @@ class ActionGame extends Game {
   /// **Deutlich, nicht hübsch.** Die ganze Fairness der Angriffe hängt
   /// daran, dass man sie sieht — ein dezenter Ring im Gewühl wäre so gut
   /// wie keiner.
+  /// Die liegenden Flächen: gefüllt in ihrer Farbe, mit Rand, und zum
+  /// Ende hin blasser.
+  void _drawZones(Canvas canvas) {
+    for (final zone in sim.zones) {
+      final farbe = tintColor(zone.tint);
+      final mitte = Offset(zone.center.x, zone.center.y);
+      final aus = zone.remaining.clamp(0.0, 1.0);
+      // Die letzte halbe Sekunde blendet aus, sonst verschwindet sie
+      // mitten im Laufen.
+      final deckkraft = aus < 0.15 ? aus / 0.15 : 1.0;
+      canvas.drawCircle(
+        mitte,
+        zone.radius,
+        Paint()..color = farbe.withValues(alpha: 0.22 * deckkraft),
+      );
+      canvas.drawCircle(
+        mitte,
+        zone.radius,
+        Paint()
+          ..color = farbe.withValues(alpha: 0.7 * deckkraft)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+    }
+  }
+
+  /// Die Vorschau beim Halten — genau das, was beim Loslassen geschieht
+  /// (`ActionWorld.aimPreview`).
+  void _drawAim(Canvas canvas) {
+    final id = _zielId;
+    if (id == null) return;
+    final vorschau = sim.aimPreview(id, _zielPunkt);
+    if (vorschau == null) return;
+
+    final farbe = tintColor(vorschau.tint);
+    final flaeche = Paint()..color = farbe.withValues(alpha: 0.28);
+    final kante = Paint()
+      ..color = farbe.withValues(alpha: 0.9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    switch (vorschau) {
+      case AimLine(:final from, :final to, :final width):
+        canvas.drawLine(
+          Offset(from.x, from.y),
+          Offset(to.x, to.y),
+          Paint()
+            ..color = farbe.withValues(alpha: 0.35)
+            ..strokeWidth = width + 8
+            ..strokeCap = StrokeCap.round,
+        );
+        canvas.drawCircle(Offset(to.x, to.y), width + 2, kante);
+      case AimCone(
+        :final origin,
+        :final direction,
+        :final range,
+        :final halfAngle,
+      ):
+        final mitte = Offset(origin.x, origin.y);
+        final winkel = math.atan2(direction.y, direction.x);
+        final bogen = Rect.fromCircle(center: mitte, radius: range);
+        canvas.drawArc(bogen, winkel - halfAngle, halfAngle * 2, true, flaeche);
+        canvas.drawArc(bogen, winkel - halfAngle, halfAngle * 2, true, kante);
+      case AimCircle(
+        :final center,
+        :final radius,
+        :final castFrom,
+        :final castRange,
+      ):
+        if (castRange > 0) {
+          // Wie weit er abgesetzt werden darf — ein blasser Ring.
+          canvas.drawCircle(
+            Offset(castFrom.x, castFrom.y),
+            castRange,
+            Paint()
+              ..color = farbe.withValues(alpha: 0.25)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.5,
+          );
+        }
+        final mitte = Offset(center.x, center.y);
+        canvas.drawCircle(mitte, radius, flaeche);
+        canvas.drawCircle(mitte, radius, kante);
+    }
+  }
+
   void _drawTelegraphs(Canvas canvas) {
     for (final zone in sim.telegraphs) {
       final mitte = Offset(zone.origin.x, zone.origin.y);
