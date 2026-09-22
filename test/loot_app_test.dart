@@ -54,4 +54,20 @@ void main() {
       isNull,
     );
   });
+
+  test('was nicht gefallen ist, steht nicht da — kein „+0 G"', () {
+    expect(
+      DamagePopup.forLoot(
+        const LootDropped(at: Vec2.zero, xp: 4, gold: 0),
+      )?.text,
+      '+4 EP',
+    );
+    expect(
+      DamagePopup.forLoot(
+        const LootDropped(at: Vec2.zero, xp: 0, gold: 2),
+      )?.text,
+      '+2 G',
+    );
+    expect(DamagePopup.lootText(12, 0), isNot(contains('0 G')));
+  });
 }

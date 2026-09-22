@@ -21,13 +21,24 @@ class DamagePopup {
   /// Was ein gefallener Gegner einbringt (ADR-0041): golden, etwas höher
   /// als die Schadenszahl, damit beide lesbar bleiben.
   static DamagePopup? forLoot(LootDropped loot) {
-    if (loot.xp <= 0 && loot.gold <= 0) return null;
+    final text = lootText(loot.xp, loot.gold);
+    if (text.isEmpty) return null;
     return DamagePopup(
-      text: '+${loot.xp} EP  +${loot.gold} G',
+      text: text,
       color: Palette.goldOnDark,
       origin: Vec2(loot.at.x, loot.at.y - 18),
       scale: 0.85,
     );
+  }
+
+  /// „+7 EP  +3 G" — aber nur, was wirklich gefallen ist.
+  ///
+  /// Der Goldtopf einer Stufe ist klein und wird abgerundet verteilt, also
+  /// bringt mancher Gegner kein ganzes Goldstück. „+0 G" liest sich wie
+  /// ein Fehler; dann steht dort nur die Erfahrung. Dieselbe Regel wie bei
+  /// den Schadenszahlen: keine Null über dem Kopf.
+  static String lootText(int xp, int gold) {
+    return <String>[if (xp > 0) '+$xp EP', if (gold > 0) '+$gold G'].join('  ');
   }
 
   /// Aus einem Treffer wird eine Zahl — oder nichts.

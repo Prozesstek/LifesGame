@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../ui/palette.dart';
 import 'ability_buttons.dart';
 import 'action_game.dart';
+import 'damage_popup.dart';
 import 'action_joystick.dart';
 
 /// Ein laufender Lauf durch die Grube: Spielfeld, Steuerkreuz, Kopfzeile
@@ -195,7 +196,7 @@ class _Hud extends StatelessWidget {
                 Flexible(
                   child: Text(
                     '${sim.kills} / ${sim.totalEnemies} erledigt'
-                    '${sim.runXp > 0 || sim.runGold > 0 ? ' · +${sim.runXp} EP +${sim.runGold} G' : ''}'
+                    '${sim.runXp > 0 || sim.runGold > 0 ? ' · ${DamagePopup.lootText(sim.runXp, sim.runGold)}' : ''}'
                     '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
