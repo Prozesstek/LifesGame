@@ -1,3 +1,4 @@
+import 'dailies.dart';
 import 'stage.dart';
 
 /// Was ein erstmals besiegter Gegner einbringt.
@@ -34,6 +35,30 @@ abstract final class LadderRewards {
   static int xpFor(int rung) => baseXp + xpPerRung * (rung - 1);
 
   static int goldFor(int rung) => baseGold + goldPerRung * (rung - 1);
+
+  /// **Ein Daily zahlt ein Viertel des Erstsiegs** (ADR-0040). Vier davon
+  /// liegen damit in der Grössenordnung eines Tags Gewohnheiten, nicht
+  /// darüber — sonst wäre der Kampf die Quelle des Fortschritts statt
+  /// seiner Auszahlung (`konzept.md` Abschnitt 2).
+  static const double dailyShare = 0.25;
+
+  static int dailyXpFor(int rung) => (xpFor(rung) * dailyShare).round();
+
+  static int dailyGoldFor(int rung) => (goldFor(rung) * dailyShare).round();
+
+  /// Was vier Dailies an einem Tag höchstens einbringen — die vier
+  /// obersten Stufen. Die Obergrenze, gegen die die Kurven rechnen.
+  static int get maxDailyXpPerDay => _obersteVier(dailyXpFor);
+
+  static int get maxDailyGoldPerDay => _obersteVier(dailyGoldFor);
+
+  static int _obersteVier(int Function(int) je) {
+    var summe = 0;
+    for (var i = 0; i < PitDailies.perDay; i++) {
+      summe += je(PitStage.count - i);
+    }
+    return summe;
+  }
 
   /// Alles, was die ganze Reihe ueber ein Spielerleben hergibt.
   static int get lifetimeXp => _summe(xpFor);
@@ -116,7 +141,7 @@ class LadderProgress {
     // einen Fortschritt.
     if (rung != highestDefeated + 1) return this;
 
-    return LadderProgress(highestDefeated: rung, defeats: defeats);
+    return copyWith(highestDefeated: rung);
   }
 
   /// Traegt eine Niederlage ein.
@@ -129,8 +154,7 @@ class LadderProgress {
   LadderProgress recordDefeat(int rung) {
     if (rung < 1 || rung > PitStage.count) return this;
 
-    return LadderProgress(
-      highestDefeated: highestDefeated,
+    return copyWith(
       defeats: <int, int>{...defeats, rung: defeatsAt(rung) + 1},
     );
   }
@@ -219,6 +243,10 @@ class LadderProgress {
         Object.hashAllUnordered(<Object>[
           for (final entry in defeats.entries)
             Object.hash(entry.key, entry.value),
+        ]),
+        Object.hashAllUnordered(<Object>[
+          for (final entry in dailyClears.entries)
+            Object.hash(entry.key, Object.hashAllUnordered(entry.value)),
         ]),
       );
 }

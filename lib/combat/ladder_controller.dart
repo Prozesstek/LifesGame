@@ -1,6 +1,8 @@
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 
+import '../habits/habits_controller.dart';
 import '../save/save_providers.dart';
 
 /// Wie weit die Gegnerreihe gegangen ist — die Riverpod-Brücke zum
@@ -63,4 +65,43 @@ final ladderProvider = NotifierProvider<LadderController, LadderProgress>(
 /// Auf welcher Sprosse der nächste Kampf stattfindet, gezählt ab 1.
 final nextRungProvider = Provider<int>((ref) {
   return ref.watch(ladderProvider).nextRung;
+});
+
+/// Tage seit dem 1.1.1970 — die Zahl, an der die Dailies hängen.
+///
+/// In UTC gerechnet, wie `Day` selbst: Eine Zeitumstellung darf keinen
+/// Tag verschlucken (`gotchas.md`).
+int dayNumberOf(Day day) {
+  return DateTime.utc(
+    day.year,
+    day.month,
+    day.day,
+  ).difference(DateTime.utc(1970)).inDays;
+}
+
+/// Ob die Dailies heute zahlen: **nur an Tagen mit einem Häkchen**
+/// (ADR-0040). Der Kampf bleibt so die Auszahlung der Gewohnheiten, nicht
+/// ihr Ersatz — wer nichts abhakt, darf trotzdem spielen.
+final dailiesUnlockedProvider = Provider<bool>((ref) {
+  final heute = ref.watch(todayProvider);
+  return ref.watch(habitTrackerProvider).checksOn(heute) > 0;
+});
+
+/// Eine Stufe des Tages, wie der Eingang sie zeigt.
+typedef DailyStage = ({int stage, bool cleared, int xp, int gold});
+
+/// Die vier Stufen des Tages — **rechnet nicht**, fragt `LadderProgress`
+/// und `LadderRewards`.
+final todayDailiesProvider = Provider<List<DailyStage>>((ref) {
+  final stand = ref.watch(ladderProvider);
+  final tag = dayNumberOf(ref.watch(todayProvider));
+  return <DailyStage>[
+    for (final stufe in stand.dailiesOn(tag))
+      (
+        stage: stufe,
+        cleared: stand.isDailyCleared(tag, stufe),
+        xp: LadderRewards.dailyXpFor(stufe),
+        gold: LadderRewards.dailyGoldFor(stufe),
+      ),
+  ];
 });

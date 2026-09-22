@@ -111,7 +111,13 @@ void main() {
       );
     }
 
-    return SaveData(theory: progress, habits: tracker, loadout: loadout);
+    return SaveData(
+      theory: progress,
+      habits: tracker,
+      loadout: loadout,
+      // Zwölf Stufen: Damit steht auf dem Eingang die Karte der Dailies.
+      ladder: const LadderProgress(highestDefeated: 12),
+    );
   }
 
   Widget appMit(Widget screen) {
