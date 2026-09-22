@@ -18,6 +18,18 @@ class DamagePopup {
     required this.scale,
   });
 
+  /// Was ein gefallener Gegner einbringt (ADR-0041): golden, etwas höher
+  /// als die Schadenszahl, damit beide lesbar bleiben.
+  static DamagePopup? forLoot(LootDropped loot) {
+    if (loot.xp <= 0 && loot.gold <= 0) return null;
+    return DamagePopup(
+      text: '+${loot.xp} EP  +${loot.gold} G',
+      color: Palette.goldOnDark,
+      origin: Vec2(loot.at.x, loot.at.y - 18),
+      scale: 0.85,
+    );
+  }
+
   /// Aus einem Treffer wird eine Zahl — oder nichts.
   ///
   /// Ein Schlag, der nichts anrichtet, bekommt keine Null über den Kopf:

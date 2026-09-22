@@ -90,6 +90,23 @@ class ActionEntity {
   /// Ob dieser Gegner den Helden bemerkt hat.
   bool aggro = false;
 
+  /// Ob die Figur gerade ausser Reichweite von allem ist — der Wächter,
+  /// solange er schläft oder auftritt. Sie nimmt keinen Schaden, wird
+  /// nicht anvisiert, von nichts geschoben und handelt nicht.
+  bool untouchable = false;
+
+  // --- Gegen Staus (ActionWorld._trackProgress) ---
+
+  /// Wo die Figur zuletzt merklich vorangekommen ist.
+  Vec2? progressAnchor;
+
+  /// Wie lange sie beim Verfolgen schon auf der Stelle tritt.
+  double stuckFor = 0;
+
+  /// Solange das läuft, geht sie durch Verbündete hindurch — nicht durch
+  /// Wände und nicht durch den Helden.
+  double ghostLeft = 0;
+
   /// Wohin die Figur zuletzt gesehen hat — nur für die Darstellung.
   Vec2 facing = const Vec2(0, 1);
 
@@ -122,6 +139,7 @@ class ActionEntity {
 
   /// Nimmt Schaden und gibt zurück, was tatsächlich abgezogen wurde.
   int takeDamage(int amount) {
+    if (untouchable) return 0;
     final vorher = hp;
     hp = (hp - amount).clamp(0, maxHp);
     return vorher - hp;

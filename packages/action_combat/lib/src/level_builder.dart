@@ -18,7 +18,9 @@ import 'stage.dart';
 ///    [PitStage.roomCount] Räume, der Wächter.
 /// 3. In jede Zelle des Pfads ein Raum, zwischen Nachbarn ein Gang von
 ///    zwei Feldern Breite — von Mitte zu Mitte, damit er immer ankommt.
-/// 4. Alles ausserhalb des Pfads bleibt Fels und wird abgeschnitten.
+/// 4. Wo der Gang den Rand des Wächterraums kreuzt, liegt ein Tor. Es
+///    schliesst sich hinter dem Helden, bis der Wächter fällt.
+/// 5. Alles ausserhalb des Pfads bleibt Fels und wird abgeschnitten.
 ///
 /// Ob das Ergebnis trägt, prüft danach dieselbe Stelle wie bei einer
 /// handgeschriebenen Halle: [Level.problems].
@@ -53,6 +55,7 @@ abstract final class LevelBuilder {
     for (var i = 1; i < pfad.length; i++) {
       _carve(feld, pfad[i - 1], pfad[i]);
     }
+    _gate(feld, pfad.last);
 
     final start = _centerOf(pfad.first);
     feld[start.y][start.x] = '@';
@@ -179,6 +182,25 @@ abstract final class LevelBuilder {
     for (var y = y0; y <= y1; y++) {
       for (var x = x0; x <= x1; x++) {
         if (feld[y][x] == '#') feld[y][x] = '.';
+      }
+    }
+  }
+
+  /// Macht den Gang in den Wächterraum dort zum Tor, wo er dessen
+  /// Felsrand kreuzt — zwei Felder, so breit wie der Gang.
+  ///
+  /// Der Rand gehört allein zu dieser Zelle; ein Gang zwischen zwei
+  /// anderen Räumen kommt hier nie durch. Das Tor liegt damit genau
+  /// zwischen dem Raum und dem Rest der Grube.
+  static void _gate(List<List<String>> feld, _Cell c) {
+    final x0 = c.x * cellWidth;
+    final y0 = c.y * cellHeight;
+    final x1 = x0 + cellWidth - 1;
+    final y1 = y0 + cellHeight - 1;
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        final rand = x == x0 || x == x1 || y == y0 || y == y1;
+        if (rand && feld[y][x] == '.') feld[y][x] = '=';
       }
     }
   }

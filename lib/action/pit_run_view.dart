@@ -72,14 +72,33 @@ class _PitRunViewState extends State<PitRunView> {
     return oben >= 0 ? oben : _slotKeysNumpad.indexOf(key);
   }
 
+  /// Wo die Maus zuletzt stand — am Rechner zielt sie.
+  Offset? _maus;
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent) {
-      final platz = _platzFuer(event.logicalKey);
-      final slots = widget.game.sim.slots;
-      if (platz >= 0) {
-        if (platz < slots.length) widget.game.sim.cast(slots[platz].id);
-        return KeyEventResult.handled;
+    final game = widget.game;
+    final platz = _platzFuer(event.logicalKey);
+    final slots = game.sim.slots;
+    if (platz >= 0) {
+      if (platz >= slots.length) return KeyEventResult.handled;
+      final ability = slots[platz];
+      // **Taste halten, mit der Maus zielen, loslassen wirkt** — wie der
+      // Daumen am Knopf. Was nichts zu zielen hat, wirkt beim Drücken.
+      if (event is KeyDownEvent) {
+        if (ability.aim == PitAim.selbst) {
+          game.sim.cast(ability.id);
+        } else {
+          game.beginAim(ability.id);
+          final maus = _maus;
+          if (maus != null) game.aimAtScreen(maus);
+        }
+      } else if (event is KeyUpEvent && game.aimingId == ability.id) {
+        game.releaseAim();
       }
+      return KeyEventResult.handled;
+    }
+
+    if (event is KeyDownEvent) {
       _tasten.add(event.logicalKey);
     } else if (event is KeyUpEvent) {
       _tasten.remove(event.logicalKey);
@@ -97,31 +116,40 @@ class _PitRunViewState extends State<PitRunView> {
     return Focus(
       autofocus: true,
       onKeyEvent: _onKey,
-      child: Stack(
-        children: <Widget>[
-          // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
-          // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
-          // keine Tasten kennt — keine davon käme dann hier oben an
-          // (`gotchas.md`).
-          Positioned.fill(child: GameWidget(game: game, autofocus: false)),
-          Positioned.fill(
-            child: ActionJoystick(
-              onChanged: (richtung) => game.moveInput = richtung,
-            ),
-          ),
-          Positioned(top: 8, left: 12, right: 12, child: _Hud(game: game)),
-          Positioned(
-            right: 16,
-            bottom: 24,
-            child: ValueListenableBuilder<int>(
-              valueListenable: game.frame,
-              builder: (context, _, _) => AbilityButtons(
-                world: game.sim,
-                onCast: (id) => game.sim.cast(id),
+      // Um den ganzen Stapel: Das Steuerkreuz liegt über dem Spielfeld
+      // und finge die Maus sonst ab. Die Koordinaten sind dieselben wie
+      // die des Spielfelds, es füllt den Stapel.
+      child: MouseRegion(
+        onHover: (event) {
+          _maus = event.localPosition;
+          game.aimAtScreen(event.localPosition);
+        },
+        child: Stack(
+          children: <Widget>[
+            // **Ohne eigenen Fokus.** Flames `GameWidget` holt ihn sich sonst
+            // selbst und meldet jede Taste als erledigt, auch wenn das Spiel
+            // keine Tasten kennt — keine davon käme dann hier oben an
+            // (`gotchas.md`).
+            Positioned.fill(child: GameWidget(game: game, autofocus: false)),
+            Positioned.fill(
+              child: ActionJoystick(
+                onChanged: (richtung) => game.moveInput = richtung,
               ),
             ),
-          ),
-        ],
+            Positioned(top: 8, left: 12, right: 12, child: _Hud(game: game)),
+            Positioned.fill(
+              child: IgnorePointer(child: _BossTitle(game: game)),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 24,
+              child: ValueListenableBuilder<int>(
+                valueListenable: game.frame,
+                builder: (context, _, _) => AbilityButtons(game: game),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -167,6 +195,7 @@ class _Hud extends StatelessWidget {
                 Flexible(
                   child: Text(
                     '${sim.kills} / ${sim.totalEnemies} erledigt'
+                    '${sim.runXp > 0 || sim.runGold > 0 ? ' · +${sim.runXp} EP +${sim.runGold} G' : ''}'
                     '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -190,18 +219,127 @@ class _Hud extends StatelessWidget {
               ],
             ),
             if (boss != null) ...<Widget>[
-              const SizedBox(height: 8),
-              PitBar(
-                ratio: boss.hpRatio,
-                color: Palette.enemyOnDark,
+              const SizedBox(height: 10),
+              BossBar(
+                name: 'Der Wächter',
+                ratio: boss.hpRatio * sim.bossBarFill,
                 // Wut ändert, was er tut — das soll man lesen können, nicht
                 // erst merken, wenn er anstürmt.
-                label: sim.isBossEnraged
-                    ? 'Der Wächter · wütend'
-                    : 'Der Wächter',
+                enraged: sim.isBossEnraged,
               ),
             ],
           ],
+        );
+      },
+    );
+  }
+}
+
+/// Der Balken des Wächters, wie in Dark Souls: der Name darüber, klein
+/// und links, darunter ein langer, schmaler Balken ohne Zahl.
+///
+/// Er erscheint erst, wenn der Wächter gelandet ist
+/// (`ActionWorld.bossView`), und läuft dann voll
+/// (`ActionWorld.bossBarFill`).
+class BossBar extends StatelessWidget {
+  const BossBar({
+    super.key,
+    required this.name,
+    required this.ratio,
+    this.enraged = false,
+  });
+
+  final String name;
+  final double ratio;
+  final bool enraged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          enraged ? '$name · wütend' : name,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 13,
+            letterSpacing: 1.2,
+            color: Palette.textOnDark,
+            shadows: <Shadow>[Shadow(blurRadius: 4)],
+          ),
+        ),
+        const SizedBox(height: 3),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(color: Palette.textOnDarkDim),
+          ),
+          child: LinearProgressIndicator(
+            value: ratio,
+            minHeight: 6,
+            backgroundColor: Palette.trackOnDark,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              Palette.enemyOnDark,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Der Schriftzug in der Mitte, während der Wächter auftritt: blendet mit
+/// der Landung ein und zum Ende des Auftritts wieder aus.
+class _BossTitle extends StatelessWidget {
+  const _BossTitle({required this.game});
+
+  final ActionGame game;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: game.frame,
+      builder: (context, _, _) {
+        final auftritt = game.sim.bossEntrance;
+        if (auftritt == null) return const SizedBox.shrink();
+
+        const landet = ActionBalance.bossLandsShare;
+        final deckkraft = auftritt < landet
+            ? 0.0
+            : auftritt < 0.8
+            ? ((auftritt - landet) / 0.15).clamp(0.0, 1.0)
+            : ((1 - auftritt) / 0.2).clamp(0.0, 1.0);
+
+        return Align(
+          alignment: const Alignment(0, -0.35),
+          child: Opacity(
+            opacity: deckkraft,
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'DER WÄCHTER',
+                  style: TextStyle(
+                    fontSize: 30,
+                    letterSpacing: 6,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.textOnDark,
+                    shadows: <Shadow>[Shadow(blurRadius: 12)],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Hüter der Tiefe',
+                  style: TextStyle(
+                    fontSize: 14,
+                    letterSpacing: 2,
+                    color: Palette.enemyOnDark,
+                    shadows: <Shadow>[Shadow(blurRadius: 8)],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

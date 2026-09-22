@@ -1,7 +1,7 @@
 # ADR-0032: Eine Gegnerreihe statt des Dungeons — und Belohnung genau einmal je Gegner
 
 **Datum:** 08.09.2026
-**Status:** Aktiv
+**Status:** Aktiv — teilweise ergänzt durch [ADR-0040](0040-vier-dailies-je-tag.md): Vier Stufen des Tages zahlen noch einmal ein Viertel, gedeckelt und nur an Tagen mit Häkchen
 **Entschieden von:** Prozesstek
 
 ## Kontext

@@ -14,6 +14,7 @@ import 'stage.dart';
 import 'stats.dart';
 import 'vec2.dart';
 
+part 'aim.dart';
 part 'boss.dart';
 
 /// Ein Lauf durch eine Halle.
@@ -30,14 +31,16 @@ part 'boss.dart';
 /// Klasse, nicht er.
 class ActionWorld {
   ActionWorld({
-    required this.level,
+    required Level level,
     required this.heroStats,
     this.stage,
     List<String> abilityIds = const <String>[],
     String? weaponMoveId,
     List<PitModifier> modifiers = const <PitModifier>[],
+    this.rewardPot = const (xp: 0, gold: 0),
     int seed = 1,
-  })  : _rng = math.Random(seed),
+  })  : _level = level,
+        _rng = math.Random(seed),
         weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
         _mana = heroStats.maxMana.toDouble(),
         // Sets und legendäre Kräfte werden hier einmal angewendet; die
@@ -54,15 +57,17 @@ class ActionWorld {
       faction: Faction.held,
       kind: EnemyKind.keiner,
       position: level.heroStart,
-      maxHp: heroStats.maxHp,
-      attack: heroStats.attack,
-      defense: heroStats.defense,
+      // Die Zahlen, wie die Grube sie führt (ADR-0042): mal zehn und mal
+      // Level und Seltenheit. Der Schaden rechnet danach mit dem blossen
+      // Angriff weiter, der Faktor steckt schon darin.
+      maxHp: heroStats.combatMaxHp,
+      attack: heroStats.combatAttack,
+      defense: heroStats.combatDefense,
       radius: ActionBalance.heroRadius,
       speed: ActionBalance.heroSpeed,
       attackRange: weapon.range,
       attackCooldown: heroStats.attackCooldown * weapon.cooldownFactor,
-      damageMultiplier: heroStats.damageMultiplier,
-      critChance: heroStats.critChance,
+      critChance: heroStats.critChance + ActionBalance.heroBaseCritChance,
       critFactor: heroStats.critFactor,
     );
     _entities.add(_hero);
@@ -71,10 +76,41 @@ class ActionWorld {
       _entities.add(_enemyFor(spawn));
     }
     _totalEnemies = level.spawns.length;
+    _boss = _entities.where((e) => e.kind == EnemyKind.endgegner).firstOrNull;
+    // Mit Tor schläft der Wächter, bis es hinter dem Helden zufällt.
+    // Ohne Tor — im Prototyp und in Testhallen — ist er von Anfang an da.
+    final boss = _boss;
+    if (level.hasGates && boss != null) {
+      _bossPhase = _BossPhase.schlaeft;
+      boss.untouchable = true;
+    }
     _rebuildPath();
   }
 
-  final Level level;
+  /// Was dieser Lauf höchstens einbringt — der Rest des Topfs der Stufe,
+  /// den die Reihe hereinreicht (ADR-0041). Null in Tests, im Prototyp
+  /// und bei einer Stufe, die heute nichts mehr zahlt.
+  final ({int xp, int gold}) rewardPot;
+
+  /// Was bisher aus dem Topf gefallen ist.
+  int get runXp => _runXp;
+  int get runGold => _runGold;
+  int _runXp = 0;
+  int _runGold = 0;
+
+  /// Wie viele Gegner ausser dem Wächter schon gefallen sind.
+  int _fussvolkGefallen = 0;
+
+  ActionEntity? _boss;
+  _BossPhase _bossPhase = _BossPhase.wach;
+  double _entranceTime = 0;
+
+  /// Die Halle, wie sie gerade ist — mit offenem oder geschlossenem Tor
+  /// zum Wächterraum. Der Renderer liest sie jedes Bild neu und zeichnet
+  /// ein geschlossenes Tor damit von selbst als Wand.
+  Level get level => _level;
+  Level _level;
+
   final ActionStats heroStats;
 
   /// Wie hart die Gegner sind (ADR-0039). `null` heisst Grundwerte aus
@@ -126,9 +162,15 @@ class ActionWorld {
   /// Richtung ab — eine Flutfüllung für alle statt einer Suche je
   /// Gegner.
   late FlowField _pathToHero;
+
+  /// Dasselbe für Figuren, die breiter sind als ein Feld.
+  late FlowField _widePathToHero;
   int _stepsSincePath = 0;
 
   final List<Projectile> _projectiles = <Projectile>[];
+
+  /// Abgesetzte Flächen, die noch liegen.
+  final List<_Zone> _zones = <_Zone>[];
   final List<HealthOrb> _orbs = <HealthOrb>[];
 
   // --- Was die Darstellung sehen darf ---
@@ -138,8 +180,45 @@ class ActionWorld {
   List<EntityView> get views {
     return <EntityView>[
       for (final entity in _entities)
-        if (entity.isAlive) EntityView.of(entity),
+        if (entity.isAlive && _isShown(entity)) _viewOf(entity),
     ];
+  }
+
+  /// Der schlafende Wächter steht nicht im Bild.
+  bool _isShown(ActionEntity entity) {
+    return entity != _boss || _bossPhase != _BossPhase.schlaeft;
+  }
+
+  /// Wie der Renderer eine Figur sieht. Beim Auftritt steht der Wächter
+  /// höher, als er ist — so fällt er ins Bild, ohne dass der Renderer
+  /// davon wissen muss.
+  EntityView _viewOf(ActionEntity entity) {
+    final view = EntityView.of(entity);
+    final hoehe = entity == _boss ? _dropHeight : 0.0;
+    if (hoehe == 0) return view;
+    return EntityView(
+      id: view.id,
+      faction: view.faction,
+      kind: view.kind,
+      position: view.position - Vec2(0, hoehe),
+      radius: view.radius,
+      hpRatio: view.hpRatio,
+      facing: view.facing,
+      isAlive: view.isAlive,
+      isSlowed: view.isSlowed,
+      isBurning: view.isBurning,
+    );
+  }
+
+  /// Wie hoch der Wächter beim Auftritt noch über seinem Platz ist —
+  /// schneller werdend, wie etwas, das fällt.
+  double get _dropHeight {
+    if (_bossPhase != _BossPhase.auftritt) return 0;
+    const landung =
+        ActionBalance.bossEntranceSeconds * ActionBalance.bossLandsShare;
+    if (_entranceTime >= landung) return 0;
+    final rest = 1 - _entranceTime / landung;
+    return ActionBalance.bossDropHeight * rest * rest;
   }
 
   EntityView get heroView => EntityView.of(_hero);
@@ -148,6 +227,19 @@ class ActionWorld {
     return <ProjectileView>[
       for (final p in _projectiles)
         if (!p.spent) ProjectileView.of(p),
+    ];
+  }
+
+  /// Die liegenden Flächen — Eisfeld, Giftboden, Sturm.
+  List<ZoneView> get zones {
+    return <ZoneView>[
+      for (final zone in _zones)
+        ZoneView(
+          center: zone.center,
+          radius: zone.radius,
+          tint: zone.tint,
+          remaining: (zone.secondsLeft / zone.seconds).clamp(0.0, 1.0),
+        ),
     ];
   }
 
@@ -198,52 +290,85 @@ class ActionWorld {
     return null;
   }
 
-  /// Wirkt eine Fähigkeit von einem Platz. Gibt false zurück, wenn sie
-  /// nicht geht — nicht auf einem Platz, nicht abgeklungen, zu wenig Mana.
+  /// Wirkt eine Fähigkeit von einem Platz — **kurz getippt**: Sie zielt
+  /// selbst, auf den nächsten Gegner, den der Held sieht. Gibt false
+  /// zurück, wenn sie nicht geht — nicht auf einem Platz, nicht
+  /// abgeklungen, zu wenig Mana, oder niemand da, worauf sie zielen könnte.
   ///
-  /// **Kein Ziel, kein Mana.** Ein Funke ohne Gegner in Reichweite kostet
-  /// nichts und klingt nicht ab: Wer ins Leere tippt, soll nicht bestraft
+  /// **Kein Ziel, kein Mana.** Wer ins Leere tippt, soll nicht bestraft
   /// werden, sondern es gleich noch einmal versuchen können.
-  bool cast(String id) {
+  bool cast(String id) => _castWith(id, null);
+
+  /// Wirkt eine Fähigkeit von einem Platz — **gezielt**, nach dem Halten:
+  /// in Richtung [target] oder, bei einem Bereich, an [target] (höchstens
+  /// so weit, wie sie reicht, und nicht hinter eine Wand).
+  ///
+  /// Anders als [cast] kostet sie hier **immer**: Ein Skillshot, der
+  /// danebengeht, ist ein verfehlter Skillshot.
+  bool castAt(String id, Vec2 target) => _castWith(id, target);
+
+  /// Was [castAt] mit [target] täte — für die Vorschau beim Halten. Null
+  /// bei einer Fähigkeit ohne Ziel (Heilung, Schutz, Mana), und null
+  /// [target] zeigt, wohin kurzes Tippen zielen würde.
+  AimPreview? aimPreview(String id, Vec2? target) {
+    final ability = _slotFor(id);
+    if (ability == null) return null;
+    return _preview(ability, target);
+  }
+
+  bool _castWith(String id, Vec2? zielpunkt) {
     if (!canCast(id)) return false;
     final ability = _slotFor(id);
     if (ability == null) return false;
-
-    for (final effect in ability.effects) {
-      if (effect is BoltAtNearest &&
-          _nearestEnemyWithin(effect.range, needsSight: true) == null) {
-        return false;
-      }
-      if (effect is StrikeNearest &&
-          _nearestEnemyWithin(effect.range) == null) {
-        return false;
-      }
-    }
+    final plan = _plan(ability, zielpunkt);
+    if (plan == null) return false;
 
     _mana -= ability.manaCost;
     _slotCooldowns[id] = ability.cooldown;
-    _events.add(AbilityCast(id: id, at: _hero.position));
+    _events.add(AbilityCast(id: id, at: plan.center));
 
+    final flaechen = <double, _Zone>{};
     for (final effect in ability.effects) {
-      _apply(effect);
+      _apply(effect, ability, plan, flaechen);
     }
+    // Eine Fläche greift schon beim Aufschlagen, nicht erst im nächsten
+    // Schritt.
+    for (final zone in flaechen.values) {
+      _affect(zone);
+    }
+    _zones.addAll(flaechen.values);
     return true;
   }
 
-  /// Die eine Stelle, die jede Art von [PitEffect] ausführt.
-  void _apply(PitEffect effect) {
+  /// Die eine Stelle, die jede Art von [PitEffect] ausführt — dorthin,
+  /// wohin [plan] zeigt.
+  void _apply(
+    PitEffect effect,
+    PitAbility ability,
+    _CastPlan plan,
+    Map<double, _Zone> flaechen,
+  ) {
     switch (effect) {
       case BoltAtNearest(:final power, :final range, :final leech):
+        final richtung = plan.direction;
+        if (richtung != null) {
+          _shootAlong(richtung, power: power, weite: range, leech: leech);
+          return;
+        }
         final ziel = _nearestEnemyWithin(range, needsSight: true);
         if (ziel == null) return;
         _shoot(ziel, power: power, leech: leech);
       case StrikeNearest(:final power, :final range):
-        final ziel = _nearestEnemyWithin(range);
+        final richtung = plan.direction;
+        final ziel = richtung != null
+            ? _nearestInCone(richtung, range)
+            : _nearestEnemyWithin(range);
+        if (richtung != null) _hero.facing = richtung;
         if (ziel == null) return;
         _hero.facing = (ziel.position - _hero.position).normalized;
         _hit(_hero, ziel, powerFactor: power);
       case StrikeAround(:final power, :final radius):
-        for (final ziel in _enemiesWithin(radius)) {
+        for (final ziel in _enemiesAround(plan.center, radius)) {
           _hit(_hero, ziel, powerFactor: power);
         }
       case HealSelf(:final share):
@@ -258,6 +383,11 @@ class ActionWorld {
             _reflectLeft > 0 ? math.max(_reflectShare, share) : share;
         _reflectLeft = seconds;
       case SlowAround(:final radius, :final factor, :final seconds):
+        if (plan.placed) {
+          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
+          zone.slowFactor = math.min(zone.slowFactor, factor);
+          return;
+        }
         for (final ziel in _enemiesWithin(radius)) {
           ziel.slowFactor =
               ziel.slowLeft > 0 ? math.min(ziel.slowFactor, factor) : factor;
@@ -265,6 +395,11 @@ class ActionWorld {
         }
       case DamageOverTime(:final radius, :final perSecond, :final seconds):
         final jeSekunde = _hero.attack * _hero.damageMultiplier * perSecond;
+        if (plan.placed) {
+          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
+          zone.dotPerSecond = math.max(zone.dotPerSecond, jeSekunde);
+          return;
+        }
         for (final ziel in _enemiesWithin(radius)) {
           _applyDot(ziel, jeSekunde, seconds);
         }
@@ -319,6 +454,7 @@ class ActionWorld {
       for (final ziel in _entities)
         if (ziel.isAlive &&
             !ziel.isHero &&
+            !ziel.untouchable &&
             _hero.position.distanceSquaredTo(ziel.position) <=
                 (radius + ziel.radius) * (radius + ziel.radius))
           ziel,
@@ -336,7 +472,7 @@ class ActionWorld {
     ActionEntity? bester;
     var besteDistanz = double.infinity;
     for (final ziel in _entities) {
-      if (!ziel.isAlive || ziel.isHero) continue;
+      if (!ziel.isAlive || ziel.isHero || ziel.untouchable) continue;
       final reichweite = range + ziel.radius;
       final d = _hero.position.distanceSquaredTo(ziel.position);
       if (d > reichweite * reichweite || d >= besteDistanz) continue;
@@ -378,13 +514,47 @@ class ActionWorld {
   int _orbsCollected = 0;
 
   /// Der Endgegner, solange er lebt — für den Balken am oberen Rand.
+  ///
+  /// **Erst ab seiner Landung**, wie Name und Balken in Dark Souls:
+  /// Solange er schläft oder noch fällt, gibt es ihn für die Kopfzeile
+  /// nicht.
   EntityView? get bossView {
-    for (final entity in _entities) {
-      if (entity.kind == EnemyKind.endgegner && entity.isAlive) {
-        return EntityView.of(entity);
-      }
-    }
-    return null;
+    final boss = _boss;
+    if (boss == null || !boss.isAlive || !_bossLanded) return null;
+    return EntityView.of(boss);
+  }
+
+  bool get _bossLanded {
+    return switch (_bossPhase) {
+      _BossPhase.wach => true,
+      _BossPhase.schlaeft => false,
+      _BossPhase.auftritt => _entranceTime >=
+          ActionBalance.bossEntranceSeconds * ActionBalance.bossLandsShare,
+    };
+  }
+
+  /// Wie weit der Balken des Wächters gefüllt gezeigt wird, 0 bis 1 —
+  /// er läuft nach der Landung voll, statt einfach dazustehen.
+  double get bossBarFill {
+    if (_bossPhase == _BossPhase.wach) return 1;
+    if (!_bossLanded) return 0;
+    const gesamt = ActionBalance.bossEntranceSeconds;
+    const landung = gesamt * ActionBalance.bossLandsShare;
+    return ((_entranceTime - landung) / (gesamt - landung)).clamp(0.0, 1.0);
+  }
+
+  /// Wie weit der Auftritt ist, 0 bis 1 — oder null, wenn gerade keiner
+  /// läuft. Für den Schriftzug in der Mitte des Bildes.
+  double? get bossEntrance {
+    if (_bossPhase != _BossPhase.auftritt) return null;
+    return (_entranceTime / ActionBalance.bossEntranceSeconds).clamp(0.0, 1.0);
+  }
+
+  /// Wo der Wächter schläft, solange er schläft — sonst null. Für den
+  /// Bot: Er sieht ihn nicht und fände den Raum sonst nie.
+  Vec2? get sleepingBossAt {
+    if (_bossPhase != _BossPhase.schlaeft) return null;
+    return _boss?.position;
   }
 
   int get heroHp => _hero.hp;
@@ -458,12 +628,15 @@ class ActionWorld {
     _tickMana(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
+    _tickZones(dt);
     _enemiesAct(dt);
     _tickStatus(dt);
     _moveProjectiles(dt);
     _separate();
     _moveOrbs(dt);
     _collectDead();
+    _updateGate();
+    _tickEntrance(dt);
     _checkEnd();
   }
 
@@ -501,6 +674,7 @@ class ActionWorld {
     const takt = 0.5;
     for (final ziel in _entities) {
       if (!ziel.isAlive || ziel.isHero) continue;
+      if (ziel.ghostLeft > 0) ziel.ghostLeft -= dt;
       if (ziel.slowLeft > 0) ziel.slowLeft -= dt;
       if (ziel.dotLeft <= 0) continue;
 
@@ -587,6 +761,7 @@ class ActionWorld {
 
     for (final entity in _entities) {
       if (!entity.isAlive || entity.faction == attacker.faction) continue;
+      if (entity.untouchable) continue;
       final reichweite = attacker.attackRange + entity.radius;
       final distanz = attacker.position.distanceSquaredTo(entity.position);
       if (distanz > reichweite * reichweite) continue;
@@ -602,7 +777,7 @@ class ActionWorld {
 
   void _enemiesAct(double dt) {
     for (final gegner in _entities) {
-      if (!gegner.isAlive || gegner.isHero) continue;
+      if (!gegner.isAlive || gegner.isHero || gegner.untouchable) continue;
 
       final abstand = gegner.position.distanceTo(_hero.position);
       // **Wer weiter schiesst, als er sieht, wäre blind.** Der
@@ -650,6 +825,7 @@ class ActionWorld {
         richtung * (gegner.speed * takt),
         gegner.radius,
       );
+      _trackProgress(gegner, takt);
       return;
     }
 
@@ -692,6 +868,7 @@ class ActionWorld {
           richtung * (schuetze.speed * dt),
           schuetze.radius,
         );
+        _trackProgress(schuetze, dt);
       }
       return;
     }
@@ -726,7 +903,7 @@ class ActionWorld {
       if (geschoss.spent) continue;
 
       geschoss.age += dt;
-      if (geschoss.age > ActionBalance.projectileLifetime) {
+      if (geschoss.age > geschoss.maxAge) {
         geschoss.spent = true;
         continue;
       }
@@ -740,6 +917,7 @@ class ActionWorld {
 
       for (final ziel in _entities) {
         if (!ziel.isAlive || ziel.faction == geschoss.faction) continue;
+        if (ziel.untouchable) continue;
         final reichweite = geschoss.radius + ziel.radius;
         if (geschoss.position.distanceSquaredTo(ziel.position) >
             reichweite * reichweite) {
@@ -831,8 +1009,10 @@ class ActionWorld {
     var roh = attacker.attack * attacker.damageMultiplier * powerFactor;
     if (kritisch) roh *= attacker.critFactor;
 
-    final streuung =
-        1 + (_rng.nextDouble() * 2 - 1) * ActionBalance.damageSpread;
+    final breite = attacker.isHero
+        ? ActionBalance.heroDamageSpread
+        : ActionBalance.damageSpread;
+    final streuung = 1 + (_rng.nextDouble() * 2 - 1) * breite;
     roh = roh * streuung - target.defense / ActionBalance.defenseDivisor;
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
@@ -895,10 +1075,68 @@ class ActionWorld {
 
   /// Verschiebt [from] um [delta] und bleibt dabei aus Wänden heraus.
   ///
-  /// Die beiden Achsen werden getrennt geprüft. Das kostet nichts und
-  /// erledigt das Entlanggleiten an einer Wand nebenbei — ohne es rutscht
-  /// man an jeder Ecke fest, und ein Gang wird unpassierbar.
+  /// **Erst bewegen, dann aus der Wand drücken** — entlang der Richtung
+  /// vom nächsten Wandpunkt zur Mitte. An einer glatten Wand ist das
+  /// Entlanggleiten, an einer **Ecke** zeigt diese Richtung schräg, und
+  /// die Figur rutscht um die Kante herum.
+  ///
+  /// Vorher wurden die Achsen getrennt geprüft und eine blockierte einfach
+  /// verworfen. An einer Ecke hiess das: stehen bleiben, und im Gedränge
+  /// vor einer Tür nie wieder loskommen. Ein Troll, breiter als ein Feld,
+  /// hing so an jedem Durchgang, dessen Feldmitte zu nah an der Wand lag.
+  ///
+  /// In Teilschritten von höchstens einem halben Radius, damit nichts
+  /// durch eine Ecke tunnelt; wo sich eine Überlappung nicht auflösen
+  /// lässt (ein Durchgang schmaler als die Figur), gilt die alte Regel.
   Vec2 _slide(Vec2 from, Vec2 delta, double radius) {
+    final laenge = delta.length;
+    if (laenge == 0) return from;
+    final schritte = math.max(1, (laenge / (radius * 0.5)).ceil());
+    final teil = delta * (1 / schritte);
+
+    var position = from;
+    for (var i = 0; i < schritte; i++) {
+      position = _pushOut(position + teil, radius) ??
+          _slideAxes(position, teil, radius);
+    }
+    return position;
+  }
+
+  /// Drückt einen Kreis aus allen Wänden, die er schneidet. Null, wenn
+  /// das nicht gelingt — dann steckt er fest oder wäre eingeklemmt.
+  Vec2? _pushOut(Vec2 center, double radius) {
+    const size = ActionBalance.tileSize;
+    var p = center;
+    for (var runde = 0; runde < 4; runde++) {
+      var geschoben = false;
+      final vonX = ((p.x - radius) / size).floor();
+      final bisX = ((p.x + radius) / size).floor();
+      final vonY = ((p.y - radius) / size).floor();
+      final bisY = ((p.y + radius) / size).floor();
+      for (var y = vonY; y <= bisY; y++) {
+        for (var x = vonX; x <= bisX; x++) {
+          if (!_level.isWallAt(x, y)) continue;
+          final nah = Vec2(
+            p.x.clamp(x * size, (x + 1) * size),
+            p.y.clamp(y * size, (y + 1) * size),
+          );
+          final weg = p - nah;
+          final abstand = weg.length;
+          if (abstand >= radius) continue;
+          // Die Mitte liegt in der Wand: keine Richtung, nach der man
+          // drücken könnte.
+          if (abstand == 0) return null;
+          p = p + weg * ((radius - abstand) / abstand);
+          geschoben = true;
+        }
+      }
+      if (!geschoben) return p;
+    }
+    return _hitsWall(p, radius - 0.01) ? null : p;
+  }
+
+  /// Die alte Regel: Achsen getrennt, eine blockierte fällt aus.
+  Vec2 _slideAxes(Vec2 from, Vec2 delta, double radius) {
     var position = from;
 
     final nachX = Vec2(position.x + delta.x, position.y);
@@ -911,6 +1149,11 @@ class ActionWorld {
   }
 
   bool _hitsWall(Vec2 center, double radius) {
+    return _touches(center, radius, _level.isWallAt);
+  }
+
+  /// Ob ein Kreis um [center] ein Feld streift, für das [test] gilt.
+  bool _touches(Vec2 center, double radius, bool Function(int, int) test) {
     const size = ActionBalance.tileSize;
     final vonX = ((center.x - radius) / size).floor();
     final bisX = ((center.x + radius) / size).floor();
@@ -919,7 +1162,7 @@ class ActionWorld {
 
     for (var y = vonY; y <= bisY; y++) {
       for (var x = vonX; x <= bisX; x++) {
-        if (!level.isWallAt(x, y)) continue;
+        if (!test(x, y)) continue;
         final nahX = center.x.clamp(x * size, (x + 1) * size);
         final nahY = center.y.clamp(y * size, (y + 1) * size);
         final dx = center.x - nahX;
@@ -937,10 +1180,14 @@ class ActionWorld {
   void _separate() {
     for (var i = 0; i < _entities.length; i++) {
       final a = _entities[i];
-      if (!a.isAlive) continue;
+      if (!a.isAlive || a.untouchable) continue;
       for (var j = i + 1; j < _entities.length; j++) {
         final b = _entities[j];
-        if (!b.isAlive) continue;
+        if (!b.isAlive || b.untouchable) continue;
+        // Wer sich aus einem Stau löst, geht durch Verbündete hindurch.
+        if (!a.isHero && !b.isHero && (a.ghostLeft > 0 || b.ghostLeft > 0)) {
+          continue;
+        }
 
         final delta = b.position - a.position;
         final mindest = a.radius + b.radius;
@@ -975,6 +1222,7 @@ class ActionWorld {
       _gemeldet.add(entity.id);
       _kills++;
       _maybeDropOrb(entity);
+      _dropLoot(entity);
       _events.add(
         EntityDied(
           id: entity.id,
@@ -987,6 +1235,115 @@ class ActionWorld {
   }
 
   final Set<int> _gemeldet = <int>{};
+
+  /// Zahlt den Teil des Topfs, der an [gefallen] hängt.
+  ///
+  /// **Gerechnet als Stand, nicht als Häppchen:** Nach k von n Gegnern ist
+  /// genau `k/n` des Fussvolk-Anteils gezahlt, abgerundet. So gehen durch
+  /// Rundung keine Punkte verloren und keine kommen dazu. **Der Wächter
+  /// füllt den Topf auf** — mit ihm ist die Grube geschafft, und wer ihn
+  /// fällt, bekommt alles, auch den Teil der Gegner, die noch stehen.
+  void _dropLoot(ActionEntity gefallen) {
+    if (rewardPot.xp <= 0 && rewardPot.gold <= 0) return;
+
+    final int zielXp;
+    final int zielGold;
+    if (gefallen == _boss) {
+      zielXp = rewardPot.xp;
+      zielGold = rewardPot.gold;
+    } else {
+      final alle = level.trashCount;
+      if (alle <= 0) return;
+      _fussvolkGefallen++;
+      const anteil = 1 - ActionBalance.bossLootShare;
+      final stand = _fussvolkGefallen / alle * anteil;
+      zielXp = (rewardPot.xp * stand).floor();
+      zielGold = (rewardPot.gold * stand).floor();
+    }
+
+    final xp = zielXp - _runXp;
+    final gold = zielGold - _runGold;
+    if (xp <= 0 && gold <= 0) return;
+    _runXp = zielXp;
+    _runGold = zielGold;
+    _events.add(LootDropped(at: gefallen.position, xp: xp, gold: gold));
+  }
+
+  // --- Das Tor zum Wächterraum ---
+
+  /// Schliesst das Tor hinter dem Helden — und weckt den Wächter.
+  ///
+  /// **Zu erst, wenn der Held ganz drin ist und niemand im Tor steht.**
+  /// Wer im Durchgang stünde, steckte danach in der Wand. Wer ihm folgt,
+  /// wartet also vor dem Tor mit — oder kommt eben noch hinein.
+  ///
+  /// **Es geht nicht wieder auf.** Fällt der Wächter, ist der Lauf
+  /// gewonnen, ob draussen noch jemand steht oder nicht.
+  void _updateGate() {
+    if (!_level.hasGates || _level.gatesClosed) return;
+    if (!_insideArena(_hero)) return;
+    for (final entity in _entities) {
+      if (!entity.isAlive || entity.untouchable) continue;
+      if (_touches(entity.position, entity.radius, _level.isGateAt)) return;
+    }
+
+    _level = _level.withGates(closed: true);
+    _rebuildPath();
+    _events.add(GateClosed(at: _gateCenter()));
+    if (_bossPhase == _BossPhase.schlaeft) {
+      _bossPhase = _BossPhase.auftritt;
+      _entranceTime = 0;
+    }
+  }
+
+  /// Der Auftritt: fallen, aufschlagen, brüllen — dann ist er wach.
+  void _tickEntrance(double dt) {
+    final boss = _boss;
+    if (_bossPhase != _BossPhase.auftritt || boss == null) return;
+
+    final warGelandet = _bossLanded;
+    _entranceTime += dt;
+    if (!warGelandet && _bossLanded) {
+      _events.add(BossLanded(at: boss.position));
+    }
+    if (_entranceTime < ActionBalance.bossEntranceSeconds) return;
+
+    _bossPhase = _BossPhase.wach;
+    boss.untouchable = false;
+    boss.aggro = true;
+  }
+
+  /// Ob [entity] mit ihrem ganzen Umriss im Wächterraum steht.
+  bool _insideArena(ActionEntity entity) {
+    const size = ActionBalance.tileSize;
+    final p = entity.position;
+    final r = entity.radius;
+    for (var y = ((p.y - r) / size).floor();
+        y <= ((p.y + r) / size).floor();
+        y++) {
+      for (var x = ((p.x - r) / size).floor();
+          x <= ((p.x + r) / size).floor();
+          x++) {
+        if (!_level.isArenaAt(x, y)) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Die Mitte aller Tor-Felder.
+  Vec2 _gateCenter() {
+    const size = ActionBalance.tileSize;
+    var summe = Vec2.zero;
+    var anzahl = 0;
+    for (var y = 0; y < _level.height; y++) {
+      for (var x = 0; x < _level.width; x++) {
+        if (!_level.isGateAt(x, y)) continue;
+        summe = summe + Vec2(x * size + size / 2, y * size + size / 2);
+        anzahl++;
+      }
+    }
+    return anzahl == 0 ? Vec2.zero : summe * (1 / anzahl);
+  }
 
   /// Manchmal bleibt etwas liegen.
   ///
@@ -1018,7 +1375,12 @@ class ActionWorld {
       _finish(won: false);
       return;
     }
-    if (_kills >= _totalEnemies) _finish(won: true);
+    // **Mit dem Wächter ist die Grube geschafft**, nicht erst mit dem
+    // letzten Gegner. Nur eine Halle ohne Wächter — es gibt sie nur in
+    // Tests — muss man leer räumen.
+    final boss = _boss;
+    final geschafft = boss != null ? !boss.isAlive : _kills >= _totalEnemies;
+    if (geschafft) _finish(won: true);
   }
 
   void _finish({required bool won}) {
@@ -1029,26 +1391,101 @@ class ActionWorld {
 
   /// Wohin dieser Gegner laufen muss, um beim Helden anzukommen.
   ///
-  /// Auf kurze Sicht geradeaus, weiter weg über das Wegfeld. Ohne das
-  /// Feld bleibt jeder an der ersten Ecke stehen — und genau das hat der
-  /// kopflose Lauf beim ersten Versuch gemeldet, bevor es das Feld gab.
+  /// **Geradeaus, wo es geht, sonst um die Ecke — aber schräg.** Passt
+  /// der Gegner mit seiner ganzen Breite in Luftlinie zum Helden, läuft
+  /// er direkt. Sonst folgt er dem Wegfeld, steuert aber den weitesten
+  /// Punkt darauf an, den er noch ohne Wand erreicht. Feld für Feld
+  /// gefolgt ergäbe das Feld eine Treppe aus rechten Winkeln — es kennt
+  /// nur vier Richtungen.
+  ///
+  /// Ohne das Feld bliebe jeder an der ersten Ecke stehen — genau das hat
+  /// der kopflose Lauf beim ersten Versuch gemeldet, bevor es das Feld
+  /// gab.
   Vec2 _chaseDirection(ActionEntity gegner) {
     final direkt = _hero.position - gegner.position;
-    if (direkt.length <= ActionBalance.directChaseRange) {
+    if (direkt.length <= ActionBalance.directChaseRange ||
+        _canPass(gegner.position, _hero.position, gegner.radius)) {
       return direkt.normalized;
     }
+    // Kein Weg — etwa vor dem geschlossenen Tor. Stehen, nicht gegen die
+    // Wand drücken.
+    final feld = _fieldFor(gegner);
+    if (feld.distanceAtPoint(gegner.position) == null) {
+      return Vec2.zero;
+    }
 
-    final ueberFeld = _pathToHero.directionFrom(gegner.position);
-    return ueberFeld.isZero ? direkt.normalized : ueberFeld;
+    final weg = feld.pathFrom(
+      gegner.position,
+      maxSteps: ActionBalance.chaseLookaheadTiles,
+    );
+    if (weg.isEmpty) return direkt.normalized;
+
+    // Die Wegpunkte sind Feldmitten. Für einen Troll, breiter als ein
+    // Feld, liegt eine davon im Durchgang zu nah an der Wand — er zielte
+    // auf einen Platz, an dem er nicht stehen kann, und blieb hängen.
+    // Also erst auf seine Breite aus der Wand drücken.
+    final punkte = <Vec2>[
+      for (final punkt in weg) _pushOut(punkt, gegner.radius) ?? punkt,
+    ];
+
+    // Vorwärts, bis der erste Punkt nicht mehr frei erreichbar ist: Der
+    // Weg biegt um Ecken, und was hinter einer liegt, bleibt dahinter.
+    var ziel = punkte.first;
+    for (final punkt in punkte.skip(1)) {
+      if (!_canPass(gegner.position, punkt, gegner.radius)) break;
+      ziel = punkt;
+    }
+    final richtung = ziel - gegner.position;
+    return richtung.isZero ? direkt.normalized : richtung.normalized;
+  }
+
+  /// Ob ein Körper mit [radius] geradewegs von [a] nach [b] kommt, ohne
+  /// eine Wand zu streifen. Strenger als [_canSee]: Eine Sichtlinie
+  /// passt durch jede Türritze, ein Troll nicht.
+  bool _canPass(Vec2 a, Vec2 b, double radius) {
+    final weg = b - a;
+    final abstand = math.min(radius, ActionBalance.tileSize / 4);
+    final schritte = (weg.length / abstand).ceil();
+    for (var i = 1; i <= schritte; i++) {
+      if (_hitsWall(a + weg * (i / schritte), radius)) return false;
+    }
+    return true;
+  }
+
+  /// Merkt sich, ob [gegner] beim Verfolgen vorankommt. Tritt er zu lange
+  /// auf der Stelle, geht er eine Weile durch Verbündete hindurch — der
+  /// Stau in einer Tür löst sich so von selbst.
+  void _trackProgress(ActionEntity gegner, double dt) {
+    final anker = gegner.progressAnchor;
+    if (anker == null ||
+        anker.distanceTo(gegner.position) > ActionBalance.stuckDistance) {
+      gegner.progressAnchor = gegner.position;
+      gegner.stuckFor = 0;
+      return;
+    }
+    gegner.stuckFor += dt;
+    if (gegner.stuckFor < ActionBalance.stuckSeconds) return;
+    gegner.stuckFor = 0;
+    gegner.ghostLeft = ActionBalance.ghostSeconds;
+  }
+
+  /// Das Wegfeld, das zur Breite von [gegner] passt. Ein breiter, der
+  /// gerade auf einem Feld steht, das das breite Feld nicht kennt, nimmt
+  /// das schmale — sonst stünde er dort für immer.
+  FlowField _fieldFor(ActionEntity gegner) {
+    if (gegner.radius <= ActionBalance.tileSize / 2) return _pathToHero;
+    if (_widePathToHero.distanceAtPoint(gegner.position) == null) {
+      return _pathToHero;
+    }
+    return _widePathToHero;
   }
 
   void _rebuildPath() {
     const size = ActionBalance.tileSize;
-    _pathToHero = FlowField.from(
-      level,
-      (_hero.position.x / size).floor(),
-      (_hero.position.y / size).floor(),
-    );
+    final x = (_hero.position.x / size).floor();
+    final y = (_hero.position.y / size).floor();
+    _pathToHero = FlowField.from(level, x, y);
+    _widePathToHero = FlowField.from(level, x, y, wide: true);
     _stepsSincePath = 0;
   }
 
@@ -1067,19 +1504,24 @@ class ActionWorld {
     );
   }
 
+  /// Die Gegnerwerte — mal der Stufe und immer mal [ActionBalance.powerScale],
+  /// auch ohne Stufe: Held und Gegner müssen im selben Massstab stehen.
   int _hp(int base) {
-    final stufe = stage;
-    if (stufe == null) return base;
-    return math.max(1, (base * stufe.hpFactor).round());
+    final faktor = stage?.hpFactor ?? 1;
+    return math.max(1, (base * faktor * ActionBalance.powerScale).round());
   }
 
   int _attack(int base) {
-    final stufe = stage;
-    if (stufe == null) return base;
-    return math.max(1, (base * stufe.attackFactor).round());
+    final faktor = stage?.attackFactor ?? 1;
+    return math.max(1, (base * faktor * ActionBalance.powerScale).round());
   }
 
-  int _defense(int base) => base + (stage?.defenseBonus ?? 0);
+  int _defense(int base) {
+    final stufe = stage;
+    final roh = base + (stufe?.defenseBonus ?? 0);
+    final faktor = stufe?.powerFactor ?? 1;
+    return (roh * faktor * ActionBalance.powerScale).round();
+  }
 
   ActionEntity _enemyFor(Spawn spawn) {
     return switch (spawn.kind) {
@@ -1150,4 +1592,16 @@ class ActionWorld {
         ),
     };
   }
+}
+
+/// Wo der Wächter in seinem Lauf steht.
+enum _BossPhase {
+  /// Unsichtbar in seinem Raum, bis das Tor hinter dem Helden zufällt.
+  schlaeft,
+
+  /// Fällt herab und brüllt — unverwundbar, untätig.
+  auftritt,
+
+  /// Kämpft.
+  wach,
 }

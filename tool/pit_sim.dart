@@ -15,6 +15,7 @@ import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:progression/progression.dart';
 
 void main(List<String> args) {
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
@@ -36,13 +37,13 @@ void main(List<String> args) {
     'Tag 30': _Spalte(_statsNach(30), bogen),
     'Tag 30+F': _Spalte(_statsNach(30), bogen, drei),
     'Tag 60+G': _Spalte(
-      _statsNach(60, bonus: _bestesGear()),
+      _statsNach(60, bonus: _bestesGear(), mitSeltenheit: true),
       gut,
       const <String>[],
       _legendaereKraefte(),
     ),
     'T60+G+F': _Spalte(
-      _statsNach(60, bonus: _bestesGear()),
+      _statsNach(60, bonus: _bestesGear(), mitSeltenheit: true),
       gut,
       drei,
       _legendaereKraefte(),
@@ -53,8 +54,9 @@ void main(List<String> args) {
   for (final e in spalten.entries) {
     final s = e.value.stats;
     print(
-      '  ${e.key.padRight(9)} ATK ${s.attack}  HP ${s.maxHp}  '
-      'DEF ${s.defense}  EN ${s.energy}',
+      '  ${e.key.padRight(9)} ATK ${s.combatAttack}  HP ${s.combatMaxHp}  '
+      'DEF ${s.combatDefense}  EN ${s.energy}  '
+      '(×${s.damageMultiplier.toStringAsFixed(2)} Schaden)',
     );
   }
   print('');
@@ -110,7 +112,16 @@ int _quote(int stufe, _Spalte spalte, int laeufe) {
 
 /// Derselbe Aufbau wie in `tool/balance_sim.dart`: die ersten fünf
 /// Vorlagen, jeden Tag abgehakt.
-ActionStats _statsNach(int tage, {GearBonus bonus = const GearBonus()}) {
+///
+/// **Seit ADR-0042 mit Level und Seltenheit**, zusammengesetzt über
+/// `PitPower.hero` wie in der App. Das Level zählt nur Gewohnheiten und
+/// das Handbuch — Baum, Reihe und Errungenschaften brächten mehr. Die
+/// Quoten bleiben damit eine **untere** Schranke.
+ActionStats _statsNach(
+  int tage, {
+  GearBonus bonus = const GearBonus(),
+  bool mitSeltenheit = false,
+}) {
   final gewaehlt = HabitCatalog.all
       .take(HabitRewards.maxActiveHabits)
       .map((t) => t.id)
@@ -129,12 +140,20 @@ ActionStats _statsNach(int tage, {GearBonus bonus = const GearBonus()}) {
     tag = tag.next;
   }
 
+  const handbuch = 275;
+  final level = LevelCurve.levelFor(tracker.totalXp + handbuch).level;
+  final waffe = _bestesIn(GearSlot.waffe).rarity.powerFactor;
+  final ruestung = _bestesIn(GearSlot.ruestung).rarity.powerFactor;
+
   final s = tracker.stats;
-  return ActionStats(
+  return PitPower.hero(
     attack: s.attack + bonus.attack,
     maxHp: s.maxHp + bonus.maxHp,
     defense: s.defense + bonus.defense,
     energy: s.maxEnergy + bonus.maxEnergy,
+    levelFactor: PowerCurve.factorFor(level),
+    weaponFactor: mitSeltenheit ? waffe : 1,
+    armorFactor: mitSeltenheit ? ruestung : 1,
   );
 }
 

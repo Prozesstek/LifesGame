@@ -4,6 +4,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 
 import '../combat/move_icon.dart';
+import 'action_game.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 
@@ -21,13 +22,17 @@ import '../ui/pixel_art.dart';
 /// Der Ring zeigt die Abklingzeit. Er läuft zu, statt eine Zahl
 /// herunterzuzählen: Im Kampf liest niemand Ziffern, aber jeder sieht
 /// einen vollen Kreis.
+///
+/// **Kurz tippen zielt selbst, halten und ziehen zielt von Hand.** Beim
+/// Halten zeigt das Bild die Fläche in der Farbe der Fähigkeit; der Zug
+/// vom Knopf weg ist Richtung und Weite, Loslassen wirkt. Heilung,
+/// Schutz und Mana haben nichts zu zielen und wirken beim Drücken.
 class AbilityButtons extends StatelessWidget {
-  const AbilityButtons({required this.world, required this.onCast, super.key});
+  const AbilityButtons({required this.game, super.key});
 
-  final ActionWorld world;
+  final ActionGame game;
 
-  /// Wirkt eine Fähigkeit von einem Platz (ADR-0039).
-  final void Function(String id) onCast;
+  ActionWorld get world => game.sim;
 
   /// Drei davon müssen neben das Steuerkreuz passen.
   static const double slotSize = 58;
@@ -39,17 +44,78 @@ class AbilityButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         for (final ability in world.slots) ...<Widget>[
-          _RoundButton(
-            size: slotSize,
-            label: ability.name,
-            ratio: world.slotCooldownRatio(ability.id),
-            ready: world.canCast(ability.id),
-            onTap: () => onCast(ability.id),
-            child: _SlotIcon(ability: ability),
+          _AimGesture(
+            game: game,
+            ability: ability,
+            child: _RoundButton(
+              size: slotSize,
+              label: ability.name,
+              ratio: world.slotCooldownRatio(ability.id),
+              ready: world.canCast(ability.id),
+              child: _SlotIcon(ability: ability),
+            ),
           ),
           if (ability != world.slots.last) const SizedBox(width: 10),
         ],
       ],
+    );
+  }
+}
+
+/// Drücken, halten, ziehen, loslassen — über rohe Zeigerereignisse,
+/// damit Tippen und Ziehen nicht um dieselbe Geste streiten.
+class _AimGesture extends StatefulWidget {
+  const _AimGesture({
+    required this.game,
+    required this.ability,
+    required this.child,
+  });
+
+  final ActionGame game;
+  final PitAbility ability;
+  final Widget child;
+
+  @override
+  State<_AimGesture> createState() => _AimGestureState();
+}
+
+/// Ein Zustand, weil die Knöpfe sich jedes Bild neu bauen — der Anfang
+/// eines Zugs muss das überleben.
+class _AimGestureState extends State<_AimGesture> {
+  Offset? _start;
+
+  @override
+  Widget build(BuildContext context) {
+    final game = widget.game;
+    final ability = widget.ability;
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (event) {
+        // Nichts zu zielen: wirken, solange der Finger unten ist. Ein
+        // Knopf, der erst beim Loslassen auslöst, fühlt sich zäh an.
+        if (ability.aim == PitAim.selbst) {
+          game.sim.cast(ability.id);
+          return;
+        }
+        _start = event.position;
+        game.beginAim(ability.id);
+      },
+      onPointerMove: (event) {
+        final von = _start;
+        if (von == null) return;
+        final zug = event.position - von;
+        game.aimDrag(Vec2(zug.dx, zug.dy));
+      },
+      onPointerUp: (_) {
+        if (_start == null) return;
+        _start = null;
+        game.releaseAim();
+      },
+      onPointerCancel: (_) {
+        _start = null;
+        game.cancelAim();
+      },
+      child: widget.child,
     );
   }
 }
@@ -87,7 +153,6 @@ class _RoundButton extends StatelessWidget {
     required this.label,
     required this.ratio,
     required this.ready,
-    required this.onTap,
     required this.child,
   });
 
@@ -98,7 +163,6 @@ class _RoundButton extends StatelessWidget {
   final double ratio;
 
   final bool ready;
-  final VoidCallback onTap;
   final Widget child;
 
   @override
@@ -107,21 +171,15 @@ class _RoundButton extends StatelessWidget {
       button: true,
       enabled: ready,
       label: label,
-      child: GestureDetector(
-        // Kein `onTap`: Der Schlag soll fallen, während der Finger unten
-        // ist. Ein Knopf, der erst beim Loslassen auslöst, fühlt sich in
-        // einem Kampf zäh an.
-        onTapDown: (_) => onTap(),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: CustomPaint(
-            painter: _CooldownPainter(ratio: ratio, ready: ready),
-            // Das Bild liegt unter dem Tortenstück der Abklingzeit, damit
-            // man beides zugleich sieht.
-            foregroundPainter: _CooldownShade(ratio: ratio, ready: ready),
-            child: Center(child: child),
-          ),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _CooldownPainter(ratio: ratio, ready: ready),
+          // Das Bild liegt unter dem Tortenstück der Abklingzeit, damit
+          // man beides zugleich sieht.
+          foregroundPainter: _CooldownShade(ratio: ratio, ready: ready),
+          child: Center(child: child),
         ),
       ),
     );

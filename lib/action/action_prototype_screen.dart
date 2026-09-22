@@ -2,10 +2,10 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../gear/gear_controller.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'action_game.dart';
+import 'hero_power.dart';
 import 'pit_run_view.dart';
 
 /// **Prototyp.** Echtzeit-Kampf in einer Halle voller Gegner.
@@ -62,15 +62,7 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
   }
 
   /// Die Werte, mit denen der Charakter gerade wirklich dasteht.
-  ActionStats _echteWerte() {
-    final stats = ref.read(equippedStatsProvider);
-    return ActionStats(
-      attack: stats.attack,
-      maxHp: stats.maxHp,
-      defense: stats.defense,
-      energy: stats.maxEnergy,
-    );
-  }
+  ActionStats _echteWerte() => ref.read(heroPowerProvider).stats;
 
   @override
   Widget build(BuildContext context) {

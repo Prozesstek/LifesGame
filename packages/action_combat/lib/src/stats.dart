@@ -12,6 +12,8 @@ class ActionStats {
     required this.defense,
     required this.energy,
     this.damageMultiplier = 1,
+    this.hpMultiplier = 1,
+    this.defenseMultiplier = 1,
     this.critChance = 0,
     this.critFactor = 2,
   });
@@ -24,15 +26,32 @@ class ActionStats {
   /// Klarheit im Echtzeit-Kampf etwas tut.
   final int energy;
 
-  /// Ein **vervielfachender** Faktor auf den Schaden.
+  /// Ein **vervielfachender** Faktor auf den Schaden — seit ADR-0042 das
+  /// Level mal die Seltenheit der Waffe ([PitPower.hero]).
   ///
-  /// Im heutigen Spiel gibt es ihn nicht: Werte wachsen additiv und
-  /// gedeckelt (ADR-0008), der Angriff also von 13 auf 20. Das Feld
-  /// existiert, damit sich die offene Frage ausprobieren lässt — ob sich
-  /// eine Halle erst dann belohnend anfühlt, wenn Macht vervielfacht
-  /// statt addiert. Es ist ein Regler für einen Prototyp, keine
-  /// Spielregel.
+  /// Bis dahin gab es ihn im Spiel nicht: Werte wuchsen additiv und
+  /// gedeckelt (ADR-0008), der Angriff also von 13 auf 20. Er war ein
+  /// Regler für einen Prototyp; jetzt ist er die Antwort auf die Frage,
+  /// die der Prototyp gestellt hat.
   final double damageMultiplier;
+
+  /// Dasselbe für das Leben: Level mal Seltenheit der Rüstung.
+  final double hpMultiplier;
+
+  /// Dasselbe für die Verteidigung: das Level.
+  final double defenseMultiplier;
+
+  /// **Die Zahlen, wie die Grube sie führt** — mal [ActionBalance.powerScale]
+  /// und mal den Faktoren. Die Welt und jede Anzeige nehmen diese, damit
+  /// der Charakterbildschirm nie etwas anderes sagt als der Kampf.
+  int get combatAttack =>
+      (attack * ActionBalance.powerScale * damageMultiplier).round();
+
+  int get combatMaxHp =>
+      (maxHp * ActionBalance.powerScale * hpMultiplier).round();
+
+  int get combatDefense =>
+      (defense * ActionBalance.powerScale * defenseMultiplier).round();
 
   /// Wahrscheinlichkeit eines kritischen Treffers, 0 bis 1. Ebenfalls
   /// hypothetisch, aus demselben Grund.
@@ -96,4 +115,37 @@ class ActionStats {
     critChance: 0.25,
     critFactor: 2.5,
   );
+}
+
+/// Wie aus Werten, Level und Ausrüstung die Stärke in der Grube wird
+/// (ADR-0042) — die eine Stelle, an der das zusammenkommt.
+///
+/// **Addiert wird, was aus den Gewohnheiten und den Boni der Ausrüstung
+/// kommt; vervielfacht, was aus dem Level und der Seltenheit kommt.** Ein
+/// Häkchen bleibt so ein fester Beitrag, und trotzdem schlägt ein
+/// Charakter nach zwei Monaten nicht doppelt, sondern vielfach so hart.
+///
+/// Die Faktoren kommen von aussen, wie alle Zahlen hier: das Level aus
+/// `package:progression` (`PowerCurve`), die Seltenheit aus
+/// `package:gear` (`GearRarity.powerFactor`).
+abstract final class PitPower {
+  static ActionStats hero({
+    required int attack,
+    required int maxHp,
+    required int defense,
+    required int energy,
+    required double levelFactor,
+    required double weaponFactor,
+    required double armorFactor,
+  }) {
+    return ActionStats(
+      attack: attack,
+      maxHp: maxHp,
+      defense: defense,
+      energy: energy,
+      damageMultiplier: levelFactor * weaponFactor,
+      hpMultiplier: levelFactor * armorFactor,
+      defenseMultiplier: levelFactor,
+    );
+  }
 }

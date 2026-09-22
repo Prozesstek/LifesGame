@@ -6,4 +6,5 @@ library;
 
 export 'src/ability_slots.dart';
 export 'src/level_curve.dart';
+export 'src/power_curve.dart';
 export 'src/theory_points.dart';

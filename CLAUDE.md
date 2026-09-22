@@ -57,15 +57,16 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, reines Dart, 33 Tests | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
+| `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 161 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 88 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 90 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
@@ -80,10 +81,12 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 121 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 182 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
+| `packages/action_combat/lib/src/dailies.dart` | **die vier Stufen des Tages** — gewürfelt aus dem Datum ([ADR-0040](docs/decisions/0040-vier-dailies-je-tag.md)) | nur Dart-SDK |
+| `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **der Wächter**: Bodenstoss, Felswurf, Ansturm, Wut — und was er ankündigt | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
@@ -96,6 +99,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/pit_gate.dart` | ob die Grube offensteht, und warum nicht | Flutter |
+| `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
+| `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
 | `lib/action/pit_text.dart` | Name und Beschreibung einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
@@ -166,7 +171,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 412 Tests
+flutter test             # 424 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -174,7 +179,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 121 Tests
+dart test                              # 182 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -184,8 +189,8 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 136 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 33 Tests
-cd packages/gear        ; dart test    # 88 Tests, prüft Preise, Sets, Verkauf und die Sperre
+cd packages/progression ; dart test    # 36 Tests
+cd packages/gear        ; dart test    # 90 Tests, prüft Preise, Sets, Verkauf und die Sperre
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -208,6 +213,27 @@ Stelle:
 | Was ändern Sets und Legendäre? | `pitModifiersFor` in `lib/gear/set_effects.dart` — rechnet nichts, übersetzt nur |
 | Welche Kraft trägt ein legendäres Stück? | `GearItem.legendaryPower` (Id) → `PitLegendaries` (Wirkung) |
 
+**Kurz tippen zielt selbst, halten zielt von Hand.** Jede Fähigkeit
+trägt ein `PitAim`: `selbst` (Heilung, Schutz, Mana — wirkt beim
+Drücken), `richtung` (Geschoss fliegt genau seine Reichweite, Schlag
+trifft im Kegel davor), `umDenHelden` (Klingenwirbel) oder `bereich` —
+abgesetzt bis `castRange`, nie hinter eine Wand. **Was ein Bereich an
+Bremsen und Dauerschaden trägt, bleibt als Fläche liegen** und wirkt auf
+jeden, der hineinläuft (Eisfeld, Giftboden). `ActionWorld.cast` zielt
+selbst und kostet ohne Ziel nichts, `castAt` wirkt dorthin und kostet
+immer — ein verfehlter Skillshot ist verfehlt. Was die Vorschau zeigt,
+rechnet `aimPreview` aus derselben Stelle (`aim.dart`); der Renderer
+zeichnet nur. Rot ist dem Wächter vorbehalten, die Farben der Flächen
+stehen in der Palette. `aim_test.dart` und `test/pit_aim_test.dart`.
+
+**Figuren gleiten um Ecken, und breite nehmen breite Wege.** `_slide`
+bewegt erst und drückt dann aus der Wand, statt eine blockierte Achse zu
+verwerfen. Für Figuren breiter als ein Feld (Troll, Wächter) gibt es ein
+zweites Wegfeld, in dem nur Felder in freien 2 × 2-Blöcken zählen; wer
+im Gedränge auf der Stelle tritt, geht kurz durch Verbündete hindurch.
+`chase_test.dart` läuft durch gebaute Gruben und zählt Verfolger, die
+hängen — es müssen null sein.
+
 **Ein Set oder eine Kraft verändert Daten, nicht die Welt.**
 `PitModifiers.apply` nimmt eine Fähigkeit und gibt eine neue zurück;
 `world.dart` sieht nur das Ergebnis. Die Art einer Fähigkeit
@@ -226,6 +252,22 @@ lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
 seinem Raum**.
 
+**Die Grube ist geschafft, wenn der Wächter fällt** — nicht erst, wenn
+jeder Gegner liegt (`ActionWorld._checkEnd`). Nur eine Halle ohne
+Wächter, die es nur in Tests gibt, muss man leer räumen.
+
+**Hinter dem Helden fällt das Tor zu, und dann tritt der Wächter auf.**
+`LevelBuilder` macht den Gang in den Wächterraum zum Tor (`=` in der
+Karte). Bis dahin **schläft** der Wächter unsichtbar und unberührbar
+(`ActionEntity.untouchable`). `ActionWorld._updateGate` schliesst das
+Tor, sobald der Held ganz drin ist und niemand im Durchgang steht; es
+geht nie wieder auf. Dann fällt der Wächter herab
+(`ActionBalance.bossEntranceSeconds`), und **erst mit seiner Landung**
+gibt es `bossView` — Name und Balken erscheinen wie in Dark Souls, der
+Balken läuft über `bossBarFill` voll. Eine Halle ohne Tor hat keinen
+Auftritt; dort ist er von Anfang an da. `gate_test.dart` hält alles
+fest.
+
 **Jeder Angriff des Wächters ist angekündigt** (`TelegraphView`: ein Ring
 oder eine Linie, die sich füllt) und lässt sich durch Laufen umgehen — es
 gibt keinen Sturmschritt mehr. Wer einen Angriff dazubaut, gibt ihm eine
@@ -238,6 +280,18 @@ Ein neuer Raum kommt nach `room_catalog.dart`, genau 14 × 10, und
 `level_builder_test.dart` baut danach jede Stufe mit vierzig Startwerten
 und prüft jede Karte. Wer an den Stufen dreht, lässt
 `dart run tool/pit_sim.dart` laufen.
+
+**Macht vervielfacht, die Gewohnheiten addieren**
+([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)). Was aus
+Häkchen und Ausrüstungsboni kommt, bleibt additiv und gedeckelt
+(ADR-0008); im Kampf vervielfachen es das **Level** (`PowerCurve`, 1,04
+je Level) und die **Seltenheit** von Waffe (Angriff) und Rüstung (Leben)
+(`GearRarity.powerFactor`). Die Stufen wachsen mit (`PitStage.powerFactor`,
+bis `stagePowerLast`), und alle Kampfzahlen stehen mal
+`ActionBalance.powerScale`. Zusammengesetzt wird nur in `PitPower.hero`;
+die Welt und jede Anzeige nehmen `ActionStats.combatAttack` und die
+anderen `combat…`. **Eine feste Zahl im Kampf ist ein Bug** — sie wäre
+zehnmal zu klein.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
 Grube stehen in `packages/action_combat/lib/src/balance.dart`, die Zahlen
@@ -427,6 +481,24 @@ einmal, und der Gesamtbetrag steht deshalb als Zahl fest
 `flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
 mit in den vier Kurven.
 
+**Seit [ADR-0040](docs/decisions/0040-vier-dailies-je-tag.md) zahlen vier
+Stufen des Tages noch einmal** — ein Viertel des Erstsiegs
+(`LadderRewards.dailyShare`), einmal je Stufe und Tag, und **nur an Tagen
+mit einem Häkchen** (`dailiesUnlockedProvider`). Welche vier, würfelt
+`PitDailies.forDay` aus dem Datum; `LadderProgress` friert sie beim
+ersten Gebrauch ein und hält die geschafften als Historie. Die
+Obergrenze je Tag steht als `maxDailyXpPerDay` und `maxDailyGoldPerDay`.
+Wer an `dailyShare` dreht, rechnet gegen die 25 Gold am Tag, auf die der
+Laden ausgelegt ist.
+
+**Seit [ADR-0041](docs/decisions/0041-beute-je-gegner.md) fällt der
+Betrag je Gegner** — derselbe Topf, anders ausgeschüttet. Die Reihe
+reicht der Welt den **Rest** des Topfs (`LadderProgress.potFor`), die
+Welt zahlt je Kill ihren Teil (`LootDropped`, 70 % aufs Fussvolk, der
+Wächter füllt auf), und `LadderProgress.bookRun` bucht am Ende — gekappt
+auf den Topf. Ein verlorener Lauf behält, was gefallen ist. **Mehr als
+der Topf zählt nie**: Wer daran rührt, lässt `loot_test.dart` laufen.
+
 **Der Kern-Loop verbindet alle acht Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
@@ -451,6 +523,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 | `combatUnlockedProvider` | ob die Grube offensteht (ADR-0020) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
+| `heroPowerProvider` | Werte, Level und Seltenheit zur Stärke in der Grube (ADR-0042) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt

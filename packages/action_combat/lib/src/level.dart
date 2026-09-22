@@ -32,7 +32,9 @@ class Level {
     required this.tiles,
     required this.heroStart,
     required this.spawns,
-  });
+    required Set<int> gates,
+    required this.gatesClosed,
+  }) : _gates = gates;
 
   /// Liest eine Karte aus Zeilen.
   ///
@@ -46,6 +48,7 @@ class Level {
   /// | `B` | Endgegner |
   /// | `k` | Kobold — schnell, schwach |
   /// | `t` | Troll — gross, zäh |
+  /// | `=` | Tor zum Wächterraum — Boden, bis der Held drin ist |
   ///
   /// Kürzere Zeilen werden rechts mit Wand aufgefüllt. Ein unbekanntes
   /// Zeichen wirft — anders als beim Spielstand ist das hier kein fremdes
@@ -58,6 +61,7 @@ class Level {
         rows.fold<int>(0, (max, r) => r.length > max ? r.length : max);
     final tiles = <List<Tile>>[];
     final spawns = <Spawn>[];
+    final gates = <int>{};
     Vec2? start;
 
     for (var y = 0; y < rows.length; y++) {
@@ -69,6 +73,9 @@ class Level {
             row.add(Tile.wand);
           case '.':
             row.add(Tile.boden);
+          case '=':
+            row.add(Tile.boden);
+            gates.add(_key(x, y));
           case '@':
             row.add(Tile.boden);
             start = _centerOf(x, y);
@@ -105,6 +112,8 @@ class Level {
       tiles: List<List<Tile>>.unmodifiable(tiles),
       heroStart: start,
       spawns: List<Spawn>.unmodifiable(spawns),
+      gates: Set<int>.unmodifiable(gates),
+      gatesClosed: false,
     );
   }
 
@@ -112,6 +121,47 @@ class Level {
   final List<List<Tile>> tiles;
   final Vec2 heroStart;
   final List<Spawn> spawns;
+
+  /// Die Tor-Felder vor dem Wächterraum, als [_key].
+  final Set<int> _gates;
+
+  /// Ob die Tore gerade Wand sind. Die Karte selbst ändert sich nie —
+  /// [withGates] gibt eine zweite zurück, und die Welt wechselt zwischen
+  /// beiden.
+  final bool gatesClosed;
+
+  bool get hasGates => _gates.isNotEmpty;
+
+  bool isGateAt(int x, int y) => _gates.contains(_key(x, y));
+
+  /// Dieselbe Halle mit offenen oder geschlossenen Toren.
+  Level withGates({required bool closed}) {
+    if (closed == gatesClosed) return this;
+    return Level._(
+      name: name,
+      tiles: tiles,
+      heroStart: heroStart,
+      spawns: spawns,
+      gates: _gates,
+      gatesClosed: closed,
+    );
+  }
+
+  /// Die Felder des Wächterraums: alles, was vom Endgegner aus erreichbar
+  /// ist, ohne durch ein Tor zu gehen. Leer, wenn die Halle keine Tore
+  /// hat — dann schliesst sich auch nichts.
+  late final Set<int> arena = _arena();
+
+  /// Ob das Feld [x], [y] im Wächterraum liegt.
+  bool isArenaAt(int x, int y) => arena.contains(_key(x, y));
+
+  Set<int> _arena() {
+    if (_gates.isEmpty) return const <int>{};
+    final boss = spawns.where((s) => s.kind == EnemyKind.endgegner);
+    if (boss.isEmpty) return const <int>{};
+    final b = boss.first;
+    return _flood(b.tileX, b.tileY, stopAtGates: true);
+  }
 
   int get height => tiles.length;
 
@@ -134,7 +184,10 @@ class Level {
     return tiles[y][x];
   }
 
-  bool isWallAt(int x, int y) => tileAt(x, y) == Tile.wand;
+  bool isWallAt(int x, int y) {
+    if (gatesClosed && isGateAt(x, y)) return true;
+    return tileAt(x, y) == Tile.wand;
+  }
 
   /// Ob der Weltpunkt [point] in einer Wand liegt.
   bool isWallAtPoint(Vec2 point) {
@@ -179,6 +232,22 @@ class Level {
       fehler.add('Eine Halle ohne Gegner ist ein Spaziergang.');
     }
 
+    if (_gates.isNotEmpty) {
+      const size = ActionBalance.tileSize;
+      final startX = (heroStart.x / size).floor();
+      final startY = (heroStart.y / size).floor();
+      if (isArenaAt(startX, startY)) {
+        fehler.add('Der Held fängt hinter dem Tor an — es gäbe keinen Weg.');
+      }
+      final ausserhalb = <Spawn>[
+        for (final s in spawns)
+          if (s.kind == EnemyKind.endgegner && !isArenaAt(s.tileX, s.tileY)) s,
+      ];
+      if (ausserhalb.isNotEmpty) {
+        fehler.add('Der Endgegner steht nicht hinter dem Tor.');
+      }
+    }
+
     final erreichbar = _reachableFromStart();
     for (final spawn in spawns) {
       if (!erreichbar.contains(_key(spawn.tileX, spawn.tileY))) {
@@ -196,9 +265,15 @@ class Level {
   /// Flutfüllung vom Startfeld aus.
   Set<int> _reachableFromStart() {
     const size = ActionBalance.tileSize;
-    final startX = (heroStart.x / size).floor();
-    final startY = (heroStart.y / size).floor();
+    return _flood(
+      (heroStart.x / size).floor(),
+      (heroStart.y / size).floor(),
+    );
+  }
 
+  /// Flutfüllung von [startX], [startY] aus — mit [stopAtGates] so, als
+  /// wären die Tore zu.
+  Set<int> _flood(int startX, int startY, {bool stopAtGates = false}) {
     final gesehen = <int>{_key(startX, startY)};
     final queue = Queue<List<int>>()..add(<int>[startX, startY]);
 
@@ -213,7 +288,8 @@ class Level {
       for (final richtung in richtungen) {
         final nx = current[0] + richtung[0];
         final ny = current[1] + richtung[1];
-        if (isWallAt(nx, ny)) continue;
+        if (tileAt(nx, ny) == Tile.wand) continue;
+        if (stopAtGates && isGateAt(nx, ny)) continue;
         if (!gesehen.add(_key(nx, ny))) continue;
         queue.add(<int>[nx, ny]);
       }
@@ -221,5 +297,5 @@ class Level {
     return gesehen;
   }
 
-  int _key(int x, int y) => y * 10000 + x;
+  static int _key(int x, int y) => y * 10000 + x;
 }

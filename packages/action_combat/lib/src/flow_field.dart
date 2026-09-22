@@ -17,12 +17,25 @@ import 'vec2.dart';
 /// kopflose Lauf beim ersten Versuch gemeldet — zwei Gegner erledigt,
 /// dann fünf Minuten gegen eine Wand gelaufen.
 class FlowField {
-  FlowField._(this._level, this._distances, this._width);
+  FlowField._(this._blocked, this._distances, this._width);
 
   /// Flutet die Halle von [tileX], [tileY] aus.
-  factory FlowField.from(Level level, int tileX, int tileY) {
+  ///
+  /// Mit [wide] gilt ein Feld nur als frei, wenn es zu einem freien
+  /// Block aus 2 × 2 Feldern gehört. **Das Feld für breite Figuren**: Ein
+  /// Troll ist breiter als ein Feld und passt durch keinen Gang, der nur
+  /// eines breit ist — ohne dieses Feld schickte ihn der Weg trotzdem
+  /// hinein, und er blieb davor stehen.
+  factory FlowField.from(
+    Level level,
+    int tileX,
+    int tileY, {
+    bool wide = false,
+  }) {
     final width = level.width;
     final distances = List<int>.filled(width * level.height, _unreachable);
+    final blocked =
+        wide ? (int x, int y) => !_inFreeBlock(level, x, y) : level.isWallAt;
 
     if (!level.isWallAt(tileX, tileY)) {
       distances[tileY * width + tileX] = 0;
@@ -37,7 +50,7 @@ class FlowField {
         for (final richtung in _richtungen) {
           final nx = x + richtung[0];
           final ny = y + richtung[1];
-          if (level.isWallAt(nx, ny)) continue;
+          if (blocked(nx, ny)) continue;
           final index = ny * width + nx;
           if (index < 0 || index >= distances.length) continue;
           if (distances[index] <= next) continue;
@@ -47,7 +60,23 @@ class FlowField {
       }
     }
 
-    return FlowField._(level, distances, width);
+    return FlowField._(blocked, distances, width);
+  }
+
+  /// Ob [x], [y] frei ist und zu einem freien 2 × 2-Block gehört.
+  static bool _inFreeBlock(Level level, int x, int y) {
+    if (level.isWallAt(x, y)) return false;
+    for (final dx in const <int>[-1, 0]) {
+      for (final dy in const <int>[-1, 0]) {
+        if (!level.isWallAt(x + dx, y + dy) &&
+            !level.isWallAt(x + dx + 1, y + dy) &&
+            !level.isWallAt(x + dx, y + dy + 1) &&
+            !level.isWallAt(x + dx + 1, y + dy + 1)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   static const int _unreachable = 1 << 30;
@@ -59,7 +88,7 @@ class FlowField {
     <int>[0, -1],
   ];
 
-  final Level _level;
+  final bool Function(int x, int y) _blocked;
   final List<int> _distances;
   final int _width;
 
@@ -85,31 +114,52 @@ class FlowField {
   /// nach Norden oder Osten: Sonst schrammt eine Figur an jeder Ecke
   /// entlang und bleibt in der Türbreite hängen.
   Vec2 directionFrom(Vec2 from) {
+    final weg = pathFrom(from, maxSteps: 1);
+    if (weg.isEmpty) return Vec2.zero;
+    return (weg.first - from).normalized;
+  }
+
+  /// Die Mitten der nächsten [maxSteps] Felder am Weg entlang, das
+  /// nächste zuerst. Leer, wenn [from] schon am Ziel liegt oder das Ziel
+  /// von dort nicht erreichbar ist.
+  ///
+  /// Das Feld kennt nur vier Richtungen, der Weg ist also eine Treppe.
+  /// Wer ihm Feld für Feld folgt, läuft im Zickzack; wer den weitesten
+  /// Punkt ansteuert, den er ohne Wand erreicht, läuft gerade — dafür ist
+  /// diese Liste da (`ActionWorld._chaseDirection`).
+  List<Vec2> pathFrom(Vec2 from, {required int maxSteps}) {
     const size = ActionBalance.tileSize;
-    final x = (from.x / size).floor();
-    final y = (from.y / size).floor();
+    var x = (from.x / size).floor();
+    var y = (from.y / size).floor();
+    final weg = <Vec2>[];
 
+    while (weg.length < maxSteps) {
+      final naechstes = _downhill(x, y);
+      if (naechstes == null) break;
+      x = naechstes % _width;
+      y = naechstes ~/ _width;
+      weg.add(Vec2(x * size + size / 2, y * size + size / 2));
+    }
+    return weg;
+  }
+
+  /// Das Nachbarfeld, das dem Ziel am nächsten liegt, als Index — oder
+  /// null am Ziel und ausserhalb des Erreichbaren.
+  int? _downhill(int x, int y) {
     final hier = distanceAt(x, y);
-    if (hier == null || hier == 0) return Vec2.zero;
+    if (hier == null || hier == 0) return null;
 
-    var besterX = x;
-    var besterY = y;
+    int? bester;
     var beste = hier;
-
     for (final richtung in _richtungen) {
       final nx = x + richtung[0];
       final ny = y + richtung[1];
-      if (_level.isWallAt(nx, ny)) continue;
+      if (_blocked(nx, ny)) continue;
       final wert = distanceAt(nx, ny);
       if (wert == null || wert >= beste) continue;
       beste = wert;
-      besterX = nx;
-      besterY = ny;
+      bester = ny * _width + nx;
     }
-
-    if (besterX == x && besterY == y) return Vec2.zero;
-
-    final ziel = Vec2(besterX * size + size / 2, besterY * size + size / 2);
-    return (ziel - from).normalized;
+    return bester;
   }
 }

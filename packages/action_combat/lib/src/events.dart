@@ -136,3 +136,31 @@ class BossEnraged extends ActionEvent {
 
   final Vec2 at;
 }
+
+/// Das Tor zum Wächterraum ist hinter dem Helden zugefallen.
+///
+/// [at] ist die Mitte des Tors, für einen Staubstoss und ein Geräusch.
+/// Es geht nicht wieder auf: Fällt der Wächter, ist der Lauf vorbei.
+class GateClosed extends ActionEvent {
+  const GateClosed({required this.at});
+
+  final Vec2 at;
+}
+
+/// Der Wächter ist bei seinem Auftritt aufgeschlagen. Ab hier stehen
+/// Name und Balken da.
+class BossLanded extends ActionEvent {
+  const BossLanded({required this.at});
+
+  final Vec2 at;
+}
+
+/// Ein Gegner hat bei seinem Tod Erfahrung und Gold gebracht — sein Teil
+/// am Topf der Stufe (ADR-0041). Für eine Zahl über der Stelle.
+class LootDropped extends ActionEvent {
+  const LootDropped({required this.at, required this.xp, required this.gold});
+
+  final Vec2 at;
+  final int xp;
+  final int gold;
+}

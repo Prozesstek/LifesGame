@@ -189,6 +189,9 @@ abstract final class PitModifiers {
       cooldown: cooldown ?? a.cooldown,
       effects: List<PitEffect>.unmodifiable(effects ?? a.effects),
       description: a.description,
+      aim: a.aim,
+      castRange: a.castRange,
+      tint: a.tint,
     );
   }
 }

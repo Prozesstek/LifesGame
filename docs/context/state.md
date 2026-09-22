@@ -7,9 +7,205 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.09.2026, abends · Frederik
+**Zuletzt aktualisiert:** 22.09.2026, abends · Frederik
 
 ---
+
+## Sitzung 22.09.2026, abends: Macht vervielfacht
+
+[ADR-0042](../decisions/0042-macht-vervielfacht.md), Schritt A und C der
+Spanne. action_combat 182, gear 90, progression 36, App 424.
+
+| | vorher | jetzt |
+|---|---|---|
+| Level im Kampf | wirkt nicht | ×1,04 je Level auf Angriff, Leben, Abwehr |
+| Seltenheit | nur ihre festen Boni | Waffe ×1 bis ×2,2 auf Angriff, Rüstung auf Leben |
+| Kampfzahlen | wie die Werte | **mal zehn** |
+| Stufen | Leben ×3,4, Angriff ×2,5 auf 30 | dazu ×1 bis ×5 auf Leben, Angriff, Abwehr |
+| Gewohnheiten, Boni | additiv, gedeckelt | **unverändert** |
+
+**Gemessen:** Tag 0 geht mit 141 Angriff und 1.731 Leben hinein, Tag 60
+voll ausgerüstet mit 1.654 und 18.449 — fast zwölfmal so hart statt gut
+doppelt. Die Siegquoten je Stufe liegen, wo sie lagen.
+
+Der Charakter zeigt über den Werten eine Karte „Angriff · Leben · Abwehr"
+mit den Faktoren. **Nicht angesehen.** Im Laden steht noch nicht, dass
+Waffe und Rüstung ihre Seltenheit vervielfachen.
+
+## Sitzung 22.09.2026, ganz zuletzt: die vier Stufen des Tages
+
+Auf Frederiks Wunsch, wie die Fraktal-Dailies in Guild Wars 2
+([ADR-0040](../decisions/0040-vier-dailies-je-tag.md)). action_combat 169
+(vorher 156), App 420 (vorher 416).
+
+| | |
+|---|---|
+| Welche | vier aus dem Geschafften: eine leichte, zwei mittlere, eine von oben — aus dem Datum gewürfelt, für beide gleich |
+| Was | ein **Viertel** des Erstsiegs, einmal je Stufe und Tag |
+| Wann | **nur an Tagen mit einem Häkchen** — sonst steht dort „erst ein Häkchen setzen" |
+| Wo | eine Karte auf dem Eingang zur Grube, antippen führt hinein |
+
+**Eingefroren beim ersten Gebrauch**: Wer mittags eine neue Stufe
+schafft, behält seine vier. Gespeichert als Historie
+(`LadderProgress.dailyClears`), Erfahrung und Gold werden gerechnet.
+
+**Gegen die Kurven nicht nachgerechnet.** Um Stufe 15 bringen vier
+Dailies rund 90 Erfahrung und 36 Gold am Tag, ganz oben höchstens 158
+und 64 — der Laden, ausgelegt auf 25 Gold am Tag aus Gewohnheiten,
+bekommt damit um Stufe 15 gut das Doppelte (61 statt 25) und leert sich entsprechend schneller. `progression_test.dart` weiss
+davon noch nichts.
+
+**Beim Bauen gemeldet:** `LadderProgress` hatte optionale Felder mit
+Standardwert — die Bauform aus `gotchas.md`, die schon zweimal ein Feld
+verschluckt hat. `defeat` und `recordDefeat` gehen jetzt über `copyWith`.
+
+### Die Spanne, erster Schritt: Streuung und Krits
+
+Frederik: „min Damage und max Damage liegen weiter auseinander, so wie
+Diablo." Von drei vorgeschlagenen Schritten (B Streuung und Krits,
+A grössere Zahlen, C multiplizieren statt addieren) ist **B gebaut**:
+
+| | vorher | jetzt |
+|---|---|---|
+| Streuung eines Heldenschlags | 85–115 % | **60–140 %** |
+| Kritisch | 0 % | **8 %**, doppelter Schaden, gross und golden |
+| Streuung der Gegner | 85–115 % | unverändert — sonst wird Sterben Lotterie |
+
+`pit_sim`: etwa eine Stufe leichter, am deutlichsten oben (Tag 60 +
+Ausrüstung, Stufe 25: 8 % → 42 %). Das sind die Krits, im Mittel rund
+8 % mehr Schaden; die Streuung allein verschiebt den Mittelwert nicht.
+**A und C sind danach gebaut**, siehe unten.
+
+### Erfahrung und Gold je Gegner
+
+[ADR-0041](../decisions/0041-beute-je-gegner.md). Jede Stufe hat einen
+**Topf** — ihren Erstsieg, als Daily ihr Viertel. Jeder Kill zahlt seinen
+Teil („+7 EP  +3 G" über dem Gegner, mitlaufend in der Kopfzeile), der
+Wächter füllt auf. **Ein verlorener Lauf behält, was gefallen ist**, der
+nächste kann nur noch den Rest holen. In der Summe genau wie vorher.
+
+action_combat 177 (vorher 169), App 422 (vorher 420). Nicht angesehen.
+
+## Sitzung 22.09.2026, zuletzt: Skillshots, und niemand hängt mehr
+
+Auf Frederiks Wünsche: „Fähigkeiten mithilfe von AOE-Einfärbungen
+erkenntlich machen und länger halten macht Skillshot aus Sachen", „so
+was wie Eisfeld oder Zeitdehnung sollen AOE-Skillshots werden", und:
+„Gegner bleiben öfter an Ecken hängen". action_combat 156 (vorher 138),
+App 416 (vorher 412).
+
+### Niemand hängt mehr
+
+Gemessen statt geraten: Ein unverwundbarer Held läuft durch gebaute
+Gruben, gezählt wird, wer ihm folgt, einen Weg hätte und eine Sekunde
+lang nicht vorankommt. **Drei Ursachen**, nacheinander gefunden:
+
+| Ursache | Wer | Abhilfe |
+|---|---|---|
+| An einer Ecke wurde die blockierte Achse **verworfen** — man glitt nicht um die Kante | alle | `_slide` bewegt und **drückt dann aus der Wand**; an einer Ecke zeigt das schräg |
+| Troll und zwei Fussvolk wollten zum selben Wegpunkt, das Wegschieben hielt alle fest | Stau im Durchgang | wer 0,6 s auf der Stelle tritt, geht 0,8 s **durch Verbündete** |
+| Das Wegfeld kennt keine Körperbreite — der Troll (36 Punkte) wurde in Gänge von einem Feld geschickt | Troll | **zweites Wegfeld** für breite Figuren: nur Felder in freien 2 × 2-Blöcken |
+
+In 60 Gruben (Stufe 1, 15, 30) vorher 10 Hänger je 30, jetzt keiner.
+`chase_test.dart` hält das fest.
+
+### Skillshots
+
+| Art | Fähigkeiten | Tippen | Halten und Ziehen |
+|---|---|---|---|
+| selbst | Steinhaut, Aurastrom, Blütentau, Prisma, Sammeln, Atemzug | wirkt beim Drücken | — |
+| Richtung | Funkenstoß, Donnerkeil, Seelenraub, Kraftschlag, Zehrung | zielt auf den nächsten Gegner | Linie oder Kegel, **daneben ist daneben** |
+| um den Helden | Klingenwirbel | wirkt | Kreis zeigt, was er erfasst |
+| **Bereich** | Wurzelgriff, **Frostnebel (Eisfeld)**, Sandsturm, Giftmoor, **Zeitdehnung**, Vulkanbruch, Sternenfall | setzt sich auf den nächsten Gegner | Kreis absetzen, bis 220–260 weit |
+
+**Eine abgesetzte Fläche bleibt liegen** und bremst oder verbrennt jeden,
+der hineinläuft, solange sie liegt — in ihrer Farbe am Boden. Vorher
+traf sie einmal, wer gerade im Umkreis stand.
+
+**Am Rechner:** Taste 1–3 halten, mit der Maus zielen, loslassen.
+
+**Tippen ohne Ziel kostet nichts, ein gezielter Wurf immer.** Ein
+Geschoss fliegt jetzt genau seine Reichweite weit (vorher vier Sekunden
+lang) — sonst wäre die Vorschau kürzer als der Funke.
+
+### Was sich an Zahlen geändert hat
+
+- **Zeitdehnung** traf alles in 600 Punkten Umkreis. Abgesetzt wäre das
+  der ganze Bildschirm; jetzt 170. Deutlich schwächer, nicht
+  nachgestellt.
+- Bereiche sitzen jetzt dort, wo man sie hinsetzt, nicht am Helden.
+- `pit_sim` liegt im Rauschen — **misst die Flächen aber nicht**: Der Bot
+  trägt Funkenstoß, Steinhaut und Blütentau, keinen Bereich, und er
+  zielt immer selbst, trifft also nie daneben.
+
+### Nicht angesehen
+
+Weder im Browser noch am Handy. Offen, und nur am Gerät zu klären: ob
+80 Punkte Zug für die volle Weite passen, ob die Totzone von 12 Punkten
+Tippen und Ziehen sauber trennt, ob man einen Wurf abbrechen können
+muss (heute nicht — Loslassen wirkt immer).
+
+## Sitzung 22.09.2026, danach: Tor, Auftritt, Sieg am Wächter
+
+Auf Frederiks Wünsche: „Bossraum ist nur Boss und der Raum schließt
+sich", dann: „der Dungeon ist fertig, wenn der Boss tot ist" und „eine
+Art Entry … erst dann den HP-Balken und Namen wie bei Dark Souls".
+Allein im Raum war der Wächter seit #74 schon.
+
+| | |
+|---|---|
+| **Sieg** | wenn der Wächter fällt — wer draussen noch steht, zählt nicht |
+| **Tor** | der Gang in den Wächterraum, wo er dessen Felsrand kreuzt, zwei Felder (`=`) |
+| Zu | sobald der Held **ganz** im Raum steht und niemand im Durchgang; geht nie wieder auf |
+| Draussen | wer keinen Weg mehr hat, bleibt stehen statt gegen das Gitter zu drücken |
+| **Vorher** | der Wächter schläft — unsichtbar, unberührbar, untätig |
+| **Auftritt** | 2,4 s: fällt aus 420 Punkten herab, landet mit Ring und Beben, brüllt |
+| Name und Balken | erst ab der Landung; der Balken läuft voll, Name klein darüber |
+| Schriftzug | „DER WÄCHTER · Hüter der Tiefe" in der Mitte, blendet ein und aus |
+
+**Unberührbar ist ein Feld, keine Ausnahme je Stelle.**
+`ActionEntity.untouchable` lässt `takeDamage` nichts abziehen, und
+Zielwahl, Geschosse, Flächentreffer, Schieben und das Handeln der Gegner
+lassen die Figur aus. Der Bot sieht den schlafenden Wächter nicht und
+läuft deshalb über `sleepingBossAt` zu ihm, wenn niemand sonst da ist.
+
+**Der Renderer weiss vom Fallen nichts.** Die Welt meldet den Wächter
+beim Auftritt höher, als er steht; der Renderer zeichnet, was er sieht.
+
+**Die Grube wird dadurch in der Mitte leichter** (`pit_sim`): Tag 14
+kommt bis Stufe 7 statt 6, Tag 30 mit Fähigkeiten bis 14 statt 13 —
+man muss nicht mehr jeden Raum räumen. Anfang und Spitze bleiben. Nicht
+nachgestellt.
+
+action_combat 138 (vorher 124), App 412.
+
+**„Hüter der Tiefe" ist ausgedacht**, ohne Vorlage — ändern ist eine
+Zeile in `pit_run_view.dart`. **Nicht angesehen**, weder im Browser noch
+am Handy. Kein Klang zu Tor oder Landung.
+
+## Sitzung 22.09.2026: Gegner laufen gerade
+
+Auf Frederiks Frage: „Kann es sein, dass Gegner rechtwinklig und nicht
+euklidisch zum Spieler laufen?" Ja. Das Wegfeld (`FlowField`) kennt nur
+vier Richtungen, und geradeaus ging es nur unter 46 Punkten Abstand.
+Jeder Gegner lief deshalb Treppen, **auch im offenen Raum**.
+
+**Jetzt gilt:** Wer mit seiner ganzen Breite in Luftlinie zum Helden
+passt, läuft direkt (`ActionWorld._canPass`, strenger als die
+Sichtlinie). Sonst folgt er dem Feld, steuert aber den weitesten der
+nächsten acht Wegpunkte an, den er noch ohne Wand erreicht
+(`FlowField.pathFrom`, `ActionBalance.chaseLookaheadTiles`). Um Ecken
+geht es damit schräg statt über Eck.
+
+`test/chase_test.dart` hält es fest; der Test im offenen Saal ist mit dem
+alten Code rot. action_combat 124 (vorher 121), App 412.
+
+**Nebenbei:** „eine eingesammelte Kugel heilt" hing an einem einzigen
+Startwert und fiel mit den neuen Laufwegen um. Er läuft jetzt über fünf.
+
+**Die Balance bewegt sich nicht messbar** (`pit_sim`, Tag 0 auf Stufe 1
+mit 100 Läufen: 72 % statt 74 %). Nicht angefasst: Der Test-Bot in
+`bot.dart` läuft weiter über das Feld, also in Treppen.
 
 ## Sitzung 21.09.2026, noch später: der Wächter kann etwas
 

@@ -14,6 +14,7 @@ library;
 
 export 'src/balance.dart';
 export 'src/bot.dart';
+export 'src/dailies.dart';
 export 'src/entity.dart';
 export 'src/events.dart';
 export 'src/flow_field.dart';

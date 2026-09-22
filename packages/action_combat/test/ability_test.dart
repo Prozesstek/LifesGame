@@ -113,30 +113,36 @@ void main() {
       // (ADR-0039, Schritt 4) machte er einen frischen Helden sonst
       // nieder, bevor der eine Kugel aufsammelt — und dieser Test prüft
       // Kugeln, nicht den Wächter.
-      final welt = _welt(
-        Level.parse('Traube, Wächter hinten', const <String>[
-          '##############################',
-          '#....ee......................#',
-          '#@...ee......................#',
-          '#....e......................B#',
-          '##############################',
-        ]),
-        stats: ActionStats.frisch,
-      );
-      // Erst Schaden nehmen, sonst gibt es nichts zu heilen.
-      while (!welt.isOver && welt.heroHpRatio > 0.7 && welt.elapsed < 60) {
-        welt.step(_zumNaechstenGegner(welt));
-      }
-
+      //
+      // **Über fünf Startwerte, nicht einen.** Ob eine Kugel fällt (28 %)
+      // und aufgesammelt wird, bevor der Wächter den frischen Helden
+      // erwischt, ist Würfelglück. An einem einzigen Startwert hing der
+      // Test an der Laufbahn jedes Gegners — als sie gerade statt über
+      // Eck liefen, fiel er um, ohne dass an den Kugeln etwas anders war.
+      var gesammelt = 0;
       var geheilt = 0;
-      while (!welt.isOver && welt.elapsed < 120) {
-        welt.step(_zumNaechstenGegner(welt));
-        for (final event in welt.drainEvents().whereType<OrbCollected>()) {
-          geheilt += event.healed;
+      for (var seed = 1; seed <= 5; seed++) {
+        final welt = _welt(
+          Level.parse('Traube, Wächter hinten', const <String>[
+            '##############################',
+            '#....ee......................#',
+            '#@...ee......................#',
+            '#....e......................B#',
+            '##############################',
+          ]),
+          stats: ActionStats.frisch,
+          seed: seed,
+        );
+        while (!welt.isOver && welt.elapsed < 120) {
+          welt.step(_zumNaechstenGegner(welt));
+          for (final event in welt.drainEvents().whereType<OrbCollected>()) {
+            geheilt += event.healed;
+          }
         }
+        gesammelt += welt.orbsCollected;
       }
 
-      expect(welt.orbsCollected, greaterThan(0));
+      expect(gesammelt, greaterThan(0));
       expect(geheilt, greaterThan(0));
     });
   });

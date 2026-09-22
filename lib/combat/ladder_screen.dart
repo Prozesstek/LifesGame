@@ -41,6 +41,7 @@ class LadderScreen extends ConsumerWidget {
                 children: <Widget>[
                   _Fortschritt(stand: stand),
                   const SizedBox(height: 14),
+                  const _Dailies(),
                   const Expanded(child: _GrubenBild()),
                   const SizedBox(height: 14),
                   _Stufenleiste(stage: stufe),
@@ -102,6 +103,110 @@ class _Fortschritt extends StatelessWidget {
           color: Palette.accentOnDark,
         ),
       ],
+    );
+  }
+}
+
+/// Die vier Stufen des Tages (ADR-0040): antippen führt hinein.
+///
+/// Ohne Häkchen heute stehen sie trotzdem da, mit dem Satz, der sagt,
+/// warum sie nichts zahlen — eine Sperre ohne Grund wäre ein kaputter
+/// Knopf.
+class _Dailies extends ConsumerWidget {
+  const _Dailies();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final heute = ref.watch(todayDailiesProvider);
+    if (heute.isEmpty) return const SizedBox.shrink();
+    final zahlen = ref.watch(dailiesUnlockedProvider);
+    final offen = heute.where((d) => !d.cleared).length;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: HolzKarte(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              zahlen
+                  ? 'Heute · noch $offen von ${heute.length}'
+                  : 'Heute · erst ein Häkchen setzen',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Palette.text,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                for (final daily in heute) ...<Widget>[
+                  Expanded(
+                    child: _DailyKachel(daily: daily, zahlt: zahlen),
+                  ),
+                  if (daily != heute.last) const SizedBox(width: 6),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyKachel extends StatelessWidget {
+  const _DailyKachel({required this.daily, required this.zahlt});
+
+  final DailyStage daily;
+  final bool zahlt;
+
+  @override
+  Widget build(BuildContext context) {
+    final erledigt = daily.cleared;
+    return Material(
+      color: erledigt ? Palette.surfaceSunken : Palette.surfaceRaised,
+      borderRadius: BorderRadius.circular(6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(6),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PitScreen(stage: PitStage(daily.stage)),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Column(
+            children: <Widget>[
+              Text(
+                '${daily.stage}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.text,
+                ),
+              ),
+              Text(
+                erledigt
+                    ? 'erledigt'
+                    : zahlt
+                    ? '+${daily.xp} · +${daily.gold}'
+                    : '—',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: erledigt ? Palette.textDim : Palette.gold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -184,30 +289,37 @@ class _Stufenleiste extends StatelessWidget {
   }
 }
 
-/// Was dieser Sieg einbringt — oder dass er nichts mehr einbringt.
+/// Was die nächste Stufe noch einbringt — oder dass sie nichts mehr
+/// einbringt.
 ///
 /// **Die Zeile gehört vor den Kampf, nicht nur danach.** Eine Belohnung,
 /// von der man erst hinterher erfährt, motiviert den Kampf nicht, den man
-/// gerade überlegt.
-class _Belohnung extends StatelessWidget {
+/// gerade überlegt. Seit ADR-0041 ist es der **Rest** des Topfs: Was ein
+/// verlorener Lauf schon eingesammelt hat, ist abgezogen.
+class _Belohnung extends ConsumerWidget {
   const _Belohnung({required this.stand});
 
   final LadderProgress stand;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final rung = stand.nextRung;
-    final neu = stand.isNewGround(rung);
+    final topf = stand.isNewGround(rung)
+        ? ref.read(ladderProvider.notifier).potFor(rung)
+        : (xp: 0, gold: 0);
+    final zahlt = topf.xp > 0 || topf.gold > 0;
+    final angebrochen = zahlt && topf.xp < LadderRewards.xpFor(rung);
 
     return Text(
-      neu
-          ? 'Erste Räumung: +${LadderRewards.xpFor(rung)} Erfahrung, '
-                '+${LadderRewards.goldFor(rung)} Gold'
-          : 'Alle Stufen geräumt — ein Lauf bringt nichts mehr ein.',
+      zahlt
+          ? '${angebrochen ? 'Noch' : 'Erste Räumung:'} '
+                '+${topf.xp} Erfahrung, +${topf.gold} Gold — '
+                'ein Teil je Gegner, der Rest beim Wächter'
+          : 'Alle Stufen geräumt — nur die Stufen des Tages zahlen noch.',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 12,
-        color: neu ? Palette.goldOnDark : Palette.textOnDarkDim,
+        color: zahlt ? Palette.goldOnDark : Palette.textOnDarkDim,
       ),
     );
   }

@@ -177,6 +177,18 @@ abstract final class ActionBalance {
 
   static const double bossRadius = 22;
   static const double bossSpeed = 52;
+
+  /// **Der Auftritt**, sobald das Tor hinter dem Helden zufällt: So lange
+  /// fällt der Wächter herab und brüllt, unverwundbar und untätig.
+  static const double bossEntranceSeconds = 2.4;
+
+  /// Nach diesem Anteil des Auftritts landet er — erst dann erscheinen
+  /// Name und Balken, und der Balken füllt sich im Rest.
+  static const double bossLandsShare = 0.35;
+
+  /// Aus dieser Höhe fällt er, in Punkten über seinem Platz. Mehr als
+  /// ein halber Bildschirm: Er soll von oben ins Bild kommen.
+  static const double bossDropHeight = 420;
   static const double bossAttackRange = 46;
   static const double bossAttackCooldown = 1.6;
 
@@ -249,6 +261,30 @@ abstract final class ActionBalance {
   /// zucken.
   static const double directChaseRange = 46;
 
+  /// So viele Felder am Wegfeld entlang schaut ein Gegner voraus, um den
+  /// weitesten frei erreichbaren Punkt anzusteuern. Mehr macht Wege um
+  /// lange Ecken glatter und kostet je Gegner und Schritt mehr Prüfungen.
+  static const int chaseLookaheadTiles = 8;
+
+  /// So lange darf ein Verfolger auf der Stelle treten, bevor er für
+  /// [ghostSeconds] durch Verbündete hindurchgeht. Ohne das verkeilten
+  /// sich ein Troll und zwei Fussvolk in einem Durchgang für immer: Jeder
+  /// wollte zum selben Wegpunkt, und das Wegschieben hielt alle fest.
+  static const double stuckSeconds = 0.6;
+
+  /// Wie weit ein gezielter Schlag neben seine Richtung reicht, zu jeder
+  /// Seite, im Bogenmass (etwa 52°). Breit genug, dass ein Daumen trifft,
+  /// schmal genug, dass hinter dem Helden niemand getroffen wird.
+  static const double strikeHalfAngle = 0.9;
+
+  /// So lange wirkt eine liegende Fläche nach, wenn man sie verlässt —
+  /// knapp über dem Takt, damit Bremsen und Brennen nicht flackern.
+  static const double zoneLinger = 0.35;
+  static const double ghostSeconds = 0.8;
+
+  /// Weniger Bewegung als das gilt als „auf der Stelle".
+  static const double stuckDistance = 4;
+
   // --- Schaden ---
 
   /// Schaden ist `Angriff * power - Verteidigung / 2`, wie im
@@ -256,8 +292,24 @@ abstract final class ActionBalance {
   /// ohne dass sie einen Schlag ganz verschluckt.
   static const double defenseDivisor = 2;
 
-  /// Streuung je Schlag, als Anteil. 0,15 heisst 85 % bis 115 %.
+  /// Streuung je Schlag der **Gegner**, als Anteil. 0,15 heisst 85 % bis
+  /// 115 %. Schmal, damit Sterben nicht zur Lotterie wird.
   static const double damageSpread = 0.15;
+
+  /// Streuung je Schlag des **Helden**: 60 % bis 140 %. Breit wie in
+  /// Diablo — ein Treffer soll sich vom nächsten unterscheiden, und ein
+  /// hoher soll auffallen. Im Mittel bleibt der Schaden derselbe.
+  static const double heroDamageSpread = 0.4;
+
+  /// Wie oft ein Schlag des Helden kritisch trifft, ohne jede Ausrüstung —
+  /// und mit welchem Faktor ([ActionStats.critFactor], 2). Dazu kommt, was
+  /// die Werte mitbringen.
+  static const double heroBaseCritChance = 0.08;
+
+  /// Welcher Anteil des Topfs einer Stufe beim **Wächter** liegt. Der Rest
+  /// verteilt sich gleich auf alle anderen Gegner der Grube — jeder Kill
+  /// zahlt sofort seinen Teil (ADR-0041).
+  static const double bossLootShare = 0.3;
 
   /// Wie weit ein Treffer den Getroffenen zurückstösst.
   ///
@@ -294,6 +346,18 @@ abstract final class ActionBalance {
   // geschätzt — wer hier dreht, lässt die Simulation laufen.
 
   /// Faktor auf die Lebenspunkte auf Stufe 1 und Stufe 30.
+  /// **Alle Kampfzahlen mal zehn** (ADR-0042) — für Held und Gegner
+  /// gleich, das Verhältnis bleibt. Ein Schlag trifft mit 180 statt 18,
+  /// ein Level mehr ist dann +7 statt +1, und die Streuung von 60 bis
+  /// 140 % ist als Zahl zu sehen statt als 11 oder 12.
+  static const int powerScale = 10;
+
+  /// Um wie viel die Gegner auf Stufe 30 **zusätzlich** vervielfacht
+  /// sind — Leben, Angriff und Verteidigung (ADR-0042). Geometrisch, von
+  /// ×1 auf Stufe 1 bis hierher. Das Gegenstück zu Level und Seltenheit
+  /// des Helden: Ohne es wäre ab der Mitte alles geschenkt.
+  static const double stagePowerLast = 5.0;
+
   static const double stageHpFactorFirst = 0.5;
   static const double stageHpFactorLast = 3.4;
 
