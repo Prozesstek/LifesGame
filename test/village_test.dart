@@ -135,6 +135,9 @@ void main() {
     ) async {
       await pumpDorf(tester);
       expect(find.text('Heute 0/0'), findsOneWidget);
+      // Die Kopfzeile gehört nach oben — sie stand einmal mitten im Bild.
+      expect(tester.getRect(find.byIcon(Icons.arrow_back)).top, lessThan(80));
+      expect(tester.getRect(find.text('Heute 0/0')).top, lessThan(80));
 
       await tester.tap(find.text('Heute 0/0'));
       await tester.pump();

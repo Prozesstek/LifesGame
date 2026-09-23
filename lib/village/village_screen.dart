@@ -148,7 +148,14 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
             Positioned.fill(
               child: _TuerKnopf(spiel: _spiel, onEnter: _betrete),
             ),
-            const SafeArea(child: _Kopf()),
+            // **Ausdrücklich oben angeheftet.** Als freies Kind im Stack
+            // landete die Kopfzeile in der Mitte des Bildschirms.
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(bottom: false, child: _Kopf()),
+            ),
           ],
         ),
       ),

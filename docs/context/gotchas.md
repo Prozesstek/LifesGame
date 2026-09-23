@@ -3,6 +3,19 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Über einem Spielfeld gehört jede Leiste ausdrücklich angeheftet
+
+Im Dorf lag die Kopfzeile (Zurück, Level, „Heute“) als freies Kind in
+einem `Stack` über dem `GameWidget` — und stand auf dem Handy **mitten im
+Bildschirm**, nicht oben. Eigentlich richtet ein `Stack` freie Kinder oben
+links aus; warum es hier die Mitte war, ist nicht geklärt. Kein Test hat
+es gemerkt, weil keiner nach der **Lage** gefragt hat, nur danach, ob
+der Knopf da ist.
+
+**Abhilfe:** `Positioned(top: 0, left: 0, right: 0, child: SafeArea(...))`
+statt eines freien `SafeArea`. Und ein Test, der die Lage prüft
+(`village_test.dart`: „die Kopfzeile gehört nach oben“).
+
 ## Achsen getrennt prüfen bleibt an Ecken hängen
 
 `_slide` in der Grube prüfte x und y getrennt und verwarf eine Achse, die
