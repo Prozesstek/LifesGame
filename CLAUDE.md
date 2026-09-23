@@ -217,7 +217,9 @@ Stelle:
 trägt ein `PitAim`: `selbst` (Heilung, Schutz, Mana — wirkt beim
 Drücken), `richtung` (Geschoss fliegt genau seine Reichweite, Schlag
 trifft im Kegel davor), `umDenHelden` (Klingenwirbel) oder `bereich` —
-abgesetzt bis `castRange`, auch hinter eine Wand — **Wände halten keine Fähigkeit auf**: Bereiche landen dahinter, Geschosse einer Fähigkeit fliegen hindurch (`Projectile.passesWalls`); nur Pfeile der Waffe und Geschosse der Gegner bleiben hängen. **Was ein Bereich an
+abgesetzt bis `castRange`, auch hinter eine Wand. **Gezielt wird über
+Wände hinweg, gewirkt nicht hindurch**: Ein Bereich landet, wo man
+hinzeigt, ein Geschoss bleibt an der Wand hängen. **Was ein Bereich an
 Bremsen und Dauerschaden trägt, bleibt als Fläche liegen** und wirkt auf
 jeden, der hineinläuft (Eisfeld, Giftboden). `ActionWorld.cast` zielt
 selbst und kostet ohne Ziel nichts, `castAt` wirkt dorthin und kostet

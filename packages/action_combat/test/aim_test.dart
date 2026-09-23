@@ -115,7 +115,7 @@ void main() {
       expect(_treffer(welt, 90), 0);
     });
 
-    test('gezielt fliegt es durch eine Wand', () {
+    test('über eine Wand gezielt, bleibt es an ihr hängen', () {
       final nah = Level.parse('Mauer nah', const <String>[
         '##############################',
         '#......#.....................#',
@@ -135,7 +135,7 @@ void main() {
       );
 
       expect(welt.castAt('funkenstoss', ziel), isTrue);
-      expect(_treffer(welt, 60), greaterThan(0));
+      expect(_treffer(welt, 60), 0);
     });
 
     test('kurz getippt ohne Gegner in Reichweite kostet nichts', () {
@@ -215,7 +215,7 @@ void main() {
       );
     });
 
-    test('eine Wand hält ihn nicht auf', () {
+    test('er lässt sich hinter eine Wand setzen', () {
       final welt = _welt(const <String>['frostnebel'], level: _mauer);
       final held = welt.heroView.position;
 

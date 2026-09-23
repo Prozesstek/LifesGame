@@ -11,21 +11,22 @@
 
 ---
 
-## Sitzung 23.09.2026: Wände halten keine Fähigkeit auf
+## Sitzung 23.09.2026: Zielen über Wände hinweg
 
-Auf Frederiks Ansage: „AOE oder generell Fähigkeiten werden, wenn sie
-geaimt werden, von Wänden aufgehalten. Das ist nicht nötig."
+Auf Frederiks Ansage: „Das Aimen von Fähigkeiten darf durch Wände gehen,
+aber nicht die Fähigkeit an sich."
 
 | | vorher | jetzt |
 |---|---|---|
 | Bereich absetzen | zurückgenommen vor die Wand | landet, wo gezielt — bis `castRange` |
-| Geschoss einer Fähigkeit | zerplatzt an der Wand | fliegt hindurch, verlischt nach seiner Reichweite |
-| Pfeil der Waffe, Geschoss der Gegner | bleibt hängen | **unverändert** |
-| Kurz tippen | zielt nur auf Gegner in Sicht | **unverändert** — tippen feuert nicht auf Unsichtbare |
+| Geschoss einer Fähigkeit | bleibt an der Wand hängen | **unverändert** |
+| Vorschaulinie eines Geschosses | lief schon durch Wände | unverändert |
+| Kurz tippen | zielt nur auf Gegner in Sicht | unverändert |
 
-Die Regel steht an einer Stelle: `Projectile.passesWalls`. action_combat
-183 (vorher 182). **Nicht angesehen**, und `pit_sim` nicht neu gerechnet —
-der Bot zielt nie von Hand und trägt keinen Bereich.
+Eine Zwischenfassung liess auch Geschosse durch Wände fliegen — das war
+falsch verstanden und ist zurückgenommen. action_combat 183 (vorher
+182). **Nicht angesehen**, `pit_sim` nicht neu gerechnet — der Bot zielt
+nie von Hand und trägt keinen Bereich.
 
 ## Sitzung 22.09.2026, abends: Macht vervielfacht
 

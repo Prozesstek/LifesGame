@@ -163,10 +163,11 @@ extension _Aim on ActionWorld {
     return _nearestEnemyWithin(weite, needsSight: braucheSicht)?.position;
   }
 
-  /// [punkt], aber höchstens [weite] vom Helden entfernt. **Wände halten
-  /// nichts auf**: Eine Fläche darf hinter Fels landen — gezielt ist
-  /// gezielt, und ein Kreis, der vor der Wand hängen bleibt, fühlte sich
-  /// wie ein verschluckter Wurf an.
+  /// [punkt], aber höchstens [weite] vom Helden entfernt. **Zielen geht
+  /// über Wände hinweg**: Eine Fläche darf hinter Fels abgesetzt werden —
+  /// ein Kreis, der vor der Wand hängen bleibt, fühlte sich wie ein
+  /// verschluckter Wurf an. Was fliegt, bleibt dagegen an der Wand
+  /// hängen; das regelt das Geschoss, nicht das Zielen.
   Vec2 _placeable(Vec2 punkt, double weite) {
     final held = _hero.position;
     var weg = punkt - held;

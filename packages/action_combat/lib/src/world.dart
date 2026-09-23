@@ -301,7 +301,8 @@ class ActionWorld {
 
   /// Wirkt eine Fähigkeit von einem Platz — **gezielt**, nach dem Halten:
   /// in Richtung [target] oder, bei einem Bereich, an [target] (höchstens
-  /// so weit, wie sie reicht — Wände halten sie nicht auf).
+  /// so weit, wie sie reicht; gezielt werden darf über Wände hinweg,
+  /// ein Geschoss bleibt trotzdem an ihnen hängen).
   ///
   /// Anders als [cast] kostet sie hier **immer**: Ein Skillshot, der
   /// danebengeht, ist ein verfehlter Skillshot.
@@ -910,8 +911,7 @@ class ActionWorld {
 
       geschoss.position = geschoss.position + geschoss.velocity * dt;
 
-      if (!geschoss.passesWalls &&
-          _hitsWall(geschoss.position, geschoss.radius)) {
+      if (_hitsWall(geschoss.position, geschoss.radius)) {
         geschoss.spent = true;
         continue;
       }
