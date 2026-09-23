@@ -33,8 +33,16 @@ class HubCircle extends StatelessWidget {
     this.lockedReason,
     this.image,
     this.progress,
+    this.symbol,
     super.key,
   });
+
+  /// Eine **gezeichnete** Figur auf der Knopffläche statt des [icon] —
+  /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
+  final String? symbol;
+
+  /// Kantenlänge einer gezeichneten Figur auf der Fläche.
+  static const double symbolSide = 46;
 
   /// Der Tagesfortschritt als Ring um den Kreis — oder `null` für keinen.
   ///
@@ -132,7 +140,9 @@ class HubCircle extends StatelessWidget {
                                 ),
                               ),
                               if (!bild.carriesIcon)
-                                Icon(icon, size: 30, color: Palette.text),
+                                _symbolOder(
+                                  Icon(icon, size: 30, color: Palette.text),
+                                ),
                             ],
                           ),
                         ),
@@ -187,6 +197,13 @@ class HubCircle extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Die gezeichnete Figur, oder [ersatz], wenn es keine gibt.
+  Widget _symbolOder(Widget ersatz) {
+    final pfad = symbol;
+    if (pfad == null) return ersatz;
+    return PixelArt(assetPath: pfad, side: symbolSide, fallback: ersatz);
   }
 
   void _sageWarum(BuildContext context) {

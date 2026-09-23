@@ -11,6 +11,16 @@
 
 ---
 
+## Sitzung 23.09.2026, Nachtrag: das Buch auf der Theorie
+
+Frederik hat alles aus dieser Sitzung gespielt („sehr coole Änderungen").
+Der Theorie-Kreis auf der Startseite trägt jetzt ein gezeichnetes Buch
+statt des Baum-Icons: `assets/UI/Buch.png`, 64 × 64 gezeichnet, als
+256 × 256 abgelegt. Es ist `Book.png` aus Frederiks Download-Ordner
+(`Desktop\Pixelart\Runtergeladen`). **Die Herkunft fehlt**, wie bei den
+anderen Paketen. `HubCircle.symbol` legt eine Zeichnung auf die
+Knopffläche, fehlt sie, steht wieder das Icon da. App 454.
+
 ## Sitzung 23.09.2026, Nachtrag: der Wochenrückblick
 
 Aus der „Wochenkarte zum Teilen" wurde auf Frederiks Wunsch zuerst etwas

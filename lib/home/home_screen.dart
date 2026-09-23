@@ -32,6 +32,9 @@ class HomeScreen extends ConsumerWidget {
 
   static const double _maxWidth = 560;
 
+  /// Das Buch auf dem Theorie-Kreis — Frederiks Zeichnung, 64 × 64.
+  static const String theorySymbol = 'assets/UI/Buch.png';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
@@ -69,6 +72,7 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.account_tree_outlined,
                         label: 'Theorie',
                         image: HubCircleImage.plain,
+                        symbol: theorySymbol,
                         onTap: () => _open(context, const SkillTreeScreen()),
                       ),
                       HubCircle(

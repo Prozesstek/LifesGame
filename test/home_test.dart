@@ -5,12 +5,14 @@ import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/character_stage.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/ui/gold_icon.dart';
+import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:abilities/abilities.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -293,6 +295,33 @@ void main() {
           reason: '${bild.assetPath} ist verdaechtig klein.',
         );
       }
+    });
+
+    testWidgets('die Theorie trägt das Buch, und es ist abgelegt', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      final buch = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == HomeScreen.theorySymbol,
+      );
+      expect(
+        find.ancestor(of: buch, matching: find.byType(HubCircle)),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<HubCircle>(
+              find.ancestor(of: buch, matching: find.byType(HubCircle)),
+            )
+            .label,
+        'Theorie',
+      );
+
+      final daten = await rootBundle.load(HomeScreen.theorySymbol);
+      expect(daten.lengthInBytes, greaterThan(1000));
     });
 
     testWidgets('die Goldmünze ebenfalls', (tester) async {

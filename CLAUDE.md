@@ -177,7 +177,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 453 Tests
+flutter test             # 454 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
