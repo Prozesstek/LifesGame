@@ -4,6 +4,7 @@ import 'package:habits/habits.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Eine laufende Gewohnheit: abhaken, Streak sehen, ein Tagesziel füllen.
 ///
@@ -80,71 +81,80 @@ class HabitCheckTile extends StatelessWidget {
     final zeigtPlus = goal != null && !isChecked;
     final zeigtBalken = goal != null && !isChecked;
 
-    return HolzKarte(
-      padding: EdgeInsets.zero,
-      color: isChecked ? Palette.surfaceRaised : Palette.surface,
-      edgeColor: isChecked ? Palette.success : Holz.kante,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onToggle,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-            child: Row(
-              children: <Widget>[
-                _CheckMark(isChecked: isChecked, label: habit.name),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        habit.name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: isChecked ? Palette.textDim : Palette.text,
-                          decoration: isChecked
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                          decorationColor: Palette.muted,
+    return Druck(
+      child: HolzKarte(
+        padding: EdgeInsets.zero,
+        color: isChecked ? Palette.surfaceRaised : Palette.surface,
+        edgeColor: isChecked ? Palette.success : Holz.kante,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onToggle,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+              child: Row(
+                children: <Widget>[
+                  _CheckMark(isChecked: isChecked, label: habit.name),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          habit.name,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isChecked ? Palette.textDim : Palette.text,
+                            decoration: isChecked
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            decorationColor: Palette.muted,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      RewardLine(
-                        xp: xpGain,
-                        gold: goldGain,
-                        alreadyEarned: isChecked,
-                      ),
-                      if (zeigtBalken) ...<Widget>[
-                        const SizedBox(height: 7),
-                        _GoalBar(
-                          done: progress,
-                          target: goal.target,
-                          label: goal.progressLabel(progress),
+                        const SizedBox(height: 5),
+                        RewardLine(
+                          xp: xpGain,
+                          gold: goldGain,
+                          alreadyEarned: isChecked,
                         ),
+                        if (zeigtBalken) ...<Widget>[
+                          const SizedBox(height: 7),
+                          _GoalBar(
+                            done: progress,
+                            target: goal.target,
+                            label: goal.progressLabel(progress),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                if (streak > 0) ...<Widget>[
-                  const SizedBox(width: 8),
-                  _StreakBadge(streak: streak, nextMultiplier: nextMultiplier),
+                  if (streak > 0) ...<Widget>[
+                    const SizedBox(width: 8),
+                    _StreakBadge(
+                      streak: streak,
+                      nextMultiplier: nextMultiplier,
+                    ),
+                  ],
+                  if (zeigtPlus)
+                    DruckSperre(
+                      child: IconButton(
+                        onPressed: onAdvance,
+                        icon: const Icon(Icons.add_circle_outline, size: 22),
+                        color: Palette.accent,
+                        tooltip: _plusTooltip(goal),
+                      ),
+                    ),
+                  DruckSperre(
+                    child: IconButton(
+                      onPressed: onStop,
+                      icon: const Icon(Icons.close, size: 18),
+                      color: Palette.muted,
+                      tooltip: 'Nicht mehr verfolgen',
+                    ),
+                  ),
                 ],
-                if (zeigtPlus)
-                  IconButton(
-                    onPressed: onAdvance,
-                    icon: const Icon(Icons.add_circle_outline, size: 22),
-                    color: Palette.accent,
-                    tooltip: _plusTooltip(goal),
-                  ),
-                IconButton(
-                  onPressed: onStop,
-                  icon: const Icon(Icons.close, size: 18),
-                  color: Palette.muted,
-                  tooltip: 'Nicht mehr verfolgen',
-                ),
-              ],
+              ),
             ),
           ),
         ),

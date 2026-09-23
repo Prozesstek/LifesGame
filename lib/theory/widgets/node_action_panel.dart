@@ -4,6 +4,7 @@ import 'package:theory/theory.dart';
 import '../../ui/palette.dart';
 import 'node_state.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Was mit dem Startknoten geschehen soll.
 enum NodeAction { read, open }
@@ -112,25 +113,27 @@ class NodeActionPanel extends StatelessWidget {
   /// eine bestandene Seite. Ein Satz, der zum Antippen auffordert und
   /// nicht antippbar ist, waere die schlechteste Fassung davon.
   Widget _passed() {
-    return InkWell(
-      onTap: () => onAction(NodeAction.read),
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Icon(Icons.check_circle, size: 15, color: Palette.success),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                'Bestanden — zum Nachlesen antippen',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Palette.muted, fontSize: 12.5),
+    return Druck(
+      child: InkWell(
+        onTap: () => onAction(NodeAction.read),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Icon(Icons.check_circle, size: 15, color: Palette.success),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  'Bestanden — zum Nachlesen antippen',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Palette.muted, fontSize: 12.5),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -14,6 +14,7 @@ import 'weapon_ability_line.dart';
 import 'widgets/shop_item_cell.dart';
 import 'widgets/shop_item_tile.dart';
 import '../ui/holz.dart';
+import '../ui/druck.dart';
 
 /// Der Laden — der einzige Ort, an dem Gold wieder verschwindet.
 ///
@@ -307,37 +308,39 @@ class _Reiter extends StatelessWidget {
     return Semantics(
       button: true,
       selected: istAktiv,
-      child: Material(
-        color: istAktiv ? Palette.accent : Palette.surface,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
+      child: Druck(
+        child: Material(
+          color: istAktiv ? Palette.accent : Palette.surface,
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  slot.label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: istAktiv ? Palette.surface : Palette.textDim,
-                  ),
-                ),
-                if (istBesetzt) ...<Widget>[
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: istAktiv ? Palette.surface : Palette.success,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    slot.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: istAktiv ? Palette.surface : Palette.textDim,
                     ),
                   ),
+                  if (istBesetzt) ...<Widget>[
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: istAktiv ? Palette.surface : Palette.success,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

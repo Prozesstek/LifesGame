@@ -14,6 +14,7 @@ import 'save/save_data.dart';
 import 'save/save_providers.dart';
 import 'save/save_store.dart';
 import 'save/save_watcher.dart';
+import 'ui/druck.dart';
 import 'ui/holz.dart';
 import 'ui/palette.dart';
 import 'ui/phone_frame.dart';
@@ -132,7 +133,7 @@ class LifesGameApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lifes Game',
       debugShowCheckedModeBanner: false,
-      theme: _theme(),
+      theme: theme(),
       home: const HomeScreen(),
       // Die Entwicklerfassung sieht man ihr an — sonst hält man am Handy
       // den eigenen Spielstand für verloren, weil man im falschen Fenster
@@ -161,7 +162,7 @@ class LifesGameApp extends StatelessWidget {
   /// Zahlen im Kampf — färbt sich ausdrücklich mit
   /// [Palette.textOnDark]; das sind wenige Stellen, und sie sind in
   /// `palette.dart` benannt.
-  static ThemeData _theme() {
+  static ThemeData theme() {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: Palette.accent,
@@ -205,6 +206,15 @@ class LifesGameApp extends StatelessWidget {
       // (`lib/ui/holz.dart`).
       filledButtonTheme: FilledButtonThemeData(style: Holz.buttonStyle()),
       iconButtonTheme: IconButtonThemeData(style: Holz.iconButtonStyle()),
+      // **Jeder Knopf gibt nach** (`lib/ui/druck.dart`). Planke und
+      // Holzknopf tun es in ihrem eigenen Hintergrund; die schlichten
+      // Knöpfe bekommen nur den Druck.
+      textButtonTheme: const TextButtonThemeData(
+        style: ButtonStyle(backgroundBuilder: Druck.builder),
+      ),
+      outlinedButtonTheme: const OutlinedButtonThemeData(
+        style: ButtonStyle(backgroundBuilder: Druck.builder),
+      ),
       dialogTheme: const DialogThemeData(backgroundColor: Palette.surface),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Palette.surface,

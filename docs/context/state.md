@@ -11,6 +11,31 @@
 
 ---
 
+## Sitzung 23.09.2026, ganz zuletzt: jeder Knopf gibt nach
+
+Auf Frederiks Wunsch: „Animation bei allen Button Pressed, wirklich bei
+allen." Ein Druck sinkt schnell ein (70 ms) und federt beim Loslassen
+zurück (220 ms, leicht über das Ziel hinaus). Kleine Knöpfe sinken
+deutlicher ein, breite Kacheln nur um wenige Punkte. Eine Stelle:
+`lib/ui/druck.dart`.
+
+| Was | Wie |
+|---|---|
+| Holzplanke, Holzknopf (auch Zurück in der Kopfzeile) | im eigenen Hintergrund (`holz.dart`) |
+| `TextButton`, `OutlinedButton` | über das Theme (`main.dart`) |
+| Bereichskreise, Kacheln, Laden, Baum, Fragen, Listen in Blättern, Chips, der schwebende Knopf | in `Druck` gelegt, 27 Stellen in 20 Dateien |
+| die drei Plätze in der Grube | am eigenen Halte-Zustand; bleibt eingedrückt, solange man zielt |
+
+**Der Innerste gewinnt:** Das Plus auf einer Gewohnheit sinkt ein, die
+Karte darum nicht (`DruckSperre`). **Wer scrollt, drückt nicht:** Wandert
+der Finger über die Toleranz hinaus, federt die Fläche zurück.
+
+**Nicht angefasst:** die Schalter im Entwicklermodus (bewegen sich schon
+selbst) und das Steuerkreuz der Grube (kein Knopf). App 435 (vorher
+426). **Nicht angesehen**, weder im Browser noch am Handy. Ob 0,9 bis
+0,97 sich richtig anfühlt, sagt nur das Gerät. Die Zahlen stehen oben in
+`Druck`.
+
 ## Sitzung 23.09.2026, zuletzt: Erledigtes rutscht nach unten
 
 Auf Frederiks Wunsch: „oben die offenen, unten die, die man am Tag schon

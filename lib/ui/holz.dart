@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'druck.dart';
 import 'palette.dart';
 
 /// Die gezeichneten Flächen aus dem UI-Paket: Planke, Rahmen, Balken,
@@ -120,7 +121,7 @@ abstract final class Holz {
     // Ausgegraut, nicht ausgeblendet: Ein gesperrter Knopf soll als Knopf
     // lesbar bleiben — er sagt, dass es hier etwas gibt, nur noch nicht.
     if (aus) flaeche = Opacity(opacity: 0.45, child: flaeche);
-    return flaeche;
+    return DruckSkala(gedrueckt: gedrueckt, child: flaeche);
   }
 
   /// Der Stil aller Hauptknöpfe.
@@ -177,7 +178,7 @@ abstract final class Holz {
     if (states.contains(WidgetState.disabled)) {
       flaeche = Opacity(opacity: 0.45, child: flaeche);
     }
-    return flaeche;
+    return DruckSkala(gedrueckt: gedrueckt, child: flaeche);
   }
 
   /// Der Stil aller Symbolknöpfe — Zurück, Plus, Zahnrad.

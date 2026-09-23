@@ -5,6 +5,7 @@ import '../../gear/gear_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Ein Ausrüstungsplatz als Kachel im 6er-Raster.
 ///
@@ -68,51 +69,58 @@ class EquipmentSlotTile extends StatelessWidget {
       label: hasNothingToPick
           ? '${slot.label}: nichts gekauft'
           : '${slot.label}: ${item?.name ?? 'leer'}',
-      child: Material(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          // Ein Platz ohne Auswahl ist nicht antippbar. Ein Blatt, in dem
-          // nichts steht, wäre eine Sackgasse statt einer Antwort.
-          onTap: hasNothingToPick ? null : () => _pick(context),
+      child: Druck(
+        enabled: !hasNothingToPick,
+        child: Material(
+          color: Palette.surface,
           borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isEmpty ? Palette.surfaceRaised : Palette.accent,
-                width: isEmpty ? 1 : 1.5,
+          child: InkWell(
+            // Ein Platz ohne Auswahl ist nicht antippbar. Ein Blatt, in dem
+            // nichts steht, wäre eine Sackgasse statt einer Antwort.
+            onTap: hasNothingToPick ? null : () => _pick(context),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isEmpty ? Palette.surfaceRaised : Palette.accent,
+                  width: isEmpty ? 1 : 1.5,
+                ),
               ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                _Zeichen(
-                  slot: slot,
-                  item: item,
-                  color: isEmpty ? Palette.muted : Palette.accent,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  slot.label,
-                  style: const TextStyle(fontSize: 10, color: Palette.textDim),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item?.name ?? (hasNothingToPick ? 'nichts gekauft' : 'leer'),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isEmpty ? FontWeight.normal : FontWeight.bold,
-                    color: isEmpty ? Palette.muted : Palette.text,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _Zeichen(
+                    slot: slot,
+                    item: item,
+                    color: isEmpty ? Palette.muted : Palette.accent,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    slot.label,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Palette.textDim,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item?.name ??
+                        (hasNothingToPick ? 'nichts gekauft' : 'leer'),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: isEmpty ? FontWeight.normal : FontWeight.bold,
+                      color: isEmpty ? Palette.muted : Palette.text,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -153,37 +161,42 @@ class EquipmentSlotTile extends StatelessWidget {
                 // lesen -- und ob es zu einem Set gehört, entscheidet die
                 // Wahl mit: Ein Teil ablegen kann eine Set-Stufe kosten.
                 for (final option in owned)
-                  ListTile(
-                    leading: _Zeichen(
-                      slot: slot,
-                      item: option,
-                      color: Palette.textDim,
-                      side: _bildImBlatt,
+                  Druck(
+                    child: ListTile(
+                      leading: _Zeichen(
+                        slot: slot,
+                        item: option,
+                        color: Palette.textDim,
+                        side: _bildImBlatt,
+                      ),
+                      title: Text(
+                        option.name,
+                        style: const TextStyle(color: Palette.text),
+                      ),
+                      subtitle: _Untertitel(option: option),
+                      trailing: option.id == equipped?.id
+                          ? const Icon(Icons.check, color: Palette.accent)
+                          : null,
+                      onTap: () => Navigator.of(
+                        sheetContext,
+                      ).pop(_Choice.equip(option.id)),
                     ),
-                    title: Text(
-                      option.name,
-                      style: const TextStyle(color: Palette.text),
-                    ),
-                    subtitle: _Untertitel(option: option),
-                    trailing: option.id == equipped?.id
-                        ? const Icon(Icons.check, color: Palette.accent)
-                        : null,
-                    onTap: () => Navigator.of(
-                      sheetContext,
-                    ).pop(_Choice.equip(option.id)),
                   ),
                 // Das Ablegen ist von der Kachel hierher gewandert: Im
                 // Raster ist kein Platz für einen zweiten Knopf, und hier
                 // steht es neben dem, was es ersetzt.
                 if (equipped != null)
-                  ListTile(
-                    leading: const Icon(Icons.close, color: Palette.muted),
-                    title: const Text(
-                      'Ablegen',
-                      style: TextStyle(color: Palette.textDim),
+                  Druck(
+                    child: ListTile(
+                      leading: const Icon(Icons.close, color: Palette.muted),
+                      title: const Text(
+                        'Ablegen',
+                        style: TextStyle(color: Palette.textDim),
+                      ),
+                      onTap: () => Navigator.of(
+                        sheetContext,
+                      ).pop(const _Choice.unequip()),
                     ),
-                    onTap: () =>
-                        Navigator.of(sheetContext).pop(const _Choice.unequip()),
                   ),
                 const SizedBox(height: 8),
               ],

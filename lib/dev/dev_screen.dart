@@ -14,6 +14,7 @@ import 'dev_actions.dart';
 import 'dev_controller.dart';
 import 'save_slot.dart';
 import '../ui/holz.dart';
+import '../ui/druck.dart';
 
 /// Die Werkbank: Erfahrung, Gold, Punkte und Sachen per Knopfdruck.
 ///
@@ -487,9 +488,11 @@ class _ItemPicker extends StatelessWidget {
         runSpacing: 6,
         children: <Widget>[
           for (final item in GearCatalog.all)
-            ActionChip(
-              label: Text(item.name, style: const TextStyle(fontSize: 11)),
-              onPressed: () => onPick(item.id),
+            Druck(
+              child: ActionChip(
+                label: Text(item.name, style: const TextStyle(fontSize: 11)),
+                onPressed: () => onPick(item.id),
+              ),
             ),
         ],
       ),
@@ -511,12 +514,14 @@ class _AbilityPicker extends StatelessWidget {
         runSpacing: 6,
         children: <Widget>[
           for (final ability in AbilityCatalog.choosable)
-            ActionChip(
-              label: Text(
-                pitNameOf(ability.moveId) ?? ability.moveId,
-                style: const TextStyle(fontSize: 11),
+            Druck(
+              child: ActionChip(
+                label: Text(
+                  pitNameOf(ability.moveId) ?? ability.moveId,
+                  style: const TextStyle(fontSize: 11),
+                ),
+                onPressed: () => onPick(ability.moveId),
               ),
-              onPressed: () => onPick(ability.moveId),
             ),
         ],
       ),

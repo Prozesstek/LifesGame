@@ -13,6 +13,7 @@ import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
 import 'widgets/character_stage.dart';
 import 'widgets/hub_circle.dart';
+import '../ui/druck.dart';
 
 /// Startbildschirm — die Figur in der Mitte, die Bereiche darum herum.
 ///
@@ -147,23 +148,25 @@ class _DevKnopf extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 4, right: 4),
       child: Tooltip(
         message: 'Entwicklermodus — ${ref.watch(activeSlotProvider).label}',
-        child: InkWell(
-          onTap: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute<void>(builder: (_) => const DevScreen())),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: Palette.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: Palette.muted),
-            ),
-            child: const Icon(
-              Icons.science_outlined,
-              size: 17,
-              color: Palette.muted,
+        child: Druck(
+          child: InkWell(
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const DevScreen())),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: Palette.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: Palette.muted),
+              ),
+              child: const Icon(
+                Icons.science_outlined,
+                size: 17,
+                color: Palette.muted,
+              ),
             ),
           ),
         ),

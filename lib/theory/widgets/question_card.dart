@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/druck.dart';
 
 /// Eine Frage mit ihren Antwortmöglichkeiten.
 ///
@@ -88,32 +89,39 @@ class _Option extends StatelessWidget {
       _ => Palette.text,
     };
 
-    return Material(
-      color: Palette.surface,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
+    return Druck(
+      enabled: onTap != null,
+      child: Material(
+        color: Palette.surface,
         borderRadius: BorderRadius.circular(10),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: border, width: 1.5),
-          ),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(fontSize: 14, height: 1.3, color: textColor),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: border, width: 1.5),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.3,
+                      color: textColor,
+                    ),
+                  ),
                 ),
-              ),
-              if (state == _OptionState.correct)
-                const Icon(Icons.check, size: 18, color: Palette.success),
-              if (state == _OptionState.wrong)
-                const Icon(Icons.close, size: 18, color: Palette.enemy),
-            ],
+                if (state == _OptionState.correct)
+                  const Icon(Icons.check, size: 18, color: Palette.success),
+                if (state == _OptionState.wrong)
+                  const Icon(Icons.close, size: 18, color: Palette.enemy),
+              ],
+            ),
           ),
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:identity/identity.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'achievements_controller.dart';
+import '../ui/druck.dart';
 
 /// Die Errungenschaften, nach Spielbereichen sortiert.
 ///
@@ -171,34 +172,36 @@ class _Reiter extends ConsumerWidget {
     return Semantics(
       button: true,
       selected: istAktiv,
-      child: Material(
-        color: istAktiv ? Palette.accent : Palette.surface,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
+      child: Druck(
+        child: Material(
+          color: istAktiv ? Palette.accent : Palette.surface,
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  area.label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: istAktiv ? Palette.surface : Palette.textDim,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    area.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: istAktiv ? Palette.surface : Palette.textDim,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${stand.earned}/${stand.total}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: istAktiv ? Palette.surface : Palette.muted,
+                  const SizedBox(width: 6),
+                  Text(
+                    '${stand.earned}/${stand.total}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: istAktiv ? Palette.surface : Palette.muted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

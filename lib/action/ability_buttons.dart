@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../combat/move_icon.dart';
 import 'action_game.dart';
+import '../ui/druck.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 
@@ -84,6 +85,14 @@ class _AimGesture extends StatefulWidget {
 class _AimGestureState extends State<_AimGesture> {
   Offset? _start;
 
+  /// Ob der Finger auf dem Knopf liegt — auch während des Zielens. Der
+  /// Knopf bleibt eingedrückt, solange man hält (`lib/ui/druck.dart`).
+  bool _gedrueckt = false;
+
+  void _setze(bool gedrueckt) {
+    if (_gedrueckt != gedrueckt) setState(() => _gedrueckt = gedrueckt);
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = widget.game;
@@ -91,6 +100,7 @@ class _AimGestureState extends State<_AimGesture> {
     return Listener(
       behavior: HitTestBehavior.opaque,
       onPointerDown: (event) {
+        _setze(true);
         // Nichts zu zielen: wirken, solange der Finger unten ist. Ein
         // Knopf, der erst beim Loslassen auslöst, fühlt sich zäh an.
         if (ability.aim == PitAim.selbst) {
@@ -107,15 +117,17 @@ class _AimGestureState extends State<_AimGesture> {
         game.aimDrag(Vec2(zug.dx, zug.dy));
       },
       onPointerUp: (_) {
+        _setze(false);
         if (_start == null) return;
         _start = null;
         game.releaseAim();
       },
       onPointerCancel: (_) {
+        _setze(false);
         _start = null;
         game.cancelAim();
       },
-      child: widget.child,
+      child: DruckSkala(gedrueckt: _gedrueckt, child: widget.child),
     );
   }
 }

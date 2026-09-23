@@ -133,6 +133,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
+| `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
@@ -171,7 +172,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 426 Tests
+flutter test             # 435 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -592,6 +593,15 @@ schliesst. Ausgenommen sind Kacheln in Rastern, Knöpfe und Kreise: Zwölf
 Punkte Holz wären dort dicker als der Inhalt. Der Rahmen kostet eine
 Karte 24 Punkte Breite; wer eine Zeile hineinlegt, gibt ihren Texten
 `Flexible` (`gotchas.md`).
+
+**Jeder Knopf gibt nach, wenn man ihn drückt** (`lib/ui/druck.dart`).
+Planke, Holzknopf, `TextButton` und `OutlinedButton` tun es über das
+Theme. Alles Eigene mit `InkWell` oder `GestureDetector`, also Kreise,
+Kacheln, Knoten und `ListTile`s, liegt in einem `Druck`. **Wer eine neue
+Tippfläche baut, legt sie in `Druck`**, sonst ist sie die eine, die nicht
+nachgibt. Liegt ein Theme-Knopf in einer Fläche mit `Druck`, kommt er in
+eine `DruckSperre`, sonst sinkt die ganze Fläche mit ihm ein
+(`HabitCheckTile`). `test/druck_test.dart`.
 
 **Die App hat zwei Untergründe, und jede Bedeutung hat für beide einen
 Wert.** Pergamentflächen (`Palette.surface`) liegen auf dunklem Leder

@@ -20,6 +20,7 @@ import 'widgets/stat_summary.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/streak_ladder_card.dart';
 import '../ui/holz.dart';
+import '../ui/druck.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
 /// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
@@ -385,16 +386,18 @@ class _CustomHabitFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
-      backgroundColor: _offen ? Palette.accent : Palette.surfaceRaised,
-      foregroundColor: _offen ? Palette.surface : Palette.muted,
-      tooltip: _hinweis,
-      // Dasselbe Zeichen wie vorher in der Liste, und bewusst ein
-      // anderes als das Plus, mit dem eine fertige Vorlage gestartet
-      // wird: Hier entsteht etwas Neues, dort wird etwas Vorhandenes
-      // aufgenommen.
-      child: const Icon(Icons.playlist_add),
+    return Druck(
+      child: FloatingActionButton(
+        onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
+        backgroundColor: _offen ? Palette.accent : Palette.surfaceRaised,
+        foregroundColor: _offen ? Palette.surface : Palette.muted,
+        tooltip: _hinweis,
+        // Dasselbe Zeichen wie vorher in der Liste, und bewusst ein
+        // anderes als das Plus, mit dem eine fertige Vorlage gestartet
+        // wird: Hier entsteht etwas Neues, dort wird etwas Vorhandenes
+        // aufgenommen.
+        child: const Icon(Icons.playlist_add),
+      ),
     );
   }
 

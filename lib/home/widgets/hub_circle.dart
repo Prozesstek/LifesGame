@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/druck.dart';
 
 /// Ein Bereich des Spiels als runder Knopf.
 ///
@@ -85,77 +86,79 @@ class HubCircle extends StatelessWidget {
       button: true,
       enabled: !isLocked,
       label: label,
-      child: InkWell(
-        onTap: () => isLocked ? _sageWarum(context) : onTap(),
-        borderRadius: BorderRadius.circular(diameter),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Stack(
-                clipBehavior: Clip.none,
-                children: <Widget>[
-                  if (bild == null)
-                    _SchlichterKreis(icon: icon, farbe: farbe)
-                  else
-                    Opacity(
-                      opacity: isLocked ? _lockedOpacity : 1,
-                      child: SizedBox(
-                        width: diameter,
-                        height: diameter,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            PixelArt(
-                              assetPath: bild.assetPath,
-                              side: diameter,
-                              fallback: _SchlichterKreis(
-                                icon: icon,
-                                farbe: farbe,
+      child: Druck(
+        child: InkWell(
+          onTap: () => isLocked ? _sageWarum(context) : onTap(),
+          borderRadius: BorderRadius.circular(diameter),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: <Widget>[
+                    if (bild == null)
+                      _SchlichterKreis(icon: icon, farbe: farbe)
+                    else
+                      Opacity(
+                        opacity: isLocked ? _lockedOpacity : 1,
+                        child: SizedBox(
+                          width: diameter,
+                          height: diameter,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              PixelArt(
+                                assetPath: bild.assetPath,
+                                side: diameter,
+                                fallback: _SchlichterKreis(
+                                  icon: icon,
+                                  farbe: farbe,
+                                ),
                               ),
-                            ),
-                            if (!bild.carriesIcon)
-                              Icon(icon, size: 30, color: Palette.text),
-                          ],
+                              if (!bild.carriesIcon)
+                                Icon(icon, size: 30, color: Palette.text),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  if (isLocked)
-                    Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: Palette.background,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.lock,
-                          size: 13,
-                          color: Palette.muted,
+                    if (isLocked)
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: Palette.background,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.lock,
+                            size: 13,
+                            color: Palette.muted,
+                          ),
                         ),
                       ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SizedBox(
+                  width: diameter + 16,
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isLocked ? Palette.muted : Palette.textOnDark,
                     ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: diameter + 16,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isLocked ? Palette.muted : Palette.textOnDark,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

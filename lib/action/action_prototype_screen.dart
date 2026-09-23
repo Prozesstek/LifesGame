@@ -7,6 +7,7 @@ import '../ui/palette.dart';
 import 'action_game.dart';
 import 'hero_power.dart';
 import 'pit_run_view.dart';
+import '../ui/druck.dart';
 
 /// **Prototyp.** Echtzeit-Kampf in einer Halle voller Gegner.
 ///
@@ -207,42 +208,46 @@ class _PowerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Palette.backgroundRaised,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
+      child: Druck(
+        child: Material(
+          color: Palette.backgroundRaised,
           borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: highlight ? Palette.goldOnDark : Colors.transparent,
-                width: 1.5,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: highlight ? Palette.goldOnDark : Colors.transparent,
+                  width: 1.5,
+                ),
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: highlight ? Palette.goldOnDark : Palette.textOnDark,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: highlight
+                          ? Palette.goldOnDark
+                          : Palette.textOnDark,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
-                    color: Palette.textOnDarkDim,
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: Palette.textOnDarkDim,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

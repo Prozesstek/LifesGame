@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/druck.dart';
 
 /// Eine Lektion in der Zweig-Übersicht.
 class LessonTile extends StatelessWidget {
@@ -27,53 +28,56 @@ class LessonTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPassed = record?.isPassed ?? false;
 
-    return Material(
-      color: isUnlocked ? Palette.surfaceRaised : Palette.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: isUnlocked ? onTap : null,
+    return Druck(
+      enabled: isUnlocked,
+      child: Material(
+        color: isUnlocked ? Palette.surfaceRaised : Palette.surface,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _Badge(
-                number: number,
-                isPassed: isPassed,
-                isUnlocked: isUnlocked,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      lesson.title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isUnlocked ? Palette.text : Palette.muted,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      isUnlocked
-                          ? lesson.summary
-                          : 'Erst nach der vorherigen Lektion',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                    if (record != null) ...<Widget>[
-                      const SizedBox(height: 6),
-                      _ScoreLine(record: record, lesson: lesson),
-                    ],
-                  ],
+        child: InkWell(
+          onTap: isUnlocked ? onTap : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _Badge(
+                  number: number,
+                  isPassed: isPassed,
+                  isUnlocked: isUnlocked,
                 ),
-              ),
-            ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        lesson.title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isUnlocked ? Palette.text : Palette.muted,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        isUnlocked
+                            ? lesson.summary
+                            : 'Erst nach der vorherigen Lektion',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Palette.textDim,
+                        ),
+                      ),
+                      if (record != null) ...<Widget>[
+                        const SizedBox(height: 6),
+                        _ScoreLine(record: record, lesson: lesson),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

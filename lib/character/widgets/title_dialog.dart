@@ -4,6 +4,7 @@ import 'package:identity/identity.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Das Ergebnis der Titelwahl.
 ///
@@ -91,17 +92,19 @@ class _NoTitleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        isSelected ? Icons.check_circle : Icons.circle_outlined,
-        color: isSelected ? Palette.accent : Palette.muted,
+    return Druck(
+      child: ListTile(
+        leading: Icon(
+          isSelected ? Icons.check_circle : Icons.circle_outlined,
+          color: isSelected ? Palette.accent : Palette.muted,
+        ),
+        title: const Text('Kein Titel'),
+        subtitle: const Text(
+          'Nur der Name',
+          style: TextStyle(fontSize: 12, color: Palette.textDim),
+        ),
+        onTap: () => Navigator.of(context).pop(const TitleSelection(null)),
       ),
-      title: const Text('Kein Titel'),
-      subtitle: const Text(
-        'Nur der Name',
-        style: TextStyle(fontSize: 12, color: Palette.textDim),
-      ),
-      onTap: () => Navigator.of(context).pop(const TitleSelection(null)),
     );
   }
 }
@@ -134,36 +137,39 @@ class _TitleTile extends StatelessWidget {
     final quelle = _quelle;
     final isEarned = quelle != null && quelle.isEarnedBy(stats);
 
-    return ListTile(
+    return Druck(
       enabled: isEarned,
-      leading: Icon(
-        !isEarned
-            ? Icons.lock_outline
-            : isSelected
-            ? Icons.check_circle
-            : Icons.circle_outlined,
-        color: !isEarned
-            ? Palette.muted
-            : isSelected
-            ? Palette.accent
-            : Palette.textDim,
-      ),
-      title: Text(
-        // Ein unverdienter Entdeckungstitel verrät nicht einmal seinen
-        // Namen -- er *ist* die Überraschung.
-        isEarned || (quelle?.isMilestone ?? false) ? title.label : '???',
-        style: TextStyle(
-          color: isEarned ? Palette.text : Palette.muted,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: ListTile(
+        enabled: isEarned,
+        leading: Icon(
+          !isEarned
+              ? Icons.lock_outline
+              : isSelected
+              ? Icons.check_circle
+              : Icons.circle_outlined,
+          color: !isEarned
+              ? Palette.muted
+              : isSelected
+              ? Palette.accent
+              : Palette.textDim,
         ),
+        title: Text(
+          // Ein unverdienter Entdeckungstitel verrät nicht einmal seinen
+          // Namen -- er *ist* die Überraschung.
+          isEarned || (quelle?.isMilestone ?? false) ? title.label : '???',
+          style: TextStyle(
+            color: isEarned ? Palette.text : Palette.muted,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        subtitle: Text(
+          _untertitel(quelle, isEarned),
+          style: const TextStyle(fontSize: 12, color: Palette.textDim),
+        ),
+        onTap: isEarned
+            ? () => Navigator.of(context).pop(TitleSelection(title.id))
+            : null,
       ),
-      subtitle: Text(
-        _untertitel(quelle, isEarned),
-        style: const TextStyle(fontSize: 12, color: Palette.textDim),
-      ),
-      onTap: isEarned
-          ? () => Navigator.of(context).pop(TitleSelection(title.id))
-          : null,
     );
   }
 

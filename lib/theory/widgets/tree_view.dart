@@ -8,6 +8,7 @@ import 'node_icon.dart';
 import 'node_state.dart';
 import 'tree_layout.dart';
 import 'tree_painter.dart';
+import '../../ui/druck.dart';
 
 /// Ein Gebiet des Skillbaums als Zeichenfläche (ADR-0026).
 ///
@@ -241,16 +242,19 @@ class _AreaArrow extends StatelessWidget {
       top: top,
       child: Opacity(
         opacity: onTap == null ? 0.25 : 1,
-        child: Material(
-          color: Palette.surface,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onTap,
-            child: SizedBox(
-              width: size,
-              height: size,
-              child: Icon(icon, size: 26, color: Palette.textDim),
+        child: Druck(
+          enabled: onTap != null,
+          child: Material(
+            color: Palette.surface,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: Icon(icon, size: 26, color: Palette.textDim),
+              ),
             ),
           ),
         ),
@@ -272,35 +276,41 @@ class _ParentStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Palette.surface,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Row(
-            children: <Widget>[
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 20,
-                color: Palette.muted,
-              ),
-              const SizedBox(width: 8),
-              Icon(iconForNode(node.iconId), size: 18, color: Palette.textDim),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Zurück zu ${node.name}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Palette.textDim,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
+    return Druck(
+      child: Material(
+        color: Palette.surface,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: Row(
+              children: <Widget>[
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20,
+                  color: Palette.muted,
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  iconForNode(node.iconId),
+                  size: 18,
+                  color: Palette.textDim,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Zurück zu ${node.name}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Palette.textDim,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

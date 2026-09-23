@@ -3,6 +3,7 @@ import 'package:gear/gear.dart';
 
 import '../../ui/palette.dart';
 import '../gear_icon.dart';
+import '../../ui/druck.dart';
 
 /// Ein Ausrüstungsstück als Kachel im Raster.
 ///
@@ -81,75 +82,77 @@ class ShopItemCell extends StatelessWidget {
       button: true,
       selected: isSelected,
       label: item.name,
-      child: Material(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
+      child: Druck(
+        child: Material(
+          color: Palette.surface,
           borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: rand, width: isSelected ? 2 : 1),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: Opacity(
-                    opacity: isOutOfReach ? outOfReachOpacity : 1,
-                    child: bild == null
-                        ? Icon(
-                            GearIcons.fallbackFor(item.slot),
-                            size: 30,
-                            color: isOwned ? Palette.muted : Palette.textDim,
-                          )
-                        : Image.asset(
-                            bild,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.none,
-                            errorBuilder: (context, error, stack) => Icon(
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: rand, width: isSelected ? 2 : 1),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Opacity(
+                      opacity: isOutOfReach ? outOfReachOpacity : 1,
+                      child: bild == null
+                          ? Icon(
                               GearIcons.fallbackFor(item.slot),
                               size: 30,
-                              color: Palette.muted,
+                              color: isOwned ? Palette.muted : Palette.textDim,
+                            )
+                          : Image.asset(
+                              bild,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.none,
+                              errorBuilder: (context, error, stack) => Icon(
+                                GearIcons.fallbackFor(item.slot),
+                                size: 30,
+                                color: Palette.muted,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    height: 1.15,
-                    fontWeight: FontWeight.bold,
-                    color: (isOwned || isOutOfReach)
-                        ? Palette.textDim
-                        : Palette.text,
+                  const SizedBox(height: 4),
+                  Text(
+                    item.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      height: 1.15,
+                      fontWeight: FontWeight.bold,
+                      color: (isOwned || isOutOfReach)
+                          ? Palette.textDim
+                          : Palette.text,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                // **Preis oder Besitz, nie beides.** Was einem gehört,
-                // hat keinen Preis mehr — es hat einen Zustand.
-                Text(
-                  _fussnote,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: isEquipped
-                        ? Palette.success
-                        : ((isOwned || isOutOfReach)
-                              ? Palette.muted
-                              : Palette.gold),
+                  const SizedBox(height: 3),
+                  // **Preis oder Besitz, nie beides.** Was einem gehört,
+                  // hat keinen Preis mehr — es hat einen Zustand.
+                  Text(
+                    _fussnote,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isEquipped
+                          ? Palette.success
+                          : ((isOwned || isOutOfReach)
+                                ? Palette.muted
+                                : Palette.gold),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

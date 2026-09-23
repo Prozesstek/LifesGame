@@ -6,6 +6,7 @@ import '../ui/palette.dart';
 import 'achievements_controller.dart';
 import 'achievements_screen.dart';
 import '../ui/holz.dart';
+import '../ui/druck.dart';
 
 /// Der Weg zu den Errungenschaften, vom Charakter aus.
 ///
@@ -23,48 +24,50 @@ class AchievementsCard extends ConsumerWidget {
     final gesamt = AchievementCatalog.all.length;
     final fame = ref.watch(fameProvider);
 
-    return HolzKarte(
-      padding: EdgeInsets.zero,
-      color: Palette.surfaceRaised,
-      child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const AchievementsScreen()),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-          child: Row(
-            children: <Widget>[
-              const Icon(
-                Icons.emoji_events_outlined,
-                size: 28,
-                color: Palette.accent,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text(
-                      'Errungenschaften',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.text,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$verdient von $gesamt · $fame Ruhm',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                  ],
+    return Druck(
+      child: HolzKarte(
+        padding: EdgeInsets.zero,
+        color: Palette.surfaceRaised,
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const AchievementsScreen()),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+            child: Row(
+              children: <Widget>[
+                const Icon(
+                  Icons.emoji_events_outlined,
+                  size: 28,
+                  color: Palette.accent,
                 ),
-              ),
-              const Icon(Icons.chevron_right, size: 22, color: Palette.muted),
-            ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'Errungenschaften',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.text,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$verdient von $gesamt · $fame Ruhm',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Palette.textDim,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, size: 22, color: Palette.muted),
+              ],
+            ),
           ),
         ),
       ),

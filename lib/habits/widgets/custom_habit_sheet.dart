@@ -4,6 +4,7 @@ import 'package:habits/habits.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Was das Formular liefert, wenn es geschlossen wird.
 ///
@@ -416,20 +417,22 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? Palette.accent : Palette.surfaceRaised,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
+    return Druck(
+      child: Material(
+        color: selected ? Palette.accent : Palette.surfaceRaised,
         borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: selected ? Palette.surface : Palette.textDim,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: selected ? Palette.surface : Palette.textDim,
+              ),
             ),
           ),
         ),

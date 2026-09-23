@@ -6,6 +6,7 @@ import '../action/pit_screen.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'ladder_controller.dart';
+import '../ui/druck.dart';
 
 /// Der Eingang zur Grube — dreissig Stufen, eine nach der anderen.
 ///
@@ -168,42 +169,44 @@ class _DailyKachel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final erledigt = daily.cleared;
-    return Material(
-      color: erledigt ? Palette.surfaceSunken : Palette.surfaceRaised,
-      borderRadius: BorderRadius.circular(6),
-      child: InkWell(
+    return Druck(
+      child: Material(
+        color: erledigt ? Palette.surfaceSunken : Palette.surfaceRaised,
         borderRadius: BorderRadius.circular(6),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => PitScreen(stage: PitStage(daily.stage)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => PitScreen(stage: PitStage(daily.stage)),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Column(
-            children: <Widget>[
-              Text(
-                '${daily.stage}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.text,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  '${daily.stage}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.text,
+                  ),
                 ),
-              ),
-              Text(
-                erledigt
-                    ? 'erledigt'
-                    : zahlt
-                    ? '+${daily.xp} · +${daily.gold}'
-                    : '—',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: erledigt ? Palette.textDim : Palette.gold,
+                Text(
+                  erledigt
+                      ? 'erledigt'
+                      : zahlt
+                      ? '+${daily.xp} · +${daily.gold}'
+                      : '—',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: erledigt ? Palette.textDim : Palette.gold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

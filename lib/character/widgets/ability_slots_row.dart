@@ -7,6 +7,7 @@ import '../../combat/move_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import '../../ui/holz.dart';
+import '../../ui/druck.dart';
 
 /// Die vier Fähigkeitsslots nebeneinander.
 ///
@@ -154,14 +155,16 @@ class AbilitySlotsRow extends StatelessWidget {
                         Navigator.of(sheetContext).pop(_Pick(ability.moveId)),
                   ),
                 if (current != null)
-                  ListTile(
-                    leading: const Icon(Icons.close, color: Palette.muted),
-                    title: const Text(
-                      'Platz räumen',
-                      style: TextStyle(color: Palette.textDim),
+                  Druck(
+                    child: ListTile(
+                      leading: const Icon(Icons.close, color: Palette.muted),
+                      title: const Text(
+                        'Platz räumen',
+                        style: TextStyle(color: Palette.textDim),
+                      ),
+                      onTap: () =>
+                          Navigator.of(sheetContext).pop(const _Pick(null)),
                     ),
-                    onTap: () =>
-                        Navigator.of(sheetContext).pop(const _Pick(null)),
                   ),
                 const SizedBox(height: 8),
               ],
@@ -204,21 +207,23 @@ class _AbilityOption extends StatelessWidget {
     final zeile = pitSummaryOf(ability.moveId);
     if (name == null || zeile == null) return const SizedBox.shrink();
 
-    return ListTile(
-      leading: _MoveBild(
-        moveId: ability.moveId,
-        side: 36,
-        fallback: const Icon(Icons.bolt, color: Palette.accent),
+    return Druck(
+      child: ListTile(
+        leading: _MoveBild(
+          moveId: ability.moveId,
+          side: 36,
+          fallback: const Icon(Icons.bolt, color: Palette.accent),
+        ),
+        title: Text(name, style: const TextStyle(color: Palette.text)),
+        subtitle: Text(
+          isElsewhere ? '$zeile · liegt auf einem anderen Platz' : zeile,
+          style: TextStyle(color: isElsewhere ? Palette.gold : Palette.textDim),
+        ),
+        trailing: isChosen
+            ? const Icon(Icons.check, color: Palette.accent)
+            : null,
+        onTap: onTap,
       ),
-      title: Text(name, style: const TextStyle(color: Palette.text)),
-      subtitle: Text(
-        isElsewhere ? '$zeile · liegt auf einem anderen Platz' : zeile,
-        style: TextStyle(color: isElsewhere ? Palette.gold : Palette.textDim),
-      ),
-      trailing: isChosen
-          ? const Icon(Icons.check, color: Palette.accent)
-          : null,
-      onTap: onTap,
     );
   }
 }
@@ -288,42 +293,49 @@ class _Slot extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: _semantics,
-      child: Material(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
+      child: Druck(
+        enabled: onTap != null,
+        child: Material(
+          color: Palette.surface,
           borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: move == null ? Palette.background : Palette.accent,
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (isOpen && belegt != null)
-                  _MoveBild(moveId: belegt, side: _bildSeite, fallback: zeichen)
-                else
-                  SizedBox.square(
-                    dimension: _bildSeite,
-                    child: Center(child: zeichen),
-                  ),
-                const SizedBox(height: 6),
-                Text(
-                  _caption,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: move == null ? Palette.muted : Palette.text,
-                  ),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: move == null ? Palette.background : Palette.accent,
                 ),
-              ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (isOpen && belegt != null)
+                    _MoveBild(
+                      moveId: belegt,
+                      side: _bildSeite,
+                      fallback: zeichen,
+                    )
+                  else
+                    SizedBox.square(
+                      dimension: _bildSeite,
+                      child: Center(child: zeichen),
+                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _caption,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: move == null ? Palette.muted : Palette.text,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

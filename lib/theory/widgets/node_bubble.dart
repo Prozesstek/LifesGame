@@ -5,6 +5,7 @@ import '../../ui/palette.dart';
 import 'node_icon.dart';
 import 'node_state.dart';
 import 'tree_layout.dart';
+import '../../ui/druck.dart';
 
 /// Ein Knoten im gezeichneten Baum: ein Kreis mit Symbol.
 ///
@@ -61,51 +62,53 @@ class NodeBubble extends StatelessWidget {
       child: Semantics(
         button: true,
         label: '${node.name}, ${_stateLabel()}',
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  width: radius * 2,
-                  height: radius * 2,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: gefuellt
-                        ? color.withValues(alpha: 0.9)
-                        : Palette.surface,
-                    border: Border.all(
-                      color: color.withValues(alpha: gefuellt ? 1 : 0.65),
-                      width: _isFocus || node.isRoot ? 2.5 : 1.8,
+        child: Druck(
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    width: radius * 2,
+                    height: radius * 2,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: gefuellt
+                          ? color.withValues(alpha: 0.9)
+                          : Palette.surface,
+                      border: Border.all(
+                        color: color.withValues(alpha: gefuellt ? 1 : 0.65),
+                        width: _isFocus || node.isRoot ? 2.5 : 1.8,
+                      ),
+                    ),
+                    child: Icon(
+                      iconForNode(node.iconId),
+                      size: _isFocus ? 32 : (node.isRoot ? 26 : 22),
+                      color: gefuellt ? Palette.background : color,
                     ),
                   ),
-                  child: Icon(
-                    iconForNode(node.iconId),
-                    size: _isFocus ? 32 : (node.isRoot ? 26 : 22),
-                    color: gefuellt ? Palette.background : color,
+                  const SizedBox(height: 5),
+                  Text(
+                    node.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: _isFocus ? 12 : 10,
+                      height: 1.2,
+                      color: _isDim()
+                          ? Palette.textOnDarkDim
+                          : Palette.textOnDark,
+                      fontWeight: _isFocus || node.isRoot
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  node.name,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: _isFocus ? 12 : 10,
-                    height: 1.2,
-                    color: _isDim()
-                        ? Palette.textOnDarkDim
-                        : Palette.textOnDark,
-                    fontWeight: _isFocus || node.isRoot
-                        ? FontWeight.w700
-                        : FontWeight.w500,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
