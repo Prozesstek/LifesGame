@@ -61,10 +61,11 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 169 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 182 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
+| `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 90 Tests | nur Dart-SDK |
@@ -173,7 +174,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 439 Tests
+flutter test             # 441 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -186,7 +187,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 169 Tests
+dart test                              # 182 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -362,12 +363,20 @@ Regeln stehen an je einer Stelle:
 | Frage | Antwortet |
 |---|---|
 | Läuft die Kette über diese Lücke? | `HabitTracker._continues` — die einzige Stelle; `streakEndingAt`, `longestStreak` und `totalXp` fragen dort |
-| Wie viele Eis hat jemand? | `StreakFreeze.lifetimeStock` minus die Historie der gedeckten Tage |
+| Wie viele Eis hat jemand? | `StreakFreeze.lifetimeStock` plus die Eis aus geöffneten Truhen, minus die Historie der gedeckten Tage |
 | Welcher Tag lässt sich noch retten? | `HabitTracker.rescuableDay` — immer nur gestern, und nur wenn dort eine Kette endet |
 
-Die Quelle der Eis ist **noch nicht entschieden** (Issue #46): Es gibt
-eines über das ganze Spiel. Wer sie entscheidet, ändert
-`StreakFreeze.lifetimeStock` und nichts in `lib/`.
+**Die Quelle der Eis ist die Tagestruhe** ([ADR-0044](docs/decisions/0044-tagestruhe.md),
+Issue #46). Wer heute jede laufende Gewohnheit erledigt, öffnet eine
+Truhe, deren Inhalt **aus dem Datum gewürfelt** ist (`DailyChest.forDay`):
+meist ein paar Münzen, manchmal mehr, gut jede zwölfte ein Streak-Eis,
+selten ein Schatz. Die Stufen und ihr Gewicht stehen als `ChestTier` in
+`rewards.dart`. Gespeichert wird nur, **an welchen Tagen** geöffnet wurde
+(`openedChests`), Gold und Eis werden daraus gerechnet. Das Gold steckt
+in `HabitTracker.totalGold` und läuft damit ohne weitere Stelle in den
+Goldstand. Im Mittel sind es rund 11 Gold am Tag, knapp die Hälfte der 25,
+auf die der Laden ausgelegt ist: Wer an den Gewichten dreht, lässt
+`daily_chest_test.dart` laufen.
 
 Der Grad ist gemessen, nicht geschätzt: Fünf „schwere" eigene
 Gewohnheiten erreichen Level 50 in 188 Tagen statt in 240. Wer an

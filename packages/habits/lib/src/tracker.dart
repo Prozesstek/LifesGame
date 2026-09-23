@@ -1,5 +1,6 @@
 import 'catalog.dart';
 import 'character_stats.dart';
+import 'daily_chest.dart';
 import 'daily_form.dart';
 import 'day.dart';
 import 'habit.dart';
@@ -75,18 +76,21 @@ class HabitTracker {
     Map<String, Map<Day, int>> progress = const <String, Map<Day, int>>{},
     List<CustomHabit> custom = const <CustomHabit>[],
     Set<Day> frozenDays = const <Day>{},
+    Set<Day> openedChests = const <Day>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
         _custom = List<CustomHabit>.unmodifiable(custom),
-        _frozenDays = Set<Day>.unmodifiable(frozenDays);
+        _frozenDays = Set<Day>.unmodifiable(frozenDays),
+        _openedChests = Set<Day>.unmodifiable(openedChests);
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
         _checks = const <String, Set<Day>>{},
         _progress = const <String, Map<Day, int>>{},
         _custom = const <CustomHabit>[],
-        _frozenDays = const <Day>{};
+        _frozenDays = const <Day>{},
+        _openedChests = const <Day>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -185,6 +189,16 @@ class HabitTracker {
       }
     }
 
+    final truhen = <Day>{};
+    final rawChests = json['chests'];
+    if (rawChests is List) {
+      for (final entry in rawChests) {
+        if (entry is! String) continue;
+        final day = Day.tryParse(entry);
+        if (day != null) truhen.add(day);
+      }
+    }
+
     // Die Obergrenze wird beim Laden erzwungen, nicht nur beim Anlegen:
     // Ein Stand aus einer Version mit anderer Grenze darf sie nicht
     // unterlaufen.
@@ -198,6 +212,7 @@ class HabitTracker {
       progress: progress,
       custom: custom,
       frozenDays: frozen,
+      openedChests: truhen,
     );
   }
 
@@ -225,6 +240,12 @@ class HabitTracker {
   /// gerechnet ([freezesLeft]); ein gespeicherter Bestand könnte von der
   /// Historie abweichen, eine Historie *ist* der Bestand.
   final Set<Day> _frozenDays;
+
+  /// Die Tage, an denen die Tagestruhe geöffnet wurde (ADR-0044).
+  ///
+  /// Wieder eine **Historie**: Der Inhalt eines Tages steht über
+  /// [DailyChest.forDay] fest, Gold und Eis werden daraus gerechnet.
+  final Set<Day> _openedChests;
 
   /// Der Stand als JSON.
   ///
@@ -256,6 +277,10 @@ class HabitTracker {
       if (_frozenDays.isNotEmpty)
         'frozen': <Object?>[
           for (final day in _frozenDays.toList()..sort()) day.toString(),
+        ],
+      if (_openedChests.isNotEmpty)
+        'chests': <Object?>[
+          for (final day in _openedChests.toList()..sort()) day.toString(),
         ],
     };
   }
@@ -626,6 +651,7 @@ class HabitTracker {
     Map<String, Map<Day, int>>? progress,
     List<CustomHabit>? custom,
     Set<Day>? frozenDays,
+    Set<Day>? openedChests,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -633,6 +659,7 @@ class HabitTracker {
       progress: progress ?? _progress,
       custom: custom ?? _custom,
       frozenDays: frozenDays ?? _frozenDays,
+      openedChests: openedChests ?? _openedChests,
     );
   }
 
@@ -708,6 +735,40 @@ class HabitTracker {
     return true;
   }
 
+  // --- Tagestruhe (ADR-0044) ---
+
+  /// Die Tage, an denen die Truhe geöffnet wurde.
+  Set<Day> get openedChests => _openedChests;
+
+  bool hasOpenedChest(Day day) => _openedChests.contains(day);
+
+  /// Ob sich die Truhe von [day] öffnen lässt: jede laufende Gewohnheit
+  /// erledigt, und noch nicht geöffnet. Nach welchem Tag gefragt wird,
+  /// entscheidet der Aufrufer — die Oberfläche fragt nur nach heute.
+  bool canOpenChest(Day day) => isDayComplete(day) && !hasOpenedChest(day);
+
+  /// Öffnet die Truhe von [day]. Ohne [canOpenChest] unverändert und ohne
+  /// Inhalt.
+  ({HabitTracker tracker, ChestContent? content}) openChest(Day day) {
+    if (!canOpenChest(day)) return (tracker: this, content: null);
+    return (
+      tracker: _copyWith(openedChests: <Day>{..._openedChests, day}),
+      content: DailyChest.forDay(day),
+    );
+  }
+
+  /// Gold aus allen geöffneten Truhen.
+  int get chestGold => _openedChests.fold(
+        0,
+        (sum, day) => sum + DailyChest.forDay(day).gold,
+      );
+
+  /// Streak-Eis aus allen geöffneten Truhen.
+  int get chestFreezes => _openedChests.fold(
+        0,
+        (sum, day) => sum + DailyChest.forDay(day).freezes,
+      );
+
   // --- Streak-Eis (Issue #46) ---
 
   /// Die Tage, die mit einem Streak-Eis gedeckt sind.
@@ -719,7 +780,8 @@ class HabitTracker {
   int get usedFreezes => _frozenDays.length;
 
   /// Wie viele noch da sind. Gerechnet, nicht gespeichert.
-  int get freezesLeft => StreakFreeze.remaining(usedFreezes);
+  int get freezesLeft =>
+      StreakFreeze.remaining(usedFreezes, earned: chestFreezes);
 
   /// Ob sich [day] decken lässt.
   ///
@@ -876,7 +938,8 @@ class HabitTracker {
     return sum;
   }
 
-  int get totalGold => totalChecks * HabitRewards.goldPerCheck;
+  /// Gold aus Häkchen **und** aus geöffneten Tagestruhen.
+  int get totalGold => totalChecks * HabitRewards.goldPerCheck + chestGold;
 
   int get totalChecks {
     return _checks.values.fold(0, (sum, days) => sum + days.length);

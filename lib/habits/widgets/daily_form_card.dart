@@ -29,8 +29,8 @@ class DailyFormCard extends StatelessWidget {
     final darunter = form.isInForm
         ? 'Alles erledigt. So gehst du heute in die Grube.'
         : open == 1
-        ? 'Noch eine bis „In Form": $alle auf alles.'
-        : 'Noch $open bis „In Form": $alle auf alles.';
+        ? 'Noch eine bis „In Form" — $alle auf alles und die Tagestruhe.'
+        : 'Noch $open bis „In Form" — $alle auf alles und die Tagestruhe.';
 
     return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),

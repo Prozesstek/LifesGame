@@ -76,6 +76,16 @@ class HabitsController extends Notifier<HabitTracker> {
     return result;
   }
 
+  /// Öffnet die Tagestruhe von [day] (ADR-0044). Null, wenn sie nicht
+  /// offen steht — nicht alles erledigt, oder schon geöffnet.
+  ChestContent? openChest(Day day) {
+    final result = state.openChest(day);
+    final inhalt = result.content;
+    if (inhalt == null) return null;
+    state = result.tracker;
+    return inhalt;
+  }
+
   /// Deckt einen verpassten Tag mit einem Streak-Eis ab.
   ///
   /// Gibt false zurück, wenn es nichts zu decken gibt oder der Vorrat

@@ -15,6 +15,7 @@ import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'habits_controller.dart';
 import 'widgets/custom_habit_sheet.dart';
+import 'widgets/daily_chest_card.dart';
 import 'widgets/daily_form_card.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
@@ -94,6 +95,17 @@ class HabitsScreen extends ConsumerWidget {
                         DailyFormCard(
                           form: ref.watch(dailyFormProvider),
                           open: active.length - tracker.completedOn(today),
+                        ),
+                      ],
+                      if (tracker.canOpenChest(today) ||
+                          tracker.hasOpenedChest(today)) ...<Widget>[
+                        const SizedBox(height: 12),
+                        DailyChestCard(
+                          canOpen: tracker.canOpenChest(today),
+                          opened: tracker.hasOpenedChest(today)
+                              ? DailyChest.forDay(today)
+                              : null,
+                          onOpen: () => _openChest(context, ref),
                         ),
                       ],
                       const SizedBox(height: 24),
@@ -291,6 +303,23 @@ class HabitsScreen extends ConsumerWidget {
         await showAbilityUnlocks(context, ref, before: vorher);
       }());
     });
+  }
+
+  /// Öffnet die Tagestruhe — der seltene Moment, der laut sein darf.
+  void _openChest(BuildContext context, WidgetRef ref) {
+    final today = ref.read(todayProvider);
+    final inhalt = ref.read(habitTrackerProvider.notifier).openChest(today);
+    if (inhalt == null) return;
+
+    unawaited(HapticFeedback.heavyImpact());
+    ref
+        .read(soundPlayerProvider)
+        .play(
+          inhalt.tier == ChestTier.schlicht
+              ? SoundEffect.sieg
+              : SoundEffect.errungenschaft,
+        );
+    unawaited(showChestReveal(context, inhalt));
   }
 
   /// Setzt ein Streak-Eis auf [tag].

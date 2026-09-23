@@ -1,3 +1,5 @@
+import 'rewards.dart';
+
 /// Das **Streak-Eis**: ein Tag darf ausfallen, ohne dass die Kette reißt.
 ///
 /// Es ist ein Gegenstand, kein Nachlass. Der Unterschied ist wichtig: Eine
@@ -26,27 +28,23 @@ abstract final class StreakFreeze {
       'Deckt einen verpassten Tag ab. Die Kette läuft weiter, wird aber '
       'nicht länger — Erfahrung gibt es nur für echte Häkchen.';
 
-  /// Wie viele Eis jemand über das ganze Spiel bekommt.
+  /// Wie viele Eis jemand zum Start bekommt.
   ///
-  /// **Das ist die eine Zahl, die noch offen ist.** Issue #46 fragt nach
-  /// dem Gegenstand, nicht nach seiner Quelle („wir überlegen dann, woher
-  /// man den bekommt"). Solange das nicht entschieden ist, gibt es einen
-  /// zum Start — genug, damit der Gegenstand im 30-Tage-Lauf überhaupt
-  /// vorkommt, zu wenig, um eine Kette beliebig zu machen.
-  ///
-  /// Kommt später eine echte Quelle dazu (Laden, Errungenschaft,
-  /// Meilenstein), gehört sie **hierher** und nicht in die Oberfläche:
-  /// Wie viele Eis jemand hat, ist eine Regel der Gewohnheiten.
+  /// **Die Quelle danach ist die Tagestruhe** (ADR-0044, Issue #46): Eine
+  /// von gut zwölf Truhen enthält eines ([ChestTier.eis]). Der eine zum
+  /// Start bleibt, damit der Gegenstand vorkommt, bevor die erste
+  /// Eis-Truhe fällt.
   static const int lifetimeStock = 1;
 
-  /// Wie viele Eis noch übrig sind, wenn [used] schon verbraucht wurden.
+  /// Wie viele Eis noch übrig sind, wenn [used] schon verbraucht und
+  /// [earned] aus Truhen dazugekommen sind.
   ///
   /// Abgeleitet statt gezählt — dieselbe Bauform wie Erfahrung und Gold
   /// (ADR-0008). Gespeichert wird die **Historie** der gedeckten Tage;
   /// der Vorrat ergibt sich daraus. Ein gespeicherter Bestand könnte von
   /// der Historie abweichen, eine Historie *ist* der Bestand.
-  static int remaining(int used) {
-    final left = lifetimeStock - (used < 0 ? 0 : used);
+  static int remaining(int used, {int earned = 0}) {
+    final left = lifetimeStock + earned - (used < 0 ? 0 : used);
     return left < 0 ? 0 : left;
   }
 }

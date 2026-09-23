@@ -11,6 +11,30 @@
 
 ---
 
+## Sitzung 23.09.2026, ganz am Ende: die Tagestruhe
+
+[ADR-0044](../decisions/0044-tagestruhe.md), der zweite Punkt aus der
+Durchsicht. **Issue #46 ist damit entschieden:** Das Streak-Eis kommt aus
+der Truhe.
+
+| Stufe | Gewicht | Inhalt |
+|---|---|---|
+| Schlicht | 70 | 5 bis 10 Gold |
+| Gut gefüllt | 20 | 15 bis 25 Gold |
+| Streak-Eis | 8 | ein Eis und 5 Gold |
+| Schatz | 2 | 60 Gold |
+
+Die Truhe erscheint, sobald heute jede laufende Gewohnheit erledigt ist,
+mit „Öffnen". Beim Öffnen springt sie auf, der Inhalt steigt herein, der
+Klang ist bei allem über „schlicht" der Errungenschaftsklang. Danach
+bleibt eine schmale Karte „Tagestruhe: +18 Gold". Vorher nennt die
+Tagesform-Karte sie als Ziel („… und die Tagestruhe").
+
+Aus dem Datum gewürfelt, für beide gleich, gespeichert wird nur der Tag
+des Öffnens. Im Mittel rund 11 Gold am Tag. `progression_test.dart`
+rechnet die Truhe nicht mit. Bild: Raven fc6. habits 182, App 441.
+**Nicht angesehen.** Issue #46 auf GitHub ist noch nicht kommentiert.
+
 ## Sitzung 23.09.2026, zum Schluss: die Tagesform
 
 [ADR-0043](../decisions/0043-tagesform.md), nach einer kritischen
@@ -29,11 +53,10 @@ erhöhen", zusammen mit dem Vorschlag eines Tagesbonus.
 habits 169, action_combat 186, App 439. `pit_sim` unverändert: Sein Bot
 geht ohne Häkchen des Tages hinein. **Nicht angesehen.**
 
-Aus derselben Durchsicht **noch offen**: die Tagestruhe für „alles
-erledigt" mit variablem Inhalt (sie würde auch Issue #46 entscheiden,
-also woher das Streak-Eis kommt), mehr Wucht beim Häkchen (Zahlen, die in
-den Balken fliegen, ein Klang für einen Stat-Punkt) und eine teilbare
-Wochenkarte für den Vergleich zu zweit.
+Aus derselben Durchsicht **noch offen**: mehr Wucht beim Häkchen
+(Zahlen, die in den Balken fliegen, ein Klang für einen Stat-Punkt) und
+eine teilbare Wochenkarte für den Vergleich zu zweit. Die Tagestruhe ist
+gleich danach gebaut, siehe oben.
 
 ## Sitzung 23.09.2026, ganz zuletzt: jeder Knopf gibt nach
 

@@ -212,3 +212,36 @@ abstract final class StatCurve {
     return rule.checksPerPoint - done % rule.checksPerPoint;
   }
 }
+
+/// Was in einer **Tagestruhe** liegen kann (ADR-0044), samt Gewicht.
+///
+/// Die Truhe ist die eine Stelle im Spiel, deren Ertrag man nicht vorher
+/// kennt: meistens wenig, manchmal viel. Das Gewicht ist relativ, die
+/// Summe muss nicht 100 sein.
+///
+/// **Im Mittel rund 11 Gold am Tag** — knapp die Hälfte der 25, auf die
+/// der Laden ausgelegt ist (`packages/gear`). Wer daran dreht, lässt
+/// `daily_chest_test.dart` laufen; dort steht die Spanne als Test.
+enum ChestTier {
+  schlicht('Schlicht', weight: 70, goldMin: 5, goldMax: 10),
+  gut('Gut gefüllt', weight: 20, goldMin: 15, goldMax: 25),
+
+  /// **Die Quelle des Streak-Eises** (Issue #46): gut zwei im Monat für
+  /// jemanden, der jeden Tag alles erledigt.
+  eis('Streak-Eis', weight: 8, goldMin: 5, goldMax: 5, freezes: 1),
+  schatz('Schatz', weight: 2, goldMin: 60, goldMax: 60);
+
+  const ChestTier(
+    this.label, {
+    required this.weight,
+    required this.goldMin,
+    required this.goldMax,
+    this.freezes = 0,
+  });
+
+  final String label;
+  final int weight;
+  final int goldMin;
+  final int goldMax;
+  final int freezes;
+}

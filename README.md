@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 439 Tests
+flutter test                       # 441 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
@@ -46,7 +46,7 @@ dart test                          # 186 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
-dart test                          # 169 Tests
+dart test                          # 182 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear
@@ -84,13 +84,13 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/action_combat` | die Grube: 30 Stufen, 5 Gegnerarten, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 186 |
 | `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 136 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte, Machtkurve | 36 |
-| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 169 |
+| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 182 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Preise, Verkauf | 90 |
 | `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 36 |
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |
 | `packages/achievements` | 19 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 439 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 441 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl
