@@ -121,7 +121,14 @@ void main() {
 
     // Eine einzige laufende Gewohnheit: Das Häkchen macht zugleich „In
     // Form", und das ist die grössere Nachricht.
-    expect(find.textContaining('In Form!'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.textContaining('In Form!'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('In Form!'), findsOneWidget, reason: 'aufsteigend');
     expect(find.text('In Form'), findsOneWidget);
   });
 }

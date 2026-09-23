@@ -7,6 +7,7 @@ import '../dev/dev_screen.dart';
 import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
+import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
@@ -36,6 +37,12 @@ class HomeScreen extends ConsumerWidget {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
 
+    final tracker = ref.watch(habitTrackerProvider);
+    final heute = HubProgress(
+      done: tracker.completedOn(ref.watch(todayProvider)),
+      total: tracker.activeIds.length,
+    );
+
     final combatOpen = ref.watch(combatUnlockedProvider);
     final combatBlock = ref.watch(combatBlockReasonProvider);
 
@@ -55,6 +62,7 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.check_circle_outline,
                         label: 'Gewohnheiten',
                         image: HubCircleImage.plain,
+                        progress: heute,
                         onTap: () => _open(context, const HabitsScreen()),
                       ),
                       HubCircle(

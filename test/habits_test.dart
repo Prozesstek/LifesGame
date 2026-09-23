@@ -611,7 +611,16 @@ void main() {
       await tester.tap(find.text('Liegestütze'));
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.textContaining('+1 Stärke'), findsOneWidget);
+      // Zweimal: in der Leiste unten und als aufsteigende Zahl dort, wo
+      // getippt wurde.
+      expect(
+        find.descendant(
+          of: find.byType(SnackBar),
+          matching: find.textContaining('+1 Stärke'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('+1 Stärke'), findsOneWidget, reason: 'aufsteigend');
     });
 
     testWidgets('der Balken eines Werts füllt sich mit jedem Häkchen', (

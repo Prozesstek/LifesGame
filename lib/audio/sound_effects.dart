@@ -12,6 +12,11 @@ enum SoundEffect {
   /// der kürzeste Klang.
   haekchen('Sound/Success.mp3'),
 
+  /// Ein Häkchen hat einen ganzen Charakterpunkt gebracht. Seltener als
+  /// ein Häkchen, deshalb ein grösserer Klang. **Vorerst dieselbe Datei
+  /// wie die Lektion** — es gibt keine weitere; tauschen ist diese Zeile.
+  statPunkt('Sound/Win.mp3'),
+
   /// Eine Lektion ist bestanden.
   lektion('Sound/Win.mp3'),
 

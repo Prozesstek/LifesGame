@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
@@ -30,14 +32,65 @@ class StatSummary extends StatelessWidget {
   }
 }
 
-class _StatCell extends StatelessWidget {
+class _StatCell extends StatefulWidget {
   const _StatCell({required this.stats, required this.stat});
 
   final CharacterStats stats;
   final HabitStat stat;
 
   @override
+  State<_StatCell> createState() => _StatCellState();
+}
+
+/// **Die Kachel antwortet auf das Häkchen.** Zahlt eines auf diesen Wert
+/// ein, pulst sie kurz; fällt dabei ein ganzer Punkt, springt sie
+/// deutlicher und ihr Rand leuchtet grün. Beides endet von selbst.
+///
+/// Ein Controller statt eines neu verschlüsselten Tweens: So bleibt der
+/// Baum darunter derselbe, und der Balken läuft von seinem alten Stand
+/// weiter statt bei jedem Puls von null.
+class _StatCellState extends State<_StatCell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _puls = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 650),
+  );
+  bool _punkt = false;
+
+  @override
+  void didUpdateWidget(_StatCell old) {
+    super.didUpdateWidget(old);
+    final stat = widget.stat;
+    if (widget.stats.checksFor(stat) <= old.stats.checksFor(stat)) return;
+    _punkt = widget.stats.valueFor(stat) > old.stats.valueFor(stat);
+    _puls.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _puls.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _puls,
+      builder: (context, _) {
+        final laeuft = _puls.isAnimating;
+        final bogen = laeuft ? math.sin(math.pi * _puls.value) : 0.0;
+        final weite = _punkt ? 0.14 : 0.06;
+        final rand = _punkt
+            ? Color.lerp(Holz.kante, Palette.success, bogen) ?? Holz.kante
+            : Holz.kante;
+        return Transform.scale(scale: 1 + weite * bogen, child: _inhalt(rand));
+      },
+    );
+  }
+
+  Widget _inhalt(Color rand) {
+    final stats = widget.stats;
+    final stat = widget.stat;
     final bonus = stats.bonusFor(stat);
     final remaining = stats.checksToNextPoint(stat);
 
@@ -45,6 +98,7 @@ class _StatCell extends StatelessWidget {
       label: '${stat.label} ${stats.valueFor(stat)}, ${stat.combatLabel}',
       child: HolzKarte(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        edgeColor: rand,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

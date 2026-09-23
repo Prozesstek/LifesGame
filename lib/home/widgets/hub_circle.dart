@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
@@ -30,8 +32,17 @@ class HubCircle extends StatelessWidget {
     required this.onTap,
     this.lockedReason,
     this.image,
+    this.progress,
     super.key,
   });
+
+  /// Der Tagesfortschritt als Ring um den Kreis — oder `null` für keinen.
+  ///
+  /// **Das Häkchen soll auf der Startseite ankommen.** Wer abhakt und
+  /// zurückgeht, sieht den Ring um den Gewohnheiten-Kreis wachsen, und ein
+  /// voller Tag leuchtet golden. Ohne ihn war der Startbildschirm vor und
+  /// nach dem Abhaken derselbe.
+  final HubProgress? progress;
 
   final IconData icon;
 
@@ -64,6 +75,9 @@ class HubCircle extends StatelessWidget {
   /// Pixeln Breite nebeneinander, und 72 liegt über den 48 Pixeln, die
   /// eine Tippfläche mindestens braucht.
   static const double diameter = 72;
+
+  /// Wie weit der Fortschrittsring aussen um den Kreis liegt.
+  static const double _ringAbstand = 5;
 
   /// Wie stark eine gesperrte Fläche verblasst.
   ///
@@ -123,6 +137,16 @@ class HubCircle extends StatelessWidget {
                           ),
                         ),
                       ),
+                    if (progress case final p? when p.total > 0) ...<Widget>[
+                      Positioned(
+                        left: -_ringAbstand,
+                        top: -_ringAbstand,
+                        right: -_ringAbstand,
+                        bottom: -_ringAbstand,
+                        child: IgnorePointer(child: _Ring(progress: p)),
+                      ),
+                      Positioned(right: -6, bottom: -4, child: _Marke(p)),
+                    ],
                     if (isLocked)
                       Positioned(
                         right: -2,
@@ -174,6 +198,112 @@ class HubCircle extends StatelessWidget {
       ..showSnackBar(
         SnackBar(content: Text(grund), duration: const Duration(seconds: 4)),
       );
+  }
+}
+
+/// Wie weit ein Bereich heute ist — „3 von 5".
+class HubProgress {
+  const HubProgress({required this.done, required this.total});
+
+  final int done;
+  final int total;
+
+  bool get isComplete => total > 0 && done >= total;
+
+  double get fraction => total <= 0 ? 0 : (done / total).clamp(0.0, 1.0);
+}
+
+/// Der Ring selbst: läuft beim Wachsen nach, voll ist er golden.
+class _Ring extends StatelessWidget {
+  const _Ring({required this.progress});
+
+  final HubProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: progress.fraction),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      builder: (context, anteil, _) => CustomPaint(
+        painter: _RingPainter(
+          anteil: anteil,
+          farbe: progress.isComplete
+              ? Palette.goldOnDark
+              : Palette.accentOnDark,
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  const _RingPainter({required this.anteil, required this.farbe});
+
+  final double anteil;
+  final Color farbe;
+
+  static const double _breite = 4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).deflate(_breite / 2);
+    canvas.drawArc(
+      rect,
+      0,
+      2 * math.pi,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _breite
+        ..color = Palette.backgroundRaised,
+    );
+    if (anteil <= 0) return;
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      2 * math.pi * anteil,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _breite
+        ..strokeCap = StrokeCap.round
+        ..color = farbe,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) =>
+      old.anteil != anteil || old.farbe != farbe;
+}
+
+/// „3/5" unten rechts, voll ein Häkchen.
+class _Marke extends StatelessWidget {
+  const _Marke(this.progress);
+
+  final HubProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final voll = progress.isComplete;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: voll ? Palette.goldOnDark : Palette.background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Palette.accentOnDark),
+      ),
+      child: voll
+          ? const Icon(Icons.check, size: 12, color: Palette.background)
+          : Text(
+              '${progress.done}/${progress.total}',
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Palette.textOnDark,
+              ),
+            ),
+    );
   }
 }
 

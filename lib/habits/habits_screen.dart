@@ -22,6 +22,7 @@ import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/streak_ladder_card.dart';
+import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
 
@@ -68,129 +69,139 @@ class HabitsScreen extends ConsumerWidget {
               listeVoll: tracker.isFull,
               onCreate: () => _createCustom(context, ref),
             ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: unlocked.isEmpty
-                ? const _NothingUnlockedYet()
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-                    children: <Widget>[
-                      StatSummary(stats: stats),
-                      const SizedBox(height: 12),
-                      if (zuRetten != null) ...<Widget>[
-                        StreakFreezeCard(
-                          streakAtRisk: tracker.currentBestStreak(zuRetten),
-                          freezesLeft: tracker.freezesLeft,
-                          onUse: () => _useFreeze(context, ref, zuRetten),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      StreakLadderCard(
-                        bestStreak: tracker.currentBestStreak(today),
-                      ),
-                      if (active.isNotEmpty) ...<Widget>[
-                        const SizedBox(height: 12),
-                        DailyFormCard(
-                          form: ref.watch(dailyFormProvider),
-                          open: active.length - tracker.completedOn(today),
-                        ),
-                      ],
-                      if (tracker.canOpenChest(today) ||
-                          tracker.hasOpenedChest(today)) ...<Widget>[
-                        const SizedBox(height: 12),
-                        DailyChestCard(
-                          canOpen: tracker.canOpenChest(today),
-                          opened: tracker.hasOpenedChest(today)
-                              ? DailyChest.forDay(today)
-                              : null,
-                          onOpen: () => _openChest(context, ref),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      _SectionHeader(
-                        title: 'Heute',
-                        trailing:
-                            '${tracker.completedOn(today)} / ${active.length}',
-                      ),
-                      const SizedBox(height: 10),
-                      if (active.isEmpty)
-                        const _Hint(
-                          'Noch nichts gewählt. Unten stehen die Vorlagen, '
-                          'die der Skillbaum freigeschaltet hat.',
-                        )
-                      else
-                        // Offene oben, erledigte unten (`dailyListOn`).
-                        // Der Schlüssel hält den Sprung des Häkchens an
-                        // der Gewohnheit, wenn die Kachel die Reihe wechselt.
-                        for (final habit in active) ...<Widget>[
-                          HabitCheckTile(
-                            key: ValueKey<String>(habit.id),
-                            habit: habit,
-                            isChecked: tracker.isChecked(habit.id, today),
-                            streak: tracker.currentStreak(habit.id, today),
-                            nextMultiplier: tracker.nextMultiplier(
-                              habit.id,
-                              today,
+      body: AufstiegHost(
+        // Ein Kontext **unter** dem Host: Die Rückrufe der Kacheln lassen
+        // darüber Zahlen aufsteigen (`AufstiegHost.maybeOf`).
+        child: Builder(
+          builder: (context) => SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxWidth),
+                child: unlocked.isEmpty
+                    ? const _NothingUnlockedYet()
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                        children: <Widget>[
+                          StatSummary(stats: stats),
+                          const SizedBox(height: 12),
+                          if (zuRetten != null) ...<Widget>[
+                            StreakFreezeCard(
+                              streakAtRisk: tracker.currentBestStreak(zuRetten),
+                              freezesLeft: tracker.freezesLeft,
+                              onUse: () => _useFreeze(context, ref, zuRetten),
                             ),
-                            xpGain: tracker.xpForNextCheck(habit.id, today),
-                            goldGain: tracker.goldForNextCheck(habit.id, today),
-                            progress: tracker.progressOn(habit.id, today),
-                            onToggle: () => _toggle(context, ref, habit),
-                            onAdvance: () => _advance(context, ref, habit),
-                            onStop: () => ref
-                                .read(habitTrackerProvider.notifier)
-                                .deactivate(habit.id),
+                            const SizedBox(height: 12),
+                          ],
+                          StreakLadderCard(
+                            bestStreak: tracker.currentBestStreak(today),
                           ),
-                          const SizedBox(height: 8),
-                        ],
-                      const SizedBox(height: 18),
-                      _SectionHeader(
-                        title: 'Eigene',
-                        trailing: '${tracker.customCount} / $slots',
-                      ),
-                      const SizedBox(height: 10),
-                      if (ruhendeEigene.isEmpty)
-                        const _Hint(
-                          'Noch keine eigene angelegt. Der Knopf unten '
-                          'rechts fragt nach Name, Wert und Tagesziel.',
-                        ),
-                      for (final habit in ruhendeEigene) ...<Widget>[
-                        _RestingCustomTile(
-                          habit: habit,
-                          canActivate: tracker.canActivate(habit.id),
-                          onActivate: () => ref
-                              .read(habitTrackerProvider.notifier)
-                              .activate(habit.id),
-                        ),
-                      ],
-                      const SizedBox(height: 18),
-                      _SectionHeader(
-                        title: 'Vorlagen',
-                        trailing:
-                            '${tracker.activeIds.length} / '
-                            '${HabitRewards.maxActiveHabits}',
-                      ),
-                      const SizedBox(height: 10),
-                      if (availableTemplates.isEmpty)
-                        const _Hint(
-                          'Alle freigeschalteten Vorlagen laufen bereits. '
-                          'Weitere kommen aus dem Skillbaum.',
-                        )
-                      else
-                        for (final template in availableTemplates) ...<Widget>[
-                          HabitTemplateTile(
-                            template: template,
-                            canActivate: tracker.canActivate(template.id),
-                            onActivate: () => ref
-                                .read(habitTrackerProvider.notifier)
-                                .activate(template.id),
+                          if (active.isNotEmpty) ...<Widget>[
+                            const SizedBox(height: 12),
+                            DailyFormCard(
+                              form: ref.watch(dailyFormProvider),
+                              open: active.length - tracker.completedOn(today),
+                            ),
+                          ],
+                          if (tracker.canOpenChest(today) ||
+                              tracker.hasOpenedChest(today)) ...<Widget>[
+                            const SizedBox(height: 12),
+                            DailyChestCard(
+                              canOpen: tracker.canOpenChest(today),
+                              opened: tracker.hasOpenedChest(today)
+                                  ? DailyChest.forDay(today)
+                                  : null,
+                              onOpen: () => _openChest(context, ref),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          _SectionHeader(
+                            title: 'Heute',
+                            trailing:
+                                '${tracker.completedOn(today)} / ${active.length}',
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
+                          if (active.isEmpty)
+                            const _Hint(
+                              'Noch nichts gewählt. Unten stehen die Vorlagen, '
+                              'die der Skillbaum freigeschaltet hat.',
+                            )
+                          else
+                            // Offene oben, erledigte unten (`dailyListOn`).
+                            // Der Schlüssel hält den Sprung des Häkchens an
+                            // der Gewohnheit, wenn die Kachel die Reihe wechselt.
+                            for (final habit in active) ...<Widget>[
+                              HabitCheckTile(
+                                key: ValueKey<String>(habit.id),
+                                habit: habit,
+                                isChecked: tracker.isChecked(habit.id, today),
+                                streak: tracker.currentStreak(habit.id, today),
+                                nextMultiplier: tracker.nextMultiplier(
+                                  habit.id,
+                                  today,
+                                ),
+                                xpGain: tracker.xpForNextCheck(habit.id, today),
+                                goldGain: tracker.goldForNextCheck(
+                                  habit.id,
+                                  today,
+                                ),
+                                progress: tracker.progressOn(habit.id, today),
+                                onToggle: () => _toggle(context, ref, habit),
+                                onAdvance: () => _advance(context, ref, habit),
+                                onStop: () => ref
+                                    .read(habitTrackerProvider.notifier)
+                                    .deactivate(habit.id),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          const SizedBox(height: 18),
+                          _SectionHeader(
+                            title: 'Eigene',
+                            trailing: '${tracker.customCount} / $slots',
+                          ),
+                          const SizedBox(height: 10),
+                          if (ruhendeEigene.isEmpty)
+                            const _Hint(
+                              'Noch keine eigene angelegt. Der Knopf unten '
+                              'rechts fragt nach Name, Wert und Tagesziel.',
+                            ),
+                          for (final habit in ruhendeEigene) ...<Widget>[
+                            _RestingCustomTile(
+                              habit: habit,
+                              canActivate: tracker.canActivate(habit.id),
+                              onActivate: () => ref
+                                  .read(habitTrackerProvider.notifier)
+                                  .activate(habit.id),
+                            ),
+                          ],
+                          const SizedBox(height: 18),
+                          _SectionHeader(
+                            title: 'Vorlagen',
+                            trailing:
+                                '${tracker.activeIds.length} / '
+                                '${HabitRewards.maxActiveHabits}',
+                          ),
+                          const SizedBox(height: 10),
+                          if (availableTemplates.isEmpty)
+                            const _Hint(
+                              'Alle freigeschalteten Vorlagen laufen bereits. '
+                              'Weitere kommen aus dem Skillbaum.',
+                            )
+                          else
+                            for (final template
+                                in availableTemplates) ...<Widget>[
+                              HabitTemplateTile(
+                                template: template,
+                                canActivate: tracker.canActivate(template.id),
+                                onActivate: () => ref
+                                    .read(habitTrackerProvider.notifier)
+                                    .activate(template.id),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
                         ],
-                    ],
-                  ),
+                      ),
+              ),
+            ),
           ),
         ),
       ),
@@ -241,12 +252,13 @@ class HabitsScreen extends ConsumerWidget {
     // Ein Häkchen soll sich anfühlen wie eins. Auf einem Handy ist das
     // ein kurzer Stoß; im Browser und im Test passiert nichts.
     unawaited(HapticFeedback.mediumImpact());
-    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
+    ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
     );
+    _steigen(context, ref, result, habit, werteVorher, formVorher);
   }
 
   /// Ein Schritt auf ein Tagesziel.
@@ -274,12 +286,13 @@ class HabitsScreen extends ConsumerWidget {
     }
 
     unawaited(HapticFeedback.mediumImpact());
-    ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
+    ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
     _celebrate(context, ref, vorher, vorherErrungen);
     _say(
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
     );
+    _steigen(context, ref, result, habit, werteVorher, formVorher);
   }
 
   /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier
@@ -379,6 +392,57 @@ class HabitsScreen extends ConsumerWidget {
     final zuwachs = nachher.valueFor(habit.stat) - vorher.valueFor(habit.stat);
     if (zuwachs <= 0) return '';
     return ' · +$zuwachs ${habit.stat.label}';
+  }
+
+  /// Welcher Klang zu diesem Häkchen gehört: der seltenere, wenn dabei ein
+  /// Punkt gefallen ist. Fünf Häkchen sind ein Punkt Stärke — der fünfte
+  /// soll anders klingen als die vier davor.
+  static SoundEffect _klang(
+    WidgetRef ref,
+    Habit habit,
+    CharacterStats werteVorher,
+  ) {
+    final nachher = ref.read(characterStatsProvider).valueFor(habit.stat);
+    return nachher > werteVorher.valueFor(habit.stat)
+        ? SoundEffect.statPunkt
+        : SoundEffect.haekchen;
+  }
+
+  /// **Die Zahlen steigen dort auf, wo getippt wurde** — Erfahrung, Gold,
+  /// ein gewonnener Punkt und die Tagesform. Dasselbe, was die Leiste unten
+  /// sagt, nur dort, wo der Blick ist.
+  static void _steigen(
+    BuildContext context,
+    WidgetRef ref,
+    CheckResult result,
+    Habit habit,
+    CharacterStats werteVorher,
+    DailyForm formVorher,
+  ) {
+    final nachher = ref.read(characterStatsProvider);
+    final punkt =
+        nachher.valueFor(habit.stat) - werteVorher.valueFor(habit.stat);
+    final form = DailyFormText.gainAfterCheck(
+      stat: habit.stat,
+      vorher: formVorher,
+      nachher: ref.read(dailyFormProvider),
+    );
+    AufstiegHost.maybeOf(context)?.zeige(<AufstiegZeile>[
+      AufstiegZeile(
+        '+${result.xpGained} EP  +${result.goldGained} G',
+        color: Palette.goldOnDark,
+      ),
+      if (punkt > 0)
+        AufstiegZeile(
+          '+$punkt ${habit.stat.label}',
+          color: Palette.successOnDark,
+        ),
+      if (form.isNotEmpty)
+        AufstiegZeile(
+          form.startsWith('In Form') ? 'In Form!' : form,
+          color: Palette.accentOnDark,
+        ),
+    ]);
   }
 
   /// Alles, was sich an ein Häkchen anhängt: ein gewonnener Punkt und

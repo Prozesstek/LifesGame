@@ -11,6 +11,24 @@
 
 ---
 
+## Sitzung 23.09.2026, zuallerletzt: Wucht beim Häkchen
+
+Der dritte Punkt aus der Durchsicht. Das Häkchen war der Moment, der am
+wenigsten zurückgab. Jetzt:
+
+| | |
+|---|---|
+| **Zahlen steigen auf** | „+18 EP +5 G", ein gewonnener Punkt, die Tagesform: dort, wo getippt wurde (`AufstiegHost`), auch wenn die Kachel im selben Moment nach unten rutscht |
+| **Die Werte-Kachel antwortet** | sie pulst, wenn ein Häkchen auf ihren Wert einzahlt; fällt ein Punkt, springt sie deutlicher und ihr Rand leuchtet grün |
+| **Ein Klang für den Punkt** | `SoundEffect.statPunkt`, **vorerst dieselbe Datei wie die Lektion** — es gibt keine weitere |
+| **Ring auf der Startseite** | um den Gewohnheiten-Kreis, „3/5", voll golden mit Häkchen |
+
+App 448. Alle Animationen enden von selbst, `pumpAndSettle` bleibt
+brauchbar. **Nicht angesehen.**
+
+Offen aus der Durchsicht bleibt nur noch die **teilbare Wochenkarte**
+für den Vergleich zu zweit.
+
 ## Sitzung 23.09.2026, ganz am Ende: die Tagestruhe
 
 [ADR-0044](../decisions/0044-tagestruhe.md), der zweite Punkt aus der
@@ -53,10 +71,8 @@ erhöhen", zusammen mit dem Vorschlag eines Tagesbonus.
 habits 169, action_combat 186, App 439. `pit_sim` unverändert: Sein Bot
 geht ohne Häkchen des Tages hinein. **Nicht angesehen.**
 
-Aus derselben Durchsicht **noch offen**: mehr Wucht beim Häkchen
-(Zahlen, die in den Balken fliegen, ein Klang für einen Stat-Punkt) und
-eine teilbare Wochenkarte für den Vergleich zu zweit. Die Tagestruhe ist
-gleich danach gebaut, siehe oben.
+Aus derselben Durchsicht sind Tagestruhe und Wucht beim Häkchen gleich
+danach gebaut, siehe oben; offen ist nur noch die Wochenkarte.
 
 ## Sitzung 23.09.2026, ganz zuletzt: jeder Knopf gibt nach
 
