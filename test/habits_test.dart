@@ -103,6 +103,44 @@ void main() {
       );
     });
 
+    testWidgets('abgehakt rutscht die Kachel nach unten', (tester) async {
+      final container = _container();
+      _passRootBranch(container);
+      final vorlagen = container.read(unlockedHabitsProvider);
+      expect(vorlagen.length, greaterThanOrEqualTo(2));
+      final erste = vorlagen[0];
+      final zweite = vorlagen[1];
+      container.read(habitTrackerProvider.notifier)
+        ..activate(erste.id)
+        ..activate(zweite.id);
+      await _pumpScreen(tester, container);
+
+      double oben(String name) => tester
+          .getTopLeft(
+            find.descendant(
+              of: find.byType(HabitCheckTile),
+              matching: find.text(name),
+            ),
+          )
+          .dy;
+
+      expect(oben(erste.name), lessThan(oben(zweite.name)));
+
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(ValueKey<String>(erste.id)),
+          matching: find.byIcon(Icons.radio_button_unchecked),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        oben(erste.name),
+        greaterThan(oben(zweite.name)),
+        reason: 'offen oben, erledigt unten',
+      );
+    });
+
     testWidgets('ein Häkchen zahlt sofort auf Erfahrung und Gold ein', (
       tester,
     ) async {

@@ -362,6 +362,40 @@ void main() {
       );
     });
 
+    test('Erledigtes rutscht nach unten, Offenes bleibt oben', () {
+      final wichtig = eigene(
+        id: 'eigen-1',
+        name: 'Wichtig',
+        priority: HabitPriority.hoch,
+      );
+      final mittel = eigene(id: 'eigen-2', name: 'Mittel');
+      final nebenbei = eigene(
+        id: 'eigen-3',
+        name: 'Nebenbei',
+        priority: HabitPriority.niedrig,
+      );
+      var tracker = const HabitTracker.empty()
+          .addCustom(wichtig, slots: 5)
+          .addCustom(mittel, slots: 5)
+          .addCustom(nebenbei, slots: 5)
+          .activate('eigen-1')
+          .activate('eigen-2')
+          .activate('eigen-3');
+      tracker = tracker.check('eigen-1', heute).tracker;
+      tracker = tracker.check('eigen-3', heute).tracker;
+
+      expect(
+        tracker.dailyListOn(heute).map((h) => h.name),
+        <String>['Mittel', 'Wichtig', 'Nebenbei'],
+        reason: 'offen zuerst, in jeder Hälfte nach Priorität',
+      );
+      expect(
+        tracker.dailyListOn(heute.next).map((h) => h.name),
+        <String>['Wichtig', 'Mittel', 'Nebenbei'],
+        reason: 'am nächsten Tag ist wieder alles offen',
+      );
+    });
+
     test('bewegt keine einzige Zahl', () {
       // Zwei identische Gewohnheiten, nur die Priorität unterscheidet sie.
       // Erfahrung, Gold und Charakterwert müssen gleich herauskommen.

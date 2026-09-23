@@ -37,7 +37,7 @@ class HabitsScreen extends ConsumerWidget {
     final slots = ref.watch(customSlotsProvider);
     final slotsLeft = ref.watch(customSlotsLeftProvider);
 
-    final active = tracker.activeHabitsByPriority;
+    final active = tracker.dailyListOn(today);
     // Der Tag, den ein Streak-Eis gerade noch retten kann. Die Regel
     // dafür steht in `package:habits`, nicht hier.
     final zuRetten = tracker.rescuableDay(today);
@@ -99,8 +99,12 @@ class HabitsScreen extends ConsumerWidget {
                           'die der Skillbaum freigeschaltet hat.',
                         )
                       else
+                        // Offene oben, erledigte unten (`dailyListOn`).
+                        // Der Schlüssel hält den Sprung des Häkchens an
+                        // der Gewohnheit, wenn die Kachel die Reihe wechselt.
                         for (final habit in active) ...<Widget>[
                           HabitCheckTile(
+                            key: ValueKey<String>(habit.id),
                             habit: habit,
                             isChecked: tracker.isChecked(habit.id, today),
                             streak: tracker.currentStreak(habit.id, today),

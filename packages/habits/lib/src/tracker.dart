@@ -370,6 +370,17 @@ class HabitTracker {
     return List<Habit>.unmodifiable(habits);
   }
 
+  /// Die Tagesliste für [day]: **offene oben, erledigte unten**, in jeder
+  /// Hälfte nach [activeHabitsByPriority]. Wer abhakt, sieht die Kachel
+  /// nach unten wandern — was oben steht, ist das, was noch zu tun ist.
+  List<Habit> dailyListOn(Day day) {
+    final sortiert = activeHabitsByPriority;
+    return List<Habit>.unmodifiable(<Habit>[
+      ...sortiert.where((h) => !isChecked(h.id, day)),
+      ...sortiert.where((h) => isChecked(h.id, day)),
+    ]);
+  }
+
   bool isActive(String habitId) => _activeIds.contains(habitId);
 
   bool get isFull => _activeIds.length >= HabitRewards.maxActiveHabits;

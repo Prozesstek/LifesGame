@@ -11,6 +11,18 @@
 
 ---
 
+## Sitzung 23.09.2026, zuletzt: Erledigtes rutscht nach unten
+
+Auf Frederiks Wunsch: „oben die offenen, unten die, die man am Tag schon
+gemacht hat." Die Tagesliste kommt jetzt aus
+`HabitTracker.dailyListOn(day)` — offene zuerst, erledigte danach, in
+jeder Hälfte nach Priorität wie bisher. Am nächsten Tag ist wieder alles
+offen und steht in der alten Reihenfolge. Jede Kachel trägt ihre Id als
+Schlüssel, damit der Sprung des Häkchens mit der Gewohnheit wandert.
+
+Die Kachel **springt**, sie gleitet nicht — eine Animation beim
+Umsortieren gibt es nicht. habits 162, App 426. **Nicht angesehen.**
+
 ## Sitzung 23.09.2026, danach: getroffen heisst bemerkt
 
 Auf Frederiks Ansage: „Sobald Gegner Damage kriegen, haben sie Aggro auf
