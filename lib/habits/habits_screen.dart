@@ -10,6 +10,7 @@ import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
+import '../progression/show_level_up.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
@@ -249,6 +250,7 @@ class HabitsScreen extends ConsumerWidget {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
+    final vorherLevel = levelBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
     final formVorher = ref.read(dailyFormProvider);
 
@@ -261,7 +263,7 @@ class HabitsScreen extends ConsumerWidget {
     // ein kurzer Stoß; im Browser und im Test passiert nichts.
     unawaited(HapticFeedback.mediumImpact());
     ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
-    _celebrate(context, ref, vorher, vorherErrungen);
+    _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
     _say(
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
@@ -274,6 +276,7 @@ class HabitsScreen extends ConsumerWidget {
     final today = ref.read(todayProvider);
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
+    final vorherLevel = levelBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
     final formVorher = ref.read(dailyFormProvider);
 
@@ -295,7 +298,7 @@ class HabitsScreen extends ConsumerWidget {
 
     unawaited(HapticFeedback.mediumImpact());
     ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
-    _celebrate(context, ref, vorher, vorherErrungen);
+    _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
     _say(
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
@@ -315,11 +318,14 @@ class HabitsScreen extends ConsumerWidget {
     WidgetRef ref,
     List<Ability> vorher,
     Set<String> vorherErrungen,
+    int vorherLevel,
   ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
       unawaited(() async {
         await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!context.mounted) return;
+        await showLevelUp(context, ref, before: vorherLevel);
         if (!context.mounted) return;
         await showAbilityUnlocks(context, ref, before: vorher);
       }());

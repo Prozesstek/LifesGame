@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../progression/show_level_up.dart';
 import 'package:theory/theory.dart';
 
 import '../audio/sound_effects.dart';
@@ -93,6 +94,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     // Unterschied verschwunden — es gaebe nichts mehr zu feiern.
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
+    final vorherLevel = levelBefore(ref);
 
     final result = ref
         .read(theoryProgressProvider.notifier)
@@ -115,6 +117,8 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       if (!mounted) return;
       unawaited(() async {
         await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!mounted) return;
+        await showLevelUp(context, ref, before: vorherLevel);
         if (!mounted) return;
         await showAbilityUnlocks(context, ref, before: vorher);
       }());

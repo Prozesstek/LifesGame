@@ -11,6 +11,24 @@
 
 ---
 
+## Sitzung 23.09.2026, Nachtrag: der Levelaufstieg wird gefeiert
+
+Bis heute passierte beim Aufstieg nichts Sichtbares, obwohl er seit
+ADR-0042 der grösste Sprung im Spiel ist. Jetzt kommt ein Blatt: „Level 7"
+springt hoch, darunter kommt Zeile für Zeile, was es bringt: im Kampf
+4 % stärker, ein Theoriepunkt, ein neuer Fähigkeitsplatz, auf 50 das
+Höchstlevel. Dazu der lange Klang und eine kräftige Vibration.
+
+Die Zahlen rechnet `LevelUp.between` in `packages/progression`, aus den
+Kurven, die es gibt. Gefeiert wird an den vier Stellen, an denen schon
+gefeiert wird (Häkchen, Lektion, Lauf, Kauf und Verkauf), **nach den
+Errungenschaften und vor den Fähigkeiten**. Kein Beobachter, der von
+selbst horcht, sonst feierte er auch beim Laden und im Entwicklermodus.
+
+progression 41, App 457. **Nicht getestet:** dass jede der vier Stellen
+die Feier wirklich auslöst. Getestet sind das Blatt und `showLevelUp`
+selbst, die Verdrahtung ist nur gelesen. **Nicht angesehen.**
+
 ## Sitzung 23.09.2026, Nachtrag: das Buch auf der Theorie
 
 Frederik hat alles aus dieser Sitzung gespielt („sehr coole Änderungen").

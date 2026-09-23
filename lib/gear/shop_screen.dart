@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../progression/show_level_up.dart';
 import 'package:gear/gear.dart';
 
 import '../combat/ladder_controller.dart';
@@ -151,6 +152,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
   void _buy(BuildContext context, WidgetRef ref, GearItem item) {
     final vorherErrungen = achievementsBefore(ref);
+    final vorherLevel = levelBefore(ref);
     final block = ref.read(loadoutProvider.notifier).buy(item.id);
     if (!context.mounted) return;
 
@@ -170,7 +172,12 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     if (block != null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      unawaited(showAchievementUnlocks(context, ref, before: vorherErrungen));
+      unawaited(() async {
+        await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!context.mounted) return;
+        // Errungenschaften im Laden zahlen auch Erfahrung (ADR-0033).
+        await showLevelUp(context, ref, before: vorherLevel);
+      }());
     });
   }
 
@@ -218,6 +225,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
       final vorherErrungen = achievementsBefore(ref);
+      final vorherLevel = levelBefore(ref);
       final erhalten = ref.read(loadoutProvider.notifier).sell(item.id);
 
       _say(
@@ -231,7 +239,12 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       // Verkauf auslösen kann — und keine, die einer wegnimmt: Gezählt
       // wird „je besessen" (ADR-0033, Punkt 3).
       if (erhalten == null) return;
-      unawaited(showAchievementUnlocks(context, ref, before: vorherErrungen));
+      unawaited(() async {
+        await showAchievementUnlocks(context, ref, before: vorherErrungen);
+        if (!context.mounted) return;
+        // Errungenschaften im Laden zahlen auch Erfahrung (ADR-0033).
+        await showLevelUp(context, ref, before: vorherLevel);
+      }());
     });
   }
 

@@ -4,6 +4,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../progression/show_level_up.dart';
 
 import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
@@ -115,6 +116,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final stufe = widget.stage.number;
 
     final vorherErrungen = achievementsBefore(ref);
+    final vorherLevel = levelBefore(ref);
     final ertrag = ref
         .read(ladderProvider.notifier)
         .recordRun(
@@ -144,6 +146,8 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
     if (!mounted) return;
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
+    if (!mounted) return;
+    await showLevelUp(context, ref, before: vorherLevel);
     if (!mounted) return;
 
     // **Nach einem Sieg zurück zur Grube**, dort steht schon die nächste
