@@ -11,6 +11,37 @@
 
 ---
 
+## Sitzung 23.09.2026, Nachtrag: das Dorf, als Prototyp
+
+Frederiks Idee: Statt der Kreise läuft die Figur wie in der Grube durch
+ein Dorf, mit einer Bücherei für die Theorie, einer Höhle für die Grube
+und einem eigenen Haus. **Gebaut als Prototyp im Entwicklermodus**
+(„Das Dorf (Prototyp)“). Die Startseite mit den Kreisen bleibt, bis ihr
+beide gespielt habt. Danach kommt ein ADR, weil die Startseite beiden
+gehört.
+
+| Ort | führt zu |
+|---|---|
+| Bücherei | Theorie (Skillbaum) |
+| Höhle | die Grube, mit derselben Sperre wie der Kampf-Kreis |
+| Laden | Laden |
+| Brett | Gewohnheiten |
+| Zuhause | Charakter; später der Ort für Trophäen und Titel |
+
+**Zwei Regeln, damit es dem Häkchen nicht schadet:** Antippen führt hin
+(die Figur läuft selbst, Ziehen steuert, am Rechner WASD), und „Heute
+2/5“ oben rechts öffnet die Gewohnheiten, ohne irgendwohin zu laufen.
+
+Die Karte ist Text wie die Räume der Grube (`lib/village/village_map.dart`,
+reines Dart). Die Figur ist der Soldat aus der Grube. **Die Kacheln und
+Gebäude sind grob selbst gezeichnet** (`tool/dorf_kacheln.py`, Python mit
+Pillow, 16er-Raster doppelt vergrössert), Platzhalter, bis es echte gibt.
+App 478. **Nicht im Browser angesehen**, nur die zusammengesetzte Karte
+als Bild.
+
+Offen: Das Haus zeigt noch nichts Eigenes, es führt zum Charakter. Die
+Dorfkarte ist fest, sie wächst nicht mit.
+
 ## Sitzung 23.09.2026, Nachtrag: die Rückfrage des Tages
 
 [ADR-0045](../decisions/0045-rueckfrage-des-tages.md), Punkt 1 aus
