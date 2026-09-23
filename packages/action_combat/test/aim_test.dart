@@ -115,6 +115,29 @@ void main() {
       expect(_treffer(welt, 90), 0);
     });
 
+    test('gezielt fliegt es durch eine Wand', () {
+      final nah = Level.parse('Mauer nah', const <String>[
+        '##############################',
+        '#......#.....................#',
+        '#......#.....................#',
+        '#...@..#..e..................#',
+        '#......#.....................#',
+        '#......#....................B#',
+        '##############################',
+      ]);
+      final welt = _welt(const <String>['funkenstoss'], level: nah);
+      final ziel = _fussvolk(welt).position;
+      final held = welt.heroView.position;
+      expect(
+        (ziel - held).length,
+        lessThan(PitAbilities.funkenstoss.reach),
+        reason: 'Sonst misst der Test die Reichweite, nicht die Wand.',
+      );
+
+      expect(welt.castAt('funkenstoss', ziel), isTrue);
+      expect(_treffer(welt, 60), greaterThan(0));
+    });
+
     test('kurz getippt ohne Gegner in Reichweite kostet nichts', () {
       final leer = Level.parse('leer', const <String>[
         '##############################',
@@ -192,13 +215,14 @@ void main() {
       );
     });
 
-    test('er landet nicht hinter einer Wand', () {
+    test('eine Wand hält ihn nicht auf', () {
       final welt = _welt(const <String>['frostnebel'], level: _mauer);
       final held = welt.heroView.position;
 
       welt.castAt('frostnebel', held + const Vec2(200, 0));
-      const wandLinks = 7 * ActionBalance.tileSize;
-      expect(welt.zones.single.center.x, lessThan(wandLinks));
+      const wandRechts = 8 * ActionBalance.tileSize;
+      expect(welt.zones.single.center.x, greaterThan(wandRechts));
+      expect(welt.zones.single.center.x, closeTo(held.x + 200, 0.001));
     });
 
     test('er bremst, wer hineinläuft — auch nach dem Absetzen', () {

@@ -7,9 +7,25 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 22.09.2026, abends · Frederik
+**Zuletzt aktualisiert:** 23.09.2026 · Frederik
 
 ---
+
+## Sitzung 23.09.2026: Wände halten keine Fähigkeit auf
+
+Auf Frederiks Ansage: „AOE oder generell Fähigkeiten werden, wenn sie
+geaimt werden, von Wänden aufgehalten. Das ist nicht nötig."
+
+| | vorher | jetzt |
+|---|---|---|
+| Bereich absetzen | zurückgenommen vor die Wand | landet, wo gezielt — bis `castRange` |
+| Geschoss einer Fähigkeit | zerplatzt an der Wand | fliegt hindurch, verlischt nach seiner Reichweite |
+| Pfeil der Waffe, Geschoss der Gegner | bleibt hängen | **unverändert** |
+| Kurz tippen | zielt nur auf Gegner in Sicht | **unverändert** — tippen feuert nicht auf Unsichtbare |
+
+Die Regel steht an einer Stelle: `Projectile.passesWalls`. action_combat
+183 (vorher 182). **Nicht angesehen**, und `pit_sim` nicht neu gerechnet —
+der Bot zielt nie von Hand und trägt keinen Bereich.
 
 ## Sitzung 22.09.2026, abends: Macht vervielfacht
 

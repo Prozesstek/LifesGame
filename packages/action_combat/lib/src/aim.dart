@@ -163,21 +163,15 @@ extension _Aim on ActionWorld {
     return _nearestEnemyWithin(weite, needsSight: braucheSicht)?.position;
   }
 
-  /// [punkt], aber höchstens [weite] vom Helden entfernt und nicht hinter
-  /// einer Wand: Zurückgenommen wird auf den letzten Punkt der Linie, den
-  /// der Held noch sieht. Man setzt ab, wo man hinsieht, nicht durch Fels.
+  /// [punkt], aber höchstens [weite] vom Helden entfernt. **Wände halten
+  /// nichts auf**: Eine Fläche darf hinter Fels landen — gezielt ist
+  /// gezielt, und ein Kreis, der vor der Wand hängen bleibt, fühlte sich
+  /// wie ein verschluckter Wurf an.
   Vec2 _placeable(Vec2 punkt, double weite) {
     final held = _hero.position;
     var weg = punkt - held;
     if (weg.length > weite) weg = weg.normalized * weite;
-    final schritte = (weg.length / (ActionBalance.tileSize / 4)).ceil();
-    var letzter = held;
-    for (var i = 1; i <= schritte; i++) {
-      final p = held + weg * (i / schritte);
-      if (level.isWallAtPoint(p)) break;
-      letzter = p;
-    }
-    return letzter;
+    return held + weg;
   }
 
   /// Ein Geschoss des Helden in [richtung], das nach [weite] verlischt.

@@ -81,7 +81,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 182 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 183 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -179,7 +179,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 182 Tests
+dart test                              # 183 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -217,7 +217,7 @@ Stelle:
 trägt ein `PitAim`: `selbst` (Heilung, Schutz, Mana — wirkt beim
 Drücken), `richtung` (Geschoss fliegt genau seine Reichweite, Schlag
 trifft im Kegel davor), `umDenHelden` (Klingenwirbel) oder `bereich` —
-abgesetzt bis `castRange`, nie hinter eine Wand. **Was ein Bereich an
+abgesetzt bis `castRange`, auch hinter eine Wand — **Wände halten keine Fähigkeit auf**: Bereiche landen dahinter, Geschosse einer Fähigkeit fliegen hindurch (`Projectile.passesWalls`); nur Pfeile der Waffe und Geschosse der Gegner bleiben hängen. **Was ein Bereich an
 Bremsen und Dauerschaden trägt, bleibt als Fläche liegen** und wirkt auf
 jeden, der hineinläuft (Eisfeld, Giftboden). `ActionWorld.cast` zielt
 selbst und kostet ohne Ziel nichts, `castAt` wirkt dorthin und kostet

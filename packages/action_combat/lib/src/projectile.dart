@@ -43,6 +43,10 @@ class Projectile {
   /// Ob es ein Pfeil der Waffe ist — dann gelten deren Nebenwirkungen.
   final bool fromWeapon;
 
+  /// Ob es durch Wände fliegt: jedes Geschoss einer **Fähigkeit** des
+  /// Helden. Pfeile der Waffe und Geschosse der Gegner bleiben hängen.
+  bool get passesWalls => heroPower != null && !fromWeapon;
+
   /// Nach so vielen Sekunden verlischt es. Ein Skillshot fliegt genau
   /// seine Reichweite weit, nicht weiter — sonst zeigte die Vorschau eine
   /// kürzere Bahn, als der Funke dann fliegt.
