@@ -6,6 +6,7 @@ import 'day.dart';
 import 'habit.dart';
 import 'rewards.dart';
 import 'streak_freeze.dart';
+import 'week_summary.dart';
 
 /// Was ein Häkchen eingebracht hat — inklusive des daraus folgenden
 /// neuen Standes.
@@ -921,7 +922,18 @@ class HabitTracker {
   /// Eine Gewohnheit, die es nicht mehr gibt, zählt als
   /// [HabitDifficulty.mittel]: Ihre Häkchen bleiben so viel wert, wie sie
   /// vor ADR-0028 waren.
-  int get totalXp {
+  int get totalXp => _xpWhere((_) => true);
+
+  /// Erfahrung aus den Häkchen zwischen [from] und [to], beide
+  /// eingeschlossen. **Die Kette zählt über die Grenze hinweg mit**: Das
+  /// Montags-Häkchen einer Kette, die am Samstag begann, bringt den
+  /// Multiplikator ihres dritten Tags, nicht den des ersten.
+  int xpBetween(Day from, Day to) =>
+      _xpWhere((day) => day >= from && day <= to);
+
+  /// Die eine Rechnung hinter [totalXp] und [xpBetween]: Die Kette läuft
+  /// immer über die ganze Historie, gezählt wird nur, was [counts] will.
+  int _xpWhere(bool Function(Day day) counts) {
     var sum = 0;
     for (final entry in _checks.entries) {
       final difficulty =
@@ -931,7 +943,7 @@ class HabitTracker {
       Day? previous;
       for (final day in sorted) {
         streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
-        sum += HabitRewards.xpFor(streak, difficulty);
+        if (counts(day)) sum += HabitRewards.xpFor(streak, difficulty);
         previous = day;
       }
     }
@@ -1064,13 +1076,85 @@ class HabitTracker {
   }
 
   /// Die Kampfwerte, die sich aus der gesamten Historie ergeben.
-  CharacterStats get stats {
-    final counts = <HabitStat, int>{};
+  CharacterStats get stats => _statsWhere((_) => true);
+
+  /// Die Kampfwerte, wie sie am Ende von [day] standen.
+  CharacterStats statsUpTo(Day day) => _statsWhere((d) => d <= day);
+
+  CharacterStats _statsWhere(bool Function(Day day) counts) {
+    final zaehler = <HabitStat, int>{};
     for (final entry in _checks.entries) {
       final habit = definitionFor(entry.key);
       if (habit == null) continue;
-      counts[habit.stat] = (counts[habit.stat] ?? 0) + entry.value.length;
+      final n = entry.value.where(counts).length;
+      zaehler[habit.stat] = (zaehler[habit.stat] ?? 0) + n;
     }
-    return CharacterStats(counts);
+    return CharacterStats(zaehler);
+  }
+
+  // --- Wochenrückblick ---
+
+  /// Die Woche (Montag bis Sonntag), in der [day] liegt. [today] trennt,
+  /// was schon war, von dem, was noch kommt.
+  WeekSummary weekOf(Day day, {required Day today}) {
+    final start = day.startOfWeek;
+    var ende = start;
+    for (var i = 0; i < 6; i++) {
+      ende = ende.next;
+    }
+
+    final tage = <WeekDay>[];
+    var checks = 0;
+    var gold = 0;
+    var truhen = 0;
+    var schatz = false;
+    var eis = 0;
+    var tag = start;
+    for (var i = 0; i < 7; i++) {
+      final n = checksOn(tag);
+      checks += n;
+      gold += n * HabitRewards.goldPerCheck;
+      final truhe = hasOpenedChest(tag);
+      if (truhe) {
+        final inhalt = DailyChest.forDay(tag);
+        truhen++;
+        gold += inhalt.gold;
+        eis += inhalt.freezes;
+        if (inhalt.tier == ChestTier.schatz) schatz = true;
+      }
+      tage.add(
+        WeekDay(
+          day: tag,
+          checks: n,
+          state: tag > today
+              ? WeekDayState.future
+              : truhe
+                  ? WeekDayState.chest
+                  : n > 0
+                      ? WeekDayState.some
+                      : WeekDayState.none,
+        ),
+      );
+      tag = tag.next;
+    }
+
+    final vorher = statsUpTo(start.previous);
+    final nachher = statsUpTo(ende);
+    return WeekSummary(
+      start: start,
+      end: ende,
+      days: tage,
+      checks: checks,
+      xp: xpBetween(start, ende),
+      gold: gold,
+      chests: truhen,
+      foundTreasure: schatz,
+      freezesFound: eis,
+      gains: <HabitStat, int>{
+        for (final stat in HabitStat.values)
+          stat: nachher.valueFor(stat) - vorher.valueFor(stat),
+      },
+      bestStreak: currentBestStreak(ende < today ? ende : today),
+    );
   }
 }

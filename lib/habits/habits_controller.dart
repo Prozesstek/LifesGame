@@ -200,6 +200,20 @@ final dailyFormProvider = Provider<DailyForm>((ref) {
   return ref.watch(habitTrackerProvider).formOn(ref.watch(todayProvider));
 });
 
+/// Die laufende Woche, Montag bis heute — und was noch kommt.
+final thisWeekProvider = Provider<WeekSummary>((ref) {
+  final heute = ref.watch(todayProvider);
+  return ref.watch(habitTrackerProvider).weekOf(heute, today: heute);
+});
+
+/// Die Woche davor, ganz vorbei.
+final lastWeekProvider = Provider<WeekSummary>((ref) {
+  final heute = ref.watch(todayProvider);
+  return ref
+      .watch(habitTrackerProvider)
+      .weekOf(heute.startOfWeek.previous, today: heute);
+});
+
 /// Die Kampfwerte, die sich aus den Gewohnheiten ergeben.
 final characterStatsProvider = Provider<CharacterStats>((ref) {
   return ref.watch(habitTrackerProvider).stats;

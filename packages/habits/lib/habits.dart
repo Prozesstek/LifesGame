@@ -13,3 +13,4 @@ export 'src/habit.dart';
 export 'src/rewards.dart';
 export 'src/streak_freeze.dart';
 export 'src/tracker.dart';
+export 'src/week_summary.dart';

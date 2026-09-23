@@ -11,6 +11,26 @@
 
 ---
 
+## Sitzung 23.09.2026, Nachtrag: der Wochenrückblick
+
+Aus der „Wochenkarte zum Teilen" wurde auf Frederiks Wunsch zuerst etwas
+für einen selbst: „Am Ende der Woche sieht man seinen Fortschritt der
+Woche nochmal auf einen Blick." **Geteilt wird noch nichts**, das wäre
+ein Bild samt Teilen-Menü und damit ein neues Paket.
+
+| | |
+|---|---|
+| Was | sieben Tagespunkte (leer, abgehakt, golden mit Truhe), Häkchen, Erfahrung und Gold der Woche, gewonnene Punkte, Truhen samt Schatz, beste Kette, Vergleich zur Vorwoche |
+| Wie | baut sich auf: Die Tage springen nacheinander auf, die Zahlen zählen hoch |
+| Wann | sonntags goldene Karte „Deine Woche", montags „Deine letzte Woche", sonst eine Zeile „Diese Woche: 3 / 7 Tage · Rückblick" |
+| Ton | sagt, was die Woche war, nie, was sie nicht war; weniger als die Vorwoche heisst „die nächste zählt neu" |
+
+Gerechnet in `HabitTracker.weekOf`; die Erfahrung der Woche zählt die
+Kette über die Wochengrenze mit (`xpBetween`, dieselbe Rechnung wie
+`totalXp`). **Ein voller Tag ist einer mit geöffneter Truhe**, weil
+„alles erledigt" rückwirkend nicht bestimmbar ist. Nichts Neues im
+Spielstand. habits 191, App 453. **Nicht angesehen.**
+
 ## Sitzung 23.09.2026, zuallerletzt: Wucht beim Häkchen
 
 Der dritte Punkt aus der Durchsicht. Das Häkchen war der Moment, der am
@@ -26,8 +46,8 @@ wenigsten zurückgab. Jetzt:
 App 448. Alle Animationen enden von selbst, `pumpAndSettle` bleibt
 brauchbar. **Nicht angesehen.**
 
-Offen aus der Durchsicht bleibt nur noch die **teilbare Wochenkarte**
-für den Vergleich zu zweit.
+Offen aus der Durchsicht blieb danach nur die **Wochenkarte**, siehe
+den Nachtrag oben.
 
 ## Sitzung 23.09.2026, ganz am Ende: die Tagestruhe
 

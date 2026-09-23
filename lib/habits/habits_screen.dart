@@ -22,6 +22,7 @@ import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/streak_ladder_card.dart';
+import 'widgets/week_card.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
@@ -113,7 +114,13 @@ class HabitsScreen extends ConsumerWidget {
                               onOpen: () => _openChest(context, ref),
                             ),
                           ],
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 8),
+                          WeekCard(
+                            today: today,
+                            thisWeek: ref.watch(thisWeekProvider),
+                            lastWeek: ref.watch(lastWeekProvider),
+                          ),
+                          const SizedBox(height: 16),
                           _SectionHeader(
                             title: 'Heute',
                             trailing:
@@ -127,8 +134,9 @@ class HabitsScreen extends ConsumerWidget {
                             )
                           else
                             // Offene oben, erledigte unten (`dailyListOn`).
-                            // Der Schlüssel hält den Sprung des Häkchens an
-                            // der Gewohnheit, wenn die Kachel die Reihe wechselt.
+                            // Der Schlüssel hält den Sprung des Häkchens
+                            // an der Gewohnheit, wenn die Kachel die Reihe
+                            // wechselt.
                             for (final habit in active) ...<Widget>[
                               HabitCheckTile(
                                 key: ValueKey<String>(habit.id),

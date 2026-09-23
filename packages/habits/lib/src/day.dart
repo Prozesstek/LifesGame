@@ -47,6 +47,12 @@ class Day implements Comparable<Day> {
 
   Day get previous => _shifted(-1);
 
+  /// Der Wochentag wie bei [DateTime]: 1 ist Montag, 7 Sonntag.
+  int get weekday => _utc.weekday;
+
+  /// Der Montag der Woche, in der dieser Tag liegt.
+  Day get startOfWeek => _shifted(1 - weekday);
+
   Day get next => _shifted(1);
 
   Day _shifted(int days) {
