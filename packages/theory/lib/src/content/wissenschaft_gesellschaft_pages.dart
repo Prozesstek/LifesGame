@@ -13,7 +13,8 @@ const Lesson stichprobePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Zufall sieht aus wie ein Muster',
-      body: 'Wirft man zehnmal eine Münze, kommt eine Serie von vier gleichen '
+      body:
+          'Wirft man zehnmal eine Münze, kommt eine Serie von vier gleichen '
           'Ergebnissen erstaunlich oft vor. Wer nur diese vier sieht, hält '
           'sie für eine Regel. Je kleiner die Zahl der Fälle, desto '
           'wilder schwanken die Ergebnisse — und desto überzeugender wirkt '
@@ -21,14 +22,16 @@ const Lesson stichprobePage = Lesson(
     ),
     LessonSection(
       heading: 'Die Geschichte des Einzelfalls',
-      body: '„Bei mir hat das sofort geholfen" ist eine Stichprobe von eins. '
+      body:
+          '„Bei mir hat das sofort geholfen" ist eine Stichprobe von eins. '
           'Sie ist nicht wertlos, aber sie erlaubt keine Aussage darüber, '
           'ob es bei jemand anderem hilft. Genau diese Verwechslung trägt '
           'den größten Teil der Ratgeberliteratur.',
     ),
     LessonSection(
       heading: 'Was man daraus mitnimmt',
-      body: 'Die nützliche Frage lautet nicht „wirkt es?", sondern „bei wie '
+      body:
+          'Die nützliche Frage lautet nicht „wirkt es?", sondern „bei wie '
           'vielen wurde das geprüft, und wie unterschiedlich waren die?". '
           'Eine ehrliche Antwort darauf sortiert mehr aus als jede '
           'Detaildiskussion über Methoden.',
@@ -81,7 +84,8 @@ const Lesson studieLesenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der Weg verzerrt',
-      body: 'Zwischen einem Ergebnis und der Überschrift, die du liest, '
+      body:
+          'Zwischen einem Ergebnis und der Überschrift, die du liest, '
           'liegen mehrere Stationen: die Studie selbst, die Mitteilung der '
           'Hochschule, die Meldung einer Agentur, die Überschrift der '
           'Redaktion. Jede Station hat einen Anreiz, die Aussage etwas '
@@ -89,13 +93,15 @@ const Lesson studieLesenPage = Lesson(
     ),
     LessonSection(
       heading: 'Drei Dinge, die fast immer fehlen',
-      body: 'Wie viele Personen es waren. Woran genau gemessen wurde. Und wie '
+      body:
+          'Wie viele Personen es waren. Woran genau gemessen wurde. Und wie '
           'groß der Unterschied war — nicht ob es einen gab. „Deutlich '
           'besser" kann ein Vorsprung von zwei Prozent sein.',
     ),
     LessonSection(
       heading: 'Ein billiger Test',
-      body: 'Suche die Zusammenfassung der Studie selbst und vergleiche sie '
+      body:
+          'Suche die Zusammenfassung der Studie selbst und vergleiche sie '
           'mit der Überschrift. Das dauert wenige Minuten und ist die '
           'wirksamste Übung dieses Zweigs — weil der Abstand zwischen '
           'beiden regelmäßig überrascht.',
@@ -122,7 +128,8 @@ const Lesson studieLesenPage = Lesson(
         'Wer sie geschrieben hat',
       ],
       correctIndex: 0,
-      explanation: '„Es gab einen Unterschied" sagt nichts darüber, ob er '
+      explanation:
+          '„Es gab einen Unterschied" sagt nichts darüber, ob er '
           'irgendjemanden interessieren sollte.',
     ),
     Question(
@@ -147,21 +154,24 @@ const Lesson vergleichPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Du siehst Ergebnisse, nicht Wege',
-      body: 'Von anderen sieht man das Ergebnis: den Abschluss, den Körper, '
+      body:
+          'Von anderen sieht man das Ergebnis: den Abschluss, den Körper, '
           'die ruhige Familie. Den Weg dorthin sieht man nicht — die Jahre, '
           'die Umstände, die Hilfe, das Scheitern dazwischen. Verglichen '
           'wird also der eigene Weg mit fremden Ergebnissen.',
     ),
     LessonSection(
       heading: 'Die Auswahl ist verzerrt',
-      body: 'Was sichtbar wird, ist vorsortiert: Erfolge werden gezeigt, '
+      body:
+          'Was sichtbar wird, ist vorsortiert: Erfolge werden gezeigt, '
           'Rückschläge selten. Wer daraus einen Durchschnitt bildet, '
           'bekommt einen Maßstab, den in Wirklichkeit fast niemand '
           'erreicht — auch die nicht, die ihn scheinbar setzen.',
     ),
     LessonSection(
       heading: 'Der brauchbare Maßstab',
-      body: 'Der einzige Vergleich mit verlässlicher Grundlage ist der mit '
+      body:
+          'Der einzige Vergleich mit verlässlicher Grundlage ist der mit '
           'dir vor einem Monat. Dort kennst du beides: das Ergebnis und den '
           'Weg. Genau deshalb zeigt dieses Spiel eine Kette und einen '
           'Bestwert und keine Rangliste.',
@@ -214,7 +224,8 @@ const Lesson hilfeBittenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die Ablehnung wird überschätzt',
-      body: 'Menschen sagen deutlich häufiger zu, als Fragende erwarten. Wer '
+      body:
+          'Menschen sagen deutlich häufiger zu, als Fragende erwarten. Wer '
           'sich vorstellt, abgelehnt zu werden, überschätzt diese '
           'Wahrscheinlichkeit regelmäßig — und fragt deshalb gar nicht '
           'erst. Die Absage, die man fürchtet, tritt seltener ein als die '
@@ -222,14 +233,16 @@ const Lesson hilfeBittenPage = Lesson(
     ),
     LessonSection(
       heading: 'Vage Bitten sind schwer zu erfüllen',
-      body: '„Kannst du mir mal helfen?" zwingt den anderen, den Aufwand zu '
+      body:
+          '„Kannst du mir mal helfen?" zwingt den anderen, den Aufwand zu '
           'schätzen — und im Zweifel schätzt er hoch. „Hast du Dienstag '
           'zwanzig Minuten, um über eine Seite zu schauen?" ist beantwortbar. '
           'Je klarer die Bitte, desto leichter das Ja.',
     ),
     LessonSection(
       heading: 'Fragen schafft Verbindung',
-      body: 'Wer um einen kleinen Gefallen bittet und sich bedankt, wird als '
+      body:
+          'Wer um einen kleinen Gefallen bittet und sich bedankt, wird als '
           'sympathischer erlebt, nicht als lästig. Eine Bitte ist ein '
           'Vertrauensbeweis — und sie macht es dem anderen leichter, '
           'seinerseits zu fragen.',
