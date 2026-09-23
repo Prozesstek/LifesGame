@@ -252,7 +252,8 @@ lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 **Fünf Gegnerarten** (`EnemyKind`): Fussvolk `e`, Schütze `s`, Kobold `k`
 (schneller als der Held), Troll `t` (gross, zäh, setzt meist der
 Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
-seinem Raum**.
+seinem Raum**. **Wer Schaden nimmt, hat den Helden bemerkt** — auch aus
+einer Entfernung, in der er ihn sonst nie sähe (`_enemiesAct`).
 
 **Die Grube ist geschafft, wenn der Wächter fällt** — nicht erst, wenn
 jeder Gegner liegt (`ActionWorld._checkEnd`). Nur eine Halle ohne
