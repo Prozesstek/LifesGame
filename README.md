@@ -42,7 +42,7 @@ dart run tool/pit_sim.dart
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/action_combat
-dart test                          # 183 Tests
+dart test                          # 185 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
@@ -81,7 +81,7 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/action_combat` | die Grube: 30 Stufen, 5 Gegnerarten, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 183 |
+| `packages/action_combat` | die Grube: 30 Stufen, 5 Gegnerarten, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 185 |
 | `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 136 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte, Machtkurve | 36 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 161 |

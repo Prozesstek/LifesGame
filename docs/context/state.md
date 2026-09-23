@@ -11,6 +11,19 @@
 
 ---
 
+## Sitzung 23.09.2026, danach: getroffen heisst bemerkt
+
+Auf Frederiks Ansage: „Sobald Gegner Damage kriegen, haben sie Aggro auf
+den Spieler." Vorher bemerkte ein Gegner den Helden nur im Umkreis von
+210 Punkten — ein Funke aus 250 liess ihn stehen, und man konnte ihn
+gefahrlos abtragen. Jetzt kommt jeder, der verwundet ist, egal woher der
+Schaden kam (Geschoss, Fläche, Dauerschaden). Eine Stelle:
+`ActionWorld._enemiesAct`. action_combat 185.
+
+`pit_sim` nachgerechnet: Die Kurve liegt, wo sie lag — Tag 30 bis Stufe
+10/11, voll ausgerüstet mit Fähigkeiten Stufe 30 zu 58 %. Der Bot
+schiesst selten aus der Ferne, der Effekt ist dort klein.
+
 ## Sitzung 23.09.2026: Zielen über Wände hinweg
 
 Auf Frederiks Ansage: „Das Aimen von Fähigkeiten darf durch Wände gehen,

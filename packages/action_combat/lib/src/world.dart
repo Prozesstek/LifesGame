@@ -785,7 +785,12 @@ class ActionWorld {
       // Fernkämpfer hat eine grössere Reichweite als der Aufmerksamkeits-
       // radius; ohne diese Zeile stünde er da und liesse sich beschiessen.
       final merkt = math.max(ActionBalance.aggroRadius, gegner.attackRange);
-      if (!gegner.aggro && abstand <= merkt) {
+      // **Wer getroffen wurde, weiss, woher.** Schaden kommt nur vom
+      // Helden — ein Funke aus der Ferne, eine Fläche, Dauerschaden —,
+      // und wer ihn nimmt, kommt. Sonst stünde ein Gegner still da und
+      // liesse sich aus sicherer Entfernung abtragen.
+      final verwundet = gegner.hp < gegner.maxHp;
+      if (!gegner.aggro && (abstand <= merkt || verwundet)) {
         gegner.aggro = true;
         _events.add(EnemyNoticed(id: gegner.id, at: gegner.position));
       }

@@ -292,6 +292,46 @@ void main() {
     });
   });
 
+  group('Getroffen heisst bemerkt', () {
+    // Der Gegner steht weiter weg, als er den Helden bemerkt, aber
+    // nah genug für einen Funken.
+    final fern = Level.parse('fern', const <String>[
+      '##############################',
+      '#............................#',
+      '#...@......e.................#',
+      '#............................#',
+      '#...........................B#',
+      '##############################',
+    ]);
+
+    List<EnemyNoticed> bemerkt(ActionWorld welt, int schritte) => [
+          for (var i = 0; i < schritte; i++)
+            ...() {
+              welt.step(Vec2.zero);
+              return welt.drainEvents().whereType<EnemyNoticed>();
+            }(),
+        ];
+
+    test('ungestört bleibt er stehen', () {
+      final welt = _welt(const <String>['funkenstoss'], level: fern);
+      final abstand =
+          (_fussvolk(welt).position - welt.heroView.position).length;
+      expect(abstand, greaterThan(ActionBalance.aggroRadius));
+      expect(abstand, lessThan(PitAbilities.funkenstoss.reach));
+
+      expect(bemerkt(welt, 60), isEmpty);
+    });
+
+    test('ein Treffer aus der Ferne holt ihn heran', () {
+      final welt = _welt(const <String>['funkenstoss'], level: fern);
+      final vorher = _fussvolk(welt).position.x;
+
+      welt.castAt('funkenstoss', _fussvolk(welt).position);
+      expect(bemerkt(welt, 60), isNotEmpty);
+      expect(_fussvolk(welt).position.x, lessThan(vorher));
+    });
+  });
+
   group('Ohne Ziel', () {
     test('Heilung und Schutz zeigen nichts', () {
       final welt = _welt(const <String>['bluetentau', 'steinhaut']);
