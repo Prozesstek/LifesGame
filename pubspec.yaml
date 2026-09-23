@@ -117,3 +117,8 @@ flutter:
     # Waechter als Streifen. Welcher Streifen zu wem gehoert, entscheidet
     # `GrubeFiguren` in `lib/action/action_sprites.dart`.
     - assets/Grube/
+
+    # Das Dorf (Prototyp im Entwicklermodus): grobe Kacheln und Gebäude,
+    # gezeichnet von `tool/dorf_kacheln.py`. Welches Bild zu welchem Ort
+    # gehört, entscheidet `DorfBilder` in `lib/village/village_game.dart`.
+    - assets/Dorf/

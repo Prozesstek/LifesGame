@@ -15,6 +15,7 @@ import 'dev_controller.dart';
 import 'save_slot.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
+import '../village/village_screen.dart';
 
 /// Die Werkbank: Erfahrung, Gold, Punkte und Sachen per Knopfdruck.
 ///
@@ -124,6 +125,24 @@ class DevScreen extends ConsumerWidget {
                     ),
                     icon: const Icon(Icons.sports_martial_arts, size: 18),
                     label: const Text('Die Grube (Echtzeit-Prototyp)'),
+                  ),
+                ),
+                const _Note(
+                  'Das Dorf: statt der Kreise ein Ort zum Herumlaufen — '
+                  'Bücherei, Höhle, Laden, Brett und das eigene Haus. '
+                  'Führt in die echten Bildschirme, auf dem Stand, der '
+                  'gerade geladen ist.',
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const VillageScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.holiday_village, size: 18),
+                    label: const Text('Das Dorf (Prototyp)'),
                   ),
                 ),
 
