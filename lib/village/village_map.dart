@@ -205,7 +205,11 @@ class VillageMap {
 }
 
 /// Die Figur im Dorf: läuft per Steuerung oder zu einem angetippten Ziel,
-/// und meldet, wenn sie eine Tür betritt.
+/// und sagt, vor welcher Tür sie steht.
+///
+/// **Sie betritt nichts von selbst.** Wer an einer Tür ankommt, bekommt
+/// einen Knopf am Gebäude; erst der öffnet den Ort. Sonst reisst jeder
+/// Schritt über eine Türschwelle einen Bildschirm auf.
 class VillageWalker {
   VillageWalker(this.map) : position = VillageMap.centerOf(map.start);
 
@@ -224,17 +228,19 @@ class VillageWalker {
   double lastSpeed = 0;
 
   List<TilePos> _weg = const <TilePos>[];
-  VillagePlace? _drinnen;
-  VillagePlace? _gemeldet;
 
   /// Ob sie gerade einem Weg folgt.
   bool get isWalkingPath => _weg.isNotEmpty;
 
-  /// Der Ort, den sie gerade betreten hat — einmal abholbar.
-  VillagePlace? takeEntered() {
-    final ort = _gemeldet;
-    _gemeldet = null;
-    return ort;
+  /// Vor welcher Tür sie gerade steht — oder null. Nur, wenn sie steht:
+  /// Wer an einer Tür vorbeiläuft, will nicht hinein.
+  VillagePlace? get atDoor {
+    if (_weg.isNotEmpty) return null;
+    final t = VillageMap.tileOf(position);
+    for (final MapEntry(:key, :value) in map.doors.entries) {
+      if (value == t) return key;
+    }
+    return null;
   }
 
   /// Geht zu dem Feld, auf das getippt wurde. Ein Gebäude heisst: zu
@@ -259,7 +265,6 @@ class VillageWalker {
         position = VillageMap.centerOf(davor);
       }
     }
-    _drinnen = place;
     _weg = const <TilePos>[];
   }
 
@@ -286,7 +291,6 @@ class VillageWalker {
       _gleite(richtung * (speed * dt));
     }
     lastSpeed = dt > 0 ? (position - vorher).length / dt : 0;
-    _pruefeTuer();
   }
 
   /// Achsenweise bewegen, damit man an Kanten entlanggleitet statt
@@ -311,38 +315,31 @@ class VillageWalker {
     }
     return true;
   }
-
-  void _pruefeTuer() {
-    final t = VillageMap.tileOf(position);
-    VillagePlace? hier;
-    for (final MapEntry(:key, :value) in map.doors.entries) {
-      if (value == t) hier = key;
-    }
-    // Erst wer die Tür verlassen hat, kann sie wieder betreten.
-    if (hier == null) {
-      _drinnen = null;
-      return;
-    }
-    if (_drinnen == hier) return;
-    _drinnen = hier;
-    _gemeldet = hier;
-    _weg = const <TilePos>[];
-  }
 }
 
 /// Das Dorf des Prototyps.
+/// Das Dorf des Prototyps — **hochkant**, zwölf Felder breit: Auf einem
+/// Handy im Hochformat passt es damit in die Breite, und die Höhe reicht
+/// für fast alles auf einmal.
+///
+/// Die Türen sitzen dort, wo `tool/dorf_kacheln.py` sie ins Bild malt:
+/// Höhle in der dritten Spalte ihres Felsens, alle anderen in der zweiten.
 final VillageMap village = VillageMap.parse(const <String>[
-  '####################',
-  '#..HHHH......BBBB..#',
-  '#..HHHH......BBBB..#',
-  '#..HHhH......BbBB..#',
-  '#....,........,....#',
-  '#....,,,,,,,,,,....#',
-  '#........,,........#',
-  '#..LLL...S,...ZZZ..#',
-  '#..LLL...s,...ZZZ..#',
-  '#..LlL...,,...ZzZ..#',
-  '#...,,,,,@,,,,,,...#',
-  '#..................#',
-  '####################',
+  '############',
+  '#HHHH.BBBB.#',
+  '#HHHH.BBBB.#',
+  '#HHhH.BbBB.#',
+  '#..,...,...#',
+  '#..,,,,,...#',
+  '#....,.....#',
+  '#...S,.....#',
+  '#...s,.....#',
+  '#...,,.....#',
+  '#....,.....#',
+  '#LLL.,.ZZZ.#',
+  '#LLL.,.ZZZ.#',
+  '#LlL.,.ZzZ.#',
+  '#.,,,@,,,..#',
+  '#..........#',
+  '############',
 ]);

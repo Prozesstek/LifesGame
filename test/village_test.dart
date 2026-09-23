@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/village/village_game.dart';
 import 'package:lifes_game/village/village_map.dart';
 import 'package:lifes_game/village/village_screen.dart';
@@ -14,7 +15,7 @@ import 'test_view.dart';
 
 /// Das Dorf des Prototyps, ohne Bildschirm.
 void main() {
-  /// Läuft höchstens [sekunden], bis ein Ort betreten wird.
+  /// Läuft höchstens [sekunden], bis die Figur vor einer Tür steht.
   VillagePlace? laufe(
     VillageWalker w, {
     Vec2 input = Vec2.zero,
@@ -23,7 +24,7 @@ void main() {
     const dt = 1 / 60;
     for (var t = 0.0; t < sekunden; t += dt) {
       w.step(dt, input);
-      final ort = w.takeEntered();
+      final ort = w.atDoor;
       if (ort != null) return ort;
     }
     return null;
@@ -59,7 +60,7 @@ void main() {
 
   group('Die Figur', () {
     for (final ort in VillagePlace.values) {
-      test('ein Tipp auf ${ort.label} führt hinein', () {
+      test('ein Tipp auf ${ort.label} führt vor die Tür', () {
         final w = VillageWalker(village);
         final mitte = village.bodies[ort]!.from;
         expect(w.walkTo(VillageMap.centerOf(mitte)), isTrue);
@@ -74,11 +75,23 @@ void main() {
       expect(w.position.y, lessThan(unten));
     });
 
-    test('betritt einen Ort einmal, nicht bei jedem Schritt', () {
+    test('solange sie einem Weg folgt, steht sie vor keiner Tür', () {
+      final w = VillageWalker(village);
+      w.walkTo(VillageMap.centerOf(village.doors[VillagePlace.zuhause]!));
+      // Unterwegs, auch wenn der Weg über eine Tür führte.
+      w.step(1 / 60, Vec2.zero);
+      expect(w.atDoor, isNull);
+    });
+
+    test('wer weitergeht, lässt die Tür hinter sich', () {
       final w = VillageWalker(village);
       w.walkTo(VillageMap.centerOf(village.doors[VillagePlace.brett]!));
       expect(laufe(w), VillagePlace.brett);
-      expect(laufe(w, sekunden: 1), isNull, reason: 'steht noch in der Tür');
+      w.walkTo(VillageMap.centerOf(village.start));
+      for (var i = 0; i < 120; i++) {
+        w.step(1 / 60, Vec2.zero);
+      }
+      expect(w.atDoor, isNull);
     });
 
     test('nach dem Zurückkommen steht sie vor der Tür, nicht darin', () {
@@ -129,13 +142,23 @@ void main() {
       expect(find.byType(HabitsScreen), findsOneWidget);
     });
 
-    testWidgets('das Brett führt zu den Gewohnheiten und wieder zurück', (
+    testWidgets('das Brett öffnet erst der Knopf, dann zurück davor', (
       tester,
     ) async {
       final spiel = await pumpDorf(tester);
       final brett = village.doors[VillagePlace.brett]!;
       spiel.walker.walkTo(VillageMap.centerOf(brett));
       await laufenLassen(tester, 3);
+      expect(
+        find.byType(HabitsScreen),
+        findsNothing,
+        reason: 'ankommen öffnet nichts',
+      );
+      expect(find.text('Brett betreten'), findsOneWidget);
+
+      await tester.tap(find.text('Brett betreten'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byType(HabitsScreen), findsOneWidget);
 
       await tester.pageBack();
@@ -149,6 +172,23 @@ void main() {
       );
     });
 
+    testWidgets('ein zweiter Tipp auf das Gebäude geht hinein', (tester) async {
+      final spiel = await pumpDorf(tester);
+      spiel.walker.walkTo(
+        VillageMap.centerOf(village.doors[VillagePlace.buecherei]!),
+      );
+      // Gut fünfzehn Felder bei 110 Punkten je Sekunde.
+      await laufenLassen(tester, 7);
+      expect(find.text('Bücherei betreten'), findsOneWidget);
+
+      // Die linke obere Ecke — weit weg vom Knopf in der Mitte.
+      final ecke = village.bodies[VillagePlace.buecherei]!.from;
+      await tester.tapAt(spiel.worldToScreen(VillageMap.centerOf(ecke)));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(SkillTreeScreen), findsOneWidget);
+    });
+
     testWidgets('die Höhle bleibt zu, solange der Kampf es ist', (
       tester,
     ) async {
@@ -157,6 +197,9 @@ void main() {
         VillageMap.centerOf(village.doors[VillagePlace.hoehle]!),
       );
       await laufenLassen(tester, 6);
+      await tester.tap(find.text('Höhle betreten'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(LadderScreen), findsNothing);
       expect(find.byType(SnackBar), findsOneWidget);

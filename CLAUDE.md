@@ -136,7 +136,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/character/show_ability_unlock.dart` | die Feier, aufgerufen an genau zwei Stellen | Flutter |
 | `lib/progression/show_level_up.dart` | die Feier eines **Aufstiegs** — nach den Errungenschaften, vor den Fähigkeiten | Flutter |
 | `lib/village/village_map.dart` | **das Dorf (Prototyp)**: Karte als Text, Wege, Laufen, Türen, reines Dart, ohne Bildschirm testbar | Flutter |
-| `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, „Heute“ immer einen Tipp entfernt | Flutter |
+| `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, **hinein nur über den Knopf am Gebäude**, „Heute“ immer einen Tipp entfernt | Flutter |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
@@ -183,7 +183,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 478 Tests
+flutter test             # 480 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

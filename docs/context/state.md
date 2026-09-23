@@ -39,6 +39,13 @@ Pillow, 16er-Raster doppelt vergrössert), Platzhalter, bis es echte gibt.
 App 478. **Nicht im Browser angesehen**, nur die zusammengesetzte Karte
 als Bild.
 
+**Nachgezogen nach dem ersten Ansehen** (Frederik): Die Karte ist jetzt
+**hochkant**, 12 × 17 Felder, und passt damit ganz in die Breite eines
+Handys, vorher lag die Hälfte außerhalb. Und **niemand geht mehr von
+selbst hinein**: Wer vor einer Tür steht, bekommt einen kleinen Knopf
+„Bücherei betreten“ mitten auf dem Gebäude. Ein zweiter Tipp auf das
+Gebäude tut dasselbe. App 480.
+
 Offen: Das Haus zeigt noch nichts Eigenes, es führt zum Charakter. Die
 Dorfkarte ist fest, sie wächst nicht mit.
 

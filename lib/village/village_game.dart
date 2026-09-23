@@ -38,13 +38,17 @@ abstract final class DorfBilder {
 }
 
 /// **Das Dorf als Spiel** — zeichnet Karte, Gebäude und die Figur, und
-/// bewegt sie über [walker]. Welcher Ort betreten wurde, meldet
-/// [onEnter]; was dann passiert, entscheidet der Bildschirm.
+/// bewegt sie über [walker]. Betreten wird hier nichts: Vor welcher Tür
+/// die Figur steht, liest der Bildschirm aus [walker] und zeigt dort einen
+/// Knopf.
 class VillageGame extends Game {
-  VillageGame({required this.walker, required this.onEnter});
+  VillageGame({required this.walker});
 
   final VillageWalker walker;
-  final void Function(VillagePlace place) onEnter;
+
+  /// Zählt Bilder hoch, damit der Knopf am Gebäude mit der Kamera wandert,
+  /// ohne den ganzen Bildschirm neu zu bauen — wie in der Grube.
+  final ValueNotifier<int> frame = ValueNotifier<int>(0);
 
   /// Die Richtung der Steuerung, gesetzt vom Ziehen.
   Vec2 moveInput = Vec2.zero;
@@ -88,11 +92,13 @@ class VillageGame extends Game {
     _zeit += dt;
     walker.step(dt, moveInput);
     if (walker.facing.x.abs() > 0.15) _nachLinks = walker.facing.x < 0;
-    final ort = walker.takeEntered();
-    if (ort != null) {
-      moveInput = Vec2.zero;
-      onEnter(ort);
-    }
+    frame.value++;
+  }
+
+  /// Wo ein Punkt der Welt gerade auf dem Bildschirm liegt.
+  Offset worldToScreen(Vec2 punkt) {
+    final k = _kamera();
+    return Offset(punkt.x + k.x, punkt.y + k.y);
   }
 
   /// Aus einem Punkt auf dem Bildschirm ein Punkt in der Welt.

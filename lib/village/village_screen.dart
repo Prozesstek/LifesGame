@@ -12,6 +12,7 @@ import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
+import '../ui/druck.dart';
 import '../ui/gold_icon.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
@@ -26,6 +27,10 @@ import 'village_map.dart';
 /// **Zwei Regeln, damit es dem Häkchen nicht schadet:** Antippen führt
 /// hin — Laufen ist ein Angebot, kein Zwang. Und die Gewohnheiten sind
 /// oben rechts immer einen Tipp entfernt.
+///
+/// **Hinein geht es über einen Knopf am Gebäude**, nicht von selbst: Wer
+/// vor einer Tür steht, sieht „Bücherei betreten", und erst der öffnet
+/// den Ort. Ein zweiter Tipp auf das Gebäude tut dasselbe.
 class VillageScreen extends ConsumerStatefulWidget {
   const VillageScreen({super.key});
 
@@ -34,10 +39,7 @@ class VillageScreen extends ConsumerStatefulWidget {
 }
 
 class _VillageScreenState extends ConsumerState<VillageScreen> {
-  late final VillageGame _spiel = VillageGame(
-    walker: VillageWalker(village),
-    onEnter: _betrete,
-  );
+  late final VillageGame _spiel = VillageGame(walker: VillageWalker(village));
 
   Offset? _zugStart;
 
@@ -79,7 +81,16 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
   }
 
   void _tippe(Offset punkt) {
-    _spiel.walker.walkTo(_spiel.screenToWorld(punkt));
+    final welt = _spiel.screenToWorld(punkt);
+    final feld = VillageMap.tileOf(welt);
+    final hier = _spiel.walker.atDoor;
+    // Steht die Figur schon vor diesem Gebäude, heisst ein Tipp darauf:
+    // hinein.
+    if (hier != null && village.placeAt(feld.x, feld.y) == hier) {
+      _betrete(hier);
+      return;
+    }
+    _spiel.walker.walkTo(welt);
   }
 
   void _ziehe(Offset punkt) {
@@ -134,10 +145,80 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
                 },
               ),
             ),
+            Positioned.fill(
+              child: _TuerKnopf(spiel: _spiel, onEnter: _betrete),
+            ),
             const SafeArea(child: _Kopf()),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Der kleine Knopf über dem Gebäude, vor dessen Tür die Figur steht.
+///
+/// Er wandert mit der Kamera über [VillageGame.frame] — nur er baut sich
+/// dabei neu, nicht der ganze Bildschirm.
+class _TuerKnopf extends StatelessWidget {
+  const _TuerKnopf({required this.spiel, required this.onEnter});
+
+  final VillageGame spiel;
+  final void Function(VillagePlace ort) onEnter;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: spiel.frame,
+      builder: (context, _, _) {
+        final ort = spiel.walker.atDoor;
+        final flaeche = ort == null ? null : village.bodies[ort];
+        if (ort == null || flaeche == null) return const SizedBox.shrink();
+
+        const t = VillageMap.tileSize;
+        final mitte = spiel.worldToScreen(
+          Vec2(
+            (flaeche.from.x + flaeche.to.x + 1) / 2 * t,
+            (flaeche.from.y + flaeche.to.y + 1) / 2 * t,
+          ),
+        );
+        return Stack(
+          children: <Widget>[
+            Positioned(
+              left: mitte.dx,
+              top: mitte.dy,
+              child: FractionalTranslation(
+                translation: const Offset(-0.5, -0.5),
+                child: Druck(
+                  child: Material(
+                    color: Palette.accent,
+                    borderRadius: BorderRadius.circular(14),
+                    elevation: 3,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => onEnter(ort),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          '${ort.label} betreten',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.surface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
