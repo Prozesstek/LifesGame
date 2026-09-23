@@ -5,13 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
+import 'package:theory/theory.dart';
 
 import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
+import '../combat/ladder_controller.dart';
 import '../progression/show_level_up.dart';
+import '../theory/review_controller.dart';
 import '../theory/skill_tree_screen.dart';
+import '../theory/widgets/review_card.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'habits_controller.dart';
@@ -102,6 +106,22 @@ class HabitsScreen extends ConsumerWidget {
                             DailyFormCard(
                               form: ref.watch(dailyFormProvider),
                               open: active.length - tracker.completedOn(today),
+                            ),
+                          ],
+                          if (ref.watch(todaysReviewProvider)
+                              case final frage?) ...<Widget>[
+                            const SizedBox(height: 12),
+                            ReviewCard(
+                              question: frage,
+                              answer: ref.watch(todaysReviewAnswerProvider),
+                              day: dayNumberOf(today),
+                              daysUntilNext: _tageBisZurRueckfrage(
+                                ref,
+                                frage,
+                                today,
+                              ),
+                              onAnswer: (wahl) =>
+                                  _answerReview(context, ref, frage, wahl),
                             ),
                           ],
                           if (tracker.canOpenChest(today) ||
@@ -329,6 +349,51 @@ class HabitsScreen extends ConsumerWidget {
         if (!context.mounted) return;
         await showAbilityUnlocks(context, ref, before: vorher);
       }());
+    });
+  }
+
+  /// Nach wie vielen Tagen die Seite der heutigen Rückfrage wiederkommt —
+  /// erst nach der Antwort bekannt.
+  static int? _tageBisZurRueckfrage(
+    WidgetRef ref,
+    ReviewQuestion frage,
+    Day today,
+  ) {
+    final faellig = ref.read(reviewLogProvider).dueDayOf(frage.lesson.id);
+    if (faellig == null) return null;
+    return faellig - dayNumberOf(today);
+  }
+
+  /// Beantwortet die Rückfrage des Tages (ADR-0045). Richtig zahlt sie
+  /// Erfahrung und Gold, und die steigen dort auf, wo getippt wurde.
+  void _answerReview(
+    BuildContext context,
+    WidgetRef ref,
+    ReviewQuestion frage,
+    int wahl,
+  ) {
+    final vorherLevel = levelBefore(ref);
+    final richtig = ref
+        .read(reviewLogProvider.notifier)
+        .answer(ref.read(todayProvider), frage, wahl);
+    if (richtig == null) return;
+
+    if (richtig) {
+      unawaited(HapticFeedback.mediumImpact());
+      ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
+      AufstiegHost.maybeOf(context)?.zeige(const <AufstiegZeile>[
+        AufstiegZeile(
+          '+${TheoryRewards.xpForReview} EP  +${TheoryRewards.goldForReview} G',
+          color: Palette.goldOnDark,
+        ),
+      ]);
+    } else {
+      unawaited(HapticFeedback.selectionClick());
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      unawaited(showLevelUp(context, ref, before: vorherLevel));
     });
   }
 

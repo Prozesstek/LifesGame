@@ -11,6 +11,24 @@
 
 ---
 
+## Sitzung 23.09.2026, Nachtrag: die Rückfrage des Tages
+
+[ADR-0045](../decisions/0045-rueckfrage-des-tages.md), Punkt 1 aus
+`docs/vorlagen/lernen.md`. **AktivesBrett baut gerade den Item- und den
+Ability-Screen**, deshalb ist hier nichts davon angefasst.
+
+| | |
+|---|---|
+| Was | jeden Tag eine Frage aus einer bestandenen Seite, als Karte auf den Gewohnheiten, direkt dort zu beantworten |
+| Richtig | +10 Erfahrung, +3 Gold (steigen auf), die Seite kommt nach 1, 3, 7, dann 21 Tagen wieder |
+| Falsch | nichts, keine Strafe, die Seite kommt morgen wieder |
+| Welche | die am längsten fällige, eine nie gefragte vor allen; die Antworten stehen jeden Tag in anderer Reihenfolge |
+
+Neuer Bereich im Spielstand: `reviews` (`ReviewLog`, eine Historie).
+`SaveWatcher` schreibt ihn, ein Test hält das fest. Erfahrung und Gold
+laufen durch alle drei Zufluss-Provider. theory 148, App 462.
+**Nicht angesehen.** Offen: „gefestigte" Seiten im Baum zeigen.
+
 ## Sitzung 23.09.2026, Nachtrag: der Levelaufstieg wird gefeiert
 
 Bis heute passierte beim Aufstieg nichts Sichtbares, obwohl er seit

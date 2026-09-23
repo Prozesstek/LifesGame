@@ -8,6 +8,7 @@ import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../theory/theory_controller.dart';
+import '../theory/review_controller.dart';
 
 /// Gesamte Erfahrung des Spielers.
 ///
@@ -34,7 +35,10 @@ final totalXpProvider = Provider<int>((ref) {
   // jede Errungenschaft genau einmal zahlt und keine Bedingung wieder
   // faellt.
   final errungenschaften = ref.watch(achievementXpProvider);
-  return theory + habits + reihe + errungenschaften;
+  // **Die Rückfrage des Tages, seit ADR-0045** — die erste Quelle ausser
+  // den Gewohnheiten, die jeden Tag wiederkommt. Klein gehalten.
+  final rueckfragen = ref.watch(reviewLogProvider).totalXp;
+  return theory + habits + reihe + errungenschaften + rueckfragen;
 });
 
 /// Erfahrung einschließlich Dev-Zuschlag.
@@ -66,7 +70,8 @@ final goldEarnedProvider = Provider<int>((ref) {
   final habits = ref.watch(habitTrackerProvider).totalGold;
   final reihe = ref.watch(ladderProvider).earnedGold;
   final errungenschaften = ref.watch(achievementGoldProvider);
-  return theory + habits + reihe + errungenschaften;
+  final rueckfragen = ref.watch(reviewLogProvider).totalGold;
+  return theory + habits + reihe + errungenschaften + rueckfragen;
 });
 
 /// Verfügbares Gold: Zufluss minus Besitz.
@@ -115,5 +120,8 @@ final incomeWithoutAchievementsProvider = Provider<int>((ref) {
   final habits = ref.watch(habitTrackerProvider).totalGold;
   final reihe = ref.watch(ladderProvider).earnedGold;
   final int granted = ref.watch(grantedGoldProvider);
-  return theory + habits + reihe + granted;
+  // Dieselben Quellen wie [goldEarnedProvider] ohne die Errungenschaften —
+  // wer dort eine ergänzt, ergänzt sie hier (`gotchas.md`).
+  final rueckfragen = ref.watch(reviewLogProvider).totalGold;
+  return theory + habits + reihe + granted + rueckfragen;
 });

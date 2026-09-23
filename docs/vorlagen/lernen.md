@@ -54,6 +54,12 @@ Zwei Nebenbefunde aus demselben Blick:
 
 ## 1. Die Rückfrage des Tages
 
+> **Gebaut am 23.09.2026** ([ADR-0045](../decisions/0045-rueckfrage-des-tages.md)).
+> Abweichend von hier: **Erfahrung und Gold** (10 und 3), **eine** Frage
+> statt ein bis drei, und die Frage rotiert innerhalb der Seite, statt die
+> beim ersten Mal falsche zuerst zu bringen. Das bräuchte eine neue Spur
+> in `LessonRecord`.
+
 **Der größte Hebel, und der mit den meisten Folgen.**
 
 Neben der Tagesliste stehen ein bis drei Fragen aus **bereits

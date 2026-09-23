@@ -52,7 +52,8 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 136 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 148 Tests | nur Dart-SDK |
+| `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
@@ -179,7 +180,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 457 Tests
+flutter test             # 462 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -196,7 +197,7 @@ dart test                              # 191 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 136 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 148 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 41 Tests
 cd packages/gear        ; dart test    # 90 Tests, prüft Preise, Sets, Verkauf und die Sperre
 cd packages/abilities   ; dart test    # 36 Tests
@@ -331,7 +332,14 @@ mit: eindeutige Ids, genau drei Fragen, gültige `correctIndex`, keine
 doppelten Antworten. Und die Struktur: keine Eltern-Id ins Leere,
 **kreisfrei**, jede Wurzel mit mindestens fünf Kindern.
 
-Was eine Seite einbringt, steht ausschließlich in `rewards.dart`. **Zweige
+Was eine Seite einbringt, steht ausschließlich in `rewards.dart`, und
+dort auch die **Rückfrage des Tages** ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)):
+eine Frage am Tag aus einer bestandenen Seite, richtig beantwortet mit
+Erfahrung und Gold. Die Seite kommt dann nach 1, 3, 7 und 21 Tagen
+wieder. Gespeichert wird `ReviewLog`, eine Historie. Ihr Zufluss steht in
+`totalXpProvider`, `goldEarnedProvider` **und**
+`incomeWithoutAchievementsProvider`, fehlt er in einem, rechnet der
+Laden mit anderem Gold als die Anzeige. **Zweige
 haben keine Levelsperren mehr** — geöffnet wird über Theoriepunkte
 ([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)). Ein Knoten
 kostet einen Punkt, die vier Wurzeln kosten nichts.
@@ -536,7 +544,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
-| `totalXpProvider` | Erfahrung aus Theorie, Gewohnheiten, Reihe **und Errungenschaften** |
+| `totalXpProvider` | Erfahrung aus Theorie, Gewohnheiten, Reihe, Errungenschaften **und Rückfragen** (ADR-0045) |
 | `goldProvider` | Gold aus allen Quellen |
 | `equippedStatsProvider` | Kampfwerte aus Gewohnheiten und Ausrüstung |
 | `achievementStatsProvider` | **die breiteste** — alle vier Bereiche für die Errungenschaften |

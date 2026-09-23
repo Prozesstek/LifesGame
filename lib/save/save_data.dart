@@ -29,6 +29,7 @@ class SaveData {
     this.abilities = const ChosenAbilities.empty(),
     this.ladder = const LadderProgress.empty(),
     this.grants = const DebugGrants.none(),
+    this.reviews = const ReviewLog.empty(),
   });
 
   const SaveData.empty() : this();
@@ -63,6 +64,9 @@ class SaveData {
   /// der Modus arbeitet auf einem eigenen Schlüssel (ADR-0021).
   final DebugGrants grants;
 
+  /// Die Rückfragen des Tages (ADR-0045) — eine Historie der Antworten.
+  final ReviewLog reviews;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
@@ -70,7 +74,8 @@ class SaveData {
         loadout.owned.isEmpty &&
         !identity.hasName &&
         abilities.isEmpty &&
-        ladder.highestDefeated == 0;
+        ladder.highestDefeated == 0 &&
+        reviews.isEmpty;
   }
 
   Map<String, Object?> toJson() {
@@ -83,6 +88,7 @@ class SaveData {
       'abilities': abilities.toJson(),
       'ladder': ladder.toJson(),
       'grants': grants.toJson(),
+      'reviews': reviews.toJson(),
     };
   }
 
@@ -99,6 +105,7 @@ class SaveData {
     final abilities = json['abilities'];
     final ladder = json['ladder'];
     final grants = json['grants'];
+    final reviews = json['reviews'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -122,6 +129,9 @@ class SaveData {
       grants: grants is Map<String, Object?>
           ? DebugGrants.fromJson(grants)
           : const DebugGrants.none(),
+      reviews: reviews is Map<String, Object?>
+          ? ReviewLog.fromJson(reviews)
+          : const ReviewLog.empty(),
     );
   }
 
@@ -149,6 +159,7 @@ class SaveData {
     ChosenAbilities? abilities,
     LadderProgress? ladder,
     DebugGrants? grants,
+    ReviewLog? reviews,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
@@ -158,6 +169,7 @@ class SaveData {
       abilities: abilities ?? this.abilities,
       ladder: ladder ?? this.ladder,
       grants: grants ?? this.grants,
+      reviews: reviews ?? this.reviews,
     );
   }
 }

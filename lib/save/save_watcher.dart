@@ -12,6 +12,7 @@ import '../habits/habits_controller.dart';
 import '../theory/theory_controller.dart';
 import 'save_data.dart';
 import 'save_providers.dart';
+import '../theory/review_controller.dart';
 
 /// Schreibt den Spielstand, sobald sich etwas daran ändert.
 ///
@@ -31,7 +32,7 @@ class SaveWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Sieben Bereiche, sieben Zeilen. Kommt ein achter dazu, gehört er
+    // Acht Bereiche, acht Zeilen. Kommt ein neunter dazu, gehört er
     // hier dazu — sonst überlebt er keinen Neustart.
     ref.listen(theoryProgressProvider, (_, _) => _save(ref));
     ref.listen(habitTrackerProvider, (_, _) => _save(ref));
@@ -40,6 +41,7 @@ class SaveWatcher extends ConsumerWidget {
     ref.listen(chosenAbilitiesProvider, (_, _) => _save(ref));
     ref.listen(ladderProvider, (_, _) => _save(ref));
     ref.listen(devGrantsProvider, (_, _) => _save(ref));
+    ref.listen(reviewLogProvider, (_, _) => _save(ref));
 
     return child;
   }
@@ -53,6 +55,7 @@ class SaveWatcher extends ConsumerWidget {
       abilities: ref.read(chosenAbilitiesProvider),
       ladder: ref.read(ladderProvider),
       grants: ref.read(devGrantsProvider),
+      reviews: ref.read(reviewLogProvider),
     );
 
     // Bewusst nicht abgewartet: Ein Häkchen soll sofort sichtbar sein und
