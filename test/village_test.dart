@@ -32,7 +32,7 @@ void main() {
 
   group('Die Karte', () {
     test('hat jeden Ort, mit Tür und Gebäude', () {
-      for (final ort in VillagePlace.values) {
+      for (final ort in VillagePlace.dorf) {
         expect(village.doors, contains(ort), reason: ort.label);
         expect(village.bodies, contains(ort), reason: ort.label);
       }
@@ -59,7 +59,7 @@ void main() {
   });
 
   group('Die Figur', () {
-    for (final ort in VillagePlace.values) {
+    for (final ort in VillagePlace.dorf) {
       test('ein Tipp auf ${ort.label} führt vor die Tür', () {
         final w = VillageWalker(village);
         final mitte = village.bodies[ort]!.from;
@@ -210,7 +210,7 @@ void main() {
 
     testWidgets('jedes Dorfbild ist abgelegt und angemeldet', (tester) async {
       for (final datei in DorfBilder.all) {
-        final daten = await rootBundle.load('${DorfBilder.folder}/$datei');
+        final daten = await rootBundle.load(datei);
         expect(daten.lengthInBytes, greaterThan(100), reason: datei);
       }
     });

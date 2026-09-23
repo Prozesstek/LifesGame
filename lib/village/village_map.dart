@@ -13,11 +13,47 @@ enum VillagePlace {
   hoehle('Höhle', 'h', 'H'),
   laden('Laden', 'l', 'L'),
   zuhause('Zuhause', 'z', 'Z'),
-  brett('Brett', 's', 'S');
+  brett('Brett', 's', 'S'),
 
-  const VillagePlace(this.label, this.doorChar, this.bodyChar);
+  // --- im eigenen Haus ---
+  trophaeen('Trophäen', 't', 'T', verb: 'ansehen'),
+  titelwand('Titelwand', 'w', 'W', verb: 'ansehen'),
+  ruestung('Rüstung', 'r', 'R', verb: 'ansehen'),
+  truhe('Schatztruhe', 'k', 'K', verb: 'öffnen'),
+  ausgang('Ausgang', 'a', 'A', verb: 'hinaus');
+
+  const VillagePlace(
+    this.label,
+    this.doorChar,
+    this.bodyChar, {
+    this.verb = 'betreten',
+  });
+
+  /// Die Orte des Dorfs.
+  static const List<VillagePlace> dorf = <VillagePlace>[
+    buecherei,
+    hoehle,
+    laden,
+    zuhause,
+    brett,
+  ];
+
+  /// Die Dinge im eigenen Haus.
+  static const List<VillagePlace> haus = <VillagePlace>[
+    trophaeen,
+    titelwand,
+    ruestung,
+    truhe,
+    ausgang,
+  ];
 
   final String label;
+
+  /// Was der Knopf davor tut — ein Haus betritt man, ein Regal sieht man an.
+  final String verb;
+
+  /// Die Aufschrift des Knopfs.
+  String get action => verb == 'hinaus' ? 'Hinausgehen' : '$label $verb';
 
   /// Das Feld, auf dem man den Ort betritt — begehbar.
   final String doorChar;
@@ -342,4 +378,21 @@ final VillageMap village = VillageMap.parse(const <String>[
   '#.,,,@,,,..#',
   '#..........#',
   '############',
+]);
+
+/// **Das eigene Haus** — ein Raum, in dem die Figur herumläuft wie im
+/// Dorf. `#` ist hier Wand. Oben an der Wand hängen Titel und steht das
+/// Trophäenregal, links der Rüstungsständer, rechts die Schatztruhe; der
+/// Kleinbuchstabe darunter ist der Platz davor. Unten geht es hinaus.
+final VillageMap house = VillageMap.parse(const <String>[
+  '############',
+  '#WWWW..TTTT#',
+  '#.w......t.#',
+  '#..........#',
+  '#RR........#',
+  '#RR......KK#',
+  '#r.......k.#',
+  '#..........#',
+  '#....@.....#',
+  '#####a######',
 ]);

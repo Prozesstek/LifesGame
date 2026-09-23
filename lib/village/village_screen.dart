@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../action/pit_gate.dart';
-import '../character/character_screen.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
@@ -16,13 +15,14 @@ import '../ui/druck.dart';
 import '../ui/gold_icon.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import 'house_screen.dart';
 import 'village_game.dart';
 import 'village_map.dart';
 
 /// **Das Dorf** — Prototyp im Entwicklermodus: statt fünf Kreisen ein Ort,
 /// in dem die Figur herumläuft. Die Bücherei führt in die Theorie, die
-/// Höhle in die Grube, das Brett zu den Gewohnheiten, das Haus zum
-/// Charakter.
+/// Höhle in die Grube, das Brett zu den Gewohnheiten, das Zuhause ins
+/// eigene Haus.
 ///
 /// **Zwei Regeln, damit es dem Häkchen nicht schadet:** Antippen führt
 /// hin — Laufen ist ein Angebot, kein Zwang. Und die Gewohnheiten sind
@@ -31,51 +31,90 @@ import 'village_map.dart';
 /// **Hinein geht es über einen Knopf am Gebäude**, nicht von selbst: Wer
 /// vor einer Tür steht, sieht „Bücherei betreten", und erst der öffnet
 /// den Ort. Ein zweiter Tipp auf das Gebäude tut dasselbe.
-class VillageScreen extends ConsumerStatefulWidget {
+class VillageScreen extends ConsumerWidget {
   const VillageScreen({super.key});
 
+  static Widget? _ziel(VillagePlace ort) => switch (ort) {
+    VillagePlace.buecherei => const SkillTreeScreen(),
+    VillagePlace.hoehle => const LadderScreen(),
+    VillagePlace.laden => const ShopScreen(),
+    VillagePlace.zuhause => const HouseScreen(),
+    VillagePlace.brett => const HabitsScreen(),
+    _ => null,
+  };
+
   @override
-  ConsumerState<VillageScreen> createState() => _VillageScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return WalkScreen(
+      scene: VillageScene.dorf,
+      onEnter: (context, ort) async {
+        // Die Höhle ist zu, solange der Kampf es ist — derselbe Satz wie
+        // auf dem Kreis der Startseite (ADR-0020).
+        if (ort == VillagePlace.hoehle && !ref.read(combatUnlockedProvider)) {
+          final grund = ref.read(combatBlockReasonProvider);
+          if (grund != null) {
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(SnackBar(content: Text(grund)));
+          }
+          return;
+        }
+        final ziel = _ziel(ort);
+        if (ziel == null) return;
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => ziel));
+      },
+    );
+  }
 }
 
-class _VillageScreenState extends ConsumerState<VillageScreen> {
-  late final VillageGame _spiel = VillageGame(walker: VillageWalker(village));
+/// **Eine Szene zum Herumlaufen** — das Dorf oder das Haus. Übernimmt
+/// Steuerung, den Knopf an der Tür und die Kopfzeile; was ein Ort öffnet,
+/// sagt [onEnter].
+class WalkScreen extends ConsumerStatefulWidget {
+  const WalkScreen({
+    required this.scene,
+    required this.onEnter,
+    this.decorate,
+    super.key,
+  });
+
+  final VillageScene scene;
+
+  /// Was passiert, wenn ein Ort betreten wird. Solange das läuft, steht
+  /// die Szene still; danach steht die Figur vor der Tür.
+  final Future<void> Function(BuildContext context, VillagePlace place) onEnter;
+
+  /// Zeichnet in die Orte hinein, siehe [VillageGame.decorate].
+  final void Function(
+    VillageGame game,
+    Canvas canvas,
+    VillagePlace place,
+    Rect area,
+  )?
+  decorate;
+
+  @override
+  ConsumerState<WalkScreen> createState() => _WalkScreenState();
+}
+
+class _WalkScreenState extends ConsumerState<WalkScreen> {
+  late final VillageGame _spiel = VillageGame(
+    walker: VillageWalker(widget.scene.map),
+    scene: widget.scene,
+  );
 
   Offset? _zugStart;
 
   /// Welche Tasten gerade gedrückt sind — am Rechner läuft man mit WASD.
   final Set<LogicalKeyboardKey> _tasten = <LogicalKeyboardKey>{};
 
-  Widget _ziel(VillagePlace ort) => switch (ort) {
-    VillagePlace.buecherei => const SkillTreeScreen(),
-    VillagePlace.hoehle => const LadderScreen(),
-    VillagePlace.laden => const ShopScreen(),
-    VillagePlace.zuhause => const CharacterScreen(),
-    VillagePlace.brett => const HabitsScreen(),
-  };
-
   Future<void> _betrete(VillagePlace ort) async {
-    // Die Höhle ist zu, solange der Kampf es ist — derselbe Satz wie auf
-    // dem Kreis der Startseite (ADR-0020).
-    if (ort == VillagePlace.hoehle && !ref.read(combatUnlockedProvider)) {
-      final grund = ref.read(combatBlockReasonProvider);
-      _spiel.walker.stepOutOf(ort);
-      if (grund != null && mounted) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(grund)));
-      }
-      return;
-    }
-    await _oeffne(ort);
-  }
-
-  Future<void> _oeffne(VillagePlace ort) async {
     _spiel.paused = true;
+    _spiel.moveInput = Vec2.zero;
     _tasten.clear();
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => _ziel(ort)));
+    await widget.onEnter(context, ort);
     _spiel.walker.stepOutOf(ort);
     _spiel.paused = false;
   }
@@ -84,9 +123,8 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
     final welt = _spiel.screenToWorld(punkt);
     final feld = VillageMap.tileOf(welt);
     final hier = _spiel.walker.atDoor;
-    // Steht die Figur schon vor diesem Gebäude, heisst ein Tipp darauf:
-    // hinein.
-    if (hier != null && village.placeAt(feld.x, feld.y) == hier) {
+    // Steht die Figur schon vor diesem Ort, heisst ein Tipp darauf: hinein.
+    if (hier != null && _spiel.walker.map.placeAt(feld.x, feld.y) == hier) {
       _betrete(hier);
       return;
     }
@@ -124,6 +162,11 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final schmuck = widget.decorate;
+    _spiel.decorate = schmuck == null
+        ? null
+        : (canvas, ort, flaeche) => schmuck(_spiel, canvas, ort, flaeche);
+
     return Scaffold(
       body: Focus(
         autofocus: true,
@@ -163,7 +206,7 @@ class _VillageScreenState extends ConsumerState<VillageScreen> {
   }
 }
 
-/// Der kleine Knopf über dem Gebäude, vor dessen Tür die Figur steht.
+/// Der kleine Knopf über dem Ort, vor dem die Figur steht.
 ///
 /// Er wandert mit der Kamera über [VillageGame.frame] — nur er baut sich
 /// dabei neu, nicht der ganze Bildschirm.
@@ -179,7 +222,7 @@ class _TuerKnopf extends StatelessWidget {
       valueListenable: spiel.frame,
       builder: (context, _, _) {
         final ort = spiel.walker.atDoor;
-        final flaeche = ort == null ? null : village.bodies[ort];
+        final flaeche = ort == null ? null : spiel.walker.map.bodies[ort];
         if (ort == null || flaeche == null) return const SizedBox.shrink();
 
         const t = VillageMap.tileSize;
@@ -210,7 +253,7 @@ class _TuerKnopf extends StatelessWidget {
                           vertical: 6,
                         ),
                         child: Text(
-                          '${ort.label} betreten',
+                          ort.action,
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
