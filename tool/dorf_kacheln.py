@@ -201,7 +201,107 @@ def brett():
     return b
 
 
+# --- Das eigene Haus -------------------------------------------------------
+#
+# Die Gegenstände sind so gross wie ihre Fläche in `house`
+# (`lib/village/village_map.dart`) — die unterste Reihe ist der Platz davor
+# und bleibt durchsichtig, wie beim Brett. Was darin liegt (Pokale, Banner,
+# Ausrüstung, Gold), zeichnet das Spiel selbst dazu.
+
+DIELE = (138, 90, 48)
+DIELE_DUNKEL = (110, 70, 36)
+DIELE_HELL = (160, 108, 60)
+WAND = (96, 70, 52)
+WAND_DUNKEL = (72, 52, 38)
+WAND_HELL = (122, 92, 68)
+
+
+def dielen(seed):
+    b = neu(1, 1, DIELE)
+    d = ImageDraw.Draw(b)
+    for y in (0, 5, 10, 15):
+        d.line((0, y, 15, y), fill=DIELE_DUNKEL)
+    r = random.Random(seed)
+    for y in (2, 7, 12):
+        x = r.randrange(16)
+        d.line((x, y - 2, x, y + 2), fill=DIELE_DUNKEL)
+    tupfen(d, F, F, [DIELE_HELL], 6, seed)
+    return b
+
+
+def wand():
+    b = neu(1, 1, WAND)
+    d = ImageDraw.Draw(b)
+    for y in (3, 8, 13):
+        d.line((0, y, 15, y), fill=WAND_DUNKEL)
+    for x, y in ((4, 0), (12, 4), (6, 9), (14, 14)):
+        d.line((x, y, x, y + 3), fill=WAND_DUNKEL)
+    tupfen(d, F, F, [WAND_HELL], 5, 21)
+    return b
+
+
+def regal():
+    """4 × 2: oben ein Brett an der Wand, unten der Platz davor."""
+    b = neu(4, 2)
+    d = ImageDraw.Draw(b)
+    d.rectangle((1, 1, 62, 14), fill=HOLZ_DUNKEL, outline=KONTUR)
+    d.rectangle((2, 11, 61, 14), fill=HOLZ_HELL, outline=KONTUR)
+    return b
+
+
+def titelwand():
+    """4 × 2: oben eine Leiste mit Haken für die Banner."""
+    b = neu(4, 2)
+    d = ImageDraw.Draw(b)
+    d.rectangle((1, 1, 62, 3), fill=HOLZ, outline=KONTUR)
+    for x in range(6, 62, 10):
+        d.point((x, 4), fill=KONTUR)
+    return b
+
+
+def ruestung():
+    """2 × 3: ein Ständer aus Holz, unten der Platz davor."""
+    b = neu(2, 3)
+    d = ImageDraw.Draw(b)
+    d.rectangle((15, 4, 16, 30), fill=HOLZ_DUNKEL)
+    d.rectangle((6, 9, 25, 10), fill=HOLZ_DUNKEL)
+    d.ellipse((12, 1, 19, 7), fill=HOLZ, outline=KONTUR)
+    d.rectangle((8, 29, 23, 31), fill=HOLZ_DUNKEL, outline=KONTUR)
+    return b
+
+
+def truhe():
+    """2 × 2: eine grosse Truhe, unten der Platz davor."""
+    b = neu(2, 2)
+    d = ImageDraw.Draw(b)
+    d.rectangle((6, 4, 25, 15), fill=HOLZ, outline=KONTUR)
+    d.rectangle((6, 4, 25, 8), fill=HOLZ_DUNKEL, outline=KONTUR)
+    d.line((6, 9, 25, 9), fill=KONTUR)
+    for x in (9, 22):
+        d.line((x, 4, x, 15), fill=(224, 176, 60))
+    d.rectangle((14, 8, 17, 11), fill=(224, 176, 60), outline=KONTUR)
+    return b
+
+
+def ausgang():
+    """1 × 1: die Tür in der unteren Wand."""
+    b = neu(1, 1, WAND)
+    d = ImageDraw.Draw(b)
+    d.rectangle((2, 0, 13, 15), fill=HOLZ_DUNKEL, outline=KONTUR)
+    d.line((8, 0, 8, 15), fill=KONTUR)
+    d.point((11, 8), fill=FENSTER)
+    return b
+
+
 def main():
+    speichern(dielen(4), "dielen.png")
+    speichern(dielen(5), "dielen2.png")
+    speichern(wand(), "wand.png")
+    speichern(regal(), "regal.png")
+    speichern(titelwand(), "titelwand.png")
+    speichern(ruestung(), "ruestung.png")
+    speichern(truhe(), "truhe.png")
+    speichern(ausgang(), "ausgang.png")
     speichern(gras(1), "gras.png")
     speichern(gras(2), "gras2.png")
     speichern(weg(), "weg.png")

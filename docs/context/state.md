@@ -46,8 +46,25 @@ selbst hinein**: Wer vor einer Tür steht, bekommt einen kleinen Knopf
 „Bücherei betreten“ mitten auf dem Gebäude. Ein zweiter Tipp auf das
 Gebäude tut dasselbe. App 480.
 
-Offen: Das Haus zeigt noch nichts Eigenes, es führt zum Charakter. Die
-Dorfkarte ist fest, sie wächst nicht mit.
+**Das eigene Haus** ist gebaut (Frederik: „bau mal Punkt 2“). Ein Raum
+zum Herumlaufen wie das Dorf, und alles darin wächst von selbst mit:
+
+| Ding | zeigt | antippen |
+|---|---|---|
+| Trophäenregal | ein Pokal je verdienter Errungenschaft, „9/27“ | Errungenschaften |
+| Titelwand | ein Banner je Titel, „4/13“ | Liste der Titel |
+| Rüstungsständer | die Bilder von Helm, Rüstung und Waffe, die angelegt sind | Charakter (nur Durchgang, AktivesBrett baut dort) |
+| Schatztruhe | ein Goldhaufen aus dem Gold der Tagestruhen, ein Schatz funkelt | Liste der Schätze |
+| Ausgang | — | zurück ins Dorf |
+
+Alles abgeleitet (`HouseView`), nichts im Spielstand. `VillageGame`
+zeichnet jetzt beide Szenen (Gras und Bäume draussen, Dielen und Wände
+drinnen); was in einem Ding liegt, zeichnet `paintHouse` über den Haken
+`decorate`. Grob gezeichnet wie das Dorf. App 486. Angesehen als
+gerendertes Testbild, nicht am Handy.
+
+Offen: Die Dorfkarte ist fest und wächst nicht mit. Das Haus wächst nicht
+selbst (Hütte zu Haus), nur sein Inhalt.
 
 ## Sitzung 23.09.2026, Nachtrag: die Rückfrage des Tages
 
