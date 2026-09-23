@@ -49,6 +49,20 @@ abstract final class HabitRewards {
   /// eine lange Streak zur Abkürzung durch den Shop.
   static const int goldPerCheck = 5;
 
+  /// **Tagesform:** Um so viel stärkt ein heutiges Häkchen heute den
+  /// Wert, den seine Gewohnheit trägt — Stärke den Angriff, Ausdauer das
+  /// Leben, Disziplin die Abwehr, Klarheit das Mana.
+  ///
+  /// Ein Faktor, kein Punkt: Er wirkt auch, wenn die Stat-Kurve längst am
+  /// Deckel steht. Die Gewohnheit bleibt so jeden Tag im Kampf spürbar,
+  /// nicht nur im ersten Monat. Er ist ein Bonus, nie ein Abzug — ein Tag
+  /// ohne Häkchen kämpft mit den Werten, die er hat.
+  static const double formPerCheck = 0.10;
+
+  /// **In Form:** der Aufschlag auf alle vier Werte, wenn heute jede
+  /// laufende Gewohnheit erledigt ist.
+  static const double formAllDone = 0.10;
+
   /// Wie viele Gewohnheiten gleichzeitig laufen dürfen.
   ///
   /// Eine Obergrenze ist kein Gängeln: Ohne sie hakt man alle Vorlagen an

@@ -61,9 +61,10 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 162 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 169 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
+| `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 90 Tests | nur Dart-SDK |
@@ -81,7 +82,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 185 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 186 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -172,7 +173,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 435 Tests
+flutter test             # 439 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -180,12 +181,12 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 185 Tests
+dart test                              # 186 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 162 Tests
+dart test                              # 169 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -294,7 +295,12 @@ je Level) und die **Seltenheit** von Waffe (Angriff) und Rüstung (Leben)
 bis `stagePowerLast`), und alle Kampfzahlen stehen mal
 `ActionBalance.powerScale`. Zusammengesetzt wird nur in `PitPower.hero`;
 die Welt und jede Anzeige nehmen `ActionStats.combatAttack` und die
-anderen `combat…`. **Eine feste Zahl im Kampf ist ein Bug** — sie wäre
+anderen `combat…`. **Dazu die Tagesform** ([ADR-0043](docs/decisions/0043-tagesform.md)):
+Jedes heutige Häkchen vervielfacht heute den Wert seiner Gewohnheit
+(Stärke → Angriff, Ausdauer → Leben, Disziplin → Abwehr, Klarheit →
+Mana), alles erledigt heißt „In Form" und hebt alle vier. Die Regel steht
+in `HabitTracker.formOn`, die Zahlen in `HabitRewards`, der Wortlaut in
+`lib/habits/daily_form_text.dart`. **Eine feste Zahl im Kampf ist ein Bug** — sie wäre
 zehnmal zu klein.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
@@ -528,7 +534,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 | `combatUnlockedProvider` | ob die Grube offensteht (ADR-0020) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
-| `heroPowerProvider` | Werte, Level und Seltenheit zur Stärke in der Grube (ADR-0042) |
+| `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt

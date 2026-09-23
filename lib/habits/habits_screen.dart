@@ -12,8 +12,10 @@ import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/palette.dart';
+import 'daily_form_text.dart';
 import 'habits_controller.dart';
 import 'widgets/custom_habit_sheet.dart';
+import 'widgets/daily_form_card.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
@@ -87,6 +89,13 @@ class HabitsScreen extends ConsumerWidget {
                       StreakLadderCard(
                         bestStreak: tracker.currentBestStreak(today),
                       ),
+                      if (active.isNotEmpty) ...<Widget>[
+                        const SizedBox(height: 12),
+                        DailyFormCard(
+                          form: ref.watch(dailyFormProvider),
+                          open: active.length - tracker.completedOn(today),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       _SectionHeader(
                         title: 'Heute',
@@ -210,6 +219,7 @@ class HabitsScreen extends ConsumerWidget {
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
+    final formVorher = ref.read(dailyFormProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
@@ -221,7 +231,10 @@ class HabitsScreen extends ConsumerWidget {
     unawaited(HapticFeedback.mediumImpact());
     ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
-    _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
+    _say(
+      context,
+      _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
+    );
   }
 
   /// Ein Schritt auf ein Tagesziel.
@@ -230,6 +243,7 @@ class HabitsScreen extends ConsumerWidget {
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
+    final formVorher = ref.read(dailyFormProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
@@ -250,7 +264,10 @@ class HabitsScreen extends ConsumerWidget {
     unawaited(HapticFeedback.mediumImpact());
     ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
     _celebrate(context, ref, vorher, vorherErrungen);
-    _say(context, _feedback(result, _statGain(ref, habit, werteVorher)));
+    _say(
+      context,
+      _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
+    );
   }
 
   /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier
@@ -333,6 +350,23 @@ class HabitsScreen extends ConsumerWidget {
     final zuwachs = nachher.valueFor(habit.stat) - vorher.valueFor(habit.stat);
     if (zuwachs <= 0) return '';
     return ' · +$zuwachs ${habit.stat.label}';
+  }
+
+  /// Alles, was sich an ein Häkchen anhängt: ein gewonnener Punkt und
+  /// die Tagesform, die es heute gehoben hat.
+  static String _gains(
+    WidgetRef ref,
+    Habit habit,
+    CharacterStats werteVorher,
+    DailyForm formVorher,
+  ) {
+    final form = DailyFormText.gainAfterCheck(
+      stat: habit.stat,
+      vorher: formVorher,
+      nachher: ref.read(dailyFormProvider),
+    );
+    final punkt = _statGain(ref, habit, werteVorher);
+    return form.isEmpty ? punkt : '$punkt · $form';
   }
 
   /// Was nach einem Häkchen in der Leiste steht.

@@ -14,6 +14,7 @@ class ActionStats {
     this.damageMultiplier = 1,
     this.hpMultiplier = 1,
     this.defenseMultiplier = 1,
+    this.manaMultiplier = 1,
     this.critChance = 0,
     this.critFactor = 2,
   });
@@ -41,6 +42,10 @@ class ActionStats {
   /// Dasselbe für die Verteidigung: das Level.
   final double defenseMultiplier;
 
+  /// Ein Faktor auf Vorrat und Nachfluss des Manas — die Tagesform der
+  /// Klarheit. Das Schlagtempo bleibt davon unberührt.
+  final double manaMultiplier;
+
   /// **Die Zahlen, wie die Grube sie führt** — mal [ActionBalance.powerScale]
   /// und mal den Faktoren. Die Welt und jede Anzeige nehmen diese, damit
   /// der Charakterbildschirm nie etwas anderes sagt als der Kampf.
@@ -60,11 +65,14 @@ class ActionStats {
   final double critFactor;
 
   /// Wie viel Mana in den Lauf mitgeht (ADR-0039).
-  int get maxMana => energy * ActionBalance.manaPerEnergy;
+  int get maxMana =>
+      (energy * ActionBalance.manaPerEnergy * manaMultiplier).round();
 
   /// Mana je Sekunde.
   double get manaRegen =>
-      ActionBalance.manaRegenBase + energy * ActionBalance.manaRegenPerEnergy;
+      (ActionBalance.manaRegenBase +
+          energy * ActionBalance.manaRegenPerEnergy) *
+      manaMultiplier;
 
   /// Sekunden zwischen zwei Schlägen.
   double get attackCooldown {
@@ -127,7 +135,9 @@ class ActionStats {
 ///
 /// Die Faktoren kommen von aussen, wie alle Zahlen hier: das Level aus
 /// `package:progression` (`PowerCurve`), die Seltenheit aus
-/// `package:gear` (`GearRarity.powerFactor`).
+/// `package:gear` (`GearRarity.powerFactor`), die **Tagesform** aus
+/// `package:habits` (`DailyForm`) — je ein Faktor für Angriff, Leben,
+/// Abwehr und Mana, 1 an einem Tag ohne Häkchen.
 abstract final class PitPower {
   static ActionStats hero({
     required int attack,
@@ -137,15 +147,20 @@ abstract final class PitPower {
     required double levelFactor,
     required double weaponFactor,
     required double armorFactor,
+    double formAttack = 1,
+    double formHp = 1,
+    double formDefense = 1,
+    double formMana = 1,
   }) {
     return ActionStats(
       attack: attack,
       maxHp: maxHp,
       defense: defense,
       energy: energy,
-      damageMultiplier: levelFactor * weaponFactor,
-      hpMultiplier: levelFactor * armorFactor,
-      defenseMultiplier: levelFactor,
+      damageMultiplier: levelFactor * weaponFactor * formAttack,
+      hpMultiplier: levelFactor * armorFactor * formHp,
+      defenseMultiplier: levelFactor * formDefense,
+      manaMultiplier: formMana,
     );
   }
 }

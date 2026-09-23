@@ -56,6 +56,56 @@ void main() {
       expect(stark.energy, roh.energy, reason: 'Energie bleibt Energie.');
     });
 
+    test('die Tagesform stärkt je ihren Wert — und nur ihn', () {
+      ActionStats held({
+        double angriff = 1,
+        double leben = 1,
+        double abwehr = 1,
+        double mana = 1,
+      }) {
+        return PitPower.hero(
+          attack: 20,
+          maxHp: 200,
+          defense: 10,
+          energy: 10,
+          levelFactor: 1.5,
+          weaponFactor: 1.2,
+          armorFactor: 1.1,
+          formAttack: angriff,
+          formHp: leben,
+          formDefense: abwehr,
+          formMana: mana,
+        );
+      }
+
+      final roh = held();
+      final kraft = held(angriff: 1.2);
+      expect(kraft.combatAttack, closeTo(roh.combatAttack * 1.2, 1));
+      expect(kraft.combatMaxHp, roh.combatMaxHp);
+      expect(kraft.combatDefense, roh.combatDefense);
+      expect(kraft.maxMana, roh.maxMana);
+
+      expect(held(leben: 1.3).combatMaxHp, closeTo(roh.combatMaxHp * 1.3, 1));
+      expect(
+        held(abwehr: 1.1).combatDefense,
+        closeTo(roh.combatDefense * 1.1, 1),
+      );
+
+      final klar = held(mana: 1.2);
+      expect(klar.maxMana, closeTo(roh.maxMana * 1.2, 1));
+      expect(klar.manaRegen, closeTo(roh.manaRegen * 1.2, 1e-9));
+      expect(
+        klar.attackCooldown,
+        roh.attackCooldown,
+        reason: 'Klarheit füllt das Mana, sie schlägt nicht schneller.',
+      );
+      expect(
+        ActionWorld(level: kammer, heroStats: klar).maxMana,
+        klar.maxMana,
+        reason: 'Die Welt nimmt das Mana aus den Werten.',
+      );
+    });
+
     test('die Stufen wachsen mit: ×1 auf Stufe 1, der Deckel auf 30', () {
       expect(PitStage(1).powerFactor, 1);
       expect(

@@ -11,6 +11,30 @@
 
 ---
 
+## Sitzung 23.09.2026, zum Schluss: die Tagesform
+
+[ADR-0043](../decisions/0043-tagesform.md), nach einer kritischen
+Durchsicht: Das Abhaken war der schwächste Moment des Spiels, und nach dem
+Deckel der Stat-Kurve spürte man die Gewohnheiten im Kampf kaum noch.
+Frederik: „Gewohnheiten sollen die ausgewählten Stats auch direkt
+erhöhen", zusammen mit dem Vorschlag eines Tagesbonus.
+
+| | |
+|---|---|
+| Ein Häkchen | heute **+10 %** auf den Wert seiner Gewohnheit: Stärke → Angriff, Ausdauer → Leben, Disziplin → Abwehr, Klarheit → Mana |
+| Alles erledigt | **In Form**: +10 % auf alle vier obendrauf |
+| Wie lange | bis Mitternacht, abgeleitet, nie gespeichert |
+| Wo sichtbar | Karte über der Tagesliste, Meldung beim Abhaken („Angriff heute +10 %", „In Form!"), Machtkarte am Charakter, Eingang zur Grube |
+
+habits 169, action_combat 186, App 439. `pit_sim` unverändert: Sein Bot
+geht ohne Häkchen des Tages hinein. **Nicht angesehen.**
+
+Aus derselben Durchsicht **noch offen**: die Tagestruhe für „alles
+erledigt" mit variablem Inhalt (sie würde auch Issue #46 entscheiden,
+also woher das Streak-Eis kommt), mehr Wucht beim Häkchen (Zahlen, die in
+den Balken fliegen, ein Klang für einen Stat-Punkt) und eine teilbare
+Wochenkarte für den Vergleich zu zweit.
+
 ## Sitzung 23.09.2026, ganz zuletzt: jeder Knopf gibt nach
 
 Auf Frederiks Wunsch: „Animation bei allen Button Pressed, wirklich bei

@@ -1,5 +1,6 @@
 import 'catalog.dart';
 import 'character_stats.dart';
+import 'daily_form.dart';
 import 'day.dart';
 import 'habit.dart';
 import 'rewards.dart';
@@ -447,6 +448,20 @@ class HabitTracker {
 
   bool isDayComplete(Day day) {
     return _activeIds.isNotEmpty && completedOn(day) == _activeIds.length;
+  }
+
+  /// Die Tagesform an [day]: die dort abgehakten **laufenden**
+  /// Gewohnheiten, gezählt je Charakterwert. Eine gestoppte Gewohnheit
+  /// zählt nicht mehr — sonst wäre sie ein Knopf, der nichts mehr kostet.
+  DailyForm formOn(Day day) {
+    final jeWert = <HabitStat, int>{};
+    for (final id in _activeIds) {
+      if (!isChecked(id, day)) continue;
+      final stat = definitionFor(id)?.stat;
+      if (stat == null) continue;
+      jeWert[stat] = (jeWert[stat] ?? 0) + 1;
+    }
+    return DailyForm(checksByStat: jeWert, isInForm: isDayComplete(day));
   }
 
   /// Füllt ein Tagesziel um einen Schritt auf.

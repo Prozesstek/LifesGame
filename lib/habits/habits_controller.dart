@@ -182,6 +182,14 @@ final customSlotsLeftProvider = Provider<int>((ref) {
   return frei < 0 ? 0 : frei;
 });
 
+/// **Die Tagesform** — was heute abgehakt ist, macht heute stärker. Die
+/// Regel steht in `package:habits` ([HabitTracker.formOn]); hier wird
+/// nur „heute" eingesetzt. Um Mitternacht rechnet sie sich über
+/// [todayProvider] von selbst neu.
+final dailyFormProvider = Provider<DailyForm>((ref) {
+  return ref.watch(habitTrackerProvider).formOn(ref.watch(todayProvider));
+});
+
 /// Die Kampfwerte, die sich aus den Gewohnheiten ergeben.
 final characterStatsProvider = Provider<CharacterStats>((ref) {
   return ref.watch(habitTrackerProvider).stats;

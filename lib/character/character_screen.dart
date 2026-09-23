@@ -23,6 +23,7 @@ import 'widgets/identity_card.dart';
 import 'widgets/name_dialog.dart';
 import 'widgets/set_card.dart';
 import 'widgets/title_dialog.dart';
+import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 
 /// Der Charakterbildschirm: Werte, Ausrüstung, Herkunft der Zahlen.
@@ -274,6 +275,20 @@ class _PowerCard extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11, color: Palette.textDim),
           ),
+          if (DailyFormText.summary(macht.form) case final form?) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              '${macht.form.isInForm ? 'In Form' : 'Tagesform'}: $form',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Palette.accent,
+              ),
+            ),
+          ],
         ],
       ),
     );
