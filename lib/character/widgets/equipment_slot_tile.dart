@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
+import '../../gear/copy_text.dart';
 import '../../gear/gear_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
@@ -36,12 +37,13 @@ class EquipmentSlotTile extends StatelessWidget {
   final GearSlot slot;
 
   /// Was gerade auf dem Platz liegt. Null heißt leer.
-  final GearItem? equipped;
+  final GearCopy? equipped;
 
-  /// Alles Gekaufte, das auf diesen Platz passt — die Auswahl.
-  final List<GearItem> owned;
+  /// Jedes Exemplar, das auf diesen Platz passt — die Auswahl (ADR-0048).
+  final List<GearCopy> owned;
 
-  final void Function(String itemId) onEquip;
+  /// Bekommt die Uid des gewählten Exemplars.
+  final void Function(String uid) onEquip;
   final VoidCallback onUnequip;
 
   /// Wie gross das Bild eines Stücks im Auswahlblatt ist. Grösser als auf
@@ -60,7 +62,7 @@ class EquipmentSlotTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = equipped;
+    final item = equipped?.item;
     final isEmpty = item == null;
     final hasNothingToPick = owned.isEmpty;
 
@@ -156,48 +158,57 @@ class EquipmentSlotTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                // **Dasselbe Bild wie im Laden und auf der Kachel.** Wer hier
-                // wählt, soll das Stück erkennen, nicht nur seinen Namen
-                // lesen -- und ob es zu einem Set gehört, entscheidet die
-                // Wahl mit: Ein Teil ablegen kann eine Set-Stufe kosten.
-                for (final option in owned)
-                  Druck(
-                    child: ListTile(
-                      leading: _Zeichen(
-                        slot: slot,
-                        item: option,
-                        color: Palette.textDim,
-                        side: _bildImBlatt,
-                      ),
-                      title: Text(
-                        option.name,
-                        style: const TextStyle(color: Palette.text),
-                      ),
-                      subtitle: _Untertitel(option: option),
-                      trailing: option.id == equipped?.id
-                          ? const Icon(Icons.check, color: Palette.accent)
-                          : null,
-                      onTap: () => Navigator.of(
-                        sheetContext,
-                      ).pop(_Choice.equip(option.id)),
-                    ),
+                // **Die Auswahl scrollt.** Seit es Beute gibt (ADR-0048),
+                // liegen auf einem Platz schnell zwanzig Exemplare.
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      // **Dasselbe Bild wie im Laden und auf der Kachel.**
+                      // Ob ein Stück zu einem Set gehört, entscheidet die
+                      // Wahl mit: Ein Teil ablegen kann eine Stufe kosten.
+                      for (final option in owned)
+                        Druck(
+                          child: ListTile(
+                            leading: _Zeichen(
+                              slot: slot,
+                              item: option.item,
+                              color: Palette.textDim,
+                              side: _bildImBlatt,
+                            ),
+                            title: Text(
+                              option.item?.name ?? option.itemId,
+                              style: const TextStyle(color: Palette.text),
+                            ),
+                            subtitle: _Untertitel(option: option),
+                            trailing: option.uid == equipped?.uid
+                                ? const Icon(Icons.check, color: Palette.accent)
+                                : null,
+                            onTap: () => Navigator.of(
+                              sheetContext,
+                            ).pop(_Choice.equip(option.uid)),
+                          ),
+                        ),
+                      // Das Ablegen steht neben dem, was es ersetzt.
+                      if (equipped != null)
+                        Druck(
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.close,
+                              color: Palette.muted,
+                            ),
+                            title: const Text(
+                              'Ablegen',
+                              style: TextStyle(color: Palette.textDim),
+                            ),
+                            onTap: () => Navigator.of(
+                              sheetContext,
+                            ).pop(const _Choice.unequip()),
+                          ),
+                        ),
+                    ],
                   ),
-                // Das Ablegen ist von der Kachel hierher gewandert: Im
-                // Raster ist kein Platz für einen zweiten Knopf, und hier
-                // steht es neben dem, was es ersetzt.
-                if (equipped != null)
-                  Druck(
-                    child: ListTile(
-                      leading: const Icon(Icons.close, color: Palette.muted),
-                      title: const Text(
-                        'Ablegen',
-                        style: TextStyle(color: Palette.textDim),
-                      ),
-                      onTap: () => Navigator.of(
-                        sheetContext,
-                      ).pop(const _Choice.unequip()),
-                    ),
-                  ),
+                ),
                 const SizedBox(height: 8),
               ],
             ),
@@ -207,11 +218,11 @@ class EquipmentSlotTile extends StatelessWidget {
     );
 
     if (chosen == null) return;
-    final itemId = chosen.itemId;
-    if (itemId == null) {
+    final uid = chosen.uid;
+    if (uid == null) {
       onUnequip();
     } else {
-      onEquip(itemId);
+      onEquip(uid);
     }
   }
 }
@@ -221,11 +232,11 @@ class EquipmentSlotTile extends StatelessWidget {
 /// Eigener Typ statt eines nullbaren Strings: Abbrechen und Ablegen sind
 /// zwei verschiedene Antworten, und beide wären sonst null.
 class _Choice {
-  const _Choice.equip(this.itemId);
+  const _Choice.equip(this.uid);
 
-  const _Choice.unequip() : itemId = null;
+  const _Choice.unequip() : uid = null;
 
-  final String? itemId;
+  final String? uid;
 }
 
 /// Was auf einem Platz oben steht: das Bild des getragenen Stücks, sonst
@@ -268,18 +279,22 @@ class _Zeichen extends StatelessWidget {
 class _Untertitel extends StatelessWidget {
   const _Untertitel({required this.option});
 
-  final GearItem option;
+  final GearCopy option;
 
   @override
   Widget build(BuildContext context) {
-    final set = GearSets.byId(option.setId);
+    final set = GearSets.byId(option.item?.setId);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          option.bonus.labels.join(' · '),
-          style: const TextStyle(color: Palette.textDim),
+          CopyText.line(option),
+          style: TextStyle(
+            color: CopyText.isGoodRoll(option)
+                ? Palette.accent
+                : Palette.textDim,
+          ),
         ),
         if (set != null)
           Text(

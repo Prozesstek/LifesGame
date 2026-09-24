@@ -110,6 +110,7 @@ class LadderProgress {
     this.dailyClears = const <int, Set<int>>{},
     this.partial = const <int, Payout>{},
     this.dailyPartial = const <int, Map<int, Payout>>{},
+    this.bestTimes = const <int, double>{},
   });
 
   const LadderProgress.empty() : this();
@@ -146,6 +147,25 @@ class LadderProgress {
 
   /// Dasselbe für die Dailies, je Tag und Stufe.
   final Map<int, Map<int, Payout>> dailyPartial;
+
+  /// Die schnellste gewonnene Zeit je Stufe, in Sekunden (ADR-0048).
+  ///
+  /// **Das Können, nicht die Macht.** Wer besser spielt, ist schneller;
+  /// eine Bestzeit gibt einer geschafften Stufe wieder einen Grund. Sie
+  /// zahlt nichts und schaltet nichts frei — sie kann fallen, und darf es.
+  final Map<int, double> bestTimes;
+
+  /// Hält einen Sieg in [seconds] fest, wenn er schneller war als der
+  /// bisher beste. Auf eine Zehntelsekunde gerundet — mehr liest niemand.
+  LadderProgress recordTime(int rung, double seconds) {
+    if (rung < 1 || rung > PitStage.count || seconds <= 0) return this;
+    final gerundet = (seconds * 10).round() / 10;
+    final bisher = bestTimes[rung];
+    if (bisher != null && bisher <= gerundet) return this;
+    return copyWith(
+      bestTimes: <int, double>{...bestTimes, rung: gerundet},
+    );
+  }
 
   /// Was ein Lauf auf [rung] am Tag [day] noch einbringen kann — der
   /// **Rest** des Topfs. Eine neue Stufe: ihr Erstsieg; ein Daily, falls
@@ -274,6 +294,7 @@ class LadderProgress {
     Map<int, Set<int>>? dailyClears,
     Map<int, Payout>? partial,
     Map<int, Map<int, Payout>>? dailyPartial,
+    Map<int, double>? bestTimes,
   }) {
     return LadderProgress(
       highestDefeated: highestDefeated ?? this.highestDefeated,
@@ -282,6 +303,7 @@ class LadderProgress {
       dailyClears: dailyClears ?? this.dailyClears,
       partial: partial ?? this.partial,
       dailyPartial: dailyPartial ?? this.dailyPartial,
+      bestTimes: bestTimes ?? this.bestTimes,
     );
   }
 
@@ -417,6 +439,10 @@ class LadderProgress {
             },
         },
       if (partial.isNotEmpty) 'partial': _teileJson(partial),
+      if (bestTimes.isNotEmpty)
+        'best': <String, Object?>{
+          for (final entry in bestTimes.entries) '${entry.key}': entry.value,
+        },
     };
   }
 
@@ -484,7 +510,21 @@ class LadderProgress {
         (r) => (xp: LadderRewards.xpFor(r), gold: LadderRewards.goldFor(r)),
       ),
       dailyPartial: tagesTeile,
+      bestTimes: _zeitenLesen(json['best']),
     );
+  }
+
+  static Map<int, double> _zeitenLesen(Object? roh) {
+    final zeiten = <int, double>{};
+    if (roh is! Map) return zeiten;
+    for (final entry in roh.entries) {
+      final rung = int.tryParse('${entry.key}');
+      final wert = entry.value;
+      if (rung == null || rung < 1 || rung > PitStage.count) continue;
+      if (wert is! num || wert <= 0) continue;
+      zeiten[rung] = wert.toDouble();
+    }
+    return zeiten;
   }
 
   static Map<String, Object?> _teileJson(Map<int, Payout> teile) {
@@ -546,6 +586,10 @@ class LadderProgress {
       final dort = other.dailyClears[entry.key];
       if (dort == null || !dort.containsAll(entry.value)) return false;
       if (dort.length != entry.value.length) return false;
+    }
+    if (other.bestTimes.length != bestTimes.length) return false;
+    for (final entry in bestTimes.entries) {
+      if (other.bestTimes[entry.key] != entry.value) return false;
     }
     return true;
   }

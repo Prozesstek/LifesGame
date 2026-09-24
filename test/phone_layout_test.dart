@@ -18,6 +18,7 @@ import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'gear_helpers.dart';
 
 /// Prüft jeden Bildschirm im Zielformat: Handy, Hochformat, 390x844.
 ///
@@ -105,7 +106,7 @@ void main() {
     var loadout = const Loadout.empty();
     for (final item in GearCatalog.all) {
       loadout = loadout.buy(
-        item.id,
+        angebot(item.id),
         availableGold: item.price,
         highestRung: GearGates.legendaryRung,
       );

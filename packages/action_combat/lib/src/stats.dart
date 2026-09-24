@@ -17,6 +17,10 @@ class ActionStats {
     this.manaMultiplier = 1,
     this.critChance = 0,
     this.critFactor = 2,
+    this.gearAttack = 0,
+    this.gearMaxHp = 0,
+    this.gearDefense = 0,
+    this.gearEnergy = 0,
   });
 
   final int attack;
@@ -26,6 +30,21 @@ class ActionStats {
   /// Energie beschleunigt die Schlagfolge — der einzige Ort, an dem
   /// Klarheit im Echtzeit-Kampf etwas tut.
   final int energy;
+
+  /// Was die Ausrüstung dazugibt — **schon im Kampfmassstab** (ADR-0048).
+  /// Gewürfelte Werte wie 11 statt 10 gingen im kleinen Massstab in der
+  /// Rundung verloren; deshalb kommen sie hier getrennt an und werden
+  /// **nach** [ActionBalance.powerScale] addiert, aber vor den Faktoren.
+  final int gearAttack;
+  final int gearMaxHp;
+  final int gearDefense;
+
+  /// Energie aus der Ausrüstung, in Zehnteln eines Punkts (ebenfalls
+  /// ×[ActionBalance.powerScale]).
+  final int gearEnergy;
+
+  /// Die Energie samt Ausrüstung, für Mana und Schlagtempo.
+  double get _energie => energy + gearEnergy / ActionBalance.powerScale;
 
   /// Ein **vervielfachender** Faktor auf den Schaden — seit ADR-0042 das
   /// Level mal die Seltenheit der Waffe ([PitPower.hero]).
@@ -50,13 +69,15 @@ class ActionStats {
   /// und mal den Faktoren. Die Welt und jede Anzeige nehmen diese, damit
   /// der Charakterbildschirm nie etwas anderes sagt als der Kampf.
   int get combatAttack =>
-      (attack * ActionBalance.powerScale * damageMultiplier).round();
+      ((attack * ActionBalance.powerScale + gearAttack) * damageMultiplier)
+          .round();
 
   int get combatMaxHp =>
-      (maxHp * ActionBalance.powerScale * hpMultiplier).round();
+      ((maxHp * ActionBalance.powerScale + gearMaxHp) * hpMultiplier).round();
 
   int get combatDefense =>
-      (defense * ActionBalance.powerScale * defenseMultiplier).round();
+      ((defense * ActionBalance.powerScale + gearDefense) * defenseMultiplier)
+          .round();
 
   /// Wahrscheinlichkeit eines kritischen Treffers, 0 bis 1. Ebenfalls
   /// hypothetisch, aus demselben Grund.
@@ -66,17 +87,17 @@ class ActionStats {
 
   /// Wie viel Mana in den Lauf mitgeht (ADR-0039).
   int get maxMana =>
-      (energy * ActionBalance.manaPerEnergy * manaMultiplier).round();
+      (_energie * ActionBalance.manaPerEnergy * manaMultiplier).round();
 
   /// Mana je Sekunde.
   double get manaRegen =>
       (ActionBalance.manaRegenBase +
-          energy * ActionBalance.manaRegenPerEnergy) *
+          _energie * ActionBalance.manaRegenPerEnergy) *
       manaMultiplier;
 
   /// Sekunden zwischen zwei Schlägen.
   double get attackCooldown {
-    final gespart = (energy - ActionBalance.energyReference) *
+    final gespart = (_energie - ActionBalance.energyReference) *
         ActionBalance.cooldownPerEnergy;
     final wert = ActionBalance.heroAttackCooldown - gespart;
     return wert < ActionBalance.minAttackCooldown
@@ -151,12 +172,20 @@ abstract final class PitPower {
     double formHp = 1,
     double formDefense = 1,
     double formMana = 1,
+    int gearAttack = 0,
+    int gearMaxHp = 0,
+    int gearDefense = 0,
+    int gearEnergy = 0,
   }) {
     return ActionStats(
       attack: attack,
       maxHp: maxHp,
       defense: defense,
       energy: energy,
+      gearAttack: gearAttack,
+      gearMaxHp: gearMaxHp,
+      gearDefense: gearDefense,
+      gearEnergy: gearEnergy,
       damageMultiplier: levelFactor * weaponFactor * formAttack,
       hpMultiplier: levelFactor * armorFactor * formHp,
       defenseMultiplier: levelFactor * formDefense,

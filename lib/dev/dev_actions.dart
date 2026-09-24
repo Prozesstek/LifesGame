@@ -47,14 +47,12 @@ class DevActions {
     if (gained > 0) _grants.addXp(gained);
   }
 
-  /// Legt ein Stück ins Inventar und schenkt den Preis gleich mit.
+  /// Legt ein Stück ins Inventar. Seit ADR-0048 kostet ein Geschenk
+  /// nichts (`GearController.grant`), also muss kein Preis mehr als
+  /// Zuschlag ausgeglichen werden.
   void grantItem(String itemId) {
-    final item = GearCatalog.byId(itemId);
-    if (item == null) return;
-    if (_ref.read(loadoutProvider).isOwned(item.id)) return;
-
-    _ref.read(loadoutProvider.notifier).grant(item.id);
-    _grants.coverPrice(item.price);
+    if (GearCatalog.byId(itemId) == null) return;
+    _ref.read(loadoutProvider.notifier).grant(itemId);
   }
 
   void grantAllItems() {

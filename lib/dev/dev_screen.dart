@@ -325,7 +325,7 @@ class _CurrentValues extends ConsumerWidget {
       'Theoriepunkte frei': '${ref.watch(availableTheoryPointsProvider)}',
       'Fähigkeitspunkte': '${ref.watch(grantedAbilityPointsProvider)}',
       'Stücke im Besitz':
-          '${ref.watch(loadoutProvider).owned.length} / ${GearCatalog.all.length}',
+          '${ref.watch(loadoutProvider).everOwnedCount} / ${GearCatalog.all.length}',
       'Seiten bestanden':
           '${ref.watch(passedPagesProvider)} / ${ref.watch(totalPagesProvider)}',
     };

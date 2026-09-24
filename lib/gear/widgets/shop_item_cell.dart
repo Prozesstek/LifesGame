@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../ui/palette.dart';
+import '../copy_text.dart';
 import '../gear_icon.dart';
 import '../../ui/druck.dart';
 
-/// Ein Ausrüstungsstück als Kachel im Raster.
+/// Ein Exemplar als Kachel im Raster — ein Angebot des Tages oder ein
+/// Stück im Inventar (ADR-0048).
 ///
 /// **Sie wählt aus, sie kauft nicht.** Gekauft wird in der Detailfläche
 /// darunter — dort steht, was das Stück kann, was es kostet und was noch
@@ -17,7 +19,7 @@ import '../../ui/druck.dart';
 /// Seltenheit als Rand, und ob das Stück schon einem gehört.
 class ShopItemCell extends StatelessWidget {
   const ShopItemCell({
-    required this.item,
+    required this.copy,
     required this.isSelected,
     required this.isOwned,
     required this.isEquipped,
@@ -26,7 +28,7 @@ class ShopItemCell extends StatelessWidget {
     super.key,
   });
 
-  final GearItem item;
+  final GearCopy copy;
   final bool isSelected;
   final bool isOwned;
   final bool isEquipped;
@@ -73,6 +75,8 @@ class ShopItemCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final item = copy.item;
+    if (item == null) return const SizedBox.shrink();
     final rand = isSelected
         ? Palette.accent
         : (isEquipped ? Palette.success : Palette.surfaceRaised);
@@ -162,8 +166,9 @@ class ShopItemCell extends StatelessWidget {
 
   String get _fussnote {
     if (isEquipped) return 'getragen';
-    if (isOwned) return 'gekauft';
+    // Im Inventar steht die Güte des Wurfs, im Laden der Preis.
+    if (isOwned) return CopyText.quality(copy);
     if (isLocked) return 'gesperrt';
-    return '${item.price} G';
+    return '${copy.paid} G';
   }
 }

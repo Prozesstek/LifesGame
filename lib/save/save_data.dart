@@ -71,7 +71,8 @@ class SaveData {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
         habits.activeIds.isEmpty &&
-        loadout.owned.isEmpty &&
+        loadout.ownedCopies.isEmpty &&
+        loadout.keysConsumed == 0 &&
         !identity.hasName &&
         abilities.isEmpty &&
         ladder.highestDefeated == 0 &&

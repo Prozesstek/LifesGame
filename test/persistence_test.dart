@@ -21,6 +21,7 @@ import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'gear_helpers.dart';
 
 /// Prüft die Schicht, die kein Package allein prüfen kann: dass ein
 /// Neustart der App den Fortschritt behält.
@@ -194,7 +195,7 @@ void main() {
         for (final question in lesson.questions) question.correctIndex,
       ]);
 
-      expect(erste.read(loadoutProvider.notifier).buy(itemId), isNull);
+      expect(erste.read(loadoutProvider.notifier).buy(angebot(itemId)), isNull);
 
       final stand = SaveData(
         theory: erste.read(theoryProgressProvider),
@@ -209,7 +210,7 @@ void main() {
 
       expect(zweite.read(habitTrackerProvider).isChecked(habitId, tag), isTrue);
       expect(zweite.read(theoryProgressProvider).isPassed(lesson.id), isTrue);
-      expect(zweite.read(loadoutProvider).isOwned(itemId), isTrue);
+      expect(zweite.read(loadoutProvider).ownsItem(itemId), isTrue);
       expect(zweite.read(totalXpProvider), xpVorher);
       expect(zweite.read(goldProvider), goldVorher);
     });
@@ -228,8 +229,10 @@ void main() {
         haken = haken.next;
       }
 
-      expect(erste.read(loadoutProvider.notifier).buy(itemId), isNull);
-      final erloes = erste.read(loadoutProvider.notifier).sell(itemId);
+      expect(erste.read(loadoutProvider.notifier).buy(angebot(itemId)), isNull);
+      final erloes = erste
+          .read(loadoutProvider.notifier)
+          .sell(angebot(itemId).uid);
       expect(erloes, isNotNull);
 
       final goldVorher = erste.read(goldProvider);
@@ -241,8 +244,8 @@ void main() {
 
       final zweite = containerMit(SaveData.decode(stand.encode()), store);
 
-      expect(zweite.read(loadoutProvider).isOwned(itemId), isFalse);
-      expect(zweite.read(loadoutProvider).soldIds, <String>[itemId]);
+      expect(zweite.read(loadoutProvider).ownsItem(itemId), isFalse);
+      expect(zweite.read(loadoutProvider).soldCount, 1);
       expect(zweite.read(goldProvider), goldVorher);
     });
 
@@ -356,7 +359,7 @@ void main() {
       expect(container.read(totalXpProvider), 0);
       expect(container.read(goldProvider), 0);
       expect(container.read(playerLevelProvider).level, 1);
-      expect(container.read(loadoutProvider).owned, isEmpty);
+      expect(container.read(loadoutProvider).ownedCopies, isEmpty);
     });
 
     test('ein beschädigter Stand kostet den Start nicht', () {
@@ -430,13 +433,16 @@ void main() {
           .tracker;
       final original = SaveData(
         habits: tracker,
-        loadout: const Loadout.empty().buy(itemId, availableGold: 9999),
+        loadout: const Loadout.empty().buy(
+          angebot(itemId),
+          availableGold: 9999,
+        ),
       );
 
       final gelesen = SaveData.decode(original.encode());
 
       expect(gelesen.habits.totalChecks, 1);
-      expect(gelesen.loadout.isOwned(itemId), isTrue);
+      expect(gelesen.loadout.ownsItem(itemId), isTrue);
       expect(gelesen.isEmpty, isFalse);
       expect(const SaveData.empty().isEmpty, isTrue);
     });
@@ -496,11 +502,11 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(LifesGameApp)),
       );
-      container.read(loadoutProvider.notifier).buy(itemId);
+      container.read(loadoutProvider.notifier).buy(angebot(itemId));
       await tester.pump();
 
       final gespeichert = await store.read();
-      expect(gespeichert.loadout.isOwned(itemId), isTrue);
+      expect(gespeichert.loadout.ownsItem(itemId), isTrue);
     });
   });
 }

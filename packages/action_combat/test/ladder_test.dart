@@ -123,4 +123,30 @@ void main() {
       expect(gelesen.highestDefeated, PitStage.count);
     });
   });
+
+  group('Bestzeiten (ADR-0048)', () {
+    test('nur eine schnellere Zeit ersetzt die alte', () {
+      final l = const LadderProgress.empty()
+          .recordTime(3, 60)
+          .recordTime(3, 70)
+          .recordTime(3, 55.04);
+      expect(l.bestTimes[3], 55.0);
+    });
+
+    test('Unsinn wird nicht festgehalten', () {
+      const leer = LadderProgress.empty();
+      expect(leer.recordTime(0, 10), same(leer));
+      expect(leer.recordTime(PitStage.count + 1, 10), same(leer));
+      expect(leer.recordTime(3, 0), same(leer));
+    });
+
+    test('eine Bestzeit überlebt die übrigen Änderungen', () {
+      // `copyWith` gibt das Feld weiter — der Fall aus `gotchas.md`.
+      final l = const LadderProgress.empty()
+          .recordTime(2, 40)
+          .defeat(1)
+          .recordDefeat(3);
+      expect(l.bestTimes[2], 40);
+    });
+  });
 }

@@ -59,15 +59,19 @@ class LadderController extends Notifier<LadderProgress> {
     int stage, {
     required bool won,
     Payout collected = (xp: 0, gold: 0),
+    double? seconds,
   }) {
     final vorher = state;
-    state = state.bookRun(
+    var neu = state.bookRun(
       dayNumberOf(ref.read(todayProvider)),
       stage,
       won: won,
       collected: collected,
       dailyAllowed: ref.read(dailiesUnlockedProvider),
     );
+    // Nur ein Sieg hat eine Zeit, die zählt (ADR-0048).
+    if (won && seconds != null) neu = neu.recordTime(stage, seconds);
+    state = neu;
     return (
       xp: state.earnedXp - vorher.earnedXp,
       gold: state.earnedGold - vorher.earnedGold,

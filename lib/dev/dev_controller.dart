@@ -63,12 +63,6 @@ class DevController extends Notifier<DebugGrants> {
     );
   }
 
-  /// Bucht den Preis eines geschenkten Stücks als Zuschlag.
-  ///
-  /// Nötig, weil Gold Zufluss minus Besitz ist (ADR-0011): Ohne diese
-  /// Gutschrift würde ein geschenktes Stück den Kontostand **senken**.
-  void coverPrice(int price) => state = state.plus(gold: price);
-
   /// Setzt nur die Zuschläge zurück, nicht den Spielstand.
   void resetGrants() => state = const DebugGrants.none();
 }

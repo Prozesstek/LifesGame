@@ -1,8 +1,10 @@
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear/gear.dart';
 
 import '../action/pit_screen.dart';
+import '../gear/gear_controller.dart';
 import '../habits/daily_form_text.dart';
 import '../habits/habits_controller.dart';
 import '../ui/holz.dart';
@@ -46,11 +48,17 @@ class LadderScreen extends ConsumerWidget {
                   _Fortschritt(stand: stand),
                   const SizedBox(height: 14),
                   const _Dailies(),
+                  if (stand.highestDefeated > 0) ...<Widget>[
+                    const SizedBox(height: 10),
+                    _Geschafft(stand: stand),
+                  ],
                   const Expanded(child: _GrubenBild()),
                   const SizedBox(height: 14),
                   _Stufenleiste(stage: stufe),
                   const SizedBox(height: 10),
                   _Belohnung(stand: stand),
+                  const SizedBox(height: 4),
+                  const _Schluessel(),
                   const SizedBox(height: 8),
                   const _Tagesform(),
                   const SizedBox(height: 10),
@@ -373,6 +381,118 @@ class _Belohnung extends ConsumerWidget {
         fontSize: 12,
         color: zahlt ? Palette.goldOnDark : Palette.textOnDarkDim,
       ),
+    );
+  }
+}
+
+/// Wie viele Schlüssel da sind — sie öffnen die Beute des Wächters
+/// (ADR-0048). Ohne einen steht, woher sie kommen.
+class _Schluessel extends ConsumerWidget {
+  const _Schluessel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final anzahl = ref.watch(availableKeysProvider);
+    return Text(
+      anzahl > 0
+          ? '$anzahl von ${GearKeys.cap} Schlüsseln für die Beute des Wächters'
+          : 'Kein Schlüssel — jedes Häkchen, jede Seite und jede Rückfrage '
+                'bringt einen',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 12,
+        color: anzahl > 0 ? Palette.goldOnDark : Palette.textOnDarkDim,
+      ),
+    );
+  }
+}
+
+/// Jede geschaffte Stufe, mit Bestzeit — antippen führt hinein
+/// (ADR-0048).
+///
+/// **Ohne diese Leiste gäbe es keine Wahl.** „Hinab" führt nur zur
+/// nächsten neuen Stufe; Bestzeiten und die Frage, wo man einen Schlüssel
+/// einsetzt (sicher flach oder riskant tief), brauchen jede Stufe.
+class _Geschafft extends StatelessWidget {
+  const _Geschafft({required this.stand});
+
+  final LadderProgress stand;
+
+  static String zeit(double sekunden) {
+    final text = sekunden.toStringAsFixed(1).replaceAll('.', ',');
+    return '$text s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stufen = <int>[for (var s = stand.highestDefeated; s >= 1; s--) s];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const Text(
+          'Geschaffte Stufen · Bestzeiten',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Palette.textOnDark,
+          ),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 50,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              for (final s in stufen) ...<Widget>[
+                Druck(
+                  child: Material(
+                    color: Palette.surfaceRaised,
+                    borderRadius: BorderRadius.circular(6),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => PitScreen(stage: PitStage(s)),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 12,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Stufe $s',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Palette.text,
+                              ),
+                            ),
+                            Text(
+                              switch (stand.bestTimes[s]) {
+                                final double t => zeit(t),
+                                null => '—',
+                              },
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Palette.textDim,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

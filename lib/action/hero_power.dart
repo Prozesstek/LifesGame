@@ -50,11 +50,18 @@ final heroPowerProvider = Provider<HeroPower>((ref) {
       loadout.equippedIn(GearSlot.ruestung)?.rarity.powerFactor ?? 1.0;
 
   return HeroPower(
+    // Alltag im kleinen Massstab, Ausrüstung schon im Kampfmassstab —
+    // getrennt, damit der Wurf eines Stücks nicht in der Rundung
+    // verschwindet (ADR-0048).
     stats: PitPower.hero(
-      attack: werte.attack,
-      maxHp: werte.maxHp,
-      defense: werte.defense,
-      energy: werte.maxEnergy,
+      attack: werte.base.attack,
+      maxHp: werte.base.maxHp,
+      defense: werte.base.defense,
+      energy: werte.base.maxEnergy,
+      gearAttack: werte.bonus.attack,
+      gearMaxHp: werte.bonus.maxHp,
+      gearDefense: werte.bonus.defense,
+      gearEnergy: werte.bonus.maxEnergy,
       levelFactor: stufe,
       weaponFactor: waffe,
       armorFactor: ruestung,

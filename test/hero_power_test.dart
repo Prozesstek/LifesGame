@@ -1,4 +1,3 @@
-import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
@@ -6,6 +5,7 @@ import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'gear_helpers.dart';
 
 /// Womit der Held in die Grube geht (ADR-0042): Gewohnheiten und Boni
 /// addiert, Level und Seltenheit vervielfacht — an einer Stelle.
@@ -26,7 +26,8 @@ void main() {
     expect(macht.levelFactor, 1);
     expect(macht.weaponFactor, 1);
     expect(macht.armorFactor, 1);
-    expect(macht.stats.combatAttack, werte.attack * ActionBalance.powerScale);
+    // `EquippedStats` rechnet seit ADR-0048 schon im Kampfmassstab.
+    expect(macht.stats.combatAttack, werte.attack);
   });
 
   test('eine legendäre Waffe vervielfacht den Angriff, nicht das Leben', () {
@@ -37,7 +38,7 @@ void main() {
     final mitWaffe = mit(
       SaveData(
         loadout: const Loadout.empty().buy(
-          waffe.id,
+          angebot(waffe.id),
           availableGold: waffe.price,
           highestRung: GearGates.legendaryRung,
         ),
