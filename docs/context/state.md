@@ -14,7 +14,7 @@
 ## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
 
 Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
-256 × 256 abgelegt. action_combat 192 (vorher 186), App 490 (vorher 486).
+256 × 256 abgelegt. action_combat 192 (vorher 186), App 495 (vorher 486).
 
 | Bild | wird |
 |---|---|
@@ -53,6 +53,14 @@ Grube immer zu sehen, auch bei vollem Leben. Er ist breiter und dicker
 als der eines Gegners und dunkel umrandet. Ab einem Drittel wird er
 golden, nicht rot, denn Rot gehört dem Wächter (`ActionGame.heroBarColor`).
 App 490.
+
+**Und eine Karte oben links** (`lib/action/minimap.dart`), rechts davon
+die Balken. Sie zeigt nur, was der Held schon gesehen hat: Alles im
+Umkreis von sechs Feldern wird aufgedeckt und bleibt es. Gegner stehen
+als Punkte darauf, aber nur in diesem Umkreis. Sonst verriete die Karte,
+was hinter den Wänden wartet. Der schlafende Wächter fehlt, wie im Bild.
+Das Aufgedeckte ist Darstellung, keine Spielregel, und steht deshalb
+nicht in `action_combat`. App 495.
 
 **Die Figur ist nur auf der Startseite.** In der Grube und im Dorf läuft
 weiter der Soldat, weil er sechs Bewegungsstreifen hat und die neue

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../ui/palette.dart';
 import 'ability_buttons.dart';
 import 'action_game.dart';
+import 'minimap.dart';
 import 'damage_popup.dart';
 import 'action_joystick.dart';
 
@@ -170,68 +171,80 @@ class _Hud extends StatelessWidget {
         final sim = game.sim;
         final boss = sim.bossView;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        // Oben links die Karte, rechts daneben die Balken.
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            PitBar(
-              ratio: sim.heroHpRatio,
-              color: Palette.successOnDark,
-              label: '${sim.heroHp} / ${sim.heroMaxHp}',
-            ),
-            // Nur wenn etwas auf den Plätzen liegt: Ohne Fähigkeit ist
-            // Mana eine Zahl, die man nicht ausgeben kann.
-            if (sim.slots.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 4),
-              PitBar(
-                ratio: sim.manaRatio,
-                color: Palette.manaOnDark,
-                label: '${sim.mana} / ${sim.maxMana} Mana',
-                height: 10,
-              ),
-            ],
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Flexible(
-                  child: Text(
-                    '${sim.kills} / ${sim.totalEnemies} erledigt'
-                    '${sim.runXp > 0 || sim.runGold > 0 ? ' · ${DamagePopup.lootText(sim.runXp, sim.runGold)}' : ''}'
-                    '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.textOnDark,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    '${sim.elapsed.toStringAsFixed(0)} s',
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textOnDarkDim,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (boss != null) ...<Widget>[
-              const SizedBox(height: 10),
-              BossBar(
-                name: 'Der Wächter',
-                ratio: boss.hpRatio * sim.bossBarFill,
-                // Wut ändert, was er tut — das soll man lesen können, nicht
-                // erst merken, wenn er anstürmt.
-                enraged: sim.isBossEnraged,
-              ),
-            ],
+            PitMinimap(game: game),
+            const SizedBox(width: 8),
+            Expanded(child: _bars(sim, boss)),
           ],
         );
       },
+    );
+  }
+
+  Widget _bars(ActionWorld sim, EntityView? boss) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        PitBar(
+          ratio: sim.heroHpRatio,
+          color: Palette.successOnDark,
+          label: '${sim.heroHp} / ${sim.heroMaxHp}',
+        ),
+        // Nur wenn etwas auf den Plätzen liegt: Ohne Fähigkeit ist
+        // Mana eine Zahl, die man nicht ausgeben kann.
+        if (sim.slots.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 4),
+          PitBar(
+            ratio: sim.manaRatio,
+            color: Palette.manaOnDark,
+            label: '${sim.mana} / ${sim.maxMana} Mana',
+            height: 10,
+          ),
+        ],
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                '${sim.kills} / ${sim.totalEnemies} erledigt'
+                '${sim.runXp > 0 || sim.runGold > 0 ? ' · ${DamagePopup.lootText(sim.runXp, sim.runGold)}' : ''}'
+                '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.textOnDark,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '${sim.elapsed.toStringAsFixed(0)} s',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Palette.textOnDarkDim,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (boss != null) ...<Widget>[
+          const SizedBox(height: 10),
+          BossBar(
+            name: 'Der Wächter',
+            ratio: boss.hpRatio * sim.bossBarFill,
+            // Wut ändert, was er tut — das soll man lesen können, nicht
+            // erst merken, wenn er anstürmt.
+            enraged: sim.isBossEnraged,
+          ),
+        ],
+      ],
     );
   }
 }
