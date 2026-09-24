@@ -11,6 +11,24 @@
 
 ---
 
+## 24.09.2026: alles am Handy durchgespielt
+
+Frederik hat alles, was hier als „nicht angesehen“ stand, am Handy
+durchgespielt, auch die Neuerungen dieser Sitzung aus der Web-Fassung
+auf `main`. Die Vermerke unten sind durchgestrichen, nicht gelöscht:
+
+| Bereich | durchgespielt |
+|---|---|
+| Gewohnheiten | Erledigtes rutscht nach unten, Wucht beim Häkchen, Tagesform, Tagestruhe, Wochenrückblick, Rückfrage des Tages |
+| Fortschritt | Levelaufstieg, Macht-Karte am Charakter |
+| Oberfläche | jeder Knopf gibt nach, Holzrahmen, Klänge |
+| Dorf | das Dorf und das eigene Haus |
+| Grube | Skillshots und Flächen, Tor und Auftritt des Wächters, Fledermaus, Steinwände, Lebensbalken, Minimap, Uhr mit Zeitkugeln |
+
+**Weiter offen**, weil es nicht am Ansehen hing: die Entscheidung übers
+Dorf (braucht AktivesBrett und einen ADR), „gefestigte“ Seiten im Baum,
+die Seltenheit im Laden, und ob die Uhr beim ersten Erkunden reicht.
+
 ## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
 
 Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
@@ -44,8 +62,8 @@ Rauschen. Oben ist es etwas härter: voll ausgerüstet mit Fähigkeiten
 schafft der Bot Stufe 30 zu 20 % statt 60 %. Das kann an der Grotte
 liegen oder am Rauschen, nachgestellt ist nichts.
 
-**Nicht im Spiel angesehen**, nur als zusammengesetzte Vorschau in
-Spielgrösse. Die Fledermaus ist dunkel auf dunklem Boden, sie liest sich
+~~**Nicht im Spiel angesehen**, nur als zusammengesetzte Vorschau in
+Spielgrösse.~~ ✓ *Am 24.09. am Handy gespielt.* Die Fledermaus ist dunkel auf dunklem Boden, sie liest sich
 dort, aber knapp.
 
 **Nachgereicht: ein Lebensbalken über dem Helden.** Er ist in der
@@ -118,8 +136,8 @@ Die Karte ist Text wie die Räume der Grube (`lib/village/village_map.dart`,
 reines Dart). Die Figur ist der Soldat aus der Grube. **Die Kacheln und
 Gebäude sind grob selbst gezeichnet** (`tool/dorf_kacheln.py`, Python mit
 Pillow, 16er-Raster doppelt vergrössert), Platzhalter, bis es echte gibt.
-App 478. **Nicht im Browser angesehen**, nur die zusammengesetzte Karte
-als Bild.
+App 478. ~~**Nicht im Browser angesehen**, nur die zusammengesetzte Karte
+als Bild.~~ ✓ *Am 24.09. am Handy gespielt.*
 
 **Nachgezogen nach dem ersten Ansehen** (Frederik): Die Karte ist jetzt
 **hochkant**, 12 × 17 Felder, und passt damit ganz in die Breite eines
@@ -142,8 +160,8 @@ zum Herumlaufen wie das Dorf, und alles darin wächst von selbst mit:
 Alles abgeleitet (`HouseView`), nichts im Spielstand. `VillageGame`
 zeichnet jetzt beide Szenen (Gras und Bäume draussen, Dielen und Wände
 drinnen); was in einem Ding liegt, zeichnet `paintHouse` über den Haken
-`decorate`. Grob gezeichnet wie das Dorf. App 486. Angesehen als
-gerendertes Testbild, nicht am Handy.
+`decorate`. Grob gezeichnet wie das Dorf. App 486. ~~Angesehen als
+gerendertes Testbild, nicht am Handy.~~ ✓ *Am 24.09. am Handy gespielt.*
 
 Offen: Die Dorfkarte ist fest und wächst nicht mit. Das Haus wächst nicht
 selbst (Hütte zu Haus), nur sein Inhalt.
@@ -164,7 +182,7 @@ Ability-Screen**, deshalb ist hier nichts davon angefasst.
 Neuer Bereich im Spielstand: `reviews` (`ReviewLog`, eine Historie).
 `SaveWatcher` schreibt ihn, ein Test hält das fest. Erfahrung und Gold
 laufen durch alle drei Zufluss-Provider. theory 148, App 462.
-**Nicht angesehen.** Offen: „gefestigte" Seiten im Baum zeigen.
+~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.* Offen: „gefestigte" Seiten im Baum zeigen.
 
 ## Sitzung 23.09.2026, Nachtrag: der Levelaufstieg wird gefeiert
 
@@ -182,7 +200,7 @@ selbst horcht, sonst feierte er auch beim Laden und im Entwicklermodus.
 
 progression 41, App 457. **Nicht getestet:** dass jede der vier Stellen
 die Feier wirklich auslöst. Getestet sind das Blatt und `showLevelUp`
-selbst, die Verdrahtung ist nur gelesen. **Nicht angesehen.**
+selbst, die Verdrahtung ist nur gelesen. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 23.09.2026, Nachtrag: das Buch auf der Theorie
 
@@ -212,7 +230,7 @@ Gerechnet in `HabitTracker.weekOf`; die Erfahrung der Woche zählt die
 Kette über die Wochengrenze mit (`xpBetween`, dieselbe Rechnung wie
 `totalXp`). **Ein voller Tag ist einer mit geöffneter Truhe**, weil
 „alles erledigt" rückwirkend nicht bestimmbar ist. Nichts Neues im
-Spielstand. habits 191, App 453. **Nicht angesehen.**
+Spielstand. habits 191, App 453. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 23.09.2026, zuallerletzt: Wucht beim Häkchen
 
@@ -227,7 +245,7 @@ wenigsten zurückgab. Jetzt:
 | **Ring auf der Startseite** | um den Gewohnheiten-Kreis, „3/5", voll golden mit Häkchen |
 
 App 448. Alle Animationen enden von selbst, `pumpAndSettle` bleibt
-brauchbar. **Nicht angesehen.**
+brauchbar. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 Offen aus der Durchsicht blieb danach nur die **Wochenkarte**, siehe
 den Nachtrag oben.
@@ -254,7 +272,7 @@ Tagesform-Karte sie als Ziel („… und die Tagestruhe").
 Aus dem Datum gewürfelt, für beide gleich, gespeichert wird nur der Tag
 des Öffnens. Im Mittel rund 11 Gold am Tag. `progression_test.dart`
 rechnet die Truhe nicht mit. Bild: Raven fc6. habits 182, App 441.
-**Nicht angesehen.** Issue #46 auf GitHub ist noch nicht kommentiert.
+~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.* Issue #46 auf GitHub ist noch nicht kommentiert.
 
 ## Sitzung 23.09.2026, zum Schluss: die Tagesform
 
@@ -272,7 +290,7 @@ erhöhen", zusammen mit dem Vorschlag eines Tagesbonus.
 | Wo sichtbar | Karte über der Tagesliste, Meldung beim Abhaken („Angriff heute +10 %", „In Form!"), Machtkarte am Charakter, Eingang zur Grube |
 
 habits 169, action_combat 186, App 439. `pit_sim` unverändert: Sein Bot
-geht ohne Häkchen des Tages hinein. **Nicht angesehen.**
+geht ohne Häkchen des Tages hinein. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 Aus derselben Durchsicht sind Tagestruhe und Wucht beim Häkchen gleich
 danach gebaut, siehe oben; offen ist nur noch die Wochenkarte.
@@ -298,8 +316,8 @@ der Finger über die Toleranz hinaus, federt die Fläche zurück.
 
 **Nicht angefasst:** die Schalter im Entwicklermodus (bewegen sich schon
 selbst) und das Steuerkreuz der Grube (kein Knopf). App 435 (vorher
-426). **Nicht angesehen**, weder im Browser noch am Handy. Ob 0,9 bis
-0,97 sich richtig anfühlt, sagt nur das Gerät. Die Zahlen stehen oben in
+426). ~~**Nicht angesehen**, weder im Browser noch am Handy. Ob 0,9 bis
+0,97 sich richtig anfühlt, sagt nur das Gerät.~~ ✓ *Am 24.09. am Handy gespielt.* Die Zahlen stehen oben in
 `Druck`.
 
 ## Sitzung 23.09.2026, zuletzt: Erledigtes rutscht nach unten
@@ -312,7 +330,7 @@ offen und steht in der alten Reihenfolge. Jede Kachel trägt ihre Id als
 Schlüssel, damit der Sprung des Häkchens mit der Gewohnheit wandert.
 
 Die Kachel **springt**, sie gleitet nicht — eine Animation beim
-Umsortieren gibt es nicht. habits 162, App 426. **Nicht angesehen.**
+Umsortieren gibt es nicht. habits 162, App 426. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 23.09.2026, danach: getroffen heisst bemerkt
 
@@ -341,7 +359,7 @@ aber nicht die Fähigkeit an sich."
 
 Eine Zwischenfassung liess auch Geschosse durch Wände fliegen — das war
 falsch verstanden und ist zurückgenommen. action_combat 183 (vorher
-182). **Nicht angesehen**, `pit_sim` nicht neu gerechnet — der Bot zielt
+182). ~~**Nicht angesehen**~~ ✓ *Am 24.09. am Handy gespielt.* `pit_sim` nicht neu gerechnet — der Bot zielt
 nie von Hand und trägt keinen Bereich.
 
 ## Sitzung 22.09.2026, abends: Macht vervielfacht
@@ -362,7 +380,7 @@ voll ausgerüstet mit 1.654 und 18.449 — fast zwölfmal so hart statt gut
 doppelt. Die Siegquoten je Stufe liegen, wo sie lagen.
 
 Der Charakter zeigt über den Werten eine Karte „Angriff · Leben · Abwehr"
-mit den Faktoren. **Nicht angesehen.** Im Laden steht noch nicht, dass
+mit den Faktoren. ~~**Nicht angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.* Im Laden steht noch nicht, dass
 Waffe und Rüstung ihre Seltenheit vervielfachen.
 
 ## Sitzung 22.09.2026, ganz zuletzt: die vier Stufen des Tages
@@ -417,7 +435,7 @@ Teil („+7 EP  +3 G" über dem Gegner, mitlaufend in der Kopfzeile), der
 Wächter füllt auf. **Ein verlorener Lauf behält, was gefallen ist**, der
 nächste kann nur noch den Rest holen. In der Summe genau wie vorher.
 
-action_combat 177 (vorher 169), App 422 (vorher 420). Nicht angesehen.
+action_combat 177 (vorher 169), App 422 (vorher 420). ~~Nicht angesehen.~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 22.09.2026, zuletzt: Skillshots, und niemand hängt mehr
 
@@ -471,7 +489,7 @@ lang) — sonst wäre die Vorschau kürzer als der Funke.
   trägt Funkenstoß, Steinhaut und Blütentau, keinen Bereich, und er
   zielt immer selbst, trifft also nie daneben.
 
-### Nicht angesehen
+### ~~Nicht angesehen~~ Am 24.09. am Handy gespielt ✓
 
 Weder im Browser noch am Handy. Offen, und nur am Gerät zu klären: ob
 80 Punkte Zug für die volle Weite passen, ob die Totzone von 12 Punkten
@@ -513,8 +531,8 @@ nachgestellt.
 action_combat 138 (vorher 124), App 412.
 
 **„Hüter der Tiefe" ist ausgedacht**, ohne Vorlage — ändern ist eine
-Zeile in `pit_run_view.dart`. **Nicht angesehen**, weder im Browser noch
-am Handy. Kein Klang zu Tor oder Landung.
+Zeile in `pit_run_view.dart`. ~~**Nicht angesehen**, weder im Browser noch
+am Handy.~~ ✓ *Am 24.09. am Handy gespielt.* Kein Klang zu Tor oder Landung.
 
 ## Sitzung 22.09.2026: Gegner laufen gerade
 
@@ -629,7 +647,7 @@ Kacheln in Rastern, Knöpfe und Kreise.
   liefen darum über und dürfen jetzt schrumpfen.
 
 **Angesehen** als gerendertes Testbild (Charakter, Gewohnheiten, Start),
-mit Ersatzschrift und ohne App-Theme. **Nicht am Handy angesehen.**
+mit Ersatzschrift und ohne App-Theme. ~~**Nicht am Handy angesehen.**~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 21.09.2026, danach: zwei neue Gegnerarten
 
@@ -798,7 +816,7 @@ und Angriff ×2,5 auf Stufe 30 statt ×2,1 und ×1,8.
   20 % statt 50 %). Ein frischer Spieler hat Stufe 1 und 2; das reicht
   für den Anfang, ist aber eine gemessene Verschiebung.
 - **Energie tut weiter zweierlei** (Mana und Schlagtempo).
-- **Nicht am Handy gespielt**, wie alles aus dieser Nacht.
+- ~~**Nicht am Handy gespielt**, wie alles aus dieser Nacht.~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ## Sitzung 21.09.2026, spät: Mana und die ersten drei Fähigkeiten
 
@@ -834,7 +852,7 @@ einem halben Katalog.
   mit der Potenz-Kurve.
 - **Der Funke zielt in Luftlinie** und bleibt an Wänden hängen. Hinter
   einer Wand verpufft er samt Mana.
-- **Nicht am Handy gespielt.** Drei Platzknöpfe über den zwei festen —
+- ~~**Nicht am Handy gespielt.**~~ ✓ *Am 24.09. am Handy gespielt.* Drei Platzknöpfe über den zwei festen —
   ob das neben dem Steuerkreuz Platz hat, sagt erst ein Gerät.
 
 ## Sitzung 21.09.2026, abends: die Grube ist der Kampf
@@ -876,8 +894,8 @@ Das ist die Form der alten Reihe, unten gnädiger und oben härter.
 - **Die Kampfsperre (ADR-0020) bleibt**, obwohl Stufe 1 mit Tag-0-Werten
   schlagbar ist. Entschieden wird das, wenn die Fähigkeiten wirken.
 - **Die Potenz-Kurve** ist weiter offen.
-- **Nicht am Handy gespielt.** Tests und Layout bei 390 × 844 sind
-  grün; wie sich eine gesteckte Grube spielt, muss jemand ansehen.
+- ~~**Nicht am Handy gespielt.** Tests und Layout bei 390 × 844 sind
+  grün; wie sich eine gesteckte Grube spielt, muss jemand ansehen.~~ ✓ *Am 24.09. am Handy gespielt.*
 
 ### Als Nächstes
 
@@ -920,8 +938,8 @@ Credential-Helper je Befehl, ohne die globale Git-Konfiguration zu ändern.
 - **Quelle und Urheber** der drei Pakete (Raven, UI-Bundle, Kampf-Figuren)
   fehlen in den HERKUNFT-Dateien — die Lizenzen hat Frederik geprüft, für
   den anderen nachprüfbar sind sie so nicht.
-- **Nicht am Gerät angehört**: die Klänge. Nicht am Handy angesehen: der
-  Holz-Stil — nur in der lokalen Vorschau im Browser und als Testbild.
+- ~~**Nicht am Gerät angehört**: die Klänge. Nicht am Handy angesehen: der
+  Holz-Stil — nur in der lokalen Vorschau im Browser und als Testbild.~~ ✓ *Am 24.09. am Handy gespielt.*
 - **ADR-0037** hat fünf offene Punkte, darunter die Belohnung fürs
   Vertiefen und wer ~340 Seiten schreibt.
 
