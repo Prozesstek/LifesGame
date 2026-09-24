@@ -31,6 +31,8 @@ import 'widgets/week_card.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
+import '../gear/gear_icon.dart';
+import '../gear/gear_controller.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
 /// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
@@ -273,6 +275,7 @@ class HabitsScreen extends ConsumerWidget {
     final vorherLevel = levelBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
     final formVorher = ref.read(dailyFormProvider);
+    final schluesselVorher = ref.read(availableKeysProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
@@ -288,7 +291,15 @@ class HabitsScreen extends ConsumerWidget {
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
     );
-    _steigen(context, ref, result, habit, werteVorher, formVorher);
+    _steigen(
+      context,
+      ref,
+      result,
+      habit,
+      werteVorher,
+      formVorher,
+      schluesselVorher,
+    );
   }
 
   /// Ein Schritt auf ein Tagesziel.
@@ -299,6 +310,7 @@ class HabitsScreen extends ConsumerWidget {
     final vorherLevel = levelBefore(ref);
     final werteVorher = ref.read(characterStatsProvider);
     final formVorher = ref.read(dailyFormProvider);
+    final schluesselVorher = ref.read(availableKeysProvider);
 
     final result = ref
         .read(habitTrackerProvider.notifier)
@@ -323,7 +335,15 @@ class HabitsScreen extends ConsumerWidget {
       context,
       _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
     );
-    _steigen(context, ref, result, habit, werteVorher, formVorher);
+    _steigen(
+      context,
+      ref,
+      result,
+      habit,
+      werteVorher,
+      formVorher,
+      schluesselVorher,
+    );
   }
 
   /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier
@@ -373,6 +393,7 @@ class HabitsScreen extends ConsumerWidget {
     int wahl,
   ) {
     final vorherLevel = levelBefore(ref);
+    final schluesselVorher = ref.read(availableKeysProvider);
     final richtig = ref
         .read(reviewLogProvider.notifier)
         .answer(ref.read(todayProvider), frage, wahl);
@@ -381,11 +402,12 @@ class HabitsScreen extends ConsumerWidget {
     if (richtig) {
       unawaited(HapticFeedback.mediumImpact());
       ref.read(soundPlayerProvider).play(SoundEffect.haekchen);
-      AufstiegHost.maybeOf(context)?.zeige(const <AufstiegZeile>[
-        AufstiegZeile(
+      AufstiegHost.maybeOf(context)?.zeige(<AufstiegZeile>[
+        const AufstiegZeile(
           '+${TheoryRewards.xpForReview} EP  +${TheoryRewards.goldForReview} G',
           color: Palette.goldOnDark,
         ),
+        ?_schluessel(ref, schluesselVorher),
       ]);
     } else {
       unawaited(HapticFeedback.selectionClick());
@@ -497,6 +519,7 @@ class HabitsScreen extends ConsumerWidget {
     Habit habit,
     CharacterStats werteVorher,
     DailyForm formVorher,
+    int schluesselVorher,
   ) {
     final nachher = ref.read(characterStatsProvider);
     final punkt =
@@ -521,7 +544,19 @@ class HabitsScreen extends ConsumerWidget {
           form.startsWith('In Form') ? 'In Form!' : form,
           color: Palette.accentOnDark,
         ),
+      ?_schluessel(ref, schluesselVorher),
     ]);
+  }
+
+  /// „+1 Schlüssel" — aber nur, wenn wirklich einer dazukam. Bei zehn auf
+  /// Vorrat verfällt er (`GearKeys`), und dann wäre die Zeile gelogen.
+  static AufstiegZeile? _schluessel(WidgetRef ref, int vorher) {
+    if (ref.read(availableKeysProvider) <= vorher) return null;
+    return const AufstiegZeile(
+      '+1 Schlüssel',
+      color: Palette.goldOnDark,
+      bild: GearIcons.schluessel,
+    );
   }
 
   /// Alles, was sich an ein Häkchen anhängt: ein gewonnener Punkt und

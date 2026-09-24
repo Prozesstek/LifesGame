@@ -3,6 +3,8 @@ import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
+import '../../ui/pixel_art.dart';
+import '../../gear/gear_icon.dart';
 
 /// Was nach der letzten Frage steht: Ergebnis, Ertrag, nächster Schritt.
 class LessonResultView extends StatelessWidget {
@@ -11,6 +13,7 @@ class LessonResultView extends StatelessWidget {
     required this.result,
     required this.onRetry,
     required this.onDone,
+    this.keyGained = false,
     super.key,
   });
 
@@ -18,6 +21,9 @@ class LessonResultView extends StatelessWidget {
   final LessonResult result;
   final VoidCallback onRetry;
   final VoidCallback onDone;
+
+  /// Ob die Seite einen Schlüssel gebracht hat (ADR-0048).
+  final bool keyGained;
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +58,11 @@ class LessonResultView extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         if (result.xpGained > 0 || result.goldGained > 0)
-          _Earnings(xp: result.xpGained, gold: result.goldGained)
-        else
+          _Earnings(xp: result.xpGained, gold: result.goldGained),
+        if (keyGained) ...<Widget>[
+          const SizedBox(height: 10),
+          const _Schluessel(),
+        ] else
           _Note(
             text: passed
                 ? 'Diese Lektion war schon bestanden — es gibt nichts '
@@ -188,6 +197,41 @@ class _Note extends StatelessWidget {
       text,
       textAlign: TextAlign.center,
       style: const TextStyle(fontSize: 13, height: 1.4, color: Palette.muted),
+    );
+  }
+}
+
+/// „+1 Schlüssel", der einmal hineinspringt — ein Wurf mehr für die Beute
+/// des Wächters (ADR-0048).
+class _Schluessel extends StatelessWidget {
+  const _Schluessel();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.elasticOut,
+      builder: (context, t, child) => Transform.scale(scale: t, child: child),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const PixelArt(
+            assetPath: GearIcons.schluessel,
+            side: 28,
+            fallback: Icon(Icons.key, color: Palette.gold),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '+1 Schlüssel für die Beute',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Palette.gold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

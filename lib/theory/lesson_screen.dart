@@ -14,6 +14,7 @@ import '../ui/palette.dart';
 import 'theory_controller.dart';
 import 'widgets/lesson_result_view.dart';
 import 'widgets/question_card.dart';
+import '../gear/gear_controller.dart';
 
 /// Was der Bildschirm gerade zeigt.
 enum _Stage { reading, quiz, result }
@@ -35,6 +36,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   int _index = 0;
   List<int?> _answers = const <int?>[];
   LessonResult? _result;
+
+  /// Ob die letzte Abgabe einen Schlüssel gebracht hat (ADR-0048).
+  bool _schluessel = false;
 
   /// Die Lektion in der Reihenfolge, in der sie **angezeigt** wird
   /// (ADR-0027). Null, solange noch gelesen wird.
@@ -95,6 +99,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final vorher = ref.read(unlockedAbilitiesProvider);
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
+    final schluesselVorher = ref.read(availableKeysProvider);
 
     final result = ref
         .read(theoryProgressProvider.notifier)
@@ -102,6 +107,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     setState(() {
       _result = result;
       _stage = _Stage.result;
+      // Eine erstmals bestandene Seite ist ein Schlüssel (ADR-0048) —
+      // gezeigt nur, wenn er nicht am Vorrat von zehn verfiel.
+      _schluessel = ref.read(availableKeysProvider) > schluesselVorher;
     });
     if (result.isPassed) {
       ref.read(soundPlayerProvider).play(SoundEffect.lektion);
@@ -207,6 +215,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     return LessonResultView(
       lesson: _lesson,
       result: result,
+      keyGained: _schluessel,
       onRetry: _startQuiz,
       onDone: () => Navigator.of(context).pop(),
     );

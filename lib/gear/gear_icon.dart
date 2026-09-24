@@ -34,6 +34,9 @@ import '../ui/pixel_art.dart';
 /// hätte die Ordnung zerstört, in der gezeichnet wird, und beim Malen
 /// gibt es die Id noch gar nicht.
 abstract final class GearIcons {
+  /// Der Schlüssel zur Beute des Wächters (ADR-0048), Raven fc77.
+  static const String schluessel = 'assets/Items/Schluessel.png';
+
   /// Item-Id → Pfad der Zeichnung.
   ///
   /// Nach Platz sortiert, innerhalb eines Platzes nach Seltenheit — so,

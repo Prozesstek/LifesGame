@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 import 'palette.dart';
+import 'pixel_art.dart';
 
 /// Eine aufsteigende Zeile, wie über einem gefallenen Gegner in der Grube.
 class AufstiegZeile {
-  const AufstiegZeile(this.text, {this.color = Palette.accent});
+  const AufstiegZeile(this.text, {this.color = Palette.accent, this.bild});
 
   final String text;
   final Color color;
+
+  /// Ein kleines Bild vor dem Text — der Schlüssel (ADR-0048).
+  final String? bild;
 }
 
 /// **Zahlen steigen dort auf, wo getippt wurde.**
@@ -122,22 +126,52 @@ class _Steigen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          for (final zeile in stoss.zeilen)
-            Text(
-              zeile.text,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.visible,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-                color: zeile.color,
-                shadows: const <Shadow>[
-                  Shadow(color: Color(0xCC1A0E05), offset: Offset(1, 1)),
-                  Shadow(color: Color(0x991A0E05), blurRadius: 3),
-                ],
+          for (final zeile in stoss.zeilen) _Zeile(zeile: zeile),
+        ],
+      ),
+    );
+  }
+}
+
+/// Eine aufsteigende Zeile, mit Bild davor, wenn sie eins hat.
+class _Zeile extends StatelessWidget {
+  const _Zeile({required this.zeile});
+
+  final AufstiegZeile zeile;
+
+  @override
+  Widget build(BuildContext context) {
+    final bild = zeile.bild;
+    // **Das Bild steht im Text, nicht daneben.** Eine `Row` liefe in der
+    // schmalen Fläche über; ein Text darf über seinen Rand hinaus stehen,
+    // und genau so sollen die Zahlen aussehen.
+    return Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
+          if (bild != null) ...<InlineSpan>[
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: PixelArt(
+                assetPath: bild,
+                side: 22,
+                fallback: const SizedBox(width: 22, height: 22),
               ),
             ),
+            const TextSpan(text: ' '),
+          ],
+          TextSpan(text: zeile.text),
+        ],
+      ),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      style: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w900,
+        color: zeile.color,
+        shadows: const <Shadow>[
+          Shadow(color: Color(0xCC1A0E05), offset: Offset(1, 1)),
+          Shadow(color: Color(0x991A0E05), blurRadius: 3),
         ],
       ),
     );
