@@ -487,6 +487,9 @@ class ActionGame extends Game {
       if (view.faction == Faction.gegner && view.hpRatio < 1) {
         _drawHpBarAt(canvas, view, fuss.dy - figur.visibleHeight - 6);
       }
+      if (view.faction == Faction.held && view.isAlive) {
+        _drawHeroBar(canvas, view, fuss.dy - figur.visibleHeight - 10);
+      }
     }
   }
 
@@ -583,6 +586,9 @@ class ActionGame extends Game {
 
       if (view.faction == Faction.gegner && view.hpRatio < 1) {
         _drawHpBar(canvas, view);
+      }
+      if (view.faction == Faction.held && view.isAlive) {
+        _drawHeroBar(canvas, view, view.position.y - view.radius - 12);
       }
     }
   }
@@ -862,6 +868,37 @@ class ActionGame extends Game {
       );
     }
   }
+
+  /// Der Balken über dem Helden — **immer da**, auch bei vollem Leben.
+  ///
+  /// Breiter und dicker als der eines Gegners und dunkel umrandet, damit
+  /// man ihn im Gedränge findet, ohne zur Kopfzeile zu schauen. Die Farbe
+  /// kommt aus [heroBarColor].
+  void _drawHeroBar(Canvas canvas, EntityView view, double oben) {
+    const breite = 34.0;
+    const hoehe = 5.0;
+    final links = view.position.x - breite / 2;
+    final rahmen = Rect.fromLTWH(links - 1, oben - 1, breite + 2, hoehe + 2);
+
+    canvas.drawRect(rahmen, Paint()..color = Colors.black);
+    canvas.drawRect(
+      Rect.fromLTWH(links, oben, breite, hoehe),
+      Paint()..color = Palette.trackOnDark,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(links, oben, breite * view.hpRatio, hoehe),
+      Paint()..color = heroBarColor(view.hpRatio),
+    );
+  }
+
+  /// Grün, und golden, sobald es knapp wird — ab einem Drittel. Rot bleibt
+  /// dem Wächter vorbehalten.
+  static Color heroBarColor(double anteil) {
+    return anteil <= lowHpShare ? Palette.goldOnDark : Palette.successOnDark;
+  }
+
+  /// Ab welchem Anteil der Balken des Helden warnt.
+  static const double lowHpShare = 1 / 3;
 
   void _drawHpBar(Canvas canvas, EntityView view) {
     final breite = view.radius * 2.2;

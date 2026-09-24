@@ -14,7 +14,7 @@
 ## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
 
 Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
-256 × 256 abgelegt. action_combat 192 (vorher 186), App 487 (vorher 486).
+256 × 256 abgelegt. action_combat 192 (vorher 186), App 490 (vorher 486).
 
 | Bild | wird |
 |---|---|
@@ -47,6 +47,12 @@ liegen oder am Rauschen, nachgestellt ist nichts.
 **Nicht im Spiel angesehen**, nur als zusammengesetzte Vorschau in
 Spielgrösse. Die Fledermaus ist dunkel auf dunklem Boden, sie liest sich
 dort, aber knapp.
+
+**Nachgereicht: ein Lebensbalken über dem Helden.** Er ist in der
+Grube immer zu sehen, auch bei vollem Leben. Er ist breiter und dicker
+als der eines Gegners und dunkel umrandet. Ab einem Drittel wird er
+golden, nicht rot, denn Rot gehört dem Wächter (`ActionGame.heroBarColor`).
+App 490.
 
 **Die Figur ist nur auf der Startseite.** In der Grube und im Dorf läuft
 weiter der Soldat, weil er sechs Bewegungsstreifen hat und die neue
