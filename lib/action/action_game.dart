@@ -10,6 +10,7 @@ import '../ui/palette.dart';
 import 'action_sprites.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
+import 'minimap.dart';
 import 'pit_tints.dart';
 
 /// Die Halle, gezeichnet.
@@ -36,6 +37,11 @@ class ActionGame extends Game {
   /// Sekunde neu zu bauen hiesse, auch das Steuerkreuz und die Overlays
   /// neu zu bauen. So hängt nur die Kopfzeile daran.
   final ValueNotifier<int> frame = ValueNotifier<int>(0);
+
+  /// Was der Held schon gesehen hat — für die Karte oben links. Beim
+  /// Start ist der Umkreis des Eingangs schon aufgedeckt.
+  late final MinimapFog fog = MinimapFog()
+    ..reveal(sim.level, sim.heroView.position);
 
   /// Die Laufrichtung, gesetzt von Steuerkreuz oder Tastatur.
   Vec2 moveInput = Vec2.zero;
@@ -162,6 +168,7 @@ class ActionGame extends Game {
   @override
   void update(double dt) {
     sim.advance(dt, moveInput);
+    fog.reveal(sim.level, sim.heroView.position);
     if (_beben > 0) _beben -= dt;
 
     for (final event in sim.drainEvents()) {
