@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../ui/palette.dart';
-import '../copy_text.dart';
+import 'copy_stats.dart';
 import 'rarity_badge.dart';
 import '../../ui/holz.dart';
 
@@ -101,28 +101,9 @@ class ShopItemTile extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    // **Der Wurf, nicht der Katalogwert.** Zwei Schwerter
-                    // derselben Sorte unterscheiden sich genau hier.
-                    Text(
-                      CopyText.line(copy),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: CopyText.isGoodRoll(copy)
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: Palette.success,
-                      ),
-                    ),
-                    if (vergleich != null) ...<Widget>[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Getragen: ${CopyText.line(vergleich)}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Palette.muted,
-                        ),
-                      ),
-                    ],
+                    // **Der Wurf, nicht der Katalogwert** — untereinander,
+                    // und in Klammern, was er gegen das Getragene bringt.
+                    CopyStats(copy: copy, worn: vergleich),
                     if (set != null) ...<Widget>[
                       const SizedBox(height: 3),
                       Text(

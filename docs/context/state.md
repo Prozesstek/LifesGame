@@ -11,6 +11,17 @@
 
 ---
 
+## 24.09.2026, danach: Werte untereinander, mit Vergleich
+
+Frederik nach dem ersten Blick: „Die Stats sollten untereinander
+angezeigt werden, und wenn schon was ausgerüstet ist, in Klammern, wie
+viel plus oder minus der neue Gegenstand gibt.“ Jetzt steht jeder Wert
+in einer eigenen Zeile, dahinter „(+2)“ grün oder „(−3)“ rot, darunter
+„Wurf 108 %“. Hat nur das getragene Stück einen Wert, steht er als
+Verlust da („+0 Verteidigung (−3)“). Im Laden, im Inventar, im
+Beute-Blatt und im Auswahlblatt am Charakter; gerechnet in
+`CopyText.lines`. App 508.
+
 ## 24.09.2026: Exemplare, Tagesladen, Beute mit Schlüsseln, Bestzeiten
 
 [ADR-0048](../decisions/0048-exemplare-tagesladen-und-beute.md), in

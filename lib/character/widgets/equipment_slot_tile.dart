@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
-import '../../gear/copy_text.dart';
+import '../../gear/widgets/copy_stats.dart';
 import '../../gear/gear_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
@@ -180,7 +180,10 @@ class EquipmentSlotTile extends StatelessWidget {
                               option.item?.name ?? option.itemId,
                               style: const TextStyle(color: Palette.text),
                             ),
-                            subtitle: _Untertitel(option: option),
+                            subtitle: _Untertitel(
+                              option: option,
+                              worn: equipped,
+                            ),
                             trailing: option.uid == equipped?.uid
                                 ? const Icon(Icons.check, color: Palette.accent)
                                 : null,
@@ -277,9 +280,12 @@ class _Zeichen extends StatelessWidget {
 /// wiedererkennt. Gezählt wird hier nichts: Wie viele Teile getragen
 /// werden, sagt die Set-Karte weiter unten auf demselben Bildschirm.
 class _Untertitel extends StatelessWidget {
-  const _Untertitel({required this.option});
+  const _Untertitel({required this.option, required this.worn});
 
   final GearCopy option;
+
+  /// Was auf dem Platz liegt — der Vergleich in Klammern.
+  final GearCopy? worn;
 
   @override
   Widget build(BuildContext context) {
@@ -288,14 +294,7 @@ class _Untertitel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          CopyText.line(option),
-          style: TextStyle(
-            color: CopyText.isGoodRoll(option)
-                ? Palette.accent
-                : Palette.textDim,
-          ),
-        ),
+        CopyStats(copy: option, worn: worn),
         if (set != null)
           Text(
             'Teil von „${set.name}"',
