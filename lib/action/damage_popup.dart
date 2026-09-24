@@ -75,6 +75,19 @@ class DamagePopup {
     );
   }
 
+  /// Was eine Zeitkugel über dem Kopf zeigt: „+8 s" in der Farbe der
+  /// Zeit. Bei voller Uhr bringt sie nichts, dann steht dort nichts.
+  static DamagePopup? forTime(double seconds, Vec2 at) {
+    final ganz = seconds.round();
+    if (ganz <= 0) return null;
+    return DamagePopup(
+      text: '+$ganz s',
+      color: Palette.tintZeit,
+      origin: Vec2(at.x, at.y - 18),
+      scale: 1.1,
+    );
+  }
+
   final String text;
   final Color color;
   final Vec2 origin;

@@ -86,7 +86,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 196 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 203 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -185,7 +185,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 495 Tests
+flutter test             # 501 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -193,7 +193,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 196 Tests
+dart test                              # 203 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -218,6 +218,7 @@ Stelle:
 | Frage | Antwortet |
 |---|---|
 | Wie hart ist eine Stufe? | `PitStage` — die Zahlen in `ActionBalance` |
+| Wie lange hat ein Lauf? | `PitStage.timeLimitSeconds`, auffüllbar über Zeitkugeln ([ADR-0046](docs/decisions/0046-uhr-in-der-grube.md)) |
 | Wie sieht die Grube aus? | `LevelBuilder.build(stage, seed)` aus `RoomCatalog`, **gesät** |
 | Was bringt ein Lauf ein? | `LadderController.recordRun` — einmal je Stufe |
 | Was tut eine Fähigkeit in der Grube? | `PitAbilities` — **dieselbe Id** wie in `abilities`, sonst wirkt sie nicht |
@@ -271,6 +272,13 @@ seinem Raum**. **Ein Gegner kommt nur aus zwei Gründen:** Er sieht den
 Helden (im Umkreis `aggroRadius` **und** ohne Wand dazwischen), oder er
 wurde von ihm getroffen, dann auch von weiter weg (`_enemiesAct`,
 `aggro_test.dart`). Durch eine Wand bemerkt ihn niemand.
+
+**Die Uhr läuft, und sie ist gegen das Kiten**
+([ADR-0046](docs/decisions/0046-uhr-in-der-grube.md)). Jede Stufe hat
+ein Limit, gemessen am Bot mit etwa doppeltem Puffer; läuft es ab, ist
+der Lauf verloren (`RunEnded.timedOut`). Zeitkugeln füllen auf, nie über
+das Limit. Ohne Stufe gibt es keine Uhr. Wer an `timeBaseSeconds` oder
+`timePerRoomSeconds` dreht, lässt `clock_test.dart` und `pit_sim` laufen.
 
 **Die Grube ist geschafft, wenn der Wächter fällt** — nicht erst, wenn
 jeder Gegner liegt (`ActionWorld._checkEnd`). Nur eine Halle ohne

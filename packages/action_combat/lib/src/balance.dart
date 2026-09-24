@@ -259,6 +259,26 @@ abstract final class ActionBalance {
   static const double bossEnrageAt = 0.5;
   static const double bossEnrageTempo = 1.5;
 
+  // --- Die Uhr ---
+
+  /// Wie viel Zeit ein Lauf hat: ein Sockel plus je Raum vor dem Wächter
+  /// ein fester Betrag (`PitStage.timeLimitSeconds`).
+  ///
+  /// **Gegen das Kiten, nicht gegen das Spielen.** Gemessen am `PitBot`,
+  /// der geradewegs durchgeht: Seine gewonnenen Läufe brauchten höchstens
+  /// rund 17 s je Raum, auf Stufe 30 insgesamt 87 s. Das Limit liegt bei
+  /// etwa dem Doppelten (Stufe 1: 120 s, Stufe 30: 170 s). Wer normal
+  /// kämpft, sieht die Uhr kaum; wer jede Traube einzeln im Kreis zieht,
+  /// schafft es nicht.
+  static const double timeBaseSeconds = 45;
+  static const double timePerRoomSeconds = 25;
+
+  /// Wie oft ein gefallener Gegner eine Zeitkugel hinterlässt, und was sie
+  /// bringt. Nie mehr, als das Limit war — die Uhr lässt sich auffüllen,
+  /// nicht ansparen.
+  static const double timeDropChance = 0.15;
+  static const double timeDropSeconds = 8;
+
   /// Ab welcher Entfernung ein Gegner den Helden bemerkt — **und nur mit
   /// Blickkontakt**. Durch eine Wand bemerkt ihn niemand, es sei denn, er
   /// wurde getroffen (`ActionWorld._enemiesAct`).

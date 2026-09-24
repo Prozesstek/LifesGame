@@ -205,6 +205,9 @@ class ActionGame extends Game {
           if (event.healed > 0) {
             _popups.add(DamagePopup.forHeal(event.healed, event.at));
           }
+        case TimeGained():
+          final popup = DamagePopup.forTime(event.seconds, event.at);
+          if (popup != null) _popups.add(popup);
         case AbilityCast():
           _figuren[sim.heroView.id]?.swing(Pose.attack2);
           // Ein Flächentreffer bekommt den goldenen Ring, so gross wie
@@ -850,17 +853,50 @@ class ActionGame extends Game {
       if (!sichtbar) continue;
 
       final mitte = Offset(orb.position.x, orb.position.y);
+      final farbe = switch (orb.kind) {
+        OrbKind.heilung => Palette.successOnDark,
+        OrbKind.zeit => Palette.tintZeit,
+      };
       canvas.drawCircle(
         mitte,
         orb.radius + 3,
-        Paint()..color = Palette.successOnDark.withValues(alpha: 0.25),
+        Paint()..color = farbe.withValues(alpha: 0.25),
       );
-      canvas.drawCircle(
-        mitte,
-        orb.radius,
-        Paint()..color = Palette.successOnDark,
-      );
+      switch (orb.kind) {
+        case OrbKind.heilung:
+          canvas.drawCircle(mitte, orb.radius, Paint()..color = farbe);
+        case OrbKind.zeit:
+          _drawHourglass(canvas, mitte, orb.radius, farbe);
+      }
     }
+  }
+
+  /// Eine Sanduhr aus zwei Dreiecken — die Zeitkugel soll man nicht mit
+  /// der Heilkugel verwechseln, auch nicht aus dem Augenwinkel.
+  static void _drawHourglass(
+    Canvas canvas,
+    Offset mitte,
+    double radius,
+    Color farbe,
+  ) {
+    final r = radius * 1.1;
+    final pfad = Path()
+      ..moveTo(mitte.dx - r, mitte.dy - r)
+      ..lineTo(mitte.dx + r, mitte.dy - r)
+      ..lineTo(mitte.dx, mitte.dy)
+      ..close()
+      ..moveTo(mitte.dx - r, mitte.dy + r)
+      ..lineTo(mitte.dx + r, mitte.dy + r)
+      ..lineTo(mitte.dx, mitte.dy)
+      ..close();
+    canvas.drawPath(pfad, Paint()..color = farbe);
+    canvas.drawPath(
+      pfad,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
   }
 
   void _drawBursts(Canvas canvas) {

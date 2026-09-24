@@ -14,7 +14,7 @@
 ## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
 
 Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
-256 × 256 abgelegt. action_combat 196 (vorher 186), App 495 (vorher 486).
+256 × 256 abgelegt. action_combat 203 (vorher 186), App 501 (vorher 486).
 
 | Bild | wird |
 |---|---|
@@ -71,6 +71,23 @@ wurde. Eine Stelle: `ActionWorld._enemiesAct`, geprüft über `_canSee`.
 das Bemerken durch die Wand voraus. Dort sieht der Gegner den Helden
 jetzt zuerst, und dann versteckt sich der Held. `pit_sim` liegt im
 Rauschen, eher einen Hauch leichter. action_combat 196.
+
+**Eine Uhr in der Grube** ([ADR-0046](../decisions/0046-uhr-in-der-grube.md)),
+gegen das Kiten. Jede Stufe hat 45 s plus 25 s je Raum (Stufe 1: 2:00,
+Stufe 30: 2:50). Läuft die Uhr ab, ist der Lauf verloren, das Blatt sagt
+„Die Zeit ist um“, und was gefallen ist, bleibt. Gefallene Gegner lassen
+zu 15 % eine **Zeitkugel** fallen (Sanduhr in der Farbe der Zeit), die
+8 s bringt, nie über das Limit. Die Uhr steht rechts in der Kopfzeile
+und wird unter 15 s golden.
+
+Gemessen am Bot, der geradewegs durchgeht: höchstens rund 17 s je Raum,
+das Limit ist etwa das Doppelte. **In 1.800 Läufen von `pit_sim` ist die
+Uhr kein einziges Mal abgelaufen.** Die Quoten liegen im Rauschen, die
+Zeitkugeln verbrauchen allerdings Zufallswürfe, damit laufen Läufe
+anders als vorher. action_combat 203, App 501.
+
+Offen: ob 25 s je Raum für jemanden reichen, der eine Grube zum ersten
+Mal erkundet. Das sagt nur das Spielen.
 
 **Die Figur ist nur auf der Startseite.** In der Grube und im Dorf läuft
 weiter der Soldat, weil er sechs Bewegungsstreifen hat und die neue

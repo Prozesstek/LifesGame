@@ -109,15 +109,29 @@ class OrbCollected extends ActionEvent {
   final int healed;
 }
 
+/// Eine Zeitkugel wurde eingesammelt.
+class TimeGained extends ActionEvent {
+  const TimeGained({required this.at, required this.seconds});
+
+  final Vec2 at;
+
+  /// Was sie tatsächlich gebracht hat — bei voller Uhr weniger.
+  final double seconds;
+}
+
 /// Der Lauf ist vorbei.
 class RunEnded extends ActionEvent {
   const RunEnded({
     required this.won,
     required this.seconds,
     required this.kills,
+    required this.timedOut,
   });
 
   final bool won;
+
+  /// Ob die Uhr abgelaufen ist — dann ist [won] immer falsch.
+  final bool timedOut;
   final double seconds;
   final int kills;
 }
