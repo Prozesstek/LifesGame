@@ -7,9 +7,50 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 23.09.2026 · Frederik
+**Zuletzt aktualisiert:** 24.09.2026 · Frederik
 
 ---
+
+## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
+
+Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
+256 × 256 abgelegt. action_combat 192 (vorher 186), App 487 (vorher 486).
+
+| Bild | wird |
+|---|---|
+| **Fledermaus** | eine **sechste Gegnerart** (`EnemyKind.flatterer`, `f`), kein neues Bild für den Kobold |
+| **Stein** | die **Wände der Grube** und der **Felswurf** des Wächters, der jetzt rollt |
+| **Figur** | die Figur auf der Startseite (`Charakter.png` ersetzt) |
+
+**Die Fledermaus greift an und zieht sich wieder zurück.** Sie kommt im
+Zickzack, schneller als der Kobold (165), beisst und flattert danach
+0,7 s lang davon. Dann kommt sie wieder. 12 Leben, 7 Angriff. Wer nur
+den Grundangriff hat, trifft sie selten. Mit Funke, Fläche oder Bogen
+erwischt man sie. Die Zahlen stehen in `ActionBalance.flatterer…`, das
+Verhalten in `ActionWorld._batActs`. Sie kommt in einem neuen Raum vor,
+der **Grotte**: vier Fledermäuse, vier Fussvolk.
+
+**Der Stein** steht als Block auf seinem Feld und ragt ein Stück ins Feld
+darüber, das gibt der Wand Höhe. Gezeichnet wird nur der Ausschnitt,
+in dem der Stein liegt (`GrubeFiguren.steinAusschnitt`). Ein Test misst
+ihn an der Datei nach. Der Felsbrocken trägt dafür `isBoulder`.
+
+Frederiks Bilder werden in der Grube auf ein Sechstel verkleinert und
+deshalb **weich** skaliert (`Figure.smooth`), nicht hart wie die
+Paketfiguren. Sonst fielen Bildpunkte weg.
+
+**`pit_sim` nachgerechnet**, zehn Läufe je Feld: Das meiste liegt im
+Rauschen. Oben ist es etwas härter: voll ausgerüstet mit Fähigkeiten
+schafft der Bot Stufe 30 zu 20 % statt 60 %. Das kann an der Grotte
+liegen oder am Rauschen, nachgestellt ist nichts.
+
+**Nicht im Spiel angesehen**, nur als zusammengesetzte Vorschau in
+Spielgrösse. Die Fledermaus ist dunkel auf dunklem Boden, sie liest sich
+dort, aber knapp.
+
+**Die Figur ist nur auf der Startseite.** In der Grube und im Dorf läuft
+weiter der Soldat, weil er sechs Bewegungsstreifen hat und die neue
+Figur ein Bild.
 
 ## Sitzung 23.09.2026, Nachtrag: das Dorf, als Prototyp
 

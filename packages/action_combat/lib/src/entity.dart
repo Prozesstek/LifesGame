@@ -29,6 +29,14 @@ enum EnemyKind {
   /// Traube davor verbrannt hat, steht vor ihm mit leerem Mana. Wird nicht
   /// zurückgestossen und lässt immer eine Heilkugel fallen.
   brocken,
+
+  /// Flattert heran, beisst und ist gleich wieder weg.
+  ///
+  /// **Sie ist der Grund, aus der Ferne zu treffen.** Der Grundangriff
+  /// schlägt nur, was in Reichweite steht, und die Fledermaus steht dort
+  /// nie lange: Nach jedem Biss flattert sie zurück und kommt im Zickzack
+  /// wieder. Ein Funke, eine Fläche oder ein Bogen erwischen sie.
+  flatterer,
 }
 
 /// Eine Figur in der Halle.
@@ -106,6 +114,9 @@ class ActionEntity {
   /// Solange das läuft, geht sie durch Verbündete hindurch — nicht durch
   /// Wände und nicht durch den Helden.
   double ghostLeft = 0;
+
+  /// Solange das läuft, flattert eine Fledermaus nach ihrem Biss davon.
+  double retreatLeft = 0;
 
   /// Wohin die Figur zuletzt gesehen hat — nur für die Darstellung.
   Vec2 facing = const Vec2(0, 1);

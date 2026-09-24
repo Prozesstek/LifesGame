@@ -91,6 +91,9 @@ class Level {
           case 'k':
             row.add(Tile.boden);
             spawns.add(Spawn(kind: EnemyKind.flink, tileX: x, tileY: y));
+          case 'f':
+            row.add(Tile.boden);
+            spawns.add(Spawn(kind: EnemyKind.flatterer, tileX: x, tileY: y));
           case 't':
             row.add(Tile.boden);
             spawns.add(Spawn(kind: EnemyKind.brocken, tileX: x, tileY: y));

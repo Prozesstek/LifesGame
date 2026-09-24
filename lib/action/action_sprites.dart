@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
@@ -40,6 +41,8 @@ class Figure {
     required this.footY,
     required this.topY,
     required this.scale,
+    this.smooth = false,
+    this.hover = 0,
   });
 
   /// Fehlt eine Pose, läuft [Pose.idle] — die kleinen Monster haben nur
@@ -56,8 +59,18 @@ class Figure {
   /// Wo im Bild der Kopf anfängt.
   final double topY;
 
-  /// Ganzzahlig, damit Pixelkunst scharf bleibt.
+  /// Ganzzahlig, damit Pixelkunst scharf bleibt — ausser bei [smooth].
   final double scale;
+
+  /// Ob das Bild **verkleinert** wird. Frederiks eigene Zeichnungen liegen
+  /// als 256 × 256 vor (64 × 64 gezeichnet) und sind in der Grube kleiner
+  /// als ein Viertel davon. Hart verkleinert fielen Bildpunkte weg, also
+  /// weich — dieselbe Regel wie `PixelArt`.
+  final bool smooth;
+
+  /// Wie viele Punkte die Figur auf und ab schwebt. Wer fliegt und nur ein
+  /// Bild hat, flattert so wenigstens.
+  final double hover;
 
   SpriteStrip stripFor(Pose pose) => strips[pose] ?? strips[Pose.idle]!;
 
@@ -167,6 +180,28 @@ abstract final class GrubeFiguren {
     scale: 4,
   );
 
+  /// Die Fledermaus — Frederiks eigene Zeichnung, ein Bild, 256 × 256.
+  /// Sie schwebt über ihrem Schatten und wippt dabei.
+  static const Figure fledermaus = Figure(
+    strips: <Pose, SpriteStrip>{Pose.idle: SpriteStrip('Fledermaus.png', 1)},
+    frameSize: 256,
+    footX: 130,
+    footY: 256,
+    topY: 32,
+    scale: 0.16,
+    smooth: true,
+    hover: 4,
+  );
+
+  /// Der Stein — Frederiks Zeichnung, 256 × 256. Aus ihm sind die Wände
+  /// der Grube gebaut, und der Wächter wirft ihn.
+  static const String stein = 'Stein.png';
+
+  /// Wo im Bild der Stein liegt; der Rest ist durchsichtig. Die Wand
+  /// zeichnet nur diesen Ausschnitt, sonst stünden Lücken zwischen den
+  /// Blöcken. `action_sprites_test.dart` misst ihn nach.
+  static const Rect steinAusschnitt = Rect.fromLTRB(28, 64, 204, 224);
+
   static Figure forKind(EnemyKind kind) {
     return switch (kind) {
       EnemyKind.keiner => held,
@@ -175,6 +210,7 @@ abstract final class GrubeFiguren {
       EnemyKind.endgegner => endgegner,
       EnemyKind.flink => flink,
       EnemyKind.brocken => brocken,
+      EnemyKind.flatterer => fledermaus,
     };
   }
 
@@ -185,12 +221,14 @@ abstract final class GrubeFiguren {
     endgegner,
     flink,
     brocken,
+    fledermaus,
   ];
 
   /// Alle Dateien, die geladen werden müssen.
   static Set<String> get files => <String>{
     for (final figure in all)
       for (final strip in figure.strips.values) strip.file,
+    stein,
   };
 }
 
@@ -242,6 +280,34 @@ class GrubeBilder {
   }
 
   static final Paint _paint = Paint()..filterQuality = FilterQuality.none;
+  static final Paint _weich = Paint()..filterQuality = FilterQuality.medium;
+
+  /// Zeichnet den Stein in [dst] — als Wandblock oder als Wurf.
+  ///
+  /// [rotation] dreht um die Mitte von [dst]; ein geworfener Brocken
+  /// rollt.
+  void drawStone(Canvas canvas, Rect dst, {double rotation = 0}) {
+    final image = _images[GrubeFiguren.stein];
+    if (image == null) return;
+    if (rotation == 0) {
+      canvas.drawImageRect(image, GrubeFiguren.steinAusschnitt, dst, _weich);
+      return;
+    }
+    canvas.save();
+    canvas.translate(dst.center.dx, dst.center.dy);
+    canvas.rotate(rotation);
+    canvas.drawImageRect(
+      image,
+      GrubeFiguren.steinAusschnitt,
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: dst.width,
+        height: dst.height,
+      ),
+      _weich,
+    );
+    canvas.restore();
+  }
 
   /// Zeichnet ein Bild der Figur so, dass ihre Füsse auf [foot] stehen.
   void draw(
@@ -265,8 +331,13 @@ class GrubeBilder {
     final src = Rect.fromLTWH(frame * size, 0, size, size);
     final scale = figure.scale * sizeFactor;
 
+    // Schweben: ein ruhiges Auf und Ab, gut anderthalbmal je Sekunde.
+    final schweben = figure.hover <= 0
+        ? 0.0
+        : figure.hover * (0.5 + 0.5 * math.sin(time * math.pi * 3));
+
     canvas.save();
-    canvas.translate(foot.dx, foot.dy);
+    canvas.translate(foot.dx, foot.dy - schweben);
     if (faceLeft) canvas.scale(-1, 1);
     final dst = Rect.fromLTWH(
       -figure.footX * scale,
@@ -274,10 +345,11 @@ class GrubeBilder {
       size * scale,
       size * scale,
     );
+    final guete = figure.smooth ? FilterQuality.medium : FilterQuality.none;
     final paint = opacity >= 1 && flash <= 0
-        ? _paint
+        ? (figure.smooth ? _weich : _paint)
         : (Paint()
-            ..filterQuality = FilterQuality.none
+            ..filterQuality = guete
             ..color = Color.fromRGBO(255, 255, 255, opacity));
     canvas.drawImageRect(image, src, dst, paint);
 
@@ -288,7 +360,7 @@ class GrubeBilder {
         src,
         dst,
         Paint()
-          ..filterQuality = FilterQuality.none
+          ..filterQuality = guete
           ..colorFilter = ColorFilter.mode(
             Color.fromRGBO(255, 255, 255, flash.clamp(0.0, 1.0)),
             BlendMode.srcATop,

@@ -128,6 +128,8 @@ class Burst {
     final (farbe, radius, dauer, strich) = switch (kind) {
       EnemyKind.endgegner => (Palette.enemy, 90.0, 0.7, 5.0),
       EnemyKind.brocken => (Palette.enemy, 55.0, 0.5, 4.0),
+      // Die Fledermaus ist klein und zerplatzt entsprechend.
+      EnemyKind.flatterer => (Palette.enemyOnDark, 18.0, 0.25, 2.0),
       _ => (Palette.enemyOnDark, 26.0, 0.3, 3.0),
     };
     return Burst(

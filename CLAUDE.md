@@ -86,7 +86,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 186 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 192 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -184,7 +184,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 486 Tests
+flutter test             # 487 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -192,7 +192,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 186 Tests
+dart test                              # 192 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -262,8 +262,9 @@ und Legendäre später eine Fähigkeit verändern. Alle neunzehn Fähigkeiten
 sind aus neun Arten gebaut; `test/pit_test.dart` hält fest, dass jede
 lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 
-**Fünf Gegnerarten** (`EnemyKind`): Fussvolk `e`, Schütze `s`, Kobold `k`
-(schneller als der Held), Troll `t` (gross, zäh, setzt meist der
+**Sechs Gegnerarten** (`EnemyKind`): Fussvolk `e`, Schütze `s`, Kobold `k`
+(schneller als der Held), Fledermaus `f` (beisst und flattert davon,
+`_batActs`), Troll `t` (gross, zäh, setzt meist der
 Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
 seinem Raum**. **Wer Schaden nimmt, hat den Helden bemerkt** — auch aus
 einer Entfernung, in der er ihn sonst nie sähe (`_enemiesAct`).
