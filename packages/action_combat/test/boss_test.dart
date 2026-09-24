@@ -112,6 +112,18 @@ void main() {
       }
       expect(brocken, isTrue);
     });
+
+    test('der Brocken sagt dem Renderer, dass er ein Brocken ist', () {
+      // Sonst zeichnet die Grube ihn als roten Punkt wie einen Pfeil.
+      final welt = _arena(abstand: 6);
+      final wuerfe = <ProjectileView>[];
+      for (var i = 0; i < 60 * 5 && wuerfe.isEmpty; i++) {
+        welt.step(Vec2.zero);
+        wuerfe.addAll(welt.projectiles.where((p) => p.isBoulder));
+      }
+      expect(wuerfe, isNotEmpty);
+      expect(wuerfe.first.radius, ActionBalance.bossBoulderRadius);
+    });
   });
 
   group('Er lernt mit der Tiefe', () {

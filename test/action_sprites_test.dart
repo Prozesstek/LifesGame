@@ -53,6 +53,42 @@ void main() {
       });
     });
 
+    testWidgets('der Ausschnitt des Steins liegt genau um den Stein', (
+      tester,
+    ) async {
+      // Stimmt er nicht, stehen zwischen den Wandblöcken Lücken — oder
+      // der Stein ist angeschnitten.
+      await tester.runAsync(() async {
+        final data = await rootBundle.load(
+          '${GrubeFiguren.folder}/${GrubeFiguren.stein}',
+        );
+        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+        final image = (await codec.getNextFrame()).image;
+        final rgba = (await image.toByteData())!;
+
+        var links = image.width, oben = image.height, rechts = 0, unten = 0;
+        for (var y = 0; y < image.height; y++) {
+          for (var x = 0; x < image.width; x++) {
+            final alpha = rgba.getUint8((y * image.width + x) * 4 + 3);
+            if (alpha == 0) continue;
+            if (x < links) links = x;
+            if (y < oben) oben = y;
+            if (x + 1 > rechts) rechts = x + 1;
+            if (y + 1 > unten) unten = y + 1;
+          }
+        }
+        expect(
+          Rect.fromLTRB(
+            links.toDouble(),
+            oben.toDouble(),
+            rechts.toDouble(),
+            unten.toDouble(),
+          ),
+          GrubeFiguren.steinAusschnitt,
+        );
+      });
+    });
+
     test('jede Art in der Grube hat eine Figur', () {
       for (final kind in EnemyKind.values) {
         expect(GrubeFiguren.forKind(kind).has(Pose.idle), isTrue);

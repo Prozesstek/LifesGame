@@ -159,6 +159,27 @@ abstract final class ActionBalance {
   static const int flinkAttack = 6;
   static const int flinkDefense = 0;
 
+  /// Die Fledermaus: noch schneller als der Kobold, noch zerbrechlicher —
+  /// und nach jedem Biss [flattererRetreatSeconds] lang auf dem Rückzug.
+  /// Wer nur mit dem Grundangriff kämpft, trifft sie selten; das ist der
+  /// Sinn.
+  static const double flattererRadius = 7;
+  static const double flattererSpeed = 165;
+  static const double flattererAttackRange = 22;
+  static const double flattererAttackCooldown = 1.2;
+  static const int flattererHp = 12;
+  static const int flattererAttack = 7;
+  static const int flattererDefense = 0;
+
+  /// Wie lange sie nach einem Biss davonflattert, bevor sie wiederkommt.
+  static const double flattererRetreatSeconds = 0.7;
+
+  /// Wie weit ihr Zickzack seitlich ausschlägt, als Anteil der
+  /// Vorwärtsrichtung, und wie schnell es hin und her geht (je Sekunde,
+  /// im Bogenmass).
+  static const double flattererWobble = 0.7;
+  static const double flattererWobbleSpeed = 7;
+
   /// Der Troll: fünfmal so viel Leben wie Fussvolk, doppelter Schlag,
   /// halbes Tempo. Ein Brocken, kein Endgegner — ein Drittel des Wächters.
   static const double brockenRadius = 18;

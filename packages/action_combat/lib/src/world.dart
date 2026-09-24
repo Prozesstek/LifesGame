@@ -813,6 +813,10 @@ class ActionWorld {
         _bossActs(gegner, abstand, takt);
         continue;
       }
+      if (gegner.kind == EnemyKind.flatterer) {
+        _batActs(gegner, abstand, takt);
+        continue;
+      }
 
       _meleeActs(gegner, abstand, takt);
     }
@@ -847,6 +851,61 @@ class ActionWorld {
       ),
     );
     _hit(gegner, _hero);
+  }
+
+  /// Die Fledermaus: im Zickzack heran, beissen, davonflattern.
+  ///
+  /// Der Zickzack ist gesät über ihre Id und die Weltzeit, also genauso
+  /// wiederholbar wie alles andere in der Halle.
+  void _batActs(ActionEntity fledermaus, double abstand, double takt) {
+    fledermaus.retreatLeft -= takt;
+    final zumHelden = (_hero.position - fledermaus.position).normalized;
+    final seitlich = Vec2(-zumHelden.y, zumHelden.x) *
+        (ActionBalance.flattererWobble *
+            math.sin(
+              _elapsed * ActionBalance.flattererWobbleSpeed + fledermaus.id,
+            ));
+
+    if (fledermaus.retreatLeft > 0) {
+      // Weg vom Helden, geradewegs — wie der Schütze, nur flatternd.
+      final weg = (zumHelden * -1 + seitlich).normalized;
+      fledermaus.facing = weg;
+      fledermaus.position = _slide(
+        fledermaus.position,
+        weg * (fledermaus.speed * takt),
+        fledermaus.radius,
+      );
+      return;
+    }
+
+    final reichweite = fledermaus.attackRange + _hero.radius;
+    if (abstand > reichweite) {
+      final richtung = _chaseDirection(fledermaus);
+      if (richtung.isZero) return;
+      final flug = (richtung + seitlich).normalized;
+      fledermaus.facing = flug;
+      fledermaus.position = _slide(
+        fledermaus.position,
+        flug * (fledermaus.speed * takt),
+        fledermaus.radius,
+      );
+      _trackProgress(fledermaus, takt);
+      return;
+    }
+
+    if (fledermaus.cooldownLeft > 0) return;
+    fledermaus.cooldownLeft = fledermaus.attackCooldown;
+    fledermaus.facing = zumHelden;
+    _events.add(
+      AttackSwung(
+        attackerId: fledermaus.id,
+        faction: Faction.gegner,
+        from: fledermaus.position,
+        direction: zumHelden,
+      ),
+    );
+    _hit(fledermaus, _hero);
+    fledermaus.retreatLeft = ActionBalance.flattererRetreatSeconds;
   }
 
   /// Der Fernkämpfer: auf Abstand halten, dann schiessen.
@@ -1569,6 +1628,19 @@ class ActionWorld {
           speed: ActionBalance.flinkSpeed,
           attackRange: ActionBalance.flinkAttackRange,
           attackCooldown: ActionBalance.flinkAttackCooldown,
+        ),
+      EnemyKind.flatterer => ActionEntity(
+          id: _nextId++,
+          faction: Faction.gegner,
+          kind: spawn.kind,
+          position: level.centerOfSpawn(spawn),
+          maxHp: _hp(ActionBalance.flattererHp),
+          attack: _attack(ActionBalance.flattererAttack),
+          defense: _defense(ActionBalance.flattererDefense),
+          radius: ActionBalance.flattererRadius,
+          speed: ActionBalance.flattererSpeed,
+          attackRange: ActionBalance.flattererAttackRange,
+          attackCooldown: ActionBalance.flattererAttackCooldown,
         ),
       EnemyKind.brocken => ActionEntity(
           id: _nextId++,

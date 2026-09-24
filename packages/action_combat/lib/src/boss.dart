@@ -195,6 +195,7 @@ extension _BossBrain on ActionWorld {
         velocity: richtung * ActionBalance.bossBoulderSpeed,
         damage: (boss.attack * ActionBalance.bossThrowPower).round(),
         radius: ActionBalance.bossBoulderRadius,
+        isBoulder: true,
       ),
     );
   }

@@ -13,6 +13,7 @@
 /// | `B` | Endgegner — nur in [bossRooms] |
 /// | `k` | Kobold — schnell, schwach, im Rudel |
 /// | `t` | Troll — gross, zäh; setzt meist der Zufallsbau |
+/// | `f` | Fledermaus — beisst und flattert davon |
 ///
 /// **Zwei Regeln, die ein Raum einhalten muss**, und die
 /// `level_builder_test.dart` über hunderte gebaute Gruben prüft:
@@ -149,6 +150,20 @@ abstract final class RoomCatalog {
       '..............',
       '#......e......',
       '##............',
+    ],
+    // Die Grotte: Fledermäuse unter der Decke, Fussvolk am Boden. Wer
+    // hier nur zuschlägt, schlägt ins Leere.
+    <String>[
+      '..............',
+      '.f..##..##..f.',
+      '....##..##....',
+      '..............',
+      '..e........e..',
+      '..............',
+      '...f......f...',
+      '..............',
+      '.....e..e.....',
+      '..............',
     ],
     // Die Wachstube: dicht gedrängt, der Raum für Klingenwirbel und Co.
     <String>[

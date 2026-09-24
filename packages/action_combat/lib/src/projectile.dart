@@ -18,6 +18,7 @@ class Projectile {
     this.heroPower,
     this.heroLeech = 0,
     this.fromWeapon = false,
+    this.isBoulder = false,
     this.maxAge = ActionBalance.projectileLifetime,
   });
 
@@ -43,6 +44,9 @@ class Projectile {
   /// Ob es ein Pfeil der Waffe ist — dann gelten deren Nebenwirkungen.
   final bool fromWeapon;
 
+  /// Ob es der Felsbrocken des Wächters ist — nur für die Darstellung.
+  final bool isBoulder;
+
   /// Nach so vielen Sekunden verlischt es. Ein Skillshot fliegt genau
   /// seine Reichweite weit, nicht weiter — sonst zeigte die Vorschau eine
   /// kürzere Bahn, als der Funke dann fliegt.
@@ -61,6 +65,7 @@ class ProjectileView {
     required this.position,
     required this.direction,
     required this.radius,
+    this.isBoulder = false,
   });
 
   factory ProjectileView.of(Projectile p) {
@@ -70,6 +75,7 @@ class ProjectileView {
       position: p.position,
       direction: p.velocity.normalized,
       radius: p.radius,
+      isBoulder: p.isBoulder,
     );
   }
 
@@ -78,4 +84,5 @@ class ProjectileView {
   final Vec2 position;
   final Vec2 direction;
   final double radius;
+  final bool isBoulder;
 }

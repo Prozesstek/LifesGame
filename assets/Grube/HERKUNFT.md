@@ -13,6 +13,14 @@ erlaubt die Verwendung im Spiel.
 | `RedCap.png` | `Characters/Basic Monster Animations/Red Cap/` — der Kobold (schnell) |
 | `StoneTroll.png` | `Characters/Basic Monster Animations/Stone Troll/` — der Troll (gross) |
 
+Dazu zwei eigene Zeichnungen von Frederik, 64 × 64 gezeichnet, als
+256 × 256 abgelegt, übernommen am 24.09.2026:
+
+| Datei | Wofür |
+|---|---|
+| `Stein.png` | die Wände der Grube und der Felswurf des Wächters |
+| `Fledermaus.png` | die Fledermaus (sechste Gegnerart) |
+
 Offen: **Quelle und Urheber** als Link nachtragen, damit die Lizenz auch
 für den anderen nachprüfbar ist. Im Paket liegt keine Lizenzdatei.
 

@@ -281,10 +281,10 @@ class ActionGame extends Game {
       );
     }
 
-    _drawFloor(canvas, kamera);
+    final bilder = _bilder;
+    _drawFloor(canvas, kamera, bilder);
     _drawZones(canvas);
     _drawOrbs(canvas);
-    final bilder = _bilder;
     if (bilder == null) {
       _drawEntities(canvas);
     } else {
@@ -292,7 +292,7 @@ class ActionGame extends Game {
       _drawFigures(canvas, bilder);
     }
     _drawStatus(canvas);
-    _drawProjectiles(canvas);
+    _drawProjectiles(canvas, bilder);
     _drawWard(canvas, held);
     _drawTelegraphs(canvas);
     _drawAim(canvas);
@@ -340,7 +340,15 @@ class ActionGame extends Game {
     ..color = Palette.textOnDarkDim
     ..strokeWidth = 3;
 
-  void _drawFloor(Canvas canvas, Vec2 kamera) {
+  /// Was zwischen den Steinen einer Wand durchscheint.
+  static final Paint _fuge = Paint()
+    ..color = Colors.black.withValues(alpha: 0.45);
+
+  /// Wie viel breiter ein Stein ist als sein Feld. Ein wenig, damit die
+  /// Blöcke aneinanderstossen statt als Kacheln dazustehen.
+  static const double _steinBreite = 1.15;
+
+  void _drawFloor(Canvas canvas, Vec2 kamera, GrubeBilder? bilder) {
     const feld = ActionBalance.tileSize;
 
     // Nur zeichnen, was auch zu sehen ist. Bei 46 x 34 Feldern spart das
@@ -359,6 +367,8 @@ class ActionGame extends Game {
 
         if (sim.level.gatesClosed && sim.level.isGateAt(x, y)) {
           _drawGate(canvas, rect);
+        } else if (sim.level.isWallAt(x, y) && bilder != null) {
+          _drawStoneWall(canvas, rect, bilder);
         } else if (sim.level.isWallAt(x, y)) {
           canvas.drawRect(rect, _wand);
           // Ein heller Streifen oben macht aus dem Quadrat einen Klotz.
@@ -374,6 +384,28 @@ class ActionGame extends Game {
         }
       }
     }
+  }
+
+  /// Ein Wandfeld aus Frederiks Stein, auf dunklem Grund.
+  ///
+  /// Der Stein steht auf der Unterkante seines Feldes und ragt ein Stück
+  /// nach oben hinaus. Gezeichnet wird Zeile für Zeile von oben, also liegt
+  /// er über dem Feld darüber — das gibt der Wand Höhe.
+  void _drawStoneWall(Canvas canvas, Rect feld, GrubeBilder bilder) {
+    canvas.drawRect(feld, _bodenDunkel);
+    canvas.drawRect(feld, _fuge);
+    final aus = GrubeFiguren.steinAusschnitt;
+    final breite = feld.width * _steinBreite;
+    final hoehe = breite * aus.height / aus.width;
+    bilder.drawStone(
+      canvas,
+      Rect.fromLTWH(
+        feld.center.dx - breite / 2,
+        feld.bottom - hoehe,
+        breite,
+        hoehe,
+      ),
+    );
   }
 
   /// Ein geschlossenes Tor: Gitterstäbe auf dunklem Grund. Es soll nach
@@ -565,6 +597,7 @@ class ActionGame extends Game {
       EnemyKind.endgegner => Palette.enemy,
       EnemyKind.flink => Palette.enemyOnDark,
       EnemyKind.brocken => Palette.enemy,
+      EnemyKind.flatterer => Palette.enemyOnDark,
     };
   }
 
@@ -754,8 +787,26 @@ class ActionGame extends Game {
     );
   }
 
-  void _drawProjectiles(Canvas canvas) {
+  void _drawProjectiles(Canvas canvas, GrubeBilder? bilder) {
     for (final shot in sim.projectiles) {
+      // Der Felswurf ist Frederiks Stein, und er rollt: Der Winkel folgt
+      // dem Weg entlang der Flugrichtung, geteilt durch den Radius.
+      if (shot.isBoulder && bilder != null) {
+        final seite = shot.radius * 2.6;
+        final weg =
+            shot.position.x * shot.direction.x +
+            shot.position.y * shot.direction.y;
+        bilder.drawStone(
+          canvas,
+          Rect.fromCenter(
+            center: Offset(shot.position.x, shot.position.y),
+            width: seite,
+            height: seite,
+          ),
+          rotation: weg / shot.radius,
+        );
+        continue;
+      }
       // Die eigenen Funken golden, die fremden Pfeile rot: Wer ausweichen
       // will, muss auf einen Blick sehen, was ihm gilt.
       final farbe = shot.faction == Faction.held
