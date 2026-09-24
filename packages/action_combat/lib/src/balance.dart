@@ -259,7 +259,9 @@ abstract final class ActionBalance {
   static const double bossEnrageAt = 0.5;
   static const double bossEnrageTempo = 1.5;
 
-  /// Ab welcher Entfernung ein Gegner den Helden bemerkt.
+  /// Ab welcher Entfernung ein Gegner den Helden bemerkt — **und nur mit
+  /// Blickkontakt**. Durch eine Wand bemerkt ihn niemand, es sei denn, er
+  /// wurde getroffen (`ActionWorld._enemiesAct`).
   ///
   /// Kein ganzer Raum: Die Halle soll sich in Wellen anfühlen, nicht als
   /// eine einzige Traube, die ab Sekunde eins hinterherläuft.

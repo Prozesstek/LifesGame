@@ -15,13 +15,18 @@ final Level _saal = Level.parse('Saal', const <String>[
 ]);
 
 /// Eine Wand zwischen Held und Gegner, offen nur am rechten Ende.
+///
+/// **Der Held fängt dort an, wo der Gegner ihn sieht**, und läuft dann
+/// nach links hinter die Wand: Durch eine Wand bemerkt ihn niemand
+/// (`aggro_test.dart`), also muss er erst gesehen werden, um verfolgt zu
+/// werden.
 final Level _winkel = Level.parse('Winkel', const <String>[
   '##########################',
-  '#@.......................#',
+  '#.........@..............#',
   '#........................#',
   '#######..................#',
   '#........................#',
-  '#..e.....................#',
+  '#.....e..................#',
   '#.......................B#',
   '##########################',
 ]);
@@ -55,7 +60,7 @@ void main() {
       final start = _gegner(welt).position;
 
       for (var i = 0; i < 30; i++) {
-        welt.step(Vec2.zero);
+        welt.step(const Vec2(-1, 0));
       }
       final gegner = _gegner(welt);
       final weg = gegner.position - start;
@@ -73,7 +78,7 @@ void main() {
       const wandOben = 3 * ActionBalance.tileSize;
       var herum = false;
       for (var i = 0; i < 60 * 10 && !welt.isOver; i++) {
-        welt.step(Vec2.zero);
+        welt.step(const Vec2(-1, 0));
         final lebend = welt.views.where((v) => v.kind == EnemyKind.fussvolk);
         if (lebend.isEmpty) break;
         if (lebend.first.position.y < wandOben) herum = true;
