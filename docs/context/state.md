@@ -30,8 +30,10 @@ jetzt zwei Drittel des alten, gerundet auf zehn.
 Besitz gerechnet wird. `catalog_test.dart` hat eine gesenkte Untergrenze
 (14 statt 24 Tage Gewohnheiten für den billigsten Satz). gear 90, App 501.
 
-**Offen:** die zweite Hälfte der Klage, dass auch Aufstiege selten
-werden. Mehr Aufstiege leerten den Baum zu früh.
+**Die Levelkurve bleibt vorerst, wie sie ist** (Frederik, 24.09.). Die
+zweite Hälfte der Klage, dass auch Aufstiege selten werden, wird erst
+wieder angefasst, wenn sie nach den neuen Preisen im Test noch stört.
+Mehr Aufstiege leerten den Baum zu früh.
 
 ## 24.09.2026: Wann geht was aus? Nichts, aber es wird dünner
 
