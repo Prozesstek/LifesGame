@@ -11,6 +11,12 @@
 /// Ein voller Satz der billigsten Stücke muss in etwa einem Monat tragbar
 /// sein, und das teuerste Einzelstück ebenso.
 ///
+/// **Seit ADR-0047 ein Drittel billiger.** Die 25 Gold sind nur noch der
+/// Sockel: Truhe, Dailies und Rückfrage bringen einen fleissigen Spieler
+/// auf rund 80 am Tag (`tool/runway_sim.dart`), und trotzdem kam im Test
+/// tagelang kein Kauf. Die Grenzen oben rechnen weiter mit dem Sockel —
+/// wer nur abhakt, soll den Laden auch erreichen.
+///
 /// **Fünf Stücke je Platz, drei Seltenheiten** (ADR-0029). Die Preise
 /// steigen durchgehend, und die Wirkung steigt mit — auch über die
 /// Seltenheiten hinweg. Dass sie das *dürften*, ohne es zu müssen, ist der
@@ -20,12 +26,12 @@
 ///
 /// | Platz | Gewöhnlich | Ungewöhnlich | Selten | Episch | Legendär |
 /// |---|---|---|---|---|---|
-/// | Waffe | 140 · 240 | 620 · 760 | 980 | 1150 · 1350 | 1800 |
-/// | Rüstung | 160 · 280 | 680 · 840 | 1040 | 1250 · 1450 | 1950 |
-/// | Helm | 110 · 200 | 420 · 560 | 760 | 950 · 1100 | 1500 |
-/// | Schuhe | 100 · 190 | 400 · 530 | 720 | 900 · 1050 | 1450 |
-/// | Ring | 180 · 320 | 740 · 880 | 1050 | 1300 · 1500 | 2000 |
-/// | Talisman | 150 · 270 | 520 · 660 | 880 | 1100 · 1300 | 1750 |
+/// | Waffe | 90 · 160 | 410 · 510 | 650 | 770 · 900 | 1200 |
+/// | Rüstung | 110 · 190 | 450 · 560 | 690 | 830 · 970 | 1300 |
+/// | Helm | 70 · 130 | 280 · 370 | 510 | 630 · 730 | 1000 |
+/// | Schuhe | 70 · 130 | 270 · 350 | 480 | 600 · 700 | 970 |
+/// | Ring | 120 · 210 | 490 · 590 | 700 | 870 · 1000 | 1330 |
+/// | Talisman | 100 · 180 | 350 · 440 | 590 | 730 · 870 | 1170 |
 ///
 /// **Episch und Legendär sind nicht über den Preis knapp, sondern über die
 /// Gegnerreihe** (`GearGates`, ADR-0034). Deshalb liegen sie nur mäßig
@@ -34,8 +40,8 @@
 ///
 /// **Die Waffen sind der eine Platz, auf dem der Preis am wenigsten sagt.**
 /// Man kauft die zweite Waffe nicht für mehr Zahlen, sondern für einen
-/// anderen Rhythmus (Ziel 3). Die Klinge für 760 richtet je Treffer
-/// *weniger* an als die für 240 und zahlt das mit Energie zurück — genau
+/// anderen Rhythmus (Ziel 3). Die Klinge für 510 richtet je Treffer
+/// *weniger* an als die für 160 und zahlt das mit Energie zurück — genau
 /// der Fall, den ADR-0029 zwischen den Seltenheiten erlaubt.
 abstract final class GearPrices {
   /// Wie viel ein Verkauf zurückbringt — die Hälfte des Preises.
@@ -52,74 +58,73 @@ abstract final class GearPrices {
   static const double refundShare = 0.5;
 
   // --- Waffe ---
-  static const int waffeCommon1 = 140;
-  static const int waffeCommon2 = 240;
-  static const int waffeUncommon1 = 620;
-  static const int waffeUncommon2 = 760;
+  static const int waffeCommon1 = 90;
+  static const int waffeCommon2 = 160;
+  static const int waffeUncommon1 = 410;
+  static const int waffeUncommon2 = 510;
 
-  /// Die teuerste Waffe bleibt unter dem Aderring (1050). Wer seinen
+  /// Die teuerste Waffe bleibt unter dem Aderring (700). Wer seinen
   /// ganzen Rhythmus umstellen will, zahlt weniger als für das teuerste
   /// Einzelstück des Ladens — sonst wäre ein Waffenwechsel eine
   /// Lebensentscheidung statt eines Versuchs.
-  static const int waffeRare = 980;
-  static const int waffeEpic1 = 1150;
-  static const int waffeEpic2 = 1350;
-  static const int waffeLegendary = 1800;
+  static const int waffeRare = 650;
+  static const int waffeEpic1 = 770;
+  static const int waffeEpic2 = 900;
+  static const int waffeLegendary = 1200;
 
   // --- Rüstung ---
-  static const int ruestungCommon1 = 160;
-  static const int ruestungCommon2 = 280;
-  static const int ruestungUncommon1 = 680;
-  static const int ruestungUncommon2 = 840;
-  static const int ruestungRare = 1040;
-  static const int ruestungEpic1 = 1250;
-  static const int ruestungEpic2 = 1450;
-  static const int ruestungLegendary = 1950;
+  static const int ruestungCommon1 = 110;
+  static const int ruestungCommon2 = 190;
+  static const int ruestungUncommon1 = 450;
+  static const int ruestungUncommon2 = 560;
+  static const int ruestungRare = 690;
+  static const int ruestungEpic1 = 830;
+  static const int ruestungEpic2 = 970;
+  static const int ruestungLegendary = 1300;
 
   // --- Helm ---
-  static const int helmCommon1 = 110;
-  static const int helmCommon2 = 200;
-  static const int helmUncommon1 = 420;
-  static const int helmUncommon2 = 560;
-  static const int helmRare = 760;
-  static const int helmEpic1 = 950;
-  static const int helmEpic2 = 1100;
-  static const int helmLegendary = 1500;
+  static const int helmCommon1 = 70;
+  static const int helmCommon2 = 130;
+  static const int helmUncommon1 = 280;
+  static const int helmUncommon2 = 370;
+  static const int helmRare = 510;
+  static const int helmEpic1 = 630;
+  static const int helmEpic2 = 730;
+  static const int helmLegendary = 1000;
 
   // --- Schuhe ---
-  static const int schuheCommon1 = 100;
-  static const int schuheCommon2 = 190;
-  static const int schuheUncommon1 = 400;
-  static const int schuheUncommon2 = 530;
-  static const int schuheRare = 720;
-  static const int schuheEpic1 = 900;
-  static const int schuheEpic2 = 1050;
-  static const int schuheLegendary = 1450;
+  static const int schuheCommon1 = 70;
+  static const int schuheCommon2 = 130;
+  static const int schuheUncommon1 = 270;
+  static const int schuheUncommon2 = 350;
+  static const int schuheRare = 480;
+  static const int schuheEpic1 = 600;
+  static const int schuheEpic2 = 700;
+  static const int schuheLegendary = 970;
 
   // --- Ring ---
-  static const int ringCommon1 = 180;
-  static const int ringCommon2 = 320;
-  static const int ringUncommon1 = 740;
-  static const int ringUncommon2 = 880;
+  static const int ringCommon1 = 120;
+  static const int ringCommon2 = 210;
+  static const int ringUncommon1 = 490;
+  static const int ringUncommon2 = 590;
 
   /// Das teuerste **frei zugängliche** Stück im Laden. Bei 25 Gold am Tag
-  /// sind das rund 42 Tage — knapp unter der Grenze, die
-  /// `catalog_test.dart` zieht.
-  static const int ringRare = 1050;
-  static const int ringEpic1 = 1300;
-  static const int ringEpic2 = 1500;
+  /// sind das 28 Tage, bei einem fleissigen Spieler knapp neun.
+  static const int ringRare = 700;
+  static const int ringEpic1 = 870;
+  static const int ringEpic2 = 1000;
 
-  /// Das teuerste Stück überhaupt. 80 Tage Gewohnheiten — aber wer es
-  /// kaufen darf, hat zwanzig Sprossen geschafft und deren Gold dazu.
-  static const int ringLegendary = 2000;
+  /// Das teuerste Stück überhaupt. 53 Tage Gewohnheiten allein — aber wer
+  /// es kaufen darf, hat zwanzig Sprossen geschafft und deren Gold dazu.
+  static const int ringLegendary = 1330;
 
   // --- Talisman ---
-  static const int talismanCommon1 = 150;
-  static const int talismanCommon2 = 270;
-  static const int talismanUncommon1 = 520;
-  static const int talismanUncommon2 = 660;
-  static const int talismanRare = 880;
-  static const int talismanEpic1 = 1100;
-  static const int talismanEpic2 = 1300;
-  static const int talismanLegendary = 1750;
+  static const int talismanCommon1 = 100;
+  static const int talismanCommon2 = 180;
+  static const int talismanUncommon1 = 350;
+  static const int talismanUncommon2 = 440;
+  static const int talismanRare = 590;
+  static const int talismanEpic1 = 730;
+  static const int talismanEpic2 = 870;
+  static const int talismanLegendary = 1170;
 }

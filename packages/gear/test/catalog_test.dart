@@ -140,7 +140,10 @@ void main() {
     test('ein voller Satz Stufe 1 ist in etwa einer Woche tragbar', () {
       final tage = GearCatalog.cheapestFullSetPrice / goldProTag;
 
-      expect(tage, greaterThan(24), reason: 'zu billig, keine Entscheidung');
+      // Seit ADR-0047 ein Drittel billiger: rund drei Wochen allein aus
+      // Gewohnheiten, bei einem fleissigen Spieler mit Truhe und Dailies
+      // etwa eine Woche.
+      expect(tage, greaterThan(14), reason: 'zu billig, keine Entscheidung');
       expect(tage, lessThan(45), reason: 'zu teuer, der Shop bleibt Deko');
     });
 

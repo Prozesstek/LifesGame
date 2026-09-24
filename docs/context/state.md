@@ -11,6 +11,28 @@
 
 ---
 
+## 24.09.2026: der Laden ein Drittel billiger
+
+[ADR-0047](../decisions/0047-laden-ein-drittel-billiger.md). Frederik
+nach vier Testtagen: „Der Laden ist auf jeden Fall zu teuer, und gerade
+passiert am Tag nicht viel ausser alle Dailies machen.“ Jeder Preis ist
+jetzt zwei Drittel des alten, gerundet auf zehn.
+
+| | vorher | jetzt |
+|---|---|---|
+| Gewöhnlich | 100–320 | 70–210 |
+| Ungewöhnlich | 400–880 | 270–590 |
+| Selten | 720–1.050 | 480–700 |
+| Episch | 900–1.500 | 600–1.000 |
+| Legendär | 1.450–2.000 | 970–1.330 |
+
+**Wer schon gekauft hat, bekommt ein Drittel zurück**, weil Gold aus dem
+Besitz gerechnet wird. `catalog_test.dart` hat eine gesenkte Untergrenze
+(14 statt 24 Tage Gewohnheiten für den billigsten Satz). gear 90, App 501.
+
+**Offen:** die zweite Hälfte der Klage, dass auch Aufstiege selten
+werden. Mehr Aufstiege leerten den Baum zu früh.
+
 ## 24.09.2026: Wann geht was aus? Nichts, aber es wird dünner
 
 Gerechnet mit `tool/runway_sim.dart`: ein Spieler, der jeden Tag alles
