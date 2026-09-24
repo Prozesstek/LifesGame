@@ -222,16 +222,7 @@ class _Hud extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                '${sim.elapsed.toStringAsFixed(0)} s',
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Palette.textOnDarkDim,
-                ),
-              ),
-            ),
+            Flexible(child: _Clock(sim: sim)),
           ],
         ),
         if (boss != null) ...<Widget>[
@@ -246,6 +237,50 @@ class _Hud extends StatelessWidget {
         ],
       ],
     );
+  }
+}
+
+/// Die Uhr: mit Stufe was noch bleibt, sonst was vergangen ist.
+///
+/// Unter [PitClock.warnSeconds] wird sie golden und fett — man soll sie
+/// bemerken, bevor sie abläuft, nicht danach.
+class _Clock extends StatelessWidget {
+  const _Clock({required this.sim});
+
+  final ActionWorld sim;
+
+  @override
+  Widget build(BuildContext context) {
+    final rest = sim.timeLeft;
+    final knapp = rest != null && PitClock.isLow(rest);
+    return Text(
+      rest == null
+          ? '${sim.elapsed.toStringAsFixed(0)} s'
+          : PitClock.text(rest),
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: knapp ? 14 : 12,
+        fontWeight: knapp ? FontWeight.bold : FontWeight.normal,
+        color: knapp ? Palette.goldOnDark : Palette.textOnDarkDim,
+      ),
+    );
+  }
+}
+
+/// Wie die Uhr der Grube angezeigt wird — reine Rechnung, testbar.
+abstract final class PitClock {
+  /// Ab hier warnt die Uhr.
+  static const double warnSeconds = 15;
+
+  static bool isLow(double sekunden) => sekunden <= warnSeconds;
+
+  /// „2:05", „0:09" — aufgerundet, damit „0:00" erst steht, wenn sie
+  /// wirklich abgelaufen ist.
+  static String text(double sekunden) {
+    final ganz = sekunden <= 0 ? 0 : sekunden.ceil();
+    final minuten = ganz ~/ 60;
+    final rest = (ganz % 60).toString().padLeft(2, '0');
+    return '$minuten:$rest';
   }
 }
 

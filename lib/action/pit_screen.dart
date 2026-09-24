@@ -139,6 +139,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         perStage: true,
         summary: gewonnen
             ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in $sekunden s.'
+            : welt.isTimedOut
+            ? 'Die Zeit ist um auf Stufe $stufe, nach ${welt.kills} von '
+                  '${welt.totalEnemies} Gegnern.'
             : 'Gefallen auf Stufe $stufe, nach ${welt.kills} von '
                   '${welt.totalEnemies} Gegnern.',
       ),

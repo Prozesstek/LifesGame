@@ -157,6 +157,11 @@ class ActionWorld {
   double _carry = 0;
   bool _over = false;
   bool _won = false;
+  bool _timedOut = false;
+
+  /// Was auf der Uhr steht. Unendlich ohne Stufe — die Halle des
+  /// Prototyps und die Tests laufen ohne Uhr.
+  late double _timeLeft = stage?.timeLimitSeconds ?? double.infinity;
 
   /// Das Wegfeld zum Helden. Jeder Gegner liest daraus seine
   /// Richtung ab — eine Flutfüllung für alle statt einer Suche je
@@ -572,6 +577,15 @@ class ActionWorld {
 
   double get elapsed => _elapsed;
 
+  /// Wie viele Sekunden der Lauf hat, oder `null` ohne Uhr.
+  double? get timeLimit => stage?.timeLimitSeconds;
+
+  /// Was noch auf der Uhr steht, oder `null` ohne Uhr.
+  double? get timeLeft => stage == null ? null : _timeLeft.clamp(0, 1e9);
+
+  /// Ob der Lauf endete, weil die Uhr ablief.
+  bool get isTimedOut => _timedOut;
+
   bool get isOver => _over;
 
   bool get isWon => _won;
@@ -620,6 +634,7 @@ class ActionWorld {
 
     const dt = ActionBalance.stepSeconds;
     _elapsed += dt;
+    _timeLeft -= dt;
 
     _stepsSincePath++;
     if (_stepsSincePath >= ActionBalance.pathRefreshSteps) {
@@ -1044,6 +1059,10 @@ class ActionWorld {
 
       if (abstand <= orb.radius + _hero.radius) {
         orb.taken = true;
+        if (orb.kind == OrbKind.zeit) {
+          _collectTime(orb);
+          continue;
+        }
         final vorher = _hero.hp;
         _hero.hp = math.min(_hero.maxHp, _hero.hp + orb.heal);
         _orbsCollected++;
@@ -1061,6 +1080,15 @@ class ActionWorld {
       }
     }
     _orbs.removeWhere((orb) => orb.taken);
+  }
+
+  /// Legt die Sekunden einer Zeitkugel auf die Uhr — nie über das Limit.
+  void _collectTime(HealthOrb orb) {
+    final limit = timeLimit;
+    if (limit == null) return;
+    final vorher = _timeLeft;
+    _timeLeft = math.min(limit, _timeLeft + orb.seconds);
+    _events.add(TimeGained(at: _hero.position, seconds: _timeLeft - vorher));
   }
 
   // --- Schaden ---
@@ -1292,6 +1320,7 @@ class ActionWorld {
       _gemeldet.add(entity.id);
       _kills++;
       _maybeDropOrb(entity);
+      _maybeDropTime(entity);
       _dropLoot(entity);
       _events.add(
         EntityDied(
@@ -1433,6 +1462,27 @@ class ActionWorld {
         (_hero.maxHp * ActionBalance.orbHealShare).round(),
       ),
       radius: ActionBalance.orbRadius,
+      kind: OrbKind.heilung,
+      seconds: 0,
+    );
+    _orbs.add(orb);
+    _events.add(OrbDropped(id: orb.id, at: orb.position));
+  }
+
+  /// Manchmal eine Zeitkugel — nur mit Uhr, nie vom Wächter.
+  ///
+  /// Sie fällt ein Stück neben die Heilkugel, damit beide zu sehen sind.
+  void _maybeDropTime(ActionEntity gefallen) {
+    if (stage == null || gefallen.kind == EnemyKind.endgegner) return;
+    if (_rng.nextDouble() >= ActionBalance.timeDropChance) return;
+
+    final orb = HealthOrb(
+      id: _nextId++,
+      position: gefallen.position + const Vec2(10, 6),
+      heal: 0,
+      radius: ActionBalance.orbRadius,
+      kind: OrbKind.zeit,
+      seconds: ActionBalance.timeDropSeconds,
     );
     _orbs.add(orb);
     _events.add(OrbDropped(id: orb.id, at: orb.position));
@@ -1450,13 +1500,27 @@ class ActionWorld {
     // Tests — muss man leer räumen.
     final boss = _boss;
     final geschafft = boss != null ? !boss.isAlive : _kills >= _totalEnemies;
-    if (geschafft) _finish(won: true);
+    if (geschafft) {
+      _finish(won: true);
+      return;
+    }
+    // **Die Uhr zuletzt:** Wer im letzten Schritt den Wächter fällt, hat
+    // gewonnen, auch wenn die Uhr im selben Schritt null zeigt.
+    if (_timeLeft <= 0) _finish(won: false, timedOut: true);
   }
 
-  void _finish({required bool won}) {
+  void _finish({required bool won, bool timedOut = false}) {
     _over = true;
     _won = won;
-    _events.add(RunEnded(won: won, seconds: _elapsed, kills: _kills));
+    _timedOut = timedOut;
+    _events.add(
+      RunEnded(
+        won: won,
+        seconds: _elapsed,
+        kills: _kills,
+        timedOut: timedOut,
+      ),
+    );
   }
 
   /// Wohin dieser Gegner laufen muss, um beim Helden anzukommen.

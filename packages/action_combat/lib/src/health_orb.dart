@@ -1,5 +1,14 @@
 import 'vec2.dart';
 
+/// Was eine Kugel bringt.
+enum OrbKind {
+  /// Leben — ein Anteil der vollen Gesundheit.
+  heilung,
+
+  /// Sekunden auf der Uhr (`ActionBalance.timeDropSeconds`).
+  zeit,
+}
+
 /// Was ein gefallener Gegner manchmal hinterlässt.
 ///
 /// **Sie ist der Grund, warum ein Lauf ein Lauf ist.** Ohne sie fällt die
@@ -12,10 +21,16 @@ class HealthOrb {
     required this.position,
     required this.heal,
     required this.radius,
+    required this.kind,
+    required this.seconds,
   });
 
   final int id;
   final int heal;
+  final OrbKind kind;
+
+  /// Nur bei [OrbKind.zeit]: wie viele Sekunden sie auf die Uhr legt.
+  final double seconds;
   final double radius;
 
   Vec2 position;
@@ -30,6 +45,7 @@ class OrbView {
     required this.position,
     required this.radius,
     required this.fading,
+    required this.kind,
   });
 
   factory OrbView.of(HealthOrb orb, {required bool fading}) {
@@ -38,6 +54,7 @@ class OrbView {
       position: orb.position,
       radius: orb.radius,
       fading: fading,
+      kind: orb.kind,
     );
   }
 
@@ -48,4 +65,6 @@ class OrbView {
   /// Ob sie bald verschwindet. Der Renderer lässt sie dann blinken —
   /// eine Kugel, die ohne Vorwarnung weg ist, liest sich als Fehler.
   final bool fading;
+
+  final OrbKind kind;
 }

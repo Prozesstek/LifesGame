@@ -66,6 +66,11 @@ class PitStage {
     return ActionBalance.stageBaseRooms + extra;
   }
 
+  /// Wie viele Sekunden ein Lauf auf dieser Stufe hat.
+  double get timeLimitSeconds =>
+      ActionBalance.timeBaseSeconds +
+      ActionBalance.timePerRoomSeconds * roomCount;
+
   /// Geometrisch statt linear: Jede Stufe ist um denselben **Anteil**
   /// härter als die vorige. Linear wären die ersten Schritte riesig und
   /// die letzten kaum zu spüren.
