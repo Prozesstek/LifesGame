@@ -79,7 +79,8 @@ durch die Grube ersetzt und gelöscht.
 | `packages/gear/lib/src/rolls.dart` | **wie gewürfelt wird**: Werte 85–115 %, Seltenheit je Stufe, der Tagesladen, die Beute ([ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)) | nur Dart-SDK |
 | `packages/gear/lib/src/copy.dart` | ein **Exemplar**: Katalogstück plus gespeicherte Werte | nur Dart-SDK |
 | `packages/gear/lib/src/keys.dart` | die **Schlüssel** zur Beute — höchstens zehn, der Überhang verfällt beim Einsetzen | nur Dart-SDK |
-| `lib/gear/copy_text.dart` | wie ein Exemplar sich beschreibt („+11 Angriff · 108 %") — **eine Stelle** | Flutter |
+| `lib/gear/copy_text.dart` | wie ein Exemplar sich beschreibt — Werte **untereinander**, mit Unterschied zum Getragenen in Klammern (`CopyText.lines`) | Flutter |
+| `lib/gear/widgets/copy_stats.dart` | zeigt das: eine Zeile je Wert, „(+2)“ grün, „(−3)“ rot — Laden, Inventar, Beute, Charakter | Flutter |
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
@@ -191,7 +192,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 503 Tests
+flutter test             # 508 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

@@ -102,6 +102,60 @@ void main() {
     });
   });
 
+  group('Die Werte untereinander, mit Vergleich', () {
+    const neu = GearCopy(
+      uid: 'neu',
+      itemId: 'gear-streitkolben',
+      bonus: GearBonus(attack: 12, maxHp: 30),
+      paid: 0,
+    );
+    const alt = GearCopy(
+      uid: 'alt',
+      itemId: 'gear-streitkolben',
+      bonus: GearBonus(attack: 10, maxHp: 40, defense: 3),
+      paid: 0,
+    );
+
+    test('ohne Getragenes: nur die Werte, keine Klammern', () {
+      final zeilen = CopyText.lines(neu);
+      expect(zeilen.map((z) => z.valueText), <String>[
+        '+12 Angriff',
+        '+30 Lebenspunkte',
+      ]);
+      expect(zeilen.every((z) => z.diffText.isEmpty), isTrue);
+    });
+
+    test('mehr ist plus, weniger ist minus', () {
+      final zeilen = CopyText.lines(neu, worn: alt);
+      expect(zeilen[0].diffText, '(+2)');
+      expect(zeilen[1].diffText, '(−10)');
+    });
+
+    test('was nur das Getragene hat, steht als Verlust da', () {
+      final zeilen = CopyText.lines(neu, worn: alt);
+      final abwehr = zeilen.firstWhere((z) => z.label == 'Verteidigung');
+      expect(abwehr.valueText, '+0 Verteidigung');
+      expect(abwehr.diffText, '(−3)');
+    });
+
+    test('gegen sich selbst gibt es keinen Vergleich', () {
+      expect(
+        CopyText.lines(neu, worn: neu).every((z) => z.diff == null),
+        isTrue,
+      );
+    });
+
+    test('gleich viel ist ±0', () {
+      const gleich = GearCopy(
+        uid: 'gleich',
+        itemId: 'gear-streitkolben',
+        bonus: GearBonus(attack: 12, maxHp: 30),
+        paid: 0,
+      );
+      expect(CopyText.lines(neu, worn: gleich).first.diffText, '(±0)');
+    });
+  });
+
   group('Schlüssel', () {
     test('jedes Häkchen ist einer — höchstens zehn auf Vorrat', () {
       final c = mit(stand(tage: 1));
@@ -227,7 +281,10 @@ void main() {
           .widgetList<ShopItemCell>(find.byType(ShopItemCell))
           .first
           .copy;
-      expect(find.text(CopyText.line(erstes)), findsOneWidget);
+      // Jeder Wert steht in einer eigenen Zeile.
+      for (final zeile in CopyText.lines(erstes)) {
+        expect(find.textContaining(zeile.valueText), findsWidgets);
+      }
     });
 
     testWidgets('ohne Gold ist jedes Angebot ausgegraut und Kaufen aus', (

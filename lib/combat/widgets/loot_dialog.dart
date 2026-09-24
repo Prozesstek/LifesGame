@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
-import '../../gear/copy_text.dart';
+import '../../gear/widgets/copy_stats.dart';
 import '../../gear/gear_icon.dart';
 import '../../gear/widgets/rarity_badge.dart';
 import '../../ui/holz.dart';
@@ -105,24 +105,7 @@ Future<bool> showLoot(
               ],
             ),
             const SizedBox(height: 4),
-            Text(
-              CopyText.line(loot),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Palette.success,
-                fontWeight: CopyText.isGoodRoll(loot)
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              ),
-            ),
-            if (worn != null) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(
-                'Getragen: ${CopyText.line(worn)}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Palette.muted),
-              ),
-            ],
+            CopyStats(copy: loot, worn: worn, center: true),
             if (GearSets.byId(item.setId) case final GearSet set) ...<Widget>[
               const SizedBox(height: 4),
               Text(
