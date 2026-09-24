@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../gear/widgets/copy_stats.dart';
+import 'loot_reveal.dart';
 import '../../gear/gear_icon.dart';
 import '../../gear/widgets/rarity_badge.dart';
 import '../../ui/holz.dart';
@@ -46,17 +47,28 @@ Future<bool> askToOpenLoot(
   return antwort ?? false;
 }
 
-/// Zeigt, was gefallen ist. Gibt `true` zurück, wenn es angelegt werden
-/// soll.
+/// Zeigt, was gefallen ist — mit der Truhe, die aufgeht
+/// ([LootReveal]). Gibt `true` zurück, wenn es angelegt werden soll.
+///
+/// [usedKey] heißt: Ein Schlüssel hat sie geöffnet, und er ist zu sehen.
+/// [onReveal] kommt im Moment, in dem die Truhe aufplatzt — für den
+/// Klang, damit er nicht vor dem Bild kommt.
 Future<bool> showLoot(
   BuildContext context, {
   required GearCopy loot,
   required String headline,
   GearCopy? worn,
+  bool usedKey = false,
+  VoidCallback? onReveal,
 }) async {
   final item = loot.item;
   if (item == null) return false;
   final bild = GearIcons.forItemId(item.id);
+  final ersatz = Icon(
+    GearIcons.fallbackFor(item.slot),
+    size: 48,
+    color: Palette.textDim,
+  );
   final antwort = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -64,56 +76,46 @@ Future<bool> showLoot(
       child: AlertDialog(
         backgroundColor: Palette.surface,
         title: Text(headline),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            SizedBox(
-              height: 72,
-              child: bild == null
-                  ? Icon(
-                      GearIcons.fallbackFor(item.slot),
-                      size: 48,
-                      color: Palette.textDim,
-                    )
-                  : PixelArt(
-                      assetPath: bild,
-                      side: 72,
-                      fallback: Icon(
-                        GearIcons.fallbackFor(item.slot),
-                        size: 48,
-                        color: Palette.textDim,
+        content: LootReveal(
+          withKey: usedKey,
+          glow: RarityBadge.colorOf(item.rarity),
+          onBurst: onReveal,
+          item: bild == null
+              ? ersatz
+              : PixelArt(assetPath: bild, side: 72, fallback: ersatz),
+          details: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(
+                    child: Text(
+                      item.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Palette.text,
                       ),
                     ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Text(
-                    item.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.text,
-                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                RarityBadge(rarity: item.rarity),
-              ],
-            ),
-            const SizedBox(height: 4),
-            CopyStats(copy: loot, worn: worn, center: true),
-            if (GearSets.byId(item.setId) case final GearSet set) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(
-                'Teil von „${set.name}"',
-                style: const TextStyle(fontSize: 12, color: Palette.accent),
+                  const SizedBox(width: 8),
+                  RarityBadge(rarity: item.rarity),
+                ],
               ),
+              const SizedBox(height: 4),
+              CopyStats(copy: loot, worn: worn, center: true),
+              if (GearSets.byId(item.setId) case final GearSet set) ...<Widget>[
+                const SizedBox(height: 4),
+                Text(
+                  'Teil von „${set.name}"',
+                  style: const TextStyle(fontSize: 12, color: Palette.accent),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
         actions: <Widget>[
           TextButton(

@@ -195,6 +195,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final getragen = slot == null
         ? null
         : ref.read(loadoutProvider).equippedCopyIn(slot);
+    final selten = (beute.item?.rarity.index ?? 0) >= GearRarity.rare.index;
     final anlegen = await showLoot(
       context,
       loot: beute,
@@ -202,6 +203,10 @@ class _PitScreenState extends ConsumerState<PitScreen> {
           ? 'Erster Sieg auf Stufe $stufe'
           : 'Die Beute des Wächters',
       worn: getragen?.uid == beute.uid ? null : getragen,
+      usedKey: !ersterSieg,
+      onReveal: () => ref
+          .read(soundPlayerProvider)
+          .play(selten ? SoundEffect.errungenschaft : SoundEffect.beute),
     );
     if (anlegen && mounted) controller.equip(beute.uid);
   }

@@ -95,3 +95,4 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Talismane/Drachenzahn.png` | fc230 |
 | `Talismane/HerzDesTitanen.png` | fc2141 |
 | `Items/Truhe.png` (Tagestruhe, ADR-0044) | fc6 |
+| `Items/Schluessel.png` (Schlüssel zur Beute, ADR-0048) | fc77 |

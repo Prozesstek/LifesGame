@@ -25,7 +25,12 @@ enum SoundEffect {
 
   /// Eine Errungenschaft ist verdient — der seltenste Moment, deshalb
   /// der längste Klang.
-  errungenschaft('Sound/Win_3.mp3');
+  errungenschaft('Sound/Win_3.mp3'),
+
+  /// Die Beute des Wächters springt auf (ADR-0048). **Vorerst dieselbe
+  /// Datei wie die Lektion**; ab Selten klingt stattdessen die
+  /// Errungenschaft.
+  beute('Sound/Win.mp3');
 
   const SoundEffect(this.asset);
 

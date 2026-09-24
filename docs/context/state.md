@@ -11,6 +11,20 @@
 
 ---
 
+## 24.09.2026, zuletzt: die Schlüssel bewegen sich
+
+Frederik: „Sonst funktioniert alles super. Kriegen wir noch eine
+Animation bei den Schlüsseln hin?“ Gebaut sind zwei Stellen:
+
+| Wo | Was |
+|---|---|
+| **Beute öffnen** | Der Schlüssel fliegt ins Schloss der Truhe und dreht sich, die Truhe wackelt und platzt auf, ein Leuchten in der Farbe der Seltenheit, das Stück springt heraus, dann blenden Name und Werte ein. Beim Erstsieg ohne Schlüssel springt die Truhe gleich auf. Klang beim Aufplatzen, ab Selten der grosse (`LootReveal`) |
+| **Schlüssel verdient** | Beim Häkchen und bei einer richtigen Rückfrage steigt „+1 Schlüssel“ mit dem gezeichneten Schlüssel auf, eine bestandene Seite zeigt ihn auf dem Ergebnis. **Nur, wenn wirklich einer dazukam**: Bei zehn auf Vorrat verfällt er, dann steht nichts da |
+
+Der Schlüssel ist Raven fc77 (`assets/Items/Schluessel.png`, eine Stelle:
+`GearIcons.schluessel`). Neuer Klang `SoundEffect.beute`, vorerst dieselbe
+Datei wie die Lektion. App 513. **Nicht am Handy angesehen.**
+
 ## 24.09.2026, danach: Werte untereinander, mit Vergleich
 
 Frederik nach dem ersten Blick: „Die Stats sollten untereinander

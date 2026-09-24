@@ -82,6 +82,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/copy_text.dart` | wie ein Exemplar sich beschreibt — Werte **untereinander**, mit Unterschied zum Getragenen in Klammern (`CopyText.lines`) | Flutter |
 | `lib/gear/widgets/copy_stats.dart` | zeigt das: eine Zeile je Wert, „(+2)“ grün, „(−3)“ rot — Laden, Inventar, Beute, Charakter | Flutter |
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
+| `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
@@ -192,7 +193,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 508 Tests
+flutter test             # 513 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
