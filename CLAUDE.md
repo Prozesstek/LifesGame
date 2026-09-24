@@ -109,6 +109,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
 | `lib/action/pit_text.dart` | Name und Beschreibung einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
+| `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
@@ -190,6 +191,7 @@ flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
+dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat

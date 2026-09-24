@@ -11,6 +11,40 @@
 
 ---
 
+## 24.09.2026: Wann geht was aus? Nichts, aber es wird dünner
+
+Gerechnet mit `tool/runway_sim.dart`: ein Spieler, der jeden Tag alles
+erledigt (fünf Gewohnheiten, Truhe, bis zu zwei Seiten, Rückfrage, eine
+neue Stufe soweit er kommt, vier Dailies). Die Reichweite in der Grube
+stammt aus `pit_sim`, ist also eine untere Schranke. Errungenschaften
+zählen nicht mit.
+
+| Tag | Level | Baum | Stufe | Gold verdient |
+|---|---|---|---|---|
+| 1 | 4 | 4 / 25 | 1 | 217 |
+| 10 | 11 | 14 / 25 | 4 | 982 |
+| 20 | 16 | 19 / 25 | 8 | 1.704 |
+| 30 | 20 | 23 / 25 | 12 | 2.474 |
+| 35 | 23 | **25 / 25** | 15 | 2.917 |
+
+**Innerhalb der 30 Tage geht nichts aus.** Der Baum ist an Tag 33
+gelesen, die Werte sind an Tag 35 am Deckel, die Grube reicht weit
+darüber hinaus. **Der Laden ist das Gegenteil von leer:** Er kostet
+zusammen 40.230 Gold, verdient sind an Tag 30 rund 2.500. Man besitzt
+dann ungefähr alle Gewöhnlichen (zusammen 2.340) und nicht viel mehr.
+Episch ist ab Stufe 10 offen (etwa Tag 25), kostet aber 900 bis 1.500
+Gold bei rund 80 Gold am Tag.
+
+**Das Risiko ist das Tempo, nicht das Ende.** In Woche 1 kommen etwa acht
+Aufstiege, neun Seiten und drei Stufen. In Woche 4 sind es zwei
+Aufstiege, zwei Seiten, drei Stufen und ein Kauf alle ein bis zwei
+Wochen. Das Neue wird ungefähr um den Faktor vier seltener. Wenn im Test
+Langeweile kommt, dann in Woche 3 und 4, und sie käme aus dieser
+Ausdünnung.
+
+Nicht entschieden, nur gemessen. Die Hebel wären Preise, die Levelkurve
+oder mehr Inhalt (Letzteres steht auf der Sperrliste).
+
 ## 24.09.2026: alles am Handy durchgespielt
 
 Frederik hat alles, was hier als „nicht angesehen“ stand, am Handy
