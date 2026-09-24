@@ -71,11 +71,16 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar, reines Dart, 90 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 112 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
 | `packages/gear/lib/src/gates.dart` | ab welcher Sprosse Episch und Legendär kaufbar sind | nur Dart-SDK |
+| `packages/gear/lib/src/rolls.dart` | **wie gewürfelt wird**: Werte 85–115 %, Seltenheit je Stufe, der Tagesladen, die Beute ([ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)) | nur Dart-SDK |
+| `packages/gear/lib/src/copy.dart` | ein **Exemplar**: Katalogstück plus gespeicherte Werte | nur Dart-SDK |
+| `packages/gear/lib/src/keys.dart` | die **Schlüssel** zur Beute — höchstens zehn, der Überhang verfällt beim Einsetzen | nur Dart-SDK |
+| `lib/gear/copy_text.dart` | wie ein Exemplar sich beschreibt („+11 Angriff · 108 %") — **eine Stelle** | Flutter |
+| `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
@@ -86,7 +91,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 203 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 206 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -127,8 +132,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/streak_ladder_card.dart` | was eine Kette einbringt, als Leiter | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden: Reiter je Platz, Raster, Detailfläche | Flutter |
-| `lib/gear/widgets/shop_item_cell.dart` | ein Stück als Kachel im Raster — wählt, kauft nicht | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: **Heute** (sechs Angebote) und **Inventar** (anlegen, verkaufen, alles Schlechtere) | Flutter |
+| `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
@@ -186,7 +191,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 501 Tests
+flutter test             # 503 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -195,7 +200,7 @@ dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausge
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 203 Tests
+dart test                              # 206 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -206,7 +211,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 148 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 41 Tests
-cd packages/gear        ; dart test    # 90 Tests, prüft Preise, Sets, Verkauf und die Sperre
+cd packages/gear        ; dart test    # 112 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -422,19 +427,36 @@ kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
 mitgeprüft — jedes Stück muss wirken, jeder Platz führt acht (fünf offene, drei verdiente), und teurer
 muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
 
-**Verkauf gibt es seit [ADR-0031](docs/decisions/0031-verkauf-als-versenkte-kosten.md),
-und die Hälfte bleibt versenkt.** Der Satz steht als
-`GearPrices.refundShare`. Wer das anfasst, muss den Grund kennen: Gold ist
-abgeleitet, also gäbe ein Verkauf **von selbst den vollen Preis zurück** —
-das Stück fällt einfach aus `spentGold` heraus. Der zweite Summand
-(`Loadout.lostGold`, gerechnet aus `soldIds`) ist das, was das verhindert.
+**Seit [ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)
+besitzt man Exemplare, keine Katalogstücke.** Jedes hat eigene,
+gewürfelte Werte (85–115 % je Wert) im **Kampfmassstab**
+(`GearBonus.combatScale` = `ActionBalance.powerScale`, eine Naht, die
+`test/loot_and_shop_test.dart` hält). In den Kampf gehen sie als eigener
+Summand (`ActionStats.gearAttack` usw.), sonst verschwände der Wurf in
+der Rundung. Der Laden verkauft **sechs Angebote am Tag**, aus dem Datum
+und der tiefsten Stufe gewürfelt (`DailyShop`). Der Wächter lässt
+**Beute** fallen (`GearLoot`): beim ersten Sieg auf einer Stufe immer,
+sonst gegen einen **Schlüssel** — einer je Häkchen, Seite und richtiger
+Rückfrage (`earnedKeysProvider`), höchstens zehn (`GearKeys`). Die Zahl
+der Würfe hängt damit nur an Gewohnheiten und Theorie, ihre Güte an der
+Tiefe. Wer an `GearRolls` dreht, lässt `tool/runway_sim.dart` laufen.
 
-`soldIds` ist eine **Historie**, kein Kontostand — dieselbe Bauform wie
-die Häkchen. Ein gespeicherter Goldstand könnte von der Rechnung
-abweichen, eine Historie *ist* die Rechnung. Und sie muss von jeder
-Methode weitergereicht werden, die ein neues `Loadout` baut; wer eine
-vergisst, verschenkt Gold. Ein Test in `loadout_test.dart` geht deshalb
-den Weg verkaufen → kaufen → anlegen → ablegen.
+| Frage | Antwortet |
+|---|---|
+| Was steht zum Verkauf? | `dailyOffersProvider` → `DailyShop.offersFor` |
+| Was ist ein Schlüssel wert? | `GearLoot.drop`, Seltenheit nach `GearRolls.weightsFor(stufe)` |
+| Wie viele Schlüssel? | `availableKeysProvider` — verdient minus verbraucht, gedeckelt |
+| Was ist Ausschuss? | `Loadout.junk` — nie Set-Teile, Episches, Legendäres, fremde Waffen |
+
+**Verkauf bringt ein Viertel**, egal ob gekauft oder erbeutet
+(`GearPrices.refundShare`); bei der Hälfte wäre Beute eine Goldquelle
+aus dem Spielen. Gold bleibt eine Rechnung aus zwei **Historien**:
+alles je Erworbene samt bezahltem Preis, alles Verkaufte samt Erlös
+(`Loadout.spentGold`). Jede Methode baut einen neuen `Loadout` über
+`_copyWith`, das kein Feld vergessen kann; `loadout_test.dart` geht den
+Weg kaufen → verkaufen → Schlüssel → kaufen → anlegen → ablegen. Alte
+Stände (mit `ownedIds`) werden beim Laden übernommen: jedes Stück ein
+Exemplar mit 100 %, frühere Verkäufe zum alten Satz.
 
 **Sets ändern heißt: den Set-Katalog anfassen, nicht die Engine.** Alle
 drei stehen in `packages/gear/lib/src/set_catalog.dart`, welche Stücke

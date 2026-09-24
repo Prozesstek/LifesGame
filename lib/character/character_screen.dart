@@ -146,12 +146,10 @@ class CharacterScreen extends ConsumerWidget {
                     for (final slot in GearSlot.values)
                       EquipmentSlotTile(
                         slot: slot,
-                        equipped: loadout.equippedIn(slot),
-                        owned: loadout.owned
-                            .where((item) => item.slot == slot)
-                            .toList(),
-                        onEquip: (itemId) =>
-                            ref.read(loadoutProvider.notifier).equip(itemId),
+                        equipped: loadout.equippedCopyIn(slot),
+                        owned: loadout.copiesIn(slot),
+                        onEquip: (uid) =>
+                            ref.read(loadoutProvider.notifier).equip(uid),
                         onUnequip: () =>
                             ref.read(loadoutProvider.notifier).unequip(slot),
                       ),

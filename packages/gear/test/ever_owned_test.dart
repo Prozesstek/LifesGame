@@ -13,18 +13,23 @@ void main() {
     return GearCatalog.all.firstWhere((i) => i.slot == slot);
   }
 
-  /// Kauft, ohne auf Gold zu achten — hier geht es um den Besitz, nicht
-  /// um die Ökonomie.
+  /// Ein Exemplar zu 100 % mit der Uid `k-<id>`.
+  GearCopy kopie(String id, {String? uid}) {
+    final item = GearCatalog.byId(id)!;
+    return GearCopy(
+      uid: uid ?? 'k-$id',
+      itemId: id,
+      bonus: item.bonus.scaled,
+      paid: item.price,
+    );
+  }
+
+  /// Legt Exemplare hin, ohne auf Gold oder Sperren zu achten — hier geht
+  /// es um den Besitz, nicht um die Ökonomie.
   Loadout mitBesitz(List<String> ids) {
     var loadout = const Loadout.empty();
     for (final id in ids) {
-      // Reihe durch: Sonst bleiben Episches und Legendaeres draussen,
-      // und `take(15)` zaehlt drei Stuecke weniger, als es glaubt.
-      loadout = loadout.buy(
-        id,
-        availableGold: 1 << 30,
-        highestRung: GearGates.legendaryRung,
-      );
+      loadout = loadout.addFree(kopie(id));
     }
     return loadout;
   }
@@ -51,10 +56,10 @@ void main() {
     test('verkauft bleibt besessen', () {
       final item = ersterAuf(GearSlot.helm);
       var loadout = mitBesitz(<String>[item.id]);
-      loadout = loadout.sell(item.id);
+      loadout = loadout.sell('k-${item.id}');
 
-      expect(loadout.isOwned(item.id), isFalse);
-      expect(loadout.owned, isEmpty);
+      expect(loadout.ownsItem(item.id), isFalse);
+      expect(loadout.ownedCopies, isEmpty);
       expect(loadout.everOwnedCount, 1);
       expect(loadout.slotsEverOwned, 1);
       expect(loadout.soldCount, 1);
@@ -63,12 +68,13 @@ void main() {
     test('zweimal kaufen und verkaufen zählt einmal als Besitz', () {
       final item = ersterAuf(GearSlot.ring);
       var loadout = mitBesitz(<String>[item.id]);
-      loadout = loadout.sell(item.id);
-      loadout = loadout.buy(item.id, availableGold: 1 << 30);
-      loadout = loadout.sell(item.id);
+      loadout = loadout.sell('k-${item.id}');
+      loadout = loadout.addFree(kopie(item.id, uid: 'zweites'));
+      loadout = loadout.sell('zweites');
 
+      // Zwei Exemplare desselben Stücks sind ein Katalogstück.
       expect(loadout.everOwnedCount, 1);
-      // Der Verkauf selbst zählt jedes Mal — zweimal draufgezahlt.
+      // Der Verkauf selbst zählt jedes Mal.
       expect(loadout.soldCount, 2);
     });
 
@@ -129,7 +135,7 @@ void main() {
       final teile = teileVon(GearSets.all.first.id);
       var loadout = mitBesitz(<String>[for (final item in teile) item.id]);
 
-      // Kaufen legt an — abgelegt wird das Set wirkungslos, besessen
+      // Das erste je Platz wird angelegt — abgelegt wird das Set wirkungslos, besessen
       // bleibt es trotzdem.
       for (final slot in GearSlot.values) {
         loadout = loadout.unequip(slot);
@@ -143,7 +149,7 @@ void main() {
     test('ein verkauftes Teil nimmt das Set nicht zurück', () {
       final teile = teileVon(GearSets.all.first.id);
       var loadout = mitBesitz(<String>[for (final item in teile) item.id]);
-      loadout = loadout.sell(teile.first.id);
+      loadout = loadout.sell('k-${teile.first.id}');
 
       expect(loadout.completeSetsEverOwned, 1);
     });
@@ -164,7 +170,7 @@ void main() {
       final teile =
           GearCatalog.all.where((i) => i.setId == GearSets.all.first.id);
       var loadout = mitBesitz(<String>[for (final item in teile) item.id]);
-      loadout = loadout.sell(teile.first.id);
+      loadout = loadout.sell('k-${teile.first.id}');
 
       final geladen = Loadout.fromJson(loadout.toJson());
 

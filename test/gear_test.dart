@@ -7,8 +7,6 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
-import 'package:lifes_game/gear/shop_screen.dart';
-import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
 import 'package:lifes_game/gear/weapon_ability_line.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -16,6 +14,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'gear_helpers.dart';
 
 void main() {
   const kappe = 'gear-lederkappe';
@@ -32,19 +31,6 @@ void main() {
       }
     }
     return SaveData(theory: progress);
-  }
-
-  /// Wegtippen, was nach einem Kauf gefeiert wird.
-  ///
-  /// **Seit ADR-0033 legt sich ein Blatt ueber den Laden**, sobald ein
-  /// Kauf eine Errungenschaft ausloest — und der erste Kauf tut das
-  /// immer. Die Tests hier interessieren sich fuer den Laden, nicht fuer
-  /// die Feier; sie raeumen sie deshalb weg.
-  Future<void> feierWeg(WidgetTester tester) async {
-    while (find.widgetWithText(FilledButton, 'Weiter').evaluate().isNotEmpty) {
-      await tester.tap(find.widgetWithText(FilledButton, 'Weiter').last);
-      await tester.pumpAndSettle();
-    }
   }
 
   Widget appMit(SaveData saved, Widget screen) {
@@ -70,7 +56,7 @@ void main() {
       final preis = GearCatalog.byId(kappe)?.price ?? 0;
       final ersterKauf = AchievementCatalog.byId('erster-kauf')!.tier.gold;
 
-      container.read(loadoutProvider.notifier).buy(kappe);
+      container.read(loadoutProvider.notifier).buy(angebot(kappe));
 
       expect(container.read(goldProvider), vorher - preis + ersterKauf);
       // Der Zufluss waechst um genau den Meilenstein, der Abfluss um den
@@ -87,13 +73,13 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      container.read(loadoutProvider.notifier).buy(kappe);
+      container.read(loadoutProvider.notifier).buy(angebot(kappe));
       final nachErstem = container.read(goldProvider);
 
       final zweites = GearCatalog.all.firstWhere(
         (i) => i.id != kappe && i.price <= nachErstem,
       );
-      container.read(loadoutProvider.notifier).buy(zweites.id);
+      container.read(loadoutProvider.notifier).buy(angebot(zweites.id));
 
       expect(container.read(goldProvider), nachErstem - zweites.price);
     });
@@ -104,10 +90,10 @@ void main() {
 
       expect(container.read(goldProvider), 0);
       expect(
-        container.read(loadoutProvider.notifier).buy(kappe),
+        container.read(loadoutProvider.notifier).buy(angebot(kappe)),
         PurchaseBlock.zuWenigGold,
       );
-      expect(container.read(loadoutProvider).owned, isEmpty);
+      expect(container.read(loadoutProvider).ownedCopies, isEmpty);
     });
 
     test('Gold kann nie unter null fallen', () {
@@ -119,15 +105,15 @@ void main() {
       addTearDown(container.dispose);
 
       for (final item in GearCatalog.all) {
-        container.read(loadoutProvider.notifier).buy(item.id);
+        container.read(loadoutProvider.notifier).buy(angebot(item.id));
       }
 
       expect(container.read(goldProvider), greaterThanOrEqualTo(0));
     });
   });
 
-  group('Verkaufen (ADR-0031)', () {
-    test('ein Verkauf gibt die Hälfte zurück, nicht den ganzen Preis', () {
+  group('Verkaufen (ADR-0048)', () {
+    test('ein Verkauf gibt ein Viertel zurück, nicht den ganzen Preis', () {
       final container = ProviderContainer(
         overrides: [savedGameProvider.overrideWithValue(mitGold())],
       );
@@ -139,13 +125,16 @@ void main() {
 
       // Der erste Kauf zahlt seinen Meilenstein aus (ADR-0033); er
       // steckt in beiden Zeilen darunter und aendert an der Aussage des
-      // Tests nichts -- die Haelfte bleibt versenkt.
+      // Tests nichts -- drei Viertel bleiben versenkt.
       final ersterKauf = AchievementCatalog.byId('erster-kauf')!.tier.gold;
 
-      container.read(loadoutProvider.notifier).buy(klinge);
+      container.read(loadoutProvider.notifier).buy(angebot(klinge));
       expect(container.read(goldProvider), zufluss - preis + ersterKauf);
 
-      expect(container.read(loadoutProvider.notifier).sell(klinge), erloes);
+      expect(
+        container.read(loadoutProvider.notifier).sell(angebot(klinge).uid),
+        erloes,
+      );
 
       // **Nicht zurück auf den Anfang.** Die Differenz ist versenkt.
       expect(
@@ -164,13 +153,13 @@ void main() {
       addTearDown(container.dispose);
 
       final vorher = container.read(equippedStatsProvider).attack;
-      container.read(loadoutProvider.notifier).buy(klinge);
+      container.read(loadoutProvider.notifier).buy(angebot(klinge));
       expect(container.read(equippedStatsProvider).attack, greaterThan(vorher));
 
-      container.read(loadoutProvider.notifier).sell(klinge);
+      container.read(loadoutProvider.notifier).sell(angebot(klinge).uid);
 
       expect(container.read(equippedStatsProvider).attack, vorher);
-      expect(container.read(loadoutProvider).isOwned(klinge), isFalse);
+      expect(container.read(loadoutProvider).ownsItem(klinge), isFalse);
     });
 
     test('ein verkauftes Set-Teil zählt nicht mehr zum Set', () {
@@ -181,11 +170,13 @@ void main() {
 
       final teile = GearCatalog.piecesOf(GearSets.ruhigerStand.id).take(2);
       for (final teil in teile) {
-        container.read(loadoutProvider.notifier).buy(teil.id);
+        container.read(loadoutProvider.notifier).buy(angebot(teil.id));
       }
       expect(container.read(activeSetsProvider), hasLength(1));
 
-      container.read(loadoutProvider.notifier).sell(teile.first.id);
+      container
+          .read(loadoutProvider.notifier)
+          .sell(angebot(teile.first.id).uid);
 
       expect(container.read(activeSetsProvider), isEmpty);
     });
@@ -207,10 +198,11 @@ void main() {
       addTearDown(container.dispose);
 
       final vorher = container.read(equippedStatsProvider).attack;
-      container.read(loadoutProvider.notifier).buy(klinge);
+      container.read(loadoutProvider.notifier).buy(angebot(klinge));
       final nachher = container.read(equippedStatsProvider);
 
-      final bonus = GearCatalog.byId(klinge)?.bonus.attack ?? 0;
+      // Im Kampfmassstab (ADR-0048): ein Angebot mit genau 100 %.
+      final bonus = GearCatalog.byId(klinge)!.bonus.scaled.attack;
       expect(nachher.attack, vorher + bonus);
       // Der Anteil aus dem Alltag bleibt sichtbar getrennt.
       expect(nachher.baseFor(HabitStat.staerke), vorher);
@@ -223,14 +215,14 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      container.read(loadoutProvider.notifier).buy(klinge);
+      container.read(loadoutProvider.notifier).buy(angebot(klinge));
       final mitKlinge = container.read(equippedStatsProvider).attack;
 
       container.read(loadoutProvider.notifier).unequip(GearSlot.waffe);
 
       expect(container.read(equippedStatsProvider).attack, lessThan(mitKlinge));
       // Besitz bleibt, nur die Wirkung ist weg.
-      expect(container.read(loadoutProvider).isOwned(klinge), isTrue);
+      expect(container.read(loadoutProvider).ownsItem(klinge), isTrue);
     });
   });
 
@@ -287,280 +279,15 @@ void main() {
     });
   });
 
-  group('ShopScreen', () {
-    testWidgets('zeigt jeden Platz und jedes Stück', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      // **Durchscrollen, sonst prüft der Test nur die obere Hälfte.** Der
-      // Laden führt fünf Stücke je Platz; was in der `ListView` weiter
-      // unten steht, wird gar nicht erst gebaut — und was nicht gebaut
-      // wird, findet `find.text` nicht (`docs/context/gotchas.md`).
-      final gefunden = <String>{};
-      for (var i = 0; i < 12; i++) {
-        for (final slot in GearSlot.values) {
-          if (find.text(slot.label).evaluate().isNotEmpty) {
-            gefunden.add(slot.label);
-          }
-        }
-        await tester.drag(find.byType(Scaffold), const Offset(0, -400));
-        await tester.pumpAndSettle();
-      }
-
-      for (final slot in GearSlot.values) {
-        expect(gefunden, contains(slot.label), reason: slot.label);
-      }
-    });
-
-    testWidgets('nennt bei jeder Waffe, welchen Zug sie mitbringt', (
-      tester,
-    ) async {
-      // **Fünf Waffen mit fünf Rhythmen sind nur dann eine
-      // Entscheidung, wenn man vor dem Kauf sieht, welchen man
-      // bekommt** (Ziel 3). Seit Issue #35 steht die Zeile in der
-      // Detailfläche statt auf jeder Kachel — der Weg dorthin ist ein
-      // Tipp, und dieser Test geht ihn für jede der fünf Waffen.
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      for (final waffe in GearCatalog.forSlot(GearSlot.waffe)) {
-        final zeile = weaponAbilityLine(waffe);
-        expect(zeile, isNotNull, reason: waffe.name);
-
-        await tester.tap(
-          find.widgetWithText(ShopItemCell, waffe.name),
-          warnIfMissed: false,
-        );
-        await tester.pumpAndSettle();
-
-        // Bei der Sonnenklinge steht die legendäre Kraft in derselben
-        // Fläche darunter — deshalb `textContaining`.
-        expect(find.textContaining(zeile!), findsOneWidget, reason: waffe.name);
-      }
-    });
-
-    testWidgets('ein Reiter je Platz, das Raster zeigt nur einen', (
-      tester,
-    ) async {
-      // **Der Kern des Umbaus aus Issue #35.** Vorher lagen alle
-      // siebenundzwanzig Stücke untereinander; jetzt liegt ein Platz auf
-      // einem Bildschirm. Der Test hält beide Hälften fest: Alle sechs
-      // Reiter sind da, und im Raster steht nur der gewählte Platz.
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      for (final slot in GearSlot.values) {
-        expect(find.text(slot.label), findsWidgets, reason: slot.label);
-      }
-
-      final zellen = tester.widgetList<ShopItemCell>(find.byType(ShopItemCell));
-
-      expect(zellen.map((z) => z.item.slot).toSet(), <GearSlot>{
-        GearSlot.waffe,
-      });
-      expect(zellen, hasLength(GearCatalog.forSlot(GearSlot.waffe).length));
-    });
-
-    testWidgets('ein anderer Reiter zeigt andere Stücke', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text(GearSlot.ring.label));
-      await tester.pumpAndSettle();
-
-      final zellen = tester.widgetList<ShopItemCell>(find.byType(ShopItemCell));
-
-      expect(zellen.map((z) => z.item.slot).toSet(), <GearSlot>{GearSlot.ring});
-
-      // **Die Detailfläche ist nie leer.** Sie rückt beim Wechsel auf das
-      // erste Stück des neuen Platzes — sonst stünde dort noch eine Waffe
-      // unter der Überschrift „Ring", oder gar nichts.
-      final ersterRing = GearCatalog.forSlot(GearSlot.ring).first;
-      expect(find.text(ersterRing.why), findsOneWidget);
-    });
-
-    testWidgets('die Detailfläche folgt der gewählten Kachel', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      final waffen = GearCatalog.forSlot(GearSlot.waffe);
-      final andere = waffen[1];
-
-      // Vorher: die Begründung der zweiten Waffe steht nirgends.
-      expect(find.text(andere.why), findsNothing);
-
-      await tester.tap(
-        find.widgetWithText(ShopItemCell, andere.name),
-        warnIfMissed: false,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text(andere.why), findsOneWidget);
-      expect(find.text(waffen.first.why), findsNothing);
-    });
-
-    testWidgets('zeigt das erste Stück mit Namen und Seltenheit', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Übungsklinge'), findsOneWidget);
-      expect(find.text(GearRarity.common.label), findsWidgets);
-    });
-
-    testWidgets('ohne Gold ist Kaufen aus', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      final buttons = tester.widgetList<FilledButton>(
-        find.widgetWithText(FilledButton, 'Kaufen'),
-      );
-
-      expect(buttons, isNotEmpty);
-      expect(buttons.every((b) => b.onPressed == null), isTrue);
-    });
-
-    testWidgets('sagt, wie viel noch fehlt', (tester) async {
-      // „Geht nicht" ohne Grund ist die häufigste Art, jemanden zu
-      // verlieren.
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('Tage Gewohnheiten'), findsWidgets);
-    });
-
-    testWidgets('Gekauftes lässt sich verkaufen — nach Rückfrage', (
-      tester,
-    ) async {
-      // **Der Dialog ist kein Zierrat.** Ein Verkauf lässt sich nicht
-      // ohne Verlust rückgängig machen; ein Fehlgriff auf einem Handy
-      // wäre teuer.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
-      await tester.pumpAndSettle();
-      await feierWeg(tester);
-
-      final erloes = Loadout.refundFor(
-        GearCatalog.forSlot(GearSlot.waffe).first,
-      );
-      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
-      await tester.pumpAndSettle();
-
-      // Erst der Dialog, und er nennt beide Zahlen.
-      expect(find.textContaining('Das bringt $erloes Gold'), findsOneWidget);
-      expect(find.text('Behalten'), findsOneWidget);
-
-      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('+$erloes Gold'), findsNothing);
-      expect(find.text('Verkaufen ($erloes)'), findsNothing);
-    });
-
-    testWidgets('„Behalten" ändert nichts', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
-      await tester.pumpAndSettle();
-      await feierWeg(tester);
-
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(ShopScreen)),
-      );
-      final vorher = container.read(goldProvider);
-
-      final erloes = Loadout.refundFor(
-        GearCatalog.forSlot(GearSlot.waffe).first,
-      );
-      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Behalten'));
-      await tester.pumpAndSettle();
-
-      expect(container.read(goldProvider), vorher);
-      expect(find.text('+$erloes Gold'), findsOneWidget);
-    });
-
-    testWidgets('mit Gold lässt sich kaufen und es wird angelegt', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitGold(), const ShopScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen').first);
-      await tester.pumpAndSettle();
-
-      expect(find.text('getragen'), findsWidgets);
-    });
-  });
-
   group('Sets im Bild', () {
     /// Ein Stand, der die [anzahl] billigsten Teile eines Sets trägt.
     SaveData mitTeilenVon(GearSet set, int anzahl) {
       var loadout = const Loadout.empty();
       for (final item in GearCatalog.piecesOf(set.id).take(anzahl)) {
-        loadout = loadout.buy(item.id, availableGold: 100000);
+        loadout = loadout.buy(angebot(item.id), availableGold: 100000);
       }
       return SaveData(loadout: loadout);
     }
-
-    testWidgets('der Laden nennt die Set-Zugehörigkeit', (tester) async {
-      // Wer nach einem Set kauft, sucht im Laden — nicht auf einem
-      // zweiten Bildschirm.
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(const SaveData.empty(), const ShopScreen()),
-      );
-      await tester.pumpAndSettle();
-
-      final waffe = GearCatalog.piecesOf(
-        GearSets.eisernerWille.id,
-      ).firstWhere((i) => i.slot == GearSlot.waffe);
-
-      // Seit Issue #35 steht die Zugehörigkeit in der Detailfläche, also
-      // an dem Stück, das gerade gewählt ist — nicht an allen zugleich.
-      await tester.tap(
-        find.widgetWithText(ShopItemCell, waffe.name),
-        warnIfMissed: false,
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        find.textContaining('Teil von „${GearSets.eisernerWille.name}"'),
-        findsWidgets,
-      );
-    });
 
     testWidgets('ohne Set-Teile zeigt der Charakter keine Set-Karte', (
       tester,
@@ -648,12 +375,12 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CharacterScreen)),
       );
-      container.read(loadoutProvider.notifier).buy(klinge);
+      container.read(loadoutProvider.notifier).buy(angebot(klinge));
       await tester.pumpAndSettle();
 
       // Die Zahl kommt aus dem Katalog, nicht aus diesem Test — sonst
       // fällt er bei jeder Preisrunde um, ohne dass etwas kaputt ist.
-      final bonus = GearCatalog.byId(klinge)!.bonus.attack;
+      final bonus = GearCatalog.byId(klinge)!.bonus.scaled.attack;
       expect(find.textContaining('+$bonus Ausrüstung'), findsOneWidget);
     });
   });

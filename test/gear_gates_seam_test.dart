@@ -1,18 +1,17 @@
 import 'package:action_combat/action_combat.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
-import 'package:lifes_game/gear/shop_screen.dart';
+import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:theory/theory.dart';
 
-import 'test_view.dart';
+import 'gear_helpers.dart';
 
 /// Die Naht zwischen `package:gear` und `package:combat` für die Sperre
 /// auf Episch und Legendär (ADR-0034).
@@ -89,10 +88,10 @@ void main() {
 
       expect(container.read(goldProvider), greaterThanOrEqualTo(episch.price));
       expect(
-        container.read(loadoutProvider.notifier).buy(episch.id),
+        container.read(loadoutProvider.notifier).buy(angebot(episch.id)),
         PurchaseBlock.gesperrt,
       );
-      expect(container.read(loadoutProvider).isOwned(episch.id), isFalse);
+      expect(container.read(loadoutProvider).ownsItem(episch.id), isFalse);
     });
 
     test('ein Sieg auf der Sprosse schließt Episches auf', () {
@@ -108,14 +107,17 @@ void main() {
       addTearDown(container.dispose);
 
       expect(
-        container.read(loadoutProvider.notifier).buy(episch.id),
+        container.read(loadoutProvider.notifier).buy(angebot(episch.id)),
         PurchaseBlock.gesperrt,
       );
 
       container.read(ladderProvider.notifier).defeat(GearGates.epicRung);
 
-      expect(container.read(loadoutProvider.notifier).buy(episch.id), isNull);
-      expect(container.read(loadoutProvider).isOwned(episch.id), isTrue);
+      expect(
+        container.read(loadoutProvider.notifier).buy(angebot(episch.id)),
+        isNull,
+      );
+      expect(container.read(loadoutProvider).ownsItem(episch.id), isTrue);
     });
 
     test('Episch reicht nicht für Legendär', () {
@@ -129,7 +131,7 @@ void main() {
       addTearDown(container.dispose);
 
       expect(
-        container.read(loadoutProvider.notifier).buy(legendaer.id),
+        container.read(loadoutProvider.notifier).buy(angebot(legendaer.id)),
         PurchaseBlock.gesperrt,
       );
     });
@@ -140,60 +142,53 @@ void main() {
 
       container.read(loadoutProvider.notifier).grant(legendaer.id);
 
-      expect(container.read(loadoutProvider).isOwned(legendaer.id), isTrue);
+      expect(container.read(loadoutProvider).ownsItem(legendaer.id), isTrue);
     });
   });
 
-  group('Der Laden zeigt die Sperre', () {
-    Widget appMit(SaveData saved) {
-      return ProviderScope(
-        overrides: [savedGameProvider.overrideWithValue(saved)],
-        child: const MaterialApp(home: ShopScreen()),
+  group('Der Tagesladen würfelt nach der Reihe (ADR-0048)', () {
+    const tag = Day(2026, 9, 24);
+
+    ProviderContainer mit(SaveData saved) {
+      return ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(saved),
+          todayProvider.overrideWithValue(tag),
+        ],
       );
     }
 
-    testWidgets('ein gesperrtes Stück nennt die Sprosse', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitGold()));
-      await tester.pumpAndSettle();
-
-      // Die Waffen liegen auf dem ersten Reiter; der Zweihänder ist das
-      // erste epische Stück im Raster.
-      final episch = GearCatalog.forSlot(
-        GearSlot.waffe,
-      ).firstWhere((i) => i.rarity == GearRarity.epic);
-      await tester.tap(find.text(episch.name));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Verdient ab Gegner ${GearGates.epicRung} der Reihe.'),
-        findsOneWidget,
-      );
-      expect(find.text('gesperrt'), findsWidgets);
-      final kaufen = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Kaufen'),
-      );
-      expect(kaufen.onPressed, isNull);
+    test('die Angebote kommen aus Datum und tiefster Stufe', () {
+      for (final rung in <int>[0, GearGates.epicRung, 25]) {
+        final container = mit(mitGold(rung: rung));
+        addTearDown(container.dispose);
+        final soll = DailyShop.offersFor(dayNumberOf(tag), highestRung: rung);
+        expect(
+          container.read(dailyOffersProvider).map((c) => c.uid),
+          soll.map((c) => c.uid),
+        );
+        expect(
+          container.read(dailyOffersProvider).map((c) => c.itemId),
+          soll.map((c) => c.itemId),
+          reason: 'Stufe $rung',
+        );
+      }
     });
 
-    testWidgets('mit der Sprosse ist es ein Kauf wie jeder andere', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitGold(rung: GearGates.epicRung)));
-      await tester.pumpAndSettle();
-
-      final episch = GearCatalog.forSlot(
-        GearSlot.waffe,
-      ).firstWhere((i) => i.rarity == GearRarity.epic);
-      await tester.tap(find.text(episch.name));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('Verdient ab Gegner'), findsNothing);
-      final kaufen = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Kaufen'),
-      );
-      expect(kaufen.onPressed, isNotNull);
+    test('ein gewürfeltes Angebot ist auch kaufbar — die Sperre passt', () {
+      // Die Tabelle würfelt nur, was die Reihe offen hat; `blockFor`
+      // prüft dieselbe Sperre. Beide müssen dasselbe sagen.
+      final container = mit(mitGold(rung: 25));
+      addTearDown(container.dispose);
+      for (final angebot in container.read(dailyOffersProvider)) {
+        expect(
+          container
+              .read(loadoutProvider)
+              .blockFor(angebot, availableGold: 1 << 30, highestRung: 25),
+          isNull,
+          reason: angebot.itemId,
+        );
+      }
     });
   });
 }

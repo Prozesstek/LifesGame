@@ -11,6 +11,52 @@
 
 ---
 
+## 24.09.2026: Exemplare, Tagesladen, Beute mit Schlüsseln, Bestzeiten
+
+[ADR-0048](../decisions/0048-exemplare-tagesladen-und-beute.md), in
+einer Konzeptrunde Frage für Frage entschieden, dann gebaut. Vorbild
+Diablo, Grundsatz Frederiks: **Gewohnheiten und Theorie bleiben der
+Hauptpunkt; wer mehr spielt, darf, wird dadurch aber nicht übertrieben
+stärker, sondern verbessert sich selbst.**
+
+| Was | Wie |
+|---|---|
+| **Exemplare** | Jedes Stück hat eigene Werte, **jeder einzeln 85–115 %** gewürfelt, im Kampfmassstab (+11 statt +1,1) |
+| **Tagesladen** | sechs Angebote, eins je Platz, aus dem Datum gewürfelt; Preis nach Seltenheit, nicht nach Wurf |
+| **Beute** | Der Wächter lässt ein Stück fallen: beim **ersten Sieg** auf einer Stufe immer, sonst gegen einen **Schlüssel** (gefragt, nicht automatisch) |
+| **Schlüssel** | einer je Häkchen, bestandener Seite, richtiger Rückfrage; höchstens **10** |
+| **Tiefer heisst besser** | Stufe 1–9: nie Episch; ab 10 Episch 7 %; ab 20 Legendär 5 % |
+| **Verkaufen** | ein **Viertel** des Katalogpreises; Knopf „alles Schlechtere verkaufen" (nie Set-Teile, Episches, Legendäres, fremde Waffen) |
+| **Bestzeiten** | je Stufe, auf dem Eingang zur Grube; dort jetzt auch **jede geschaffte Stufe wählbar** |
+| **Übernahme** | Jedes besessene Stück wird ein Exemplar mit 100 %, Gold bleibt gleich |
+
+**Warum der Grundsatz hält:** Die **Zahl** der Würfe hängt nur an
+Gewohnheiten und Theorie (Schlüssel), die **Güte** an der Tiefe — und wie
+tief man kommt, entscheiden Level und Werte plus das eigene Können.
+
+**Gemessen** mit `tool/runway_sim.dart` (Bot-Reichweite, also eher
+spät): rund 270 Stücke in 60 Tagen, das erste Seltene um Tag 7, das
+erste Epische an **Tag 27 im Laden, Tag 29 als Beute** — knapp im Test —,
+das erste Legendäre um Tag 48.
+
+**Der Kampfmassstab musste mitkommen.** Die Werte aus dem Alltag sind
+klein (Angriff 13–20), und erst `ActionStats.combatAttack` nahm alles mal
+zehn; ein Wurf von 1,1 wäre auf 1 gerundet worden. Die Ausrüstung geht
+jetzt als eigener Summand in `ActionStats` (`gearAttack` usw.). Die
+Werte-Karten am Charakter zeigen seitdem den Kampfmassstab („180 Alltag
+· +11 Ausrüstung"). **Der Gewohnheiten-Bildschirm zeigt die Werte noch
+klein** — ein eigener Umbau, bewusst nicht mitgemacht.
+
+gear 112 (vorher 90), action_combat 206, App 503. **Nicht angesehen**,
+weder im Browser noch am Handy. Nicht getestet: der Weg durch einen
+gewonnenen Lauf bis zum Beute-Blatt (die Teile sind getestet, die
+Verdrahtung in `PitScreen._beute` nur gelesen).
+
+**Offen:** Die Zahlen der Tabelle sind ein Anfang. Ob 4 bis 5 Stücke am
+Tag das Inventar überfluten, sagt das Spielen; der Knopf für Ausschuss
+ist die Antwort, falls ja. `runway_sim` zählt den Laden noch als
+Katalogsumme („Laden offen"), was seit dem Tagesladen wenig sagt.
+
 ## 24.09.2026: der Laden ein Drittel billiger
 
 [ADR-0047](../decisions/0047-laden-ein-drittel-billiger.md). Frederik

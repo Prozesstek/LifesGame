@@ -15,6 +15,7 @@ import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:theory/theory.dart';
+import 'gear_helpers.dart';
 
 /// Die Naht zwischen `achievements` und allem, woran es hängt.
 ///
@@ -278,8 +279,11 @@ void main() {
       final item = GearCatalog.all.first;
 
       // Ohne die Auflösung wirft diese Zeile CircularDependencyError.
-      expect(container.read(loadoutProvider.notifier).buy(item.id), isNull);
-      expect(container.read(loadoutProvider).isOwned(item.id), isTrue);
+      expect(
+        container.read(loadoutProvider.notifier).buy(angebot(item.id)),
+        isNull,
+      );
+      expect(container.read(loadoutProvider).ownsItem(item.id), isTrue);
       expect(
         container.read(earnedAchievementIdsProvider),
         contains('erster-kauf'),

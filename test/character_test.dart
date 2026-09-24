@@ -20,6 +20,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'gear_helpers.dart';
 
 /// Prüft Name und Titel auf dem Charakterbildschirm.
 ///
@@ -364,7 +365,7 @@ void main() {
         (i) => i.slot == GearSlot.waffe,
       );
       final loadout = const Loadout.empty().buy(
-        klinge.id,
+        angebot(klinge.id),
         availableGold: klinge.price,
       );
 
@@ -538,7 +539,7 @@ void main() {
         // **Mit der höchsten Sprosse.** Ohne sie greift seit ADR-0034 die
         // Sperre, und die drei verdienten Waffen fehlen still im Blatt.
         loadout = loadout.buy(
-          item.id,
+          angebot(item.id),
           availableGold: item.price,
           highestRung: GearGates.legendaryRung,
         );

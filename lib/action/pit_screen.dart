@@ -10,6 +10,7 @@ import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../combat/ladder_controller.dart';
+import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/result_dialog.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
@@ -117,13 +118,19 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
+    final vorherReihe = ref.read(ladderProvider);
+    final ersterSieg = gewonnen && stufe > vorherReihe.highestDefeated;
+    final vorherBest = vorherReihe.bestTimes[stufe];
     final ertrag = ref
         .read(ladderProvider.notifier)
         .recordRun(
           stufe,
           won: gewonnen,
           collected: (xp: welt.runXp, gold: welt.runGold),
+          seconds: welt.elapsed,
         );
+    final best = ref.read(ladderProvider).bestTimes[stufe];
+    final neueBestzeit = gewonnen && best != null && best != vorherBest;
     if (gewonnen) ref.read(soundPlayerProvider).play(SoundEffect.sieg);
 
     final sekunden = welt.elapsed.round();
@@ -138,7 +145,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         earnedGold: ertrag.gold,
         perStage: true,
         summary: gewonnen
-            ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in $sekunden s.'
+            ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in '
+                  '$sekunden s.'
+                  '${neueBestzeit ? ' Neue Bestzeit!' : ''}'
             : welt.isTimedOut
             ? 'Die Zeit ist um auf Stufe $stufe, nach ${welt.kills} von '
                   '${welt.totalEnemies} Gegnern.'
@@ -147,6 +156,8 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       ),
     );
 
+    if (!mounted) return;
+    if (gewonnen) await _beute(stufe, ersterSieg: ersterSieg);
     if (!mounted) return;
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
     if (!mounted) return;
@@ -161,6 +172,38 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     } else {
       setState(() => _verloren = true);
     }
+  }
+
+  /// Die Beute des Wächters (ADR-0048): Der erste Sieg auf einer Stufe
+  /// bringt sie ohne Schlüssel, jeder weitere nur mit einem — und nur,
+  /// wenn man ihn einsetzen will.
+  Future<void> _beute(int stufe, {required bool ersterSieg}) async {
+    final controller = ref.read(loadoutProvider.notifier);
+    if (!ersterSieg) {
+      final schluessel = ref.read(availableKeysProvider);
+      if (schluessel <= 0) return;
+      final oeffnen = await askToOpenLoot(
+        context,
+        stage: stufe,
+        keys: schluessel,
+      );
+      if (!oeffnen || !mounted) return;
+    }
+    final beute = controller.takeLoot(stage: stufe, useKey: !ersterSieg);
+    if (beute == null || !mounted) return;
+    final slot = beute.item?.slot;
+    final getragen = slot == null
+        ? null
+        : ref.read(loadoutProvider).equippedCopyIn(slot);
+    final anlegen = await showLoot(
+      context,
+      loot: beute,
+      headline: ersterSieg
+          ? 'Erster Sieg auf Stufe $stufe'
+          : 'Die Beute des Wächters',
+      worn: getragen?.uid == beute.uid ? null : getragen,
+    );
+    if (anlegen && mounted) controller.equip(beute.uid);
   }
 
   void _nochmal() {

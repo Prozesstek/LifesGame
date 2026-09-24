@@ -72,16 +72,23 @@ void main() {
       (i) => i.rarity == GearRarity.legendary,
     );
 
+    GearCopy angebot(GearItem item) => GearCopy(
+          uid: 'laden-${item.id}',
+          itemId: item.id,
+          bonus: item.bonus.scaled,
+          paid: item.price,
+        );
+
     test('ohne Sprosse ist Episches gesperrt — auch mit Gold', () {
       // **Die Sperre kommt vor dem Gold.** Wer das Stück ansieht, soll
       // lesen, dass es verdient werden muss, nicht dass es zu teuer ist.
       const leer = Loadout.empty();
 
       expect(
-        leer.blockFor(episch.id, availableGold: 100000),
+        leer.blockFor(angebot(episch), availableGold: 100000),
         PurchaseBlock.gesperrt,
       );
-      expect(leer.buy(episch.id, availableGold: 100000), same(leer));
+      expect(leer.buy(angebot(episch), availableGold: 100000), same(leer));
     });
 
     test('mit der Sprosse ist es ein Kauf wie jeder andere', () {
@@ -89,7 +96,7 @@ void main() {
 
       expect(
         leer.blockFor(
-          episch.id,
+          angebot(episch),
           availableGold: 100000,
           highestRung: GearGates.epicRung,
         ),
@@ -97,7 +104,7 @@ void main() {
       );
       expect(
         leer.blockFor(
-          episch.id,
+          angebot(episch),
           availableGold: 0,
           highestRung: GearGates.epicRung,
         ),
@@ -108,7 +115,7 @@ void main() {
     test('Episch reicht nicht für Legendär', () {
       expect(
         const Loadout.empty().blockFor(
-          legendaer.id,
+          angebot(legendaer),
           availableGold: 100000,
           highestRung: GearGates.epicRung,
         ),
@@ -117,30 +124,29 @@ void main() {
     });
 
     test('ein gekauftes Stück bleibt, auch wenn die Sprosse fehlt', () {
-      // Die Sprosse wird beim **Kauf** geprüft, nicht beim Tragen. Ein
-      // gespeicherter Stand mit einem verdienten Stück lädt es wie jedes
-      // andere — dieselbe Trennung wie beim Titel (ADR-0014).
+      // Die Sprosse wird beim **Kauf** geprüft, nicht beim Tragen.
       final mit = const Loadout.empty().buy(
-        episch.id,
+        angebot(episch),
         availableGold: 100000,
         highestRung: GearGates.epicRung,
       );
       final gelesen = Loadout.fromJson(mit.toJson());
 
-      expect(gelesen.isOwned(episch.id), isTrue);
-      expect(gelesen.isEquipped(episch.id), isTrue);
+      expect(gelesen.ownsItem(episch.id), isTrue);
+      expect(gelesen.equippedIn(episch.slot), episch);
       expect(gelesen.bonus.isEmpty, isFalse);
     });
 
     test('Verkaufen braucht keine Sprosse', () {
       final mit = const Loadout.empty().buy(
-        episch.id,
+        angebot(episch),
         availableGold: 100000,
         highestRung: GearGates.epicRung,
       );
+      final uid = angebot(episch).uid;
 
-      expect(mit.canSell(episch.id), isTrue);
-      expect(mit.sell(episch.id).isOwned(episch.id), isFalse);
+      expect(mit.canSell(uid), isTrue);
+      expect(mit.sell(uid).ownsItem(episch.id), isFalse);
     });
   });
 }

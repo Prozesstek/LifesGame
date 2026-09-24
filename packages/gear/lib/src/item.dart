@@ -46,6 +46,60 @@ class GearBonus {
   bool get isEmpty =>
       attack == 0 && maxHp == 0 && defense == 0 && maxEnergy == 0;
 
+  /// Wie viel grösser die Zahlen eines Exemplars sind als die des
+  /// Katalogs (ADR-0048). **Dieselbe Zahl wie `ActionBalance.powerScale`**
+  /// — dieses Package kennt die Grube nicht, also steht sie hier ein
+  /// zweites Mal, und `test/gear_scale_seam_test.dart` in der App hält
+  /// beide zusammen.
+  static const int combatScale = 10;
+
+  /// Der Katalogwert im Kampfmassstab — ein Exemplar mit genau 100 %.
+  GearBonus get scaled => GearBonus(
+        attack: attack * combatScale,
+        maxHp: maxHp * combatScale,
+        defense: defense * combatScale,
+        maxEnergy: maxEnergy * combatScale,
+      );
+
+  /// Die Summe der vier Werte — nur zum Vergleichen zweier Würfe
+  /// desselben Stücks, nicht zweier verschiedener.
+  int get total => attack + maxHp + defense + maxEnergy;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      if (attack != 0) 'a': attack,
+      if (maxHp != 0) 'h': maxHp,
+      if (defense != 0) 'd': defense,
+      if (maxEnergy != 0) 'e': maxEnergy,
+    };
+  }
+
+  factory GearBonus.fromJson(Object? json) {
+    if (json is! Map) return const GearBonus();
+    int zahl(String key) {
+      final wert = json[key];
+      return wert is int ? wert : 0;
+    }
+
+    return GearBonus(
+      attack: zahl('a'),
+      maxHp: zahl('h'),
+      defense: zahl('d'),
+      maxEnergy: zahl('e'),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is GearBonus &&
+      other.attack == attack &&
+      other.maxHp == maxHp &&
+      other.defense == defense &&
+      other.maxEnergy == maxEnergy;
+
+  @override
+  int get hashCode => Object.hash(attack, maxHp, defense, maxEnergy);
+
   /// Die Wirkung als kurze Liste, wie sie auf einer Kachel steht.
   List<String> get labels {
     return <String>[

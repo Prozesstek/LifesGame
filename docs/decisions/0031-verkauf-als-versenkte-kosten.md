@@ -1,7 +1,7 @@
 # ADR-0031: Verkauf zur Hälfte, und was fehlt, bleibt versenkt
 
 **Datum:** 08.09.2026
-**Status:** Aktiv
+**Status:** Teilweise abgelöst durch [ADR-0048](0048-exemplare-tagesladen-und-beute.md) — ein Verkauf bringt seitdem ein Viertel, nicht die Hälfte; frühere Verkäufe behalten ihre Rechnung
 **Ändert:** [ADR-0011](0011-ausruestung-als-eigenes-package.md) (Punkt „kein Verkauf")
 
 ## Kontext
