@@ -86,7 +86,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 192 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 196 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -193,7 +193,7 @@ dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 192 Tests
+dart test                              # 196 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -267,8 +267,10 @@ lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 (schneller als der Held), Fledermaus `f` (beisst und flattert davon,
 `_batActs`), Troll `t` (gross, zäh, setzt meist der
 Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
-seinem Raum**. **Wer Schaden nimmt, hat den Helden bemerkt** — auch aus
-einer Entfernung, in der er ihn sonst nie sähe (`_enemiesAct`).
+seinem Raum**. **Ein Gegner kommt nur aus zwei Gründen:** Er sieht den
+Helden (im Umkreis `aggroRadius` **und** ohne Wand dazwischen), oder er
+wurde von ihm getroffen, dann auch von weiter weg (`_enemiesAct`,
+`aggro_test.dart`). Durch eine Wand bemerkt ihn niemand.
 
 **Die Grube ist geschafft, wenn der Wächter fällt** — nicht erst, wenn
 jeder Gegner liegt (`ActionWorld._checkEnd`). Nur eine Halle ohne

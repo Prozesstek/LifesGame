@@ -790,7 +790,12 @@ class ActionWorld {
       // und wer ihn nimmt, kommt. Sonst stünde ein Gegner still da und
       // liesse sich aus sicherer Entfernung abtragen.
       final verwundet = gegner.hp < gegner.maxHp;
-      if (!gegner.aggro && (abstand <= merkt || verwundet)) {
+      // **Nah genug heisst nicht gesehen.** Ohne Blickkontakt zog der
+      // Radius Gegner durch Wände aus dem Nachbarraum. Jetzt kommt nur,
+      // wer den Helden sieht — oder von ihm getroffen wurde.
+      if (!gegner.aggro &&
+          (verwundet ||
+              (abstand <= merkt && _canSee(gegner.position, _hero.position)))) {
         gegner.aggro = true;
         _events.add(EnemyNoticed(id: gegner.id, at: gegner.position));
       }

@@ -14,7 +14,7 @@
 ## Sitzung 24.09.2026: Fledermaus, Stein und die neue Figur
 
 Drei Zeichnungen von Frederik, alle 64 × 64 gezeichnet und als
-256 × 256 abgelegt. action_combat 192 (vorher 186), App 495 (vorher 486).
+256 × 256 abgelegt. action_combat 196 (vorher 186), App 495 (vorher 486).
 
 | Bild | wird |
 |---|---|
@@ -61,6 +61,16 @@ als Punkte darauf, aber nur in diesem Umkreis. Sonst verriete die Karte,
 was hinter den Wänden wartet. Der schlafende Wächter fehlt, wie im Bild.
 Das Aufgedeckte ist Darstellung, keine Spielregel, und steht deshalb
 nicht in `action_combat`. App 495.
+
+**Gegner kommen nicht mehr durch Wände** (Frederik: „werden zu früh aus
+Räumen gepullt“). Bisher reichte es, näher als 210 Punkte zu sein, auch
+mit einer Wand dazwischen, und der Nachbarraum lief los. Jetzt kommt ein
+Gegner nur, wenn er den Helden **sieht** oder von ihm **getroffen**
+wurde. Eine Stelle: `ActionWorld._enemiesAct`, geprüft über `_canSee`.
+`aggro_test.dart` hält es fest. Zwei Tests in `chase_test.dart` setzten
+das Bemerken durch die Wand voraus. Dort sieht der Gegner den Helden
+jetzt zuerst, und dann versteckt sich der Held. `pit_sim` liegt im
+Rauschen, eher einen Hauch leichter. action_combat 196.
 
 **Die Figur ist nur auf der Startseite.** In der Grube und im Dorf läuft
 weiter der Soldat, weil er sechs Bewegungsstreifen hat und die neue
