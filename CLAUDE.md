@@ -84,7 +84,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
-| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke, samt Farben | Flutter |
+| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
@@ -114,12 +114,12 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_gate.dart` | ob die Grube offensteht, und warum nicht | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
-| `lib/action/pit_text.dart` | Name und Beschreibung einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
+| `lib/action/pit_text.dart` | Name, Beschreibung **und alle Werte** einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sechs** Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
@@ -138,7 +138,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
-| `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze, wählen und räumen | Flutter |
+| `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter der ganze Katalog | Flutter |
+| `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — auch bei gesperrten | Flutter |
+| `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze — zeigt nur, wählt nicht | Flutter |
 | `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/ability_unlock.dart` | was neu ist und wohin es passt — reine Rechnung | Flutter |
@@ -194,7 +196,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 520 Tests
+flutter test             # 533 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

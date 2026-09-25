@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:abilities/abilities.dart';
-import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
-import 'package:lifes_game/character/abilities_controller.dart';
+import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
+import 'package:lifes_game/character/widgets/ability_slots_row.dart';
 import 'package:lifes_game/character/identity_controller.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/ui/holz.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
-import 'package:progression/progression.dart';
-import 'package:theory/theory.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -290,241 +287,33 @@ void main() {
     });
   });
 
-  group('Die Fähigkeitsslots', () {
-    /// Ein Stand, der auf [level] steht. Erfahrung kommt aus Häkchen —
-    /// gerechnet wird sie in `package:progression`, hier wird nur genug
-    /// davon erzeugt.
-    /// Ein Fortschritt, in dem die vier Körperknoten bestanden sind.
-    ///
-    /// **Seit ADR-0019 hängt jede wählbare Fähigkeit an einem Knoten.**
-    /// Ohne Theoriefortschritt gäbe es nichts, was in einen freien Platz
-    /// passt — diese Tests wollen aber die Plätze prüfen, nicht das
-    /// Freischalten.
-    TheoryProgress mitKnoten() {
-      var progress = const TheoryProgress.empty();
-      for (final ability in AbilityCatalog.choosable) {
-        if (ability.source case FromTheory(:final nodeId)) {
-          final lesson = theoryGraph.nodeById(nodeId)!.lesson;
-          progress = progress.submit(lesson, <int?>[
-            for (final q in lesson.questions) q.correctIndex,
-          ]).progress;
-        }
-      }
-      return progress;
-    }
-
-    SaveData aufLevel(
-      int level, {
-      Loadout? loadout,
-      ChosenAbilities? abilities,
-    }) {
-      final theory = mitKnoten();
-      // Bestandene Seiten bringen selbst Erfahrung mit — sonst läge das
-      // Level über dem gewünschten und es wären mehr Plätze offen.
-      final noetig = LevelCurve.totalXpFor(level) - theory.totalXp;
-      var tracker = const HabitTracker.empty().activate(habitId);
-      var day = tag;
-      while (tracker.totalXp < noetig) {
-        tracker = tracker.check(habitId, day).tracker;
-        day = day.next;
-      }
-      return SaveData(
-        theory: theory,
-        habits: tracker,
-        loadout: loadout ?? const Loadout.empty(),
-        abilities: abilities ?? const ChosenAbilities.empty(),
-      );
-    }
-
-    testWidgets('auf Level 1 ist nur der Waffenplatz offen', (tester) async {
+  group('Die Fähigkeiten sind ausgezogen', () {
+    testWidgets('der Charakter zeigt keine Plätze mehr', (tester) async {
+      // **Sie standen bis zum 25.09. hier** (ADR-0049). Der Abschnitt
+      // ist weg, und mit ihm die vier Plätze — nachzuprüfen an dem,
+      // was ein leerer Platz beschriftet war.
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      expect(find.text('Fähigkeiten'), findsOneWidget);
-      // Drei gesperrte Plätze nennen ihre Stufe, statt zu fehlen.
-      expect(find.text('ab Level 3'), findsOneWidget);
-      expect(find.text('ab Level 6'), findsOneWidget);
-      expect(find.text('ab Level 10'), findsOneWidget);
-    });
-
-    testWidgets('ohne Waffe trägt Slot 1 trotzdem etwas', (tester) async {
-      // Der wichtigste Fall: Auf Level 1 ist Slot 1 der einzige offene.
-      // Wäre er leer, hätte ein frischer Charakter keinen einzigen Move.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
-      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
-      expect(find.text(rueckfall.name), findsOneWidget);
-    });
-
-    testWidgets('Slot 1 zeigt die Fähigkeit der Waffe, nicht die Waffe', (
-      tester,
-    ) async {
-      useTallView(tester);
-      final klinge = GearCatalog.all.firstWhere(
-        (i) => i.slot == GearSlot.waffe,
-      );
-      final loadout = const Loadout.empty().buy(
-        angebot(klinge.id),
-        availableGold: klinge.price,
-      );
-
-      await tester.pumpWidget(appMit(aufLevel(1, loadout: loadout)));
-
-      final move = PitWeapons.byMoveId(AbilityCatalog.weaponMoves[klinge.id]!)!;
-      // Der Waffenname steht auf dem Ausrüstungsplatz, der Move-Name im
-      // Fähigkeitsslot — zwei verschiedene Dinge.
-      expect(find.text(move.name), findsOneWidget);
-      expect(find.text(klinge.name), findsOneWidget);
-    });
-
-    testWidgets('auf Level 3 geht der zweite Platz auf', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(aufLevel(3)));
-
+      expect(find.byType(AbilitySlotsRow), findsNothing);
       expect(find.text('ab Level 3'), findsNothing);
-      expect(find.text('ab Level 6'), findsOneWidget);
-      expect(find.text('leer'), findsOneWidget);
-      expect(find.textContaining('Ein Platz ist noch frei'), findsOneWidget);
     });
 
-    testWidgets('auf Level 10 sind alle vier offen', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(aufLevel(10)));
-
-      expect(find.textContaining('ab Level'), findsNothing);
-      // Drei freie Plätze leer, der vierte trägt die Waffe.
-      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 1));
-      expect(find.textContaining('3 Plätze sind noch frei'), findsOneWidget);
-    });
-
-    testWidgets('ein gesperrter Platz lässt sich nicht antippen', (
-      tester,
-    ) async {
+    testWidgets('der Weg dorthin bleibt trotzdem', (tester) async {
+      // Wer seinen Charakter ansieht, sucht sie hier — der Kreis auf
+      // der Startseite hilft ihm dabei nicht.
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('ab Level 3'));
+      await tester.scrollUntilVisible(
+        find.text('Zu den Fähigkeiten'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Zu den Fähigkeiten'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Fähigkeit wählen'), findsNothing);
-    });
-
-    testWidgets('der Waffenplatz lässt sich nicht antippen', (tester) async {
-      // Slot 1 folgt aus der Ausrüstung, er ist keine Wahl (ADR-0013).
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
-      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
-      await tester.tap(find.text(rueckfall.name));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Fähigkeit wählen'), findsNothing);
-    });
-
-    testWidgets('einen freien Platz belegen und der Slot zeigt es', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(aufLevel(3)));
-
-      await tester.tap(find.text('leer'));
-      await tester.pumpAndSettle();
-      expect(find.text('Fähigkeit wählen'), findsOneWidget);
-
-      await tester.tap(find.text(PitAbilities.funkenstoss.name).last);
-      await tester.pumpAndSettle();
-
-      expect(find.text(PitAbilities.funkenstoss.name), findsOneWidget);
-      expect(find.text('leer'), findsNothing);
-    });
-
-    testWidgets('einen Platz räumen macht ihn wieder leer', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(
-          aufLevel(
-            3,
-            abilities: const ChosenAbilities.empty().withAt(
-              0,
-              PitAbilities.bluetentau.id,
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text(PitAbilities.bluetentau.name), findsOneWidget);
-
-      await tester.tap(find.text(PitAbilities.bluetentau.name));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Platz räumen'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('leer'), findsOneWidget);
-    });
-
-    testWidgets('ein belegter Platz zeigt das Bild der Fähigkeit', (
-      tester,
-    ) async {
-      // Blütentau und der Kurzbogen im Waffenplatz tragen je ein Bild —
-      // jeder auf **seinem** Platz, nicht irgendwohin.
-      useTallView(tester);
-      await tester.pumpWidget(
-        appMit(
-          aufLevel(
-            3,
-            abilities: const ChosenAbilities.empty().withAt(
-              0,
-              PitAbilities.bluetentau.id,
-            ),
-          ),
-        ),
-      );
-
-      Finder platzVon(String name) =>
-          find.ancestor(of: find.text(name), matching: find.byType(InkWell));
-
-      expect(
-        find.descendant(
-          of: platzVon(PitAbilities.bluetentau.name).first,
-          matching: find.byType(Image),
-        ),
-        findsOneWidget,
-      );
-      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
-      expect(
-        find.descendant(
-          of: platzVon(rueckfall.name).first,
-          matching: find.byType(Image),
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('nur die offenen Plätze gehen in den Kampf', (tester) async {
-      // Der eigentliche Zweck der Verkabelung: Was gewählt ist, wirkt sich
-      // aus — aber nur so weit, wie Plätze offen sind (ADR-0016).
-      useTallView(tester);
-      final saved = aufLevel(
-        3,
-        abilities: const ChosenAbilities.empty()
-            .withAt(0, PitAbilities.funkenstoss.id)
-            .withAt(1, PitAbilities.bluetentau.id),
-      );
-
-      final container = ProviderContainer(
-        overrides: [
-          savedGameProvider.overrideWithValue(saved),
-          todayProvider.overrideWithValue(tag),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      final moves = container.read(activeMovesProvider);
-
-      // Level 3: Waffenslot plus genau ein freier Platz.
-      expect(moves, hasLength(2));
-      expect(moves.last, PitAbilities.funkenstoss.id);
+      expect(find.byType(AbilitiesScreen), findsOneWidget);
     });
   });
 

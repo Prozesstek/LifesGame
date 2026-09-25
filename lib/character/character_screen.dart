@@ -14,9 +14,8 @@ import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../ui/palette.dart';
-import 'abilities_controller.dart';
+import 'abilities_screen.dart';
 import 'identity_controller.dart';
-import 'widgets/ability_slots_row.dart';
 import 'widgets/consistency_card.dart';
 import 'widgets/equipment_slot_tile.dart';
 import 'widgets/identity_card.dart';
@@ -103,20 +102,6 @@ class CharacterScreen extends ConsumerWidget {
                   _StatRow(stat: stat, stats: stats),
                   const SizedBox(height: 8),
                 ],
-                const SizedBox(height: 14),
-                const _SectionTitle('Fähigkeiten'),
-                const SizedBox(height: 10),
-                AbilitySlotsRow(
-                  level: level.level,
-                  weaponMove: ref.watch(weaponMoveProvider),
-                  chosen: ref.watch(chosenAbilitiesProvider),
-                  unlocked: ref.watch(unlockedAbilitiesProvider),
-                  onChoose: (index, moveId) => ref
-                      .read(chosenAbilitiesProvider.notifier)
-                      .choose(index, moveId),
-                  onClear: (index) =>
-                      ref.read(chosenAbilitiesProvider.notifier).clear(index),
-                ),
                 const SizedBox(height: 18),
                 const _SectionTitle('Ausrüstung'),
                 const SizedBox(height: 6),
@@ -171,6 +156,20 @@ class CharacterScreen extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.storefront_outlined),
                   label: const Text('Zum Laden'),
+                ),
+                const SizedBox(height: 10),
+                // **Die Fähigkeiten stehen seit ADR-0049 nicht mehr hier.**
+                // Der Weg bleibt trotzdem: Wer seinen Charakter ansieht,
+                // sucht sie an dieser Stelle, und der Kreis auf der
+                // Startseite hilft ihm dabei nicht.
+                FilledButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AbilitiesScreen(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Zu den Fähigkeiten'),
                 ),
               ],
             ),

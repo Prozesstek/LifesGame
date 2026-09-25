@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
@@ -33,6 +34,7 @@ void main() {
         'Theorie',
         'Kampf',
         'Laden',
+        'Fähigkeiten',
         'Charakter',
       ]) {
         expect(find.text(title), findsOneWidget, reason: title);
@@ -50,7 +52,8 @@ void main() {
 
       // Der Entwicklermodus ist seit Issue #35 kein Bereich mehr,
       // sondern ein kleiner Knopf daneben (ADR-0021: er gehört nicht zum
-      // Spiel). Die fünf Kreise sind damit genau die fünf Bereiche.
+      // Spiel). Die Kreise sind damit genau die Bereiche — sechs, seit
+      // die Fähigkeiten einen eigenen haben (ADR-0049).
       final kreise = tester
           .widgetList<HubCircle>(find.byType(HubCircle))
           .toList();
@@ -59,7 +62,7 @@ void main() {
           .map((k) => k.label)
           .toList();
 
-      expect(kreise, hasLength(5));
+      expect(kreise, hasLength(6));
       expect(locked, <String>['Kampf']);
     });
 
@@ -255,6 +258,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ShopScreen), findsOneWidget);
+    });
+
+    testWidgets('Fähigkeiten führt zum eigenen Bildschirm', (tester) async {
+      // **Nie gesperrt** (ADR-0049), obwohl auf Level 1 nur der
+      // Waffenplatz offen ist: Der Bildschirm zeigt vor allem, was es zu
+      // holen gibt — und das ist genau dann nützlich, wenn man noch
+      // nichts hat.
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      await tester.tap(find.text('Fähigkeiten'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AbilitiesScreen), findsOneWidget);
+    });
+
+    testWidgets('der Kreis trägt den Stern, und er ist abgelegt', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      final stern = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == HomeScreen.abilitySymbol,
+      );
+      expect(
+        tester
+            .widget<HubCircle>(
+              find.ancestor(of: stern, matching: find.byType(HubCircle)),
+            )
+            .label,
+        'Fähigkeiten',
+      );
+
+      final daten = await rootBundle.load(HomeScreen.abilitySymbol);
+      expect(daten.lengthInBytes, greaterThan(100));
     });
 
     testWidgets('Charakter führt zum Charakterbildschirm', (tester) async {

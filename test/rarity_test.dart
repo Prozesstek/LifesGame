@@ -1,3 +1,4 @@
+import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
@@ -33,12 +34,28 @@ void main() {
       expect(GearRarity.values, hasLength(5));
       expect(GearRarity.gated, hasLength(2));
     });
+
+    test('Ausrüstung und Fähigkeiten teilen sich die Stufenreihe', () {
+      // **Zwei Aufzählungen, eine Farbtabelle.** `RarityBadge` bekommt
+      // für eine Fähigkeit nur die Nummer der Stufe, weil es sonst
+      // beide Packages kennen müsste. Käme drüben eine Stufe dazu oder
+      // rutschte eine an eine andere Position, bekäme „Selten" bei den
+      // Fähigkeiten die Farbe von „Episch" — ohne eine einzige Meldung.
+      expect(Rarity.values, hasLength(GearRarity.values.length));
+      for (final rarity in Rarity.values) {
+        expect(
+          rarity.label,
+          GearRarity.values[rarity.index].label,
+          reason: 'Stufe ${rarity.index} heißt zweimal verschieden.',
+        );
+      }
+    });
   });
 
   group('Die Marke im Laden', () {
     testWidgets('nennt die Stufe beim Namen', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(body: RarityBadge(rarity: GearRarity.rare)),
         ),
       );
@@ -50,7 +67,7 @@ void main() {
       // Sonst leuchtet die Marke über einer grauen Karte und zieht den
       // Blick auf etwas, das man schon hat.
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: Column(
               children: <Widget>[

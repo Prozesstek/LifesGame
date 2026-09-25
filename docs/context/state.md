@@ -7,7 +7,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 25.09.2026 · Frederik
+**Zuletzt aktualisiert:** 25.09.2026 · AktivesBrett, Frederik
 
 ---
 
@@ -22,6 +22,69 @@ man läuft. Fehlt das Bild, bleibt das Schachbrett. App 520. Angesehen als
 zusammengesetzte Vorschau in Spielgrösse, **nicht am Handy**. Offen,
 falls gewünscht: Varianten gegen die Wiederholung, ein Schatten am
 Wandfuss.
+
+## 25.09.2026, danach: die Fähigkeiten bekommen einen eigenen Bereich
+
+Wunsch von AktivesBrett: „Ein eigenes Menü für Fähigkeiten — 4 Slots,
+darunter die freigeschalteten normal und die anderen grau, Popup mit
+allen Stats, auch bei den ausgegrauten. Eigenes Icon im Startmenü, und
+aus dem Charakter raus."
+[ADR-0049](../decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md).
+532 App-Tests (vorher 519).
+
+**Der Anlass war eine Lücke, nicht nur ein Umzug.** Das alte
+Auswahlblatt im Charakter zeigte **nur das Freigeschaltete** — ein
+frischer Charakter sah von neunzehn Fähigkeiten keine einzige. Was man
+sich erarbeiten kann, stand nirgends.
+
+| Was | Wo |
+|---|---|
+| Vier Plätze oben, darunter der ganze Katalog nach Seltenheit gruppiert | `lib/character/abilities_screen.dart` |
+| Das Blatt mit **allen** Werten, auch bei gesperrten | `lib/character/widgets/ability_sheet.dart` |
+| Die Werte selbst — gelesen, nicht gerechnet | `pitAbilityStats` / `pitWeaponStats` in `lib/action/pit_text.dart` |
+| Sechster Kreis, Sternenfall als Zeichen | `HomeScreen.abilitySymbol` |
+| Die Slot-Reihe zeigt nur noch, sie wählt nicht mehr | `ability_slots_row.dart` |
+
+**Was im Blatt steht:** Art, Mana, Abklingzeit, Zielart, Reichweite oder
+Wurfweite, Umkreis, dazu je Wirkung Schaden, Dauerschaden, Heilung,
+Mana, Schutz, Rückwurf, Verlangsamung, Lebensraub — Seltenheit als Marke
+und die Bedingung im Klartext. Neben jedem Faktor steht die Zahl beim
+**eigenen** Angriffswert („×1,2 · etwa 230"), flach gerechnet; der Satz
+darunter sagt das auch.
+
+**Die Wirkungen kommen aus `PitAbility.effects`**, nicht aus einer
+zweiten Liste. `PitEffect` ist `sealed` — eine neue Art von Wirkung ist
+ein Compilerfehler in `pit_text.dart`, kein stilles Loch im Blatt.
+Dieselbe Naht wie in `world.dart`, nur fürs Lesen.
+
+**Drei Entscheidungen, die im ADR begründet sind:** Das Blatt bietet die
+Plätze **einzeln** an und nennt dabei, was dort liegt (ein „Anlegen"
+ersetzt blind, sobald alle belegt sind). Angeboten wird nur, was das
+Modell trägt — `ChosenAbilities` hält keine Lücken, „Platz 4" bei leerem
+Platz 2 landete in Wahrheit auf Platz 2. Und der Kreis ist **nie
+gesperrt**: Der Bildschirm ist am nützlichsten, wenn man noch nichts
+hat.
+
+**`RarityBadge` hat einen zweiten Konstruktor.** `GearRarity` und
+`Rarity` sind zwei Aufzählungen mit denselben fünf Stufen; die Marke
+nimmt jetzt Nummer und Wortlaut statt eines der beiden Typen, damit die
+Farbtabelle **eine** bleibt. `rarity_test.dart` hält fest, dass beide
+Reihen gleich lang sind und dieselbe Stufe gleich heißt.
+
+**Im Browser durchgespielt** (375 × 812): sechs Kreise passen in zwei
+Reihen, die gesperrten Zeichnungen sind entsättigt und trotzdem
+erkennbar, zwei Platz-Knöpfe nebeneinander sitzen bequem. **Nicht am
+Handy angesehen** — ob vier Kacheln je Reihe mit „Prisma-Barriere" als
+Raster lesen oder als Gedränge, sagt erst ein Gerät.
+
+### Offen
+
+- **Die Waffenzüge stehen nicht im Katalog darunter**, nur auf Platz 1.
+  Acht Kacheln, die man nicht wählen kann, wären eine zweite Art von
+  Eintrag im selben Raster.
+- **Die Zeile „Zielen" bricht bei `PitAim.richtung` um** („Richtung —
+  daneben ist daneben"). Lesbar, aber die einzige Stelle im Blatt, die
+  zwei Zeilen braucht.
 
 ## 25.09.2026: die Figur trägt ihren Helm
 

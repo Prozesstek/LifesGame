@@ -6,6 +6,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_screen.dart';
 import 'package:lifes_game/action/pit_screen.dart';
+import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
@@ -137,6 +138,7 @@ void main() {
     'Gewohnheiten': const HabitsScreen(),
     'Laden': const ShopScreen(),
     'Charakter': const CharacterScreen(),
+    'Fähigkeiten': const AbilitiesScreen(),
     'Gegnerreihe': const LadderScreen(),
     'Errungenschaften': const AchievementsScreen(),
   };
@@ -226,7 +228,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Charakter läuft auch ohne Fortschritt nicht über', (
+    testWidgets('Fähigkeiten laufen auch ohne Fortschritt nicht über', (
       tester,
     ) async {
       // Der Gegenfall zu oben: `mitInhalt` steht auf hohem Level, dort
@@ -234,6 +236,9 @@ void main() {
       // sagen sie „ab Level 10" — die breiteste Beschriftung, die in die
       // schmalste Kachel muss. Vier Slots auf 390 Pixeln ist die engste
       // Stelle des Bildschirms.
+      //
+      // **Er stand bis zum 25.09. beim Charakter** und ist mit den
+      // Plätzen hierher gewandert (ADR-0049).
       usePhoneView(tester);
       await tester.pumpWidget(
         ProviderScope(
@@ -241,7 +246,7 @@ void main() {
             savedGameProvider.overrideWithValue(const SaveData.empty()),
             todayProvider.overrideWithValue(_heute),
           ],
-          child: const MaterialApp(home: CharacterScreen()),
+          child: const MaterialApp(home: AbilitiesScreen()),
         ),
       );
       await tester.pumpAndSettle();
