@@ -126,7 +126,11 @@ def kettenpanzer(breite: int, hoehe: int) -> Image.Image:
 
 
 HAUT = (255, 212, 165)  # Hautfarbe der Grundfigur
-BEINE = range(48, 59)  # Zeilen der Beine, unter der Rüstung, über den Füssen
+# Hüfte und Beine: ab Zeile 44, damit zwischen Rüstung und Hose keine
+# Haut durchscheint — je nach Rüstung endet der Rumpf früher. Nur
+# zwischen den Händen (Spalte 25 bis 38), Arme und Hände bleiben Haut.
+BEINE = range(44, 59)
+HUEFTE = range(25, 39)
 
 
 def hell(c: tuple[int, int, int]) -> float:
@@ -154,7 +158,7 @@ def beine(ruestung: Image.Image, kette: bool) -> Image.Image:
 
     aus = Image.new("RGBA", (RAUM, RAUM))
     for y in BEINE:
-        for x in range(RAUM):
+        for x in HUEFTE:
             if not haut(x, y):
                 continue
             if not haut(x - 1, y):
