@@ -4,10 +4,9 @@ import 'package:progression/progression.dart';
 
 import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
+import '../../ui/druck.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
-import '../../ui/holz.dart';
-import '../../ui/druck.dart';
 
 /// Die vier Fähigkeitsslots nebeneinander.
 ///
@@ -19,15 +18,18 @@ import '../../ui/druck.dart';
 ///
 /// **Slot 1 gehört der Waffe** (ADR-0013, ADR-0017): Er ist von Level 1 an
 /// offen und trägt, was die getragene Waffe mitbringt. Er wird nicht
-/// gewählt — deshalb ist er der einzige, der sich nicht antippen lässt.
+/// gewählt — antippen zeigt seine Werte, mehr nicht.
+///
+/// **Sie wählt nichts mehr aus** (ADR-0049). Bis zum 25.09. hing an
+/// dieser Reihe ein eigenes Auswahlblatt; seit die Fähigkeiten einen
+/// eigenen Bildschirm haben, meldet sie nur den angetippten Platz, und
+/// das Blatt mit den Werten entscheidet.
 class AbilitySlotsRow extends StatelessWidget {
   const AbilitySlotsRow({
     required this.level,
     required this.weaponMove,
     required this.chosen,
-    required this.unlocked,
-    required this.onChoose,
-    required this.onClear,
+    required this.onTapSlot,
     super.key,
   });
 
@@ -39,12 +41,8 @@ class AbilitySlotsRow extends StatelessWidget {
   /// Was auf den freien Slots liegt.
   final ChosenAbilities chosen;
 
-  /// Was der Spieler auf einen freien Slot legen darf.
-  final List<Ability> unlocked;
-
-  /// [index] zählt die **freien** Slots ab 0 — Slot 1 ist nicht dabei.
-  final void Function(int index, String moveId) onChoose;
-  final void Function(int index) onClear;
+  /// Wird für jeden **offenen** Platz gerufen, [slot] zählt ab 1.
+  final void Function(int slot) onTapSlot;
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +62,7 @@ class AbilitySlotsRow extends StatelessWidget {
                   isOpen: slot <= open,
                   isWeaponSlot: slot == 1,
                   move: _moveIn(slot),
-                  onTap: slot == 1 || slot > open
-                      ? null
-                      : () => _pick(context, slot - 2),
+                  onTap: slot > open ? null : () => onTapSlot(slot),
                 ),
               ),
             ],
@@ -91,8 +87,8 @@ class AbilitySlotsRow extends StatelessWidget {
   /// Der Satz unter den Slots.
   ///
   /// Nennt die nächste Stufe, damit ein gesperrter Platz ein Ziel ist
-  /// statt einer Absage — und sagt bei offenen leeren Plätzen, dass da
-  /// etwas hingehört.
+  /// statt einer Absage — und sagt bei offenen leeren Plätzen, wo das
+  /// herkommt, was hineingehört.
   String _hint(int? next, int open) {
     final frei = open - 1;
     final belegt = chosen.length;
@@ -103,141 +99,23 @@ class AbilitySlotsRow extends StatelessWidget {
     if (belegt < frei) {
       final offen = frei - belegt;
       return offen == 1
-          ? 'Ein Platz ist noch frei — antippen und belegen.'
-          : '$offen Plätze sind noch frei — antippen und belegen.';
+          ? 'Ein Platz ist noch frei — unten eine Fähigkeit antippen.'
+          : '$offen Plätze sind noch frei — unten eine Fähigkeit antippen.';
     }
     return 'Alle vier Plätze offen und belegt.';
-  }
-
-  Future<void> _pick(BuildContext context, int freeIndex) async {
-    final current = chosen.at(freeIndex);
-
-    final result = await showModalBottomSheet<_Pick>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      builder: (sheetContext) {
-        return HolzBlatt(
-          child: SafeArea(
-            child: ListView(
-              shrinkWrap: true,
-              children: <Widget>[
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 8),
-                  child: Text(
-                    'Fähigkeit wählen',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.text,
-                    ),
-                  ),
-                ),
-                if (unlocked.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 4, 20, 16),
-                    child: Text(
-                      'Noch nichts freigeschaltet.',
-                      style: TextStyle(color: Palette.muted),
-                    ),
-                  ),
-                for (final ability in unlocked)
-                  _AbilityOption(
-                    ability: ability,
-                    isChosen: ability.moveId == current,
-                    // Was anderswo liegt, wird nicht versteckt: Antippen
-                    // schiebt es hierher. Erst aufräumen zu müssen, bevor man
-                    // umstellen kann, wäre ein Umweg ohne Gewinn.
-                    isElsewhere:
-                        ability.moveId != current &&
-                        chosen.contains(ability.moveId),
-                    onTap: () =>
-                        Navigator.of(sheetContext).pop(_Pick(ability.moveId)),
-                  ),
-                if (current != null)
-                  Druck(
-                    child: ListTile(
-                      leading: const Icon(Icons.close, color: Palette.muted),
-                      title: const Text(
-                        'Platz räumen',
-                        style: TextStyle(color: Palette.textDim),
-                      ),
-                      onTap: () =>
-                          Navigator.of(sheetContext).pop(const _Pick(null)),
-                    ),
-                  ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (result == null) return;
-    final moveId = result.moveId;
-    if (moveId == null) {
-      onClear(freeIndex);
-    } else {
-      onChoose(freeIndex, moveId);
-    }
-  }
-}
-
-/// Ein Eintrag im Auswahlblatt.
-class _AbilityOption extends StatelessWidget {
-  const _AbilityOption({
-    required this.ability,
-    required this.isChosen,
-    required this.isElsewhere,
-    required this.onTap,
-  });
-
-  final Ability ability;
-  final bool isChosen;
-
-  /// Ob dieselbe Fähigkeit bereits auf einem anderen Platz liegt.
-  final bool isElsewhere;
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final name = pitNameOf(ability.moveId);
-    final zeile = pitSummaryOf(ability.moveId);
-    if (name == null || zeile == null) return const SizedBox.shrink();
-
-    return Druck(
-      child: ListTile(
-        leading: _MoveBild(
-          moveId: ability.moveId,
-          side: 36,
-          fallback: const Icon(Icons.bolt, color: Palette.accent),
-        ),
-        title: Text(name, style: const TextStyle(color: Palette.text)),
-        subtitle: Text(
-          isElsewhere ? '$zeile · liegt auf einem anderen Platz' : zeile,
-          style: TextStyle(color: isElsewhere ? Palette.gold : Palette.textDim),
-        ),
-        trailing: isChosen
-            ? const Icon(Icons.check, color: Palette.accent)
-            : null,
-        onTap: onTap,
-      ),
-    );
   }
 }
 
 /// Das Bild einer Fähigkeit — oder [fallback], solange sie keins hat.
 ///
-/// Immer [side] groß, auch mit Zeichen statt Bild: Sonst stünden im
-/// Auswahlblatt die Namen nicht bündig und die Plätze wären verschieden
-/// hoch, je nachdem, was darauf liegt.
-class _MoveBild extends StatelessWidget {
-  const _MoveBild({
+/// Immer [side] groß, auch mit Zeichen statt Bild: Sonst wären die
+/// Plätze verschieden hoch, je nachdem, was darauf liegt.
+class MoveBild extends StatelessWidget {
+  const MoveBild({
     required this.moveId,
     required this.side,
     required this.fallback,
+    super.key,
   });
 
   final String moveId;
@@ -255,14 +133,6 @@ class _MoveBild extends StatelessWidget {
     if (pfad == null) return ersatz;
     return PixelArt(assetPath: pfad, side: side, fallback: ersatz);
   }
-}
-
-/// Was das Auswahlblatt zurückgibt. Eigener Typ, weil Abbrechen (null vom
-/// Blatt) und Räumen (moveId null) zwei verschiedene Antworten sind.
-class _Pick {
-  const _Pick(this.moveId);
-
-  final String? moveId;
 }
 
 class _Slot extends StatelessWidget {
@@ -313,7 +183,7 @@ class _Slot extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   if (isOpen && belegt != null)
-                    _MoveBild(
+                    MoveBild(
                       moveId: belegt,
                       side: _bildSeite,
                       fallback: zeichen,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
+import '../character/abilities_screen.dart';
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
@@ -36,6 +37,14 @@ class HomeScreen extends ConsumerWidget {
 
   /// Das Buch auf dem Theorie-Kreis — Frederiks Zeichnung, 64 × 64.
   static const String theorySymbol = 'assets/UI/Buch.png';
+
+  /// Der Stern auf dem Fähigkeiten-Kreis (ADR-0049).
+  ///
+  /// **Eine vorhandene Zeichnung statt eines Systemzeichens**, wie das
+  /// Buch auf der Theorie. Sternenfall ist die einzige legendäre
+  /// Fähigkeit und die einzige, deren Bild mittig und ringsum gleich ist
+  /// — auf einem runden Knopf sitzt das, ohne zu kippen.
+  static const String abilitySymbol = 'assets/Faehigkeiten/Sternenfall.png';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,6 +128,17 @@ class HomeScreen extends ConsumerWidget {
                         label: 'Laden',
                         image: HubCircleImage.plain,
                         onTap: () => _open(context, const ShopScreen()),
+                      ),
+                      // **Nie gesperrt**, obwohl auf Level 1 nur der
+                      // Waffenplatz offen ist: Der Bildschirm zeigt vor
+                      // allem, was es zu holen gibt, und das ist genau
+                      // dann am nützlichsten, wenn man noch nichts hat.
+                      HubCircle(
+                        icon: Icons.auto_awesome,
+                        label: 'Fähigkeiten',
+                        image: HubCircleImage.plain,
+                        symbol: abilitySymbol,
+                        onTap: () => _open(context, const AbilitiesScreen()),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
