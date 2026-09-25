@@ -368,6 +368,21 @@ class ActionGame extends Game {
     final vonY = ((-kamera.y) / feld).floor() - 1;
     final bisY = ((-kamera.y + size.y) / feld).ceil() + 1;
 
+    // Frederiks Ziegel unter allem; Wände und Tore liegen darüber. Fehlt
+    // das Bild noch, bleibt das Schachbrett.
+    final gepflastert =
+        bilder?.drawFloor(
+          canvas,
+          Rect.fromLTRB(
+            math.max(vonX, 0) * feld,
+            math.max(vonY, 0) * feld,
+            math.min(bisX + 1, sim.level.width) * feld,
+            math.min(bisY + 1, sim.level.height) * feld,
+          ),
+          feld,
+        ) ??
+        false;
+
     for (var y = vonY; y <= bisY; y++) {
       for (var x = vonX; x <= bisX; x++) {
         if (x < 0 || y < 0 || x >= sim.level.width || y >= sim.level.height) {
@@ -386,7 +401,7 @@ class ActionGame extends Game {
             Rect.fromLTWH(x * feld, y * feld, feld, feld * 0.22),
             _wandOben,
           );
-        } else {
+        } else if (!gepflastert) {
           // Schachbrett, damit Bewegung sichtbar ist. Auf einer
           // einfarbigen Fläche merkt man nicht, dass man läuft.
           final hell = (x + y).isEven;

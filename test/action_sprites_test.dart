@@ -53,6 +53,22 @@ void main() {
       });
     });
 
+    testWidgets('der Boden ist angemeldet, quadratisch und wird geladen', (
+      tester,
+    ) async {
+      // Fehlt er, liegt still das Schachbrett da — niemand merkt es.
+      expect(GrubeFiguren.files, contains(GrubeFiguren.boden));
+      await tester.runAsync(() async {
+        final data = await rootBundle.load(
+          '${GrubeFiguren.folder}/${GrubeFiguren.boden}',
+        );
+        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+        final image = (await codec.getNextFrame()).image;
+        expect(image.width, image.height);
+        expect(image.width, 256);
+      });
+    });
+
     testWidgets('der Ausschnitt des Steins liegt genau um den Stein', (
       tester,
     ) async {

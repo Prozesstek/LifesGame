@@ -11,6 +11,18 @@
 
 ---
 
+## 25.09.2026, danach: Ziegelboden in der Grube
+
+Frederiks Bodenkachel (`assets/Grube/Boden.png`, 256 × 256, nahtlos)
+ersetzt das Schachbrett. **Eine Kachel liegt über 4 × 4 Feldern**
+(`GrubeFiguren.bodenFelder`): auf ein Feld gelegt, wären die Ziegel zwei
+Punkte hoch und nur Rauschen. Gezeichnet mit einem wiederholten
+`ImageShader`, an der Welt ausgerichtet, damit man am Muster sieht, dass
+man läuft. Fehlt das Bild, bleibt das Schachbrett. App 520. Angesehen als
+zusammengesetzte Vorschau in Spielgrösse, **nicht am Handy**. Offen,
+falls gewünscht: Varianten gegen die Wiederholung, ein Schatten am
+Wandfuss.
+
 ## 25.09.2026: die Figur trägt ihren Helm
 
 Frederik hat acht Zeichnungen geliefert, eine je Helm im Katalog, auf

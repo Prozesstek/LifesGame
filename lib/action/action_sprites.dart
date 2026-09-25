@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
@@ -197,6 +198,12 @@ abstract final class GrubeFiguren {
   /// der Grube gebaut, und der Wächter wirft ihn.
   static const String stein = 'Stein.png';
 
+  /// Der Boden — Frederiks Ziegel, 256 × 256, nahtlos. Eine Kachel liegt
+  /// über [bodenFelder] × [bodenFelder] Feldern; auf ein einziges Feld
+  /// gelegt, wären die Ziegel zwei Punkte hoch und nur noch Rauschen.
+  static const String boden = 'Boden.png';
+  static const int bodenFelder = 4;
+
   /// Wo im Bild der Stein liegt; der Rest ist durchsichtig. Die Wand
   /// zeichnet nur diesen Ausschnitt, sonst stünden Lücken zwischen den
   /// Blöcken. `action_sprites_test.dart` misst ihn nach.
@@ -229,6 +236,7 @@ abstract final class GrubeFiguren {
     for (final figure in all)
       for (final strip in figure.strips.values) strip.file,
     stein,
+    boden,
   };
 }
 
@@ -281,6 +289,30 @@ class GrubeBilder {
 
   static final Paint _paint = Paint()..filterQuality = FilterQuality.none;
   static final Paint _weich = Paint()..filterQuality = FilterQuality.medium;
+
+  /// Legt den Boden über [area], an der Welt ausgerichtet — nicht an
+  /// [area]. Sonst liefe das Muster mit der Kamera mit, und genau daran
+  /// sieht man, dass man läuft. Gibt `false` zurück, solange das Bild
+  /// fehlt; dann bleibt das Schachbrett.
+  bool drawFloor(Canvas canvas, Rect area, double tileSize) {
+    final image = _images[GrubeFiguren.boden];
+    if (image == null) return false;
+    final massstab = GrubeFiguren.bodenFelder * tileSize / image.width;
+    final shader = ImageShader(
+      image,
+      TileMode.repeated,
+      TileMode.repeated,
+      Float64List.fromList(<double>[
+        massstab, 0, 0, 0, //
+        0, massstab, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+      ]),
+      filterQuality: FilterQuality.medium,
+    );
+    canvas.drawRect(area, Paint()..shader = shader);
+    return true;
+  }
 
   /// Zeichnet den Stein in [dst] — als Wandblock oder als Wurf.
   ///
