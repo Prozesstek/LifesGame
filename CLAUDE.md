@@ -121,7 +121,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen | Flutter |
+| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt getragenem Helm** (`helmOverlays`, deckungsgleich auf 256 × 256) | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
@@ -193,7 +193,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 513 Tests
+flutter test             # 518 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

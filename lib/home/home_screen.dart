@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear/gear.dart';
 
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
 import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
+import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
@@ -39,6 +41,10 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
+    final helmId = ref
+        .watch(loadoutProvider)
+        .equippedCopyIn(GearSlot.helm)
+        ?.itemId;
 
     final tracker = ref.watch(habitTrackerProvider);
     final heute = HubProgress(
@@ -96,7 +102,11 @@ class HomeScreen extends ConsumerWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: CharacterStage(level: level, gold: gold),
+                      child: CharacterStage(
+                        level: level,
+                        gold: gold,
+                        helmId: helmId,
+                      ),
                     ),
                   ),
 

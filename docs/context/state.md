@@ -7,9 +7,24 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 24.09.2026 · Frederik
+**Zuletzt aktualisiert:** 25.09.2026 · Frederik
 
 ---
+
+## 25.09.2026: die Figur trägt ihren Helm
+
+Frederik hat acht Zeichnungen geliefert, eine je Helm im Katalog, auf
+derselben 256er-Fläche wie `Charakter.png`. Auf der Startseite liegt der
+angelegte Helm jetzt über der Figur (`CharacterStage.helmOverlays`,
+Id → Pfad). Kein Versatz, keine Rechnung: Die Bilder sitzen
+deckungsgleich, zusammengesetzt nachgeprüft.
+
+Der Drachenhelm kam 252 breit an und ist auf 256 gepolstert (rechts
+leer, kein Pixel verschoben), sonst wäre er beim Skalieren gestaucht
+worden. `test/character_stage_test.dart` hält fest: jeder Helm im
+Katalog hat eine Zeichnung, jede ist so gross wie die Figur. App 518.
+**Nicht am Handy angesehen.** Rüstung, Schuhe und Waffe auf der Figur
+fehlen noch — gleiche Bauform, sobald es Bilder gibt.
 
 ## 24.09.2026, zuletzt: die Schlüssel bewegen sich
 
