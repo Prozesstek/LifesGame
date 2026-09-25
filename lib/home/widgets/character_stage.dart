@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gear/gear.dart';
 import 'package:progression/progression.dart';
 
 import '../../ui/palette.dart';
@@ -19,28 +20,42 @@ class CharacterStage extends StatelessWidget {
   const CharacterStage({
     required this.level,
     required this.gold,
-    this.helmId,
+    this.worn = const <String>[],
     super.key,
   });
 
   final PlayerLevel level;
   final int gold;
 
-  /// Die Item-Id des getragenen Helms, oder `null` ohne Helm.
-  final String? helmId;
+  /// Die Item-Ids der angelegten Stücke, in beliebiger Reihenfolge.
+  /// Übereinander gelegt wird nach [layers], nicht nach dieser Liste.
+  final List<String> worn;
 
-  /// Wo die Figur liegt: die Grundfigur im 64 × 64-Stil, noch ohne
-  /// Kleidung. Kommt später eine Fassung mit Rüstung dazu, ist das eine
-  /// Datei mehr im selben Ordner und keine Änderung an `pubspec.yaml`.
+  /// Wo die Figur liegt: die Grundfigur im 64 × 64-Stil, ohne Kleidung.
   static const String assetPath = 'assets/character/Charakter.png';
 
-  /// Helm-Id → Zeichnung **auf der Figur**, nicht das Ladenbild.
+  /// In welcher Reihenfolge die Plätze auf der Figur liegen, von unten
+  /// nach oben. Die Rüstung reicht bis unter den Helm, die Waffe liegt
+  /// vor der Rüstung.
+  static const List<GearSlot> layers = <GearSlot>[
+    GearSlot.ruestung,
+    GearSlot.waffe,
+    GearSlot.helm,
+  ];
+
+  /// Item-Id → Zeichnung **auf der Figur**, nicht das Ladenbild.
   ///
   /// Jede Datei liegt auf derselben 256er-Fläche wie [assetPath] und
   /// sitzt deckungsgleich darüber — kein Versatz, keine Rechnung. Ein
-  /// neuer Helm ohne Eintrag hier steht im Laden, nur die Figur trägt
-  /// ihn nicht; `test/character_stage_test.dart` meldet das.
-  static const Map<String, String> helmOverlays = <String, String>{
+  /// neues Stück ohne Eintrag hier steht im Laden, nur die Figur trägt
+  /// es nicht; `test/character_stage_test.dart` meldet das für jeden
+  /// Platz in [layers].
+  ///
+  /// **Die Helme sind gezeichnet, Rüstungen und Waffen erzeugt**, aus den
+  /// Ladenbildern mit `tool/figur_ausruestung.py`. Wer eine davon von
+  /// Hand ersetzt, nimmt sie dort aus der Liste.
+  static const Map<String, String> overlays = <String, String>{
+    // Helm — gezeichnet
     'gear-lederkappe': 'assets/character/Charakter_Lederkappe.png',
     'gear-eisenhaube': 'assets/character/Charakter_Eisenhaube.png',
     'gear-schuppenhaube': 'assets/character/Charakter_Schuppenhaube.png',
@@ -50,7 +65,38 @@ class CharacterStage extends StatelessWidget {
     'gear-runenkrone': 'assets/character/Charakter_Runenkrone.png',
     'gear-krone-des-hochwaechters':
         'assets/character/Charakter_KroneDesHochwaechters.png',
+    // Rüstung — erzeugt
+    'gear-lederwams': 'assets/character/Charakter_Lederwams.png',
+    'gear-gestepptes-wams': 'assets/character/Charakter_GesteppteWams.png',
+    'gear-schuppenpanzer': 'assets/character/Charakter_Schuppenpanzer.png',
+    'gear-kettenpanzer': 'assets/character/Charakter_Kettenpanzer.png',
+    'gear-plattenharnisch': 'assets/character/Charakter_Plattenharnisch.png',
+    'gear-drachenschuppenpanzer':
+        'assets/character/Charakter_Drachenschuppenpanzer.png',
+    'gear-runenharnisch': 'assets/character/Charakter_Runenharnisch.png',
+    'gear-titanenpanzer': 'assets/character/Charakter_Titanenpanzer.png',
+    // Waffe — erzeugt
+    'gear-kurzbogen': 'assets/character/Charakter_Kurzbogen.png',
+    'gear-uebungsklinge': 'assets/character/Charakter_Uebungsklinge.png',
+    'gear-streitkolben': 'assets/character/Charakter_Streitkolben.png',
+    'gear-geschliffene-klinge':
+        'assets/character/Charakter_GeschliffeneKlinge.png',
+    'gear-kriegsstab': 'assets/character/Charakter_Kriegsstab.png',
+    'gear-zweihaender': 'assets/character/Charakter_Zweihaender.png',
+    'gear-langbogen': 'assets/character/Charakter_Langbogen.png',
+    'gear-sonnenklinge': 'assets/character/Charakter_Sonnenklinge.png',
   };
+
+  /// Die Zeichnungen, die über der Figur liegen, von unten nach oben.
+  static List<String> overlaysFor(Iterable<String> worn) {
+    final ids = worn.toSet();
+    return <String>[
+      for (final slot in layers)
+        for (final item in GearCatalog.forSlot(slot))
+          if (ids.contains(item.id) && overlays[item.id] != null)
+            overlays[item.id]!,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +105,7 @@ class CharacterStage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Expanded(
-            child: Center(child: _Figur(helmId: helmId)),
+            child: Center(child: _Figur(overlays: overlaysFor(worn))),
           ),
           const SizedBox(height: 10),
           LevelCard(level: level, gold: gold),
@@ -77,16 +123,15 @@ class CharacterStage extends StatelessWidget {
 /// wegen eines fehlenden Bildes gar nicht erscheint, wäre der teuerste
 /// denkbare Preis für eine Zeichnung.
 class _Figur extends StatelessWidget {
-  const _Figur({required this.helmId});
+  const _Figur({required this.overlays});
 
-  final String? helmId;
+  final List<String> overlays;
 
   @override
   Widget build(BuildContext context) {
-    final String? helm = CharacterStage.helmOverlays[helmId];
     // Die Zeichnung ist quadratisch und bekommt die kürzere Seite der
     // Fläche. Ob hart oder weich skaliert wird, entscheidet `PixelArt`.
-    // Der Helm bekommt dieselbe Seite und liegt damit genau auf dem Kopf.
+    // Jedes Stück bekommt dieselbe Seite und liegt damit deckungsgleich.
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.biggest.shortestSide;
@@ -98,10 +143,10 @@ class _Figur extends StatelessWidget {
               side: side,
               fallback: const _KeineFigur(),
             ),
-            if (helm != null)
+            for (final bild in overlays)
               PixelArt(
-                key: ValueKey<String>(helm),
-                assetPath: helm,
+                key: ValueKey<String>(bild),
+                assetPath: bild,
                 side: side,
                 fallback: const SizedBox.shrink(),
               ),

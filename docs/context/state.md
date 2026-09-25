@@ -22,9 +22,20 @@ deckungsgleich, zusammengesetzt nachgeprüft.
 Der Drachenhelm kam 252 breit an und ist auf 256 gepolstert (rechts
 leer, kein Pixel verschoben), sonst wäre er beim Skalieren gestaucht
 worden. `test/character_stage_test.dart` hält fest: jeder Helm im
-Katalog hat eine Zeichnung, jede ist so gross wie die Figur. App 518.
-**Nicht am Handy angesehen.** Rüstung, Schuhe und Waffe auf der Figur
-fehlen noch — gleiche Bauform, sobald es Bilder gibt.
+Katalog hat eine Zeichnung, jede ist so gross wie die Figur.
+
+**Nachgezogen: Rüstung und Waffe.** Nicht gezeichnet, sondern aus den
+Ladenbildern erzeugt (`tool/figur_ausruestung.py`): weich verkleinert,
+jeder Pixel zurück auf eine Farbe des Originals. Die Rüstung reicht bis
+unter den Helm (Frederik: „ruhig unter dem Helm“), die Waffe steht in
+der rechten Hand. Nachgebessert sind zwei: der **Kettenpanzer**, im
+Laden ein Knäuel, hat den Umriss des Schuppenpanzers und ein eigenes
+Kettenmuster; der **Plattenharnisch** sitzt schmaler. Die Qualität der
+Helme erreichen sie nicht — **Platzhalter**, bis es gezeichnete gibt.
+Gestapelt wird nach Platz (`CharacterStage.layers`: Rüstung, Waffe,
+Helm). **Schuhe fehlen bewusst**: Die Ladenbilder sind ein Paar von der
+Seite, verkleinert bleibt ein Klecks. Ring und Talisman zeigen sich
+nicht. App 519. **Nicht am Handy angesehen.**
 
 ## 24.09.2026, zuletzt: die Schlüssel bewegen sich
 

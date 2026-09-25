@@ -121,7 +121,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, fünf Kreise darum | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt getragenem Helm** (`helmOverlays`, deckungsgleich auf 256 × 256) | Flutter |
+| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
@@ -147,6 +147,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/village/village_map.dart` | **das Dorf (Prototyp)**: Karte als Text, Wege, Laufen, Türen, reines Dart, ohne Bildschirm testbar | Flutter |
 | `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, **hinein nur über den Knopf am Gebäude**, „Heute“ immer einen Tipp entfernt | Flutter |
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
+| `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
@@ -193,7 +194,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 518 Tests
+flutter test             # 519 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

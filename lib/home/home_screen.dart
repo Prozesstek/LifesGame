@@ -41,10 +41,10 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
-    final helmId = ref
-        .watch(loadoutProvider)
-        .equippedCopyIn(GearSlot.helm)
-        ?.itemId;
+    final loadout = ref.watch(loadoutProvider);
+    final worn = <String>[
+      for (final slot in GearSlot.values) ?loadout.equippedCopyIn(slot)?.itemId,
+    ];
 
     final tracker = ref.watch(habitTrackerProvider);
     final heute = HubProgress(
@@ -105,7 +105,7 @@ class HomeScreen extends ConsumerWidget {
                       child: CharacterStage(
                         level: level,
                         gold: gold,
-                        helmId: helmId,
+                        worn: worn,
                       ),
                     ),
                   ),

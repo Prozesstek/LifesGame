@@ -6,7 +6,7 @@ import 'package:lifes_game/home/widgets/character_stage.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:progression/progression.dart';
 
-/// Der getragene Helm auf der Figur des Startbildschirms.
+/// Helm, Rüstung und Waffe auf der Figur des Startbildschirms.
 ///
 /// Dieselben Nähte wie in `gear_icon_test.dart` — jeder Helm hat eine
 /// Zeichnung, jede Zeichnung ist da und angemeldet — plus die eine
@@ -15,20 +15,22 @@ import 'package:progression/progression.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('jeder Helm im Katalog hat eine Zeichnung auf der Figur', () {
-    for (final helm in GearCatalog.forSlot(GearSlot.helm)) {
-      expect(
-        CharacterStage.helmOverlays,
-        contains(helm.id),
-        reason: '${helm.name} steht im Laden, aber die Figur trägt ihn nicht.',
-      );
+  test('jedes Stück auf Helm, Rüstung und Waffe hat eine Zeichnung', () {
+    for (final slot in CharacterStage.layers) {
+      for (final item in GearCatalog.forSlot(slot)) {
+        expect(
+          CharacterStage.overlays,
+          contains(item.id),
+          reason: '${item.name} steht im Laden, aber die Figur trägt es nicht.',
+        );
+      }
     }
   });
 
-  test('keine Zeichnung zeigt auf einen Helm, den es nicht gibt', () {
-    final helme = GearCatalog.forSlot(GearSlot.helm).map((h) => h.id);
-    for (final id in CharacterStage.helmOverlays.keys) {
-      expect(helme, contains(id));
+  test('keine Zeichnung zeigt auf ein Stück, das es nicht gibt', () {
+    final ids = GearCatalog.all.map((item) => item.id);
+    for (final id in CharacterStage.overlays.keys) {
+      expect(ids, contains(id));
     }
   });
 
@@ -38,7 +40,7 @@ void main() {
     final hoehe = figur.getUint32(20);
     expect(breite, PixelArt.assetSize);
 
-    for (final pfad in CharacterStage.helmOverlays.values) {
+    for (final pfad in CharacterStage.overlays.values) {
       final daten = await rootBundle.load(pfad);
       expect(daten.getUint32(0), 0x89504E47, reason: '$pfad ist kein PNG.');
       expect(daten.getUint32(16), breite, reason: pfad);
@@ -46,7 +48,7 @@ void main() {
     }
   });
 
-  Future<void> zeige(WidgetTester tester, {String? helmId}) {
+  Future<void> zeige(WidgetTester tester, {List<String> worn = const []}) {
     return tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -56,7 +58,7 @@ void main() {
             child: CharacterStage(
               level: LevelCurve.levelFor(0),
               gold: 0,
-              helmId: helmId,
+              worn: worn,
             ),
           ),
         ),
@@ -77,14 +79,30 @@ void main() {
     expect(figurenbilder(tester), <String>[CharacterStage.assetPath]);
   });
 
-  testWidgets('mit Helm liegt seine Zeichnung über der Figur', (tester) async {
-    await zeige(tester, helmId: 'gear-drachenhelm');
+  testWidgets('Rüstung, Waffe und Helm liegen in dieser Reihenfolge', (
+    tester,
+  ) async {
+    // Absichtlich verdreht übergeben: gestapelt wird nach Platz, nicht
+    // nach Liste — sonst läge die Rüstung je nach Zufall über dem Helm.
+    await zeige(
+      tester,
+      worn: <String>['gear-drachenhelm', 'gear-kurzbogen', 'gear-lederwams'],
+    );
 
-    final bilder = figurenbilder(tester);
-    // Reihenfolge ist Stapelreihenfolge: die Figur unten, der Helm oben.
-    expect(bilder, <String>[
+    expect(figurenbilder(tester), <String>[
       CharacterStage.assetPath,
-      CharacterStage.helmOverlays['gear-drachenhelm']!,
+      CharacterStage.overlays['gear-lederwams']!,
+      CharacterStage.overlays['gear-kurzbogen']!,
+      CharacterStage.overlays['gear-drachenhelm']!,
     ]);
+  });
+
+  testWidgets('Ring und Talisman zeigen sich nicht auf der Figur', (
+    tester,
+  ) async {
+    final ring = GearCatalog.forSlot(GearSlot.ring).first.id;
+    await zeige(tester, worn: <String>[ring]);
+
+    expect(figurenbilder(tester), <String>[CharacterStage.assetPath]);
   });
 }
