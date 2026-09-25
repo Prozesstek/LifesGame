@@ -22,8 +22,12 @@ Zwei Stücke sind nachgebessert:
   Umriss des Schuppenpanzers und ein eigenes Kettenmuster in seinen
   Farben.
 * **Plattenharnisch** — schmaler gesetzt, sonst steht er als Kasten da.
+
+Jede Rüstung bringt **Beine** mit: die Hautpixel der Beine in ihren
+Farben, siehe ``beine()``. Die Füsse bleiben frei für Schuhe.
 """
 
+from collections import Counter
 from pathlib import Path
 
 from PIL import Image
@@ -121,11 +125,62 @@ def kettenpanzer(breite: int, hoehe: int) -> Image.Image:
     return aus
 
 
-def ablegen(stueck: Image.Image, feld: tuple[int, int, int, int], name: str) -> None:
+HAUT = (255, 212, 165)  # Hautfarbe der Grundfigur
+BEINE = range(48, 59)  # Zeilen der Beine, unter der Rüstung, über den Füssen
+
+
+def hell(c: tuple[int, int, int]) -> float:
+    return 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]
+
+
+def beine(ruestung: Image.Image, kette: bool) -> Image.Image:
+    """Hosen in den Farben der Rüstung: die Hautpixel der Beine.
+
+    Die häufigste Farbe der Rüstung (ohne Kontur) füllt das Bein, links
+    liegt der nächsthellere Ton, rechts der nächstdunklere — so haben die
+    Beine dasselbe Licht wie der Rumpf. Die Kontur der Figur bleibt.
+    """
+    figur = Image.open(FIGUR / "Charakter.png").convert("RGBA").resize((RAUM, RAUM), Image.NEAREST)
+    zaehler = Counter(p[:3] for p in ruestung.get_flattened_data() if p[3] > 0)
+    palette = sorted(zaehler, key=hell)
+    innen = [c for c in palette if hell(c) >= 60] or palette
+    haupt = max(innen, key=lambda c: zaehler[c])
+    i = palette.index(haupt)
+    licht, schatten = palette[min(i + 1, len(palette) - 1)], palette[max(i - 1, 0)]
+
+    def haut(x: int, y: int) -> bool:
+        p = figur.getpixel((x, y))
+        return p[3] > 0 and p[:3] == HAUT
+
+    aus = Image.new("RGBA", (RAUM, RAUM))
+    for y in BEINE:
+        for x in range(RAUM):
+            if not haut(x, y):
+                continue
+            if not haut(x - 1, y):
+                farbe = licht
+            elif not haut(x + 1, y):
+                farbe = schatten
+            elif kette and (x + y) % 2:
+                farbe = schatten
+            else:
+                farbe = haupt
+            aus.putpixel((x, y), farbe + (255,))
+    return aus
+
+
+def ablegen(
+    stueck: Image.Image,
+    feld: tuple[int, int, int, int],
+    name: str,
+    darunter: Image.Image | None = None,
+) -> None:
     links, oben, _, _ = feld
-    gross = stueck.resize((stueck.width * FAKTOR, stueck.height * FAKTOR), Image.NEAREST)
-    ebene = Image.new("RGBA", (RAUM * FAKTOR, RAUM * FAKTOR))
-    ebene.alpha_composite(gross, (links * FAKTOR, oben * FAKTOR))
+    raster = Image.new("RGBA", (RAUM, RAUM))
+    if darunter is not None:
+        raster.alpha_composite(darunter)
+    raster.alpha_composite(stueck, (links, oben))
+    ebene = raster.resize((RAUM * FAKTOR, RAUM * FAKTOR), Image.NEAREST)
     ziel = FIGUR / f"Charakter_{name}.png"
     ebene.save(ziel)
     print(ziel)
@@ -138,7 +193,7 @@ def main() -> None:
             stueck = kettenpanzer(breite, hoehe)
         else:
             stueck = verkleinern(zeichnung(Path(f"assets/Ruestung/{name}.png")), breite, hoehe)
-        ablegen(stueck, feld, name)
+        ablegen(stueck, feld, name, darunter=beine(stueck, kette=name == "Kettenpanzer"))
 
     for pfad in WAFFEN:
         breite, hoehe = HAND[2] - HAND[0], HAND[3] - HAND[1]

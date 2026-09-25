@@ -33,7 +33,10 @@ Laden ein Knäuel, hat den Umriss des Schuppenpanzers und ein eigenes
 Kettenmuster; der **Plattenharnisch** sitzt schmaler. Die Qualität der
 Helme erreichen sie nicht — **Platzhalter**, bis es gezeichnete gibt.
 Gestapelt wird nach Platz (`CharacterStage.layers`: Rüstung, Waffe,
-Helm). **Schuhe fehlen bewusst**: Die Ladenbilder sind ein Paar von der
+Helm). **Jede Rüstung bringt Beine mit** (Frederik: „die Beine in der
+gleichen Farbe wie die Rüstung“): die Hautpixel der Beine in ihrer
+häufigsten Farbe, links Licht, rechts Schatten, beim Kettenpanzer mit
+Kettenmuster. Die Füsse bleiben frei. **Schuhe fehlen bewusst**: Die Ladenbilder sind ein Paar von der
 Seite, verkleinert bleibt ein Klecks. Ring und Talisman zeigen sich
 nicht. App 519. **Nicht am Handy angesehen.**
 
