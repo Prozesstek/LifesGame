@@ -14,6 +14,7 @@ export 'src/content/habits_branch.dart';
 export 'src/content/koerper_branch.dart';
 export 'src/content/koerper_geist_pages.dart';
 export 'src/content/kraft_pages.dart';
+export 'src/content/psychologie_pages.dart';
 export 'src/content/root_pages.dart';
 export 'src/content/theory_graph_content.dart';
 export 'src/content/wissenschaft_gesellschaft_pages.dart';

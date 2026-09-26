@@ -33,6 +33,7 @@ import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
 import 'koerper_geist_pages.dart';
 import 'kraft_pages.dart';
+import 'psychologie_pages.dart';
 import 'root_pages.dart';
 import 'wissenschaft_branch.dart';
 import 'wissenschaft_gesellschaft_pages.dart';
@@ -207,6 +208,36 @@ final TheoryGraph theoryGraph = TheoryGraph(
       iconId: 'repeat',
       parentIds: <String>['geist-psychologie'],
       unlocksAbility: 'klingenwirbel',
+    ),
+    const TheoryNode(
+      id: 'psychologie-konformitaet',
+      lesson: aschPage,
+      iconId: 'crowd',
+      parentIds: <String>['geist-psychologie'],
+    ),
+    const TheoryNode(
+      id: 'psychologie-gehorsam',
+      lesson: milgramPage,
+      iconId: 'authority',
+      parentIds: <String>['geist-psychologie'],
+    ),
+    const TheoryNode(
+      id: 'psychologie-bystander',
+      lesson: bystanderPage,
+      iconId: 'bystander',
+      parentIds: <String>['geist-psychologie'],
+    ),
+    const TheoryNode(
+      id: 'psychologie-gedaechtnis',
+      lesson: gedaechtnisPage,
+      iconId: 'memory',
+      parentIds: <String>['geist-psychologie'],
+    ),
+    const TheoryNode(
+      id: 'psychologie-emotionen',
+      lesson: emotionenPage,
+      iconId: 'emotion',
+      parentIds: <String>['geist-psychologie'],
     ),
     const TheoryNode(
       id: 'selbstentwicklung',

@@ -38,6 +38,13 @@ const Map<String, IconData> _icons = <String, IconData>{
   'technique': Icons.straighten_rounded,
   'recovery': Icons.hotel_outlined,
 
+  // Psychologie
+  'crowd': Icons.groups_2_outlined,
+  'authority': Icons.gavel_rounded,
+  'bystander': Icons.visibility_outlined,
+  'memory': Icons.photo_library_outlined,
+  'emotion': Icons.sentiment_satisfied_alt_outlined,
+
   // Ausdauer & Fitness
   'endurance': Icons.directions_bike_outlined,
   'heartbeat': Icons.monitor_heart_outlined,

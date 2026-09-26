@@ -876,7 +876,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(totalPagesProvider), 48);
+      expect(container.read(totalPagesProvider), 53);
       expect(
         container.read(totalPagesProvider),
         greaterThan(theoryTree.lessonCount),

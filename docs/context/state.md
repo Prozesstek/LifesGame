@@ -69,7 +69,14 @@ Damit ist die alte Schieflage bei Stärke und Ausdauer zumindest in der
 Theorie angegangen — Gewohnheitsvorlagen gibt es dafür weiter keine
 neuen.
 
-**Damit ist der Baum zum ersten Mal größer als 60 Tage:** 43 Knoten,
+**Dann Psychologie**, fünf Themen neben Aufmerksamkeit und Wiederholen,
+jedes an einem Versuch aufgehängt: Die Macht der Mehrheit (Asch),
+Gehorsam (Milgram), Warum keiner hilft (Bystander), Erinnerung ist kein
+Video (Loftus), Gefühle regulieren (Gross). Wo ein Befund später
+eingeschränkt wurde, steht das dabei — die 38 Zeugen im Fall Genovese
+sind als Übertreibung benannt (`psychologie_pages.dart`).
+
+**Damit ist der Baum zum ersten Mal größer als 60 Tage:** 48 Knoten,
 an Tag 60 sind 33 offen (`runway_sim`). Das ist die Knappheit aus
 ADR-0037 — wer Kraft liest, lässt dafür etwas anderes liegen.
 
@@ -79,12 +86,12 @@ Versprechen lesen oder als Baustelle, sagt nur das Bild.
 
 ### Offen
 
-- **Gegenlesen** der acht Einführungsseiten, der fünf Kraft- und der
-  fünf Ausdauer-Seiten.
+- **Gegenlesen** der acht Einführungsseiten und der fünfzehn Themen
+  (Kraft, Ausdauer, Psychologie).
 - **Wie viel XP und Gold** Theorie künftig bringt (ADR-0037, Punkt 1).
 - **Welches Gebiet als Nächstes befüllt wird.** Körper fehlen noch
-  Körperkontrolle und Biologie des Körpers; Geist hat mit Psychologie
-  den dankbarsten Stoff (Experimente wie Milgram und Asch).
+  Körperkontrolle und Biologie des Körpers; in Geist stehen Philosophie,
+  Geschichte und Kreativität noch grau.
 - Eine Ankündigung antippen tut nichts. Ob man dort eine Zeile „kommt
   noch" erwartet, zeigt das Spielen.
 
