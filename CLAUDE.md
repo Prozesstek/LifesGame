@@ -52,10 +52,12 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 148 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 163 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
-| `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, wer an wem hängt | nur Dart-SDK |
+| `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — und die **angekündigten** Überschriften (`theoryPlaceholders`) | nur Dart-SDK |
+| `packages/theory/lib/src/content/area_pages.dart` | die Einführungsseiten der **Zwischenebenen** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)) | nur Dart-SDK |
+| `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 41 Tests | nur Dart-SDK |
@@ -196,7 +198,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 533 Tests
+flutter test             # 534 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -214,7 +216,7 @@ dart test                              # 191 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 148 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 163 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 41 Tests
 cd packages/gear        ; dart test    # 112 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
@@ -355,6 +357,19 @@ Dauerschaden ein Vielfaches des Angriffs.
 **Theorie schreiben heißt testen lassen.** Eine neue Seite kommt nach
 `packages/theory/lib/src/content/`, ein neuer Knoten zusätzlich in
 `theoryGraph` (`theory_graph_content.dart`) — danach `dart test`.
+
+**Seit [ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)
+hat der Baum drei Ebenen:** Wurzel (frei) → **Zwischenebene** („Kraft &
+Muskulatur", ein Punkt, eine Einführungsseite) → Thema. Überschriften
+ohne Inhalt stehen als `TheoryPlaceholder` grau im Bild und lassen sich
+nicht öffnen. **Wer eine befüllt**, nimmt sie aus `theoryPlaceholders`
+und trägt sie mit **derselben Id** als Knoten ein — samt Einführungsseite
+in `area_pages.dart`. Alte Stände werden nicht umgeschrieben: Eine
+Zwischenebene gilt als offen, wenn ein Kind aus `legacyOpenedBy` offen
+ist, und kostet dann keinen Punkt. Dort stehen nur Kinder mit **genau
+einem** Eltern, sonst ließe sie sich über den zweiten Weg verschenken
+(`strayGrants`). Der Weg zu einer Fähigkeit kostet jetzt zwei Punkte —
+`abilities_seam_test.dart` rechnet ihn aus.
 `graph_content_test.dart` läuft über den ganzen Graphen und prüft den Inhalt
 mit: eindeutige Ids, genau drei Fragen, gültige `correctIndex`, keine
 doppelten Antworten. Und die Struktur: keine Eltern-Id ins Leere,

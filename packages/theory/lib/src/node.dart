@@ -18,6 +18,7 @@ class TheoryNode {
     this.parentIds = const <String>[],
     this.cost = 1,
     this.unlocksAbility,
+    this.legacyOpenedBy = const <String>[],
   });
 
   final String id;
@@ -49,6 +50,15 @@ class TheoryNode {
   /// Nur vier Knoten im Startbaum tragen eine (ADR-0019). Alle übrigen
   /// geben Erfahrung und Gold über `TheoryRewards`.
   final String? unlocksAbility;
+
+  /// Kinder, deren Öffnen in einem **alten** Spielstand diesen Knoten
+  /// mitöffnet — ohne Punkt (ADR-0050).
+  ///
+  /// Nur an Zwischenebenen, und nur mit Kindern, die **allein** hier
+  /// hängen. Ein Kind mit zweitem Weg (Stress, Vergleich) ließe sich an
+  /// der Zwischenebene vorbei öffnen und schenkte sie dann auch einem
+  /// neuen Spieler.
+  final List<String> legacyOpenedBy;
 
   bool get isRoot => parentIds.isEmpty;
 

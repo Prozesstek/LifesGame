@@ -192,7 +192,9 @@ class TheoryProgress {
   bool isNodeOpened(String nodeId, TheoryGraph graph) {
     final node = graph.nodeById(nodeId);
     if (node == null) return false;
-    return node.isFree || _openedNodeIds.contains(nodeId);
+    return node.isFree ||
+        _openedNodeIds.contains(nodeId) ||
+        graph.isGrantedBy(nodeId, _openedNodeIds);
   }
 
   /// Alle offenen Knoten — bezahlte **und** kostenlose.
@@ -204,7 +206,7 @@ class TheoryProgress {
     return <String>{
       ..._openedNodeIds,
       for (final node in graph.nodes)
-        if (node.isFree) node.id,
+        if (node.isFree || graph.isGrantedBy(node.id, _openedNodeIds)) node.id,
     };
   }
 

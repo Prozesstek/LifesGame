@@ -253,8 +253,8 @@ void main() {
       final store = InMemorySaveStore();
       final erste = containerMit(const SaveData(), store);
 
-      // Level 2 heißt ein Theoriepunkt — genug für einen Knoten.
-      const knoten = 'koerper-schlaf';
+      // Level 2 heißt ein Theoriepunkt — genug für eine Zwischenebene.
+      const knoten = 'schlaf-regeneration';
       final geoeffnet = erste
           .read(theoryProgressProvider.notifier)
           .openNode(knoten, availablePoints: 1);

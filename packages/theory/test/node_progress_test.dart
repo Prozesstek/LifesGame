@@ -202,4 +202,74 @@ void main() {
       );
     });
   });
+
+  group('Übernahme alter Stände (ADR-0050)', () {
+    // Ein Stand von vor ADR-0050: Schlaf direkt an Körper geöffnet,
+    // ein Punkt bezahlt.
+    final alt = const TheoryProgress.empty().openNode('koerper-schlaf');
+
+    test('die Zwischenebene darüber gilt als offen', () {
+      expect(alt.isNodeOpened('schlaf-regeneration', theoryGraph), isTrue);
+      expect(alt.openIdsIn(theoryGraph), contains('schlaf-regeneration'));
+    });
+
+    test('und kostet keinen Punkt', () {
+      expect(alt.spentPointsIn(theoryGraph), 1);
+    });
+
+    test('lässt sich nicht noch einmal kaufen', () {
+      expect(
+        alt.canOpenNode('schlaf-regeneration', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
+    });
+
+    test('ein Geschwister darunter ist mit einem Punkt zu haben', () {
+      expect(
+        alt.canOpenNode('koerper-erholung', theoryGraph, availablePoints: 1),
+        isTrue,
+      );
+    });
+
+    test('eine andere Zwischenebene bleibt zu', () {
+      expect(alt.isNodeOpened('kraft-muskulatur', theoryGraph), isFalse);
+    });
+
+    test('ein neuer Spieler kommt nur über die Zwischenebene an Schlaf', () {
+      const neu = TheoryProgress.empty();
+      expect(
+        neu.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
+
+      final mitEbene = neu.openNode('schlaf-regeneration');
+      expect(
+        mitEbene.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
+        isTrue,
+      );
+      expect(mitEbene.openNode('koerper-schlaf').spentPointsIn(theoryGraph), 2);
+    });
+
+    test('Stress über Geist schenkt Schlaf & Regeneration nicht', () {
+      // Stress hat einen zweiten Weg über die Wurzel Geist. Stünde er in
+      // der Übernahme, bekäme ein neuer Spieler die Zwischenebene über
+      // diesen Umweg geschenkt.
+      final stress = const TheoryProgress.empty().openNode('koerper-stress');
+      expect(stress.isNodeOpened('schlaf-regeneration', theoryGraph), isFalse);
+    });
+
+    test('Ankündigungen lassen sich nie öffnen', () {
+      for (final p in theoryGraph.placeholders) {
+        expect(
+          const TheoryProgress.empty().canOpenNode(
+            p.id,
+            theoryGraph,
+            availablePoints: 99,
+          ),
+          isFalse,
+          reason: p.id,
+        );
+      }
+    });
+  });
 }

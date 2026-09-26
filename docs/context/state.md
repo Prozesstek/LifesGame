@@ -7,9 +7,58 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 25.09.2026 · AktivesBrett, Frederik
+**Zuletzt aktualisiert:** 26.09.2026 · Frederik
 
 ---
+
+## 26.09.2026: der Wissensbaum bekommt Zwischenebenen
+
+Frederik: „Ich würde gerne den Theorie-Teil überarbeiten" — das Zielbild
+aus [ADR-0037](../decisions/0037-der-wissensbaum-als-endziel.md) /
+Issue #54, **mitten im Testlauf** statt danach. Die offenen Punkte in
+einer Fragerunde entschieden, festgehalten in
+[ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md).
+Die Sperre „Baum über 24 Knoten" in `ziele.md` ist aufgehoben.
+
+**Erster Schritt, auf Frederiks Wunsch: alle Überschriften als Gebiet,
+um Wirkung und Navigation zu sehen. Inhalt kommt später.**
+
+| Was | Wie |
+|---|---|
+| Zwischenebene | zwischen Wurzel und Thema; **ein Punkt**, eine Einführungsseite |
+| Befüllt | 8: Kraft & Muskulatur, Ernährung, Schlaf & Regeneration, Psychologie, Selbstentwicklung, Wissenschaftliches Denken, Beziehungen, Medien & Information |
+| Angekündigt | 17, grau mit „Inhalt folgt", nicht zu öffnen (`TheoryPlaceholder`) |
+| Die 21 alten Knoten | einsortiert; wer einen offen hatte, bekommt die Zwischenebene geschenkt (`legacyOpenedBy`) |
+| Punkte | weiter einer je Level |
+
+**Sieben neue Einführungsseiten, Entwürfe von Claude — noch nicht
+gegengelesen.** `packages/theory/lib/src/content/area_pages.dart`.
+„Wissenschaftliches Denken" steht nicht in #54: Die fünf alten
+Wissenschaftsthemen sind Methode und passten unter keine der sechs
+Überschriften. „Was ist Psychologie" heisst jetzt „Psychologie" und ist
+die Seite ihrer Zwischenebene.
+
+**Was die Simulation dazu sagt** (`runway_sim`): Bis Tag 35 ändert sich
+nichts, der Baum ist erst an **Tag 50 statt Tag 33** gelesen. Die Punkte
+sind der Engpass, nicht die Seiten. Neue Seiten verlängern also das Ende
+und füllen nicht die Wochen 3 und 4. Wer das will, dreht an den Punkten.
+
+**Der Weg zu jeder Fähigkeit im Baum kostet einen Punkt mehr.** Auf
+Level 3 (zwei Punkte) geht es genau auf; `abilities_seam_test.dart`
+rechnet jetzt den ganzen Weg statt nur einen Schritt.
+
+theory 163 (vorher 148), App 534. **Nicht angesehen**, weder im Browser
+noch am Handy — ob drei Reihen Überschriften mit „Inhalt folgt" als
+Versprechen lesen oder als Baustelle, sagt nur das Bild.
+
+### Offen
+
+- **Gegenlesen** der sieben Einführungsseiten.
+- **Wie viel XP und Gold** Theorie künftig bringt (ADR-0037, Punkt 1).
+- **Welche Überschrift zuerst befüllt wird** — gefragt war Kraft &
+  Muskulatur; Frederik wollte erst das Gerüst sehen.
+- Eine Ankündigung antippen tut nichts. Ob man dort eine Zeile „kommt
+  noch" erwartet, zeigt das Spielen.
 
 ## 25.09.2026, danach: Ziegelboden in der Grube
 

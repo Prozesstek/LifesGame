@@ -274,11 +274,12 @@ const Lesson wiederholungPage = Lesson(
   ],
 );
 
-/// Der erste Knoten auf der **zweiten** Ebene: Er hängt nicht an der
-/// Wurzel, sondern an *Aufmerksamkeit*.
+/// Seit ADR-0050 die Seite der **Zwischenebene** Psychologie: Sie hängt an
+/// Geist; Aufmerksamkeit und Wiederholen hängen an ihr. Die Lektions-Id
+/// bleibt, damit ein bestandener Stand bestanden bleibt.
 const Lesson psychologiePage = Lesson(
   id: 'geist-06-psychologie',
-  title: 'Was ist Psychologie',
+  title: 'Psychologie',
   summary: 'Warum wir sind, wie wir sind.',
   sections: <LessonSection>[
     LessonSection(

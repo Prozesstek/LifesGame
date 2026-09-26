@@ -22,9 +22,37 @@ const Map<String, IconData> _icons = <String, IconData>{
   'science': Icons.science_outlined,
   'society': Icons.groups_outlined,
 
+  // Zwischenebenen (ADR-0050)
+  'strength': Icons.fitness_center,
+  'nutrition': Icons.eco_outlined,
+  'moon': Icons.nights_stay_outlined,
+  'growth': Icons.trending_up_rounded,
+  'bond': Icons.handshake_outlined,
+  'media': Icons.smartphone_outlined,
+  'method': Icons.fact_check_outlined,
+
+  // Angekündigte Überschriften
+  'endurance': Icons.directions_bike_outlined,
+  'posture': Icons.accessibility_new_rounded,
+  'anatomy': Icons.monitor_heart_outlined,
+  'philosophy': Icons.account_balance_outlined,
+  'history': Icons.history_edu_outlined,
+  'creativity': Icons.palette_outlined,
+  'speech': Icons.record_voice_over_outlined,
+  'work': Icons.work_outline,
+  'money': Icons.savings_outlined,
+  'law': Icons.gavel_outlined,
+  'culture': Icons.public_outlined,
+  'physics': Icons.bolt_outlined,
+  'chemistry': Icons.science_outlined,
+  'biology': Icons.pets_outlined,
+  'math': Icons.functions_rounded,
+  'computer': Icons.computer_outlined,
+  'planet': Icons.travel_explore_outlined,
+
   // Körper
   'sleep': Icons.bedtime_outlined,
-  'run': Icons.fitness_center,
+  'run': Icons.directions_walk_rounded,
   'food': Icons.restaurant_outlined,
   'pause': Icons.self_improvement_outlined,
   'storm': Icons.thunderstorm_outlined,

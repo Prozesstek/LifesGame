@@ -2,6 +2,7 @@
 
 **Datum:** 21.09.2026
 **Status:** Aktiv — als **Zielbild**. Gebaut wird nach dem 30-Tage-Lauf (Ziel 7).
+**Nachtrag 26.09.2026:** Der erste Schritt ist doch schon im Testlauf gebaut, und die Punkte 2 bis 5 sind entschieden — siehe [ADR-0050](0050-zwischenebenen-und-angekuendigte-gebiete.md).
 **Entschieden von:** Frederik
 
 ## Kontext

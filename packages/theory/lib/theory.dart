@@ -6,6 +6,7 @@
 library;
 
 export 'src/branch.dart';
+export 'src/content/area_pages.dart';
 export 'src/content/geist_branch.dart';
 export 'src/content/gesellschaft_branch.dart';
 export 'src/content/habits_branch.dart';
@@ -18,6 +19,7 @@ export 'src/content/wissenschaft_branch.dart';
 export 'src/lesson.dart';
 export 'src/node.dart';
 export 'src/node_graph.dart';
+export 'src/placeholder.dart';
 export 'src/progress.dart';
 export 'src/review.dart';
 export 'src/rewards.dart';

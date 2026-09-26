@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 21.09.2026 · Frederik
+**Zuletzt aktualisiert:** 26.09.2026 · Frederik
 
 ---
 
@@ -54,7 +54,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
 | ~~**Verkauf im Laden**~~ → **gebaut am 08.09.** | Das Signal war eingetreten ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)): Mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets kostet ein Fehlgriff bis zu 42 Tage und war nicht zu korrigieren. Wer fünf Rhythmen anbietet, muss das Ausprobieren bezahlbar machen — sonst probiert niemand. **Entprellen der Persistenz** bleibt zurückgestellt. |
 | **Dungeon** (Lauf aus 5 Kämpfen, Tränke, Wiederbelebung) | Neu auf dieser Liste am 08.09. ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)): Issue #36 hat Ziel 6 auf die Gegnerreihe umgeschrieben. Der Dungeon braucht drei Systeme mehr **und** eine Entscheidung, die `konzept.md` selbst offen lässt. Nach dem Teststart. |
-| **Baum über 24 Knoten hinaus** | Der Startbaum aus ADR-0019 reicht für 30 Tage. Wachstum ist Inhalt, kein MVP. |
+| ~~**Baum über 24 Knoten hinaus**~~ → **begonnen am 26.09.** | Frederik hat die Sperre aufgehoben ([ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)): Zwischenebenen und alle Überschriften aus Issue #54 stehen im Baum, der Inhalt kommt schrittweise. Der Grund: `runway_sim` zeigte den Baum an Tag 33 leer gelesen. |
 | **Entwicklermodus** | Gebaut am 25.08. ([ADR-0021](../decisions/0021-entwicklermodus-mit-eigenem-spielstand.md)), aber **kein MVP-Bestandteil**: nur im Debug-Build, eigener Spielstand. Er kann Ziel 7 technisch nicht berühren — genau dafür ist er so gebaut. |
 
 **Diese Liste ist bindend.** Wer sie ändern will, ändert sie hier — sichtbar
@@ -507,6 +507,11 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **26.09.2026** — **Die Sperre „Baum über 24 Knoten" ist aufgehoben**
+  ([ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)).
+  Mitten im Testlauf, bewusst: Der Baum bekommt Zwischenebenen, und alle
+  Überschriften aus Issue #54 stehen im Bild, die meisten als „Inhalt
+  folgt". Kein neues Ziel — der Inhalt kommt schrittweise.
 - **21.09.2026** — **Kein neues Ziel, aber ein neuer Kampf**
   ([ADR-0039](../decisions/0039-die-grube-ersetzt-den-rundenkampf.md)).
   Die Grube ersetzt den Rundenkampf; die dreissig Sprossen aus Ziel 6

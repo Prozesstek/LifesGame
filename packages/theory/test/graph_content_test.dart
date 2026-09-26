@@ -36,13 +36,21 @@ void main() {
       }
     });
 
-    test('jede Wurzel hat mindestens fünf Unterknoten', () {
+    test('jede Wurzel hat mindestens fünf Zwischenebenen', () {
+      // Angekündigte zählen mit (ADR-0050): Die Zusage aus ADR-0019 ist,
+      // dass ein Gebiet breit genug für eine Wahl ist — und das zeigt
+      // der Baum, auch bevor jede Überschrift befüllt ist.
       for (final rootId in theoryRootIds) {
-        expect(
-          theoryGraph.childrenOf(rootId).length,
-          greaterThanOrEqualTo(5),
-          reason: rootId,
-        );
+        final breite = theoryGraph.childrenOf(rootId).length +
+            theoryGraph.placeholdersOf(rootId).length;
+
+        expect(breite, greaterThanOrEqualTo(5), reason: rootId);
+      }
+    });
+
+    test('jede Wurzel hat mindestens eine befüllte Zwischenebene', () {
+      for (final rootId in theoryRootIds) {
+        expect(theoryGraph.childrenOf(rootId), isNotEmpty, reason: rootId);
       }
     });
 
@@ -203,15 +211,89 @@ void main() {
   });
 
   group('Der Startbaum in Zahlen', () {
-    test('25 Knoten — vier Wurzeln und einundzwanzig darunter', () {
-      expect(theoryGraph.nodeCount, 25);
+    test('32 Knoten — vier Wurzeln, acht Zwischenebenen, zwanzig Themen', () {
+      expect(theoryGraph.nodeCount, 32);
       expect(theoryGraph.roots.length, 4);
     });
 
-    test('kostet einundzwanzig Theoriepunkte', () {
+    test('kostet achtundzwanzig Theoriepunkte', () {
       final gesamt = nodes.fold(0, (sum, n) => sum + n.cost);
 
-      expect(gesamt, 21);
+      expect(gesamt, 28);
+    });
+
+    test('siebzehn Überschriften sind angekündigt', () {
+      expect(theoryGraph.placeholders.length, 17);
+    });
+  });
+
+  group('Zwischenebenen (ADR-0050)', () {
+    test('jede Ankündigung hängt direkt an einer Wurzel', () {
+      for (final p in theoryGraph.placeholders) {
+        expect(p.parentIds, isNotEmpty, reason: p.id);
+        for (final parentId in p.parentIds) {
+          expect(theoryRootIds, contains(parentId), reason: p.id);
+        }
+      }
+    });
+
+    test('kein Knoten hängt an einer Ankündigung', () {
+      // Er wäre unerreichbar: Eine Ankündigung lässt sich nicht öffnen.
+      final angekuendigt = theoryGraph.placeholders.map((p) => p.id).toSet();
+      for (final node in nodes) {
+        expect(
+          node.parentIds.where(angekuendigt.contains),
+          isEmpty,
+          reason: node.id,
+        );
+      }
+    });
+
+    test('jedes Kind einer Wurzel hat eigene Kinder', () {
+      // Eine befüllte Zwischenebene ohne Themen wäre ein Punkt für eine
+      // Einführung ins Nichts. Stress und Vergleich hängen zusätzlich
+      // direkt an Geist — sie sind Themen, keine Zwischenebenen.
+      const querverbindungen = <String>{
+        'koerper-stress',
+        'gesellschaft-vergleich',
+      };
+      for (final rootId in theoryRootIds) {
+        for (final kind in theoryGraph.childrenOf(rootId)) {
+          if (querverbindungen.contains(kind.id)) continue;
+          expect(theoryGraph.childrenOf(kind.id), isNotEmpty, reason: kind.id);
+        }
+      }
+    });
+
+    test('Übernahmen zeigen nur auf Kinder mit genau einem Eltern', () {
+      // Ein Kind mit zweitem Weg ließe sich an der Zwischenebene vorbei
+      // öffnen — und schenkte sie dann auch einem neuen Spieler.
+      expect(theoryGraph.strayGrants, isEmpty);
+      for (final node in nodes) {
+        for (final kindId in node.legacyOpenedBy) {
+          expect(
+            theoryGraph.nodeById(kindId)!.parentIds,
+            <String>[node.id],
+            reason: '${node.id} <- $kindId',
+          );
+        }
+      }
+    });
+
+    test('jedes alte Thema hat einen Weg ohne neuen Punkt', () {
+      // Die zwanzig Themen von vor ADR-0050 hingen direkt an einer
+      // Wurzel. Jedes muss jetzt entweder eine Übernahme haben oder
+      // weiter direkt an einer Wurzel hängen.
+      final alteThemen = nodes.where((n) => _alteThemen.contains(n.id));
+      expect(alteThemen.length, _alteThemen.length);
+
+      for (final thema in alteThemen) {
+        final anWurzel = thema.parentIds.any(theoryRootIds.contains);
+        final uebernommen = nodes.any(
+          (n) => n.legacyOpenedBy.contains(thema.id),
+        );
+        expect(anWurzel || uebernommen, isTrue, reason: thema.id);
+      }
     });
   });
 
@@ -223,8 +305,8 @@ void main() {
       expect(imGraph.intersection(imHandbuch), isEmpty);
     });
 
-    test('zusammen sind es 30 Seiten', () {
-      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 30);
+    test('zusammen sind es 37 Seiten', () {
+      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 37);
     });
 
     test('ein bestandener Knoten wird gezählt', () {
@@ -242,3 +324,27 @@ void main() {
     });
   });
 }
+
+/// Die Themen, die vor ADR-0050 direkt an einer Wurzel hingen.
+const Set<String> _alteThemen = <String>{
+  'koerper-schlaf',
+  'koerper-bewegung',
+  'koerper-ernaehrung',
+  'koerper-erholung',
+  'koerper-stress',
+  'geist-aufmerksamkeit',
+  'geist-gedanken',
+  'geist-unbehagen',
+  'geist-motivation',
+  'geist-wiederholung',
+  'wissenschaft-quelle',
+  'wissenschaft-ursache',
+  'wissenschaft-selbsttest',
+  'wissenschaft-stichprobe',
+  'wissenschaft-studie',
+  'gesellschaft-umfeld',
+  'gesellschaft-zugehoerigkeit',
+  'gesellschaft-grenzen',
+  'gesellschaft-vergleich',
+  'gesellschaft-hilfe',
+};

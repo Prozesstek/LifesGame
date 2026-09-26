@@ -1,4 +1,5 @@
 import 'node.dart';
+import 'placeholder.dart';
 
 /// Alle Theorieknoten und ihre Verbindungen.
 ///
@@ -12,9 +13,18 @@ import 'node.dart';
 /// sieht — wer von der einen Seite kommt, käme nicht weiter und wüsste
 /// nicht, warum.
 class TheoryGraph {
-  const TheoryGraph(this.nodes);
+  const TheoryGraph(
+    this.nodes, {
+    this.placeholders = const <TheoryPlaceholder>[],
+  });
 
   final List<TheoryNode> nodes;
+
+  /// Angekündigte Überschriften ohne Seite (ADR-0050).
+  ///
+  /// Stehen **nicht** in [nodes]: Alles, was Seiten zählt, belohnt oder
+  /// abfragt, sieht sie nicht. Nur das Bild zeigt sie.
+  final List<TheoryPlaceholder> placeholders;
 
   int get nodeCount => nodes.length;
 
@@ -34,6 +44,20 @@ class TheoryGraph {
     return List<TheoryNode>.unmodifiable(
       nodes.where((n) => n.parentIds.contains(id)),
     );
+  }
+
+  /// Die angekündigten Überschriften unter [id].
+  List<TheoryPlaceholder> placeholdersOf(String id) {
+    return List<TheoryPlaceholder>.unmodifiable(
+      placeholders.where((p) => p.parentIds.contains(id)),
+    );
+  }
+
+  TheoryPlaceholder? placeholderById(String id) {
+    for (final placeholder in placeholders) {
+      if (placeholder.id == id) return placeholder;
+    }
+    return null;
   }
 
   List<TheoryNode> parentsOf(String id) {
@@ -94,12 +118,33 @@ class TheoryGraph {
     return node.parentIds.any(openedIds.contains);
   }
 
+  /// Ob [id] als offen gilt, weil ein alter Knoten darunter offen ist.
+  ///
+  /// **Die Übernahme aus ADR-0050.** Bis dahin hingen Schlaf, Umfeld und
+  /// die übrigen Startknoten direkt an ihrer Wurzel; seitdem hängen sie
+  /// unter einer Zwischenebene. Wer einen davon schon bezahlt hat, bekäme
+  /// sonst einen offenen Knoten unter einem geschlossenen Eltern — und
+  /// müsste für einen Weg zahlen, den er längst gegangen ist.
+  ///
+  /// Geschenkt, nicht gekauft: Die Zwischenebene steht nicht im
+  /// Spielstand und kostet deshalb keinen Punkt. Ein neuer Spieler kann
+  /// die alten Knoten nur **über** ihre Zwischenebene öffnen und hat sie
+  /// dann ohnehin bezahlt — die Schenkung greift nur bei alten Ständen.
+  bool isGrantedBy(String id, Set<String> openedIds) {
+    final node = nodeById(id);
+    if (node == null) return false;
+    return node.legacyOpenedBy.any(openedIds.contains);
+  }
+
   /// Ids, die mehr als einmal vorkommen. Leer ist gut.
   List<String> get duplicateIds {
     final seen = <String>{};
     final doubled = <String>{};
-    for (final node in nodes) {
-      if (!seen.add(node.id)) doubled.add(node.id);
+    for (final id in <String>[
+      for (final node in nodes) node.id,
+      for (final placeholder in placeholders) placeholder.id,
+    ]) {
+      if (!seen.add(id)) doubled.add(id);
     }
     return List<String>.unmodifiable(doubled);
   }
@@ -111,8 +156,12 @@ class TheoryGraph {
   List<String> get danglingParentIds {
     final known = nodes.map((n) => n.id).toSet();
     final missing = <String>{};
-    for (final node in nodes) {
-      for (final parentId in node.parentIds) {
+    final parentLists = <List<String>>[
+      for (final node in nodes) node.parentIds,
+      for (final placeholder in placeholders) placeholder.parentIds,
+    ];
+    for (final parentIds in parentLists) {
+      for (final parentId in parentIds) {
         if (!known.contains(parentId)) missing.add(parentId);
       }
     }
@@ -150,6 +199,33 @@ class TheoryGraph {
     return true;
   }
 
+  /// Ankündigungen ohne Eltern. Leer ist gut.
+  ///
+  /// Eine Ankündigung ohne Platz stünde nirgends im Bild.
+  List<String> get orphanPlaceholderIds {
+    return List<String>.unmodifiable(
+      placeholders.where((p) => p.parentIds.isEmpty).map((p) => p.id),
+    );
+  }
+
+  /// Schenkungen, die auf keinen Kindknoten zeigen. Leer ist gut.
+  ///
+  /// `legacyOpenedBy` darf nur Knoten nennen, die **direkt** darunter
+  /// hängen — sonst schenkte ein Knoten irgendwo im Baum eine
+  /// Zwischenebene, mit der er nichts zu tun hat.
+  List<String> get strayGrants {
+    final falsch = <String>[];
+    for (final node in nodes) {
+      for (final kindId in node.legacyOpenedBy) {
+        final kind = nodeById(kindId);
+        if (kind == null || !kind.parentIds.contains(node.id)) {
+          falsch.add('${node.id} <- $kindId');
+        }
+      }
+    }
+    return List<String>.unmodifiable(falsch);
+  }
+
   /// Ob der Graph benutzbar ist.
   ///
   /// Vier Bedingungen, alle mit demselben Zweck: Es darf keinen Knoten
@@ -159,6 +235,8 @@ class TheoryGraph {
     return duplicateIds.isEmpty &&
         danglingParentIds.isEmpty &&
         isAcyclic &&
-        roots.isNotEmpty;
+        roots.isNotEmpty &&
+        orphanPlaceholderIds.isEmpty &&
+        strayGrants.isEmpty;
   }
 }
