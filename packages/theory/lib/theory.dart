@@ -7,6 +7,7 @@ library;
 
 export 'src/branch.dart';
 export 'src/content/area_pages.dart';
+export 'src/content/ausdauer_pages.dart';
 export 'src/content/geist_branch.dart';
 export 'src/content/gesellschaft_branch.dart';
 export 'src/content/habits_branch.dart';

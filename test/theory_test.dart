@@ -138,8 +138,8 @@ void main() {
 
       await _pumpTree(tester, container);
 
-      // Drei befüllt, drei angekündigt (ADR-0050).
-      expect(kinder.length, 3);
+      // Vier befüllt, zwei angekündigt (ADR-0050).
+      expect(kinder.length, 4);
       expect(find.text('Körper'), findsWidgets);
       for (final kind in kinder) {
         expect(find.text(kind.name), findsOneWidget, reason: kind.id);
@@ -147,8 +147,8 @@ void main() {
       for (final angekuendigt in theoryGraph.placeholdersOf('koerper')) {
         expect(find.text(angekuendigt.title), findsOneWidget);
       }
-      expect(find.byType(PlaceholderBubble), findsNWidgets(3));
-      expect(find.text('Inhalt folgt'), findsNWidgets(3));
+      expect(find.byType(PlaceholderBubble), findsNWidgets(2));
+      expect(find.text('Inhalt folgt'), findsNWidgets(2));
     });
 
     testWidgets('die anderen Gebiete liegen nicht gleichzeitig im Bild', (
@@ -243,7 +243,7 @@ void main() {
       final gesamt = container.read(totalPagesProvider);
       final bestanden = container.read(passedPagesProvider);
 
-      expect(find.text('0 von 14'), findsOneWidget);
+      expect(find.text('0 von 20'), findsOneWidget);
       expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
     });
 
@@ -876,7 +876,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(totalPagesProvider), 42);
+      expect(container.read(totalPagesProvider), 48);
       expect(
         container.read(totalPagesProvider),
         greaterThan(theoryTree.lessonCount),

@@ -38,8 +38,15 @@ const Map<String, IconData> _icons = <String, IconData>{
   'technique': Icons.straighten_rounded,
   'recovery': Icons.hotel_outlined,
 
-  // Angekündigte Überschriften
+  // Ausdauer & Fitness
   'endurance': Icons.directions_bike_outlined,
+  'heartbeat': Icons.monitor_heart_outlined,
+  'lungs': Icons.air_rounded,
+  'jog': Icons.directions_run_rounded,
+  'intervals': Icons.timer_outlined,
+  'battery': Icons.battery_charging_full_rounded,
+
+  // Angekündigte Überschriften
   'posture': Icons.accessibility_new_rounded,
   'anatomy': Icons.monitor_heart_outlined,
   'philosophy': Icons.account_balance_outlined,

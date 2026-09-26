@@ -27,6 +27,7 @@ import '../node.dart';
 import '../node_graph.dart';
 import '../placeholder.dart';
 import 'area_pages.dart';
+import 'ausdauer_pages.dart';
 import 'geist_branch.dart';
 import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
@@ -108,6 +109,42 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: muskelkaterPage,
       iconId: 'recovery',
       parentIds: <String>['kraft-muskulatur'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-fitness',
+      lesson: ausdauerPage,
+      iconId: 'endurance',
+      parentIds: <String>['koerper'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-herz',
+      lesson: herzPage,
+      iconId: 'heartbeat',
+      parentIds: <String>['ausdauer-fitness'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-vo2max',
+      lesson: vo2maxPage,
+      iconId: 'lungs',
+      parentIds: <String>['ausdauer-fitness'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-grundlage',
+      lesson: grundlagePage,
+      iconId: 'jog',
+      parentIds: <String>['ausdauer-fitness'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-intervalle',
+      lesson: intervallPage,
+      iconId: 'intervals',
+      parentIds: <String>['ausdauer-fitness'],
+    ),
+    const TheoryNode(
+      id: 'ausdauer-energie',
+      lesson: energiePage,
+      iconId: 'battery',
+      parentIds: <String>['ausdauer-fitness'],
     ),
     const TheoryNode(
       id: 'ernaehrung',
@@ -297,12 +334,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
 /// trägt sie mit **derselben Id** oben als Knoten ein.
 const List<TheoryPlaceholder> theoryPlaceholders = <TheoryPlaceholder>[
   // Körper
-  TheoryPlaceholder(
-    id: 'ausdauer-fitness',
-    title: 'Ausdauer & Fitness',
-    iconId: 'endurance',
-    parentIds: <String>['koerper'],
-  ),
   TheoryPlaceholder(
     id: 'koerperkontrolle',
     title: 'Körperkontrolle',

@@ -62,7 +62,14 @@ je Kilo, zehn und mehr harte Sätze je Muskel und Woche, null bis drei
 Wiederholungen in Reserve — sind als Größenordnung formuliert. Keine
 neue Fähigkeit, keine Gewohnheitsvorlage.
 
-**Damit ist der Baum zum ersten Mal größer als 60 Tage:** 37 Knoten,
+**Dann Ausdauer & Fitness**, vorher grau angekündigt, jetzt ein Gebiet
+mit Einführung und fünf Themen: Das Herz als Motor, VO₂max, Locker und
+lang, Intervalltraining, Woher die Energie kommt (`ausdauer_pages.dart`).
+Damit ist die alte Schieflage bei Stärke und Ausdauer zumindest in der
+Theorie angegangen — Gewohnheitsvorlagen gibt es dafür weiter keine
+neuen.
+
+**Damit ist der Baum zum ersten Mal größer als 60 Tage:** 43 Knoten,
 an Tag 60 sind 33 offen (`runway_sim`). Das ist die Knappheit aus
 ADR-0037 — wer Kraft liest, lässt dafür etwas anderes liegen.
 
@@ -72,10 +79,12 @@ Versprechen lesen oder als Baustelle, sagt nur das Bild.
 
 ### Offen
 
-- **Gegenlesen** der sieben Einführungsseiten und der fünf Kraft-Seiten.
+- **Gegenlesen** der acht Einführungsseiten, der fünf Kraft- und der
+  fünf Ausdauer-Seiten.
 - **Wie viel XP und Gold** Theorie künftig bringt (ADR-0037, Punkt 1).
-- **Welches Gebiet als Nächstes befüllt wird.** Nahe liegt Ausdauer &
-  Fitness — die zweite Hälfte der Schieflage bei Stärke und Ausdauer.
+- **Welches Gebiet als Nächstes befüllt wird.** Körper fehlen noch
+  Körperkontrolle und Biologie des Körpers; Geist hat mit Psychologie
+  den dankbarsten Stoff (Experimente wie Milgram und Asch).
 - Eine Ankündigung antippen tut nichts. Ob man dort eine Zeile „kommt
   noch" erwartet, zeigt das Spielen.
 
