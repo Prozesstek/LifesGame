@@ -236,7 +236,7 @@ void main() {
     });
 
     test('ein neuer Spieler kommt nur über die Zwischenebene an Schlaf', () {
-      const neu = TheoryProgress.empty();
+      final neu = const TheoryProgress.empty().openNode('koerper');
       expect(
         neu.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
         isFalse,
@@ -247,7 +247,7 @@ void main() {
         mitEbene.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
         isTrue,
       );
-      expect(mitEbene.openNode('koerper-schlaf').spentPointsIn(theoryGraph), 2);
+      expect(mitEbene.openNode('koerper-schlaf').spentPointsIn(theoryGraph), 3);
     });
 
     test('Stress über Geist schenkt Schlaf & Regeneration nicht', () {
@@ -256,6 +256,37 @@ void main() {
       // diesen Umweg geschenkt.
       final stress = const TheoryProgress.empty().openNode('koerper-stress');
       expect(stress.isNodeOpened('schlaf-regeneration', theoryGraph), isFalse);
+    });
+
+    test('eine gelesene Wurzel bleibt offen, ohne Punkt (ADR-0051)', () {
+      // Bis ADR-0051 kosteten die Wurzeln nichts, und fast jeder hat
+      // ihre Seite gelesen. Lesen ging nur, wenn der Knoten offen war —
+      // eine bestandene Seite ist also der Beleg.
+      final koerper = theoryGraph.nodeById('koerper')!;
+      final gelesen = const TheoryProgress.empty().submit(koerper.lesson, [
+        for (final q in koerper.lesson.questions) q.correctIndex,
+      ]).progress;
+
+      expect(gelesen.isNodeOpened('koerper', theoryGraph), isTrue);
+      expect(gelesen.spentPointsIn(theoryGraph), 0);
+    });
+
+    test('Schlaf offen hält auch die Wurzel Körper offen', () {
+      expect(alt.isNodeOpened('koerper', theoryGraph), isTrue);
+      expect(alt.isNodeOpened('geist', theoryGraph), isFalse);
+    });
+
+    test('ein neuer Spieler kauft die Wurzel wie jeden Knoten', () {
+      const neu = TheoryProgress.empty();
+      expect(neu.isNodeOpened('koerper', theoryGraph), isFalse);
+      expect(
+        neu.canOpenNode('koerper', theoryGraph, availablePoints: 1),
+        isTrue,
+      );
+      expect(
+        neu.canOpenNode('schlaf-regeneration', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
     });
 
     test('Ankündigungen lassen sich nie öffnen', () {

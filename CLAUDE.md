@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 163 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 165 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — und die **angekündigten** Überschriften (`theoryPlaceholders`) | nur Dart-SDK |
@@ -60,7 +60,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 41 Tests | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 42 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
@@ -198,7 +198,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 534 Tests
+flutter test             # 535 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -216,8 +216,8 @@ dart test                              # 191 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 163 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 41 Tests
+cd packages/theory      ; dart test    # 165 Tests, prüft auch den Inhalt
+cd packages/progression ; dart test    # 42 Tests
 cd packages/gear        ; dart test    # 112 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
@@ -359,17 +359,21 @@ Dauerschaden ein Vielfaches des Angriffs.
 `theoryGraph` (`theory_graph_content.dart`) — danach `dart test`.
 
 **Seit [ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)
-hat der Baum drei Ebenen:** Wurzel (frei) → **Zwischenebene** („Kraft &
+hat der Baum drei Ebenen:** Wurzel → **Zwischenebene** („Kraft &
 Muskulatur", ein Punkt, eine Einführungsseite) → Thema. Überschriften
 ohne Inhalt stehen als `TheoryPlaceholder` grau im Bild und lassen sich
 nicht öffnen. **Wer eine befüllt**, nimmt sie aus `theoryPlaceholders`
 und trägt sie mit **derselben Id** als Knoten ein — samt Einführungsseite
-in `area_pages.dart`. Alte Stände werden nicht umgeschrieben: Eine
-Zwischenebene gilt als offen, wenn ein Kind aus `legacyOpenedBy` offen
-ist, und kostet dann keinen Punkt. Dort stehen nur Kinder mit **genau
-einem** Eltern, sonst ließe sie sich über den zweiten Weg verschenken
-(`strayGrants`). Der Weg zu einer Fähigkeit kostet jetzt zwei Punkte —
-`abilities_seam_test.dart` rechnet ihn aus.
+in `area_pages.dart`.
+
+**Jeder Knoten kostet einen Punkt, auch die Wurzeln**
+([ADR-0051](docs/decisions/0051-wurzeln-kosten-einen-punkt.md)), dafür
+beginnt jeder mit einem (`TheoryPoints.atStart`). Der Weg zur ersten
+Fähigkeit — Wurzel, Zwischenebene, Thema — kostet drei Punkte, und
+Level 3 gibt genau drei; `abilities_seam_test.dart` rechnet ihn aus.
+**Offen ist, was gekauft, bestanden oder einziger Eltern eines Offenen
+ist** (`TheoryProgress.openIdsIn`, `TheoryGraph.withSoleParents`). Damit
+behalten alte Stände alles, ohne dass der Spielstand umgeschrieben wird.
 `graph_content_test.dart` läuft über den ganzen Graphen und prüft den Inhalt
 mit: eindeutige Ids, genau drei Fragen, gültige `correctIndex`, keine
 doppelten Antworten. Und die Struktur: keine Eltern-Id ins Leere,
@@ -385,7 +389,7 @@ wieder. Gespeichert wird `ReviewLog`, eine Historie. Ihr Zufluss steht in
 Laden mit anderem Gold als die Anzeige. **Zweige
 haben keine Levelsperren mehr** — geöffnet wird über Theoriepunkte
 ([ADR-0019](docs/decisions/0019-skillbaum-mit-vier-wurzeln.md)). Ein Knoten
-kostet einen Punkt, die vier Wurzeln kosten nichts.
+kostet einen Punkt, seit ADR-0051 auch jede Wurzel.
 
 **Gewohnheiten ändern heißt ebenfalls simulieren.** Alle Zahlen —
 Erfahrung je Häkchen, Streak-Meilensteine, Deckel, Stat-Kurve — stehen in

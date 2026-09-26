@@ -30,9 +30,11 @@ void main() {
       expect(theoryGraph.roots.map((n) => n.id), theoryRootIds);
     });
 
-    test('alle Wurzeln sind kostenlos — der Einstieg kostet nichts', () {
+    test('jede Wurzel kostet einen Punkt (ADR-0051)', () {
+      // Auch welches Gebiet man betritt, ist eine Wahl. Bis ADR-0051
+      // waren die Wurzeln kostenlos.
       for (final root in theoryGraph.roots) {
-        expect(root.isFree, isTrue, reason: root.id);
+        expect(root.cost, 1, reason: root.id);
       }
     });
 
@@ -54,8 +56,8 @@ void main() {
       }
     });
 
-    test('alles außer den Wurzeln kostet genau einen Punkt', () {
-      for (final node in nodes.where((n) => !n.isRoot)) {
+    test('jeder Knoten kostet genau einen Punkt', () {
+      for (final node in nodes) {
         expect(node.cost, 1, reason: node.id);
       }
     });
@@ -216,10 +218,10 @@ void main() {
       expect(theoryGraph.roots.length, 4);
     });
 
-    test('kostet achtundzwanzig Theoriepunkte', () {
+    test('kostet zweiunddreißig Theoriepunkte', () {
       final gesamt = nodes.fold(0, (sum, n) => sum + n.cost);
 
-      expect(gesamt, 28);
+      expect(gesamt, 32);
     });
 
     test('siebzehn Überschriften sind angekündigt', () {
@@ -265,34 +267,25 @@ void main() {
       }
     });
 
-    test('Übernahmen zeigen nur auf Kinder mit genau einem Eltern', () {
-      // Ein Kind mit zweitem Weg ließe sich an der Zwischenebene vorbei
-      // öffnen — und schenkte sie dann auch einem neuen Spieler.
-      expect(theoryGraph.strayGrants, isEmpty);
-      for (final node in nodes) {
-        for (final kindId in node.legacyOpenedBy) {
-          expect(
-            theoryGraph.nodeById(kindId)!.parentIds,
-            <String>[node.id],
-            reason: '${node.id} <- $kindId',
-          );
-        }
-      }
-    });
-
-    test('jedes alte Thema hat einen Weg ohne neuen Punkt', () {
+    test('jedes alte Thema nimmt seinen Weg nach oben mit', () {
       // Die zwanzig Themen von vor ADR-0050 hingen direkt an einer
-      // Wurzel. Jedes muss jetzt entweder eine Übernahme haben oder
-      // weiter direkt an einer Wurzel hängen.
+      // kostenlosen Wurzel. Wer eines offen hat, darf nach dem Umbau
+      // keinen Punkt für Zwischenebene oder Wurzel nachzahlen müssen.
       final alteThemen = nodes.where((n) => _alteThemen.contains(n.id));
       expect(alteThemen.length, _alteThemen.length);
 
       for (final thema in alteThemen) {
-        final anWurzel = thema.parentIds.any(theoryRootIds.contains);
-        final uebernommen = nodes.any(
-          (n) => n.legacyOpenedBy.contains(thema.id),
-        );
-        expect(anWurzel || uebernommen, isTrue, reason: thema.id);
+        final stand = const TheoryProgress.empty().openNode(thema.id);
+        final offen = stand.openIdsIn(theoryGraph);
+
+        expect(stand.spentPointsIn(theoryGraph), 1, reason: thema.id);
+        if (thema.parentIds.length == 1) {
+          expect(
+            offen.intersection(theoryRootIds.toSet()),
+            isNotEmpty,
+            reason: '${thema.id}: der Weg zur Wurzel muss mit offen sein',
+          );
+        }
       }
     });
   });

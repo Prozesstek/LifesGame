@@ -251,7 +251,8 @@ void main() {
       final container = _containerAtLevel(4);
       addTearDown(container.dispose);
 
-      expect(container.read(availableTheoryPointsProvider), 3);
+      // Der Startpunkt und drei Aufstiege (ADR-0051).
+      expect(container.read(availableTheoryPointsProvider), 4);
     });
   });
 
@@ -260,13 +261,39 @@ void main() {
     final schlaf = theoryGraph.nodeById('schlaf-regeneration')!;
     final schlafThema = theoryGraph.nodeById('koerper-schlaf')!;
 
+    /// Handbuch durch und die Wurzel Körper gekauft — seit ADR-0051
+    /// kostet sie einen Punkt, und erst dahinter beginnt das Erkunden.
     Future<void> pumpTree(
       WidgetTester tester,
       ProviderContainer container,
     ) async {
       _passHandbook(container);
+      container
+          .read(theoryProgressProvider.notifier)
+          .openNode(
+            theoryRootIds.first,
+            availablePoints: container.read(availableTheoryPointsProvider),
+          );
       await _pumpTree(tester, container);
     }
+
+    testWidgets('eine ungekaufte Wurzel ist kaufbar, nicht offen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      final wurzel = tester
+          .widgetList<NodeBubble>(find.byType(NodeBubble))
+          .singleWhere((b) => b.node.isRoot);
+
+      // Der Startpunkt reicht für genau eine Wurzel (ADR-0051).
+      expect(wurzel.state, NodeState.affordable);
+    });
 
     testWidgets('die Wurzel ist offen, die Kinder nicht', (tester) async {
       useTallView(tester);
@@ -323,7 +350,7 @@ void main() {
 
       // Erkunden darf nichts kosten. Sonst gäbe man beim Umsehen Punkte
       // aus — der Grund, warum Antippen und Öffnen getrennt sind.
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
       expect(container.read(availableTheoryPointsProvider), vorher);
     });
 
@@ -363,7 +390,7 @@ void main() {
 
       // Nur noch der Startknoten selbst — über ihm geht es nicht weiter.
       expect(find.byType(NodeBubble), findsOneWidget);
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
     });
 
     testWidgets('der Knopf öffnet und zieht den Punkt ab', (tester) async {
@@ -379,7 +406,7 @@ void main() {
       await tester.tap(find.text('Für einen Punkt öffnen'));
       await tester.pumpAndSettle();
 
-      expect(container.read(spentTheoryPointsProvider), 1);
+      expect(container.read(spentTheoryPointsProvider), 2);
       expect(container.read(availableTheoryPointsProvider), vorher - 1);
       expect(
         container
@@ -410,7 +437,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Für einen Punkt öffnen'), findsNothing);
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
     });
 
     testWidgets('beim Reingehen steht nichts über dem Startknoten', (

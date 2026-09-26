@@ -1,6 +1,7 @@
 /// Der Theoriegraph, wie er im Spiel steht (ADR-0019, ADR-0050).
 ///
-/// **Drei Ebenen.** Oben die vier Wurzeln, kostenlos. Darunter die
+/// **Drei Ebenen.** Oben die vier Wurzeln, seit ADR-0051 je einen Punkt
+/// wert — auch welches Gebiet man betritt, ist eine Wahl. Darunter die
 /// **Zwischenebenen** aus Issue #54 — „Kraft & Muskulatur", „Beziehungen",
 /// „Physik" —, jede einen Punkt und eine Einführungsseite wert. Darunter
 /// die Themen. Wer die Zwischenebene nicht öffnet, kommt an ihre Themen
@@ -40,37 +41,25 @@ import 'wissenschaft_gesellschaft_pages.dart';
 /// * *Stress* gehört zu Schlaf & Regeneration und zu Geist.
 /// * *Vergleich* gehört zu Medien & Information und zu Geist.
 ///
-/// Zum Öffnen genügt eine der beiden Stellen (ADR-0019). Beide behalten
-/// deshalb die Wurzel Geist als zweiten Weg — und brauchen darum keine
-/// Übernahme ([TheoryNode.legacyOpenedBy]).
+/// Zum Öffnen genügt eine der beiden Stellen (ADR-0019). Alte Stände
+/// übernimmt `TheoryGraph.withSoleParents`; diese beiden schenken dabei
+/// nichts, weil unklar ist, über welchen Eltern sie geöffnet wurden.
 final TheoryGraph theoryGraph = TheoryGraph(
   <TheoryNode>[
     // ----------------------------------------------------------------
-    // Wurzeln — kostenlos
+    // Wurzeln — ein Punkt (ADR-0051)
     // ----------------------------------------------------------------
-    const TheoryNode(
-      id: 'koerper',
-      lesson: koerperRootPage,
-      iconId: 'body',
-      cost: 0,
-    ),
-    const TheoryNode(
-      id: 'geist',
-      lesson: geistRootPage,
-      iconId: 'mind',
-      cost: 0,
-    ),
+    const TheoryNode(id: 'koerper', lesson: koerperRootPage, iconId: 'body'),
+    const TheoryNode(id: 'geist', lesson: geistRootPage, iconId: 'mind'),
     const TheoryNode(
       id: 'wissenschaft',
       lesson: wissenschaftRootPage,
       iconId: 'science',
-      cost: 0,
     ),
     const TheoryNode(
       id: 'gesellschaft',
       lesson: gesellschaftRootPage,
       iconId: 'society',
-      cost: 0,
     ),
 
     // ----------------------------------------------------------------
@@ -81,7 +70,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: kraftPage,
       iconId: 'strength',
       parentIds: <String>['koerper'],
-      legacyOpenedBy: <String>['koerper-bewegung'],
     ),
     TheoryNode(
       id: 'koerper-bewegung',
@@ -95,7 +83,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: ernaehrungPage,
       iconId: 'nutrition',
       parentIds: <String>['koerper'],
-      legacyOpenedBy: <String>['koerper-ernaehrung'],
     ),
     TheoryNode(
       id: 'koerper-ernaehrung',
@@ -109,7 +96,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: schlafRegenerationPage,
       iconId: 'moon',
       parentIds: <String>['koerper'],
-      legacyOpenedBy: <String>['koerper-schlaf', 'koerper-erholung'],
     ),
     TheoryNode(
       id: 'koerper-schlaf',
@@ -139,7 +125,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: psychologiePage,
       iconId: 'psyche',
       parentIds: <String>['geist'],
-      legacyOpenedBy: <String>['geist-aufmerksamkeit', 'geist-wiederholung'],
     ),
     TheoryNode(
       id: 'geist-aufmerksamkeit',
@@ -160,11 +145,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: selbstentwicklungPage,
       iconId: 'growth',
       parentIds: <String>['geist'],
-      legacyOpenedBy: <String>[
-        'geist-gedanken',
-        'geist-unbehagen',
-        'geist-motivation',
-      ],
     ),
     TheoryNode(
       id: 'geist-gedanken',
@@ -194,13 +174,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: denkenPage,
       iconId: 'method',
       parentIds: <String>['wissenschaft'],
-      legacyOpenedBy: <String>[
-        'wissenschaft-quelle',
-        'wissenschaft-ursache',
-        'wissenschaft-selbsttest',
-        'wissenschaft-stichprobe',
-        'wissenschaft-studie',
-      ],
     ),
     TheoryNode(
       id: 'wissenschaft-quelle',
@@ -243,12 +216,6 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: beziehungenPage,
       iconId: 'bond',
       parentIds: <String>['gesellschaft'],
-      legacyOpenedBy: <String>[
-        'gesellschaft-umfeld',
-        'gesellschaft-zugehoerigkeit',
-        'gesellschaft-grenzen',
-        'gesellschaft-hilfe',
-      ],
     ),
     TheoryNode(
       id: 'gesellschaft-umfeld',

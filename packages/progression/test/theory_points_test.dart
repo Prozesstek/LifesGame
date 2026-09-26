@@ -3,14 +3,21 @@ import 'package:test/test.dart';
 
 void main() {
   group('Theoriepunkte entstehen beim Aufstieg', () {
-    test('Level 1 hat noch keinen Punkt — er kommt für den Aufstieg', () {
-      expect(TheoryPoints.earnedAt(1), 0);
+    test('Level 1 hat den Startpunkt (ADR-0051)', () {
+      expect(TheoryPoints.earnedAt(1), TheoryPoints.atStart);
+      expect(TheoryPoints.earnedAt(1), 1);
     });
 
-    test('jeder Aufstieg gibt einen Punkt (ADR-0035)', () {
-      expect(TheoryPoints.earnedAt(2), 1);
-      expect(TheoryPoints.earnedAt(3), 2);
-      expect(TheoryPoints.earnedAt(10), 9);
+    test('jeder Aufstieg gibt einen Punkt dazu (ADR-0035)', () {
+      expect(TheoryPoints.earnedAt(2), 2);
+      expect(TheoryPoints.earnedAt(3), 3);
+      expect(TheoryPoints.earnedAt(10), 10);
+    });
+
+    test('auf Level 3 reicht es für Wurzel, Zwischenebene und Thema', () {
+      // Das Handbuch führt auf Level 3, dort geht der zweite Platz auf.
+      // Der Weg zur ersten Fähigkeit kostet seit ADR-0051 drei Punkte.
+      expect(TheoryPoints.earnedAt(3), greaterThanOrEqualTo(3));
     });
 
     test('unter Level 1 gibt es nichts', () {
@@ -26,33 +33,37 @@ void main() {
   });
 
   group('Der Vorrat über ein Spielerleben', () {
-    test('sind 49 Punkte — ein Punkt je Aufstieg', () {
-      expect(TheoryPoints.lifetimeTotal, 49);
+    test('sind 50 Punkte — der Startpunkt und einer je Aufstieg', () {
+      expect(TheoryPoints.lifetimeTotal, 50);
       expect(
         TheoryPoints.lifetimeTotal,
-        (LevelCurve.maxLevel - 1) * TheoryPoints.perLevel,
+        TheoryPoints.atStart +
+            (LevelCurve.maxLevel - 1) * TheoryPoints.perLevel,
+      );
+      expect(
+        TheoryPoints.lifetimeTotal,
+        TheoryPoints.earnedAt(LevelCurve.maxLevel),
       );
     });
 
-    test('der Startbaum steht ab Level 22 ganz offen, nicht früher', () {
-      // Der Startbaum hat 21 kostenpflichtige Knoten (ADR-0035 rechnete
-      // noch mit 20 und Level 21; seit dem 21.09. hängt *Psychologie*
-      // dazu). Unter ADR-0019 stand er ab Level 11 offen, und jeder
-      // weitere Punkt war wertlos. Mit einem Punkt je Aufstieg ist die
-      // Reihenfolge bis dahin eine Wahl.
-      const knotenImStartbaum = 21;
+    test('der befüllte Baum steht ab Level 32 ganz offen, nicht früher', () {
+      // 32 Knoten, jeder kostet seit ADR-0051 einen Punkt — auch die
+      // Wurzeln. ADR-0035 rechnete mit 21 und Level 22. Mit jedem
+      // befüllten Gebiet rückt die Zahl nach oben, bis der Baum größer
+      // ist als ein Spielerleben (ADR-0037).
+      const knotenImBaum = 32;
 
       expect(
-        TheoryPoints.earnedAt(22),
-        greaterThanOrEqualTo(knotenImStartbaum),
+        TheoryPoints.earnedAt(32),
+        greaterThanOrEqualTo(knotenImBaum),
       );
-      expect(TheoryPoints.earnedAt(21), lessThan(knotenImStartbaum));
+      expect(TheoryPoints.earnedAt(31), lessThan(knotenImBaum));
     });
   });
 
   group('Ausgeben', () {
     test('verfügbar ist verdient minus ausgegeben', () {
-      expect(TheoryPoints.availableAt(level: 5, spent: 3), 1);
+      expect(TheoryPoints.availableAt(level: 5, spent: 3), 2);
     });
 
     test('nie negativ, auch wenn ein Spielstand mehr ausgibt als er hat', () {
@@ -60,8 +71,8 @@ void main() {
     });
 
     test('leisten kann man sich, was man übrig hat', () {
-      expect(TheoryPoints.canAfford(level: 2, spent: 0, cost: 1), isTrue);
-      expect(TheoryPoints.canAfford(level: 2, spent: 1, cost: 1), isFalse);
+      expect(TheoryPoints.canAfford(level: 2, spent: 1, cost: 1), isTrue);
+      expect(TheoryPoints.canAfford(level: 2, spent: 2, cost: 1), isFalse);
     });
 
     test('was nichts kostet, kann man immer — das Handbuch', () {

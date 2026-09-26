@@ -1,7 +1,7 @@
 # ADR-0050: Zwischenebenen und angekündigte Gebiete
 
 **Datum:** 26.09.2026
-**Status:** Aktiv
+**Status:** Aktiv — die Übernahme alter Stände ist abgelöst durch [ADR-0051](0051-wurzeln-kosten-einen-punkt.md) (allgemeine Regel statt `legacyOpenedBy`)
 **Entschieden von:** Frederik
 
 ## Kontext

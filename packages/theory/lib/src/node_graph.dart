@@ -118,22 +118,33 @@ class TheoryGraph {
     return node.parentIds.any(openedIds.contains);
   }
 
-  /// Ob [id] als offen gilt, weil ein alter Knoten darunter offen ist.
+  /// [ids], ergänzt um jeden Knoten, der als **einziger Eltern** eines
+  /// Knotens darin steht — bis nichts mehr dazukommt.
   ///
-  /// **Die Übernahme aus ADR-0050.** Bis dahin hingen Schlaf, Umfeld und
-  /// die übrigen Startknoten direkt an ihrer Wurzel; seitdem hängen sie
-  /// unter einer Zwischenebene. Wer einen davon schon bezahlt hat, bekäme
-  /// sonst einen offenen Knoten unter einem geschlossenen Eltern — und
-  /// müsste für einen Weg zahlen, den er längst gegangen ist.
+  /// **Warum das stimmt.** Ein Knoten mit genau einem Eltern ließ sich
+  /// nur öffnen, solange dieser Eltern offen war. Steht er offen da, war
+  /// es der Eltern also auch. Für einen neuen Spieler ändert die Regel
+  /// darum nichts.
   ///
-  /// Geschenkt, nicht gekauft: Die Zwischenebene steht nicht im
-  /// Spielstand und kostet deshalb keinen Punkt. Ein neuer Spieler kann
-  /// die alten Knoten nur **über** ihre Zwischenebene öffnen und hat sie
-  /// dann ohnehin bezahlt — die Schenkung greift nur bei alten Ständen.
-  bool isGrantedBy(String id, Set<String> openedIds) {
-    final node = nodeById(id);
-    if (node == null) return false;
-    return node.legacyOpenedBy.any(openedIds.contains);
+  /// **Wofür sie da ist: alte Spielstände** (ADR-0050, ADR-0051). Wer
+  /// Schlaf geöffnet hat, als er noch direkt an einer kostenlosen Wurzel
+  /// hing, hat weder Schlaf & Regeneration noch Körper im Spielstand.
+  /// Beide gelten über diese Regel als offen — ohne Punkt, weil sie
+  /// nicht im Spielstand stehen.
+  ///
+  /// Ein Kind mit **zwei** Eltern (Stress, Vergleich) sagt nichts
+  /// darüber, welcher offen war, und schenkt deshalb keinen.
+  Set<String> withSoleParents(Set<String> ids) {
+    final offen = <String>{...ids};
+    var gewachsen = true;
+    while (gewachsen) {
+      gewachsen = false;
+      for (final node in nodes) {
+        if (!offen.contains(node.id) || node.parentIds.length != 1) continue;
+        if (offen.add(node.parentIds.single)) gewachsen = true;
+      }
+    }
+    return offen;
   }
 
   /// Ids, die mehr als einmal vorkommen. Leer ist gut.
@@ -208,24 +219,6 @@ class TheoryGraph {
     );
   }
 
-  /// Schenkungen, die auf keinen Kindknoten zeigen. Leer ist gut.
-  ///
-  /// `legacyOpenedBy` darf nur Knoten nennen, die **direkt** darunter
-  /// hängen — sonst schenkte ein Knoten irgendwo im Baum eine
-  /// Zwischenebene, mit der er nichts zu tun hat.
-  List<String> get strayGrants {
-    final falsch = <String>[];
-    for (final node in nodes) {
-      for (final kindId in node.legacyOpenedBy) {
-        final kind = nodeById(kindId);
-        if (kind == null || !kind.parentIds.contains(node.id)) {
-          falsch.add('${node.id} <- $kindId');
-        }
-      }
-    }
-    return List<String>.unmodifiable(falsch);
-  }
-
   /// Ob der Graph benutzbar ist.
   ///
   /// Vier Bedingungen, alle mit demselben Zweck: Es darf keinen Knoten
@@ -236,7 +229,6 @@ class TheoryGraph {
         danglingParentIds.isEmpty &&
         isAcyclic &&
         roots.isNotEmpty &&
-        orphanPlaceholderIds.isEmpty &&
-        strayGrants.isEmpty;
+        orphanPlaceholderIds.isEmpty;
   }
 }

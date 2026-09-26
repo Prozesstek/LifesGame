@@ -28,8 +28,9 @@ um Wirkung und Navigation zu sehen. Inhalt kommt später.**
 | Zwischenebene | zwischen Wurzel und Thema; **ein Punkt**, eine Einführungsseite |
 | Befüllt | 8: Kraft & Muskulatur, Ernährung, Schlaf & Regeneration, Psychologie, Selbstentwicklung, Wissenschaftliches Denken, Beziehungen, Medien & Information |
 | Angekündigt | 17, grau mit „Inhalt folgt", nicht zu öffnen (`TheoryPlaceholder`) |
-| Die 21 alten Knoten | einsortiert; wer einen offen hatte, bekommt die Zwischenebene geschenkt (`legacyOpenedBy`) |
-| Punkte | weiter einer je Level |
+| Die 21 alten Knoten | einsortiert; wer einen offen hatte, behält Zwischenebene und Wurzel darüber ohne Punkt |
+| Punkte | einer je Level, **dazu einer zum Start** |
+| Wurzeln | **kosten jetzt auch einen Punkt** ([ADR-0051](../decisions/0051-wurzeln-kosten-einen-punkt.md)) |
 
 **Sieben neue Einführungsseiten, Entwürfe von Claude — noch nicht
 gegengelesen.** `packages/theory/lib/src/content/area_pages.dart`.
@@ -43,11 +44,17 @@ nichts, der Baum ist erst an **Tag 50 statt Tag 33** gelesen. Die Punkte
 sind der Engpass, nicht die Seiten. Neue Seiten verlängern also das Ende
 und füllen nicht die Wochen 3 und 4. Wer das will, dreht an den Punkten.
 
-**Der Weg zu jeder Fähigkeit im Baum kostet einen Punkt mehr.** Auf
-Level 3 (zwei Punkte) geht es genau auf; `abilities_seam_test.dart`
-rechnet jetzt den ganzen Weg statt nur einen Schritt.
+**Danach auf Frederiks Wunsch: die Wurzeln kosten einen Punkt**
+(ADR-0051). Damit der zweite Fähigkeitsplatz auf Level 3 nicht leer
+aufgeht, beginnt jeder mit einem Theoriepunkt. Der Weg zur ersten
+Fähigkeit — Wurzel, Zwischenebene, Thema — kostet drei, Level 3 gibt
+drei; `abilities_seam_test.dart` rechnet den ganzen Weg. Alte Stände
+behalten alles über eine Regel statt einer Liste: offen ist, was
+gekauft, bestanden oder einziger Eltern eines Offenen ist.
+`runway_sim` danach: an Tag 30 sind 20 Knoten offen, gelesen ist der
+Baum an Tag 58.
 
-theory 163 (vorher 148), App 534. **Nicht angesehen**, weder im Browser
+theory 165 (vorher 148), progression 42, App 535. **Nicht angesehen**, weder im Browser
 noch am Handy — ob drei Reihen Überschriften mit „Inhalt folgt" als
 Versprechen lesen oder als Baustelle, sagt nur das Bild.
 

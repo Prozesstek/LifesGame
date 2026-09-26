@@ -253,8 +253,8 @@ void main() {
       final store = InMemorySaveStore();
       final erste = containerMit(const SaveData(), store);
 
-      // Level 2 heißt ein Theoriepunkt — genug für eine Zwischenebene.
-      const knoten = 'schlaf-regeneration';
+      // Seit ADR-0051 kostet die Wurzel selbst einen Punkt.
+      const knoten = 'koerper';
       final geoeffnet = erste
           .read(theoryProgressProvider.notifier)
           .openNode(knoten, availablePoints: 1);
