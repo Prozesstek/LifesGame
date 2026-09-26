@@ -1,9 +1,9 @@
 /// Die vier Wurzelseiten des Theoriegraphen (ADR-0019).
 ///
-/// **Sie kosten keinen Theoriepunkt.** Eine Wurzel ist der Einstieg in
-/// ein Gebiet — sie hinter einen Punkt zu legen hieße, den Spieler für
-/// etwas zahlen zu lassen, das er noch nicht beurteilen kann. Bezahlt
-/// wird ab dem ersten Unterknoten.
+/// **Seit ADR-0051 kosten sie einen Theoriepunkt** — welches Gebiet man
+/// betritt, ist eine Wahl. Bis dahin waren sie kostenlos. Damit die
+/// erste Wahl nicht am Punktestand scheitert, beginnt jeder mit einem
+/// Punkt (`TheoryPoints.atStart`).
 ///
 /// Jede Wurzel beantwortet dieselbe Frage für ihr Gebiet: *Warum steht
 /// das in einem Spiel über Gewohnheiten?*

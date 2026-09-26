@@ -138,3 +138,79 @@ class NodeBubble extends StatelessWidget {
     };
   }
 }
+
+/// Eine angekündigte Überschrift: grau, ohne Druck, „Inhalt folgt"
+/// (ADR-0050).
+///
+/// **Nicht antippbar, und deshalb kein [Druck].** Ein Knopf, der einsinkt
+/// und dann nichts tut, wäre schlimmer als einer, der gar nicht erst so
+/// aussieht. Gestrichelter Rand statt durchgezogener: Der Kreis ist
+/// vorgezeichnet, gefüllt wird er später.
+class PlaceholderBubble extends StatelessWidget {
+  const PlaceholderBubble({required this.placeholder, super.key});
+
+  final TheoryPlaceholder placeholder;
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = TreeLayout.nodeRadius;
+
+    return SizedBox(
+      width: NodeBubble.labelWidth,
+      child: Semantics(
+        label: '${placeholder.title}, Inhalt folgt',
+        child: Opacity(
+          opacity: 0.55,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                  width: radius * 2,
+                  height: radius * 2,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Palette.background,
+                    border: Border.all(
+                      color: Palette.textOnDarkDim.withValues(alpha: 0.6),
+                      width: 1.4,
+                    ),
+                  ),
+                  child: Icon(
+                    iconForNode(placeholder.iconId),
+                    size: 22,
+                    color: Palette.textOnDarkDim,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  placeholder.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    height: 1.2,
+                    color: Palette.textOnDarkDim,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Text(
+                  'Inhalt folgt',
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 9,
+                    height: 1.2,
+                    color: Palette.textOnDarkDim,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -7,9 +7,101 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 25.09.2026 · AktivesBrett, Frederik
+**Zuletzt aktualisiert:** 26.09.2026 · Frederik
 
 ---
+
+## 26.09.2026: der Wissensbaum bekommt Zwischenebenen
+
+Frederik: „Ich würde gerne den Theorie-Teil überarbeiten" — das Zielbild
+aus [ADR-0037](../decisions/0037-der-wissensbaum-als-endziel.md) /
+Issue #54, **mitten im Testlauf** statt danach. Die offenen Punkte in
+einer Fragerunde entschieden, festgehalten in
+[ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md).
+Die Sperre „Baum über 24 Knoten" in `ziele.md` ist aufgehoben.
+
+**Erster Schritt, auf Frederiks Wunsch: alle Überschriften als Gebiet,
+um Wirkung und Navigation zu sehen. Inhalt kommt später.**
+
+| Was | Wie |
+|---|---|
+| Zwischenebene | zwischen Wurzel und Thema; **ein Punkt**, eine Einführungsseite |
+| Befüllt | 8: Kraft & Muskulatur, Ernährung, Schlaf & Regeneration, Psychologie, Selbstentwicklung, Wissenschaftliches Denken, Beziehungen, Medien & Information |
+| Angekündigt | 17, grau mit „Inhalt folgt", nicht zu öffnen (`TheoryPlaceholder`) |
+| Die 21 alten Knoten | einsortiert; wer einen offen hatte, behält Zwischenebene und Wurzel darüber ohne Punkt |
+| Punkte | einer je Level, **dazu einer zum Start** |
+| Wurzeln | **kosten jetzt auch einen Punkt** ([ADR-0051](../decisions/0051-wurzeln-kosten-einen-punkt.md)) |
+
+**Sieben neue Einführungsseiten, Entwürfe von Claude — noch nicht
+gegengelesen.** `packages/theory/lib/src/content/area_pages.dart`.
+„Wissenschaftliches Denken" steht nicht in #54: Die fünf alten
+Wissenschaftsthemen sind Methode und passten unter keine der sechs
+Überschriften. „Was ist Psychologie" heisst jetzt „Psychologie" und ist
+die Seite ihrer Zwischenebene.
+
+**Was die Simulation dazu sagt** (`runway_sim`): Bis Tag 35 ändert sich
+nichts, der Baum ist erst an **Tag 50 statt Tag 33** gelesen. Die Punkte
+sind der Engpass, nicht die Seiten. Neue Seiten verlängern also das Ende
+und füllen nicht die Wochen 3 und 4. Wer das will, dreht an den Punkten.
+
+**Danach auf Frederiks Wunsch: die Wurzeln kosten einen Punkt**
+(ADR-0051). Damit der zweite Fähigkeitsplatz auf Level 3 nicht leer
+aufgeht, beginnt jeder mit einem Theoriepunkt. Der Weg zur ersten
+Fähigkeit — Wurzel, Zwischenebene, Thema — kostet drei, Level 3 gibt
+drei; `abilities_seam_test.dart` rechnet den ganzen Weg. Alte Stände
+behalten alles über eine Regel statt einer Liste: offen ist, was
+gekauft, bestanden oder einziger Eltern eines Offenen ist.
+`runway_sim` danach: an Tag 30 sind 20 Knoten offen, gelesen ist der
+Baum an Tag 58.
+
+**Und das erste Gebiet ist befüllt: Kraft & Muskulatur.** Fünf neue
+Themen neben „Die kleinste Dosis, die wirkt": Wie ein Muskel wächst,
+Wie nah ans Versagen, Den Plan bauen, Technik vor Gewicht, Muskelkater
+und Pausen (`kraft_pages.dart`). Die Zahlen darin — etwa 1,6 g Eiweiß
+je Kilo, zehn und mehr harte Sätze je Muskel und Woche, null bis drei
+Wiederholungen in Reserve — sind als Größenordnung formuliert. Keine
+neue Fähigkeit, keine Gewohnheitsvorlage.
+
+**Dann Ausdauer & Fitness**, vorher grau angekündigt, jetzt ein Gebiet
+mit Einführung und fünf Themen: Das Herz als Motor, VO₂max, Locker und
+lang, Intervalltraining, Woher die Energie kommt (`ausdauer_pages.dart`).
+Damit ist die alte Schieflage bei Stärke und Ausdauer zumindest in der
+Theorie angegangen — Gewohnheitsvorlagen gibt es dafür weiter keine
+neuen.
+
+**Dann Psychologie**, fünf Themen neben Aufmerksamkeit und Wiederholen,
+jedes an einem Versuch aufgehängt: Die Macht der Mehrheit (Asch),
+Gehorsam (Milgram), Warum keiner hilft (Bystander), Erinnerung ist kein
+Video (Loftus), Gefühle regulieren (Gross). Wo ein Befund später
+eingeschränkt wurde, steht das dabei — die 38 Zeugen im Fall Genovese
+sind als Übertreibung benannt (`psychologie_pages.dart`).
+
+**Dann Philosophie**, vorher grau angekündigt: Einführung und fünf
+Themen — Was in deiner Macht steht (Epiktet, Mark Aurel), Folgen,
+Pflichten, Charakter (Utilitarismus, Kant, Aristoteles), Fehlschlüsse
+erkennen, Fragen statt behaupten (Sokrates), Freiheit und Sinn (Sartre,
+Camus). `philosophie_pages.dart`.
+
+**Damit ist der Baum größer als ein Spielerleben:** 54 Knoten gegen 50
+Theoriepunkte über 50 Level. Das ist das Zielbild aus ADR-0037 — man
+kann nicht alles lernen, man wählt. `theory_points_test.dart` hält das
+jetzt als Zusage fest. In 60 Tagen sind 33 offen (`runway_sim`).
+
+theory 165 (vorher 148), progression 42, App 535. **Nicht angesehen**, weder im Browser
+noch am Handy — ob drei Reihen Überschriften mit „Inhalt folgt" als
+Versprechen lesen oder als Baustelle, sagt nur das Bild.
+
+### Offen
+
+- **Gegenlesen** der neun Einführungsseiten und der zwanzig Themen
+  (Kraft, Ausdauer, Psychologie, Philosophie).
+- **Wie viel XP und Gold** Theorie künftig bringt (ADR-0037, Punkt 1).
+- **Welches Gebiet als Nächstes befüllt wird.** Körper fehlen noch
+  Körperkontrolle und Biologie des Körpers; in Geist stehen Geschichte
+  und Kreativität noch grau, Gesellschaft und Wissenschaft haben die
+  meisten leeren Überschriften.
+- Eine Ankündigung antippen tut nichts. Ob man dort eine Zeile „kommt
+  noch" erwartet, zeigt das Spielen.
 
 ## 25.09.2026, danach: Ziegelboden in der Grube
 

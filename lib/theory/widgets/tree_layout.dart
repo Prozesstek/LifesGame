@@ -41,7 +41,12 @@ class TreeLayout {
     required double width,
     required double minHeight,
   }) {
-    final kinder = graph.childrenOf(focusId).map((n) => n.id).toList();
+    // Angekündigte Überschriften stehen hinter den befüllten (ADR-0050):
+    // Was sich öffnen lässt, liegt näher am Daumen.
+    final kinder = <String>[
+      for (final kind in graph.childrenOf(focusId)) kind.id,
+      for (final angekuendigt in graph.placeholdersOf(focusId)) angekuendigt.id,
+    ];
     final rows = _rowsFor(kinder, width);
 
     final height = math.max(minHeight, _heightFor(rows.length));

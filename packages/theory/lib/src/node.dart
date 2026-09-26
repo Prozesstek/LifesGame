@@ -40,8 +40,9 @@ class TheoryNode {
   /// Was das Öffnen kostet, in Theoriepunkten.
   ///
   /// Immer 1, unabhängig von der Tiefe (ADR-0012, von ADR-0019
-  /// übernommen). Ausnahme ist das Handbuch mit 0: Es erklärt das Spiel
-  /// und darf nichts kosten (ADR-0005, ADR-0018).
+  /// übernommen) — seit ADR-0051 **auch für die Wurzeln**. 0 ist
+  /// weiter möglich, im Spiel aber nur noch beim Handbuch, das kein
+  /// Knoten ist (ADR-0005, ADR-0018).
   final int cost;
 
   /// Die Fähigkeit, die dieser Knoten mitbringt — oder null.

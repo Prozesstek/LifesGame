@@ -154,6 +154,12 @@ Ein Knoten erscheint erst, wenn sein Inhalt geschrieben ist.
 > **Abgelöst durch ADR-0037:** Die Bedingung „mindestens eine täglich
 > abhakbare Gewohnheit" gilt nicht mehr — Lernen zählt für sich. Ein
 > Knoten *darf* eine Vorlage freischalten, er *muss* es nicht.
+> **Bestätigt am 26.09.2026** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)).
+>
+> **Seit ADR-0050** gibt es zwischen Wurzel und Thema eine Zwischenebene
+> („Kraft & Muskulatur"), und Überschriften ohne Inhalt stehen grau als
+> „Inhalt folgt" im Baum. Sie sind keine Knoten und lassen sich nicht
+> öffnen — die Regel unten gilt weiter für Knoten.
 
 **Ein Knoten verdient seinen Platz nur**, wenn er drei Lektionen trägt,
 mindestens eine täglich abhakbare Gewohnheit hervorbringt und auf einen der
