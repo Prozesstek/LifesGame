@@ -32,6 +32,7 @@ import 'geist_branch.dart';
 import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
 import 'koerper_geist_pages.dart';
+import 'philosophie_pages.dart';
 import 'kraft_pages.dart';
 import 'psychologie_pages.dart';
 import 'root_pages.dart';
@@ -264,6 +265,42 @@ final TheoryGraph theoryGraph = TheoryGraph(
       iconId: 'spark',
       parentIds: <String>['selbstentwicklung'],
     ),
+    const TheoryNode(
+      id: 'philosophie',
+      lesson: philosophiePage,
+      iconId: 'philosophy',
+      parentIds: <String>['geist'],
+    ),
+    const TheoryNode(
+      id: 'philosophie-stoizismus',
+      lesson: stoizismusPage,
+      iconId: 'stoic',
+      parentIds: <String>['philosophie'],
+    ),
+    const TheoryNode(
+      id: 'philosophie-ethik',
+      lesson: ethikPage,
+      iconId: 'ethics',
+      parentIds: <String>['philosophie'],
+    ),
+    const TheoryNode(
+      id: 'philosophie-fehlschluesse',
+      lesson: fehlschluessePage,
+      iconId: 'fallacy',
+      parentIds: <String>['philosophie'],
+    ),
+    const TheoryNode(
+      id: 'philosophie-sokrates',
+      lesson: sokratesPage,
+      iconId: 'dialogue',
+      parentIds: <String>['philosophie'],
+    ),
+    const TheoryNode(
+      id: 'philosophie-existenzialismus',
+      lesson: existenzialismusPage,
+      iconId: 'boulder',
+      parentIds: <String>['philosophie'],
+    ),
 
     // ----------------------------------------------------------------
     // Wissenschaft
@@ -379,12 +416,6 @@ const List<TheoryPlaceholder> theoryPlaceholders = <TheoryPlaceholder>[
   ),
 
   // Geist
-  TheoryPlaceholder(
-    id: 'philosophie',
-    title: 'Philosophie',
-    iconId: 'philosophy',
-    parentIds: <String>['geist'],
-  ),
   TheoryPlaceholder(
     id: 'geschichte',
     title: 'Geschichte',

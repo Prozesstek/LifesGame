@@ -76,9 +76,16 @@ Video (Loftus), Gefühle regulieren (Gross). Wo ein Befund später
 eingeschränkt wurde, steht das dabei — die 38 Zeugen im Fall Genovese
 sind als Übertreibung benannt (`psychologie_pages.dart`).
 
-**Damit ist der Baum zum ersten Mal größer als 60 Tage:** 48 Knoten,
-an Tag 60 sind 33 offen (`runway_sim`). Das ist die Knappheit aus
-ADR-0037 — wer Kraft liest, lässt dafür etwas anderes liegen.
+**Dann Philosophie**, vorher grau angekündigt: Einführung und fünf
+Themen — Was in deiner Macht steht (Epiktet, Mark Aurel), Folgen,
+Pflichten, Charakter (Utilitarismus, Kant, Aristoteles), Fehlschlüsse
+erkennen, Fragen statt behaupten (Sokrates), Freiheit und Sinn (Sartre,
+Camus). `philosophie_pages.dart`.
+
+**Damit ist der Baum größer als ein Spielerleben:** 54 Knoten gegen 50
+Theoriepunkte über 50 Level. Das ist das Zielbild aus ADR-0037 — man
+kann nicht alles lernen, man wählt. `theory_points_test.dart` hält das
+jetzt als Zusage fest. In 60 Tagen sind 33 offen (`runway_sim`).
 
 theory 165 (vorher 148), progression 42, App 535. **Nicht angesehen**, weder im Browser
 noch am Handy — ob drei Reihen Überschriften mit „Inhalt folgt" als
@@ -86,12 +93,13 @@ Versprechen lesen oder als Baustelle, sagt nur das Bild.
 
 ### Offen
 
-- **Gegenlesen** der acht Einführungsseiten und der fünfzehn Themen
-  (Kraft, Ausdauer, Psychologie).
+- **Gegenlesen** der neun Einführungsseiten und der zwanzig Themen
+  (Kraft, Ausdauer, Psychologie, Philosophie).
 - **Wie viel XP und Gold** Theorie künftig bringt (ADR-0037, Punkt 1).
 - **Welches Gebiet als Nächstes befüllt wird.** Körper fehlen noch
-  Körperkontrolle und Biologie des Körpers; in Geist stehen Philosophie,
-  Geschichte und Kreativität noch grau.
+  Körperkontrolle und Biologie des Körpers; in Geist stehen Geschichte
+  und Kreativität noch grau, Gesellschaft und Wissenschaft haben die
+  meisten leeren Überschriften.
 - Eine Ankündigung antippen tut nichts. Ob man dort eine Zeile „kommt
   noch" erwartet, zeigt das Spielen.
 

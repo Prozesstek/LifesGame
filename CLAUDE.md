@@ -59,6 +59,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/content/area_pages.dart` | die Einführungsseiten der **Zwischenebenen** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet | nur Dart-SDK |
 | `packages/theory/lib/src/content/ausdauer_pages.dart` | **Ausdauer & Fitness**: Einführung und fünf Themen | nur Dart-SDK |
+| `packages/theory/lib/src/content/philosophie_pages.dart` | **Philosophie**: Einführung, Stoizismus, Ethik, Fehlschlüsse, Sokrates, Existenzialismus | nur Dart-SDK |
 | `packages/theory/lib/src/content/psychologie_pages.dart` | **Psychologie**: fünf Themen an Experimenten — Asch, Milgram, Bystander, Loftus, Gefühle | nur Dart-SDK |
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |

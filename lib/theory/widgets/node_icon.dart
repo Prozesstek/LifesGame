@@ -38,6 +38,13 @@ const Map<String, IconData> _icons = <String, IconData>{
   'technique': Icons.straighten_rounded,
   'recovery': Icons.hotel_outlined,
 
+  // Philosophie
+  'stoic': Icons.spa_outlined,
+  'ethics': Icons.balance_rounded,
+  'fallacy': Icons.report_gmailerrorred_outlined,
+  'dialogue': Icons.forum_outlined,
+  'boulder': Icons.landscape_outlined,
+
   // Psychologie
   'crowd': Icons.groups_2_outlined,
   'authority': Icons.gavel_rounded,
