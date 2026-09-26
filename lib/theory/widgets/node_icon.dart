@@ -31,6 +31,13 @@ const Map<String, IconData> _icons = <String, IconData>{
   'media': Icons.smartphone_outlined,
   'method': Icons.fact_check_outlined,
 
+  // Kraft & Muskulatur
+  'muscle': Icons.sports_gymnastics,
+  'gauge': Icons.speed_rounded,
+  'plan': Icons.event_note_outlined,
+  'technique': Icons.straighten_rounded,
+  'recovery': Icons.hotel_outlined,
+
   // Angekündigte Überschriften
   'endurance': Icons.directions_bike_outlined,
   'posture': Icons.accessibility_new_rounded,

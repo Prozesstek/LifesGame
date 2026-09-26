@@ -31,6 +31,7 @@ import 'geist_branch.dart';
 import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
 import 'koerper_geist_pages.dart';
+import 'kraft_pages.dart';
 import 'root_pages.dart';
 import 'wissenschaft_branch.dart';
 import 'wissenschaft_gesellschaft_pages.dart';
@@ -77,6 +78,36 @@ final TheoryGraph theoryGraph = TheoryGraph(
       iconId: 'run',
       parentIds: const <String>['kraft-muskulatur'],
       unlocksAbility: 'funkenstoss',
+    ),
+    const TheoryNode(
+      id: 'kraft-hypertrophie',
+      lesson: hypertrophiePage,
+      iconId: 'muscle',
+      parentIds: <String>['kraft-muskulatur'],
+    ),
+    const TheoryNode(
+      id: 'kraft-intensitaet',
+      lesson: intensitaetPage,
+      iconId: 'gauge',
+      parentIds: <String>['kraft-muskulatur'],
+    ),
+    const TheoryNode(
+      id: 'kraft-trainingsplanung',
+      lesson: trainingsplanungPage,
+      iconId: 'plan',
+      parentIds: <String>['kraft-muskulatur'],
+    ),
+    const TheoryNode(
+      id: 'kraft-technik',
+      lesson: technikPage,
+      iconId: 'technique',
+      parentIds: <String>['kraft-muskulatur'],
+    ),
+    const TheoryNode(
+      id: 'kraft-muskelkater',
+      lesson: muskelkaterPage,
+      iconId: 'recovery',
+      parentIds: <String>['kraft-muskulatur'],
     ),
     const TheoryNode(
       id: 'ernaehrung',

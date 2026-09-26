@@ -46,18 +46,18 @@ void main() {
       );
     });
 
-    test('der befüllte Baum steht ab Level 32 ganz offen, nicht früher', () {
-      // 32 Knoten, jeder kostet seit ADR-0051 einen Punkt — auch die
+    test('der befüllte Baum steht ab Level 37 ganz offen, nicht früher', () {
+      // 37 Knoten, jeder kostet seit ADR-0051 einen Punkt — auch die
       // Wurzeln. ADR-0035 rechnete mit 21 und Level 22. Mit jedem
       // befüllten Gebiet rückt die Zahl nach oben, bis der Baum größer
       // ist als ein Spielerleben (ADR-0037).
-      const knotenImBaum = 32;
+      const knotenImBaum = 37;
 
       expect(
-        TheoryPoints.earnedAt(32),
+        TheoryPoints.earnedAt(37),
         greaterThanOrEqualTo(knotenImBaum),
       );
-      expect(TheoryPoints.earnedAt(31), lessThan(knotenImBaum));
+      expect(TheoryPoints.earnedAt(36), lessThan(knotenImBaum));
     });
   });
 

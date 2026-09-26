@@ -243,7 +243,7 @@ void main() {
       final gesamt = container.read(totalPagesProvider);
       final bestanden = container.read(passedPagesProvider);
 
-      expect(find.text('0 von 9'), findsOneWidget);
+      expect(find.text('0 von 14'), findsOneWidget);
       expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
     });
 
@@ -876,7 +876,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(totalPagesProvider), 37);
+      expect(container.read(totalPagesProvider), 42);
       expect(
         container.read(totalPagesProvider),
         greaterThan(theoryTree.lessonCount),

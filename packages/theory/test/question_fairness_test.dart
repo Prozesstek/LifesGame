@@ -27,8 +27,8 @@ void main() {
         (quelle: '${seite.id} F${i + 1}', frage: seite.questions[i]),
   ];
 
-  test('es sind die erwarteten 37 Seiten', () {
-    expect(seiten.length, 37);
+  test('es sind die erwarteten 42 Seiten', () {
+    expect(seiten.length, 42);
   });
 
   group('Die richtige Antwort verrät sich nicht (ADR-0027)', () {
