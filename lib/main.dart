@@ -38,10 +38,11 @@ Future<void> main() async {
   final saved = await store.read();
 
   runApp(
-    ProviderScope(
+    SpielstandHost(
+      store: store,
+      saved: saved,
       overrides: [
         saveStoreProvider.overrideWithValue(store),
-        savedGameProvider.overrideWithValue(saved),
         activeSlotProvider.overrideWithValue(slot),
         // Der einzige Ort mit echtem Ton — Tests bleiben still.
         soundPlayerProvider.overrideWithValue(AssetSoundPlayer()),
@@ -56,11 +57,65 @@ Future<void> main() async {
           ),
         ],
       ],
+    ),
+  );
+}
+
+/// Hält den Stand, mit dem die App läuft — und tauscht ihn beim Einfügen
+/// aus (ADR-0054).
+///
+/// **Ein neuer `ProviderScope` statt zurückgesetzter Controller.** Mit
+/// einem neuen Schlüssel baut sich alles unter ihm neu: jeder Controller
+/// liest seinen Anfangszustand aus dem neuen Stand, und kein alter kann
+/// danach noch etwas schreiben. Dasselbe wie ein Neustart, nur ohne die
+/// App zu verlassen.
+class SpielstandHost extends StatefulWidget {
+  const SpielstandHost({
+    required this.store,
+    required this.saved,
+    this.overrides = const <dynamic>[],
+    super.key,
+  });
+
+  final SaveStore store;
+  final SaveData saved;
+
+  /// Alles, was über einen Neustart gleich bleibt. `dynamic`, weil
+  /// Riverpod 3 den Typ `Override` nicht exportiert (`gotchas.md`); der
+  /// `ProviderScope` bekommt ihn über `cast` zurück.
+  final List<dynamic> overrides;
+
+  @override
+  State<SpielstandHost> createState() => _SpielstandHostState();
+}
+
+class _SpielstandHostState extends State<SpielstandHost> {
+  late SaveData _saved = widget.saved;
+  Key _key = UniqueKey();
+
+  Future<void> _einfuegen(SaveData neu) async {
+    await widget.store.write(neu);
+    if (!mounted) return;
+    setState(() {
+      _saved = neu;
+      _key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      key: _key,
+      overrides: [
+        ...widget.overrides.cast(),
+        savedGameProvider.overrideWithValue(_saved),
+        saveImporterProvider.overrideWithValue(_einfuegen),
+      ],
       child: const PhoneFrame(
         child: SaveWatcher(child: DayWatcher(child: LifesGameApp())),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Legt die App auf Hochformat fest.
