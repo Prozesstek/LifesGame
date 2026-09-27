@@ -25,6 +25,27 @@ import '../theory/review_controller.dart';
 ///
 /// Der Preis dafür ist, dass dieses Widget im Baum hängen muss. Deshalb
 /// sitzt es direkt unter dem `ProviderScope` in `main.dart`.
+/// Der Stand, wie er **jetzt** ist — dasselbe, was [SaveWatcher]
+/// schreibt. Der Export (ADR-0054) liest ihn hier, damit er nie etwas
+/// anderes kopiert, als gespeichert wird.
+///
+/// **Eine Funktion, kein Provider.** Ein abgeleiteter Provider lieferte
+/// im Moment des Speicherns noch den alten Stand: Der Watcher hört auf
+/// eine Änderung, bevor der Provider davon weiß. Direkt gelesen gibt es
+/// nichts, was hinterherhinken kann.
+SaveData currentSave(WidgetRef ref) {
+  return SaveData(
+    theory: ref.read(theoryProgressProvider),
+    habits: ref.read(habitTrackerProvider),
+    loadout: ref.read(loadoutProvider),
+    identity: ref.read(identityProvider),
+    abilities: ref.read(chosenAbilitiesProvider),
+    ladder: ref.read(ladderProvider),
+    grants: ref.read(devGrantsProvider),
+    reviews: ref.read(reviewLogProvider),
+  );
+}
+
 class SaveWatcher extends ConsumerWidget {
   const SaveWatcher({required this.child, super.key});
 
@@ -47,16 +68,7 @@ class SaveWatcher extends ConsumerWidget {
   }
 
   void _save(WidgetRef ref) {
-    final data = SaveData(
-      theory: ref.read(theoryProgressProvider),
-      habits: ref.read(habitTrackerProvider),
-      loadout: ref.read(loadoutProvider),
-      identity: ref.read(identityProvider),
-      abilities: ref.read(chosenAbilitiesProvider),
-      ladder: ref.read(ladderProvider),
-      grants: ref.read(devGrantsProvider),
-      reviews: ref.read(reviewLogProvider),
-    );
+    final data = currentSave(ref);
 
     // Bewusst nicht abgewartet: Ein Häkchen soll sofort sichtbar sein und
     // nicht auf die Platte warten. Ein Fehler wird gemeldet, nicht

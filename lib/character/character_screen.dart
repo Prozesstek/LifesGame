@@ -13,6 +13,7 @@ import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
+import '../save/widgets/save_transfer_card.dart';
 import '../ui/palette.dart';
 import 'abilities_screen.dart';
 import 'identity_controller.dart';
@@ -171,6 +172,10 @@ class CharacterScreen extends ConsumerWidget {
                   icon: const Icon(Icons.auto_awesome),
                   label: const Text('Zu den Fähigkeiten'),
                 ),
+                const SizedBox(height: 24),
+                // Ganz unten, weil man es selten braucht — und dann
+                // dringend (ADR-0054).
+                const SaveTransferCard(),
               ],
             ),
           ),

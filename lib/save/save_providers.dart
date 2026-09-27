@@ -17,3 +17,14 @@ final saveStoreProvider = Provider<SaveStore>((ref) => InMemorySaveStore());
 /// synchron, und kein Bildschirm braucht einen Ladezustand für Daten, die
 /// längst im Speicher liegen.
 final savedGameProvider = Provider<SaveData>((ref) => const SaveData.empty());
+
+/// Ersetzt den Spielstand und startet die App damit neu (ADR-0054).
+///
+/// **Ein Neustart von innen, kein „bitte neu laden“.** Der Stand wird
+/// einmal gelesen, und jeder Controller baut seinen Anfangszustand
+/// daraus. Würde nur der Speicher überschrieben, schriebe die laufende App
+/// beim nächsten Häkchen ihren alten Stand darüber. `main.dart`
+/// überschreibt den Provider; ohne Überschreibung passiert nichts.
+final saveImporterProvider = Provider<Future<void> Function(SaveData)>(
+  (ref) => (_) async {},
+);

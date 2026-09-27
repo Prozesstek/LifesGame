@@ -131,7 +131,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
-| `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** | Flutter |
+| `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
+| `lib/save/widgets/save_transfer_card.dart` | **den Stand als Text sichern** und einfügen, samt Neustart von innen ([ADR-0054](docs/decisions/0054-spielstand-als-text-sichern.md)) | Flutter |
 | `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
@@ -205,7 +206,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 546 Tests
+flutter test             # 559 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -759,13 +760,14 @@ liest `todayProvider`, nie `DateTime.now()`. Wer daran dreht, lässt
 
 ## Gedächtnis-Protokoll
 
-Diese sechs Orte sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
+Diese sieben Orte sind das geteilte Gedächtnis. Sie zu pflegen ist Teil der Arbeit,
 nicht Nacharbeit:
 
 | Datei | Enthält | Wann aktualisieren |
 |---|---|---|
 | `konzept.md` | Produktvision, Systeme, MVP-Schnitt | wenn sich das Produkt ändert |
 | `docs/context/state.md` | Was fertig ist, woran gerade gearbeitet wird, was als Nächstes kommt | am Ende jeder Arbeitssitzung |
+| `docs/context/verlauf.md` | Die Einträge aus `state.md`, die älter als etwa eine Woche sind — wortgleich, **nicht** in jede Sitzung geladen | wenn `state.md` wächst: alte Einträge dorthin verschieben |
 | `docs/context/ziele.md` | **Wohin** es geht: Ziellinie, SMART-Ziele mit Termin, und was ausdrücklich *nicht* dazugehört | freitags die Ist-Spalten; bei Zielwechsel sofort |
 | `docs/decisions/NNNN-*.md` | **Warum** eine Entscheidung so fiel | sobald eine Entscheidung fällt, die man in drei Monaten hinterfragen würde |
 | `docs/context/gotchas.md` | Fallstricke, die Zeit gekostet haben | sobald etwas unerwartet war |

@@ -152,6 +152,30 @@ class SaveData {
     }
   }
 
+  /// Liest einen **eingefügten** Stand — oder null (ADR-0054).
+  ///
+  /// **Streng, anders als [decode].** Beim Start ist Nachsicht richtig:
+  /// Ein halb lesbarer Stand ist besser als keiner. Beim Einfügen wäre sie
+  /// gefährlich — ein falsch kopierter Text würde zu einem leeren Stand
+  /// und ersetzte den echten. Verlangt wird deshalb ein JSON-Objekt mit
+  /// Versionsnummer, und keine aus einer neueren App: Die kennte Felder,
+  /// die diese Fassung beim nächsten Speichern verlöre.
+  static SaveData? tryImport(String raw) {
+    final text = raw.trim();
+    if (text.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is! Map<String, Object?>) return null;
+      final version = decoded['version'];
+      if (version is! int || version < 1 || version > schemaVersion) {
+        return null;
+      }
+      return SaveData.fromJson(decoded);
+    } on FormatException {
+      return null;
+    }
+  }
+
   SaveData copyWith({
     TheoryProgress? theory,
     HabitTracker? habits,
