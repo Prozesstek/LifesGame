@@ -26,7 +26,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
 | **Startseite** | Figur mit Ausrüstung, sechs Kreise, „Heute“ zum Abhaken | ADR-0049, -0053 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal** | ADR-0019, -0045, -0050, -0051, -0055 |
+| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel | ADR-0029–0031, -0034, -0047, -0048 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 570, dazu die acht Packages (theory 165, habits 227, gear
+**Tests:** App 576, dazu die acht Packages (theory 174, habits 227, gear
 112, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -82,6 +82,27 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 27.09.2026, zuletzt: Überblick im Wissensbaum
+
+Frederik: „Man weiß schwer, wie viele der Unterpunkte man schon gemacht
+hat.“ Ein gerendertes Bild zeigte den Grund: Eine Zwischenebene
+leuchtete grün, sobald ihre Einführung gelesen war, und sah fertig aus.
+[ADR-0056](../decisions/0056-ueberblick-im-wissensbaum.md).
+
+| Was | Wie |
+|---|---|
+| **Ring und Zähler** | um jeden Knoten mit Unterpunkten, „2 / 5“ unter dem Namen; gold erst, wenn alles darunter geschafft ist |
+| **Zeichen am Kreis** | ✓ bestanden, Buch offen, „1“ kaufbar, Schloss mit Uhr zu teuer, Schloss unerreichbar; Legende hinter dem Fragezeichen |
+| **Vier Gebiete oben** | statt der Punkte, je mit Balken und Stand, antippen springt hin |
+| **Weiterlesen** | die offene, ungelesene Seite, einen Tipp entfernt |
+
+Gerechnet wird in `TheoryProgress.progressBelow` und `nextToRead`, nicht
+mehr im Bildschirm. **Beim Ansehen gefunden:** Die Wurzel zeigte 7 / 19,
+der Balken oben 8 / 20 — eine Wurzel zählt ihre eigene Seite jetzt mit.
+
+theory 174 (vorher 165), App 576. **Nicht am Handy angesehen**,
+gerendert in 390 × 844.
 
 ## 27.09.2026, spät: drei Dinge von Duolingo
 

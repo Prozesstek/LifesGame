@@ -135,6 +135,11 @@ class TreeView extends StatelessWidget {
               child: NodeBubble(
                 node: kind,
                 state: nodeStateFor(kind, graph, progress, availablePoints),
+                below: progress.progressBelow(
+                  kind.id,
+                  graph,
+                  includeSelf: kind.isRoot,
+                ),
                 onTap: () => _tapChild(kind),
               ),
             )
@@ -178,6 +183,13 @@ class TreeView extends StatelessWidget {
           child: NodeBubble.focus(
             node: focus,
             state: focusState,
+            // Eine Wurzel zählt ihre eigene Seite mit — sie gehört zum
+            // Gebiet, und oben im Balken steht dieselbe Zahl (ADR-0056).
+            below: progress.progressBelow(
+              focus.id,
+              graph,
+              includeSelf: focus.isRoot,
+            ),
             onTap: onTogglePanel,
           ),
         ),

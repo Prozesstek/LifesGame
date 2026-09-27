@@ -1,5 +1,6 @@
 import 'branch.dart';
 import 'lesson.dart';
+import 'node.dart';
 import 'node_graph.dart';
 import 'rewards.dart';
 import 'skill_tree.dart';
@@ -231,6 +232,42 @@ class TheoryProgress {
     if (node.cost > availablePoints) return false;
 
     return graph.canOpen(nodeId, openIdsIn(graph));
+  }
+
+  /// Wie viele Seiten unter [nodeId] bestanden sind — und wie viele es
+  /// dort gibt (ADR-0056).
+  ///
+  /// **Ohne den Knoten selbst**, es sei denn [includeSelf]: An einer
+  /// Zwischenebene soll „2 / 5“ die Themen darunter zählen, nicht ihre
+  /// eigene Einführung. Das Gebiet in der Kopfzeile zählt sich mit.
+  /// Angekündigte Überschriften zählen nicht — sie haben keine Seite.
+  ({int passed, int total}) progressBelow(
+    String nodeId,
+    TheoryGraph graph, {
+    bool includeSelf = false,
+  }) {
+    final knoten = graph.descendantsOf(nodeId, includeSelf: includeSelf);
+    return (
+      passed: knoten.where((n) => isPassed(n.lesson.id)).length,
+      total: knoten.length,
+    );
+  }
+
+  /// Die Seite, die als Nächstes zu lesen ist: geöffnet, aber noch nicht
+  /// bestanden — oder null (ADR-0056).
+  ///
+  /// Mit [under] nur unter diesem Knoten, ihn selbst eingeschlossen.
+  /// Gesucht wird in der Reihenfolge des Graphen, also so, wie der Inhalt
+  /// geschrieben ist: erst die Einführung, dann ihre Themen.
+  TheoryNode? nextToRead(TheoryGraph graph, {String? under}) {
+    final kandidaten = under == null
+        ? graph.nodes
+        : graph.descendantsOf(under, includeSelf: true);
+    final offen = openIdsIn(graph);
+    for (final node in kandidaten) {
+      if (offen.contains(node.id) && !isPassed(node.lesson.id)) return node;
+    }
+    return null;
   }
 
   /// Wie viele Theoriepunkte ausgegeben sind.

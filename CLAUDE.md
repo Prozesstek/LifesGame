@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 165 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 174 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — und die **angekündigten** Überschriften (`theoryPlaceholders`) | nur Dart-SDK |
@@ -187,6 +187,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
 | `lib/theory/widgets/tree_painter.dart` | die Verbindungslinien | Flutter |
 | `lib/theory/widgets/node_action_panel.dart` | der Knopf **über** dem Startknoten | Flutter |
+| `lib/theory/widgets/tree_overview.dart` | **der Überblick**: vier Gebiete mit Stand, „Weiterlesen“, Legende ([ADR-0056](docs/decisions/0056-ueberblick-im-wissensbaum.md)) | Flutter |
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/branch_screen.dart` | nur noch das Handbuch: Reihenfolge statt Graph | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
@@ -209,7 +210,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 570 Tests
+flutter test             # 576 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -227,7 +228,7 @@ dart test                              # 227 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 165 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 174 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 42 Tests
 cd packages/gear        ; dart test    # 112 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
