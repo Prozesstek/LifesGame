@@ -85,7 +85,14 @@ void main() {
           ),
           slots: 5,
         )
-        .activate('eigen-1');
+        .activate('eigen-1')
+        // Auslöser (ADR-0052), einer davon so lang, wie er sein darf: Ohne
+        // sie wäre die Zeile auf Kachel und Startseite nie gebaut.
+        .setCue('eigen-1', 'Nach dem Zähneputzen')
+        .setCue(
+          HabitCatalog.all.first.id,
+          'Direkt nach dem Abendessen, bevor der Fernseher angeht, am Tisch',
+        );
 
     // **Zwei Tage abgehakt, gestern nichts.** Das ist die vollste
     // Fassung des Bildschirms: Die Kacheln tragen ihre Streak-Marke, die

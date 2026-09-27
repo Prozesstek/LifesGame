@@ -14,9 +14,11 @@ import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
+import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
 import 'widgets/character_stage.dart';
 import 'widgets/hub_circle.dart';
+import 'widgets/today_card.dart';
 import '../ui/druck.dart';
 
 /// Startbildschirm — die Figur in der Mitte, die Bereiche darum herum.
@@ -65,104 +67,113 @@ class HomeScreen extends ConsumerWidget {
     final combatBlock = ref.watch(combatBlockReasonProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      HubCircle(
-                        icon: Icons.check_circle_outline,
-                        label: 'Gewohnheiten',
-                        image: HubCircleImage.plain,
-                        progress: heute,
-                        onTap: () => _open(context, const HabitsScreen()),
-                      ),
-                      HubCircle(
-                        icon: Icons.account_tree_outlined,
-                        label: 'Theorie',
-                        image: HubCircleImage.plain,
-                        symbol: theorySymbol,
-                        onTap: () => _open(context, const SkillTreeScreen()),
-                      ),
-                      HubCircle(
-                        icon: Icons.sports_martial_arts,
-                        label: 'Kampf',
-                        image: HubCircleImage.plain,
-                        // Der Kampf hängt am Moveset (ADR-0025). Ist es zu
-                        // dünn, nennt der Kreis beim Antippen, woran es
-                        // liegt — der Satz unterscheidet drei Fälle, und
-                        // der dritte ist der wichtigste: gelernt, aber
-                        // nicht angelegt.
-                        lockedReason: combatOpen ? null : combatBlock,
-                        onTap: () => _open(context, const LadderScreen()),
-                      ),
-                    ],
-                  ),
+      // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
+      // Gewohnheiten-Bildschirm (`AufstiegHost.maybeOf`).
+      body: AufstiegHost(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxWidth),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        HubCircle(
+                          icon: Icons.check_circle_outline,
+                          label: 'Gewohnheiten',
+                          image: HubCircleImage.plain,
+                          progress: heute,
+                          onTap: () => _open(context, const HabitsScreen()),
+                        ),
+                        HubCircle(
+                          icon: Icons.account_tree_outlined,
+                          label: 'Theorie',
+                          image: HubCircleImage.plain,
+                          symbol: theorySymbol,
+                          onTap: () => _open(context, const SkillTreeScreen()),
+                        ),
+                        HubCircle(
+                          icon: Icons.sports_martial_arts,
+                          label: 'Kampf',
+                          image: HubCircleImage.plain,
+                          // Der Kampf hängt am Moveset (ADR-0025). Ist es zu
+                          // dünn, nennt der Kreis beim Antippen, woran es
+                          // liegt — der Satz unterscheidet drei Fälle, und
+                          // der dritte ist der wichtigste: gelernt, aber
+                          // nicht angelegt.
+                          lockedReason: combatOpen ? null : combatBlock,
+                          onTap: () => _open(context, const LadderScreen()),
+                        ),
+                      ],
+                    ),
 
-                  // **Die Figur bekommt, was übrig bleibt.** Der Rest des
-                  // Bildschirms steht fest; damit passt das Layout auf
-                  // jede Höhe, ohne zu scrollen und ohne überzulaufen.
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: CharacterStage(
-                        level: level,
-                        gold: gold,
-                        worn: worn,
+                    // **Die Figur bekommt, was übrig bleibt.** Der Rest des
+                    // Bildschirms steht fest; damit passt das Layout auf
+                    // jede Höhe, ohne zu scrollen und ohne überzulaufen.
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: CharacterStage(
+                          level: level,
+                          gold: gold,
+                          worn: worn,
+                        ),
                       ),
                     ),
-                  ),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      HubCircle(
-                        icon: Icons.storefront_outlined,
-                        label: 'Laden',
-                        image: HubCircleImage.plain,
-                        onTap: () => _open(context, const ShopScreen()),
-                      ),
-                      // **Nie gesperrt**, obwohl auf Level 1 nur der
-                      // Waffenplatz offen ist: Der Bildschirm zeigt vor
-                      // allem, was es zu holen gibt, und das ist genau
-                      // dann am nützlichsten, wenn man noch nichts hat.
-                      HubCircle(
-                        icon: Icons.auto_awesome,
-                        label: 'Fähigkeiten',
-                        image: HubCircleImage.plain,
-                        symbol: abilitySymbol,
-                        onTap: () => _open(context, const AbilitiesScreen()),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          // Nur im Debug-Build. Im Release ist der Zweig
-                          // samt Bildschirm gar nicht erst im Bündel
-                          // (ADR-0021), und an dieser Stelle steht dann
-                          // nichts.
-                          if (devModeAvailable) const _DevKnopf(),
-                          HubCircle(
-                            icon: Icons.person_outline,
-                            label: 'Charakter',
-                            // Die einzige Flaeche, die ihr Zeichen selbst
-                            // mitbringt.
-                            image: HubCircleImage.character,
-                            onTap: () =>
-                                _open(context, const CharacterScreen()),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                    // **Heute** (ADR-0053): die offenen Gewohnheiten, ein
+                    // Tipp je Häkchen. Die Figur gibt dafür Platz ab.
+                    const TodayCard(),
+                    const SizedBox(height: 12),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        HubCircle(
+                          icon: Icons.storefront_outlined,
+                          label: 'Laden',
+                          image: HubCircleImage.plain,
+                          onTap: () => _open(context, const ShopScreen()),
+                        ),
+                        // **Nie gesperrt**, obwohl auf Level 1 nur der
+                        // Waffenplatz offen ist: Der Bildschirm zeigt vor
+                        // allem, was es zu holen gibt, und das ist genau
+                        // dann am nützlichsten, wenn man noch nichts hat.
+                        HubCircle(
+                          icon: Icons.auto_awesome,
+                          label: 'Fähigkeiten',
+                          image: HubCircleImage.plain,
+                          symbol: abilitySymbol,
+                          onTap: () => _open(context, const AbilitiesScreen()),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            // Nur im Debug-Build. Im Release ist der Zweig
+                            // samt Bildschirm gar nicht erst im Bündel
+                            // (ADR-0021), und an dieser Stelle steht dann
+                            // nichts.
+                            if (devModeAvailable) const _DevKnopf(),
+                            HubCircle(
+                              icon: Icons.person_outline,
+                              label: 'Charakter',
+                              // Die einzige Flaeche, die ihr Zeichen selbst
+                              // mitbringt.
+                              image: HubCircleImage.character,
+                              onTap: () =>
+                                  _open(context, const CharacterScreen()),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
