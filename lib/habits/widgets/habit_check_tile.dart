@@ -38,6 +38,8 @@ class HabitCheckTile extends StatelessWidget {
     required this.onToggle,
     required this.onAdvance,
     required this.onStop,
+    this.cue,
+    this.onEditCue,
     super.key,
   });
 
@@ -72,6 +74,17 @@ class HabitCheckTile extends StatelessWidget {
   final VoidCallback onAdvance;
 
   final VoidCallback onStop;
+
+  /// Wann die Gewohnheit drankommt — „nach dem Zähneputzen" (ADR-0052).
+  ///
+  /// Steht **unten** auf der Kachel, nicht unter dem Namen: Die Mitte
+  /// ist, wo man zum Abhaken hintippt, und eine eigene Tippfläche dort
+  /// machte aus einem Häkchen einen Dialog. Auf einer erledigten Kachel
+  /// fällt er weg — dort hat er seine Arbeit getan.
+  final String? cue;
+
+  /// Öffnet die Frage nach dem Auslöser. Null blendet die Zeile aus.
+  final VoidCallback? onEditCue;
 
   HabitGoal? get _goal => habit.goal;
 
@@ -126,6 +139,10 @@ class HabitCheckTile extends StatelessWidget {
                             label: goal.progressLabel(progress),
                           ),
                         ],
+                        if (!isChecked && onEditCue != null) ...<Widget>[
+                          const SizedBox(height: 4),
+                          _CueLine(cue: cue, onTap: onEditCue!),
+                        ],
                       ],
                     ),
                   ),
@@ -164,6 +181,59 @@ class HabitCheckTile extends StatelessWidget {
 
   static String _plusTooltip(HabitGoal goal) {
     return goal.step == 1 ? 'Eins mehr' : '${goal.step} ${goal.unit} mehr';
+  }
+}
+
+/// Die Zeile mit dem Auslöser — oder, ohne ihn, die Frage danach.
+///
+/// Eine eigene Tippfläche in der Kachel: Wer sie antippt, will den Satz
+/// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
+/// Kachel darum bleibt stehen.
+class _CueLine extends StatelessWidget {
+  const _CueLine({required this.cue, required this.onTap});
+
+  final String? cue;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = cue;
+    final farbe = text == null ? Palette.muted : Palette.textDim;
+
+    return Druck(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                text == null ? Icons.add_alarm_outlined : Icons.link_rounded,
+                size: 14,
+                color: farbe,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  text ?? 'Wann machst du das?',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: farbe,
+                    fontStyle: text == null
+                        ? FontStyle.italic
+                        : FontStyle.normal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -39,6 +39,21 @@ void _passRootBranch(ProviderContainer container) {
   }
 }
 
+/// Startet die oberste Vorlage und lässt die Frage nach dem Auslöser
+/// liegen (ADR-0052) — „Später", wie jemand, der es eilig hat.
+Future<void> _vorlageStarten(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+  await tester.pumpAndSettle();
+  await _spaeter(tester);
+}
+
+/// Schließt die Frage „Wann machst du das?", falls sie offen ist.
+Future<void> _spaeter(WidgetTester tester) async {
+  if (find.text('Später').evaluate().isEmpty) return;
+  await tester.tap(find.text('Später'));
+  await tester.pumpAndSettle();
+}
+
 Future<void> _pumpScreen(
   WidgetTester tester,
   ProviderContainer container,
@@ -55,14 +70,17 @@ Future<void> _pumpScreen(
 
 void main() {
   group('HabitsScreen', () {
-    testWidgets('ohne Fortschritt weist der Bildschirm zum Skillbaum', (
+    testWidgets('ohne Fortschritt steht die Startvorlage bereit', (
       tester,
     ) async {
+      // Die erste Sitzung soll mit einem Häkchen enden, nicht mit Lesen
+      // (ADR-0052). Bis dahin stand hier ein leerer Bildschirm mit dem
+      // Weg zum Skillbaum.
       final container = _container();
       await _pumpScreen(tester, container);
 
-      expect(find.text('Noch keine Gewohnheit freigeschaltet'), findsOneWidget);
-      expect(find.text('Zum Skillbaum'), findsOneWidget);
+      expect(find.text(HabitCatalog.starter.name), findsOneWidget);
+      expect(find.byIcon(Icons.playlist_add), findsOneWidget);
     });
 
     testWidgets('bestandene Lektionen bringen ihre Vorlagen mit', (
@@ -87,8 +105,7 @@ void main() {
       _passRootBranch(container);
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await _vorlageStarten(tester);
 
       final tracker = container.read(habitTrackerProvider);
       expect(tracker.activeIds, hasLength(1));
@@ -150,8 +167,7 @@ void main() {
       final goldVorher = container.read(goldProvider);
 
       await _pumpScreen(tester, container);
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await _vorlageStarten(tester);
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
 
@@ -175,8 +191,7 @@ void main() {
       final xpVorher = container.read(totalXpProvider);
 
       await _pumpScreen(tester, container);
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await _vorlageStarten(tester);
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
       await tester.tap(find.byIcon(Icons.check_circle));
@@ -217,8 +232,7 @@ void main() {
       await _pumpScreen(tester, container);
 
       for (var i = 0; i < HabitRewards.maxActiveHabits; i++) {
-        await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-        await tester.pump();
+        await _vorlageStarten(tester);
       }
 
       expect(
@@ -236,6 +250,119 @@ void main() {
       );
       expect(buttons, isNotEmpty);
       expect(buttons.every((b) => b.onPressed == null), isTrue);
+    });
+  });
+
+  /// Der Auslöser (ADR-0052): wann eine Gewohnheit drankommt.
+  ///
+  /// Der Weg geht über drei Stellen — Starten, Dialog, Kachel —, und der
+  /// Satz muss am Ende auf der Kachel stehen und im Tracker liegen.
+  group('Wann machst du das?', () {
+    testWidgets('Starten fragt nach dem Auslöser', (tester) async {
+      final container = _container();
+      await _pumpScreen(tester, container);
+
+      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Wann machst du das?'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Später'), findsOneWidget);
+    });
+
+    testWidgets('ein Vorschlag landet auf der Kachel', (tester) async {
+      final container = _container();
+      await _pumpScreen(tester, container);
+
+      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ActionChip, 'Nach dem Zähneputzen'));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'Festlegen'));
+      await tester.pumpAndSettle();
+
+      final starter = HabitCatalog.starterId;
+      expect(
+        container.read(habitTrackerProvider).cueFor(starter),
+        'Nach dem Zähneputzen',
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.text('Nach dem Zähneputzen'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Später lässt die Frage auf der Kachel stehen', (tester) async {
+      final container = _container();
+      await _pumpScreen(tester, container);
+      await _vorlageStarten(tester);
+
+      expect(
+        container.read(habitTrackerProvider).cueFor(HabitCatalog.starterId),
+        isNull,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.text('Wann machst du das?'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('die Zeile ändert den Satz, statt abzuhaken', (tester) async {
+      final container = _container();
+      await _pumpScreen(tester, container);
+      await _vorlageStarten(tester);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.text('Wann machst du das?'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        container
+            .read(habitTrackerProvider)
+            .isChecked(HabitCatalog.starterId, _heute),
+        isFalse,
+      );
+      await tester.enterText(find.byType(TextField), 'Nach dem Kaffee');
+      await tester.tap(find.widgetWithText(FilledButton, 'Festlegen'));
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(habitTrackerProvider).cueFor(HabitCatalog.starterId),
+        'Nach dem Kaffee',
+      );
+    });
+
+    testWidgets('auf einer erledigten Kachel steht er nicht', (tester) async {
+      final container = _container();
+      container
+          .read(habitTrackerProvider.notifier)
+          .activate(HabitCatalog.starterId);
+      container
+          .read(habitTrackerProvider.notifier)
+          .setCue(HabitCatalog.starterId, 'Nach dem Kaffee');
+      await _pumpScreen(tester, container);
+
+      expect(find.text('Nach dem Kaffee'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nach dem Kaffee'), findsNothing);
     });
   });
 
@@ -273,18 +400,19 @@ void main() {
 
       await tester.tap(find.widgetWithText(FilledButton, 'Anlegen'));
       await tester.pumpAndSettle();
+      await _spaeter(tester);
     }
 
-    testWidgets('ohne freigeschaltete Vorlage gibt es keinen Platz', (
+    testWidgets('ohne Lektion gibt es den Platz der Startvorlage', (
       tester,
     ) async {
+      // Eine Vorlage bringt beides mit, den Eintrag und den Platz
+      // (ADR-0028) — auch die Startvorlage (ADR-0052).
       final container = _container();
       await _pumpScreen(tester, container);
 
-      // Der leere Bildschirm nennt es ausdrücklich mit: Eine Vorlage
-      // bringt beides mit, den Eintrag und den Platz.
-      expect(container.read(customSlotsProvider), 0);
-      expect(find.byIcon(Icons.playlist_add), findsNothing);
+      expect(container.read(customSlotsProvider), 1);
+      expect(find.byIcon(Icons.playlist_add), findsOneWidget);
     });
 
     testWidgets('jede freigeschaltete Vorlage gibt einen Platz', (
@@ -542,8 +670,7 @@ void main() {
       _passRootBranch(container);
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await _vorlageStarten(tester);
       await tester.tap(find.byType(HabitCheckTile).first);
       await tester.pump(const Duration(milliseconds: 300));
 

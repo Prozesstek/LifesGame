@@ -7,9 +7,44 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.09.2026 · Frederik
+**Zuletzt aktualisiert:** 27.09.2026 · Frederik
 
 ---
+
+## 27.09.2026: „Wann machst du das?“ und die erste Gewohnheit ab Start
+
+Nach einer Durchsicht der ganzen App nach den vier Gesetzen der
+Verhaltensänderung (Frederik, mit einem Foto aus *Die 1%-Methode*):
+Die Belohnung ist die Stärke der App, der **Auslöser** fehlt fast ganz.
+Frederik hat zwei der fünf Vorschläge gewählt,
+[ADR-0052](../decisions/0052-ausloeser-und-startvorlage.md).
+
+| Was | Wie |
+|---|---|
+| **Auslöser** | jede Gewohnheit kann eine Zeile tragen, „nach dem Zähneputzen“. Gefragt wird beim Starten, mit sechs Vorschlägen zum Antippen; „Später“ lässt die Frage auf der Kachel stehen |
+| Wo er steht | unten auf der Kachel, nur solange sie offen ist; antippen ändert ihn |
+| Gespeichert | `HabitTracker.cueFor`, Abschnitt `cues`, erzeugt keine Zahl |
+| **Startvorlage** | „Zwei Minuten lesen“ ist ab Start offen, samt Platz für eine eigene |
+| Weg | der leere Bildschirm „Noch keine Gewohnheit freigeschaltet“ — er ist unerreichbar |
+
+**Was der Test gefunden hat:** Die erste Fassung setzte die Zeile unter
+den Namen, und dort lag sie genau in der Mitte der Kachel. Ein Tipp in
+die Mitte, der übliche zum Abhaken, öffnete den Dialog. Sie steht jetzt
+unten.
+
+habits 205 (vorher 191), App 540 (vorher 535). **Nicht angesehen**,
+weder im Browser noch am Handy.
+
+### Offen aus der Durchsicht
+
+1. **Eine tägliche Erinnerung** — der größte Hebel. Die Web-Fassung
+   kann sie ohne Server nicht verlässlich schicken; das braucht das APK
+   oder Web-Push. Entscheidung steht aus.
+2. **„Heute“ auf der Startseite**, direkt abhakbar über der Figur.
+3. **Identität im Wochenrückblick**: „23-mal gelesen — so sieht ein
+   Leser aus“ (Handbuch-Lektion „Wer du sein willst“).
+4. Grundsatz für alles Neue: Jede Spielmechanik führt zurück zum
+   Häkchen, wie die Schlüssel.
 
 ## 26.09.2026: der Wissensbaum bekommt Zwischenebenen
 

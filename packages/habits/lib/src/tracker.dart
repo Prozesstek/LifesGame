@@ -78,12 +78,14 @@ class HabitTracker {
     List<CustomHabit> custom = const <CustomHabit>[],
     Set<Day> frozenDays = const <Day>{},
     Set<Day> openedChests = const <Day>{},
+    Map<String, String> cues = const <String, String>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
         _custom = List<CustomHabit>.unmodifiable(custom),
         _frozenDays = Set<Day>.unmodifiable(frozenDays),
-        _openedChests = Set<Day>.unmodifiable(openedChests);
+        _openedChests = Set<Day>.unmodifiable(openedChests),
+        _cues = Map<String, String>.unmodifiable(cues);
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
@@ -91,7 +93,8 @@ class HabitTracker {
         _progress = const <String, Map<Day, int>>{},
         _custom = const <CustomHabit>[],
         _frozenDays = const <Day>{},
-        _openedChests = const <Day>{};
+        _openedChests = const <Day>{},
+        _cues = const <String, String>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -200,6 +203,20 @@ class HabitTracker {
       }
     }
 
+    final cues = <String, String>{};
+    final rawCues = json['cues'];
+    if (rawCues is Map) {
+      for (final entry in rawCues.entries) {
+        final habitId = entry.key;
+        final text = entry.value;
+        if (habitId is! String || text is! String || !bekannt(habitId)) {
+          continue;
+        }
+        final bereinigt = _cleanCue(text);
+        if (bereinigt != null) cues[habitId] = bereinigt;
+      }
+    }
+
     // Die Obergrenze wird beim Laden erzwungen, nicht nur beim Anlegen:
     // Ein Stand aus einer Version mit anderer Grenze darf sie nicht
     // unterlaufen.
@@ -214,6 +231,7 @@ class HabitTracker {
       custom: custom,
       frozenDays: frozen,
       openedChests: truhen,
+      cues: cues,
     );
   }
 
@@ -247,6 +265,16 @@ class HabitTracker {
   /// Wieder eine **Historie**: Der Inhalt eines Tages steht über
   /// [DailyChest.forDay] fest, Gold und Eis werden daraus gerechnet.
   final Set<Day> _openedChests;
+
+  /// Je Gewohnheit der **Auslöser**: wann oder wonach sie drankommt
+  /// (ADR-0052) — „nach dem Zähneputzen".
+  ///
+  /// Eine Zeile Text, keine Uhrzeit und kein Plan. Er gilt für Vorlagen
+  /// **und** eigene Gewohnheiten und steht deshalb hier, nicht am
+  /// [CustomHabit]: Eine Vorlage gehört dem Katalog, ihr Auslöser dem
+  /// Spieler. Er erzeugt keine Zahl und darf sich darum jederzeit
+  /// ändern.
+  final Map<String, String> _cues;
 
   /// Der Stand als JSON.
   ///
@@ -283,6 +311,7 @@ class HabitTracker {
         'chests': <Object?>[
           for (final day in _openedChests.toList()..sort()) day.toString(),
         ],
+      if (_cues.isNotEmpty) 'cues': <String, Object?>{..._cues},
     };
   }
 
@@ -406,6 +435,42 @@ class HabitTracker {
       ...sortiert.where((h) => !isChecked(h.id, day)),
       ...sortiert.where((h) => isChecked(h.id, day)),
     ]);
+  }
+
+  /// Wie lang ein Auslöser höchstens sein darf.
+  ///
+  /// Er steht auf der Kachel in einer Zeile. Was länger ist, ist kein
+  /// Auslöser mehr, sondern ein Plan.
+  static const int maxCueLength = 60;
+
+  /// Der Auslöser von [habitId] — oder null, wenn keiner festgelegt ist.
+  String? cueFor(String habitId) => _cues[habitId];
+
+  /// Legt den Auslöser von [habitId] fest; leer oder null entfernt ihn.
+  ///
+  /// Eine unbekannte Id ändert nichts — dieselbe Nachsicht wie beim
+  /// Laden. Überlanges wird gekürzt statt abgelehnt.
+  HabitTracker setCue(String habitId, String? text) {
+    if (definitionFor(habitId) == null) return this;
+
+    final bereinigt = text == null ? null : _cleanCue(text);
+    if (bereinigt == _cues[habitId]) return this;
+
+    final next = <String, String>{..._cues};
+    if (bereinigt == null) {
+      next.remove(habitId);
+    } else {
+      next[habitId] = bereinigt;
+    }
+    return _copyWith(cues: next);
+  }
+
+  static String? _cleanCue(String text) {
+    final eineZeile = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (eineZeile.isEmpty) return null;
+    return eineZeile.length > maxCueLength
+        ? eineZeile.substring(0, maxCueLength).trimRight()
+        : eineZeile;
   }
 
   bool isActive(String habitId) => _activeIds.contains(habitId);
@@ -653,6 +718,7 @@ class HabitTracker {
     List<CustomHabit>? custom,
     Set<Day>? frozenDays,
     Set<Day>? openedChests,
+    Map<String, String>? cues,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -661,6 +727,7 @@ class HabitTracker {
       custom: custom ?? _custom,
       frozenDays: frozenDays ?? _frozenDays,
       openedChests: openedChests ?? _openedChests,
+      cues: cues ?? _cues,
     );
   }
 

@@ -14,11 +14,11 @@ import '../character/show_ability_unlock.dart';
 import '../combat/ladder_controller.dart';
 import '../progression/show_level_up.dart';
 import '../theory/review_controller.dart';
-import '../theory/skill_tree_screen.dart';
 import '../theory/widgets/review_card.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'habits_controller.dart';
+import 'widgets/cue_dialog.dart';
 import 'widgets/custom_habit_sheet.dart';
 import 'widgets/daily_chest_card.dart';
 import 'widgets/daily_form_card.dart';
@@ -66,17 +66,14 @@ class HabitsScreen extends ConsumerWidget {
 
       // **Unten rechts, wo der Daumen ist.** Der Knopf sass bis Issue #35
       // als Zeile mitten in der Liste unter „Eigene" -- also genau dort,
-      // wo man ihn nur findet, wenn man ohnehin schon scrollt. Er ist
-      // ausgeblendet, solange der Skillbaum keine einzige Vorlage
-      // hergegeben hat: Ohne Vorlage gibt es keinen Platz (ADR-0028), und
-      // ein Knopf, der nur absagen kann, ist keiner.
-      floatingActionButton: unlocked.isEmpty
-          ? null
-          : _CustomHabitFab(
-              slotsLeft: slotsLeft,
-              listeVoll: tracker.isFull,
-              onCreate: () => _createCustom(context, ref),
-            ),
+      // wo man ihn nur findet, wenn man ohnehin schon scrollt. Seit der
+      // Startvorlage (ADR-0052) gibt es immer mindestens einen Platz, und
+      // der Knopf steht immer da.
+      floatingActionButton: _CustomHabitFab(
+        slotsLeft: slotsLeft,
+        listeVoll: tracker.isFull,
+        onCreate: () => _createCustom(context, ref),
+      ),
       body: AufstiegHost(
         // Ein Kontext **unter** dem Host: Die Rückrufe der Kacheln lassen
         // darüber Zahlen aufsteigen (`AufstiegHost.maybeOf`).
@@ -85,152 +82,140 @@ class HabitsScreen extends ConsumerWidget {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: _maxWidth),
-                child: unlocked.isEmpty
-                    ? const _NothingUnlockedYet()
-                    : ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-                        children: <Widget>[
-                          StatSummary(stats: stats),
-                          const SizedBox(height: 12),
-                          if (zuRetten != null) ...<Widget>[
-                            StreakFreezeCard(
-                              streakAtRisk: tracker.currentBestStreak(zuRetten),
-                              freezesLeft: tracker.freezesLeft,
-                              onUse: () => _useFreeze(context, ref, zuRetten),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          StreakLadderCard(
-                            bestStreak: tracker.currentBestStreak(today),
-                          ),
-                          if (active.isNotEmpty) ...<Widget>[
-                            const SizedBox(height: 12),
-                            DailyFormCard(
-                              form: ref.watch(dailyFormProvider),
-                              open: active.length - tracker.completedOn(today),
-                            ),
-                          ],
-                          if (ref.watch(todaysReviewProvider)
-                              case final frage?) ...<Widget>[
-                            const SizedBox(height: 12),
-                            ReviewCard(
-                              question: frage,
-                              answer: ref.watch(todaysReviewAnswerProvider),
-                              day: dayNumberOf(today),
-                              daysUntilNext: _tageBisZurRueckfrage(
-                                ref,
-                                frage,
-                                today,
-                              ),
-                              onAnswer: (wahl) =>
-                                  _answerReview(context, ref, frage, wahl),
-                            ),
-                          ],
-                          if (tracker.canOpenChest(today) ||
-                              tracker.hasOpenedChest(today)) ...<Widget>[
-                            const SizedBox(height: 12),
-                            DailyChestCard(
-                              canOpen: tracker.canOpenChest(today),
-                              opened: tracker.hasOpenedChest(today)
-                                  ? DailyChest.forDay(today)
-                                  : null,
-                              onOpen: () => _openChest(context, ref),
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          WeekCard(
-                            today: today,
-                            thisWeek: ref.watch(thisWeekProvider),
-                            lastWeek: ref.watch(lastWeekProvider),
-                          ),
-                          const SizedBox(height: 16),
-                          _SectionHeader(
-                            title: 'Heute',
-                            trailing:
-                                '${tracker.completedOn(today)} / ${active.length}',
-                          ),
-                          const SizedBox(height: 10),
-                          if (active.isEmpty)
-                            const _Hint(
-                              'Noch nichts gewählt. Unten stehen die Vorlagen, '
-                              'die der Skillbaum freigeschaltet hat.',
-                            )
-                          else
-                            // Offene oben, erledigte unten (`dailyListOn`).
-                            // Der Schlüssel hält den Sprung des Häkchens
-                            // an der Gewohnheit, wenn die Kachel die Reihe
-                            // wechselt.
-                            for (final habit in active) ...<Widget>[
-                              HabitCheckTile(
-                                key: ValueKey<String>(habit.id),
-                                habit: habit,
-                                isChecked: tracker.isChecked(habit.id, today),
-                                streak: tracker.currentStreak(habit.id, today),
-                                nextMultiplier: tracker.nextMultiplier(
-                                  habit.id,
-                                  today,
-                                ),
-                                xpGain: tracker.xpForNextCheck(habit.id, today),
-                                goldGain: tracker.goldForNextCheck(
-                                  habit.id,
-                                  today,
-                                ),
-                                progress: tracker.progressOn(habit.id, today),
-                                onToggle: () => _toggle(context, ref, habit),
-                                onAdvance: () => _advance(context, ref, habit),
-                                onStop: () => ref
-                                    .read(habitTrackerProvider.notifier)
-                                    .deactivate(habit.id),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
-                          const SizedBox(height: 18),
-                          _SectionHeader(
-                            title: 'Eigene',
-                            trailing: '${tracker.customCount} / $slots',
-                          ),
-                          const SizedBox(height: 10),
-                          if (ruhendeEigene.isEmpty)
-                            const _Hint(
-                              'Noch keine eigene angelegt. Der Knopf unten '
-                              'rechts fragt nach Name, Wert und Tagesziel.',
-                            ),
-                          for (final habit in ruhendeEigene) ...<Widget>[
-                            _RestingCustomTile(
-                              habit: habit,
-                              canActivate: tracker.canActivate(habit.id),
-                              onActivate: () => ref
-                                  .read(habitTrackerProvider.notifier)
-                                  .activate(habit.id),
-                            ),
-                          ],
-                          const SizedBox(height: 18),
-                          _SectionHeader(
-                            title: 'Vorlagen',
-                            trailing:
-                                '${tracker.activeIds.length} / '
-                                '${HabitRewards.maxActiveHabits}',
-                          ),
-                          const SizedBox(height: 10),
-                          if (availableTemplates.isEmpty)
-                            const _Hint(
-                              'Alle freigeschalteten Vorlagen laufen bereits. '
-                              'Weitere kommen aus dem Skillbaum.',
-                            )
-                          else
-                            for (final template
-                                in availableTemplates) ...<Widget>[
-                              HabitTemplateTile(
-                                template: template,
-                                canActivate: tracker.canActivate(template.id),
-                                onActivate: () => ref
-                                    .read(habitTrackerProvider.notifier)
-                                    .activate(template.id),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
-                        ],
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                  children: <Widget>[
+                    StatSummary(stats: stats),
+                    const SizedBox(height: 12),
+                    if (zuRetten != null) ...<Widget>[
+                      StreakFreezeCard(
+                        streakAtRisk: tracker.currentBestStreak(zuRetten),
+                        freezesLeft: tracker.freezesLeft,
+                        onUse: () => _useFreeze(context, ref, zuRetten),
                       ),
+                      const SizedBox(height: 12),
+                    ],
+                    StreakLadderCard(
+                      bestStreak: tracker.currentBestStreak(today),
+                    ),
+                    if (active.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      DailyFormCard(
+                        form: ref.watch(dailyFormProvider),
+                        open: active.length - tracker.completedOn(today),
+                      ),
+                    ],
+                    if (ref.watch(todaysReviewProvider)
+                        case final frage?) ...<Widget>[
+                      const SizedBox(height: 12),
+                      ReviewCard(
+                        question: frage,
+                        answer: ref.watch(todaysReviewAnswerProvider),
+                        day: dayNumberOf(today),
+                        daysUntilNext: _tageBisZurRueckfrage(ref, frage, today),
+                        onAnswer: (wahl) =>
+                            _answerReview(context, ref, frage, wahl),
+                      ),
+                    ],
+                    if (tracker.canOpenChest(today) ||
+                        tracker.hasOpenedChest(today)) ...<Widget>[
+                      const SizedBox(height: 12),
+                      DailyChestCard(
+                        canOpen: tracker.canOpenChest(today),
+                        opened: tracker.hasOpenedChest(today)
+                            ? DailyChest.forDay(today)
+                            : null,
+                        onOpen: () => _openChest(context, ref),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    WeekCard(
+                      today: today,
+                      thisWeek: ref.watch(thisWeekProvider),
+                      lastWeek: ref.watch(lastWeekProvider),
+                    ),
+                    const SizedBox(height: 16),
+                    _SectionHeader(
+                      title: 'Heute',
+                      trailing:
+                          '${tracker.completedOn(today)} / ${active.length}',
+                    ),
+                    const SizedBox(height: 10),
+                    if (active.isEmpty)
+                      const _Hint(
+                        'Noch nichts gewählt. Unten stehen die Vorlagen, '
+                        'die der Skillbaum freigeschaltet hat.',
+                      )
+                    else
+                      // Offene oben, erledigte unten (`dailyListOn`).
+                      // Der Schlüssel hält den Sprung des Häkchens
+                      // an der Gewohnheit, wenn die Kachel die Reihe
+                      // wechselt.
+                      for (final habit in active) ...<Widget>[
+                        HabitCheckTile(
+                          key: ValueKey<String>(habit.id),
+                          habit: habit,
+                          isChecked: tracker.isChecked(habit.id, today),
+                          streak: tracker.currentStreak(habit.id, today),
+                          nextMultiplier: tracker.nextMultiplier(
+                            habit.id,
+                            today,
+                          ),
+                          xpGain: tracker.xpForNextCheck(habit.id, today),
+                          goldGain: tracker.goldForNextCheck(habit.id, today),
+                          progress: tracker.progressOn(habit.id, today),
+                          onToggle: () => _toggle(context, ref, habit),
+                          onAdvance: () => _advance(context, ref, habit),
+                          onStop: () => ref
+                              .read(habitTrackerProvider.notifier)
+                              .deactivate(habit.id),
+                          cue: tracker.cueFor(habit.id),
+                          onEditCue: () => _editCue(context, ref, habit),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    const SizedBox(height: 18),
+                    _SectionHeader(
+                      title: 'Eigene',
+                      trailing: '${tracker.customCount} / $slots',
+                    ),
+                    const SizedBox(height: 10),
+                    if (ruhendeEigene.isEmpty)
+                      const _Hint(
+                        'Noch keine eigene angelegt. Der Knopf unten '
+                        'rechts fragt nach Name, Wert und Tagesziel.',
+                      ),
+                    for (final habit in ruhendeEigene) ...<Widget>[
+                      _RestingCustomTile(
+                        habit: habit,
+                        canActivate: tracker.canActivate(habit.id),
+                        onActivate: () => _activate(context, ref, habit),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    _SectionHeader(
+                      title: 'Vorlagen',
+                      trailing:
+                          '${tracker.activeIds.length} / '
+                          '${HabitRewards.maxActiveHabits}',
+                    ),
+                    const SizedBox(height: 10),
+                    if (availableTemplates.isEmpty)
+                      const _Hint(
+                        'Alle freigeschalteten Vorlagen laufen bereits. '
+                        'Weitere kommen aus dem Skillbaum.',
+                      )
+                    else
+                      for (final template in availableTemplates) ...<Widget>[
+                        HabitTemplateTile(
+                          template: template,
+                          canActivate: tracker.canActivate(template.id),
+                          onActivate: () => _activate(context, ref, template),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -256,6 +241,7 @@ class HabitsScreen extends ConsumerWidget {
         );
 
     final tracker = ref.read(habitTrackerProvider);
+    final laeuft = habit != null && tracker.isActive(habit.id);
     _say(context, switch (habit) {
       null =>
         'Kein Platz frei — dafür braucht es eine weitere Vorlage '
@@ -266,6 +252,43 @@ class HabitsScreen extends ConsumerWidget {
         '„${habit.name}" ist angelegt — die Tagesliste ist voll, '
             'sie wartet unter „Eigene".',
     });
+
+    if (laeuft) await _editCue(context, ref, habit);
+  }
+
+  /// Nimmt eine Gewohnheit auf die Tagesliste — und fragt gleich, wann
+  /// sie drankommt (ADR-0052).
+  ///
+  /// **Jetzt, nicht später:** Wer gerade entschieden hat, etwas täglich
+  /// zu tun, hat den Zeitpunkt im Kopf. Einen Tag später steht nur noch
+  /// die Zeile „Wann machst du das?" auf der Kachel. Wer schon einen
+  /// Auslöser hat (eine pausierte Gewohnheit), wird nicht noch einmal
+  /// gefragt.
+  Future<void> _activate(
+    BuildContext context,
+    WidgetRef ref,
+    Habit habit,
+  ) async {
+    ref.read(habitTrackerProvider.notifier).activate(habit.id);
+    final tracker = ref.read(habitTrackerProvider);
+    if (!tracker.isActive(habit.id) || tracker.cueFor(habit.id) != null) {
+      return;
+    }
+    await _editCue(context, ref, habit);
+  }
+
+  Future<void> _editCue(
+    BuildContext context,
+    WidgetRef ref,
+    Habit habit,
+  ) async {
+    final text = await showCueDialog(
+      context,
+      habitName: habit.name,
+      current: ref.read(habitTrackerProvider).cueFor(habit.id),
+    );
+    if (text == null || !context.mounted) return;
+    ref.read(habitTrackerProvider.notifier).setCue(habit.id, text);
   }
 
   void _toggle(BuildContext context, WidgetRef ref, Habit habit) {
@@ -730,62 +753,6 @@ class _RestingCustomTile extends StatelessWidget {
     final goal = habit.goal;
     if (goal != null) teile.add(goal.label);
     return teile.join(' · ');
-  }
-}
-
-/// Wenn der Skillbaum noch keine Vorlage hergegeben hat.
-///
-/// Kein leerer Bildschirm, sondern der Weg dorthin: Die erste Lektion im
-/// Zweig „Gewohnheiten" bringt die erste Vorlage — und damit auch den
-/// ersten Platz für eine eigene.
-class _NothingUnlockedYet extends StatelessWidget {
-  const _NothingUnlockedYet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Icon(
-            Icons.spa_outlined,
-            size: 44,
-            color: Palette.textOnDarkDim,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Noch keine Gewohnheit freigeschaltet',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Palette.textOnDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Jede Vorlage kommt aus einer Lektion — erst verstehen, '
-            'dann verfolgen. Die erste wartet im Zweig „Gewohnheiten", '
-            'und sie gibt zugleich den ersten Platz für eine eigene.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              height: 1.5,
-              color: Palette.textOnDarkDim,
-            ),
-          ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const SkillTreeScreen()),
-            ),
-            icon: const Icon(Icons.account_tree_outlined, size: 18),
-            label: const Text('Zum Skillbaum'),
-          ),
-        ],
-      ),
-    );
   }
 }
 

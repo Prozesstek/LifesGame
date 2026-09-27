@@ -116,6 +116,11 @@ als „bestanden".
 
 ## 3. Die Brücke zum Handeln
 
+> **Teilweise gebaut am 27.09.2026** ([ADR-0052](../decisions/0052-ausloeser-und-startvorlage.md)):
+> „Wann machst du das?“ wird beim **Starten** einer Gewohnheit gefragt,
+> nicht am Lektionsende — dort wird nur freigeschaltet. Die Verbindung
+> im Moment des Lernens steht weiter aus.
+
 **Der billigste große Hebel** — und der, der am meisten auf das
 Produktversprechen einzahlt.
 
