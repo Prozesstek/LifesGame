@@ -31,8 +31,9 @@ Bild in 390 × 844 mit Roboto, **nicht am Handy**. Der Layout-Test baut
 die Startseite jetzt mit fünf offenen Gewohnheiten **und** Auslösern.
 App 546.
 
-Offen aus der Durchsicht bleiben die Erinnerung (APK oder Web-Push) und
-die Identität im Wochenrückblick.
+**Zurückgestellt** (Frederik, 27.09.: „nicht so wichtig“): die tägliche
+Erinnerung (APK oder Web-Push) und die Identität im Wochenrückblick.
+Beide stehen unten unter „Offen aus der Durchsicht“.
 
 ## 27.09.2026: „Wann machst du das?“ und die erste Gewohnheit ab Start
 
@@ -60,11 +61,11 @@ weder im Browser noch am Handy.
 
 ### Offen aus der Durchsicht
 
-1. **Eine tägliche Erinnerung** — der größte Hebel. Die Web-Fassung
+1. *(zurückgestellt)* **Eine tägliche Erinnerung** — der größte Hebel. Die Web-Fassung
    kann sie ohne Server nicht verlässlich schicken; das braucht das APK
    oder Web-Push. Entscheidung steht aus.
 2. ~~**„Heute“ auf der Startseite**~~ — gebaut, siehe oben.
-3. **Identität im Wochenrückblick**: „23-mal gelesen — so sieht ein
+3. *(zurückgestellt)* **Identität im Wochenrückblick**: „23-mal gelesen — so sieht ein
    Leser aus“ (Handbuch-Lektion „Wer du sein willst“).
 4. Grundsatz für alles Neue: Jede Spielmechanik führt zurück zum
    Häkchen, wie die Schlüssel.
