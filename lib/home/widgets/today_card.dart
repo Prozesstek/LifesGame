@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
+import '../../habits/daily_quests_provider.dart';
 import '../../habits/habit_check_flow.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/habits_screen.dart';
@@ -39,6 +40,7 @@ class TodayCard extends ConsumerWidget {
         if (!tracker.isChecked(habit.id, today)) habit,
     ];
     final erledigt = liste.length - offen.length;
+    final abholbar = ref.watch(claimableQuestsProvider).length;
 
     return HolzKarte(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -46,7 +48,12 @@ class TodayCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _Kopf(done: erledigt, total: liste.length),
+          _Kopf(
+            done: erledigt,
+            total: liste.length,
+            streak: tracker.currentDayStreak(today),
+            heuteGetan: tracker.hasCheckOn(today),
+          ),
           if (liste.isEmpty)
             const _Hinweis(
               icon: Icons.play_circle_outline,
@@ -61,6 +68,16 @@ class TodayCard extends ConsumerWidget {
                 habit: habit,
                 cue: tracker.cueFor(habit.id),
                 onTap: () => toggleHabit(context, ref, habit),
+              ),
+            // Eine erledigte Tagesaufgabe wartet (ADR-0055) — abgeholt
+            // wird auf dem Gewohnheiten-Bildschirm, wo die Aufgaben stehen.
+            if (abholbar > 0)
+              _Hinweis(
+                icon: Icons.flag_rounded,
+                text: abholbar == 1
+                    ? 'Eine Tagesaufgabe ist erledigt — abholen'
+                    : '$abholbar Tagesaufgaben sind erledigt — abholen',
+                highlight: true,
               ),
             if (offen.isEmpty)
               _Hinweis(
@@ -90,10 +107,22 @@ void _oeffneGewohnheiten(BuildContext context) {
 
 /// „Heute" und der Stand — führt zum Gewohnheiten-Bildschirm.
 class _Kopf extends StatelessWidget {
-  const _Kopf({required this.done, required this.total});
+  const _Kopf({
+    required this.done,
+    required this.total,
+    required this.streak,
+    required this.heuteGetan,
+  });
 
   final int done;
   final int total;
+
+  /// Die Tageskette (ADR-0055) — die eine Zahl, die man schützen will.
+  final int streak;
+
+  /// Ob heute schon etwas abgehakt ist. Sonst brennt die Flamme blass:
+  /// Die Kette lebt noch, aber heute trägt sie noch nichts.
+  final bool heuteGetan;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +142,10 @@ class _Kopf extends StatelessWidget {
                   color: Palette.text,
                 ),
               ),
+              if (streak > 0) ...<Widget>[
+                const SizedBox(width: 10),
+                _Flamme(streak: streak, heuteGetan: heuteGetan),
+              ],
               const Spacer(),
               if (total > 0)
                 Text(
@@ -131,6 +164,40 @@ class _Kopf extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Die Flamme der Tageskette: kräftig, sobald heute etwas abgehakt ist,
+/// blass, solange der Tag sie noch nicht trägt.
+class _Flamme extends StatelessWidget {
+  const _Flamme({required this.streak, required this.heuteGetan});
+
+  final int streak;
+  final bool heuteGetan;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = heuteGetan ? Palette.accent : Palette.muted;
+    return Semantics(
+      label: heuteGetan
+          ? '$streak Tage am Stück'
+          : '$streak Tage am Stück, heute noch offen',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(Icons.local_fire_department_rounded, size: 20, color: farbe),
+          const SizedBox(width: 2),
+          Text(
+            '$streak',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: farbe,
+            ),
+          ),
+        ],
       ),
     );
   }

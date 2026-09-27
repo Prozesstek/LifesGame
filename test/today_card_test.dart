@@ -115,6 +115,36 @@ void main() {
     expect(find.byType(HabitsScreen), findsOneWidget);
   });
 
+  testWidgets('die Flamme zeigt die Tageskette', (tester) async {
+    // Zwei Gewohnheiten im Wechsel: Keine hat eine Kette über einen Tag,
+    // die Tageskette steht trotzdem auf drei (ADR-0055).
+    final tracker = const HabitTracker.empty()
+        .activate(starter.id)
+        .activate(zweite.id)
+        .check(starter.id, heute.previous.previous)
+        .tracker
+        .check(zweite.id, heute.previous)
+        .tracker
+        .check(starter.id, heute)
+        .tracker;
+    await startseite(tester, tracker);
+
+    expect(
+      inDerKarte(find.byIcon(Icons.local_fire_department_rounded)),
+      findsOneWidget,
+    );
+    expect(inDerKarte(find.text('3')), findsOneWidget);
+  });
+
+  testWidgets('ohne Kette keine Flamme', (tester) async {
+    await startseite(tester, const HabitTracker.empty().activate(starter.id));
+
+    expect(
+      inDerKarte(find.byIcon(Icons.local_fire_department_rounded)),
+      findsNothing,
+    );
+  });
+
   testWidgets('der Kopf führt zum Gewohnheiten-Bildschirm', (tester) async {
     await startseite(tester, const HabitTracker.empty().activate(starter.id));
 

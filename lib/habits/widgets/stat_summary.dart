@@ -102,9 +102,17 @@ class _StatCellState extends State<_StatCell>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              stat.label,
-              style: const TextStyle(fontSize: 11, color: Palette.textDim),
+            // **Eine Zeile, notfalls kleiner.** Im Viertel der Breite brach
+            // „Ausdauer" mit echter Schrift mitten im Wort um („Ausda|uer").
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                stat.label,
+                maxLines: 1,
+                softWrap: false,
+                style: const TextStyle(fontSize: 11, color: Palette.textDim),
+              ),
             ),
             const SizedBox(height: 4),
             // **Beide Zahlen schrumpfbar.** Eine Kachel ist ein Viertel

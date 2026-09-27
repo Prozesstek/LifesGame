@@ -47,6 +47,15 @@ class HabitsController extends Notifier<HabitTracker> {
     state = state.deactivate(habitId);
   }
 
+  /// Holt eine erledigte Tagesaufgabe ab (ADR-0055). Gibt zurück, ob
+  /// sich etwas geändert hat — eine offene oder schon abgeholte Aufgabe
+  /// ändert nichts.
+  bool claimQuest(DailyQuest quest) {
+    final vorher = state;
+    state = state.claimQuest(ref.read(todayProvider), quest);
+    return !identical(vorher, state);
+  }
+
   /// Legt fest, wann [habitId] drankommt; leer entfernt es (ADR-0052).
   void setCue(String habitId, String? text) {
     state = state.setCue(habitId, text);

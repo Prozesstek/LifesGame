@@ -716,6 +716,18 @@ void main() {
       (q) => find.text(q.prompt).evaluate().isNotEmpty,
     );
 
+    /// Beantwortet die zweite Runde richtig, falls es eine gibt
+    /// (ADR-0055): Was falsch war, kommt am Ende noch einmal.
+    Future<void> zweiteRunde(WidgetTester tester) async {
+      while (find.textContaining('Noch einmal').evaluate().isNotEmpty) {
+        final question = shownQuestion();
+        await tester.tap(find.text(question.options[question.correctIndex]));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Weiter'));
+        await tester.pumpAndSettle();
+      }
+    }
+
     /// Beantwortet alle Fragen und geht bis zum Ergebnis durch.
     ///
     /// Getippt wird ueber den **Text** der Antwort, nicht ueber ihre
@@ -739,6 +751,7 @@ void main() {
         await tester.tap(find.text(isLast ? 'Auswerten' : 'Weiter'));
         await tester.pumpAndSettle();
       }
+      await zweiteRunde(tester);
     }
 
     testWidgets('zeigt erst den Text, dann die Fragen', (tester) async {
@@ -780,6 +793,105 @@ void main() {
         ),
       );
       expect(button.onPressed, isNull);
+    });
+
+    group('Die zweite Runde (ADR-0055)', () {
+      Future<void> ersteRunde(
+        WidgetTester tester, {
+        required int falsch,
+      }) async {
+        await tester.tap(
+          find.text('${_first.questionCount} Fragen beantworten'),
+        );
+        await tester.pumpAndSettle();
+        for (var i = 0; i < _first.questionCount; i++) {
+          final question = shownQuestion();
+          final option = i < falsch
+              ? (question.correctIndex + 1) % question.options.length
+              : question.correctIndex;
+          await tester.tap(find.text(question.options[option]));
+          await tester.pumpAndSettle();
+          final isLast = i == _first.questionCount - 1;
+          await tester.tap(find.text(isLast ? 'Auswerten' : 'Weiter'));
+          await tester.pumpAndSettle();
+        }
+      }
+
+      testWidgets('alles richtig: keine zweite Runde', (tester) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        await pump(tester, container);
+
+        await ersteRunde(tester, falsch: 0);
+
+        expect(find.textContaining('Noch einmal'), findsNothing);
+        expect(
+          container.read(theoryProgressProvider).isPassed(_first.id),
+          isTrue,
+        );
+      });
+
+      testWidgets('eine falsche Antwort kommt am Ende noch einmal', (
+        tester,
+      ) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        await pump(tester, container);
+
+        await ersteRunde(tester, falsch: 1);
+
+        expect(find.text('Noch einmal — die letzte'), findsOneWidget);
+        // Noch nicht abgegeben: Das Ergebnis kommt nach der Runde.
+        expect(
+          container.read(theoryProgressProvider).recordFor(_first.id),
+          isNull,
+        );
+      });
+
+      testWidgets('wieder falsch heißt: sie kommt wieder', (tester) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        await pump(tester, container);
+        await ersteRunde(tester, falsch: 1);
+
+        final frage = shownQuestion();
+        await tester.tap(
+          find.text(
+            frage.options[(frage.correctIndex + 1) % frage.options.length],
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Weiter'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Noch einmal — die letzte'), findsOneWidget);
+        expect(shownQuestion().prompt, frage.prompt);
+      });
+
+      testWidgets('gewertet wird der erste Durchgang', (tester) async {
+        // Zwei von drei falsch, dann alles nachgeholt: Die Seite ist
+        // trotzdem nicht bestanden. Sonst bestünde jede.
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        await pump(tester, container);
+
+        await ersteRunde(tester, falsch: 2);
+        await zweiteRunde(tester);
+
+        final record = container
+            .read(theoryProgressProvider)
+            .recordFor(_first.id);
+        expect(record, isNotNull);
+        expect(record!.bestCorrect, _first.questionCount - 2);
+        expect(
+          container.read(theoryProgressProvider).isPassed(_first.id),
+          isFalse,
+        );
+      });
     });
 
     testWidgets('die Erklärung erscheint nach der Antwort', (tester) async {

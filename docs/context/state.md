@@ -24,9 +24,9 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, Streaks, Streak-Eis, Tagesform, Tagestruhe, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052 |
+| **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
 | **Startseite** | Figur mit Ausrüstung, sechs Kreise, „Heute“ zum Abhaken | ADR-0049, -0053 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages | ADR-0019, -0045, -0050, -0051 |
+| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal** | ADR-0019, -0045, -0050, -0051, -0055 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel | ADR-0029–0031, -0034, -0047, -0048 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 559, dazu die acht Packages (theory 165, habits 205, gear
+**Tests:** App 570, dazu die acht Packages (theory 165, habits 227, gear
 112, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -44,10 +44,9 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
 **Braucht euch beide:**
 
-- **Was der Testlauf misst.** Seit dem 21.09. kamen 83 Commits und
-  +35.000 Zeilen, darunter ein neues Kampfsystem; gezählt wird für Ziel 7
-  nichts. Funktionen einfrieren und zählen — oder die Ziellinie neu
-  setzen.
+- ~~**Was der Testlauf misst.**~~ Entschieden am 27.09. (Frederik):
+  **weiterbauen**. Der Testlauf ist damit ein Entwicklungsmonat; ob
+  Ziel 7 neu formuliert wird, steht in `ziele.md` noch aus.
 - **Das Dorf** statt der Kreise? Braucht AktivesBrett und einen ADR.
 
 **Inhalt und Balance:**
@@ -83,6 +82,27 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 27.09.2026, spät: drei Dinge von Duolingo
+
+Auf die Frage, wie sich das Konzept mit Duolingo als Vorbild verfeinern
+lässt; Frederik hat drei Vorschläge gewählt und entschieden:
+**weiterbauen** statt einfrieren.
+[ADR-0055](../decisions/0055-tageskette-aufgaben-und-wiederholen.md).
+
+| Was | Wie |
+|---|---|
+| **Tageskette** | Tage mit mindestens einem Häkchen, als Flamme in „Heute“ auf der Startseite; blass, solange heute nichts abgehakt ist. Die Leiter auf dem Gewohnheiten-Bildschirm heißt jetzt „Kette je Gewohnheit“, ohne Flamme |
+| **Zweite Runde** | Falsch Beantwortetes kommt am Ende der Lektion noch einmal, neu gemischt, bis es sitzt. Gewertet wird der erste Durchgang |
+| **Tagesaufgaben** | drei am Tag, immer eine zum Abhaken; abholen bringt einen Schlüssel. Nie aus der Grube (ADR-0048). Auf der Startseite ein Hinweis, sobald etwas abzuholen ist |
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit echter Schrift):
+Der Knopf „Abholen“ als Holzplanke drückte den Text weg — jetzt ein
+kleiner eigener Knopf. Und ein **alter** Fehler: Die Namen der Werte
+brachen mitten im Wort um („Ausda|uer“). Behoben.
+
+habits 227 (vorher 205), App 570. **Nicht am Handy angesehen.**
+
 ## 27.09.2026, abends: Sicherung, CI, Aufräumen
 
 Nach einer kritischen Durchsicht der ganzen App (Frederik: „gehe

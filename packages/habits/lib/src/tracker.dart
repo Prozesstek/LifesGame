@@ -2,6 +2,7 @@ import 'catalog.dart';
 import 'character_stats.dart';
 import 'daily_chest.dart';
 import 'daily_form.dart';
+import 'daily_quests.dart';
 import 'day.dart';
 import 'habit.dart';
 import 'rewards.dart';
@@ -79,13 +80,18 @@ class HabitTracker {
     Set<Day> frozenDays = const <Day>{},
     Set<Day> openedChests = const <Day>{},
     Map<String, String> cues = const <String, String>{},
+    Map<Day, Set<String>> claimedQuests = const <Day, Set<String>>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
         _custom = List<CustomHabit>.unmodifiable(custom),
         _frozenDays = Set<Day>.unmodifiable(frozenDays),
         _openedChests = Set<Day>.unmodifiable(openedChests),
-        _cues = Map<String, String>.unmodifiable(cues);
+        _cues = Map<String, String>.unmodifiable(cues),
+        _claimedQuests = Map<Day, Set<String>>.unmodifiable(<Day, Set<String>>{
+          for (final entry in claimedQuests.entries)
+            entry.key: Set<String>.unmodifiable(entry.value),
+        });
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
@@ -94,7 +100,8 @@ class HabitTracker {
         _custom = const <CustomHabit>[],
         _frozenDays = const <Day>{},
         _openedChests = const <Day>{},
-        _cues = const <String, String>{};
+        _cues = const <String, String>{},
+        _claimedQuests = const <Day, Set<String>>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -217,6 +224,23 @@ class HabitTracker {
       }
     }
 
+    final abgeholt = <Day, Set<String>>{};
+    final rawQuests = json['quests'];
+    if (rawQuests is Map) {
+      for (final entry in rawQuests.entries) {
+        final key = entry.key;
+        final ids = entry.value;
+        if (key is! String || ids is! List) continue;
+        final day = Day.tryParse(key);
+        if (day == null) continue;
+        final gueltig = <String>{
+          for (final id in ids)
+            if (id is String && QuestKind.values.any((k) => k.name == id)) id,
+        };
+        if (gueltig.isNotEmpty) abgeholt[day] = gueltig;
+      }
+    }
+
     // Die Obergrenze wird beim Laden erzwungen, nicht nur beim Anlegen:
     // Ein Stand aus einer Version mit anderer Grenze darf sie nicht
     // unterlaufen.
@@ -232,6 +256,7 @@ class HabitTracker {
       frozenDays: frozen,
       openedChests: truhen,
       cues: cues,
+      claimedQuests: abgeholt,
     );
   }
 
@@ -276,6 +301,12 @@ class HabitTracker {
   /// ändern.
   final Map<String, String> _cues;
 
+  /// Je Tag die abgeholten Tagesaufgaben (ADR-0055) — eine **Historie**
+  /// wie die geöffneten Truhen. Was eine Aufgabe verlangte, steht über
+  /// `DailyQuests.forDay` fest; gespeichert wird nur das Abholen, denn
+  /// nur das bringt etwas ein.
+  final Map<Day, Set<String>> _claimedQuests;
+
   /// Der Stand als JSON.
   ///
   /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
@@ -312,6 +343,11 @@ class HabitTracker {
           for (final day in _openedChests.toList()..sort()) day.toString(),
         ],
       if (_cues.isNotEmpty) 'cues': <String, Object?>{..._cues},
+      if (_claimedQuests.isNotEmpty)
+        'quests': <String, Object?>{
+          for (final day in _claimedQuests.keys.toList()..sort())
+            day.toString(): (_claimedQuests[day]!.toList()..sort()),
+        },
     };
   }
 
@@ -719,6 +755,7 @@ class HabitTracker {
     Set<Day>? frozenDays,
     Set<Day>? openedChests,
     Map<String, String>? cues,
+    Map<Day, Set<String>>? claimedQuests,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -728,6 +765,7 @@ class HabitTracker {
       frozenDays: frozenDays ?? _frozenDays,
       openedChests: openedChests ?? _openedChests,
       cues: cues ?? _cues,
+      claimedQuests: claimedQuests ?? _claimedQuests,
     );
   }
 
@@ -937,6 +975,90 @@ class HabitTracker {
     if (milestone == null) return 0;
     final fehlt = milestone.days - currentStreak(habitId, today);
     return fehlt < 1 ? 1 : fehlt;
+  }
+
+  // --- Tagesaufgaben (ADR-0055) ---
+
+  /// Ob die Aufgabe [questId] an [day] schon abgeholt ist.
+  bool isQuestClaimed(Day day, String questId) =>
+      _claimedQuests[day]?.contains(questId) ?? false;
+
+  /// Wie viele Aufgaben je abgeholt wurden — die Quelle ihrer Schlüssel.
+  int get claimedQuestCount =>
+      _claimedQuests.values.fold(0, (sum, ids) => sum + ids.length);
+
+  /// Holt [quest] an [day] ab — nur wenn sie erledigt und noch nicht
+  /// abgeholt ist. Sonst ändert sich nichts.
+  ///
+  /// Ob sie erledigt ist, prüft der Aufrufer über `DailyQuests.forDay`:
+  /// Die Rückfrage, die dort mitzählt, kennt dieses Package nicht.
+  HabitTracker claimQuest(Day day, DailyQuest quest) {
+    if (!quest.isDone || isQuestClaimed(day, quest.id)) return this;
+    return _copyWith(
+      claimedQuests: <Day, Set<String>>{
+        ..._claimedQuests,
+        day: <String>{...?_claimedQuests[day], quest.id},
+      },
+    );
+  }
+
+  // --- Tageskette (ADR-0055) ---
+
+  /// Die Tage mit mindestens einem Häkchen, egal an welcher Gewohnheit.
+  Set<Day> get _activeDays => <Day>{
+        for (final days in _checks.values) ...days,
+      };
+
+  /// Ob an [day] irgendetwas abgehakt ist.
+  bool hasCheckOn(Day day) => _checks.values.any((d) => d.contains(day));
+
+  /// Die **Tageskette**, die an [day] endet: Tage am Stück mit mindestens
+  /// einem Häkchen, egal an welcher Gewohnheit.
+  ///
+  /// **Warum es sie neben den Ketten je Gewohnheit gibt.** Die eine Zahl,
+  /// die man schützen will — die Flamme bei Duolingo. Wer eine von fünf
+  /// Gewohnheiten auslässt, hat den Tag trotzdem geschafft, und diese
+  /// Kette sagt das. Die Ketten je Gewohnheit bleiben für die
+  /// Multiplikatoren.
+  ///
+  /// Das Streak-Eis gilt hier wie dort: Ein gedeckter Tag trägt die Kette,
+  /// verlängert sie aber nicht.
+  int dayStreakEndingAt(Day day) {
+    final days = _activeDays;
+    if (days.isEmpty) return 0;
+
+    var streak = 0;
+    var cursor = day;
+    while (true) {
+      if (days.contains(cursor)) {
+        streak++;
+      } else if (!_frozenDays.contains(cursor)) {
+        break;
+      }
+      cursor = cursor.previous;
+    }
+    return streak;
+  }
+
+  /// Die Tageskette, die heute noch zählt — dieselbe Regel wie bei
+  /// [currentStreak]: Sie stirbt erst, wenn der Tag vorbei ist.
+  int currentDayStreak(Day today) {
+    if (hasCheckOn(today)) return dayStreakEndingAt(today);
+    return dayStreakEndingAt(today.previous);
+  }
+
+  /// Die längste Tageskette, die je gelaufen ist. Darf nur steigen.
+  int get longestDayStreak {
+    final sorted = _activeDays.toList()..sort();
+    var best = 0;
+    var streak = 0;
+    Day? previous;
+    for (final day in sorted) {
+      streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
+      if (streak > best) best = streak;
+      previous = day;
+    }
+    return best;
   }
 
   /// Die längste Kette, die **gerade** läuft — über alle Gewohnheiten.

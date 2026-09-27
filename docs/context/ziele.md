@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 26.09.2026 · Frederik
+**Zuletzt aktualisiert:** 27.09.2026 · Frederik
 
 ---
 
@@ -507,6 +507,13 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **27.09.2026** — **Weiterbauen im Testlauf** (Frederik). Die Frage war,
+  ob bis zum 20.10. eingefroren und Ziel 7 gezählt wird; entschieden ist,
+  weiterzubauen. Seit dem 21.09. hat sich das Spiel täglich geändert —
+  „Abbruch wegen Langeweile“ misst damit ein bewegliches Ziel. Ob Ziel 7
+  neu formuliert wird, ist offen. Als Erstes gebaut: Tageskette,
+  Tagesaufgaben, zweite Runde in Lektionen
+  ([ADR-0055](../decisions/0055-tageskette-aufgaben-und-wiederholen.md)).
 - **26.09.2026** — **Die Sperre „Baum über 24 Knoten" ist aufgehoben**
   ([ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)).
   Mitten im Testlauf, bewusst: Der Baum bekommt Zwischenebenen, und alle

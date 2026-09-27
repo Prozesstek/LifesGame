@@ -64,6 +64,27 @@ void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
   );
 }
 
+/// Holt eine erledigte Tagesaufgabe ab (ADR-0055): Klang, Stoß, und
+/// der Schlüssel steigt dort auf, wo getippt wurde.
+///
+/// Ist der Vorrat voll, verfällt der Schlüssel (`GearKeys`) — dann steht
+/// das auch da, statt „+1 Schlüssel" zu behaupten.
+void claimDailyQuest(BuildContext context, WidgetRef ref, DailyQuest quest) {
+  final schluesselVorher = ref.read(availableKeysProvider);
+  final geaendert = ref.read(habitTrackerProvider.notifier).claimQuest(quest);
+  if (!geaendert) return;
+
+  unawaited(HapticFeedback.mediumImpact());
+  ref.read(soundPlayerProvider).play(SoundEffect.beute);
+  AufstiegHost.maybeOf(context)?.zeige(<AufstiegZeile>[
+    keyGainLine(ref, schluesselVorher) ??
+        const AufstiegZeile(
+          'Aufgabe erledigt — Schlüssel voll',
+          color: Palette.goldOnDark,
+        ),
+  ]);
+}
+
 /// Ein Schritt auf ein Tagesziel.
 void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
   final today = ref.read(todayProvider);
