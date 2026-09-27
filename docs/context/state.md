@@ -11,6 +11,16 @@
 
 ---
 
+## 27.09.2026, zuletzt: neuer Boden in der Grube
+
+Frederiks neue Ziegel ersetzen `assets/Grube/Boden.png` (256 × 256,
+nahtlos, geprüft an einer 2 × 2 gelegten Vorschau). Sie haben sechzehn
+Reihen statt etwa elf; die Kachel liegt deshalb über **sechs** Felder
+statt vier (`GrubeFiguren.bodenFelder`), damit die Ziegel im Spiel so
+groß bleiben wie vorher. Der neue Boden hat **mehr Kontrast** — ob die
+dunkle Fledermaus darauf noch liest, zeigt das Spielen. Angesehen als
+skalierte Vorschau, nicht in der Grube.
+
 ## 27.09.2026, danach: „Heute“ auf der Startseite
 
 [ADR-0053](../decisions/0053-heute-auf-der-startseite.md), Punkt 2 aus

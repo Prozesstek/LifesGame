@@ -201,8 +201,13 @@ abstract final class GrubeFiguren {
   /// Der Boden — Frederiks Ziegel, 256 × 256, nahtlos. Eine Kachel liegt
   /// über [bodenFelder] × [bodenFelder] Feldern; auf ein einziges Feld
   /// gelegt, wären die Ziegel zwei Punkte hoch und nur noch Rauschen.
+  ///
+  /// **Sechs seit dem 27.09.**: Der neue Boden hat sechzehn Ziegelreihen
+  /// statt etwa elf. Über sechs Felder sind sie im Spiel so groß wie die
+  /// alten (rund zwölf Punkte je Reihe), über vier wären sie ein Drittel
+  /// kleiner geworden.
   static const String boden = 'Boden.png';
-  static const int bodenFelder = 4;
+  static const int bodenFelder = 6;
 
   /// Wo im Bild der Stein liegt; der Rest ist durchsichtig. Die Wand
   /// zeichnet nur diesen Ausschnitt, sonst stünden Lücken zwischen den
