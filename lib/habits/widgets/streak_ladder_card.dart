@@ -39,15 +39,15 @@ class StreakLadderCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(
-                Icons.local_fire_department,
-                size: 16,
-                color: Palette.gold,
-              ),
+              // **Nicht die Flamme** — die gehört seit ADR-0055 der
+              // Tageskette auf der Startseite. Hier geht es um die Kette
+              // *einer* Gewohnheit, an der der Multiplikator hängt; zwei
+              // Flammen mit verschiedenen Zahlen läsen sich als Fehler.
+              const Icon(Icons.link_rounded, size: 16, color: Palette.gold),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  'Beständigkeit',
+                  'Kette je Gewohnheit',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 13,
@@ -59,7 +59,7 @@ class StreakLadderCard extends StatelessWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  bestStreak == 0 ? 'keine Kette' : '$bestStreak Tage',
+                  bestStreak == 0 ? 'keine Kette' : 'beste: $bestStreak Tage',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12,

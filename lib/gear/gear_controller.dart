@@ -170,9 +170,10 @@ final dailyOffersProvider = Provider<List<GearCopy>>((ref) {
 });
 
 /// Wie viele Schlüssel je verdient wurden: jedes Häkchen, jede bestandene
-/// Seite, jede richtige Rückfrage (ADR-0048).
+/// Seite, jede richtige Rückfrage (ADR-0048), jede abgeholte Tagesaufgabe
+/// (ADR-0055).
 ///
-/// **Rechnet nicht, zählt nur zusammen** — die drei Zahlen stehen in
+/// **Rechnet nicht, zählt nur zusammen** — die vier Zahlen stehen in
 /// ihren Packages. Wer eine vierte Quelle dazunimmt, trägt sie hier ein.
 final earnedKeysProvider = Provider<int>((ref) {
   // Ausdrücklich getypt: Über den Importkreis zu `theory_controller`
@@ -180,7 +181,12 @@ final earnedKeysProvider = Provider<int>((ref) {
   final int haekchen = ref.watch(habitTrackerProvider).totalChecks;
   final int seiten = ref.watch(passedPagesProvider);
   final int rueckfragen = ref.watch(reviewLogProvider).correctCount;
-  return haekchen + seiten + rueckfragen;
+  // Abgeholte Tagesaufgaben (ADR-0055). Sie hängen nur an Gewohnheiten
+  // und Rückfrage, damit bleibt die Regel aus ADR-0048 gewahrt.
+  final int aufgaben =
+      ref.watch(habitTrackerProvider).claimedQuestCount *
+      DailyQuests.keysPerQuest;
+  return haekchen + seiten + rueckfragen + aufgaben;
 });
 
 /// Wie viele Schlüssel gerade da sind — höchstens `GearKeys.cap`.

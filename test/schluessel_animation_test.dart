@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/habits/widgets/daily_quests_card.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/combat/widgets/loot_reveal.dart';
@@ -71,12 +72,17 @@ void main() {
       await tester.pump();
 
       expect(find.textContaining('+1 Schlüssel'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is PixelArt && w.assetPath == GearIcons.schluessel,
-        ),
-        findsOneWidget,
+      // Das Häkchen kann eine Tagesaufgabe erledigen (ADR-0055), deren
+      // Knopf „Abholen" ebenfalls einen Schlüssel trägt — gezählt wird nur
+      // der aufsteigende.
+      final schluessel = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == GearIcons.schluessel,
       );
+      final imKnopf = find.descendant(
+        of: find.byType(DailyQuestsCard),
+        matching: schluessel,
+      );
+      expect(schluessel.evaluate().length - imKnopf.evaluate().length, 1);
       await tester.pumpAndSettle();
       expect(find.textContaining('+1 Schlüssel'), findsNothing);
     });

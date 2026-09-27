@@ -13,11 +13,13 @@ import '../theory/review_controller.dart';
 import '../theory/widgets/review_card.dart';
 import '../ui/palette.dart';
 import 'habit_check_flow.dart';
+import 'daily_quests_provider.dart';
 import 'habits_controller.dart';
 import 'widgets/cue_dialog.dart';
 import 'widgets/custom_habit_sheet.dart';
 import 'widgets/daily_chest_card.dart';
 import 'widgets/daily_form_card.dart';
+import 'widgets/daily_quests_card.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
 import 'widgets/stat_summary.dart';
@@ -98,6 +100,15 @@ class HabitsScreen extends ConsumerWidget {
                       DailyFormCard(
                         form: ref.watch(dailyFormProvider),
                         open: active.length - tracker.completedOn(today),
+                      ),
+                    ],
+                    if (ref.watch(dailyQuestsProvider) case final aufgaben
+                        when aufgaben.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      DailyQuestsCard(
+                        quests: aufgaben,
+                        isClaimed: (q) => tracker.isQuestClaimed(today, q.id),
+                        onClaim: (q) => claimDailyQuest(context, ref, q),
                       ),
                     ],
                     if (ref.watch(todaysReviewProvider)

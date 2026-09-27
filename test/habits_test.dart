@@ -830,7 +830,7 @@ void main() {
       controller.toggle(vorlage.id, _heute);
       await tester.pump();
 
-      expect(find.text('2 Tage'), findsOneWidget);
+      expect(find.text('beste: 2 Tage'), findsOneWidget);
     });
   });
 
