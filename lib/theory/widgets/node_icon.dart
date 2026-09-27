@@ -62,7 +62,7 @@ const Map<String, IconData> _icons = <String, IconData>{
 
   // Angekündigte Überschriften
   'posture': Icons.accessibility_new_rounded,
-  'anatomy': Icons.monitor_heart_outlined,
+  'anatomy': Icons.bloodtype_outlined,
   'philosophy': Icons.account_balance_outlined,
   'history': Icons.history_edu_outlined,
   'creativity': Icons.palette_outlined,
@@ -72,7 +72,7 @@ const Map<String, IconData> _icons = <String, IconData>{
   'law': Icons.gavel_outlined,
   'culture': Icons.public_outlined,
   'physics': Icons.bolt_outlined,
-  'chemistry': Icons.science_outlined,
+  'chemistry': Icons.biotech_outlined,
   'biology': Icons.pets_outlined,
   'math': Icons.functions_rounded,
   'computer': Icons.computer_outlined,

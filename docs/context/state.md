@@ -28,6 +28,7 @@ um Wirkung und Navigation zu sehen. Inhalt kommt später.**
 | Zwischenebene | zwischen Wurzel und Thema; **ein Punkt**, eine Einführungsseite |
 | Befüllt | 8: Kraft & Muskulatur, Ernährung, Schlaf & Regeneration, Psychologie, Selbstentwicklung, Wissenschaftliches Denken, Beziehungen, Medien & Information |
 | Angekündigt | 17, grau mit „Inhalt folgt", nicht zu öffnen (`TheoryPlaceholder`) |
+| Stand am Ende der Sitzung | **10 befüllt, 15 angekündigt** — Ausdauer & Fitness und Philosophie kamen dazu |
 | Die 21 alten Knoten | einsortiert; wer einen offen hatte, behält Zwischenebene und Wurzel darüber ohne Punkt |
 | Punkte | einer je Level, **dazu einer zum Start** |
 | Wurzeln | **kosten jetzt auch einen Punkt** ([ADR-0051](../decisions/0051-wurzeln-kosten-einen-punkt.md)) |

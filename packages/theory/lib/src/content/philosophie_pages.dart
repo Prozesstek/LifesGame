@@ -99,8 +99,8 @@ const Lesson stoizismusPage = Lesson(
     ),
     LessonSection(
       heading: 'Ein Kaiser mit Notizbuch',
-      body: 'Mark Aurel, römischer Kaiser, schrieb abends Notizen an sich '
-          'selbst, die heute als „Selbstbetrachtungen" gelesen werden. Er '
+      body: 'Mark Aurel, römischer Kaiser, schrieb im Feldlager Notizen an '
+          'sich selbst, die heute als „Selbstbetrachtungen" gelesen werden. Er '
           'erinnerte sich darin immer wieder an dieselben Grundsätze. Auch '
           'für einen Kaiser war Gelassenheit also keine Eigenschaft, sondern '
           'eine tägliche Übung.',
