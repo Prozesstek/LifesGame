@@ -47,6 +47,11 @@ class HabitsController extends Notifier<HabitTracker> {
     state = state.deactivate(habitId);
   }
 
+  /// Legt fest, wann [habitId] drankommt; leer entfernt es (ADR-0052).
+  void setCue(String habitId, String? text) {
+    state = state.setCue(habitId, text);
+  }
+
   /// Hakt ab oder nimmt das Häkchen zurück.
   ///
   /// Gibt das Ergebnis zurück, wenn dabei etwas verdient wurde — sonst
@@ -157,7 +162,8 @@ final habitTrackerProvider = NotifierProvider<HabitsController, HabitTracker>(
   HabitsController.new,
 );
 
-/// Die Vorlagen, die der Skillbaum bereits freigeschaltet hat.
+/// Die Vorlagen, die der Skillbaum bereits freigeschaltet hat — dazu
+/// die Startvorlage, die von Anfang an offen ist (ADR-0052).
 ///
 /// Hier treffen sich zwei Packages, die einander nicht kennen: `theory`
 /// liefert Namen freigeschalteter Vorlagen, `habits` löst sie in Vorlagen
@@ -165,10 +171,13 @@ final habitTrackerProvider = NotifierProvider<HabitsController, HabitTracker>(
 /// `test/habits_theory_test.dart`.
 final unlockedHabitsProvider = Provider<List<HabitTemplate>>((ref) {
   final progress = ref.watch(theoryProgressProvider);
-  final names = <String>[
+  // Die Startvorlage zuerst, und jede nur einmal: Ihre Lektion schaltet
+  // sie später ein zweites Mal frei (ADR-0052).
+  final names = <String>{
+    HabitCatalog.starter.name,
     for (final branch in theoryTree.branches)
       ...progress.unlockedHabits(branch),
-  ];
+  };
   return HabitCatalog.byNames(names);
 });
 

@@ -69,7 +69,10 @@ void main() {
       );
       await tester.pump();
       await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await tester.pumpAndSettle();
+      // Die Frage nach dem Auslöser liegen lassen (ADR-0052).
+      await tester.tap(find.text('Später'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();

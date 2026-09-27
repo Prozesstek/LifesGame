@@ -108,6 +108,19 @@ abstract final class HabitCatalog {
     ),
   ];
 
+  /// Die Vorlage, die **von Anfang an** offen ist (ADR-0052).
+  ///
+  /// Alle anderen kommen aus einer Lektion. Ohne sie endete die erste
+  /// Sitzung mit Lesen statt mit einem Häkchen, vor einem leeren
+  /// Gewohnheiten-Bildschirm. Zwei Minuten lesen ist die kleinste Vorlage
+  /// im Katalog — die Zwei-Minuten-Regel in Reinform.
+  ///
+  /// Ihre Lektion („Zwei Minuten reichen") schaltet sie weiter frei, dann
+  /// eben ein zweites Mal und ohne Folgen.
+  static const String starterId = 'habit-zwei-minuten-lesen';
+
+  static HabitTemplate get starter => byId(starterId)!;
+
   static HabitTemplate? byId(String id) {
     for (final template in all) {
       if (template.id == id) return template;
