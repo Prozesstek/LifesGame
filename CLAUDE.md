@@ -125,8 +125,9 @@ durch die Grube ersetzt und gelöscht.
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sechs** Kreise darum | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sechs** Kreise darum, „Heute“ darunter | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: offene Gewohnheiten, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
 | `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
@@ -135,6 +136,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | Werte, Tagesliste, Vorlagen, eigene Gewohnheiten | Flutter |
+| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen; **eine Stelle** für Startseite und Gewohnheiten | Flutter |
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) | Flutter |
@@ -203,7 +205,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 540 Tests
+flutter test             # 546 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

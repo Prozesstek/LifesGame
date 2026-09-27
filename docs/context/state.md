@@ -11,6 +11,29 @@
 
 ---
 
+## 27.09.2026, danach: „Heute“ auf der Startseite
+
+[ADR-0053](../decisions/0053-heute-auf-der-startseite.md), Punkt 2 aus
+der Durchsicht. Zwischen Figur und unterer Kreisreihe steht eine Karte
+mit den **offenen** Gewohnheiten und ihrem Auslöser; ein Tipp hakt ab.
+Erledigtes schrumpft auf „2 erledigt“, ist alles erledigt, weist die
+Karte auf die Truhe.
+
+| Was | Wo |
+|---|---|
+| Die Karte | `lib/home/widgets/today_card.dart` |
+| Der Ablauf eines Häkchens, jetzt **eine Stelle** für beide Orte | `lib/habits/habit_check_flow.dart` (aus `habits_screen.dart` gezogen) |
+
+**Die Figur gibt den Platz ab**: bei fünf offenen nur rund 80 Punkte
+hoch, bei drei rund 110, mit jedem Häkchen wieder mehr. Ob das zu klein
+ist, ist die offene Frage. Angesehen als gerendertes
+Bild in 390 × 844 mit Roboto, **nicht am Handy**. Der Layout-Test baut
+die Startseite jetzt mit fünf offenen Gewohnheiten **und** Auslösern.
+App 546.
+
+Offen aus der Durchsicht bleiben die Erinnerung (APK oder Web-Push) und
+die Identität im Wochenrückblick.
+
 ## 27.09.2026: „Wann machst du das?“ und die erste Gewohnheit ab Start
 
 Nach einer Durchsicht der ganzen App nach den vier Gesetzen der
@@ -40,7 +63,7 @@ weder im Browser noch am Handy.
 1. **Eine tägliche Erinnerung** — der größte Hebel. Die Web-Fassung
    kann sie ohne Server nicht verlässlich schicken; das braucht das APK
    oder Web-Push. Entscheidung steht aus.
-2. **„Heute“ auf der Startseite**, direkt abhakbar über der Figur.
+2. ~~**„Heute“ auf der Startseite**~~ — gebaut, siehe oben.
 3. **Identität im Wochenrückblick**: „23-mal gelesen — so sieht ein
    Leser aus“ (Handbuch-Lektion „Wer du sein willst“).
 4. Grundsatz für alles Neue: Jede Spielmechanik führt zurück zum
