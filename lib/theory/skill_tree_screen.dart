@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../ui/druck.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'branch_screen.dart';
@@ -9,6 +10,7 @@ import 'lesson_screen.dart';
 import 'theory_controller.dart';
 import 'widgets/node_action_panel.dart';
 import 'widgets/points_chip.dart';
+import 'widgets/tree_overview.dart';
 import 'widgets/tree_view.dart';
 
 /// Der Skillbaum: ein Bildschirm je Gebiet, waagerecht zu wischen
@@ -111,14 +113,23 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
             children: <Widget>[
               _Header(
                 area: graph.nodeById(_areaId),
-                areaPassed: _passedIn(graph, progress, _areaId),
-                areaTotal: graph
-                    .descendantsOf(_areaId, includeSelf: true)
-                    .length,
+                areas: <(TheoryNode, ({int passed, int total}))>[
+                  for (final id in theoryRootIds)
+                    if (graph.nodeById(id) case final TheoryNode wurzel)
+                      (
+                        wurzel,
+                        progress.progressBelow(id, graph, includeSelf: true),
+                      ),
+                ],
                 passed: passed,
                 total: total,
                 areaIndex: _current,
-                areaCount: theoryRootIds.length,
+                onSelectArea: _goToArea,
+                // Erst im Gebiet, das gerade offen ist, dann irgendwo.
+                next:
+                    progress.nextToRead(graph, under: _areaId) ??
+                    progress.nextToRead(graph),
+                onRead: (node) => _act(node, NodeAction.read),
               ),
               Expanded(
                 child: PageView.builder(
@@ -155,18 +166,6 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
         ),
       ),
     );
-  }
-
-  /// Wie viele Seiten eines Gebiets bestanden sind.
-  ///
-  /// Ein Knoten mit zwei Eltern zählt in **beiden** Gebieten mit — das
-  /// ist keine Doppelzählung, sondern die Aussage des Graphen: *Stress*
-  /// gehört zu Körper und zu Geist.
-  int _passedIn(TheoryGraph graph, TheoryProgress progress, String areaId) {
-    return graph
-        .descendantsOf(areaId, includeSelf: true)
-        .where((n) => progress.isPassed(n.lesson.id))
-        .length;
   }
 
   /// Zum Gebiet [index] wechseln.
@@ -213,7 +212,12 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
 }
 
 /// Fortschritt des Gebiets groß, Gesamtfortschritt klein daneben
-/// (ADR-0026, Punkt 6).
+/// (ADR-0026, Punkt 6) — darunter die vier Gebiete mit ihrem Stand und
+/// „Weiterlesen“ (ADR-0056).
+///
+/// Ein Knoten mit zwei Eltern zählt in **beiden** Gebieten mit — das ist
+/// keine Doppelzählung, sondern die Aussage des Graphen: *Stress* gehört
+/// zu Körper und zu Geist.
 ///
 /// Die freien Punkte stehen nicht hier, sondern als [PointsChip] in der
 /// Leiste darüber — sie gelten für alle vier Gebiete und wären hier eine
@@ -221,26 +225,33 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
 class _Header extends StatelessWidget {
   const _Header({
     required this.area,
-    required this.areaPassed,
-    required this.areaTotal,
+    required this.areas,
     required this.passed,
     required this.total,
     required this.areaIndex,
-    required this.areaCount,
+    required this.onSelectArea,
+    required this.next,
+    required this.onRead,
   });
 
   final TheoryNode? area;
-  final int areaPassed;
-  final int areaTotal;
+  final List<(TheoryNode, ({int passed, int total}))> areas;
   final int passed;
   final int total;
   final int areaIndex;
-  final int areaCount;
+  final ValueChanged<int> onSelectArea;
+  final TheoryNode? next;
+  final ValueChanged<TheoryNode> onRead;
 
   @override
   Widget build(BuildContext context) {
+    final stand = areaIndex < areas.length
+        ? areas[areaIndex].$2
+        : (passed: 0, total: 0);
+    final naechste = next;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 4, 8, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -252,8 +263,10 @@ class _Header extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: <Widget>[
               Flexible(
+                flex: 3,
                 child: Text(
-                  '$areaPassed von $areaTotal',
+                  area?.name ?? '',
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Palette.textOnDark,
@@ -264,8 +277,24 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Flexible(
+                flex: 2,
+                child: Text(
+                  '${stand.passed} von ${stand.total}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Palette.accentOnDark,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Flexible(
+                flex: 3,
                 child: Text(
                   'gesamt $passed von $total',
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Palette.textOnDarkDim,
@@ -273,63 +302,60 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 4),
+              const _LegendKnopf(),
             ],
           ),
           const SizedBox(height: 6),
-          Row(
-            children: <Widget>[
-              Flexible(
-                child: Text(
-                  (area?.name ?? '').toUpperCase(),
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Palette.accentOnDark,
-                    fontSize: 11,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              _Dots(index: areaIndex, count: areaCount),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: AreaProgressRow(
+              areas: areas,
+              current: areaIndex,
+              onSelect: onSelectArea,
+            ),
           ),
+          if (naechste != null) ...<Widget>[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ContinueReadingTile(
+                node: naechste,
+                onTap: () => onRead(naechste),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// Vier Punkte für vier Gebiete.
+/// Das Fragezeichen, das die Legende öffnet (ADR-0056).
 ///
-/// Ohne sie wäre nicht zu sehen, dass es überhaupt etwas zum Wischen
-/// gibt — eine Geste, die niemand vermutet, existiert nicht.
-class _Dots extends StatelessWidget {
-  const _Dots({required this.index, required this.count});
-
-  final int index;
-  final int count;
+/// **Kein `IconButton`**: Das Theme macht jeden daraus eine Holzplanke,
+/// und ein Klotz neben einer Zahl liest sich als Hauptknopf.
+class _LegendKnopf extends StatelessWidget {
+  const _LegendKnopf();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        for (var i = 0; i < count; i++)
-          Padding(
-            padding: const EdgeInsets.only(left: 5),
-            child: Container(
-              width: i == index ? 16 : 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: i == index
-                    ? Palette.accentOnDark
-                    : Palette.textOnDarkDim,
-                borderRadius: BorderRadius.circular(3),
-              ),
+    return Tooltip(
+      message: 'Was die Zeichen bedeuten',
+      child: Druck(
+        child: InkWell(
+          onTap: () => showTreeLegend(context),
+          customBorder: const CircleBorder(),
+          child: const Padding(
+            padding: EdgeInsets.all(6),
+            child: Icon(
+              Icons.help_outline_rounded,
+              size: 20,
+              color: Palette.textOnDarkDim,
             ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }
