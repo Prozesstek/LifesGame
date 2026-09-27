@@ -17,22 +17,32 @@ abstract final class TheoryPoints {
   /// Regel wie bei der Kurve und den Slots.
   static const int perLevel = 1;
 
+  /// Der Punkt, mit dem jeder anfängt (ADR-0051).
+  ///
+  /// **Seit die Wurzeln einen Punkt kosten**, ist der Weg zur ersten
+  /// Fähigkeit drei Schritte lang: Wurzel, Zwischenebene, Thema. Auf
+  /// Level 3 — dort, wo das Handbuch hinführt und der zweite Platz
+  /// aufgeht — gäbe es ohne ihn nur zwei. Der Platz ginge leer auf, und
+  /// die Grube bliebe zu (ADR-0020).
+  static const int atStart = 1;
+
   /// Alle Punkte, die ein Spielerleben hergibt.
   ///
-  /// **49 für einen Startbaum aus 20 kostenpflichtigen Knoten.** Der
-  /// Baum steht damit ab Level 21 ganz offen statt ab Level 11 — lange
-  /// genug, dass die Reihenfolge eine Wahl ist (ADR-0035).
-  static const int lifetimeTotal = (LevelCurve.maxLevel - 1) * perLevel;
+  /// **50: der Startpunkt und einer je Aufstieg.** Der Baum ist seit
+  /// ADR-0050 größer, als diese Zahl je öffnen kann — die Knappheit ist
+  /// der Zweck (ADR-0037).
+  static const int lifetimeTotal =
+      atStart + (LevelCurve.maxLevel - 1) * perLevel;
 
   /// Wie viele Punkte ein Charakter auf [level] insgesamt verdient hat.
   ///
-  /// Level 1 gibt nichts: Der Punkt kommt für den *Aufstieg*, nicht für
-  /// den Start.
+  /// Level 1 hat nur den Startpunkt ([atStart]); jeder weitere kommt für
+  /// einen *Aufstieg*.
   static int earnedAt(int level) {
-    if (level <= LevelCurve.minLevel) return 0;
+    if (level < LevelCurve.minLevel) return 0;
 
     final capped = level > LevelCurve.maxLevel ? LevelCurve.maxLevel : level;
-    return (capped - LevelCurve.minLevel) * perLevel;
+    return atStart + (capped - LevelCurve.minLevel) * perLevel;
   }
 
   /// Was auf [level] noch übrig ist, nachdem [spent] ausgegeben wurde.

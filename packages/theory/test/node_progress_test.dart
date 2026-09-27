@@ -202,4 +202,105 @@ void main() {
       );
     });
   });
+
+  group('Übernahme alter Stände (ADR-0050)', () {
+    // Ein Stand von vor ADR-0050: Schlaf direkt an Körper geöffnet,
+    // ein Punkt bezahlt.
+    final alt = const TheoryProgress.empty().openNode('koerper-schlaf');
+
+    test('die Zwischenebene darüber gilt als offen', () {
+      expect(alt.isNodeOpened('schlaf-regeneration', theoryGraph), isTrue);
+      expect(alt.openIdsIn(theoryGraph), contains('schlaf-regeneration'));
+    });
+
+    test('und kostet keinen Punkt', () {
+      expect(alt.spentPointsIn(theoryGraph), 1);
+    });
+
+    test('lässt sich nicht noch einmal kaufen', () {
+      expect(
+        alt.canOpenNode('schlaf-regeneration', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
+    });
+
+    test('ein Geschwister darunter ist mit einem Punkt zu haben', () {
+      expect(
+        alt.canOpenNode('koerper-erholung', theoryGraph, availablePoints: 1),
+        isTrue,
+      );
+    });
+
+    test('eine andere Zwischenebene bleibt zu', () {
+      expect(alt.isNodeOpened('kraft-muskulatur', theoryGraph), isFalse);
+    });
+
+    test('ein neuer Spieler kommt nur über die Zwischenebene an Schlaf', () {
+      final neu = const TheoryProgress.empty().openNode('koerper');
+      expect(
+        neu.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
+
+      final mitEbene = neu.openNode('schlaf-regeneration');
+      expect(
+        mitEbene.canOpenNode('koerper-schlaf', theoryGraph, availablePoints: 5),
+        isTrue,
+      );
+      expect(mitEbene.openNode('koerper-schlaf').spentPointsIn(theoryGraph), 3);
+    });
+
+    test('Stress über Geist schenkt Schlaf & Regeneration nicht', () {
+      // Stress hat einen zweiten Weg über die Wurzel Geist. Stünde er in
+      // der Übernahme, bekäme ein neuer Spieler die Zwischenebene über
+      // diesen Umweg geschenkt.
+      final stress = const TheoryProgress.empty().openNode('koerper-stress');
+      expect(stress.isNodeOpened('schlaf-regeneration', theoryGraph), isFalse);
+    });
+
+    test('eine gelesene Wurzel bleibt offen, ohne Punkt (ADR-0051)', () {
+      // Bis ADR-0051 kosteten die Wurzeln nichts, und fast jeder hat
+      // ihre Seite gelesen. Lesen ging nur, wenn der Knoten offen war —
+      // eine bestandene Seite ist also der Beleg.
+      final koerper = theoryGraph.nodeById('koerper')!;
+      final gelesen = const TheoryProgress.empty().submit(koerper.lesson, [
+        for (final q in koerper.lesson.questions) q.correctIndex,
+      ]).progress;
+
+      expect(gelesen.isNodeOpened('koerper', theoryGraph), isTrue);
+      expect(gelesen.spentPointsIn(theoryGraph), 0);
+    });
+
+    test('Schlaf offen hält auch die Wurzel Körper offen', () {
+      expect(alt.isNodeOpened('koerper', theoryGraph), isTrue);
+      expect(alt.isNodeOpened('geist', theoryGraph), isFalse);
+    });
+
+    test('ein neuer Spieler kauft die Wurzel wie jeden Knoten', () {
+      const neu = TheoryProgress.empty();
+      expect(neu.isNodeOpened('koerper', theoryGraph), isFalse);
+      expect(
+        neu.canOpenNode('koerper', theoryGraph, availablePoints: 1),
+        isTrue,
+      );
+      expect(
+        neu.canOpenNode('schlaf-regeneration', theoryGraph, availablePoints: 5),
+        isFalse,
+      );
+    });
+
+    test('Ankündigungen lassen sich nie öffnen', () {
+      for (final p in theoryGraph.placeholders) {
+        expect(
+          const TheoryProgress.empty().canOpenNode(
+            p.id,
+            theoryGraph,
+            availablePoints: 99,
+          ),
+          isFalse,
+          reason: p.id,
+        );
+      }
+    });
+  });
 }

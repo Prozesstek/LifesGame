@@ -192,20 +192,27 @@ class TheoryProgress {
   bool isNodeOpened(String nodeId, TheoryGraph graph) {
     final node = graph.nodeById(nodeId);
     if (node == null) return false;
-    return node.isFree || _openedNodeIds.contains(nodeId);
+    return openIdsIn(graph).contains(nodeId);
   }
 
-  /// Alle offenen Knoten — bezahlte **und** kostenlose.
+  /// Alle offenen Knoten — bezahlte, kostenlose und abgeleitete.
+  ///
+  /// **Abgeleitet** heißt zweierlei (ADR-0051): Eine bestandene Seite war
+  /// offen, sonst hätte man sie nicht lesen können — das hält die
+  /// Wurzeln offen, die vor ADR-0051 nichts kosteten. Und ein offener
+  /// Knoten mit einem einzigen Eltern hält den Eltern offen
+  /// (`TheoryGraph.withSoleParents`). Beides kostet keinen Punkt, weil
+  /// es nicht im Spielstand steht.
   ///
   /// Das ist die Menge, die `TheoryGraph.canOpen` erwartet. Ohne die
   /// kostenlosen wäre kein einziger Unterknoten erreichbar, weil die
   /// Wurzeln nie im Spielstand stehen.
   Set<String> openIdsIn(TheoryGraph graph) {
-    return <String>{
+    return graph.withSoleParents(<String>{
       ..._openedNodeIds,
       for (final node in graph.nodes)
-        if (node.isFree) node.id,
-    };
+        if (node.isFree || isPassed(node.lesson.id)) node.id,
+    });
   }
 
   /// Ob [nodeId] jetzt geöffnet werden könnte — Struktur **und** Preis.

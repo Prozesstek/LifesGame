@@ -60,6 +60,18 @@ class TreePainter extends CustomPainter {
         canvas.drawPath(pfad, paint);
       }
     }
+
+    // Angekündigte Überschriften: gestrichelt und blass. Der Weg dorthin
+    // steht fest, begehen lässt er sich noch nicht (ADR-0050).
+    final blass = Paint()
+      ..color = Palette.textOnDarkDim.withValues(alpha: 0.25)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    for (final angekuendigt in graph.placeholdersOf(layout.focusId)) {
+      final ziel = layout[angekuendigt.id];
+      if (ziel == null) continue;
+      _drawDashed(canvas, _curve(start, ziel), blass);
+    }
   }
 
   /// Eine weiche Kurve statt einer Geraden — gerade Linien zwischen

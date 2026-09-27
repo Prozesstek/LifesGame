@@ -193,20 +193,20 @@ void main() {
       // Seit die vier an Knoten hängen, wandert die Zusage: Nicht
       // *vorhanden* muss etwas sein, sondern **erreichbar**. Auf der
       // Stufe, auf der der zweite Platz aufgeht, muss es einen Knoten
-      // geben, der eine Fähigkeit bringt, an einer kostenlosen Wurzel
-      // hängt und mit den Punkten dieser Stufe bezahlbar ist.
+      // geben, der eine Fähigkeit bringt und dessen **ganzer Weg** von
+      // einer kostenlosen Wurzel mit den Punkten dieser Stufe bezahlbar
+      // ist.
+      //
+      // Seit ADR-0050 ist der Weg zwei Schritte lang: Zwischenebene und
+      // Thema, zwei Punkte. Auf Level 3 gibt es genau zwei — ein Punkt
+      // mehr, und der zweite Platz ginge leer auf.
       final level = AbilitySlots.levelForSlot(2)!;
       final punkte = TheoryPoints.earnedAt(level);
 
       final erreichbar = AbilityCatalog.choosable.where((ability) {
         if (ability.source case FromTheory(:final nodeId)) {
-          final node = theoryGraph.nodeById(nodeId);
-          if (node == null) return false;
-
-          final elternteilOffen = node.parentIds.any(
-            (id) => theoryGraph.nodeById(id)?.isFree ?? false,
-          );
-          return elternteilOffen && node.cost <= punkte;
+          final kosten = _billigsterWeg(nodeId);
+          return kosten != null && kosten <= punkte;
         }
         return false;
       });
@@ -221,4 +221,21 @@ void main() {
       );
     });
   });
+}
+
+/// Was es kostet, [nodeId] von einer Wurzel aus zu öffnen — der Knoten
+/// selbst plus alles darüber, auf dem billigsten Weg. Null, wenn es ihn
+/// nicht gibt.
+int? _billigsterWeg(String nodeId) {
+  final node = theoryGraph.nodeById(nodeId);
+  if (node == null) return null;
+  if (node.isRoot) return node.cost;
+
+  int? billigster;
+  for (final parentId in node.parentIds) {
+    final oben = _billigsterWeg(parentId);
+    if (oben == null) continue;
+    if (billigster == null || oben < billigster) billigster = oben;
+  }
+  return billigster == null ? null : billigster + node.cost;
 }

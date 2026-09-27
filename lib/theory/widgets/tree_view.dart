@@ -137,6 +137,13 @@ class TreeView extends StatelessWidget {
                 state: nodeStateFor(kind, graph, progress, availablePoints),
                 onTap: () => _tapChild(kind),
               ),
+            )
+          else if (graph.placeholderById(id)
+              case final TheoryPlaceholder angekuendigt)
+            Positioned(
+              left: layout[id]!.dx - NodeBubble.labelWidth / 2,
+              top: layout[id]!.dy - TreeLayout.nodeRadius,
+              child: PlaceholderBubble(placeholder: angekuendigt),
             ),
         // Der Knopf sitzt über dem Startknoten, nicht in einer festen
         // Leiste am Bildschirmrand: Er gehört zu genau diesem Knoten.

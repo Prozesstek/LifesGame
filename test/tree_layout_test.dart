@@ -82,10 +82,25 @@ void main() {
   });
 
   group('Genau eine Ebene ist angeordnet', () {
-    test('der Startknoten und seine Kinder, sonst nichts', () {
+    test('der Startknoten, seine Kinder und Ankündigungen, sonst nichts', () {
       final kinder = theoryGraph.childrenOf('koerper').map((n) => n.id);
+      final angekuendigt = theoryGraph
+          .placeholdersOf('koerper')
+          .map((p) => p.id);
 
-      expect(koerper.positions.keys.toSet(), <String>{'koerper', ...kinder});
+      expect(koerper.positions.keys.toSet(), <String>{
+        'koerper',
+        ...kinder,
+        ...angekuendigt,
+      });
+    });
+
+    test('Befüllte stehen vor Angekündigten', () {
+      // Was sich öffnen lässt, liegt näher am Daumen (ADR-0050).
+      final reihenfolge = koerper.rows.expand((r) => r).toList();
+      final befuellt = theoryGraph.childrenOf('koerper').map((n) => n.id);
+
+      expect(reihenfolge.take(befuellt.length).toSet(), befuellt.toSet());
     });
 
     test('ein Enkel bekommt keinen Platz', () {
@@ -96,7 +111,11 @@ void main() {
       final inReihen = koerper.rows.expand((r) => r).toList();
 
       expect(inReihen.toSet().length, inReihen.length);
-      expect(inReihen.length, theoryGraph.childrenOf('koerper').length);
+      expect(
+        inReihen.length,
+        theoryGraph.childrenOf('koerper').length +
+            theoryGraph.placeholdersOf('koerper').length,
+      );
     });
 
     test('ein Blatt zieht nichts herein', () {
@@ -199,8 +218,12 @@ void main() {
   });
 
   group('Die Reihen', () {
-    test('fünf Kinder passen auf einem Handy nicht in eine Reihe', () {
-      expect(theoryGraph.childrenOf('koerper').length, 5);
+    test('sechs Überschriften passen auf einem Handy nicht in eine Reihe', () {
+      expect(
+        theoryGraph.childrenOf('koerper').length +
+            theoryGraph.placeholdersOf('koerper').length,
+        6,
+      );
       expect(koerper.rows.length, 2);
     });
 
@@ -244,18 +267,21 @@ void main() {
   });
 
   group('Ein verbindender Knoten steht in beiden Gebieten', () {
-    test('Stress hängt an Körper und an Geist — und erscheint zweimal', () {
+    test('Stress hängt an Schlaf & Regeneration und an Geist', () {
       // Der Beleg dafür, dass die Struktur ein Graph ist. Vorher war das
-      // ein Sonderfall („nur einmal platzieren"); seit ein Gebiet einen
+      // ein Sonderfall („nur einmal platzieren"); seit jede Ebene einen
       // eigenen Bildschirm hat, ist es schlicht wahr.
-      expect(um('koerper')['koerper-stress'], isNotNull);
+      expect(um('schlaf-regeneration')['koerper-stress'], isNotNull);
       expect(um('geist')['koerper-stress'], isNotNull);
     });
 
     test('es ist derselbe Knoten, nicht zwei', () {
       final node = theoryGraph.nodeById('koerper-stress')!;
 
-      expect(node.parentIds, containsAll(<String>['koerper', 'geist']));
+      expect(
+        node.parentIds,
+        containsAll(<String>['schlaf-regeneration', 'geist']),
+      );
     });
   });
 }

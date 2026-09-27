@@ -128,7 +128,9 @@ void main() {
   group('Der Baum — ein Bildschirm je Gebiet (ADR-0026)', () {
     final kinder = theoryGraph.childrenOf('koerper');
 
-    testWidgets('zeigt ein Gebiet mit seinen fünf Kindern', (tester) async {
+    testWidgets('zeigt ein Gebiet mit allen seinen Überschriften', (
+      tester,
+    ) async {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
@@ -136,11 +138,17 @@ void main() {
 
       await _pumpTree(tester, container);
 
-      expect(kinder.length, 5);
+      // Vier befüllt, zwei angekündigt (ADR-0050).
+      expect(kinder.length, 4);
       expect(find.text('Körper'), findsWidgets);
       for (final kind in kinder) {
         expect(find.text(kind.name), findsOneWidget, reason: kind.id);
       }
+      for (final angekuendigt in theoryGraph.placeholdersOf('koerper')) {
+        expect(find.text(angekuendigt.title), findsOneWidget);
+      }
+      expect(find.byType(PlaceholderBubble), findsNWidgets(2));
+      expect(find.text('Inhalt folgt'), findsNWidgets(2));
     });
 
     testWidgets('die anderen Gebiete liegen nicht gleichzeitig im Bild', (
@@ -235,7 +243,7 @@ void main() {
       final gesamt = container.read(totalPagesProvider);
       final bestanden = container.read(passedPagesProvider);
 
-      expect(find.text('0 von 6'), findsOneWidget);
+      expect(find.text('0 von 20'), findsOneWidget);
       expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
     });
 
@@ -243,20 +251,49 @@ void main() {
       final container = _containerAtLevel(4);
       addTearDown(container.dispose);
 
-      expect(container.read(availableTheoryPointsProvider), 3);
+      // Der Startpunkt und drei Aufstiege (ADR-0051).
+      expect(container.read(availableTheoryPointsProvider), 4);
     });
   });
 
   group('Ein Knoten wird hereingezogen, nicht geöffnet (ADR-0026)', () {
-    final schlaf = theoryGraph.nodeById('koerper-schlaf')!;
+    // Seit ADR-0050 sind die Kinder einer Wurzel Zwischenebenen.
+    final schlaf = theoryGraph.nodeById('schlaf-regeneration')!;
+    final schlafThema = theoryGraph.nodeById('koerper-schlaf')!;
 
+    /// Handbuch durch und die Wurzel Körper gekauft — seit ADR-0051
+    /// kostet sie einen Punkt, und erst dahinter beginnt das Erkunden.
     Future<void> pumpTree(
       WidgetTester tester,
       ProviderContainer container,
     ) async {
       _passHandbook(container);
+      container
+          .read(theoryProgressProvider.notifier)
+          .openNode(
+            theoryRootIds.first,
+            availablePoints: container.read(availableTheoryPointsProvider),
+          );
       await _pumpTree(tester, container);
     }
+
+    testWidgets('eine ungekaufte Wurzel ist kaufbar, nicht offen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(1);
+      addTearDown(container.dispose);
+      _passHandbook(container);
+
+      await _pumpTree(tester, container);
+
+      final wurzel = tester
+          .widgetList<NodeBubble>(find.byType(NodeBubble))
+          .singleWhere((b) => b.node.isRoot);
+
+      // Der Startpunkt reicht für genau eine Wurzel (ADR-0051).
+      expect(wurzel.state, NodeState.affordable);
+    });
 
     testWidgets('die Wurzel ist offen, die Kinder nicht', (tester) async {
       useTallView(tester);
@@ -313,7 +350,7 @@ void main() {
 
       // Erkunden darf nichts kosten. Sonst gäbe man beim Umsehen Punkte
       // aus — der Grund, warum Antippen und Öffnen getrennt sind.
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
       expect(container.read(availableTheoryPointsProvider), vorher);
     });
 
@@ -344,14 +381,16 @@ void main() {
       addTearDown(container.dispose);
 
       await pumpTree(tester, container);
-      expect(theoryGraph.childrenOf(schlaf.id), isEmpty);
+      expect(theoryGraph.childrenOf(schlafThema.id), isEmpty);
 
       await tester.tap(find.text(schlaf.name));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(schlafThema.name));
       await tester.pumpAndSettle();
 
       // Nur noch der Startknoten selbst — über ihm geht es nicht weiter.
       expect(find.byType(NodeBubble), findsOneWidget);
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
     });
 
     testWidgets('der Knopf öffnet und zieht den Punkt ab', (tester) async {
@@ -367,7 +406,7 @@ void main() {
       await tester.tap(find.text('Für einen Punkt öffnen'));
       await tester.pumpAndSettle();
 
-      expect(container.read(spentTheoryPointsProvider), 1);
+      expect(container.read(spentTheoryPointsProvider), 2);
       expect(container.read(availableTheoryPointsProvider), vorher - 1);
       expect(
         container
@@ -398,7 +437,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Für einen Punkt öffnen'), findsNothing);
-      expect(container.read(spentTheoryPointsProvider), 0);
+      expect(container.read(spentTheoryPointsProvider), 1); // die Wurzel
     });
 
     testWidgets('beim Reingehen steht nichts über dem Startknoten', (
@@ -435,7 +474,7 @@ void main() {
       await tester.tap(find.text('Zurück zu Körper'));
       await tester.pumpAndSettle();
 
-      // Alle fünf Kinder stehen wieder da.
+      // Alle Kinder stehen wieder da.
       for (final kind in theoryGraph.childrenOf('koerper')) {
         expect(find.text(kind.name), findsOneWidget, reason: kind.id);
       }
@@ -480,10 +519,13 @@ void main() {
 
       await pumpTree(tester, container);
 
+      final ebene = theoryGraph.nodeById('kraft-muskulatur')!;
       final mitFaehigkeit = theoryGraph
-          .childrenOf('koerper')
+          .childrenOf(ebene.id)
           .firstWhere((n) => n.unlocksAbility != null);
 
+      await tester.tap(find.text(ebene.name));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(mitFaehigkeit.name));
       await tester.pumpAndSettle();
 
@@ -834,7 +876,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(totalPagesProvider), 30);
+      expect(container.read(totalPagesProvider), 59);
       expect(
         container.read(totalPagesProvider),
         greaterThan(theoryTree.lessonCount),
