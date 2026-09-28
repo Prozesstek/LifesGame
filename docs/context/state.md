@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 607, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 610, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -81,6 +81,25 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026, zuletzt: der Eingang der Grube wird ein Fahrstuhl
+
+Dritter Block aus Issue #88. Frederik hat gewählt: Schacht statt Bild,
+Schlüssel als Zeichen mit Zahl.
+
+| Vorher | Jetzt |
+|---|---|
+| Karte „Heute · noch 3 von 4“ mit vier Kacheln | ein **Stern** vor jeder Stufe des Tages, gold, solange sie zahlt |
+| Leiste „Geschaffte Stufen · Bestzeiten“ | **alle 30 Stufen untereinander** im Schacht, 30 oben, mit Bestzeit; die nächste heißt „neu“, darüber Schlösser |
+| leeres Bild, „Stufe 1“ mit Faktoren | Tippen wählt, „Hinab“ fährt zur gewählten |
+| zwei Sätze zu Belohnung und Schlüsseln | ✨ +55  ● +22, Schlüssel ×1 (Tipp erklärt) |
+| Tagesform als Satz | der Blitz-Kreis; voll steht dort nur „In Form“ |
+
+Keine neuen Daten: Bestzeiten gab es schon (`LadderProgress.bestTimes`),
+offen ist dieselbe Grenze wie vorher. **Beim Ansehen gefunden:**
+Schlüssel und Blitz in einer Zeile liefen mit echter Schrift um 100
+Punkte über — der Blitz schrumpft jetzt (`gotchas.md`, dritter Fall
+dieser Art). App 610. Gerendert in 390 × 844, **nicht am Handy**.
 
 ## 28.09.2026, spät: der Gewohnheiten-Bildschirm zeigt nur noch „Heute“
 

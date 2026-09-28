@@ -9,6 +9,8 @@ import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/gear/set_effects.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
+import 'package:lifes_game/save/save_data.dart';
+import 'package:lifes_game/save/save_providers.dart';
 
 /// Die Grube als Kampf des Spiels (ADR-0039).
 void main() {
@@ -65,10 +67,65 @@ void main() {
 
       expect(find.text('0 / ${PitStage.count}'), findsOneWidget);
       expect(find.text('Stufe 1'), findsOneWidget);
-      expect(
-        find.textContaining('+${LadderRewards.xpFor(1)} Erfahrung'),
-        findsOneWidget,
+      // Seit dem 28.09. als Zeichen und Zahl, ohne Satz (Issue #88).
+      expect(find.text('+${LadderRewards.xpFor(1)}'), findsOneWidget);
+      expect(find.text('neu'), findsOneWidget);
+    });
+
+    /// Ein Stand mit drei geschafften Stufen und einer Bestzeit auf 2.
+    Widget mitDreiStufen() {
+      const stand = LadderProgress(
+        highestDefeated: 3,
+        bestTimes: <int, double>{2: 42.3},
       );
+      return ProviderScope(
+        overrides: [
+          savedGameProvider.overrideWithValue(const SaveData(ladder: stand)),
+        ],
+        child: const MaterialApp(home: LadderScreen()),
+      );
+    }
+
+    testWidgets('der Schacht zeigt Bestzeit, neue Stufe und Sperre', (
+      tester,
+    ) async {
+      await tester.pumpWidget(mitDreiStufen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('42,3 s'), findsOneWidget);
+      // Stufe 4 ist die nächste neue, darüber ist zu.
+      expect(find.text('neu'), findsOneWidget);
+      expect(find.byIcon(Icons.lock), findsWidgets);
+    });
+
+    testWidgets('eine geschaffte Stufe wählen, „Hinab“ fährt dorthin', (
+      tester,
+    ) async {
+      await tester.pumpWidget(mitDreiStufen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Stufe 2'));
+      await tester.pump();
+      await tester.tap(find.text('Hinab'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final grube = tester.widget<PitScreen>(find.byType(PitScreen));
+      expect(grube.stage.number, 2);
+    });
+
+    testWidgets('eine gesperrte Stufe lässt sich nicht wählen', (tester) async {
+      await tester.pumpWidget(mitDreiStufen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Stufe 5'));
+      await tester.pump();
+      await tester.tap(find.text('Hinab'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final grube = tester.widget<PitScreen>(find.byType(PitScreen));
+      expect(grube.stage.number, 4, reason: 'die nächste neue');
     });
 
     testWidgets('„Hinab" führt in die Grube der nächsten Stufe', (

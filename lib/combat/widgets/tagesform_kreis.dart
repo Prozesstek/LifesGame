@@ -71,7 +71,9 @@ class TagesformKreis extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    summe ?? 'Tagesform leer',
+                    // Voll heisst alles +10 % — das ist ein Wort, keine
+                    // Liste. Die Einzelheiten zeigt der Tipp.
+                    form.isInForm ? 'In Form' : summe ?? 'Tagesform leer',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

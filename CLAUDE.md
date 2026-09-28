@@ -184,7 +184,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: „17 / 30", Stufe, „Hinab" | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: „17 / 30", der **Fahrstuhl** (alle 30 Stufen, Stern für die des Tages, Bestzeit), Belohnung als Zeichen, „Hinab" | Flutter |
 | `lib/combat/widgets/tagesform_kreis.dart` | die **Tagesform als Blitz**, der sich mit jedem Häkchen auflädt; Tipp zeigt, was sie bringt | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
@@ -220,7 +220,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 607 Tests
+flutter test             # 610 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
