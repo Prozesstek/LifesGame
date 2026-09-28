@@ -5,67 +5,96 @@ import 'package:gear/gear.dart';
 
 import '../action/pit_screen.dart';
 import '../gear/gear_controller.dart';
+import '../gear/gear_icon.dart';
+import '../ui/druck.dart';
+import '../ui/gold_icon.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
+import '../ui/pixel_art.dart';
 import 'ladder_controller.dart';
 import 'widgets/tagesform_kreis.dart';
-import '../ui/druck.dart';
 
-/// Der Eingang zur Grube — dreissig Stufen, eine nach der anderen.
+/// Der Eingang zur Grube — dreissig Stufen als **Fahrstuhl** (Issue #88).
 ///
 /// **Seit ADR-0039 führt er in die Grube statt in den Rundenkampf.** Die
 /// Zahl oben ist dieselbe geblieben, weil an ihr die Sperren im Laden,
 /// die Errungenschaften und die einmalige Belohnung hängen; aus der
-/// Sprosse ist eine Stufe geworden. Der Klassenname bleibt, bis
-/// `package:combat` gelöscht wird — er ist der Ort, auf den Startbildschirm
-/// und Tests zeigen.
+/// Sprosse ist eine Stufe geworden. Der Klassenname bleibt — er ist der
+/// Ort, auf den Startbildschirm und Tests zeigen.
 ///
-/// **Kein Gegnerbild mehr.** Eine Stufe hat keinen einen Gegner, sondern
-/// eine Grube voller, die bei jedem Lauf anders liegt. Was sich zwischen
-/// den Stufen ändert, steht als Zahl darunter.
-class LadderScreen extends ConsumerWidget {
+/// **Seit dem 28.09. ein Schacht statt Text.** Vorher standen hier eine
+/// Karte mit den vier Stufen des Tages, eine Leiste mit Bestzeiten, ein
+/// leeres Bild und drei Sätze. Jetzt stehen alle dreissig Stufen
+/// untereinander, jede mit Stern (Stufe des Tages) und Bestzeit; ein Tipp
+/// wählt, „Hinab“ fährt hin. Was die gewählte Stufe einbringt, steht als
+/// Zeichen und Zahl darunter.
+class LadderScreen extends ConsumerStatefulWidget {
   const LadderScreen({super.key});
 
   static const double _maxWidth = 560;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LadderScreen> createState() => _LadderScreenState();
+}
+
+class _LadderScreenState extends ConsumerState<LadderScreen> {
+  /// Die gewählte Stufe, oder null: dann die nächste neue. Wer nichts
+  /// wählt, fährt nach einem Sieg von selbst eine Stufe tiefer.
+  int? _gewaehlt;
+
+  @override
+  Widget build(BuildContext context) {
     final stand = ref.watch(ladderProvider);
-    final stufe = PitStage(stand.nextRung);
+    final dailies = ref.watch(todayDailiesProvider);
+    final zahlen = ref.watch(dailiesUnlockedProvider);
+    final stufe = _gewaehlt ?? stand.nextRung;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Die Grube')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
+            constraints: const BoxConstraints(maxWidth: LadderScreen._maxWidth),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: Column(
                 children: <Widget>[
                   _Fortschritt(stand: stand),
                   const SizedBox(height: 14),
-                  const _Dailies(),
-                  if (stand.highestDefeated > 0) ...<Widget>[
-                    const SizedBox(height: 10),
-                    _Geschafft(stand: stand),
-                  ],
-                  const Expanded(child: _GrubenBild()),
-                  const SizedBox(height: 14),
-                  _Stufenleiste(stage: stufe),
+                  Expanded(
+                    child: _Schacht(
+                      stand: stand,
+                      dailies: dailies,
+                      zahlen: zahlen,
+                      gewaehlt: stufe,
+                      onWaehle: (s) => setState(() => _gewaehlt = s),
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  _Belohnung(stand: stand),
-                  const SizedBox(height: 4),
-                  const _Schluessel(),
+                  _Belohnung(
+                    stand: stand,
+                    stufe: stufe,
+                    daily: _dailyFuer(dailies, stufe),
+                    zahlen: zahlen,
+                  ),
                   const SizedBox(height: 8),
-                  const TagesformKreis(),
+                  // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
+                  // kann lang werden („Angriff +10 %, Leben +10 %, …“).
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      _Schluessel(),
+                      SizedBox(width: 16),
+                      Flexible(child: TagesformKreis()),
+                    ],
+                  ),
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => PitScreen(stage: stufe),
+                          builder: (_) => PitScreen(stage: PitStage(stufe)),
                         ),
                       ),
                       style: FilledButton.styleFrom(
@@ -85,6 +114,13 @@ class LadderScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static DailyStage? _dailyFuer(List<DailyStage> dailies, int stufe) {
+    for (final d in dailies) {
+      if (d.stage == stufe) return d;
+    }
+    return null;
   }
 }
 
@@ -119,334 +155,319 @@ class _Fortschritt extends StatelessWidget {
   }
 }
 
-/// Die vier Stufen des Tages (ADR-0040): antippen führt hinein.
+/// Der Schacht: Stufe 30 oben, Stufe 1 unten, wie es hinabgeht.
 ///
-/// Ohne Häkchen heute stehen sie trotzdem da, mit dem Satz, der sagt,
-/// warum sie nichts zahlen — eine Sperre ohne Grund wäre ein kaputter
-/// Knopf.
-class _Dailies extends ConsumerWidget {
-  const _Dailies();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final heute = ref.watch(todayDailiesProvider);
-    if (heute.isEmpty) return const SizedBox.shrink();
-    final zahlen = ref.watch(dailiesUnlockedProvider);
-    final offen = heute.where((d) => !d.cleared).length;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: HolzKarte(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              zahlen
-                  ? 'Heute · noch $offen von ${heute.length}'
-                  : 'Heute · erst ein Häkchen setzen',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: Palette.text,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                for (final daily in heute) ...<Widget>[
-                  Expanded(
-                    child: _DailyKachel(daily: daily, zahlt: zahlen),
-                  ),
-                  if (daily != heute.last) const SizedBox(width: 6),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DailyKachel extends StatelessWidget {
-  const _DailyKachel({required this.daily, required this.zahlt});
-
-  final DailyStage daily;
-  final bool zahlt;
-
-  @override
-  Widget build(BuildContext context) {
-    final erledigt = daily.cleared;
-    return Druck(
-      child: Material(
-        color: erledigt ? Palette.surfaceSunken : Palette.surfaceRaised,
-        borderRadius: BorderRadius.circular(6),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => PitScreen(stage: PitStage(daily.stage)),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  '${daily.stage}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
-                Text(
-                  erledigt
-                      ? 'erledigt'
-                      : zahlt
-                      ? '+${daily.xp} · +${daily.gold}'
-                      : '—',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: erledigt ? Palette.textDim : Palette.gold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Die Bildfläche über der Stufe.
-///
-/// Ein Platzhalter, bis es ein Bild der Grube gibt — dieselbe Fläche, auf
-/// der vorher der Gegner der Sprosse stand.
-class _GrubenBild extends StatelessWidget {
-  const _GrubenBild();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: SizedBox(
-          width: double.infinity,
-          child: HolzKarte(
-            padding: EdgeInsets.zero,
-            child: const Center(
-              child: Icon(
-                Icons.stairs_outlined,
-                size: 72,
-                color: Palette.surfaceRaised,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Welche Stufe ansteht und was sie von der ersten unterscheidet.
-///
-/// **Gerechnet in `package:action_combat`**, hier nur abgelesen: Die
-/// Faktoren stehen in `PitStage`, der Bildschirm rundet sie für die
-/// Anzeige.
-class _Stufenleiste extends StatelessWidget {
-  const _Stufenleiste({required this.stage});
-
-  final PitStage stage;
-
-  @override
-  Widget build(BuildContext context) {
-    final leben = stage.hpFactor.toStringAsFixed(1).replaceAll('.', ',');
-    final angriff = stage.attackFactor.toStringAsFixed(1).replaceAll('.', ',');
-
-    return SizedBox(
-      width: double.infinity,
-      child: HolzKarte(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          children: <Widget>[
-            Text(
-              'Stufe ${stage.number}',
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Palette.text,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${stage.roomCount} Räume vor dem Wächter · '
-              'Leben ×$leben · Angriff ×$angriff',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Palette.textDim),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Was die nächste Stufe noch einbringt — oder dass sie nichts mehr
-/// einbringt.
-///
-/// **Die Zeile gehört vor den Kampf, nicht nur danach.** Eine Belohnung,
-/// von der man erst hinterher erfährt, motiviert den Kampf nicht, den man
-/// gerade überlegt. Seit ADR-0041 ist es der **Rest** des Topfs: Was ein
-/// verlorener Lauf schon eingesammelt hat, ist abgezogen.
-class _Belohnung extends ConsumerWidget {
-  const _Belohnung({required this.stand});
+/// **Offen ist jede geschaffte Stufe und die nächste neue** — dieselbe
+/// Grenze wie vorher über „Hinab“ und die Leiste der geschafften Stufen.
+/// Darunter liegt nichts, was man nicht auch vorher betreten konnte.
+class _Schacht extends StatefulWidget {
+  const _Schacht({
+    required this.stand,
+    required this.dailies,
+    required this.zahlen,
+    required this.gewaehlt,
+    required this.onWaehle,
+  });
 
   final LadderProgress stand;
+  final List<DailyStage> dailies;
+  final bool zahlen;
+  final int gewaehlt;
+  final ValueChanged<int> onWaehle;
+
+  static const double zeilenHoehe = 44;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rung = stand.nextRung;
-    final topf = stand.isNewGround(rung)
-        ? ref.read(ladderProvider.notifier).potFor(rung)
-        : (xp: 0, gold: 0);
-    final zahlt = topf.xp > 0 || topf.gold > 0;
-    final angebrochen = zahlt && topf.xp < LadderRewards.xpFor(rung);
+  State<_Schacht> createState() => _SchachtState();
+}
 
-    return Text(
-      zahlt
-          ? '${angebrochen ? 'Noch' : 'Erste Räumung:'} '
-                '+${topf.xp} Erfahrung, +${topf.gold} Gold — '
-                'ein Teil je Gegner, der Rest beim Wächter'
-          : 'Alle Stufen geräumt — nur die Stufen des Tages zahlen noch.',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
-        color: zahlt ? Palette.goldOnDark : Palette.textOnDarkDim,
+class _SchachtState extends State<_Schacht> {
+  // Umgekehrt gebaut: Der Anfang der Liste ist unten, dort liegt Stufe 1.
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // **Die gewählte Stufe etwas unter die Mitte**, die geschafften
+    // darunter im Bild. Wie hoch der Schacht ist, weiss erst das Layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      final pos = _scroll.position;
+      final ziel =
+          (widget.gewaehlt - 0.5) * _Schacht.zeilenHoehe -
+          pos.viewportDimension * 0.4;
+      _scroll.jumpTo(ziel.clamp(0, pos.maxScrollExtent).toDouble());
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final offen = widget.stand.nextRung;
+    return HolzKarte(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: ListView.builder(
+        controller: _scroll,
+        reverse: true,
+        itemExtent: _Schacht.zeilenHoehe,
+        itemCount: PitStage.count,
+        itemBuilder: (context, i) {
+          final s = i + 1;
+          final daily = _LadderScreenState._dailyFuer(widget.dailies, s);
+          return _Etage(
+            stufe: s,
+            gesperrt: s > offen,
+            neu: widget.stand.isNewGround(s) && s <= offen,
+            bestzeit: widget.stand.bestTimes[s],
+            daily: daily,
+            zahlen: widget.zahlen,
+            gewaehlt: s == widget.gewaehlt,
+            onTap: () => widget.onWaehle(s),
+          );
+        },
       ),
     );
   }
 }
 
-/// Wie viele Schlüssel da sind — sie öffnen die Beute des Wächters
-/// (ADR-0048). Ohne einen steht, woher sie kommen.
+/// Eine Etage im Schacht.
+class _Etage extends StatelessWidget {
+  const _Etage({
+    required this.stufe,
+    required this.gesperrt,
+    required this.neu,
+    required this.bestzeit,
+    required this.daily,
+    required this.zahlen,
+    required this.gewaehlt,
+    required this.onTap,
+  });
+
+  final int stufe;
+  final bool gesperrt;
+  final bool neu;
+  final double? bestzeit;
+  final DailyStage? daily;
+  final bool zahlen;
+  final bool gewaehlt;
+  final VoidCallback onTap;
+
+  /// Unter einer Minute auf die Zehntelsekunde, darüber Minuten und
+  /// Sekunden.
+  static String zeit(double sekunden) {
+    if (sekunden < 60) {
+      return '${sekunden.toStringAsFixed(1).replaceAll('.', ',')} s';
+    }
+    final ganz = sekunden.round();
+    final rest = (ganz % 60).toString().padLeft(2, '0');
+    return '${ganz ~/ 60}:$rest';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = gesperrt ? Palette.muted : Palette.text;
+    final rechts = switch ((gesperrt, neu, bestzeit)) {
+      (true, _, _) => const Icon(Icons.lock, size: 16, color: Palette.muted),
+      (_, true, _) => const Text(
+        'neu',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: Palette.accent,
+        ),
+      ),
+      (_, _, final double t) => Text(
+        zeit(t),
+        style: const TextStyle(fontSize: 13, color: Palette.textDim),
+      ),
+      _ => const Text('—', style: TextStyle(color: Palette.textDim)),
+    };
+
+    return Semantics(
+      button: !gesperrt,
+      selected: gewaehlt,
+      label: 'Stufe $stufe${daily != null ? ', Stufe des Tages' : ''}',
+      child: Druck(
+        child: Material(
+          color: gewaehlt ? Palette.surfaceRaised : Colors.transparent,
+          child: InkWell(
+            onTap: gesperrt ? null : onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: 22,
+                    child: gewaehlt
+                        ? const Icon(
+                            Icons.play_arrow,
+                            size: 18,
+                            color: Palette.accent,
+                          )
+                        : null,
+                  ),
+                  SizedBox(
+                    width: 22,
+                    child: switch (daily) {
+                      null => null,
+                      final d => Icon(
+                        Icons.star,
+                        size: 18,
+                        // Offen und zahlend gold, sonst blass: geschafft
+                        // oder heute noch ohne Häkchen.
+                        color: !d.cleared && zahlen
+                            ? Palette.gold
+                            : Palette.muted,
+                      ),
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Stufe $stufe',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: gewaehlt
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        color: farbe,
+                      ),
+                    ),
+                  ),
+                  rechts,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Was die gewählte Stufe einbringt, als Zeichen und Zahl: Erstsieg oder
+/// Stufe des Tages. Zahlt sie nichts, steht nichts da.
+///
+/// **Die Zeile gehört vor den Kampf, nicht nur danach.** Seit ADR-0041
+/// ist es beim Erstsieg der **Rest** des Topfs: Was ein verlorener Lauf
+/// schon eingesammelt hat, ist abgezogen.
+class _Belohnung extends ConsumerWidget {
+  const _Belohnung({
+    required this.stand,
+    required this.stufe,
+    required this.daily,
+    required this.zahlen,
+  });
+
+  final LadderProgress stand;
+  final int stufe;
+  final DailyStage? daily;
+  final bool zahlen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ({int xp, int gold, bool stern})? topf;
+    if (stand.isNewGround(stufe)) {
+      final t = ref.read(ladderProvider.notifier).potFor(stufe);
+      topf = (xp: t.xp, gold: t.gold, stern: false);
+    } else if (daily case final d? when zahlen && !d.cleared) {
+      topf = (xp: d.xp, gold: d.gold, stern: true);
+    } else {
+      topf = null;
+    }
+
+    // Die Höhe bleibt, auch wenn nichts zahlt — sonst springt „Hinab“.
+    return SizedBox(
+      height: 22,
+      child: topf == null || (topf.xp == 0 && topf.gold == 0)
+          ? null
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                if (topf.stern) ...<Widget>[
+                  const Icon(Icons.star, size: 16, color: Palette.goldOnDark),
+                  const SizedBox(width: 6),
+                ],
+                const Icon(
+                  Icons.auto_awesome,
+                  size: 16,
+                  color: Palette.goldOnDark,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '+${topf.xp}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.goldOnDark,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const GoldIcon(size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  '+${topf.gold}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Palette.goldOnDark,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// Die Schlüssel zur Beute des Wächters (ADR-0048), als Zeichen mit Zahl.
+/// Ein Tipp sagt, wofür sie sind und woher sie kommen.
 class _Schluessel extends ConsumerWidget {
   const _Schluessel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final anzahl = ref.watch(availableKeysProvider);
-    return Text(
-      anzahl > 0
-          ? '$anzahl von ${GearKeys.cap} Schlüsseln für die Beute des Wächters'
-          : 'Kein Schlüssel — jedes Häkchen, jede Seite und jede Rückfrage '
-                'bringt einen',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
-        color: anzahl > 0 ? Palette.goldOnDark : Palette.textOnDarkDim,
-      ),
-    );
-  }
-}
-
-/// Jede geschaffte Stufe, mit Bestzeit — antippen führt hinein
-/// (ADR-0048).
-///
-/// **Ohne diese Leiste gäbe es keine Wahl.** „Hinab" führt nur zur
-/// nächsten neuen Stufe; Bestzeiten und die Frage, wo man einen Schlüssel
-/// einsetzt (sicher flach oder riskant tief), brauchen jede Stufe.
-class _Geschafft extends StatelessWidget {
-  const _Geschafft({required this.stand});
-
-  final LadderProgress stand;
-
-  static String zeit(double sekunden) {
-    final text = sekunden.toStringAsFixed(1).replaceAll('.', ',');
-    return '$text s';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final stufen = <int>[for (var s = stand.highestDefeated; s >= 1; s--) s];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        const Text(
-          'Geschaffte Stufen · Bestzeiten',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Palette.textOnDark,
-          ),
-        ),
-        const SizedBox(height: 6),
-        SizedBox(
-          height: 50,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message:
+          'Schlüssel öffnen die Beute des Wächters, höchstens '
+          '${GearKeys.cap}. Jedes Häkchen, jede Seite und jede Rückfrage '
+          'bringt einen.',
+      child: Semantics(
+        label: '$anzahl Schlüssel',
+        excludeSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              for (final s in stufen) ...<Widget>[
-                Druck(
-                  child: Material(
-                    color: Palette.surfaceRaised,
-                    borderRadius: BorderRadius.circular(6),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(6),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => PitScreen(stage: PitStage(s)),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                          horizontal: 12,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'Stufe $s',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Palette.text,
-                              ),
-                            ),
-                            Text(
-                              switch (stand.bestTimes[s]) {
-                                final double t => zeit(t),
-                                null => '—',
-                              },
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Palette.textDim,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+              PixelArt(
+                assetPath: GearIcons.schluessel,
+                side: 26,
+                fallback: const Icon(Icons.key, color: Palette.goldOnDark),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '×$anzahl',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: anzahl > 0
+                      ? Palette.goldOnDark
+                      : Palette.textOnDarkDim,
                 ),
-                const SizedBox(width: 6),
-              ],
+              ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
