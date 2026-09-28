@@ -156,7 +156,11 @@ weil `ChosenAbilities` keine Lücken hält. Die Knöpfe im Blatt bleiben.
 unter dem Finger, Leuchten und Zurücktreten, das Hochrollen. Die
 Ausrüstung ist darauf umgestellt. Der Fähigkeiten-Bildschirm ist dafür
 kein `ListView` mehr. Getestet im Widget-Test (Anlegen, Ersetzen, Lücke,
-Waffenplatz, Gesperrtes), App 603. Nicht im Browser nachgestellt.
+Waffenplatz, Gesperrtes), App 603, und im Browser bei 375 × 812
+nachgestellt: Sammeln gehalten, der leere Platz leuchtet, Waffenplatz
+und gesperrte treten zurück, Loslassen legt es auf Platz 2. Der Satz
+unter den Plätzen sagt jetzt „halten und hierher ziehen“ statt
+„antippen“. **Mit einem Finger am Handy nicht.**
 
 ### Offen
 

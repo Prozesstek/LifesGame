@@ -126,8 +126,8 @@ class AbilitySlotsRow extends StatelessWidget {
     if (belegt < frei) {
       final offen = frei - belegt;
       return offen == 1
-          ? 'Ein Platz ist noch frei — unten eine Fähigkeit antippen.'
-          : '$offen Plätze sind noch frei — unten eine Fähigkeit antippen.';
+          ? 'Ein Platz ist noch frei — unten eine Fähigkeit halten und hierher ziehen.'
+          : '$offen Plätze sind noch frei — unten eine Fähigkeit halten und hierher ziehen.';
     }
     return 'Alle vier Plätze offen und belegt.';
   }
