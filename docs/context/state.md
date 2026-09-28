@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 610, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 607, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -81,6 +81,33 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026, spät: der Gewohnheiten-Bildschirm zeigt nur noch „Heute“
+
+Zweiter Block aus Issue #88, durchgesprochen und entschieden mit
+Frederik: [ADR-0059](../decisions/0059-gewohnheiten-nur-noch-heute.md).
+Über der Tagesliste standen sechs Karten; jetzt steht sie oben.
+
+| Was | Wohin |
+|---|---|
+| **Werte** (Stärke …) | weg — stehen im Charakter unter „Werte im Kampf“ |
+| **Kette je Gewohnheit** | weg; an jeder Kachel steht jetzt klein die nächste Stufe („x1,4 in 2 Tagen“) |
+| **Tagesform** | als Blitz-Kreis an den Eingang der Grube, der sich mit jedem Häkchen auflädt; Tipp zeigt die Karte |
+| **Tagesaufgaben** | auf die Startseite unter „Heute“, dort wird auch abgeholt |
+| **Rückfrage des Tages** | oben in die Theorie, als Zeile, die aufklappt |
+| **Deine Woche** | in den Charakter unter „Beständigkeit“ |
+| **Vorlagen** | Reiter „Eigene“ / „Vorerstellte“, darüber „Neue Gewohnheit“ statt des schwebenden Knopfs |
+
+Streak-Eis und Tagestruhe bleiben, beide hängen am Häkchen.
+
+**Beim Bauen gefunden:** Die Rückfrage aufgeklappt nahm auf dem Handy
+ein Drittel der Theorie, der Layout-Test fand den Baum nicht mehr —
+sie beginnt jetzt immer als Zeile. Und wer noch keine eigene hat,
+landet im Reiter „Vorerstellte“; dort stand der Knopf zum Anlegen
+nicht, er steht jetzt über beiden.
+
+App 607 (Wertekacheln, Leiter und ihre Tests sind entfallen). Gerendert
+in 390 × 844, **nicht am Handy**.
 
 ## 28.09.2026, abends: die Figur zieht in die Ausrüstung
 

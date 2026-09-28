@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
-import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/main.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -11,6 +10,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/save/save_store.dart';
 import 'package:lifes_game/save/save_watcher.dart';
 import 'package:lifes_game/theory/review_controller.dart';
+import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/review_card.dart';
 import 'package:theory/theory.dart';
@@ -18,7 +18,8 @@ import 'package:theory/theory.dart';
 import 'test_view.dart';
 
 /// Die Rückfrage des Tages in der App (ADR-0045): wann sie dasteht, was
-/// sie einbringt, und dass sie einen Neustart überlebt.
+/// sie einbringt, und dass sie einen Neustart überlebt. Seit dem 28.09.
+/// steht sie in der Theorie (Issue #88).
 const Day _heute = Day(2026, 9, 23);
 
 ProviderContainer _container({bool handbuch = true}) {
@@ -43,10 +44,16 @@ Future<void> _pump(WidgetTester tester, ProviderContainer c) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: c,
-      child: const MaterialApp(home: HabitsScreen()),
+      child: const MaterialApp(home: SkillTreeScreen()),
     ),
   );
   await tester.pump();
+}
+
+/// Klappt die Rückfrage auf — sie beginnt als eine Zeile.
+Future<void> _klappeAuf(WidgetTester tester) async {
+  await tester.tap(find.textContaining('Rückfrage des Tages'));
+  await tester.pumpAndSettle();
 }
 
 /// Tippt die Antwort mit [index] (in der Lektion) an.
@@ -71,6 +78,8 @@ void main() {
     final gold = c.read(goldProvider);
     final einkommen = c.read(incomeWithoutAchievementsProvider);
 
+    expect(find.byType(ReviewCard), findsNothing, reason: 'erst eine Zeile');
+    await _klappeAuf(tester);
     expect(find.byType(ReviewCard), findsOneWidget);
     expect(find.text(frage.question.prompt), findsOneWidget);
 
@@ -93,6 +102,7 @@ void main() {
     final frage = c.read(todaysReviewProvider)!;
     final xp = c.read(totalXpProvider);
 
+    await _klappeAuf(tester);
     await _antworte(tester, frage, (frage.question.correctIndex + 1) % 4);
     await tester.pumpAndSettle();
 
@@ -100,6 +110,33 @@ void main() {
     expect(find.textContaining('morgen wieder'), findsOneWidget);
     expect(c.read(totalXpProvider), xp);
   });
+
+  testWidgets(
+    'nach dem Antworten bleibt die Auflösung, beim nächsten Mal eine Zeile',
+    (tester) async {
+      final c = _container();
+      await _pump(tester, c);
+      final frage = c.read(todaysReviewProvider)!;
+      await _klappeAuf(tester);
+      await _antworte(tester, frage, frage.question.correctIndex);
+      await tester.pumpAndSettle();
+      expect(find.byType(ReviewCard), findsOneWidget, reason: 'Auflösung');
+
+      // Die Theorie verlassen und wieder öffnen.
+      await tester.pumpWidget(const SizedBox());
+      await _pump(tester, c);
+
+      expect(find.byType(ReviewCard), findsNothing);
+      expect(
+        find.textContaining('Rückfrage des Tages: richtig'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.textContaining('Rückfrage des Tages: richtig'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReviewCard), findsOneWidget);
+    },
+  );
 
   test('der Spielstand trägt die Antworten durch JSON', () {
     const tag = 20000;

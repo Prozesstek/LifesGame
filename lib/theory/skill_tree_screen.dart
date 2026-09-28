@@ -12,6 +12,8 @@ import 'widgets/node_action_panel.dart';
 import 'widgets/points_chip.dart';
 import 'widgets/tree_overview.dart';
 import 'widgets/tree_view.dart';
+import '../ui/aufstieg.dart';
+import 'widgets/review_section.dart';
 
 /// Der Skillbaum: ein Bildschirm je Gebiet, waagerecht zu wischen
 /// (ADR-0026).
@@ -108,57 +110,78 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
             ),
           ],
         ),
-        body: OnDark(
+        // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
+        // auf dem Gewohnheiten-Bildschirm.
+        body: AufstiegHost(
           child: Column(
             children: <Widget>[
-              _Header(
-                area: graph.nodeById(_areaId),
-                areas: <(TheoryNode, ({int passed, int total}))>[
-                  for (final id in theoryRootIds)
-                    if (graph.nodeById(id) case final TheoryNode wurzel)
-                      (
-                        wurzel,
-                        progress.progressBelow(id, graph, includeSelf: true),
-                      ),
-                ],
-                passed: passed,
-                total: total,
-                areaIndex: _current,
-                onSelectArea: _goToArea,
-                // Erst im Gebiet, das gerade offen ist, dann irgendwo.
-                next:
-                    progress.nextToRead(graph, under: _areaId) ??
-                    progress.nextToRead(graph),
-                onRead: (node) => _act(node, NodeAction.read),
+              // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
+              // `OnDark`: Ihre Karte ist Pergament.
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: ReviewSection(),
               ),
               Expanded(
-                child: PageView.builder(
-                  controller: _pages,
-                  itemCount: theoryRootIds.length,
-                  onPageChanged: (i) => setState(() => _current = i),
-                  itemBuilder: (context, i) {
-                    final id = theoryRootIds[i];
+                child: OnDark(
+                  child: Column(
+                    children: <Widget>[
+                      _Header(
+                        area: graph.nodeById(_areaId),
+                        areas: <(TheoryNode, ({int passed, int total}))>[
+                          for (final id in theoryRootIds)
+                            if (graph.nodeById(id) case final TheoryNode wurzel)
+                              (
+                                wurzel,
+                                progress.progressBelow(
+                                  id,
+                                  graph,
+                                  includeSelf: true,
+                                ),
+                              ),
+                        ],
+                        passed: passed,
+                        total: total,
+                        areaIndex: _current,
+                        onSelectArea: _goToArea,
+                        // Erst im Gebiet, das gerade offen ist, dann irgendwo.
+                        next:
+                            progress.nextToRead(graph, under: _areaId) ??
+                            progress.nextToRead(graph),
+                        onRead: (node) => _act(node, NodeAction.read),
+                      ),
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _pages,
+                          itemCount: theoryRootIds.length,
+                          onPageChanged: (i) => setState(() => _current = i),
+                          itemBuilder: (context, i) {
+                            final id = theoryRootIds[i];
 
-                    return TreeView(
-                      graph: graph,
-                      progress: progress,
-                      availablePoints: available,
-                      path: _paths[id]!,
-                      panelOpen: _panelOpen[id]!,
-                      onTogglePanel: () =>
-                          setState(() => _panelOpen[id] = !_panelOpen[id]!),
-                      onEnter: (node) => setState(() {
-                        _paths[id]!.add(node.id);
-                        _panelOpen[id] = true;
-                      }),
-                      onLeave: _leave,
-                      onAction: _act,
-                      onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
-                      onNextArea: i < theoryRootIds.length - 1
-                          ? () => _goToArea(i + 1)
-                          : null,
-                    );
-                  },
+                            return TreeView(
+                              graph: graph,
+                              progress: progress,
+                              availablePoints: available,
+                              path: _paths[id]!,
+                              panelOpen: _panelOpen[id]!,
+                              onTogglePanel: () => setState(
+                                () => _panelOpen[id] = !_panelOpen[id]!,
+                              ),
+                              onEnter: (node) => setState(() {
+                                _paths[id]!.add(node.id);
+                                _panelOpen[id] = true;
+                              }),
+                              onLeave: _leave,
+                              onAction: _act,
+                              onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
+                              onNextArea: i < theoryRootIds.length - 1
+                                  ? () => _goToArea(i + 1)
+                                  : null,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

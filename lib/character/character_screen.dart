@@ -23,6 +23,7 @@ import 'widgets/name_dialog.dart';
 import 'widgets/title_dialog.dart';
 import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
+import '../habits/widgets/week_card.dart';
 
 /// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
 /// Fähigkeiten haben eigene Bildschirme (ADR-0049, ADR-0057).
@@ -86,6 +87,15 @@ class CharacterScreen extends ConsumerWidget {
                   currentStreak: habits.currentBestStreak(today),
                   longestStreak: habits.longestStreak,
                   totalChecks: habits.totalChecks,
+                ),
+                const SizedBox(height: 10),
+                // **Seit dem 28.09. hier** statt auf dem Gewohnheiten-
+                // Bildschirm (Issue #88): Eine Woche im Rückblick sagt,
+                // wer man geworden ist, nicht, was heute ansteht.
+                WeekCard(
+                  today: today,
+                  thisWeek: ref.watch(thisWeekProvider),
+                  lastWeek: ref.watch(lastWeekProvider),
                 ),
                 const SizedBox(height: 20),
                 const _SectionTitle('Werte im Kampf'),

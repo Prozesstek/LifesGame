@@ -354,28 +354,50 @@ class _StreakBadge extends StatelessWidget {
         ? null
         : 'x${nextMultiplier.toStringAsFixed(1).replaceAll('.', ',')}';
 
+    // **Die nächste Stufe steht darunter** (Issue #88). Bis zum 28.09.
+    // zeigte das eine eigene Karte als Leiter über der Liste; hier steht
+    // nur, was als Nächstes kommt, und nur an der Kette, die es betrifft.
+    final naechste = HabitRewards.nextMilestoneAfter(streak);
+    final noch = naechste == null ? 0 : naechste.days - streak;
+
     return Semantics(
       label: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          const Icon(
-            Icons.local_fire_department,
-            size: 14,
-            color: Palette.gold,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Icon(
+                Icons.local_fire_department,
+                size: 14,
+                color: Palette.gold,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                faktor == null ? '$streak' : '$streak · $faktor',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.gold,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 3),
-          Text(
-            faktor == null ? '$streak' : '$streak · $faktor',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: Palette.gold,
+          if (naechste != null)
+            Text(
+              '${_faktor(naechste.multiplier)} in $noch '
+              '${noch == 1 ? 'Tag' : 'Tagen'}',
+              style: const TextStyle(fontSize: 9, color: Palette.textDim),
             ),
-          ),
         ],
       ),
     );
+  }
+
+  static String _faktor(double wert) {
+    return 'x${wert.toStringAsFixed(1).replaceAll('.', ',')}';
   }
 }
 

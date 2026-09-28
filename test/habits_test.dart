@@ -6,9 +6,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
-import 'package:lifes_game/habits/widgets/stat_summary.dart';
 import 'package:lifes_game/habits/widgets/streak_freeze_card.dart';
-import 'package:lifes_game/habits/widgets/streak_ladder_card.dart';
 import 'package:lifes_game/habits/widgets/custom_habit_sheet.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
@@ -198,19 +196,6 @@ void main() {
       await tester.pump();
 
       expect(container.read(totalXpProvider), xpVorher);
-    });
-
-    testWidgets('die Charakterwerte stehen über der Liste', (tester) async {
-      final container = _container();
-      _passRootBranch(container);
-      await _pumpScreen(tester, container);
-
-      for (final stat in HabitStat.values) {
-        expect(find.text(stat.label), findsWidgets, reason: stat.label);
-      }
-
-      const frisch = CharacterStats.fresh();
-      expect(find.text('${frisch.attack}'), findsWidgets);
     });
 
     testWidgets('mehr als die Obergrenze lässt sich nicht starten', (
@@ -749,76 +734,12 @@ void main() {
       );
       expect(find.text('+1 Stärke'), findsOneWidget, reason: 'aufsteigend');
     });
-
-    testWidgets('der Balken eines Werts füllt sich mit jedem Häkchen', (
-      tester,
-    ) async {
-      final container = _container();
-      _passRootBranch(container);
-      await _pumpScreen(tester, container);
-
-      double anteilVon(HabitStat stat) {
-        final bars = tester.widgetList<StatPointBar>(find.byType(StatPointBar));
-        return bars.firstWhere((bar) => bar.stat == stat).fraction;
-      }
-
-      final controller = container.read(habitTrackerProvider.notifier);
-      final habit = controller.addCustom(
-        name: 'Laufen',
-        stat: HabitStat.staerke,
-        difficulty: HabitDifficulty.mittel,
-      );
-      await tester.pump();
-      final vorher = anteilVon(HabitStat.staerke);
-
-      controller.toggle(habit!.id, _heute);
-      await tester.pump();
-
-      expect(
-        anteilVon(HabitStat.staerke),
-        greaterThan(vorher),
-        reason:
-            'ein Punkt kostet fünf Häkchen — der Balken muss sich trotzdem '
-            'bei jedem bewegen',
-      );
-    });
   });
 
-  group('Was Beständigkeit bringt (Issue #46)', () {
-    testWidgets('die Leiter steht über der Liste und rechnet in Erfahrung', (
-      tester,
-    ) async {
-      final container = _container();
-      _passRootBranch(container);
-      await _pumpScreen(tester, container);
-
-      expect(find.byType(StreakLadderCard), findsOneWidget);
-      expect(
-        find.textContaining(
-          '${HabitRewards.xpFor(3)} statt ${HabitRewards.xpPerCheck}',
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('sie zeigt alle fünf Meilensteine', (tester) async {
-      final container = _container();
-      _passRootBranch(container);
-      await _pumpScreen(tester, container);
-
-      for (final milestone in HabitRewards.streakMilestones) {
-        expect(
-          find.descendant(
-            of: find.byType(StreakLadderCard),
-            matching: find.text('${milestone.days}'),
-          ),
-          findsOneWidget,
-          reason: '${milestone.days} Tage',
-        );
-      }
-    });
-
-    testWidgets('sie folgt der besten laufenden Kette', (tester) async {
+  group('Was Beständigkeit bringt (Issue #46, #88)', () {
+    testWidgets('die Kachel nennt die nächste Stufe der Kette', (tester) async {
+      // Seit dem 28.09. keine Leiter mehr über der Liste: Was als
+      // Nächstes kommt, steht an der Kette, die es betrifft.
       final container = _container();
       _passRootBranch(container);
       await _pumpScreen(tester, container);
@@ -827,10 +748,25 @@ void main() {
       final vorlage = container.read(unlockedHabitsProvider).first;
       controller.activate(vorlage.id);
       controller.toggle(vorlage.id, _heute.previous);
-      controller.toggle(vorlage.id, _heute);
       await tester.pump();
 
-      expect(find.text('beste: 2 Tage'), findsOneWidget);
+      final naechste = HabitRewards.nextMilestoneAfter(1)!;
+      final noch = naechste.days - 1;
+      final faktor = naechste.multiplier
+          .toStringAsFixed(1)
+          .replaceAll('.', ',');
+      expect(find.text('x$faktor in $noch Tagen'), findsOneWidget);
+    });
+
+    testWidgets('die Leiter und die Werte stehen nicht mehr da', (
+      tester,
+    ) async {
+      final container = _container();
+      _passRootBranch(container);
+      await _pumpScreen(tester, container);
+
+      expect(find.text('Kette je Gewohnheit'), findsNothing);
+      expect(find.text('Tagesform'), findsNothing);
     });
   });
 

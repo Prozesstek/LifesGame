@@ -8,7 +8,6 @@ import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/daily_quests_card.dart';
 import 'package:lifes_game/home/home_screen.dart';
-import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -70,18 +69,22 @@ void main() {
     expect(c.read(claimableQuestsProvider), contains(zumAbhaken));
   });
 
-  testWidgets('die Karte steht auf dem Gewohnheiten-Bildschirm', (
-    tester,
-  ) async {
-    await zeige(tester, container(beideErledigt()), const HabitsScreen());
+  testWidgets(
+    'die Karte steht auf der Startseite, nicht bei den Gewohnheiten',
+    (tester) async {
+      // Seit dem 28.09. (Issue #88): abgeholt wird, wo man abhakt.
+      await zeige(tester, container(beideErledigt()), const HomeScreen());
+      expect(find.byType(DailyQuestsCard), findsOneWidget);
+      expect(find.text('Tagesaufgaben'), findsOneWidget);
 
-    expect(find.byType(DailyQuestsCard), findsOneWidget);
-    expect(find.text('Tagesaufgaben'), findsOneWidget);
-  });
+      await zeige(tester, container(beideErledigt()), const HabitsScreen());
+      expect(find.byType(DailyQuestsCard), findsNothing);
+    },
+  );
 
   testWidgets('Abholen bringt einen Schlüssel, und nur einmal', (tester) async {
     final c = container(beideErledigt());
-    await zeige(tester, c, const HabitsScreen());
+    await zeige(tester, c, const HomeScreen());
     final vorher = c.read(earnedKeysProvider);
     final abholbar = c.read(claimableQuestsProvider).length;
 
@@ -108,7 +111,7 @@ void main() {
 
   testWidgets('eine offene Aufgabe hat keinen Knopf', (tester) async {
     final offen = const HabitTracker.empty().activate(a.id).activate(b.id);
-    await zeige(tester, container(offen), const HabitsScreen());
+    await zeige(tester, container(offen), const HomeScreen());
 
     expect(
       find.descendant(
@@ -116,18 +119,6 @@ void main() {
         matching: find.text('Abholen'),
       ),
       findsNothing,
-    );
-  });
-
-  testWidgets('die Startseite sagt, dass etwas abzuholen ist', (tester) async {
-    await zeige(tester, container(beideErledigt()), const HomeScreen());
-
-    expect(
-      find.descendant(
-        of: find.byType(TodayCard),
-        matching: find.textContaining('abholen'),
-      ),
-      findsOneWidget,
     );
   });
 }

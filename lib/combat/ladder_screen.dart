@@ -5,12 +5,10 @@ import 'package:gear/gear.dart';
 
 import '../action/pit_screen.dart';
 import '../gear/gear_controller.dart';
-import '../habits/daily_form_text.dart';
-import '../habits/habits_controller.dart';
 import '../ui/holz.dart';
-import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'ladder_controller.dart';
+import 'widgets/tagesform_kreis.dart';
 import '../ui/druck.dart';
 
 /// Der Eingang zur Grube — dreissig Stufen, eine nach der anderen.
@@ -60,7 +58,7 @@ class LadderScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   const _Schluessel(),
                   const SizedBox(height: 8),
-                  const _Tagesform(),
+                  const TagesformKreis(),
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
@@ -85,50 +83,6 @@ class LadderScreen extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Womit man heute hinabsteigt — die Tagesform aus den Häkchen. Ohne
-/// Häkchen ein Hinweis, dass es sie gibt: Wer vor dem Kampf steht, soll
-/// wissen, dass ein Häkchen ihn stärker macht.
-class _Tagesform extends ConsumerWidget {
-  const _Tagesform();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final form = ref.watch(dailyFormProvider);
-    final summe = DailyFormText.summary(form);
-    final text = summe == null
-        ? 'Keine Tagesform — jedes Häkchen macht dich heute stärker.'
-        : '${form.isInForm ? 'In Form' : 'Tagesform'}: $summe';
-    return OnDark(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(
-            form.isInForm ? Icons.local_fire_department : Icons.bolt,
-            size: 16,
-            color: summe == null ? Palette.textOnDarkDim : Palette.accentOnDark,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: summe == null
-                    ? Palette.textOnDarkDim
-                    : Palette.accentOnDark,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

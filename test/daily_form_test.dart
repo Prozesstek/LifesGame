@@ -10,6 +10,7 @@ import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'package:lifes_game/combat/widgets/tagesform_kreis.dart';
 
 /// Die Tagesform auf dem ganzen Weg: Häkchen → [dailyFormProvider] →
 /// [heroPowerProvider] → die Zahlen, mit denen die Grube rechnet.
@@ -98,8 +99,7 @@ void main() {
     expect(morgen.isActive, isFalse);
   });
 
-  testWidgets('die Karte sagt vorher, was ein Häkchen bringt, und danach, '
-      'was es gebracht hat', (tester) async {
+  testWidgets('ein Häkchen meldet „In Form!“', (tester) async {
     final c = _containerMitVorlagen();
     final kraft = _vorlage(c, HabitStat.staerke);
     c.read(habitTrackerProvider.notifier).activate(kraft.id);
@@ -113,8 +113,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(DailyFormCard), findsOneWidget);
-    expect(find.textContaining('jedes Häkchen gibt heute'), findsOneWidget);
+    // Seit dem 28.09. keine Karte mehr über der Liste (Issue #88).
+    expect(find.byType(DailyFormCard), findsNothing);
 
     await tester.tap(find.byIcon(Icons.radio_button_unchecked));
     await tester.pump();
@@ -129,6 +129,36 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('In Form!'), findsOneWidget, reason: 'aufsteigend');
+  });
+
+  testWidgets('der Blitz am Eingang der Grube lädt sich mit dem Häkchen auf', (
+    tester,
+  ) async {
+    final c = _containerMitVorlagen();
+    final kraft = _vorlage(c, HabitStat.staerke);
+    c.read(habitTrackerProvider.notifier).activate(kraft.id);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(
+          home: Scaffold(body: Center(child: TagesformKreis())),
+        ),
+      ),
+    );
+    expect(find.text('Tagesform leer'), findsOneWidget);
+    expect(find.byIcon(Icons.bolt), findsOneWidget);
+
+    c.read(habitTrackerProvider.notifier).toggle(kraft.id, _heute);
+    await tester.pump();
+    expect(find.text('Tagesform leer'), findsNothing);
+    // Alles erledigt: aus dem Blitz wird die Flamme.
+    expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+
+    // Ein Tipp zeigt, was sie bringt.
+    await tester.tap(find.byType(TagesformKreis));
+    await tester.pumpAndSettle();
+    expect(find.byType(DailyFormCard), findsOneWidget);
     expect(find.text('In Form'), findsOneWidget);
   });
 }
