@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
-import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/habits/week_review_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
@@ -58,7 +58,7 @@ void main() {
       await _pump(
         tester,
         _container(_mittwoch, <Day>[_montag, _mittwoch]),
-        const HabitsScreen(),
+        const CharacterScreen(),
       );
       await tester.pump();
 
@@ -70,7 +70,7 @@ void main() {
       await _pump(
         tester,
         _container(_sonntag, <Day>[_montag]),
-        const HabitsScreen(),
+        const CharacterScreen(),
       );
       await tester.pump();
 
@@ -85,7 +85,7 @@ void main() {
       await _pump(
         tester,
         _container(naechsterMontag, <Day>[_montag, _mittwoch]),
-        const HabitsScreen(),
+        const CharacterScreen(),
       );
       await tester.pump();
 

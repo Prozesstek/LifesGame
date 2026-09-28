@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
-import '../../habits/daily_quests_provider.dart';
 import '../../habits/habit_check_flow.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/habits_screen.dart';
@@ -40,7 +39,6 @@ class TodayCard extends ConsumerWidget {
         if (!tracker.isChecked(habit.id, today)) habit,
     ];
     final erledigt = liste.length - offen.length;
-    final abholbar = ref.watch(claimableQuestsProvider).length;
 
     return HolzKarte(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -68,16 +66,6 @@ class TodayCard extends ConsumerWidget {
                 habit: habit,
                 cue: tracker.cueFor(habit.id),
                 onTap: () => toggleHabit(context, ref, habit),
-              ),
-            // Eine erledigte Tagesaufgabe wartet (ADR-0055) — abgeholt
-            // wird auf dem Gewohnheiten-Bildschirm, wo die Aufgaben stehen.
-            if (abholbar > 0)
-              _Hinweis(
-                icon: Icons.flag_rounded,
-                text: abholbar == 1
-                    ? 'Eine Tagesaufgabe ist erledigt — abholen'
-                    : '$abholbar Tagesaufgaben sind erledigt — abholen',
-                highlight: true,
               ),
             if (offen.isEmpty)
               _Hinweis(

@@ -19,6 +19,9 @@ import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
 import '../ui/druck.dart';
+import '../habits/daily_quests_provider.dart';
+import '../habits/habit_check_flow.dart';
+import '../habits/widgets/daily_quests_card.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
@@ -125,8 +128,32 @@ class HomeScreen extends ConsumerWidget {
                     // zum 28.09. stand hier die Figur und gab an vollen
                     // Tagen Platz ab; sie ist jetzt in der Ausrüstung.
                     // Eine lange Liste rollt, statt überzulaufen.
-                    const Expanded(
-                      child: SingleChildScrollView(child: TodayCard()),
+                    // Darunter die **Tagesaufgaben** (Issue #88): Sie hängen
+                    // an denselben Häkchen, und abgeholt wird, wo man
+                    // abhakt.
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            const TodayCard(),
+                            if (ref.watch(dailyQuestsProvider)
+                                case final aufgaben
+                                when aufgaben.isNotEmpty) ...<Widget>[
+                              const SizedBox(height: 10),
+                              DailyQuestsCard(
+                                quests: aufgaben,
+                                isClaimed: (q) => tracker.isQuestClaimed(
+                                  ref.watch(todayProvider),
+                                  q.id,
+                                ),
+                                onClaim: (q) =>
+                                    claimDailyQuest(context, ref, q),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 12),
 

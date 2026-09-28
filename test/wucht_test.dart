@@ -5,7 +5,6 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
-import 'package:lifes_game/habits/widgets/stat_summary.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/ui/aufstieg.dart';
@@ -73,21 +72,6 @@ Future<void> _pumpHabits(WidgetTester tester, ProviderContainer c) async {
   await tester.pump();
 }
 
-double _skalaVon(WidgetTester tester, String wert) {
-  final transform = tester.widget<Transform>(
-    find
-        .ancestor(
-          of: find.descendant(
-            of: find.byType(StatSummary),
-            matching: find.text(wert),
-          ),
-          matching: find.byType(Transform),
-        )
-        .first,
-  );
-  return transform.transform.getMaxScaleOnAxis();
-}
-
 void main() {
   group('Aufsteigende Zahlen', () {
     testWidgets('steigen dort auf, wo getippt wurde, und verschwinden', (
@@ -132,27 +116,6 @@ void main() {
   });
 
   group('Ein Punkt fällt', () {
-    testWidgets('die Kachel des Werts springt und kommt zurück', (
-      tester,
-    ) async {
-      final c = _container();
-      _vorDemPunkt(c);
-      await _pumpHabits(tester, c);
-      final vorher = c.read(characterStatsProvider).attack;
-      expect(_skalaVon(tester, '$vorher'), 1);
-
-      await tester.tap(find.text('Liegestütze'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      final nachher = c.read(characterStatsProvider).attack;
-      expect(nachher, vorher + 1);
-      expect(_skalaVon(tester, '$nachher'), greaterThan(1.05));
-
-      await tester.pumpAndSettle();
-      expect(_skalaVon(tester, '$nachher'), 1);
-    });
-
     testWidgets('und klingt anders als ein Häkchen', (tester) async {
       final mitschrift = _Mitschrift();
       final c = _container(klang: mitschrift);

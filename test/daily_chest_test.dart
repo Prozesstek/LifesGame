@@ -49,7 +49,6 @@ void main() {
     await _pump(tester, c);
 
     expect(find.byType(DailyChestCard), findsNothing);
-    expect(find.textContaining('und die Tagestruhe'), findsOneWidget);
   });
 
   testWidgets('alles erledigt: öffnen, sehen, einsacken', (tester) async {
