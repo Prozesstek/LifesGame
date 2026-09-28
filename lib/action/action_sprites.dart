@@ -209,6 +209,32 @@ abstract final class GrubeFiguren {
   static const String boden = 'Boden.png';
   static const int bodenFelder = 6;
 
+  /// Frederiks zwei Abwandlungen desselben Bodens (28.09.): Moos und
+  /// Risse, die Ziegel an derselben Stelle — deshalb stossen sie nahtlos
+  /// an den Grundboden. Sie liegen auf einzelnen Flecken von
+  /// [bodenFelder] × [bodenFelder] Feldern, damit sich nicht alle sechs
+  /// Felder dasselbe Bild wiederholt.
+  static const List<String> bodenFlecken = <String>[
+    'BodenMoos.png',
+    'BodenRisse.png',
+  ];
+
+  /// Jeder wievielte Fleck eine Abwandlung trägt. Mehr, und der
+  /// Grundboden wäre die Ausnahme.
+  static const int fleckJeder = 3;
+
+  /// Welche Abwandlung auf dem Fleck ([fx], [fy]) liegt, oder `null` für
+  /// den Grundboden. Aus dem Ort gewürfelt, nicht aus der Zeit: Derselbe
+  /// Fleck sieht in jedem Bild gleich aus, sonst flackerte der Boden.
+  static String? fleckAt(int fx, int fy) {
+    // Ein gesäter Zufall statt einer eigenen Formel: Die mischte schlecht
+    // und legte die Risse auf jeden zweiten Fleck einer Reihe.
+    final wurf = math.Random(
+      fx * 7919 + fy * 104729,
+    ).nextInt(fleckJeder * bodenFlecken.length);
+    return wurf < bodenFlecken.length ? bodenFlecken[wurf] : null;
+  }
+
   /// Wo im Bild der Stein liegt; der Rest ist durchsichtig. Die Wand
   /// zeichnet nur diesen Ausschnitt, sonst stünden Lücken zwischen den
   /// Blöcken. `action_sprites_test.dart` misst ihn nach.
@@ -242,6 +268,7 @@ abstract final class GrubeFiguren {
       for (final strip in figure.strips.values) strip.file,
     stein,
     boden,
+    ...bodenFlecken,
   };
 }
 
@@ -316,7 +343,33 @@ class GrubeBilder {
       filterQuality: FilterQuality.medium,
     );
     canvas.drawRect(area, Paint()..shader = shader);
+    _drawFloorPatches(canvas, area, image.width * massstab);
     return true;
+  }
+
+  /// Legt Moos und Risse auf einzelne Flecken, genau über eine Kachel
+  /// des Grundbodens — so passen die Ziegel an den Rändern.
+  void _drawFloorPatches(Canvas canvas, Rect area, double fleck) {
+    canvas.save();
+    canvas.clipRect(area);
+    for (var fy = (area.top / fleck).floor(); fy * fleck < area.bottom; fy++) {
+      for (
+        var fx = (area.left / fleck).floor();
+        fx * fleck < area.right;
+        fx++
+      ) {
+        final file = GrubeFiguren.fleckAt(fx, fy);
+        final image = file == null ? null : _images[file];
+        if (image == null) continue;
+        canvas.drawImageRect(
+          image,
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+          Rect.fromLTWH(fx * fleck, fy * fleck, fleck, fleck),
+          _weich,
+        );
+      }
+    }
+    canvas.restore();
   }
 
   /// Zeichnet den Stein in [dst] — als Wandblock oder als Wurf.

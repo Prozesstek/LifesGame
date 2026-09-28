@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 603, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 605, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -82,6 +82,20 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026, später: Moos und Risse im Boden der Grube
+
+Frederiks zwei neue Bodenkacheln: derselbe Ziegelboden mit Moos und mit
+Rissen (`BodenMoos.png`, `BodenRisse.png`). Sie liegen auf einzelnen
+Flecken von 6 × 6 Feldern, genau über einer Kachel des Grundbodens, im
+Mittel jeder dritte, aus dem Ort gewürfelt (`GrubeFiguren.fleckAt`).
+Die Ziegel sind in allen drei Bildern dieselben, der Übergang ist
+deshalb nahtlos. App 605.
+
+**Angesehen als zusammengesetzte Vorschau, nicht im Spiel.** Moos und
+Risse gehen bis an den Rand ihrer Kachel, deshalb liest man die Flecken
+als Quadrate. Wer das weicher will, zeichnet die Ränder frei, der Code
+bleibt dann, wie er ist.
 
 ## 28.09.2026: die Ausrüstung bekommt einen eigenen Bereich
 
