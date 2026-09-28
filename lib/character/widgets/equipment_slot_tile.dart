@@ -3,27 +3,9 @@ import 'package:gear/gear.dart';
 
 import '../../gear/gear_icon.dart';
 import '../../ui/druck.dart';
+import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
-
-/// Wie ein Platz gerade zum gezogenen Stück steht (ADR-0057).
-///
-/// **Beim Ziehen soll man sehen, wohin es gehört**, bevor man loslässt,
-/// wie beim Deckbau in Clash Royale. Der passende Platz leuchtet, die
-/// anderen treten zurück.
-enum SlotDragState {
-  /// Es wird nichts gezogen.
-  ruhig,
-
-  /// Das gezogene Stück gehört auf diesen Platz.
-  passt,
-
-  /// Und es schwebt gerade darüber: Loslassen legt es an.
-  darueber,
-
-  /// Das gezogene Stück gehört woandershin.
-  passtNicht,
-}
 
 /// Ein Ausrüstungsplatz als Kachel im 6er-Raster.
 ///
@@ -68,16 +50,10 @@ class EquipmentSlotTile extends StatelessWidget {
     final item = equipped?.item;
     final isEmpty = item == null;
 
-    final rand = switch (dragState) {
-      SlotDragState.darueber => Palette.success,
-      SlotDragState.passt => Palette.accent,
-      _ => isEmpty ? Palette.surfaceRaised : Palette.accent,
-    };
-    final randBreite = switch (dragState) {
-      SlotDragState.darueber => 3.0,
-      SlotDragState.passt => 2.5,
-      _ => isEmpty ? 1.0 : 1.5,
-    };
+    final rand = dragState.randFarbe(
+      isEmpty ? Palette.surfaceRaised : Palette.accent,
+    );
+    final randBreite = dragState.randBreite(isEmpty ? 1.0 : 1.5);
 
     final kachel = Semantics(
       button: true,
@@ -139,21 +115,7 @@ class EquipmentSlotTile extends StatelessWidget {
       ),
     );
 
-    // Die Plätze, auf die das gezogene Stück nicht passt, treten zurück,
-    // der passende wird ein wenig größer.
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 120),
-      opacity: dragState == SlotDragState.passtNicht ? 0.35 : 1,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 120),
-        scale: switch (dragState) {
-          SlotDragState.darueber => 1.08,
-          SlotDragState.passt => 1.04,
-          _ => 1,
-        },
-        child: kachel,
-      ),
-    );
+    return PlatzBeimZiehen(zustand: dragState, child: kachel);
   }
 }
 

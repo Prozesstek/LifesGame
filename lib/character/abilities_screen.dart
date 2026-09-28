@@ -1,6 +1,7 @@
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:progression/progression.dart';
 
@@ -10,6 +11,7 @@ import '../gear/widgets/rarity_badge.dart';
 import '../progression/level_provider.dart';
 import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
+import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
 import 'abilities_controller.dart';
 import 'widgets/ability_sheet.dart';
@@ -29,17 +31,34 @@ import 'widgets/ability_slots_row.dart';
 /// sie vollständig. Dieselbe Hausregel wie beim gesperrten Stück im
 /// Laden (ADR-0034) und beim gesperrten Kreis auf der Startseite
 /// (ADR-0020): Ein Ziel, das man nicht sieht, ist keins.
-class AbilitiesScreen extends ConsumerWidget {
+class AbilitiesScreen extends ConsumerStatefulWidget {
   const AbilitiesScreen({super.key});
 
+  @override
+  ConsumerState<AbilitiesScreen> createState() => _AbilitiesScreenState();
+}
+
+class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
   static const double _maxWidth = 560;
 
   /// Vier Bilder je Reihe. Bei 390 Pixeln Breite bleiben je rund 80 —
   /// genug für das 36er-Bild und zwei Zeilen Name darunter.
   static const int _columns = 4;
 
+  final ScrollController _scroll = ScrollController();
+
+  /// Die Id der Fähigkeit, die gerade gezogen wird, oder null. Die Plätze
+  /// lesen sie, um zu zeigen, wohin sie passt (ADR-0057).
+  String? _gezogen;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final level = ref.watch(playerLevelProvider);
     final chosen = ref.watch(chosenAbilitiesProvider);
     final weaponMove = ref.watch(weaponMoveProvider);
@@ -59,47 +78,61 @@ class AbilitiesScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: ListView(
+            // **Kein ListView**, aus demselben Grund wie bei der
+            // Ausrüstung: Beim Hochrollen während des Ziehens verwürfe sie
+            // die Kachel, von der gezogen wird.
+            child: SingleChildScrollView(
+              controller: _scroll,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-              children: <Widget>[
-                const _SectionTitle('Deine vier Plätze'),
-                const SizedBox(height: 10),
-                AbilitySlotsRow(
-                  level: level.level,
-                  weaponMove: weaponMove,
-                  chosen: chosen,
-                  onTapSlot: (slot) => _tippePlatz(
-                    context,
-                    ref,
-                    slot: slot,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const _SectionTitle('Deine vier Plätze'),
+                  const SizedBox(height: 10),
+                  AbilitySlotsRow(
+                    level: level.level,
                     weaponMove: weaponMove,
-                    attack: attack,
-                    offen: offen,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _SectionTitle('Alle Fähigkeiten'),
-                const SizedBox(height: 4),
-                Text(
-                  '${offen.length} von ${AbilityCatalog.choosable.length} '
-                  'freigeschaltet. Antippen zeigt alle Werte — auch bei '
-                  'den grauen.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textOnDarkDim,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (final rarity in Rarity.values)
-                  ..._gruppe(
-                    context,
-                    ref,
-                    rarity: rarity,
-                    offen: offen,
                     chosen: chosen,
-                    attack: attack,
+                    gezogen: _gezogen,
+                    // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
+                    // die belegten plus der nächste leere.
+                    nimmtAn: (slot) =>
+                        slot >= 2 &&
+                        slot - 2 < _belegung(chosen, level.level).length,
+                    onAblegen: _lege,
+                    onTapSlot: (slot) => _tippePlatz(
+                      context,
+                      ref,
+                      slot: slot,
+                      weaponMove: weaponMove,
+                      attack: attack,
+                      offen: offen,
+                    ),
                   ),
-              ],
+                  const SizedBox(height: 20),
+                  const _SectionTitle('Alle Fähigkeiten'),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${offen.length} von ${AbilityCatalog.choosable.length} '
+                    'freigeschaltet. Antippen zeigt alle Werte — auch bei '
+                    'den grauen.',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Palette.textOnDarkDim,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  for (final rarity in Rarity.values)
+                    ..._gruppe(
+                      context,
+                      ref,
+                      rarity: rarity,
+                      offen: offen,
+                      chosen: chosen,
+                      attack: attack,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -157,22 +190,68 @@ class AbilitiesScreen extends ConsumerWidget {
         childAspectRatio: 0.78,
         children: <Widget>[
           for (final ability in stufe)
-            _Kachel(
-              ability: ability,
-              unlocked: offen.contains(ability.moveId),
-              imEinsatz: chosen.contains(ability.moveId),
-              onTap: () => _zeigeFaehigkeit(
-                context,
-                ref,
+            HaltenUndZiehen<String>(
+              data: ability.moveId,
+              // **Nur Freigeschaltetes lässt sich ziehen.** Eine graue
+              // Fähigkeit auf einen Platz zu legen hieße, sie zu benutzen,
+              // bevor sie verdient ist.
+              aktiv: offen.contains(ability.moveId),
+              bild: MoveBild(
+                moveId: ability.moveId,
+                side: HaltenUndZiehen.schwebeSeite - 12,
+                fallback: const Icon(Icons.bolt, color: Palette.accent),
+              ),
+              rahmenFarbe: RarityBadge.colorOfStufe(ability.rarity.index),
+              onStart: () => _beginneZiehen(ability.moveId),
+              onEnde: _beendeZiehen,
+              child: _Kachel(
                 ability: ability,
                 unlocked: offen.contains(ability.moveId),
-                attack: attack,
+                imEinsatz: chosen.contains(ability.moveId),
+                ausgeblendet: _gezogen == ability.moveId,
+                onTap: () => _zeigeFaehigkeit(
+                  context,
+                  ref,
+                  ability: ability,
+                  unlocked: offen.contains(ability.moveId),
+                  attack: attack,
+                ),
               ),
             ),
         ],
       ),
       const SizedBox(height: 16),
     ];
+  }
+
+  void _beginneZiehen(String moveId) {
+    setState(() => _gezogen = moveId);
+    zuDenPlaetzen(_scroll);
+  }
+
+  void _beendeZiehen() {
+    if (_gezogen == null) return;
+    setState(() => _gezogen = null);
+  }
+
+  /// Legt die gezogene Fähigkeit auf den freien Platz [slot] (ab 2).
+  ///
+  /// Lag sie schon woanders, zieht sie um. Das regelt
+  /// `ChosenAbilities.withAt`, nicht dieser Bildschirm.
+  void _lege(int slot, String moveId) {
+    _beendeZiehen();
+    ref.read(chosenAbilitiesProvider.notifier).choose(slot - 2, moveId);
+    HapticFeedback.selectionClick();
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            '${pitNameOf(moveId) ?? moveId} liegt auf Platz $slot.',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 
   /// Ein angetippter Platz: Der Waffenplatz und belegte Plätze zeigen
@@ -201,11 +280,15 @@ class AbilitiesScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Unten eine Fähigkeit antippen und dort den Platz wählen.',
+              offen.isEmpty
+                  ? 'Noch keine Fähigkeit freigeschaltet. Was es dafür '
+                        'braucht, steht bei den grauen.'
+                  : 'Halte unten eine Fähigkeit gedrückt und zieh sie '
+                        'hierher.',
             ),
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       return;
@@ -308,6 +391,7 @@ class _Kachel extends StatelessWidget {
     required this.unlocked,
     required this.imEinsatz,
     required this.onTap,
+    this.ausgeblendet = false,
   });
 
   final Ability ability;
@@ -315,6 +399,9 @@ class _Kachel extends StatelessWidget {
 
   /// Ob sie gerade auf einem Platz liegt.
   final bool imEinsatz;
+
+  /// Ob sie gerade gezogen wird. Dann bleibt an ihrer Stelle ein Schatten.
+  final bool ausgeblendet;
 
   final VoidCallback onTap;
 
@@ -337,71 +424,74 @@ class _Kachel extends StatelessWidget {
       ),
     );
 
-    return Semantics(
-      button: true,
-      label: unlocked
-          ? '$name, freigeschaltet'
-          : '$name, noch nicht freigeschaltet',
-      child: Druck(
-        child: Material(
-          color: unlocked ? Palette.surface : Palette.surfaceSunken,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            onTap: onTap,
+    return Opacity(
+      opacity: ausgeblendet ? 0.3 : 1,
+      child: Semantics(
+        button: true,
+        label: unlocked
+            ? '$name, freigeschaltet'
+            : '$name, noch nicht freigeschaltet',
+        child: Druck(
+          child: Material(
+            color: unlocked ? Palette.surface : Palette.surfaceSunken,
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: imEinsatz
-                      ? Palette.accent
-                      : farbe.withValues(alpha: unlocked ? 0.7 : 0.25),
-                  width: imEinsatz ? 2 : 1,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: imEinsatz
+                        ? Palette.accent
+                        : farbe.withValues(alpha: unlocked ? 0.7 : 0.25),
+                    width: imEinsatz ? 2 : 1,
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: <Widget>[
-                      bild,
-                      if (!unlocked)
-                        const Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Icon(
-                            Icons.lock,
-                            size: 12,
-                            color: Palette.muted,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: <Widget>[
+                        bild,
+                        if (!unlocked)
+                          const Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Icon(
+                              Icons.lock,
+                              size: 12,
+                              color: Palette.muted,
+                            ),
                           ),
-                        ),
-                      if (imEinsatz)
-                        const Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Icon(
-                            Icons.check_circle,
-                            size: 12,
-                            color: Palette.accent,
+                        if (imEinsatz)
+                          const Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 12,
+                              color: Palette.accent,
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 9,
-                      height: 1.15,
-                      color: unlocked ? Palette.text : Palette.muted,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9,
+                        height: 1.15,
+                        color: unlocked ? Palette.text : Palette.muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

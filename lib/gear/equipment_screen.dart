@@ -8,6 +8,7 @@ import '../character/widgets/set_card.dart';
 import '../combat/ladder_controller.dart';
 import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
+import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'gear_controller.dart';
@@ -62,19 +63,9 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     super.dispose();
   }
 
-  /// **Wer zieht, wird nach oben gebracht**, wie beim Deckbau in Clash
-  /// Royale: Die Plätze stehen ganz oben, das Stück meist weiter unten.
-  /// Ohne das müsste man mit dem Finger auf dem Stück gleichzeitig
-  /// rollen.
   void _beginneZiehen(GearItem item) {
     setState(() => _gezogen = item);
-    if (_scroll.hasClients && _scroll.offset > 0) {
-      _scroll.animateTo(
-        0,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
-    }
+    zuDenPlaetzen(_scroll);
   }
 
   void _beendeZiehen() {
@@ -107,6 +98,18 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                 'Laden und als Beute des Wächters.'
           : 'Halte unten ein Stück gedrückt und zieh es hierher.',
     );
+  }
+
+  /// Was beim Ziehen unter dem Finger hängt: das Bild des Stücks.
+  static Widget _schwebeBild(GearItem item) {
+    const seite = HaltenUndZiehen.schwebeSeite - 12;
+    final ersatz = Icon(
+      GearIcons.fallbackFor(item.slot),
+      color: Palette.accent,
+    );
+    final pfad = GearIcons.forItemId(item.id);
+    if (pfad == null) return ersatz;
+    return PixelArt(assetPath: pfad, side: seite, fallback: ersatz);
   }
 
   void _sage(String text) {
@@ -289,8 +292,10 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
         childAspectRatio: 0.78,
         children: <Widget>[
           for (final item in gruppe.items)
-            _Ziehbar(
-              item: item,
+            HaltenUndZiehen<GearItem>(
+              data: item,
+              bild: _schwebeBild(item),
+              rahmenFarbe: RarityBadge.colorOf(item.rarity),
               // **Nur was man hat, lässt sich ziehen.** Ein graues Stück
               // auf einen Platz zu legen hieße, etwas anzulegen, das es
               // nicht gibt.
@@ -343,88 +348,14 @@ class _Ablage extends StatelessWidget {
       onWillAcceptWithDetails: (details) => details.data.slot == slot,
       onAcceptWithDetails: (details) => onAblegen(details.data),
       builder: (context, kandidaten, _) {
-        final schwebt = kandidaten.isNotEmpty;
-        final zustand = switch (gezogen) {
-          null => SlotDragState.ruhig,
-          final GearItem g when g.slot != slot => SlotDragState.passtNicht,
-          _ when schwebt => SlotDragState.darueber,
-          _ => SlotDragState.passt,
-        };
-        return child(zustand);
-      },
-    );
-  }
-}
-
-/// Eine Kachel, die sich nach kurzem Halten ziehen lässt.
-///
-/// **Halten, nicht sofort ziehen**, damit Rollen und Antippen bleiben,
-/// wie sie waren. Beim Start gibt das Handy einen kurzen Stoß
-/// (`hapticFeedbackOnStart`), und unter dem Finger hängt das Bild des
-/// Stücks, etwas größer als auf der Kachel.
-class _Ziehbar extends StatelessWidget {
-  const _Ziehbar({
-    required this.item,
-    required this.aktiv,
-    required this.onStart,
-    required this.onEnde,
-    required this.child,
-  });
-
-  final GearItem item;
-  final bool aktiv;
-  final VoidCallback onStart;
-  final VoidCallback onEnde;
-  final Widget child;
-
-  /// Wie groß das Stück unter dem Finger hängt.
-  static const double _schwebeSeite = 64;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!aktiv) return child;
-    final pfad = GearIcons.forItemId(item.id);
-    final farbe = RarityBadge.colorOf(item.rarity);
-
-    return LongPressDraggable<GearItem>(
-      data: item,
-      onDragStarted: onStart,
-      // Ein Ende gibt es auf drei Wegen (abgelegt, zurückgeflogen,
-      // abgebrochen), und alle drei landen hier.
-      onDragEnd: (_) => onEnde(),
-      // Der Finger liegt mitten auf dem Bild, nicht an seiner Ecke.
-      dragAnchorStrategy: pointerDragAnchorStrategy,
-      feedback: Transform.translate(
-        offset: const Offset(-_schwebeSeite / 2, -_schwebeSeite / 2),
-        child: Container(
-          width: _schwebeSeite,
-          height: _schwebeSeite,
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: Palette.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: farbe, width: 2),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x66000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
-              ),
-            ],
+        return child(
+          SlotDragState.fuer(
+            zieht: gezogen != null,
+            passt: gezogen?.slot == slot,
+            schwebt: kandidaten.isNotEmpty,
           ),
-          child: pfad == null
-              ? Icon(GearIcons.fallbackFor(item.slot), color: Palette.accent)
-              : PixelArt(
-                  assetPath: pfad,
-                  side: _schwebeSeite - 12,
-                  fallback: Icon(
-                    GearIcons.fallbackFor(item.slot),
-                    color: Palette.accent,
-                  ),
-                ),
-        ),
-      ),
-      child: child,
+        );
+      },
     );
   }
 }

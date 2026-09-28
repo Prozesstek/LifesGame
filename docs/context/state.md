@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 598, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 603, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -141,6 +141,22 @@ verwarf die ListView sonst die Kachel, von der gezogen wird. gear 117
 nachgestellt (Berührung halten, Ring aus dem Raster auf den Ring-Platz):
 Hochrollen, Leuchten, grüner Rand, Anlegen. **Mit einem echten Finger
 am Handy nicht.**
+
+### Nachgereicht: dasselbe Ziehen für die Fähigkeiten
+
+AktivesBrett: „dasselbe System mit dem lange drauf gehen und dann rein
+ziehen auch für die Fähigkeiten“. Freigeschaltete Fähigkeiten lassen sich
+jetzt auf die freien Plätze ziehen, gesperrte nicht. Der Waffenplatz
+nimmt nichts an, und es leuchten nur die belegten Plätze plus der
+nächste leere. **Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt**,
+weil `ChosenAbilities` keine Lücken hält. Die Knöpfe im Blatt bleiben.
+
+**Wie sich das Ziehen anfühlt, steht jetzt an einer Stelle**
+(`lib/ui/halten_und_ziehen.dart`): der Zustand eines Platzes, das Bild
+unter dem Finger, Leuchten und Zurücktreten, das Hochrollen. Die
+Ausrüstung ist darauf umgestellt. Der Fähigkeiten-Bildschirm ist dafür
+kein `ListView` mehr. Getestet im Widget-Test (Anlegen, Ersetzen, Lücke,
+Waffenplatz, Gesperrtes), App 603. Nicht im Browser nachgestellt.
 
 ### Offen
 

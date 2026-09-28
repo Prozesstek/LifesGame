@@ -41,6 +41,12 @@ der Startseite, gebaut wie der Fähigkeiten-Bildschirm:
    falschen Platz fliegt es zurück. Hat man es mehrfach, kommt das
    **beste Exemplar** drauf (`Loadout.bestCopyOf`, der höchste Wurf); ein
    bestimmtes anderes legt man im Blatt einzeln an.
+   **Dasselbe gilt seit dem 28.09. für die Fähigkeiten** (ADR-0049):
+   Freigeschaltete lassen sich auf die freien Plätze ziehen, der
+   Waffenplatz nimmt nichts an, und es leuchten nur die belegten Plätze
+   plus der nächste leere, dieselbe Grenze wie bei den Platz-Knöpfen im
+   Blatt, weil `ChosenAbilities` keine Lücken hält. Wie sich das Ziehen
+   anfühlt, steht für beide an einer Stelle (`lib/ui/halten_und_ziehen.dart`).
 3. **Darunter der ganze Katalog**, jedes Stück einmal: besessene farbig,
    der Rest grau, gesperrte (Episch/Legendär vor ihrer Stufe) mit
    Schloss, mehrfach besessene mit „×2".

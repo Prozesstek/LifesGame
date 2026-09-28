@@ -5,6 +5,7 @@ import 'package:progression/progression.dart';
 import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
 import '../../ui/druck.dart';
+import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 
@@ -30,6 +31,9 @@ class AbilitySlotsRow extends StatelessWidget {
     required this.weaponMove,
     required this.chosen,
     required this.onTapSlot,
+    this.gezogen,
+    this.nimmtAn = _nimmtNichts,
+    this.onAblegen = _legtNichts,
     super.key,
   });
 
@@ -44,6 +48,20 @@ class AbilitySlotsRow extends StatelessWidget {
   /// Wird für jeden **offenen** Platz gerufen, [slot] zählt ab 1.
   final void Function(int slot) onTapSlot;
 
+  /// Die Id der Fähigkeit, die gerade gezogen wird, oder null (ADR-0057).
+  final String? gezogen;
+
+  /// Ob der Platz [slot] (ab 1) eine gezogene Fähigkeit nimmt. **Die
+  /// Regel steht beim Bildschirm**, weil sie dieselbe ist wie für die
+  /// Platz-Knöpfe im Blatt: die belegten plus der nächste leere.
+  final bool Function(int slot) nimmtAn;
+
+  /// Wird gerufen, wenn [moveId] auf [slot] losgelassen wurde.
+  final void Function(int slot, String moveId) onAblegen;
+
+  static bool _nimmtNichts(int _) => false;
+  static void _legtNichts(int _, String _) {}
+
   @override
   Widget build(BuildContext context) {
     final open = AbilitySlots.openAt(level);
@@ -57,12 +75,21 @@ class AbilitySlotsRow extends StatelessWidget {
             for (var slot = 1; slot <= AbilitySlots.total; slot++) ...<Widget>[
               if (slot > 1) const SizedBox(width: 8),
               Expanded(
-                child: _Slot(
-                  slot: slot,
-                  isOpen: slot <= open,
-                  isWeaponSlot: slot == 1,
-                  move: _moveIn(slot),
-                  onTap: slot > open ? null : () => onTapSlot(slot),
+                child: DragTarget<String>(
+                  onWillAcceptWithDetails: (_) => nimmtAn(slot),
+                  onAcceptWithDetails: (d) => onAblegen(slot, d.data),
+                  builder: (context, kandidaten, _) => _Slot(
+                    slot: slot,
+                    isOpen: slot <= open,
+                    isWeaponSlot: slot == 1,
+                    move: _moveIn(slot),
+                    onTap: slot > open ? null : () => onTapSlot(slot),
+                    dragState: SlotDragState.fuer(
+                      zieht: gezogen != null,
+                      passt: nimmtAn(slot),
+                      schwebt: kandidaten.isNotEmpty,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -142,9 +169,11 @@ class _Slot extends StatelessWidget {
     required this.isWeaponSlot,
     required this.move,
     required this.onTap,
+    required this.dragState,
   });
 
   final int slot;
+  final SlotDragState dragState;
   final bool isOpen;
   final bool isWeaponSlot;
 
@@ -160,51 +189,60 @@ class _Slot extends StatelessWidget {
     final belegt = move;
     final zeichen = Icon(_icon, size: 18, color: _iconColour);
 
-    return Semantics(
-      button: onTap != null,
-      label: _semantics,
-      child: Druck(
-        enabled: onTap != null,
-        child: Material(
-          color: Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            onTap: onTap,
+    return PlatzBeimZiehen(
+      zustand: dragState,
+      child: Semantics(
+        button: onTap != null,
+        label: _semantics,
+        child: Druck(
+          enabled: onTap != null,
+          child: Material(
+            color: Palette.surface,
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: move == null ? Palette.background : Palette.accent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 10,
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (isOpen && belegt != null)
-                    MoveBild(
-                      moveId: belegt,
-                      side: _bildSeite,
-                      fallback: zeichen,
-                    )
-                  else
-                    SizedBox.square(
-                      dimension: _bildSeite,
-                      child: Center(child: zeichen),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: dragState.randFarbe(
+                      move == null ? Palette.background : Palette.accent,
                     ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _caption,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: move == null ? Palette.muted : Palette.text,
-                    ),
+                    width: dragState.randBreite(1),
                   ),
-                ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (isOpen && belegt != null)
+                      MoveBild(
+                        moveId: belegt,
+                        side: _bildSeite,
+                        fallback: zeichen,
+                      )
+                    else
+                      SizedBox.square(
+                        dimension: _bildSeite,
+                        child: Center(child: zeichen),
+                      ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _caption,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: move == null ? Palette.muted : Palette.text,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
