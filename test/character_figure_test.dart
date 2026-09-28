@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
-import 'package:lifes_game/home/widgets/character_stage.dart';
+import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
-import 'package:progression/progression.dart';
 
-/// Helm, Rüstung und Waffe auf der Figur des Startbildschirms.
+/// Helm, Rüstung und Waffe auf der Figur im Ausrüstungs-Bildschirm.
 ///
 /// Dieselben Nähte wie in `gear_icon_test.dart` — jeder Helm hat eine
 /// Zeichnung, jede Zeichnung ist da und angemeldet — plus die eine
@@ -16,10 +15,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('jedes Stück auf Helm, Rüstung und Waffe hat eine Zeichnung', () {
-    for (final slot in CharacterStage.layers) {
+    for (final slot in CharacterFigure.layers) {
       for (final item in GearCatalog.forSlot(slot)) {
         expect(
-          CharacterStage.overlays,
+          CharacterFigure.overlays,
           contains(item.id),
           reason: '${item.name} steht im Laden, aber die Figur trägt es nicht.',
         );
@@ -29,18 +28,18 @@ void main() {
 
   test('keine Zeichnung zeigt auf ein Stück, das es nicht gibt', () {
     final ids = GearCatalog.all.map((item) => item.id);
-    for (final id in CharacterStage.overlays.keys) {
+    for (final id in CharacterFigure.overlays.keys) {
       expect(ids, contains(id));
     }
   });
 
   test('jede Zeichnung ist ein PNG in der Größe der Figur', () async {
-    final figur = await rootBundle.load(CharacterStage.assetPath);
+    final figur = await rootBundle.load(CharacterFigure.assetPath);
     final breite = figur.getUint32(16);
     final hoehe = figur.getUint32(20);
     expect(breite, PixelArt.assetSize);
 
-    for (final pfad in CharacterStage.overlays.values) {
+    for (final pfad in CharacterFigure.overlays.values) {
       final daten = await rootBundle.load(pfad);
       expect(daten.getUint32(0), 0x89504E47, reason: '$pfad ist kein PNG.');
       expect(daten.getUint32(16), breite, reason: pfad);
@@ -55,18 +54,13 @@ void main() {
           body: SizedBox(
             width: 360,
             height: 400,
-            child: CharacterStage(
-              level: LevelCurve.levelFor(0),
-              gold: 0,
-              worn: worn,
-            ),
+            child: CharacterFigure(worn: worn),
           ),
         ),
       ),
     );
   }
 
-  // Die Goldmünze darunter ist auch `PixelArt` — gezählt wird nur die Figur.
   List<String> figurenbilder(WidgetTester tester) => tester
       .widgetList<PixelArt>(find.byType(PixelArt))
       .map((b) => b.assetPath)
@@ -76,7 +70,7 @@ void main() {
   testWidgets('ohne Helm steht nur die Figur da', (tester) async {
     await zeige(tester);
 
-    expect(figurenbilder(tester), <String>[CharacterStage.assetPath]);
+    expect(figurenbilder(tester), <String>[CharacterFigure.assetPath]);
   });
 
   testWidgets('Rüstung, Waffe und Helm liegen in dieser Reihenfolge', (
@@ -90,10 +84,10 @@ void main() {
     );
 
     expect(figurenbilder(tester), <String>[
-      CharacterStage.assetPath,
-      CharacterStage.overlays['gear-lederwams']!,
-      CharacterStage.overlays['gear-kurzbogen']!,
-      CharacterStage.overlays['gear-drachenhelm']!,
+      CharacterFigure.assetPath,
+      CharacterFigure.overlays['gear-lederwams']!,
+      CharacterFigure.overlays['gear-kurzbogen']!,
+      CharacterFigure.overlays['gear-drachenhelm']!,
     ]);
   });
 
@@ -103,6 +97,6 @@ void main() {
     final ring = GearCatalog.forSlot(GearSlot.ring).first.id;
     await zeige(tester, worn: <String>[ring]);
 
-    expect(figurenbilder(tester), <String>[CharacterStage.assetPath]);
+    expect(figurenbilder(tester), <String>[CharacterFigure.assetPath]);
   });
 }

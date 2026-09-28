@@ -126,10 +126,11 @@ durch die Grube ersetzt und gelöscht.
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sieben** Kreise darum, unten vier kleinere, „Heute“ darunter | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)) | Flutter |
+| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: offene Gewohnheiten, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
-| `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
+| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
@@ -176,6 +177,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
+| `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen. Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
@@ -216,7 +218,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 605 Tests
+flutter test             # 610 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

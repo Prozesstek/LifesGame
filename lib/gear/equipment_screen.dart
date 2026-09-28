@@ -15,6 +15,7 @@ import 'gear_controller.dart';
 import 'gear_grouping.dart';
 import 'gear_icon.dart';
 import 'shop_screen.dart';
+import 'widgets/character_figure.dart';
 import 'widgets/gear_sheet.dart';
 import 'widgets/rarity_badge.dart';
 
@@ -45,8 +46,19 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   /// Spielstand: Wer den Bildschirm wieder öffnet, sieht wieder A bis Z.
   GearGrouping _gruppierung = GearGrouping.values.first;
 
-  /// Drei Spalten für die Plätze, wie bisher im Charakter.
-  static const int _slotColumns = 3;
+  /// Welche Plätze links und rechts der Figur stehen, von oben nach
+  /// unten. Links, was sie am Leib trägt, rechts, was sie hält und
+  /// umhängt.
+  static const List<GearSlot> _linkeSeite = <GearSlot>[
+    GearSlot.helm,
+    GearSlot.ruestung,
+    GearSlot.schuhe,
+  ];
+  static const List<GearSlot> _rechteSeite = <GearSlot>[
+    GearSlot.waffe,
+    GearSlot.ring,
+    GearSlot.talisman,
+  ];
 
   /// Vier Spalten für den Katalog, wie bei den Fähigkeiten.
   static const int _columns = 4;
@@ -163,31 +175,27 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  GridView.count(
-                    // Das Raster sitzt in einer ListView: eigene Höhe, kein
-                    // eigenes Scrollen. Sonst scrollten zwei Flächen
-                    // ineinander.
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: _slotColumns,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 0.92,
-                    children: <Widget>[
-                      for (final slot in GearSlot.values)
-                        _Ablage(
-                          slot: slot,
-                          gezogen: _gezogen,
-                          onAblegen: _lege,
-                          child: (dragState) => EquipmentSlotTile(
-                            slot: slot,
-                            equipped: loadout.equippedCopyIn(slot),
-                            hasAny: loadout.copiesIn(slot).isNotEmpty,
-                            dragState: dragState,
-                            onTap: () => _tippePlatz(slot, loadout),
-                          ),
-                        ),
-                    ],
+                  _Anziehpuppe(
+                    links: _linkeSeite,
+                    rechts: _rechteSeite,
+                    figur: CharacterFigure(
+                      worn: <String>[
+                        for (final slot in GearSlot.values)
+                          ?loadout.equippedCopyIn(slot)?.itemId,
+                      ],
+                    ),
+                    platz: (slot) => _Ablage(
+                      slot: slot,
+                      gezogen: _gezogen,
+                      onAblegen: _lege,
+                      child: (dragState) => EquipmentSlotTile(
+                        slot: slot,
+                        equipped: loadout.equippedCopyIn(slot),
+                        hasAny: loadout.copiesIn(slot).isNotEmpty,
+                        dragState: dragState,
+                        onTap: () => _tippePlatz(slot, loadout),
+                      ),
+                    ),
                   ),
                   // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
                   // „keine Sets" sagt, ist eine Zeile über nichts.
@@ -317,6 +325,60 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
       ),
       const SizedBox(height: 16),
     ];
+  }
+}
+
+/// Die Figur in der Mitte, drei Plätze links, drei rechts (Frederik,
+/// 28.09.) — wie in einem Rollenspiel, statt eines Rasters darüber.
+///
+/// **Alle Plätze gleich hoch**, sonst stünde ein Platz mit zweizeiligem
+/// Namen höher als sein Nachbar, und die Seiten liefen auseinander.
+class _Anziehpuppe extends StatelessWidget {
+  const _Anziehpuppe({
+    required this.links,
+    required this.rechts,
+    required this.figur,
+    required this.platz,
+  });
+
+  final List<GearSlot> links;
+  final List<GearSlot> rechts;
+  final Widget figur;
+  final Widget Function(GearSlot slot) platz;
+
+  static const double platzHoehe = 112;
+  static const double abstand = 8;
+
+  Widget _seite(List<GearSlot> slots) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        for (final (i, slot) in slots.indexed) ...<Widget>[
+          if (i > 0) const SizedBox(height: abstand),
+          SizedBox(height: platzHoehe, child: platz(slot)),
+        ],
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(flex: 3, child: _seite(links)),
+        const SizedBox(width: abstand),
+        Expanded(
+          flex: 4,
+          child: SizedBox(
+            height: 3 * platzHoehe + 2 * abstand,
+            child: Center(child: figur),
+          ),
+        ),
+        const SizedBox(width: abstand),
+        Expanded(flex: 3, child: _seite(rechts)),
+      ],
+    );
   }
 }
 
