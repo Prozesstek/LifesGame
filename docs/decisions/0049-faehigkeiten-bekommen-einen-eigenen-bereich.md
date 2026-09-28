@@ -1,7 +1,9 @@
 # ADR-0049: Die Fähigkeiten bekommen einen eigenen Bereich
 
 **Datum:** 25.09.2026
-**Status:** Aktiv
+**Status:** Aktiv, **ergänzt durch [ADR-0057](0057-ausruestung-bekommt-einen-eigenen-bereich.md)**:
+Fähigkeiten lassen sich seitdem auch per Halten und Ziehen auf einen
+Platz legen. Die Platz-Knöpfe im Blatt bleiben.
 **Entschieden von:** AktivesBrett
 **Ergänzt:** [ADR-0013](0013-charakter-als-kommandozentrale.md) (die Plätze
 ziehen aus dem Charakter aus)

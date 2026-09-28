@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
+import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
@@ -35,6 +36,7 @@ void main() {
         'Kampf',
         'Laden',
         'Fähigkeiten',
+        'Ausrüstung',
         'Charakter',
       ]) {
         expect(find.text(title), findsOneWidget, reason: title);
@@ -52,8 +54,8 @@ void main() {
 
       // Der Entwicklermodus ist seit Issue #35 kein Bereich mehr,
       // sondern ein kleiner Knopf daneben (ADR-0021: er gehört nicht zum
-      // Spiel). Die Kreise sind damit genau die Bereiche — sechs, seit
-      // die Fähigkeiten einen eigenen haben (ADR-0049).
+      // Spiel). Die Kreise sind damit genau die Bereiche — sieben, seit
+      // Fähigkeiten und Ausrüstung eigene haben (ADR-0049, ADR-0057).
       final kreise = tester
           .widgetList<HubCircle>(find.byType(HubCircle))
           .toList();
@@ -62,7 +64,7 @@ void main() {
           .map((k) => k.label)
           .toList();
 
-      expect(kreise, hasLength(6));
+      expect(kreise, hasLength(7));
       expect(locked, <String>['Kampf']);
     });
 
@@ -296,6 +298,61 @@ void main() {
 
       final daten = await rootBundle.load(HomeScreen.abilitySymbol);
       expect(daten.lengthInBytes, greaterThan(100));
+    });
+
+    testWidgets('Ausrüstung führt zum eigenen Bildschirm', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      await tester.tap(find.text('Ausrüstung'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EquipmentScreen), findsOneWidget);
+    });
+
+    testWidgets('der Kreis trägt den Harnisch, und er ist abgelegt', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      final harnisch = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == HomeScreen.gearSymbol,
+      );
+      expect(
+        tester
+            .widget<HubCircle>(
+              find.ancestor(of: harnisch, matching: find.byType(HubCircle)),
+            )
+            .label,
+        'Ausrüstung',
+      );
+
+      final daten = await rootBundle.load(HomeScreen.gearSymbol);
+      expect(daten.lengthInBytes, greaterThan(100));
+    });
+
+    testWidgets('unten stehen vier kleinere Kreise', (tester) async {
+      // **Vier passen nur kleiner** (ADR-0057): Bei 72 Punkten bräuchten
+      // sie mit Namen 352 Punkte, ein Handy hat nach dem Rand 335.
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      final unten = tester
+          .widgetList<HubCircle>(find.byType(HubCircle))
+          .where((k) => k.size == HomeScreen.bottomCircleSize)
+          .map((k) => k.label)
+          .toList();
+      expect(unten, <String>[
+        'Laden',
+        'Fähigkeiten',
+        'Ausrüstung',
+        'Charakter',
+      ]);
+      expect(4 * (HomeScreen.bottomCircleSize + 16), lessThanOrEqualTo(335));
     });
 
     testWidgets('Charakter führt zum Charakterbildschirm', (tester) async {

@@ -241,6 +241,23 @@ class Loadout {
   /// Ob man irgendein Exemplar dieses Katalogstücks hat.
   bool ownsItem(String itemId) => ownedCopies.any((c) => c.itemId == itemId);
 
+  /// Das beste Exemplar eines Katalogstücks, oder null, wenn man keines
+  /// hat (ADR-0057).
+  ///
+  /// **„Beste“ heißt der höchste Wurf**, gemessen an der Summe der Werte.
+  /// Das ist die Antwort, wenn im Ausrüstungs-Bildschirm ein Stück
+  /// gezogen wird statt eines bestimmten Exemplars. Wer ein anderes will,
+  /// legt es im Blatt einzeln an. Bei gleicher Summe gewinnt das zuerst
+  /// erworbene, damit dieselbe Frage immer dieselbe Antwort bekommt.
+  GearCopy? bestCopyOf(String itemId) {
+    GearCopy? beste;
+    for (final copy in _acquired) {
+      if (copy.itemId != itemId || _sold.containsKey(copy.uid)) continue;
+      if (beste == null || copy.bonus.total > beste.bonus.total) beste = copy;
+    }
+    return beste;
+  }
+
   /// Wie viel Gold ausgegeben ist: was je bezahlt wurde, minus was
   /// Verkäufe zurückgebracht haben.
   int get spentGold {

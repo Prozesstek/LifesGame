@@ -34,8 +34,19 @@ class HubCircle extends StatelessWidget {
     this.image,
     this.progress,
     this.symbol,
+    this.size = diameter,
     super.key,
   });
+
+  /// Wie gross dieser Kreis gezeichnet wird. Standard ist [diameter].
+  ///
+  /// **Kleiner nur, wenn vier in eine Reihe muessen** (ADR-0057). Vier
+  /// Kreise mit ihrem Namen darunter brauchen bei 72 Punkten 352 Punkte
+  /// Breite, ein Handy hat nach dem Rand 335. Zeichen und Symbol wachsen
+  /// und schrumpfen mit, damit der kleine Kreis aussieht wie der grosse.
+  final double size;
+
+  double get _scale => size / diameter;
 
   /// Eine **gezeichnete** Figur auf der Knopffläche statt des [icon] —
   /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
@@ -111,7 +122,7 @@ class HubCircle extends StatelessWidget {
       child: Druck(
         child: InkWell(
           onTap: () => isLocked ? _sageWarum(context) : onTap(),
-          borderRadius: BorderRadius.circular(diameter),
+          borderRadius: BorderRadius.circular(size),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
@@ -121,27 +132,32 @@ class HubCircle extends StatelessWidget {
                   clipBehavior: Clip.none,
                   children: <Widget>[
                     if (bild == null)
-                      _SchlichterKreis(icon: icon, farbe: farbe)
+                      _SchlichterKreis(icon: icon, farbe: farbe, size: size)
                     else
                       Opacity(
                         opacity: isLocked ? _lockedOpacity : 1,
                         child: SizedBox(
-                          width: diameter,
-                          height: diameter,
+                          width: size,
+                          height: size,
                           child: Stack(
                             alignment: Alignment.center,
                             children: <Widget>[
                               PixelArt(
                                 assetPath: bild.assetPath,
-                                side: diameter,
+                                side: size,
                                 fallback: _SchlichterKreis(
                                   icon: icon,
                                   farbe: farbe,
+                                  size: size,
                                 ),
                               ),
                               if (!bild.carriesIcon)
                                 _symbolOder(
-                                  Icon(icon, size: 30, color: Palette.text),
+                                  Icon(
+                                    icon,
+                                    size: 30 * _scale,
+                                    color: Palette.text,
+                                  ),
                                 ),
                             ],
                           ),
@@ -178,7 +194,7 @@ class HubCircle extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 SizedBox(
-                  width: diameter + 16,
+                  width: size + 16,
                   child: Text(
                     label,
                     textAlign: TextAlign.center,
@@ -203,7 +219,11 @@ class HubCircle extends StatelessWidget {
   Widget _symbolOder(Widget ersatz) {
     final pfad = symbol;
     if (pfad == null) return ersatz;
-    return PixelArt(assetPath: pfad, side: symbolSide, fallback: ersatz);
+    return PixelArt(
+      assetPath: pfad,
+      side: symbolSide * _scale,
+      fallback: ersatz,
+    );
   }
 
   void _sageWarum(BuildContext context) {
@@ -352,22 +372,27 @@ enum HubCircleImage {
 /// genau die Sorte Verdopplung, die irgendwann nur an einer Stelle
 /// nachgezogen wird.
 class _SchlichterKreis extends StatelessWidget {
-  const _SchlichterKreis({required this.icon, required this.farbe});
+  const _SchlichterKreis({
+    required this.icon,
+    required this.farbe,
+    required this.size,
+  });
 
   final IconData icon;
   final Color farbe;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: HubCircle.diameter,
-      height: HubCircle.diameter,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Palette.surface,
         shape: BoxShape.circle,
         border: Border.all(color: farbe, width: 2),
       ),
-      child: Icon(icon, size: 30, color: farbe),
+      child: Icon(icon, size: 30 * size / HubCircle.diameter, color: farbe),
     );
   }
 }

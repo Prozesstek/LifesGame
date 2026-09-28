@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +157,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.textContaining('Unten eine Fähigkeit antippen'),
+        find.textContaining('gedrückt und zieh sie hierher'),
         findsOneWidget,
       );
     });
@@ -177,6 +178,123 @@ void main() {
         find.textContaining('Kommt von der getragenen Waffe'),
         findsOneWidget,
       );
+    });
+  });
+
+  group('Ziehen wie beim Deckbau (ADR-0057)', () {
+    /// Hält [name] im Raster gedrückt und zieht es auf [ziel].
+    Future<void> ziehe(WidgetTester tester, String name, Finder ziel) async {
+      await tester.scrollUntilVisible(
+        find.text(name).last,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(name).last),
+      );
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      // Das Hochrollen läuft ab, erst danach stehen die Plätze fest.
+      await tester.pumpAndSettle();
+
+      final platz = tester.getCenter(ziel);
+      await gesture.moveTo(platz + const Offset(0, -20));
+      await tester.pump();
+      await gesture.moveTo(platz);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    ProviderContainer containerOf(WidgetTester tester) =>
+        ProviderScope.containerOf(tester.element(find.byType(AbilitiesScreen)));
+
+    testWidgets('halten, ziehen, loslassen legt sie auf den Platz', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      await ziehe(
+        tester,
+        PitAbilities.funkenstoss.name,
+        find.text('leer').first,
+      );
+
+      expect(
+        containerOf(tester).read(chosenAbilitiesProvider).at(0),
+        PitAbilities.funkenstoss.id,
+      );
+      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 2));
+    });
+
+    testWidgets('ein belegter Platz wird ersetzt', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(
+          aufLevel(
+            10,
+            abilities: const ChosenAbilities.empty().withAt(
+              0,
+              PitAbilities.bluetentau.id,
+            ),
+          ),
+        ),
+      );
+
+      await ziehe(
+        tester,
+        PitAbilities.funkenstoss.name,
+        find.text(PitAbilities.bluetentau.name).first,
+      );
+
+      final chosen = containerOf(tester).read(chosenAbilitiesProvider);
+      expect(chosen.at(0), PitAbilities.funkenstoss.id);
+      expect(chosen.contains(PitAbilities.bluetentau.id), isFalse);
+    });
+
+    testWidgets('hinter einer Lücke nimmt kein Platz an', (tester) async {
+      // **Dieselbe Grenze wie bei den Knöpfen im Blatt.**
+      // `ChosenAbilities` hält keine Lücken: Auf Platz 4 bei leerem
+      // Platz 2 landete die Fähigkeit in Wahrheit auf Platz 2.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      await ziehe(
+        tester,
+        PitAbilities.funkenstoss.name,
+        find.text('leer').last,
+      );
+
+      expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
+    });
+
+    testWidgets('der Waffenplatz nimmt nichts an', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      final rueckfall = PitWeapons.byMoveId(AbilityCatalog.fallbackMoveId)!;
+      await ziehe(
+        tester,
+        PitAbilities.funkenstoss.name,
+        find.text(rueckfall.name).first,
+      );
+
+      expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
+      expect(find.text(rueckfall.name), findsWidgets);
+    });
+
+    testWidgets('eine gesperrte lässt sich nicht ziehen', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      // Sternenfall braucht sechzig Tage Kette, die hat hier niemand.
+      await ziehe(
+        tester,
+        PitAbilities.sternenfall.name,
+        find.text('leer').first,
+      );
+
+      expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
     });
   });
 
