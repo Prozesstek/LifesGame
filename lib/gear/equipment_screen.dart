@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
@@ -49,6 +50,73 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   /// Vier Spalten für den Katalog, wie bei den Fähigkeiten.
   static const int _columns = 4;
 
+  final ScrollController _scroll = ScrollController();
+
+  /// Was gerade gezogen wird, oder null. Die Plätze lesen es, um zu
+  /// zeigen, wohin das Stück gehört.
+  GearItem? _gezogen;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// **Wer zieht, wird nach oben gebracht**, wie beim Deckbau in Clash
+  /// Royale: Die Plätze stehen ganz oben, das Stück meist weiter unten.
+  /// Ohne das müsste man mit dem Finger auf dem Stück gleichzeitig
+  /// rollen.
+  void _beginneZiehen(GearItem item) {
+    setState(() => _gezogen = item);
+    if (_scroll.hasClients && _scroll.offset > 0) {
+      _scroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  void _beendeZiehen() {
+    if (_gezogen == null) return;
+    setState(() => _gezogen = null);
+  }
+
+  /// Legt das beste Exemplar des gezogenen Stücks an
+  /// (`Loadout.bestCopyOf`). Ein bestimmtes anderes legt man im Blatt an.
+  void _lege(GearItem item) {
+    final copy = ref.read(loadoutProvider).bestCopyOf(item.id);
+    _beendeZiehen();
+    if (copy == null) return;
+    ref.read(loadoutProvider.notifier).equip(copy.uid);
+    HapticFeedback.selectionClick();
+    _sage('${item.name} angelegt.');
+  }
+
+  /// Ein belegter Platz zeigt das Blatt seines Stücks. Ein leerer sagt,
+  /// wie er sich füllt, statt ein Auswahlblatt zu öffnen.
+  void _tippePlatz(GearSlot slot, Loadout loadout) {
+    final item = loadout.equippedCopyIn(slot)?.item;
+    if (item != null) {
+      showGearSheet(context, item);
+      return;
+    }
+    _sage(
+      loadout.copiesIn(slot).isEmpty
+          ? 'Für diesen Platz hast du noch nichts. Stücke kommen aus dem '
+                'Laden und als Beute des Wächters.'
+          : 'Halte unten ein Stück gedrückt und zieh es hierher.',
+    );
+  }
+
+  void _sage(String text) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(content: Text(text), duration: const Duration(seconds: 3)),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loadout = ref.watch(loadoutProvider);
@@ -68,88 +136,100 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
             constraints: const BoxConstraints(
               maxWidth: EquipmentScreen._maxWidth,
             ),
-            child: ListView(
+            // **Kein ListView.** Eine ListView baut nur, was in der Nähe
+            // des Sichtbaren liegt. Wer ein Stück von unten zieht und die
+            // Fläche nach oben rollt, bekäme seine Kachel dabei verworfen,
+            // und mit ihr das Ende des Ziehens. 48 Kacheln sind wenig genug,
+            // um sie alle gebaut zu halten.
+            child: SingleChildScrollView(
+              controller: _scroll,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-              children: <Widget>[
-                const _SectionTitle('Deine sechs Plätze'),
-                const SizedBox(height: 4),
-                Text(
-                  loadout.equippedCount == 0
-                      ? 'Noch nichts angelegt. Antippen wechselt, was auf '
-                            'einem Platz liegt.'
-                      : '${loadout.equippedCount} von '
-                            '${GearSlot.values.length} Plätzen belegt. '
-                            'Antippen wechselt.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textOnDarkDim,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const _SectionTitle('Deine sechs Plätze'),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${loadout.equippedCount} von '
+                    '${GearSlot.values.length} Plätzen belegt. Antippen '
+                    'zeigt die Werte. Zum Wechseln ein Stück unten gedrückt '
+                    'halten und auf seinen Platz ziehen.',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Palette.textOnDarkDim,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                GridView.count(
-                  // Das Raster sitzt in einer ListView: eigene Höhe, kein
-                  // eigenes Scrollen. Sonst scrollten zwei Flächen
-                  // ineinander.
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: _slotColumns,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 0.92,
-                  children: <Widget>[
-                    for (final slot in GearSlot.values)
-                      EquipmentSlotTile(
-                        slot: slot,
-                        equipped: loadout.equippedCopyIn(slot),
-                        owned: loadout.copiesIn(slot),
-                        onEquip: (uid) =>
-                            ref.read(loadoutProvider.notifier).equip(uid),
-                        onUnequip: () =>
-                            ref.read(loadoutProvider.notifier).unequip(slot),
-                      ),
-                  ],
-                ),
-                // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
-                // „keine Sets" sagt, ist eine Zeile über nichts.
-                if (loadout.wearsAnySetPiece) ...<Widget>[
-                  const SizedBox(height: 18),
-                  const _SectionTitle('Sets'),
                   const SizedBox(height: 10),
-                  SetCard(loadout: loadout),
+                  GridView.count(
+                    // Das Raster sitzt in einer ListView: eigene Höhe, kein
+                    // eigenes Scrollen. Sonst scrollten zwei Flächen
+                    // ineinander.
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: _slotColumns,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 0.92,
+                    children: <Widget>[
+                      for (final slot in GearSlot.values)
+                        _Ablage(
+                          slot: slot,
+                          gezogen: _gezogen,
+                          onAblegen: _lege,
+                          child: (dragState) => EquipmentSlotTile(
+                            slot: slot,
+                            equipped: loadout.equippedCopyIn(slot),
+                            hasAny: loadout.copiesIn(slot).isNotEmpty,
+                            dragState: dragState,
+                            onTap: () => _tippePlatz(slot, loadout),
+                          ),
+                        ),
+                    ],
+                  ),
+                  // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
+                  // „keine Sets" sagt, ist eine Zeile über nichts.
+                  if (loadout.wearsAnySetPiece) ...<Widget>[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('Sets'),
+                    const SizedBox(height: 10),
+                    SetCard(loadout: loadout),
+                  ],
+                  const SizedBox(height: 20),
+                  const _SectionTitle('Alle Stücke'),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${besessen.length} von ${GearCatalog.all.length} im '
+                    'Besitz. Antippen zeigt alle Werte, auch bei den grauen.',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Palette.textOnDarkDim,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _Gruppenwahl(
+                    aktiv: _gruppierung,
+                    onWaehle: (g) => setState(() => _gruppierung = g),
+                  ),
+                  const SizedBox(height: 12),
+                  for (final gruppe in groupGear(_gruppierung))
+                    ..._gruppe(
+                      gruppe,
+                      loadout: loadout,
+                      besessen: besessen,
+                      rung: rung,
+                    ),
+                  const SizedBox(height: 4),
+                  FilledButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ShopScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.storefront_outlined),
+                    label: const Text('Zum Laden'),
+                  ),
                 ],
-                const SizedBox(height: 20),
-                const _SectionTitle('Alle Stücke'),
-                const SizedBox(height: 4),
-                Text(
-                  '${besessen.length} von ${GearCatalog.all.length} im '
-                  'Besitz. Antippen zeigt alle Werte, auch bei den grauen.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textOnDarkDim,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _Gruppenwahl(
-                  aktiv: _gruppierung,
-                  onWaehle: (g) => setState(() => _gruppierung = g),
-                ),
-                const SizedBox(height: 12),
-                for (final gruppe in groupGear(_gruppierung))
-                  ..._gruppe(
-                    gruppe,
-                    loadout: loadout,
-                    besessen: besessen,
-                    rung: rung,
-                  ),
-                const SizedBox(height: 4),
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const ShopScreen()),
-                  ),
-                  icon: const Icon(Icons.storefront_outlined),
-                  label: const Text('Zum Laden'),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -209,19 +289,143 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
         childAspectRatio: 0.78,
         children: <Widget>[
           for (final item in gruppe.items)
-            _Kachel(
+            _Ziehbar(
               item: item,
-              anzahl: loadout.ownedCopies
-                  .where((c) => c.itemId == item.id)
-                  .length,
-              angelegt: loadout.equippedCopyIn(item.slot)?.itemId == item.id,
-              gesperrt: !GearGates.isOpen(item.rarity, highestRung: rung),
-              onTap: () => showGearSheet(context, item),
+              // **Nur was man hat, lässt sich ziehen.** Ein graues Stück
+              // auf einen Platz zu legen hieße, etwas anzulegen, das es
+              // nicht gibt.
+              aktiv: besessen.contains(item.id),
+              onStart: () => _beginneZiehen(item),
+              onEnde: _beendeZiehen,
+              child: _Kachel(
+                item: item,
+                anzahl: loadout.ownedCopies
+                    .where((c) => c.itemId == item.id)
+                    .length,
+                angelegt: loadout.equippedCopyIn(item.slot)?.itemId == item.id,
+                gesperrt: !GearGates.isOpen(item.rarity, highestRung: rung),
+                ausgeblendet: _gezogen?.id == item.id,
+                onTap: () => showGearSheet(context, item),
+              ),
             ),
         ],
       ),
       const SizedBox(height: 16),
     ];
+  }
+}
+
+/// Ein Platz als Ablageziel: Er nimmt nur Stücke, die auf ihn gehören.
+///
+/// **Die Regel steht am Stück** (`GearItem.slot`), hier wird sie nur
+/// gefragt. Ein Helm, über dem Waffenplatz losgelassen, fliegt zurück.
+class _Ablage extends StatelessWidget {
+  const _Ablage({
+    required this.slot,
+    required this.gezogen,
+    required this.onAblegen,
+    required this.child,
+  });
+
+  final GearSlot slot;
+
+  /// Was der Bildschirm gerade gezogen weiß, oder null.
+  final GearItem? gezogen;
+
+  final ValueChanged<GearItem> onAblegen;
+
+  /// Baut die Kachel im passenden Zustand.
+  final Widget Function(SlotDragState dragState) child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<GearItem>(
+      onWillAcceptWithDetails: (details) => details.data.slot == slot,
+      onAcceptWithDetails: (details) => onAblegen(details.data),
+      builder: (context, kandidaten, _) {
+        final schwebt = kandidaten.isNotEmpty;
+        final zustand = switch (gezogen) {
+          null => SlotDragState.ruhig,
+          final GearItem g when g.slot != slot => SlotDragState.passtNicht,
+          _ when schwebt => SlotDragState.darueber,
+          _ => SlotDragState.passt,
+        };
+        return child(zustand);
+      },
+    );
+  }
+}
+
+/// Eine Kachel, die sich nach kurzem Halten ziehen lässt.
+///
+/// **Halten, nicht sofort ziehen**, damit Rollen und Antippen bleiben,
+/// wie sie waren. Beim Start gibt das Handy einen kurzen Stoß
+/// (`hapticFeedbackOnStart`), und unter dem Finger hängt das Bild des
+/// Stücks, etwas größer als auf der Kachel.
+class _Ziehbar extends StatelessWidget {
+  const _Ziehbar({
+    required this.item,
+    required this.aktiv,
+    required this.onStart,
+    required this.onEnde,
+    required this.child,
+  });
+
+  final GearItem item;
+  final bool aktiv;
+  final VoidCallback onStart;
+  final VoidCallback onEnde;
+  final Widget child;
+
+  /// Wie groß das Stück unter dem Finger hängt.
+  static const double _schwebeSeite = 64;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!aktiv) return child;
+    final pfad = GearIcons.forItemId(item.id);
+    final farbe = RarityBadge.colorOf(item.rarity);
+
+    return LongPressDraggable<GearItem>(
+      data: item,
+      onDragStarted: onStart,
+      // Ein Ende gibt es auf drei Wegen (abgelegt, zurückgeflogen,
+      // abgebrochen), und alle drei landen hier.
+      onDragEnd: (_) => onEnde(),
+      // Der Finger liegt mitten auf dem Bild, nicht an seiner Ecke.
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      feedback: Transform.translate(
+        offset: const Offset(-_schwebeSeite / 2, -_schwebeSeite / 2),
+        child: Container(
+          width: _schwebeSeite,
+          height: _schwebeSeite,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Palette.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: farbe, width: 2),
+            boxShadow: const <BoxShadow>[
+              BoxShadow(
+                color: Color(0x66000000),
+                blurRadius: 12,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: pfad == null
+              ? Icon(GearIcons.fallbackFor(item.slot), color: Palette.accent)
+              : PixelArt(
+                  assetPath: pfad,
+                  side: _schwebeSeite - 12,
+                  fallback: Icon(
+                    GearIcons.fallbackFor(item.slot),
+                    color: Palette.accent,
+                  ),
+                ),
+        ),
+      ),
+      child: child,
+    );
   }
 }
 
@@ -272,6 +476,7 @@ class _Kachel extends StatelessWidget {
     required this.angelegt,
     required this.gesperrt,
     required this.onTap,
+    this.ausgeblendet = false,
   });
 
   final GearItem item;
@@ -284,6 +489,10 @@ class _Kachel extends StatelessWidget {
 
   /// Ob die Seltenheit noch gesperrt ist.
   final bool gesperrt;
+
+  /// Ob das Stück gerade gezogen wird. Dann bleibt an seiner Stelle ein
+  /// Schatten, und das Stück selbst hängt unter dem Finger.
+  final bool ausgeblendet;
 
   final VoidCallback onTap;
 
@@ -303,103 +512,106 @@ class _Kachel extends StatelessWidget {
       ),
     );
 
-    return Semantics(
-      button: true,
-      label: _besessen
-          ? '${item.name}, $anzahl im Besitz'
-          : '${item.name}, nicht im Besitz',
-      child: Druck(
-        child: Material(
-          color: _besessen ? Palette.surface : Palette.surfaceSunken,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            onTap: onTap,
+    return Opacity(
+      opacity: ausgeblendet ? 0.3 : 1,
+      child: Semantics(
+        button: true,
+        label: _besessen
+            ? '${item.name}, $anzahl im Besitz'
+            : '${item.name}, nicht im Besitz',
+        child: Druck(
+          child: Material(
+            color: _besessen ? Palette.surface : Palette.surfaceSunken,
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: angelegt
-                      ? Palette.accent
-                      : farbe.withValues(alpha: _besessen ? 0.7 : 0.25),
-                  width: angelegt ? 2 : 1,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: angelegt
+                        ? Palette.accent
+                        : farbe.withValues(alpha: _besessen ? 0.7 : 0.25),
+                    width: angelegt ? 2 : 1,
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: <Widget>[
-                      Ausgegraut(
-                        aktiv: !_besessen,
-                        child: pfad == null
-                            ? ersatz
-                            : PixelArt(
-                                assetPath: pfad,
-                                side: _bildSeite,
-                                fallback: ersatz,
-                              ),
-                      ),
-                      if (angelegt)
-                        const Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Icon(
-                            Icons.check_circle,
-                            size: 12,
-                            color: Palette.accent,
-                          ),
-                        )
-                      else if (!_besessen && gesperrt)
-                        const Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Icon(
-                            Icons.lock,
-                            size: 12,
-                            color: Palette.muted,
-                          ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: <Widget>[
+                        Ausgegraut(
+                          aktiv: !_besessen,
+                          child: pfad == null
+                              ? ersatz
+                              : PixelArt(
+                                  assetPath: pfad,
+                                  side: _bildSeite,
+                                  fallback: ersatz,
+                                ),
                         ),
-                      if (anzahl > 1)
-                        Positioned(
-                          left: -4,
-                          top: -4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
+                        if (angelegt)
+                          const Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 12,
                               color: Palette.accent,
-                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Text(
-                              '×$anzahl',
-                              style: const TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: Palette.surface,
+                          )
+                        else if (!_besessen && gesperrt)
+                          const Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Icon(
+                              Icons.lock,
+                              size: 12,
+                              color: Palette.muted,
+                            ),
+                          ),
+                        if (anzahl > 1)
+                          Positioned(
+                            left: -4,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Palette.accent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '×$anzahl',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Palette.surface,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 9,
-                      height: 1.15,
-                      color: _besessen ? Palette.text : Palette.muted,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      item.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9,
+                        height: 1.15,
+                        color: _besessen ? Palette.text : Palette.muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

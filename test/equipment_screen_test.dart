@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,59 +107,35 @@ void main() {
       );
     });
 
-    testWidgets('ein leerer Platz ohne Auswahl lässt sich nicht antippen', (
+    testWidgets('ein belegter Platz zeigt das Blatt mit den Werten', (
       tester,
     ) async {
+      // **Der Wunsch:** Wer auf ein angelegtes Stück tippt, will wissen,
+      // was es kann, nicht eine Liste zum Wechseln sehen.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final angelegt = GearCatalog.forSlot(GearSlot.waffe).first;
+      await tester.tap(aufDenPlaetzen('Waffe'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(GearSheet), findsOneWidget);
+      expect(find.text(angelegt.why), findsOneWidget);
+      expect(find.text('Angelegt'), findsOneWidget);
+    });
+
+    testWidgets('ein leerer Platz sagt, wie er sich füllt', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       await tester.tap(aufDenPlaetzen('Waffe'));
       await tester.pumpAndSettle();
 
-      // Kein Auswahlblatt: Ein Blatt ohne Einträge wäre eine Sackgasse.
-      expect(find.text('Ablegen'), findsNothing);
+      expect(find.byType(GearSheet), findsNothing);
+      expect(find.textContaining('noch nichts'), findsOneWidget);
     });
 
-    testWidgets('antippen öffnet die Auswahl und wechselt das Stück', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitAllenWaffen()));
-
-      await tester.tap(aufDenPlaetzen('Waffe'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Übungsklinge').last);
-      await tester.pumpAndSettle();
-
-      expect(aufDenPlaetzen('Übungsklinge'), findsOneWidget);
-    });
-
-    testWidgets('das Auswahlblatt zeigt Bild und Set jedes Stücks', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitAllenWaffen()));
-
-      await tester.tap(aufDenPlaetzen('Waffe'));
-      await tester.pumpAndSettle();
-
-      final mitBild = GearCatalog.forSlot(
-        GearSlot.waffe,
-      ).where((i) => GearIcons.forItemId(i.id) != null);
-      expect(mitBild, isNotEmpty, reason: 'Der Test braucht ein Bild');
-      expect(find.byType(PixelArt), findsAtLeastNWidgets(mitBild.length));
-
-      for (final item in GearCatalog.forSlot(GearSlot.waffe)) {
-        final set = GearSets.byId(item.setId);
-        if (set == null) continue;
-        expect(find.text('Teil von „${set.name}"'), findsWidgets);
-      }
-      // Ein Stück ohne Set bekommt keine leere Set-Zeile.
-      expect(find.text('Teil von „"'), findsNothing);
-    });
-
-    testWidgets('Ablegen räumt den Platz', (tester) async {
+    testWidgets('Ablegen im Blatt räumt den Platz', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitAllenWaffen()));
 
@@ -166,9 +143,121 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ablegen'));
       await tester.pumpAndSettle();
+      // Das Blatt schließen, dann steht der Platz wieder frei im Blick.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
 
-      // Leer, aber nicht „nichts gekauft": Es liegt nur nichts drauf.
+      // Leer, aber nicht „nichts gekauft“: Es liegt nur nichts drauf.
       expect(aufDenPlaetzen('leer'), findsOneWidget);
+    });
+  });
+
+  group('Ziehen wie beim Deckbau', () {
+    /// Hält [item] im Raster gedrückt und zieht es auf den Platz
+    /// [ziel]. Gibt nichts zurück: Was passiert ist, prüft der Test am
+    /// Spielstand.
+    Future<void> ziehe(
+      WidgetTester tester,
+      GearItem item,
+      GearSlot ziel,
+    ) async {
+      await tester.scrollUntilVisible(
+        find.text(item.name).last,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(item.name).last),
+      );
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      // Das Hochrollen läuft ab, erst danach stehen die Plätze fest.
+      await tester.pumpAndSettle();
+
+      final platz = tester.getCenter(aufDenPlaetzen(ziel.label));
+      await gesture.moveTo(platz + const Offset(0, -20));
+      await tester.pump();
+      await gesture.moveTo(platz);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    ProviderContainer containerOf(WidgetTester tester) =>
+        ProviderScope.containerOf(tester.element(find.byType(EquipmentScreen)));
+
+    testWidgets('halten, ziehen, loslassen legt das Stück an', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      // Nicht das erste (das liegt schon), sondern eines weiter unten
+      // im Alphabet, damit das Hochrollen wirklich etwas tut.
+      final waffen = GearCatalog.forSlot(GearSlot.waffe).toList()
+        ..sort((a, b) => sortKey(b.name).compareTo(sortKey(a.name)));
+      final neu = waffen.first;
+      expect(
+        containerOf(tester).read(loadoutProvider).equippedIn(GearSlot.waffe),
+        isNot(neu),
+      );
+
+      await ziehe(tester, neu, GearSlot.waffe);
+
+      expect(
+        containerOf(tester).read(loadoutProvider).equippedIn(GearSlot.waffe),
+        neu,
+      );
+      expect(aufDenPlaetzen(neu.name), findsOneWidget);
+    });
+
+    testWidgets('auf den falschen Platz geht es nicht', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final vorher = containerOf(
+        tester,
+      ).read(loadoutProvider).equippedIn(GearSlot.waffe);
+      final andere = GearCatalog.forSlot(
+        GearSlot.waffe,
+      ).firstWhere((i) => i != vorher);
+
+      await ziehe(tester, andere, GearSlot.helm);
+
+      final loadout = containerOf(tester).read(loadoutProvider);
+      expect(loadout.equippedIn(GearSlot.waffe), vorher);
+      expect(loadout.equippedIn(GearSlot.helm), isNull);
+    });
+
+    testWidgets('mehrfach besessen: das beste Exemplar kommt drauf', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitZweiExemplaren()));
+      // Erst ablegen, damit das Ziehen etwas ändert.
+      containerOf(
+        tester,
+      ).read(loadoutProvider.notifier).unequip(doppelt().slot);
+      await tester.pumpAndSettle();
+
+      await ziehe(tester, doppelt(), doppelt().slot);
+
+      expect(
+        containerOf(
+          tester,
+        ).read(loadoutProvider).equippedCopyIn(doppelt().slot)?.uid,
+        'test-b',
+      );
+    });
+
+    testWidgets('was man nicht hat, lässt sich nicht ziehen', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      final item = GearCatalog.forSlot(GearSlot.waffe).first;
+      await ziehe(tester, item, GearSlot.waffe);
+
+      expect(
+        containerOf(tester).read(loadoutProvider).equippedIn(GearSlot.waffe),
+        isNull,
+      );
     });
   });
 
@@ -264,6 +353,27 @@ void main() {
       expect(find.textContaining('Noch nicht im Besitz'), findsOneWidget);
       // Nichts zum Anlegen, man hat es ja nicht.
       expect(find.text('Anlegen'), findsNothing);
+    });
+
+    testWidgets('ein Set-Teil zeigt sein Bild und sein Set', (tester) async {
+      // **Wer wechselt, soll wissen, ob Ablegen ein Set kostet.** Das
+      // stand bis zum 28.09. im Auswahlblatt am Platz, jetzt im Blatt.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      final teil = GearCatalog.all.firstWhere(
+        (i) => i.setId != null && GearIcons.forItemId(i.id) != null,
+      );
+      await oeffne(tester, teil);
+
+      expect(
+        find.descendant(
+          of: find.byType(GearSheet),
+          matching: find.byType(PixelArt),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('„${GearSets.byId(teil.setId)!.name}"'), findsOneWidget);
     });
 
     testWidgets('ein legendäres nennt die Stufe, ab der es geht', (

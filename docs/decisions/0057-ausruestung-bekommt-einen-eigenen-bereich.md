@@ -29,23 +29,32 @@ mit eigenem Wurf.
 Die Ausrüstung bekommt einen eigenen Bildschirm mit eigenem Kreis auf
 der Startseite, gebaut wie der Fähigkeiten-Bildschirm:
 
-1. **Oben die sechs Plätze**, dieselben Kacheln wie bisher im Charakter
-   (`EquipmentSlotTile`), antippen wechselt, was darauf liegt. Darunter
-   die Set-Karte, wenn etwas anliegt.
-2. **Darunter der ganze Katalog**, jedes Stück einmal: besessene farbig,
+1. **Oben die sechs Plätze**, darunter die Set-Karte, wenn etwas
+   anliegt. **Antippen eines belegten Platzes öffnet das Blatt mit den
+   Werten** des angelegten Stücks, ein leerer Platz sagt, wie er sich
+   füllt. Das Auswahlblatt, das bis dahin am Platz hing, gibt es nicht
+   mehr.
+2. **Gewechselt wird per Ziehen, wie beim Deckbau in Clash Royale.** Ein
+   besessenes Stück im Katalog kurz gedrückt halten, der Bildschirm
+   rollt nach oben zu den Plätzen, der passende Platz leuchtet, die
+   anderen treten zurück. Loslassen darüber legt es an, auf einem
+   falschen Platz fliegt es zurück. Hat man es mehrfach, kommt das
+   **beste Exemplar** drauf (`Loadout.bestCopyOf`, der höchste Wurf); ein
+   bestimmtes anderes legt man im Blatt einzeln an.
+3. **Darunter der ganze Katalog**, jedes Stück einmal: besessene farbig,
    der Rest grau, gesperrte (Episch/Legendär vor ihrer Stufe) mit
    Schloss, mehrfach besessene mit „×2".
-3. **Vier Ordnungen**: A–Z (Standard), nach Platz, nach Seltenheit, nach
+4. **Vier Ordnungen**: A–Z (Standard), nach Platz, nach Seltenheit, nach
    Set. Die Wahl gehört zur Ansicht, nicht zum Spielstand.
-4. **Antippen öffnet ein Blatt** mit allem, was es über das Stück gibt:
+5. **Antippen öffnet ein Blatt** mit allem, was es über das Stück gibt:
    Grundwerte, Wurfspanne, was die Seltenheit im Kampf vervielfacht,
    Kampfwirkung (Waffenzug, legendäre Kraft), Set mit beiden Stufen,
    Preis, Verkaufserlös, und woher es kommt. Darunter **jedes eigene
    Exemplar** mit seinem Wurf gegen das Getragene, und je Exemplar
    Anlegen, Ablegen und Verkaufen.
-5. **Im Charakter** bleiben die Werte mit ihrer Herkunft; statt der
+6. **Im Charakter** bleiben die Werte mit ihrer Herkunft; statt der
    Plätze steht dort ein Knopf „Zur Ausrüstung".
-6. **Das Inventar im Laden bleibt**, unangetastet.
+7. **Das Inventar im Laden bleibt**, unangetastet.
 
 ## Begründung
 
@@ -58,6 +67,14 @@ anderen, weil man sie genau dort vergleichen will.
 **A–Z als Standard** auf ausdrücklichen Wunsch: „damit man alle Items
 einfach so sehen kann." Sortiert wird nach deutschem Alphabet
 (`sortKey`), sonst stünde „Übungsklinge" hinter „Zweihänder".
+
+**Ziehen statt Auswahlblatt**, auf ausdrücklichen Wunsch nach dem
+ersten Ansehen: Ein Tipp auf ein angelegtes Stück soll zeigen, was es
+kann, nicht eine Liste zum Wechseln. Ziehen macht dazu sichtbar, *wohin*
+etwas gehört, bevor man loslässt. **Halten, nicht sofort ziehen**, damit
+Rollen und Antippen bleiben, wie sie waren. Und die Fläche ist kein
+`ListView` mehr, sondern hält alle 48 Kacheln gebaut: Eine ListView
+verwirft beim Hochrollen die Kachel, von der gezogen wird.
 
 **Verkaufen auch hier**, obwohl der Laden es schon kann: Wer im Blatt
 zwei Würfe desselben Stücks nebeneinander sieht, will den schlechteren
@@ -76,6 +93,9 @@ Zeichen und Symbol schrumpfen mit.
 | Umschalter „Meine / Alle" | Zwei Ansichten für eine Frage; die Exemplare stehen ohnehin im Blatt |
 | Inventar aus dem Laden nehmen | Greift in Frederiks Laden ein; gewünscht war, dass er bleibt |
 | Oben vier Kreise, unten drei | Dann wären die Kreise für Gewohnheiten und Theorie, die täglichen, die kleineren |
+| Das Auswahlblatt am Platz behalten | War die erste Fassung; ein Tipp auf ein angelegtes Stück sollte seine Werte zeigen, nicht eine Liste |
+| Beim Ziehen fragen, welches Exemplar | Ein Dialog mitten im Ziehen bricht die Geste; wer ein bestimmtes will, legt es im Blatt an |
+| Ziehen ohne Halten | Dann ließe sich die Fläche nicht mehr rollen, ohne versehentlich ein Stück mitzunehmen |
 | Ein neu gezeichnetes Zeichen für den Kreis | Der Plattenharnisch aus dem Laden sitzt mittig und sagt „Ausrüstung", ohne Zeichenarbeit |
 
 ## Konsequenzen
@@ -101,5 +121,8 @@ Fähigkeiten und Ausrüstung. Vorher stand es im Fähigkeiten-Bildschirm.
 - **Nicht am Handy angesehen.** Die Layouts laufen bei 390 × 844 ohne
   Überlauf; ob 48 Kacheln mit zweizeiligen Namen („Krone des
   Hochwächters") lesbar bleiben, sagt ein Gerät.
+- **Das Ziehen ist nur im Test gelaufen**, nicht mit einem Finger. Ob
+  die Haltezeit (Flutters Standard, eine halbe Sekunde) sich richtig
+  anfühlt und das Hochrollen nicht zu schnell ist, sagt ein Gerät.
 - **Kaufen geht hier nicht.** Das Blatt sagt, wenn ein Stück heute im
   Laden liegt, führt aber nicht direkt zum Angebot.

@@ -119,6 +119,55 @@ void main() {
     });
   });
 
+  group('Das beste Exemplar (ADR-0057)', () {
+    GearCopy mitPlus(String uid, int plus) {
+      final grund = klinge.bonus.scaled;
+      return GearCopy(
+        uid: uid,
+        itemId: klinge.id,
+        bonus: GearBonus(attack: grund.attack + plus),
+        paid: 0,
+      );
+    }
+
+    test('ohne Exemplar gibt es keines', () {
+      expect(const Loadout.empty().bestCopyOf(klinge.id), isNull);
+    });
+
+    test('der höchste Wurf gewinnt, egal wann er kam', () {
+      final l = const Loadout.empty()
+          .addFree(mitPlus('schwach', 0))
+          .addFree(mitPlus('stark', 3))
+          .addFree(mitPlus('mittel', 1));
+
+      expect(l.bestCopyOf(klinge.id)?.uid, 'stark');
+    });
+
+    test('bei gleichem Wurf das zuerst erworbene', () {
+      // Dieselbe Frage bekommt immer dieselbe Antwort, sonst sprängen
+      // zwei gleiche Würfe bei jedem Ziehen hin und her.
+      final l = const Loadout.empty()
+          .addFree(mitPlus('erstes', 2))
+          .addFree(mitPlus('zweites', 2));
+
+      expect(l.bestCopyOf(klinge.id)?.uid, 'erstes');
+    });
+
+    test('ein verkauftes zählt nicht mehr', () {
+      final l = const Loadout.empty()
+          .addFree(mitPlus('schwach', 0))
+          .addFree(mitPlus('stark', 3))
+          .sell('stark');
+
+      expect(l.bestCopyOf(klinge.id)?.uid, 'schwach');
+    });
+
+    test('fremde Stücke zählen nicht', () {
+      final l = const Loadout.empty().addFree(_angebot(bogen.id));
+      expect(l.bestCopyOf(klinge.id), isNull);
+    });
+  });
+
   group('Tragen', () {
     test('nur Getragenes wirkt, Besitz allein nicht', () {
       final l = const Loadout.empty()

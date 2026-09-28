@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 594, dazu die acht Packages (theory 174, habits 227, gear
-112, action_combat 206, progression 42, abilities 36, identity 25,
+**Tests:** App 598, dazu die acht Packages (theory 174, habits 227, gear
+117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
@@ -120,6 +120,25 @@ verkauft, sieht es sofort, ohne es zu schließen.
 **Im Browser durchgespielt** (375 × 812), leer und mit allem
 geschenkt: Kreise, Raster, Ordnungen, Blatt, Anlegen. **Nicht am Handy
 angesehen.**
+
+### Nachgereicht: Popup am Platz, Wechseln per Ziehen
+
+AktivesBrett nach dem ersten Ansehen: Ein Tipp auf einen belegten Platz
+öffnete nur die Auswahl, nicht die Werte. Und gewechselt werden soll
+„wie in Clash Royale“, durch Halten und Ziehen.
+
+| | Jetzt |
+|---|---|
+| Tipp auf einen belegten Platz | **das Blatt mit den Werten** des angelegten Stücks |
+| Tipp auf einen leeren Platz | ein Satz, wie er sich füllt |
+| Wechseln | ein besessenes Stück **halten**, die Fläche rollt zu den Plätzen, der passende leuchtet, die übrigen treten zurück; loslassen legt an, der falsche Platz nimmt nichts |
+| Mehrfach besessen | das **beste Exemplar** (`Loadout.bestCopyOf`, neu in `gear`) |
+| Das alte Auswahlblatt am Platz | **entfernt** |
+
+Die Fläche ist kein `ListView` mehr: Beim Hochrollen während des Ziehens
+verwarf die ListView sonst die Kachel, von der gezogen wird. gear 117
+(vorher 112), App 598. **Das Ziehen ist nur im Widget-Test gelaufen**, im
+Browser nicht mit der Maus nachgestellt.
 
 ### Offen
 
