@@ -14,6 +14,7 @@ import '../ui/pixel_art.dart';
 import 'gear_controller.dart';
 import 'gear_grouping.dart';
 import 'gear_icon.dart';
+import 'sell_flow.dart';
 import 'shop_screen.dart';
 import 'widgets/character_figure.dart';
 import 'widgets/gear_sheet.dart';
@@ -31,7 +32,8 @@ import 'widgets/rarity_badge.dart';
 /// **Der Katalog, nicht das Inventar.** Jedes Stück steht einmal da,
 /// besessene farbig, der Rest grau. Wer ein Stück mehrfach hat, sieht
 /// die Zahl auf der Kachel, und im Blatt jedes Exemplar mit seinem Wurf.
-/// Das Inventar im Laden bleibt daneben bestehen.
+/// Seit Issue #88 ist er der einzige Ort für Besessenes: Der Laden hat
+/// sein Inventar abgegeben und verkauft nur noch, was es heute gibt.
 class EquipmentScreen extends ConsumerStatefulWidget {
   const EquipmentScreen({super.key});
 
@@ -204,6 +206,24 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                     const _SectionTitle('Sets'),
                     const SizedBox(height: 10),
                     SetCard(loadout: loadout),
+                  ],
+                  // **Aus dem Laden hierher** (Issue #88): Seit der Laden
+                  // nur noch kauft, steht alles Besessene hier — auch das
+                  // Aufräumen. Nur sichtbar, wenn es etwas zu räumen gibt.
+                  if (loadout.junk case final ausschuss
+                      when ausschuss.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () => sellJunkWithConfirm(context, ref),
+                      icon: const Icon(
+                        Icons.cleaning_services_outlined,
+                        size: 18,
+                      ),
+                      label: Text(
+                        'Alles Schlechtere verkaufen · ${ausschuss.length} '
+                        'Stück, +${junkRefund(ausschuss)} Gold',
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 20),
                   const _SectionTitle('Alle Stücke'),

@@ -10,16 +10,18 @@ import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
 
-/// Verkauft ein Exemplar, **nach Rückfrage**, und feiert, was daraus
-/// folgt (ADR-0048, ADR-0057).
+/// **Der einzige Weg, etwas zu verkaufen** (ADR-0048, ADR-0057,
+/// Issue #88): ein Exemplar oder alles Schlechtere, jeweils nach
+/// Rückfrage, und danach wird gefeiert, was daraus folgt.
 ///
-/// Gibt zurück, ob verkauft wurde. Zurück kommt ein Viertel des Preises,
-/// und der Wurf ist danach weg. Deshalb die Rückfrage.
-///
-/// **Der Laden hat denselben Weg noch einmal** (`ShopScreen._sell`),
-/// weil er beim Bau des Ausrüstungs-Bildschirms nicht angefasst werden
-/// sollte. Wer an einem der beiden dreht, sieht beim anderen nach, und
-/// irgendwann gehört der Laden auf diese Funktion umgestellt.
+/// Bis zum 28.09. hatte der Laden denselben Weg noch einmal
+/// (`ShopScreen._sell`). Seit der Laden nur noch verkauft, was es heute
+/// gibt, und alles Besessene in der Ausrüstung steht, gibt es ihn nur
+/// hier.
+
+/// Verkauft ein Exemplar. Gibt zurück, ob verkauft wurde. Zurück kommt
+/// ein Viertel des Preises, und der Wurf ist danach weg — deshalb die
+/// Rückfrage.
 Future<bool> sellWithConfirm(
   BuildContext context,
   WidgetRef ref,
@@ -29,13 +31,69 @@ Future<bool> sellWithConfirm(
   if (item == null) return false;
   final erloes = Loadout.refundFor(item);
 
+  return _nachRueckfrage(
+    context,
+    ref,
+    titel: '${item.name} verkaufen?',
+    text: 'Das bringt $erloes Gold. Dieser Wurf ist danach weg.',
+    verkaufe: () {
+      final erhalten = ref.read(loadoutProvider.notifier).sell(copy.uid);
+      return (
+        ok: erhalten != null,
+        meldung: erhalten == null
+            ? 'Das besitzt du nicht.'
+            : '${item.name} verkauft — $erhalten Gold zurück.',
+      );
+    },
+  );
+}
+
+/// Verkauft alles Schlechtere auf einmal (`Loadout.junk`): was nicht
+/// getragen wird und schwächer ist als das Getragene. Set-Teile,
+/// Episches und Legendäres bleiben.
+Future<bool> sellJunkWithConfirm(BuildContext context, WidgetRef ref) {
+  final ausschuss = ref.read(loadoutProvider).junk;
+  final anzahl = ausschuss.length;
+  final erloes = junkRefund(ausschuss);
+
+  return _nachRueckfrage(
+    context,
+    ref,
+    titel: '$anzahl Stück verkaufen?',
+    text:
+        'Alles, was nicht getragen wird und schwächer ist als das '
+        'Getragene. Set-Teile, Episches und Legendäres bleiben. '
+        'Das bringt $erloes Gold.',
+    verkaufe: () {
+      final erhalten = ref.read(loadoutProvider.notifier).sellJunk();
+      return (
+        ok: true,
+        meldung: '$anzahl Stück verkauft — $erhalten Gold zurück.',
+      );
+    },
+  );
+}
+
+/// Was der Ausschuss beim Verkauf einbringt.
+int junkRefund(List<GearCopy> ausschuss) => ausschuss.fold<int>(
+  0,
+  (s, c) => s + (c.item == null ? 0 : Loadout.refundFor(c.item!)),
+);
+
+Future<bool> _nachRueckfrage(
+  BuildContext context,
+  WidgetRef ref, {
+  required String titel,
+  required String text,
+  required ({bool ok, String meldung}) Function() verkaufe,
+}) async {
   final bestaetigt = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => HolzDialog(
       child: AlertDialog(
         backgroundColor: Palette.surface,
-        title: Text('${item.name} verkaufen?'),
-        content: Text('Das bringt $erloes Gold. Dieser Wurf ist danach weg.'),
+        title: Text(titel),
+        content: Text(text),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -62,21 +120,17 @@ Future<bool> sellWithConfirm(
     }
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
-    final erhalten = ref.read(loadoutProvider.notifier).sell(copy.uid);
+    final ergebnis = verkaufe();
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: Text(
-            erhalten == null
-                ? 'Das besitzt du nicht.'
-                : '${item.name} verkauft — $erhalten Gold zurück.',
-          ),
+          content: Text(ergebnis.meldung),
           duration: const Duration(seconds: 2),
         ),
       );
-    fertig.complete(erhalten != null);
-    if (erhalten == null) return;
+    fertig.complete(ergebnis.ok);
+    if (!ergebnis.ok) return;
 
     // Errungenschaften im Laden zahlen auch Erfahrung (ADR-0033), ein
     // Verkauf kann also einen Aufstieg auslösen.

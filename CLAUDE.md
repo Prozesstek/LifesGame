@@ -147,11 +147,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden: **Heute** (sechs Angebote) und **Inventar** (anlegen, verkaufen, alles Schlechtere) | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88) | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter der ganze Katalog in vier Ordnungen; **gewechselt wird per Ziehen** | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
-| `lib/gear/sell_flow.dart` | verkaufen mit Rückfrage. **Der Laden hat denselben Weg noch einmal** (`ShopScreen._sell`) | Flutter |
+| `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar oder alles Schlechtere, mit Rückfrage und Feier | Flutter |
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |

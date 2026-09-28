@@ -8,23 +8,23 @@ import '../achievements/show_achievement_unlock.dart';
 import '../combat/ladder_controller.dart';
 import '../progression/level_provider.dart';
 import '../progression/show_level_up.dart';
-import '../ui/druck.dart';
 import '../ui/gold_icon.dart';
-import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
 import 'weapon_ability_line.dart';
 import 'widgets/shop_item_cell.dart';
 import 'widgets/shop_item_tile.dart';
 
-/// Der Laden — seit ADR-0048 ein **Tagesladen** und das Inventar.
+/// Der Laden — seit ADR-0048 ein **Tagesladen**.
 ///
-/// **Heute:** sechs Angebote, eins je Platz, aus dem Datum gewürfelt.
-/// Jedes ist ein fertiges Exemplar mit eigenen Werten; der Preis hängt an
-/// der Seltenheit, nicht am Wurf. Um Mitternacht kommt eine neue Auswahl.
+/// Sechs Angebote, eins je Platz, aus dem Datum gewürfelt. Jedes ist ein
+/// fertiges Exemplar mit eigenen Werten; der Preis hängt an der
+/// Seltenheit, nicht am Wurf. Um Mitternacht kommt eine neue Auswahl.
 ///
-/// **Inventar:** jedes Exemplar, je Platz. Anlegen, verkaufen, und ein
-/// Knopf, der alles Schlechtere auf einmal verkauft.
+/// **Nur noch kaufen** (Issue #88). Bis zum 28.09. hatte der Laden einen
+/// zweiten Reiter „Inventar“ mit Anlegen und Verkaufen — dasselbe, was
+/// der Ausrüstungs-Bildschirm kann (ADR-0057). Alles Besessene steht
+/// jetzt dort, auch „Alles Schlechtere verkaufen“.
 ///
 /// **Die Detailfläche ist nie leer.** Beim Wechsel rückt die Wahl auf das
 /// erste Stück. Ein leeres Feld mit „bitte wählen" wäre ein zweiter
@@ -38,11 +38,7 @@ class ShopScreen extends ConsumerStatefulWidget {
   ConsumerState<ShopScreen> createState() => _ShopScreenState();
 }
 
-enum _Ansicht { heute, inventar }
-
 class _ShopScreenState extends ConsumerState<ShopScreen> {
-  _Ansicht _ansicht = _Ansicht.heute;
-  GearSlot _slot = GearSlot.values.first;
   String? _gewaehlt;
 
   @override
@@ -80,32 +76,12 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: ShopScreen.maxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _Reiterleiste<_Ansicht>(
-                  werte: _Ansicht.values,
-                  aktiv: _ansicht,
-                  label: (a) => a == _Ansicht.heute ? 'Heute' : 'Inventar',
-                  onWaehle: (a) => setState(() {
-                    _ansicht = a;
-                    _gewaehlt = null;
-                  }),
-                ),
-                Expanded(
-                  child: _ansicht == _Ansicht.heute
-                      ? _heute(gold)
-                      : _inventar(),
-                ),
-              ],
-            ),
+            child: _heute(gold),
           ),
         ),
       ),
     );
   }
-
-  // --- Heute ---
 
   Widget _heute(int gold) {
     final angebote = ref.watch(dailyOffersProvider);
@@ -123,7 +99,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
       children: <Widget>[
         const Text(
           'Sechs Stücke, jeden Tag neu gewürfelt. Um Mitternacht kommt '
@@ -144,8 +120,6 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         if (item != null)
           ShopItemTile(
             copy: gewaehlt,
-            isOwned: false,
-            isEquipped: false,
             block: block,
             missingGold: gewaehlt.paid - gold,
             worn: loadout.equippedCopyIn(item.slot),
@@ -182,173 +156,6 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     _feiern(context, ref, vorherErrungen, vorherLevel);
   }
 
-  // --- Inventar ---
-
-  Widget _inventar() {
-    final loadout = ref.watch(loadoutProvider);
-    final hier = loadout.copiesIn(_slot);
-    final ausschuss = loadout.junk;
-    final erloes = ausschuss.fold<int>(
-      0,
-      (s, c) => s + (c.item == null ? 0 : Loadout.refundFor(c.item!)),
-    );
-    final gewaehlt =
-        hier.where((c) => c.uid == _gewaehlt).firstOrNull ??
-        loadout.equippedCopyIn(_slot) ??
-        hier.firstOrNull;
-    final item = gewaehlt?.item;
-    final getragen = loadout.equippedCopyIn(_slot);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      children: <Widget>[
-        if (ausschuss.isNotEmpty) ...<Widget>[
-          OutlinedButton.icon(
-            onPressed: () => _sellJunk(context, ref, ausschuss.length, erloes),
-            icon: const Icon(Icons.cleaning_services_outlined, size: 18),
-            label: Text(
-              'Alles Schlechtere verkaufen · ${ausschuss.length} Stück, '
-              '+$erloes Gold',
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-        _Reiterleiste<GearSlot>(
-          werte: GearSlot.values,
-          aktiv: _slot,
-          label: (s) => '${s.label} ${loadout.copiesIn(s).length}',
-          onWaehle: (s) => setState(() {
-            _slot = s;
-            _gewaehlt = null;
-          }),
-          padding: EdgeInsets.zero,
-        ),
-        const SizedBox(height: 8),
-        if (hier.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Text(
-              'Hier liegt noch nichts. Stücke kommen aus dem Laden und als '
-              'Beute des Wächters.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Palette.textOnDarkDim),
-            ),
-          )
-        else ...<Widget>[
-          _Raster(
-            copies: hier,
-            gewaehlteUid: gewaehlt?.uid,
-            isOwned: (_) => true,
-            isEquipped: (c) => loadout.isEquipped(c.uid),
-            blockFor: (_) => null,
-            onWaehle: (uid) => setState(() => _gewaehlt = uid),
-          ),
-          const SizedBox(height: 14),
-          if (gewaehlt != null && item != null)
-            ShopItemTile(
-              copy: gewaehlt,
-              isOwned: true,
-              isEquipped: loadout.isEquipped(gewaehlt.uid),
-              worn: getragen?.uid == gewaehlt.uid ? null : getragen,
-              abilityLine: itemAbilityText(item),
-              setPieces: loadout.equippedPiecesOf(item.setId ?? ''),
-              onEquip: () =>
-                  ref.read(loadoutProvider.notifier).equip(gewaehlt.uid),
-              onSell: () => _sell(context, ref, gewaehlt),
-            ),
-        ],
-      ],
-    );
-  }
-
-  /// Verkauft ein Exemplar — **nach Rückfrage**. Zurück kommt ein
-  /// Viertel, und ein Wurf ist danach weg (ADR-0048).
-  Future<void> _sell(BuildContext context, WidgetRef ref, GearCopy copy) async {
-    final item = copy.item;
-    if (item == null) return;
-    final erloes = Loadout.refundFor(item);
-
-    final bestaetigt = await _frage(
-      context,
-      titel: '${item.name} verkaufen?',
-      text: 'Das bringt $erloes Gold. Dieser Wurf ist danach weg.',
-    );
-    if (bestaetigt != true || !context.mounted) return;
-
-    // **Erst im nächsten Bild ändern.** `showDialog` kehrt zurück, sobald
-    // `Navigator.pop` gerufen wurde — der Dialog wird zu dem Zeitpunkt
-    // noch abgebaut (`docs/context/gotchas.md`).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      final vorherErrungen = achievementsBefore(ref);
-      final vorherLevel = levelBefore(ref);
-      final erhalten = ref.read(loadoutProvider.notifier).sell(copy.uid);
-      _say(
-        context,
-        erhalten == null
-            ? 'Das besitzt du nicht.'
-            : '${item.name} verkauft — $erhalten Gold zurück.',
-      );
-      if (erhalten == null) return;
-      setState(() => _gewaehlt = null);
-      _feiern(context, ref, vorherErrungen, vorherLevel);
-    });
-  }
-
-  Future<void> _sellJunk(
-    BuildContext context,
-    WidgetRef ref,
-    int anzahl,
-    int erloes,
-  ) async {
-    final bestaetigt = await _frage(
-      context,
-      titel: '$anzahl Stück verkaufen?',
-      text:
-          'Alles, was nicht getragen wird und schwächer ist als das '
-          'Getragene. Set-Teile, Episches und Legendäres bleiben. '
-          'Das bringt $erloes Gold.',
-    );
-    if (bestaetigt != true || !context.mounted) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      final vorherErrungen = achievementsBefore(ref);
-      final vorherLevel = levelBefore(ref);
-      final erhalten = ref.read(loadoutProvider.notifier).sellJunk();
-      _say(context, '$anzahl Stück verkauft — $erhalten Gold zurück.');
-      setState(() => _gewaehlt = null);
-      _feiern(context, ref, vorherErrungen, vorherLevel);
-    });
-  }
-
-  Future<bool?> _frage(
-    BuildContext context, {
-    required String titel,
-    required String text,
-  }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => HolzDialog(
-        child: AlertDialog(
-          backgroundColor: Palette.surface,
-          title: Text(titel),
-          content: Text(text),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Behalten'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Verkaufen'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   /// Errungenschaften im Laden zahlen auch Erfahrung (ADR-0033).
   void _feiern(
     BuildContext context,
@@ -372,91 +179,6 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       ..showSnackBar(
         SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
       );
-  }
-}
-
-/// Eine waagerechte Reiterleiste — für „Heute / Inventar" und für die
-/// sechs Plätze.
-///
-/// **Waagerecht scrollbar statt gestaucht.** Sechs Reiter nebeneinander
-/// auf 390 Pixeln lassen je 65 Pixel — „Talisman" passt dort nicht. Ein
-/// abgeschnittenes Wort ist schlimmer als ein Reiter, den man
-/// heranschiebt.
-class _Reiterleiste<T> extends StatelessWidget {
-  const _Reiterleiste({
-    required this.werte,
-    required this.aktiv,
-    required this.label,
-    required this.onWaehle,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  });
-
-  final List<T> werte;
-  final T aktiv;
-  final String Function(T) label;
-  final void Function(T) onWaehle;
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: padding,
-        children: <Widget>[
-          for (final wert in werte) ...<Widget>[
-            _Reiter(
-              text: label(wert),
-              istAktiv: wert == aktiv,
-              onTap: () => onWaehle(wert),
-            ),
-            const SizedBox(width: 8),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Reiter extends StatelessWidget {
-  const _Reiter({
-    required this.text,
-    required this.istAktiv,
-    required this.onTap,
-  });
-
-  final String text;
-  final bool istAktiv;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: istAktiv,
-      child: Druck(
-        child: Material(
-          color: istAktiv ? Palette.accent : Palette.surface,
-          borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: istAktiv ? Palette.surface : Palette.textDim,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
