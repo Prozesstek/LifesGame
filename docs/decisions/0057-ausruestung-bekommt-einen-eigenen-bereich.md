@@ -121,7 +121,8 @@ Fähigkeiten und Ausrüstung. Vorher stand es im Fähigkeiten-Bildschirm.
 - **Nicht am Handy angesehen.** Die Layouts laufen bei 390 × 844 ohne
   Überlauf; ob 48 Kacheln mit zweizeiligen Namen („Krone des
   Hochwächters") lesbar bleiben, sagt ein Gerät.
-- **Das Ziehen ist nur im Test gelaufen**, nicht mit einem Finger. Ob
+- **Das Ziehen ist im Test und im Browser gelaufen**, nicht mit einem
+  Finger am Handy. Ob
   die Haltezeit (Flutters Standard, eine halbe Sekunde) sich richtig
   anfühlt und das Hochrollen nicht zu schnell ist, sagt ein Gerät.
 - **Kaufen geht hier nicht.** Das Blatt sagt, wenn ein Stück heute im

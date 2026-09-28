@@ -137,8 +137,10 @@ AktivesBrett nach dem ersten Ansehen: Ein Tipp auf einen belegten Platz
 
 Die Fläche ist kein `ListView` mehr: Beim Hochrollen während des Ziehens
 verwarf die ListView sonst die Kachel, von der gezogen wird. gear 117
-(vorher 112), App 598. **Das Ziehen ist nur im Widget-Test gelaufen**, im
-Browser nicht mit der Maus nachgestellt.
+(vorher 112), App 598. Das Ziehen ist im Widget-Test gelaufen und im Browser bei 375 × 812
+nachgestellt (Berührung halten, Ring aus dem Raster auf den Ring-Platz):
+Hochrollen, Leuchten, grüner Rand, Anlegen. **Mit einem echten Finger
+am Handy nicht.**
 
 ### Offen
 
