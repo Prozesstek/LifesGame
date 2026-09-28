@@ -21,6 +21,14 @@ Dazu zwei eigene Zeichnungen von Frederik, 64 × 64 gezeichnet, als
 | `Stein.png` | die Wände der Grube und der Felswurf des Wächters |
 | `Fledermaus.png` | die Fledermaus (sechste Gegnerart) |
 
+Ebenfalls Frederiks Zeichnungen, 256 × 256, nahtlos:
+
+| Datei | Wofür | Übernommen |
+|---|---|---|
+| `Boden.png` | der Boden der Grube | 27.09.2026 |
+| `BodenMoos.png` | derselbe Boden mit Moos, auf einzelnen Flecken | 28.09.2026 |
+| `BodenRisse.png` | derselbe Boden mit Rissen, auf einzelnen Flecken | 28.09.2026 |
+
 Offen: **Quelle und Urheber** als Link nachtragen, damit die Lizenz auch
 für den anderen nachprüfbar ist. Im Paket liegt keine Lizenzdatei.
 

@@ -69,6 +69,40 @@ void main() {
       });
     });
 
+    testWidgets('Moos und Risse sind angemeldet und so gross wie der Boden', (
+      tester,
+    ) async {
+      // Sonst läge ein Fleck verschoben über den Ziegeln darunter.
+      for (final file in GrubeFiguren.bodenFlecken) {
+        expect(GrubeFiguren.files, contains(file));
+        await tester.runAsync(() async {
+          final data = await rootBundle.load('${GrubeFiguren.folder}/$file');
+          final codec = await ui.instantiateImageCodec(
+            data.buffer.asUint8List(),
+          );
+          final image = (await codec.getNextFrame()).image;
+          expect(image.width, 256, reason: file);
+          expect(image.height, 256, reason: file);
+        });
+      }
+    });
+
+    test('die Flecken sind fest gewürfelt und gemischt', () {
+      final zaehler = <String?, int>{};
+      for (var fy = 0; fy < 12; fy++) {
+        for (var fx = 0; fx < 12; fx++) {
+          final file = GrubeFiguren.fleckAt(fx, fy);
+          expect(GrubeFiguren.fleckAt(fx, fy), file);
+          zaehler[file] = (zaehler[file] ?? 0) + 1;
+        }
+      }
+      // Grundboden überwiegt, beide Abwandlungen kommen vor.
+      expect(zaehler[null], greaterThan(144 ~/ 2));
+      for (final file in GrubeFiguren.bodenFlecken) {
+        expect(zaehler[file], greaterThan(0), reason: file);
+      }
+    });
+
     testWidgets('der Ausschnitt des Steins liegt genau um den Stein', (
       tester,
     ) async {
