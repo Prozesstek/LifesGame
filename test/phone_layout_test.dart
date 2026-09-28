@@ -8,6 +8,7 @@ import 'package:lifes_game/achievements/achievements_screen.dart';
 import 'package:lifes_game/action/pit_screen.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
+import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
@@ -146,6 +147,7 @@ void main() {
     'Laden': const ShopScreen(),
     'Charakter': const CharacterScreen(),
     'Fähigkeiten': const AbilitiesScreen(),
+    'Ausrüstung': const EquipmentScreen(),
     'Gegnerreihe': const LadderScreen(),
     'Errungenschaften': const AchievementsScreen(),
   };

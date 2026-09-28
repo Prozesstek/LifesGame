@@ -1,7 +1,6 @@
 import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
@@ -10,6 +9,7 @@ import '../achievements/achievements_card.dart';
 import '../achievements/achievements_controller.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
+import '../gear/equipment_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
@@ -18,15 +18,14 @@ import '../ui/palette.dart';
 import 'abilities_screen.dart';
 import 'identity_controller.dart';
 import 'widgets/consistency_card.dart';
-import 'widgets/equipment_slot_tile.dart';
 import 'widgets/identity_card.dart';
 import 'widgets/name_dialog.dart';
-import 'widgets/set_card.dart';
 import 'widgets/title_dialog.dart';
 import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 
-/// Der Charakterbildschirm: Werte, Ausrüstung, Herkunft der Zahlen.
+/// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
+/// Fähigkeiten haben eigene Bildschirme (ADR-0049, ADR-0057).
 ///
 /// **Der Zweck ist Zurechenbarkeit.** Jede Zahl im Kampf soll hier eine
 /// Herkunft haben — so viel aus dem Alltag, so viel aus dem Laden. Ein
@@ -38,15 +37,9 @@ class CharacterScreen extends ConsumerWidget {
 
   static const double _maxWidth = 560;
 
-  /// Drei Spalten, zwei Reihen. Sechs Plätze gehen auch als 2x3 auf, aber
-  /// drei nebeneinander passen auf 390 Pixel Breite, ohne dass die Namen
-  /// abgeschnitten werden.
-  static const int _gearColumns = 3;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(equippedStatsProvider);
-    final loadout = ref.watch(loadoutProvider);
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
     final identity = ref.watch(identityProvider);
@@ -104,53 +97,19 @@ class CharacterScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                 ],
                 const SizedBox(height: 18),
-                const _SectionTitle('Ausrüstung'),
-                const SizedBox(height: 6),
-                Text(
-                  loadout.equippedCount == 0
-                      ? 'Noch nichts angelegt. Im Laden gibt es sechs Plätze '
-                            'zu füllen.'
-                      : '${loadout.equippedCount} von '
-                            '${GearSlot.values.length} Plätzen belegt.',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Palette.textOnDarkDim,
+                // **Die Ausrüstung steht seit ADR-0057 nicht mehr hier**,
+                // genau wie die Fähigkeiten seit ADR-0049. Was sie an den
+                // Werten ändert, steht weiter oben bei „Werte im Kampf“.
+                FilledButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const EquipmentScreen(),
+                    ),
                   ),
+                  icon: const Icon(Icons.shield_outlined),
+                  label: const Text('Zur Ausrüstung'),
                 ),
                 const SizedBox(height: 10),
-                GridView.count(
-                  // Das Raster sitzt in einer ListView: eigene Höhe, kein
-                  // eigenes Scrollen. Sonst scrollten zwei Flächen
-                  // ineinander.
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: _gearColumns,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 0.92,
-                  children: <Widget>[
-                    for (final slot in GearSlot.values)
-                      EquipmentSlotTile(
-                        slot: slot,
-                        equipped: loadout.equippedCopyIn(slot),
-                        owned: loadout.copiesIn(slot),
-                        onEquip: (uid) =>
-                            ref.read(loadoutProvider.notifier).equip(uid),
-                        onUnequip: () =>
-                            ref.read(loadoutProvider.notifier).unequip(slot),
-                      ),
-                  ],
-                ),
-                // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
-                // „keine Sets" sagt, ist eine Zeile über nichts — die
-                // Zugehörigkeit steht ohnehin an jedem Stück im Laden.
-                if (loadout.wearsAnySetPiece) ...<Widget>[
-                  const SizedBox(height: 18),
-                  const _SectionTitle('Sets'),
-                  const SizedBox(height: 10),
-                  SetCard(loadout: loadout),
-                ],
-                const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(builder: (_) => const ShopScreen()),

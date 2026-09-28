@@ -126,7 +126,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sechs** Kreise darum, „Heute“ darunter | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: Figur in der Mitte, **sieben** Kreise darum, unten vier kleinere, „Heute“ darunter | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: offene Gewohnheiten, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
 | `lib/home/widgets/character_stage.dart` | die Figur und ihre Zahlen — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256) | Flutter |
@@ -148,8 +148,12 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **Heute** (sechs Angebote) und **Inventar** (anlegen, verkaufen, alles Schlechtere) | Flutter |
+| `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter der ganze Katalog in vier Ordnungen | Flutter |
+| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen | Flutter |
+| `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
+| `lib/gear/sell_flow.dart` | verkaufen mit Rückfrage. **Der Laden hat denselben Weg noch einmal** (`ShopScreen._sell`) | Flutter |
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
-| `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Ausrüstungsraster | Flutter |
+| `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
 | `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter der ganze Katalog | Flutter |
 | `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — auch bei gesperrten | Flutter |
@@ -172,6 +176,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
+| `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
@@ -210,7 +215,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 576 Tests
+flutter test             # 594 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

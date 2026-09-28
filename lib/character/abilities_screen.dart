@@ -8,6 +8,7 @@ import '../action/hero_power.dart';
 import '../action/pit_text.dart';
 import '../gear/widgets/rarity_badge.dart';
 import '../progression/level_provider.dart';
+import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
 import '../ui/palette.dart';
 import 'abilities_controller.dart';
@@ -319,35 +320,22 @@ class _Kachel extends StatelessWidget {
 
   static const double _bildSeite = 36;
 
-  /// Macht aus einer Zeichnung eine graue — ohne sie unkenntlich zu
-  /// machen. Die Werte sind die Helligkeitsanteile von Rot, Grün und
-  /// Blau, wie jede Graustufen-Umrechnung sie benutzt.
-  static const ColorFilter _grau = ColorFilter.matrix(<double>[
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0, 0, 0, 1, 0, //
-  ]);
-
   @override
   Widget build(BuildContext context) {
     final farbe = RarityBadge.colorOfStufe(ability.rarity.index);
     final name = pitNameOf(ability.moveId) ?? ability.moveId;
 
-    Widget bild = MoveBild(
-      moveId: ability.moveId,
-      side: _bildSeite,
-      fallback: Icon(
-        Icons.bolt,
-        color: unlocked ? Palette.accent : Palette.muted,
+    final bild = Ausgegraut(
+      aktiv: !unlocked,
+      child: MoveBild(
+        moveId: ability.moveId,
+        side: _bildSeite,
+        fallback: Icon(
+          Icons.bolt,
+          color: unlocked ? Palette.accent : Palette.muted,
+        ),
       ),
     );
-    if (!unlocked) {
-      bild = Opacity(
-        opacity: 0.45,
-        child: ColorFiltered(colorFilter: _grau, child: bild),
-      );
-    }
 
     return Semantics(
       button: true,

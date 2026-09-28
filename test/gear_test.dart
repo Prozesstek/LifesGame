@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/character_screen.dart';
+import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/weapon_ability_line.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -289,12 +290,12 @@ void main() {
       return SaveData(loadout: loadout);
     }
 
-    testWidgets('ohne Set-Teile zeigt der Charakter keine Set-Karte', (
+    testWidgets('ohne Set-Teile zeigt die Ausrüstung keine Set-Karte', (
       tester,
     ) async {
       useTallView(tester);
       await tester.pumpWidget(
-        appMit(const SaveData.empty(), const CharacterScreen()),
+        appMit(const SaveData.empty(), const EquipmentScreen()),
       );
       await tester.pumpAndSettle();
 
@@ -308,7 +309,7 @@ void main() {
       // wissen, hat kein Ziel — er hat Zufall.
       useTallView(tester);
       await tester.pumpWidget(
-        appMit(mitTeilenVon(GearSets.sturmruf, 1), const CharacterScreen()),
+        appMit(mitTeilenVon(GearSets.sturmruf, 1), const EquipmentScreen()),
       );
       await tester.pumpAndSettle();
 
@@ -325,7 +326,7 @@ void main() {
     ) async {
       useTallView(tester);
       await tester.pumpWidget(
-        appMit(mitTeilenVon(GearSets.sturmruf, 2), const CharacterScreen()),
+        appMit(mitTeilenVon(GearSets.sturmruf, 2), const EquipmentScreen()),
       );
       await tester.pumpAndSettle();
 
@@ -341,7 +342,7 @@ void main() {
   });
 
   group('CharacterScreen', () {
-    testWidgets('zeigt alle vier Werte und alle sechs Plätze', (tester) async {
+    testWidgets('zeigt alle vier Werte', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(
         appMit(const SaveData.empty(), const CharacterScreen()),
@@ -351,6 +352,16 @@ void main() {
       for (final stat in HabitStat.values) {
         expect(find.text(stat.label), findsOneWidget, reason: stat.label);
       }
+    });
+
+    testWidgets('die Ausrüstung zeigt alle sechs Plätze', (tester) async {
+      // Die Plätze standen bis ADR-0057 im Charakter.
+      useTallView(tester);
+      await tester.pumpWidget(
+        appMit(const SaveData.empty(), const EquipmentScreen()),
+      );
+      await tester.pumpAndSettle();
+
       for (final slot in GearSlot.values) {
         expect(find.text(slot.label), findsOneWidget, reason: slot.label);
       }

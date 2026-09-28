@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../character/abilities_screen.dart';
+import '../gear/equipment_screen.dart';
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
@@ -47,6 +48,17 @@ class HomeScreen extends ConsumerWidget {
   /// Fähigkeit und die einzige, deren Bild mittig und ringsum gleich ist
   /// — auf einem runden Knopf sitzt das, ohne zu kippen.
   static const String abilitySymbol = 'assets/Faehigkeiten/Sternenfall.png';
+
+  /// Der Harnisch auf dem Ausrüstungs-Kreis (ADR-0057), aus demselben
+  /// Grund wie der Stern: eine vorhandene Zeichnung, mittig und
+  /// symmetrisch, die auf den ersten Blick „Ausrüstung“ sagt.
+  static const String gearSymbol = 'assets/Ruestung/Plattenharnisch.png';
+
+  /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
+  /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
+  /// Ausrüstung, Charakter. Bei 72 Punkten bräuchten sie mit Namen 352
+  /// Punkte Breite, ein Handy hat nach dem Rand 335.
+  static const double bottomCircleSize = 64;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -137,6 +149,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.storefront_outlined,
                           label: 'Laden',
                           image: HubCircleImage.plain,
+                          size: bottomCircleSize,
                           onTap: () => _open(context, const ShopScreen()),
                         ),
                         // **Nie gesperrt**, obwohl auf Level 1 nur der
@@ -147,8 +160,17 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.auto_awesome,
                           label: 'Fähigkeiten',
                           image: HubCircleImage.plain,
+                          size: bottomCircleSize,
                           symbol: abilitySymbol,
                           onTap: () => _open(context, const AbilitiesScreen()),
+                        ),
+                        HubCircle(
+                          icon: Icons.shield_outlined,
+                          label: 'Ausrüstung',
+                          image: HubCircleImage.plain,
+                          size: bottomCircleSize,
+                          symbol: gearSymbol,
+                          onTap: () => _open(context, const EquipmentScreen()),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -162,6 +184,7 @@ class HomeScreen extends ConsumerWidget {
                             HubCircle(
                               icon: Icons.person_outline,
                               label: 'Charakter',
+                              size: bottomCircleSize,
                               // Die einzige Flaeche, die ihr Zeichen selbst
                               // mitbringt.
                               image: HubCircleImage.character,

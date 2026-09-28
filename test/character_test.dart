@@ -7,12 +7,13 @@ import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/character/widgets/ability_slots_row.dart';
+import 'package:lifes_game/character/widgets/equipment_slot_tile.dart';
+import 'package:lifes_game/character/widgets/set_card.dart';
+import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/character/identity_controller.dart';
-import 'package:lifes_game/gear/gear_icon.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/ui/holz.dart';
-import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -317,132 +318,52 @@ void main() {
     });
   });
 
-  group('Das Ausrüstungsraster', () {
-    /// Beide Waffen gekauft — damit gibt es auf einem Platz wirklich
-    /// etwas zu wählen. Gekauft wird angelegt, die Klinge liegt also drauf.
-    SaveData mitBeidenWaffen() {
-      var loadout = const Loadout.empty();
-      for (final item in GearCatalog.all.where(
-        (i) => i.slot == GearSlot.waffe,
-      )) {
-        // **Mit der höchsten Sprosse.** Ohne sie greift seit ADR-0034 die
-        // Sperre, und die drei verdienten Waffen fehlen still im Blatt.
-        loadout = loadout.buy(
+  group('Die Ausrüstung ist ausgezogen', () {
+    /// Eine Waffe gekauft und angelegt.
+    SaveData mitWaffe() {
+      final item = GearCatalog.forSlot(GearSlot.waffe).first;
+      return SaveData(
+        loadout: const Loadout.empty().buy(
           angebot(item.id),
           availableGold: item.price,
-          highestRung: GearGates.legendaryRung,
-        );
-      }
-      return SaveData(loadout: loadout);
+        ),
+      );
     }
 
-    testWidgets('alle sechs Plätze sind sichtbar, auch die leeren', (
-      tester,
-    ) async {
+    testWidgets('der Charakter zeigt keine Plätze mehr', (tester) async {
+      // **Sie standen bis zum 28.09. hier** (ADR-0057), die Tests dazu
+      // stehen jetzt in `equipment_screen_test.dart`.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitWaffe()));
+
+      expect(find.byType(EquipmentSlotTile), findsNothing);
+      expect(find.byType(SetCard), findsNothing);
+    });
+
+    testWidgets('der Weg dorthin bleibt', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      for (final slot in GearSlot.values) {
-        expect(find.text(slot.label), findsOneWidget);
-      }
-      // Ohne Gekauftes sagt jede Kachel, warum sie leer ist.
-      expect(
-        find.text('nichts gekauft'),
-        findsNWidgets(GearSlot.values.length),
+      await tester.scrollUntilVisible(
+        find.text('Zur Ausrüstung'),
+        200,
+        scrollable: find.byType(Scrollable).first,
       );
+      await tester.tap(find.text('Zur Ausrüstung'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EquipmentScreen), findsOneWidget);
     });
 
-    testWidgets('ein leerer Platz ohne Auswahl lässt sich nicht antippen', (
-      tester,
-    ) async {
+    testWidgets('was sie bringt, steht weiter bei den Werten', (tester) async {
+      // **Die Herkunft der Zahl ist der Zweck dieses Bildschirms.** Die
+      // Plätze sind weg, der Beitrag der Waffe zu „Werte im Kampf" nicht.
+      // Geprüft an der Zeile selbst: Seit es den Knopf „Zur Ausrüstung"
+      // gibt, stünde das Wort auch ohne Beitrag auf dem Bildschirm.
       useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
+      await tester.pumpWidget(appMit(mitWaffe()));
 
-      await tester.tap(find.text('Waffe'));
-      await tester.pumpAndSettle();
-
-      // Kein Auswahlblatt: Ein Blatt ohne Einträge wäre eine Sackgasse.
-      expect(find.text('Ablegen'), findsNothing);
-    });
-
-    testWidgets('antippen öffnet die Auswahl und wechselt das Stück', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitBeidenWaffen()));
-
-      await tester.tap(find.text('Waffe'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Übungsklinge').last);
-      await tester.pumpAndSettle();
-
-      // Einmal: auf dem Ausrüstungsplatz. Im Fähigkeitsslot steht seit
-      // ADR-0017 der Name der *Fähigkeit*, nicht der der Waffe.
-      expect(find.text('Übungsklinge'), findsOneWidget);
-      expect(find.text('Geschliffene Klinge'), findsNothing);
-    });
-
-    testWidgets('das Auswahlblatt zeigt Bild und Set jedes Stücks', (
-      tester,
-    ) async {
-      // **Wer wählt, soll das Stück erkennen** — und wissen, ob das
-      // Ablegen ein Set kostet. Der Kurzbogen hat ein Bild und gehört zu
-      // „Ruhiger Stand"; die Geschliffene Klinge hat ein Bild und kein
-      // Set. Beides kommt aus dem Katalog, nicht aus diesem Test.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitBeidenWaffen()));
-
-      await tester.tap(find.text('Waffe'));
-      await tester.pumpAndSettle();
-
-      final mitBild = GearCatalog.all.where(
-        (i) => i.slot == GearSlot.waffe && GearIcons.forItemId(i.id) != null,
-      );
-      expect(mitBild, isNotEmpty, reason: 'Der Test braucht ein Bild');
-      expect(
-        find.byType(PixelArt),
-        findsAtLeastNWidgets(mitBild.length),
-        reason: 'Jedes Stück mit Bild zeigt es im Blatt',
-      );
-
-      final mitSet = GearCatalog.all.where(
-        (i) => i.slot == GearSlot.waffe && i.setId != null,
-      );
-      for (final item in mitSet) {
-        final set = GearSets.byId(item.setId)!;
-        expect(find.text('Teil von „${set.name}"'), findsWidgets);
-      }
-      final ohneSet = GearCatalog.all.where(
-        (i) => i.slot == GearSlot.waffe && i.setId == null,
-      );
-      expect(ohneSet, isNotEmpty);
-      // Ein Stück ohne Set bekommt keine leere Set-Zeile.
-      expect(find.text('Teil von „"'), findsNothing);
-    });
-
-    testWidgets('Ablegen räumt den Platz', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitBeidenWaffen()));
-
-      await tester.tap(find.text('Waffe'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Ablegen'));
-      await tester.pumpAndSettle();
-
-      // Der Platz ist leer, aber nicht „nichts gekauft" -- es liegt nur
-      // nichts drauf.
-      expect(find.text('leer'), findsOneWidget);
-      expect(find.text('Geschliffene Klinge'), findsNothing);
-    });
-
-    testWidgets('ein belegter Platz zahlt auf die Werte ein', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(mitBeidenWaffen()));
-
-      // Die Herkunft der Zahl ist der Zweck des ganzen Bildschirms: Die
-      // Klinge muss in „Werte im Kampf" als Ausrüstung auftauchen.
-      expect(find.textContaining('Ausrüstung'), findsWidgets);
+      expect(find.textContaining('Alltag · +'), findsWidgets);
     });
   });
 

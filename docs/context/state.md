@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 27.09.2026 · Frederik
+**Zuletzt aktualisiert:** 28.09.2026 · AktivesBrett
 
 ---
 
@@ -25,17 +25,17 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
-| **Startseite** | Figur mit Ausrüstung, sechs Kreise, „Heute“ zum Abhaken | ADR-0049, -0053 |
+| **Startseite** | Figur mit Ausrüstung, sieben Kreise, „Heute“ zum Abhaken | ADR-0049, -0053, -0057 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
-| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel | ADR-0029–0031, -0034, -0047, -0048 |
+| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
 | **Errungenschaften** | 19 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 576, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 594, dazu die acht Packages (theory 174, habits 227, gear
 112, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -82,6 +82,57 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026: die Ausrüstung bekommt einen eigenen Bereich
+
+Wunsch von AktivesBrett: ein Ausrüstungsfenster wie das der Fähigkeiten,
+mit sechs Plätzen oben und allen Stücken darunter, gruppierbar, mit
+Popup, und raus aus dem Charakter.
+[ADR-0057](../decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md).
+App 594 Tests (vorher 576).
+
+**Vorher gefragt und entschieden:**
+
+| Frage | Antwort |
+|---|---|
+| Was steht im Raster? | **der ganze Katalog**, besessene Stücke farbig, der Rest grau; mehrfach besessene mit „×2“ |
+| Wonach ordnen? | **A–Z** (Standard), Platz, Seltenheit, Set |
+| Das Inventar im Laden? | **bleibt**, das neue Fenster kann auch verkaufen |
+| Der 7. Kreis? | **unten vier**, auf 64 statt 72 Punkte verkleinert |
+
+| Was | Wo |
+|---|---|
+| Sechs Plätze, Set-Karte, 48 Stücke in vier Ordnungen | `lib/gear/equipment_screen.dart` |
+| Das Blatt: Grundwerte, Wurfspanne, Seltenheitsfaktor, Kampfwirkung, Set mit beiden Stufen, Preis, Verkauf, Herkunft und **jedes eigene Exemplar** mit Anlegen, Ablegen, Verkaufen | `lib/gear/widgets/gear_sheet.dart` |
+| Die Ordnungen, reine Rechnung, deutsches Alphabet | `lib/gear/gear_grouping.dart` |
+| Verkaufen mit Rückfrage und Feier | `lib/gear/sell_flow.dart` |
+| Kreise in beliebiger Größe | `HubCircle.size`, `HomeScreen.bottomCircleSize` |
+| Das Grau für „noch nicht“, jetzt eine Stelle | `lib/ui/ausgegraut.dart` |
+
+**Im Charakter** bleiben die Werte mit ihrer Herkunft; statt Plätzen und
+Set-Karte steht dort „Zur Ausrüstung“. Die Tests dazu sind aus
+`character_test.dart` und `gear_test.dart` nach
+`equipment_screen_test.dart` gewandert.
+
+**Das Blatt liest den Spielstand selbst.** Wer darin anlegt oder
+verkauft, sieht es sofort, ohne es zu schließen.
+
+**Im Browser durchgespielt** (375 × 812), leer und mit allem
+geschenkt: Kreise, Raster, Ordnungen, Blatt, Anlegen. **Nicht am Handy
+angesehen.**
+
+### Offen
+
+- **Zwei Verkaufswege**: `sellWithConfirm` und `ShopScreen._sell` tun
+  dasselbe, weil der Laden nicht angefasst werden sollte. Auf Dauer
+  gehört der Laden auf `sellWithConfirm` umgestellt.
+- **Lange Namen brechen mitten im Wort um** („Bernsteinamulet-t“), bei
+  9 Punkten Schrift in einer 77 Punkte breiten Kachel.
+- **Die Marke „Gewöhnlich“ ist auf Leder kaum zu lesen**, im
+  Ausrüstungs- wie im Fähigkeiten-Bildschirm. Ihre Farben sind für
+  Pergament gewählt.
+- **Kaufen geht dort nicht.** Das Blatt sagt, wenn ein Stück heute im
+  Laden liegt, führt aber nicht direkt zum Angebot.
 
 ## 27.09.2026, zuletzt: Überblick im Wissensbaum
 
