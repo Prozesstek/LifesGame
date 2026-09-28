@@ -6,8 +6,8 @@ import 'copy_stats.dart';
 import 'rarity_badge.dart';
 import '../../ui/holz.dart';
 
-/// Ein Exemplar im Laden — ein Angebot des Tages oder ein Stück im
-/// Inventar (ADR-0048).
+/// Ein Angebot des Tages im Laden (ADR-0048). Besessenes zeigt seit
+/// Issue #88 nur noch der Ausrüstungs-Bildschirm.
 ///
 /// Zeigt auch, was **nicht** geht, und warum. „Kaufen" auszugrauen ohne
 /// Grund ist die häufigste Art, einen Nutzer ratlos zurückzulassen —
@@ -16,14 +16,10 @@ import '../../ui/holz.dart';
 class ShopItemTile extends StatelessWidget {
   const ShopItemTile({
     required this.copy,
-    required this.isOwned,
-    required this.isEquipped,
     this.block,
     this.missingGold = 0,
     this.worn,
     this.onBuy,
-    this.onSell,
-    this.onEquip,
     this.abilityLine,
     this.setPieces = 0,
     this.requiredRung = 0,
@@ -32,11 +28,7 @@ class ShopItemTile extends StatelessWidget {
 
   final GearCopy copy;
 
-  /// Im Inventar (true) oder ein Angebot (false).
-  final bool isOwned;
-  final bool isEquipped;
-
-  /// Warum der Kauf nicht geht. Null heißt: geht. Nur für Angebote.
+  /// Warum der Kauf nicht geht. Null heißt: geht.
   final PurchaseBlock? block;
 
   /// Wie viel Gold noch fehlt. Nur bei [PurchaseBlock.zuWenigGold].
@@ -47,8 +39,6 @@ class ShopItemTile extends StatelessWidget {
   final GearCopy? worn;
 
   final VoidCallback? onBuy;
-  final VoidCallback? onSell;
-  final VoidCallback? onEquip;
 
   /// Was die Waffe an Fähigkeit mitbringt, in einer Zeile. Nur Waffen.
   final String? abilityLine;
@@ -131,7 +121,7 @@ class ShopItemTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              isOwned ? _eigenes(item) : _angebot(),
+              _angebot(),
             ],
           ),
           const SizedBox(height: 8),
@@ -143,7 +133,7 @@ class ShopItemTile extends StatelessWidget {
               color: Palette.textDim,
             ),
           ),
-          if (!isOwned && block == PurchaseBlock.gesperrt) ...<Widget>[
+          if (block == PurchaseBlock.gesperrt) ...<Widget>[
             const SizedBox(height: 6),
             Text(
               'Verdient ab Stufe $requiredRung der Grube.',
@@ -154,7 +144,7 @@ class ShopItemTile extends StatelessWidget {
               ),
             ),
           ],
-          if (!isOwned && block == PurchaseBlock.zuWenigGold) ...<Widget>[
+          if (block == PurchaseBlock.zuWenigGold) ...<Widget>[
             const SizedBox(height: 6),
             Text(
               'Noch $missingGold Gold.',
@@ -194,48 +184,6 @@ class ShopItemTile extends StatelessWidget {
           onPressed: block == null ? onBuy : null,
           style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
           child: const Text('Kaufen'),
-        ),
-      ],
-    );
-  }
-
-  /// Rechts im Inventar: Anlegen und Verkaufen. Der Betrag steht über
-  /// dem Knopf, nicht darin — sonst läuft die Zeile über
-  /// (`docs/context/gotchas.md`).
-  Widget _eigenes(GearItem item) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        if (isEquipped)
-          const Text(
-            'getragen',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Palette.accent,
-            ),
-          )
-        else
-          FilledButton(
-            onPressed: onEquip,
-            style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
-            child: const Text('Anlegen'),
-          ),
-        const SizedBox(height: 4),
-        Text(
-          '+${Loadout.refundFor(item)} Gold',
-          style: const TextStyle(fontSize: 12, color: Palette.gold),
-        ),
-        TextButton(
-          onPressed: onSell,
-          style: TextButton.styleFrom(
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            minimumSize: const Size(0, 30),
-            foregroundColor: Palette.textDim,
-            textStyle: const TextStyle(fontSize: 12),
-          ),
-          child: const Text('Verkaufen'),
         ),
       ],
     );

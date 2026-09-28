@@ -47,7 +47,9 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 - ~~**Was der Testlauf misst.**~~ Entschieden am 27.09. (Frederik):
   **weiterbauen**. Der Testlauf ist damit ein Entwicklungsmonat; ob
   Ziel 7 neu formuliert wird, steht in `ziele.md` noch aus.
-- **Das Dorf** statt der Kreise? Braucht AktivesBrett und einen ADR.
+- **Das Dorf** statt der Kreise? Frederik lehnt es ab (Issue #88) und
+  will stattdessen das **Haus** ausbauen (Möbel, Haustiere). Braucht
+  AktivesBrett und einen ADR.
 
 **Inhalt und Balance:**
 
@@ -81,6 +83,24 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026, ganz zuletzt: der Laden kauft nur noch
+
+Vierter Block aus Issue #88, „Laden und Ausrüstung doppelt sich“. Der
+Reiter „Inventar“ im Laden konnte anlegen und verkaufen — dasselbe wie
+das Blatt in der Ausrüstung (ADR-0057).
+
+| Was | Wo jetzt |
+|---|---|
+| Kaufen, sechs Angebote am Tag | Laden, ohne Reiter |
+| Anlegen, Ablegen, Verkaufen | Ausrüstung, im Blatt eines Stücks (wie bisher) |
+| Alles Schlechtere verkaufen | Ausrüstung, über „Alle Stücke“, nur wenn es etwas zu räumen gibt |
+| Verkaufen im Code | **ein** Weg, `lib/gear/sell_flow.dart` |
+
+**Das hebt eine Entscheidung aus ADR-0057 auf**: Dort sollte das
+Inventar im Laden bleiben (AktivesBrett). Frederik hat es mit Issue #88
+anders entschieden. `ShopItemTile` hat seinen Inventar-Zweig verloren.
+App 610.
 
 ## 28.09.2026, zuletzt: der Eingang der Grube wird ein Fahrstuhl
 
@@ -246,9 +266,8 @@ unter den Plätzen sagt jetzt „halten und hierher ziehen“ statt
 
 ### Offen
 
-- **Zwei Verkaufswege**: `sellWithConfirm` und `ShopScreen._sell` tun
-  dasselbe, weil der Laden nicht angefasst werden sollte. Auf Dauer
-  gehört der Laden auf `sellWithConfirm` umgestellt.
+- ~~**Zwei Verkaufswege**~~: erledigt am 28.09., der Laden verkauft
+  nicht mehr (Eintrag oben).
 - **Lange Namen brechen mitten im Wort um** („Bernsteinamulet-t“), bei
   9 Punkten Schrift in einer 77 Punkte breiten Kachel.
 - **Die Marke „Gewöhnlich“ ist auf Leder kaum zu lesen**, im

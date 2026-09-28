@@ -7,6 +7,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/copy_text.dart';
+import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
@@ -328,31 +329,18 @@ void main() {
       expect(find.text('gekauft'), findsWidgets);
     });
 
-    testWidgets('im Inventar: verkaufen nach Rückfrage, ein Viertel zurück', (
-      tester,
-    ) async {
+    testWidgets('der Laden hat kein Inventar mehr', (tester) async {
+      // Seit dem 28.09. (Issue #88): Besessenes steht nur noch in der
+      // Ausrüstung, dort wird auch verkauft (`equipment_screen_test`).
       useTallView(tester);
       final klinge = GearCatalog.byId('gear-uebungsklinge')!;
-      final saved = stand(
-        loadout: const Loadout.empty().addFree(angebot(klinge.id)),
+      await tester.pumpWidget(
+        app(stand(loadout: const Loadout.empty().addFree(angebot(klinge.id)))),
       );
-      await tester.pumpWidget(app(saved));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Inventar'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen'));
-      await tester.pumpAndSettle();
-
-      final erloes = Loadout.refundFor(klinge);
-      expect(find.textContaining('Das bringt $erloes Gold'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
-      await tester.pumpAndSettle();
-
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(ShopScreen)),
-      );
-      expect(container.read(loadoutProvider).ownsItem(klinge.id), isFalse);
+      expect(find.text('Inventar'), findsNothing);
+      expect(find.widgetWithText(TextButton, 'Verkaufen'), findsNothing);
     });
 
     testWidgets('alles Schlechtere verkaufen räumt den Ausschuss', (
@@ -371,13 +359,20 @@ void main() {
         bonus: GearBonus(attack: 30),
         paid: 0,
       );
+      // In der Ausrüstung, nicht mehr im Laden (Issue #88).
       await tester.pumpWidget(
-        app(
-          stand(loadout: const Loadout.empty().addFree(stark).addFree(schwach)),
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(
+              stand(
+                loadout: const Loadout.empty().addFree(stark).addFree(schwach),
+              ),
+            ),
+            todayProvider.overrideWithValue(heute),
+          ],
+          child: const MaterialApp(home: EquipmentScreen()),
         ),
       );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Inventar'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.textContaining('Alles Schlechtere verkaufen'));
@@ -386,7 +381,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final container = ProviderScope.containerOf(
-        tester.element(find.byType(ShopScreen)),
+        tester.element(find.byType(EquipmentScreen)),
       );
       expect(container.read(loadoutProvider).owns('w'), isFalse);
       expect(container.read(loadoutProvider).owns('s'), isTrue);
