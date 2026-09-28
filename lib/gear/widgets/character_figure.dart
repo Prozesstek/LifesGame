@@ -1,31 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
-import 'package:progression/progression.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
-import 'level_card.dart';
-import '../../ui/holz.dart';
 
-/// Die Figur in der Mitte des Startbildschirms, mit ihren Zahlen darunter.
+/// Die Figur mit allem, was sie trägt — im Ausrüstungs-Bildschirm
+/// zwischen den sechs Plätzen.
 ///
-/// **Warum Level und Gold hier stehen und nicht oben.** Die fünf Kreise
-/// haben keinen Platz mehr für die Statuszahlen, die vorher auf jeder
-/// Kachel standen. Sie unter die Figur zu legen macht aus zwei Dingen
-/// eines: Das ist dein Charakter, und das sind seine Zahlen. Eine
-/// Statuszeile am oberen Rand hätte dieselbe Information getragen, aber
-/// als Kopfzeile eines Menüs — und ein Menü ist der Bildschirm gerade
-/// nicht mehr.
-class CharacterStage extends StatelessWidget {
-  const CharacterStage({
-    required this.level,
-    required this.gold,
-    this.worn = const <String>[],
-    super.key,
-  });
-
-  final PlayerLevel level;
-  final int gold;
+/// **Bis zum 28.09. stand sie in der Mitte der Startseite**
+/// (`CharacterStage`, samt Level und Gold darunter). Dort gab sie an
+/// vollen Tagen immer mehr Platz an „Heute“ ab, bei fünf offenen
+/// Gewohnheiten blieben rund 80 Punkte. Neben den Plätzen zeigt sie, was
+/// sie trägt, und die Startseite gehört den Gewohnheiten (Frederik).
+class CharacterFigure extends StatelessWidget {
+  const CharacterFigure({this.worn = const <String>[], super.key});
 
   /// Die Item-Ids der angelegten Stücke, in beliebiger Reihenfolge.
   /// Übereinander gelegt wird nach [layers], nicht nach dieser Liste.
@@ -48,7 +36,7 @@ class CharacterStage extends StatelessWidget {
   /// Jede Datei liegt auf derselben 256er-Fläche wie [assetPath] und
   /// sitzt deckungsgleich darüber — kein Versatz, keine Rechnung. Ein
   /// neues Stück ohne Eintrag hier steht im Laden, nur die Figur trägt
-  /// es nicht; `test/character_stage_test.dart` meldet das für jeden
+  /// es nicht; `test/character_figure_test.dart` meldet das für jeden
   /// Platz in [layers].
   ///
   /// **Die Helme sind gezeichnet, Rüstungen und Waffen erzeugt**, aus den
@@ -100,18 +88,7 @@ class CharacterStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HolzKarte(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Center(child: _Figur(overlays: overlaysFor(worn))),
-          ),
-          const SizedBox(height: 10),
-          LevelCard(level: level, gold: gold),
-        ],
-      ),
-    );
+    return _Figur(overlays: overlaysFor(worn));
   }
 }
 
@@ -139,7 +116,7 @@ class _Figur extends StatelessWidget {
           alignment: Alignment.center,
           children: <Widget>[
             PixelArt(
-              assetPath: CharacterStage.assetPath,
+              assetPath: CharacterFigure.assetPath,
               side: side,
               fallback: const _KeineFigur(),
             ),

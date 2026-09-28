@@ -131,6 +131,28 @@ abstract final class Palette {
   static const Color tintSchutz = Color(0xFFE0B65B);
 
   // ---------------------------------------------------------------
+  // Die Rahmen des Level-Abzeichens, je zehn Level einer
+  // ---------------------------------------------------------------
+  //
+  // Je ein heller und ein dunkler Ton, der Ring läuft von hell nach
+  // dunkel. Welcher Rahmen zu welchem Level gehört, steht in
+  // `lib/ui/level_abzeichen.dart`.
+
+  static const Color rahmenHolzHell = Color(0xFFB07A45);
+  static const Color rahmenHolzDunkel = Color(0xFF5E3B1C);
+  static const Color rahmenBronzeHell = Color(0xFFD9955A);
+  static const Color rahmenBronzeDunkel = Color(0xFF7A4520);
+  static const Color rahmenSilberHell = Color(0xFFE4E6EA);
+  static const Color rahmenSilberDunkel = Color(0xFF7D838C);
+  static const Color rahmenGoldHell = Color(0xFFF5D56E);
+  static const Color rahmenGoldDunkel = Color(0xFF9A6D12);
+  static const Color rahmenEdelHell = Color(0xFFB9A2F0);
+  static const Color rahmenEdelDunkel = Color(0xFF4E3391);
+
+  /// Der Grund im Inneren des Abzeichens, auf dem die Zahl steht.
+  static const Color abzeichenGrund = Color(0xFF2E2314);
+
+  // ---------------------------------------------------------------
   // Die Arena
   // ---------------------------------------------------------------
 

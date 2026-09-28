@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear/gear.dart';
 
 import '../character/abilities_screen.dart';
 import '../gear/equipment_screen.dart';
@@ -9,7 +8,6 @@ import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
 import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
-import '../gear/gear_controller.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
@@ -17,18 +15,19 @@ import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
-import 'widgets/character_stage.dart';
 import 'widgets/hub_circle.dart';
+import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
 import '../ui/druck.dart';
 
-/// Startbildschirm — die Figur in der Mitte, die Bereiche darum herum.
+/// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
 /// **Bis Issue #35 war das eine Liste aus fünf Kacheln.** Sie hat
 /// funktioniert und nichts erzählt: Ein Habit-Tracker, dessen Startseite
 /// aussieht wie ein Einstellungsmenü, muss seine eigene Aussage jeden Tag
-/// aufs Neue behaupten. Jetzt steht der Charakter in der Mitte, und die
-/// fünf Bereiche liegen als Kreise darum.
+/// aufs Neue behaupten. Seitdem liegen die Bereiche als Kreise um die
+/// Mitte. Dort stand bis zum 28.09. der Charakter; jetzt steht dort, was
+/// heute zu tun ist, und die Figur ist in der Ausrüstung.
 ///
 /// Gesperrte Bereiche stehen bewusst mit dabei. Ein Startbildschirm, der
 /// nur zeigt, was schon fertig ist, verschweigt, worum es geht — und der
@@ -64,10 +63,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
     final gold = ref.watch(goldProvider);
-    final loadout = ref.watch(loadoutProvider);
-    final worn = <String>[
-      for (final slot in GearSlot.values) ?loadout.equippedCopyIn(slot)?.itemId,
-    ];
 
     final tracker = ref.watch(habitTrackerProvider);
     final heute = HubProgress(
@@ -122,23 +117,17 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    // **Die Figur bekommt, was übrig bleibt.** Der Rest des
-                    // Bildschirms steht fest; damit passt das Layout auf
-                    // jede Höhe, ohne zu scrollen und ohne überzulaufen.
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: CharacterStage(
-                          level: level,
-                          gold: gold,
-                          worn: worn,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 12),
+                    StatusLeiste(level: level, gold: gold),
+                    const SizedBox(height: 12),
 
-                    // **Heute** (ADR-0053): die offenen Gewohnheiten, ein
-                    // Tipp je Häkchen. Die Figur gibt dafür Platz ab.
-                    const TodayCard(),
+                    // **Heute** (ADR-0053) bekommt, was übrig bleibt. Bis
+                    // zum 28.09. stand hier die Figur und gab an vollen
+                    // Tagen Platz ab; sie ist jetzt in der Ausrüstung.
+                    // Eine lange Liste rollt, statt überzulaufen.
+                    const Expanded(
+                      child: SingleChildScrollView(child: TodayCard()),
+                    ),
                     const SizedBox(height: 12),
 
                     Row(

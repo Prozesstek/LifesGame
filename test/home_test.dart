@@ -8,7 +8,10 @@ import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/home/home_screen.dart';
-import 'package:lifes_game/home/widgets/character_stage.dart';
+import 'package:lifes_game/gear/widgets/character_figure.dart';
+import 'package:lifes_game/home/widgets/status_leiste.dart';
+import 'package:lifes_game/ui/holz.dart';
+import 'package:lifes_game/ui/level_abzeichen.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -366,13 +369,13 @@ void main() {
       expect(find.byType(CharacterScreen), findsOneWidget);
     });
 
-    testWidgets('die Figur in der Mitte ist wirklich abgelegt', (tester) async {
+    testWidgets('die Figur ist wirklich abgelegt', (tester) async {
       // **Dieselbe Naht wie bei `move_icon_test.dart`.** `rootBundle`
       // findet nur, was in `pubspec.yaml` unter `assets:` steht — der
       // Test prueft damit Datei **und** Anmeldung in einem Zug. Ohne ihn
       // faellt ein vergessener Eintrag erst im Browser auf, und dann als
-      // Platzhalter, den `CharacterStage` absichtlich still zeigt.
-      final daten = await rootBundle.load(CharacterStage.assetPath);
+      // Platzhalter, den `CharacterFigure` absichtlich still zeigt.
+      final daten = await rootBundle.load(CharacterFigure.assetPath);
 
       expect(daten.lengthInBytes, greaterThan(1000));
     });
@@ -445,13 +448,49 @@ void main() {
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      expect(find.text('Level 1'), findsOneWidget);
-      expect(find.text('0 von 100 Erfahrung bis Level 2'), findsOneWidget);
+      // Das Level steht als Zahl im Abzeichen, das Gold neben der
+      // Münze — beide ohne Wort davor oder dahinter (Frederik, 28.09.).
+      final abzeichen = find.byType(LevelAbzeichen);
+      expect(abzeichen, findsOneWidget);
+      expect(
+        find.descendant(of: abzeichen, matching: find.text('1')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(StatusLeiste),
+          matching: find.text('0'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Gold'), findsNothing);
+    });
 
-      // Nur noch einmal: Die Zahl stand vorher zusätzlich als Zustand
-      // auf der Laden-Kachel. Ein Kreis trägt keinen Zustand mehr, und
-      // dieselbe Zahl an zwei Stellen war ohnehin eine zu viel.
-      expect(find.text('0 Gold'), findsOneWidget);
+    testWidgets('der Satz zur Erfahrung kommt erst auf Tipp', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      const satz = '0 von 100 Erfahrung bis Level 2';
+      expect(find.text(satz), findsNothing);
+
+      await tester.tap(find.byType(HolzBalken));
+      await tester.pumpAndSettle();
+      expect(find.text(satz), findsOneWidget);
+
+      await tester.tap(find.byType(HolzBalken));
+      await tester.pumpAndSettle();
+      expect(find.text(satz), findsNothing);
+    });
+
+    testWidgets('die Figur steht nicht mehr auf der Startseite', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      expect(find.byType(CharacterFigure), findsNothing);
     });
   });
 }

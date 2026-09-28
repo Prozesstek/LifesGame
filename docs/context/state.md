@@ -25,7 +25,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
-| **Startseite** | Figur mit Ausrüstung, sieben Kreise, „Heute“ zum Abhaken | ADR-0049, -0053, -0057 |
+| **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 605, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 610, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -62,7 +62,6 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
 **Oberfläche, nicht am Handy geprüft:**
 
-- Die Figur an vollen Tagen (rund 80 Punkte bei fünf offenen).
 - Kopieren und Einfügen des Spielstands im Handy-Browser.
 - Ob der kontrastreichere Boden die dunkle Fledermaus schluckt.
 - Drei Reihen „Inhalt folgt“ im Baum: Versprechen oder Baustelle?
@@ -82,6 +81,29 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.09.2026, abends: die Figur zieht in die Ausrüstung
+
+Frederik wollte die Startseite umbauen:
+[ADR-0058](../decisions/0058-figur-in-die-ausruestung.md).
+
+| Was | Wie |
+|---|---|
+| **Figur** | im Ausrüstungs-Bildschirm zwischen den Plätzen, drei links (Helm, Rüstung, Schuhe), drei rechts (Waffe, Ring, Talisman) |
+| **Level** | ein rundes Abzeichen mit der Zahl darin; je zehn Level ein Rahmen, Holz, Bronze, Silber, Gold, Edelstein, dazu 0 bis 8 Nieten |
+| **Gold** | nur Münze und Zahl, ohne das Wort |
+| **Balken** | bleibt; „x von y Erfahrung“ erst auf Tipp |
+| **„Heute“** | bekommt den Platz der Figur und rollt, statt überzulaufen |
+
+Die Rahmen sind **gemalt, nicht gezeichnet** — Platzhalter, bis es
+Bilder gibt; welcher zu welchem Level gehört, steht in `LevelRahmen`.
+Damit ist der offene Punkt „die Figur an vollen Tagen“ erledigt.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Die
+Plätze wurden nur so breit wie ihr Inhalt, und Holz und Bronze sahen
+gleich aus — jetzt füllen die Plätze die Spalte, und jede Stufe hat
+mehr Nieten als die davor. App 610. **Nicht am Handy angesehen.**
+Ohne Gewohnheiten bleibt unter „Heute“ viel Leder frei.
 
 ## 28.09.2026, später: Moos und Risse im Boden der Grube
 

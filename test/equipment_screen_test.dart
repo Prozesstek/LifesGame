@@ -9,6 +9,7 @@ import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/gear_grouping.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
+import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/gear/widgets/gear_sheet.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -105,6 +106,24 @@ void main() {
         aufDenPlaetzen('nichts gekauft'),
         findsNWidgets(GearSlot.values.length),
       );
+    });
+
+    testWidgets('die Figur steht zwischen den Plätzen und trägt die Waffe', (
+      tester,
+    ) async {
+      // Seit dem 28.09. hier statt auf der Startseite: drei Plätze links,
+      // drei rechts, die Figur dazwischen.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final figur = find.byType(CharacterFigure);
+      expect(figur, findsOneWidget);
+      final mitte = tester.getCenter(figur).dx;
+      expect(tester.getCenter(aufDenPlaetzen('Helm')).dx, lessThan(mitte));
+      expect(tester.getCenter(aufDenPlaetzen('Waffe')).dx, greaterThan(mitte));
+
+      final waffe = GearCatalog.forSlot(GearSlot.waffe).first.id;
+      expect(tester.widget<CharacterFigure>(figur).worn, contains(waffe));
     });
 
     testWidgets('ein belegter Platz zeigt das Blatt mit den Werten', (
