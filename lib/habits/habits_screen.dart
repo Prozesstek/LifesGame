@@ -9,6 +9,7 @@ import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
+import 'stat_icon.dart';
 import 'widgets/cue_dialog.dart';
 import 'widgets/custom_habit_sheet.dart';
 import 'widgets/daily_chest_card.dart';
@@ -74,44 +75,34 @@ class HabitsScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                     ],
                     _SectionHeader(
-                      title: 'Heute',
                       trailing:
                           '${tracker.completedOn(today)} / ${active.length}',
                     ),
                     const SizedBox(height: 10),
-                    if (active.isEmpty)
-                      const _Hint(
-                        'Noch nichts gewählt. Unten stehen deine eigenen '
-                        'und die vorerstellten Gewohnheiten.',
-                      )
-                    else
-                      // Offene oben, erledigte unten (`dailyListOn`).
-                      // Der Schlüssel hält den Sprung des Häkchens
-                      // an der Gewohnheit, wenn die Kachel die Reihe
-                      // wechselt.
-                      for (final habit in active) ...<Widget>[
-                        HabitCheckTile(
-                          key: ValueKey<String>(habit.id),
-                          habit: habit,
-                          isChecked: tracker.isChecked(habit.id, today),
-                          streak: tracker.currentStreak(habit.id, today),
-                          nextMultiplier: tracker.nextMultiplier(
-                            habit.id,
-                            today,
-                          ),
-                          xpGain: tracker.xpForNextCheck(habit.id, today),
-                          goldGain: tracker.goldForNextCheck(habit.id, today),
-                          progress: tracker.progressOn(habit.id, today),
-                          onToggle: () => toggleHabit(context, ref, habit),
-                          onAdvance: () => advanceHabit(context, ref, habit),
-                          onStop: () => ref
-                              .read(habitTrackerProvider.notifier)
-                              .deactivate(habit.id),
-                          cue: tracker.cueFor(habit.id),
-                          onEditCue: () => _editCue(context, ref, habit),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
+                    // Offene oben, erledigte unten (`dailyListOn`).
+                    // Der Schlüssel hält den Sprung des Häkchens
+                    // an der Gewohnheit, wenn die Kachel die Reihe
+                    // wechselt.
+                    for (final habit in active) ...<Widget>[
+                      HabitCheckTile(
+                        key: ValueKey<String>(habit.id),
+                        habit: habit,
+                        isChecked: tracker.isChecked(habit.id, today),
+                        streak: tracker.currentStreak(habit.id, today),
+                        nextMultiplier: tracker.nextMultiplier(habit.id, today),
+                        xpGain: tracker.xpForNextCheck(habit.id, today),
+                        goldGain: tracker.goldForNextCheck(habit.id, today),
+                        progress: tracker.progressOn(habit.id, today),
+                        onToggle: () => toggleHabit(context, ref, habit),
+                        onAdvance: () => advanceHabit(context, ref, habit),
+                        onStop: () => ref
+                            .read(habitTrackerProvider.notifier)
+                            .deactivate(habit.id),
+                        cue: tracker.cueFor(habit.id),
+                        onEditCue: () => _editCue(context, ref, habit),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     if (tracker.canOpenChest(today) ||
                         tracker.hasOpenedChest(today)) ...<Widget>[
                       const SizedBox(height: 4),
@@ -139,11 +130,6 @@ class HabitsScreen extends ConsumerWidget {
                           '${tracker.activeIds.length} / '
                           '${HabitRewards.maxActiveHabits}',
                       eigene: <Widget>[
-                        if (ruhendeEigene.isEmpty)
-                          const _Hint(
-                            'Keine eigene wartet. Neue fragen nach Name, '
-                            'Wert und Tagesziel.',
-                          ),
                         for (final habit in ruhendeEigene)
                           _RestingCustomTile(
                             habit: habit,
@@ -152,22 +138,14 @@ class HabitsScreen extends ConsumerWidget {
                           ),
                       ],
                       vorerstellte: <Widget>[
-                        if (availableTemplates.isEmpty)
-                          const _Hint(
-                            'Alle freigeschalteten laufen bereits. Weitere '
-                            'kommen aus dem Skillbaum.',
-                          )
-                        else
-                          for (final template
-                              in availableTemplates) ...<Widget>[
-                            HabitTemplateTile(
-                              template: template,
-                              canActivate: tracker.canActivate(template.id),
-                              onActivate: () =>
-                                  _activate(context, ref, template),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                        for (final template in availableTemplates) ...<Widget>[
+                          HabitTemplateTile(
+                            template: template,
+                            canActivate: tracker.canActivate(template.id),
+                            onActivate: () => _activate(context, ref, template),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
                       ],
                     ),
                   ],
@@ -320,7 +298,12 @@ class _NeueGewohnheitKnopf extends StatelessWidget {
         child: FilledButton.icon(
           onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
           icon: const Icon(Icons.playlist_add),
-          label: const Text('Neue Gewohnheit'),
+          // Kein Wort, nur wie viele Plätze frei sind; der Tooltip sagt
+          // den Rest.
+          label: Text(
+            '$slotsLeft',
+            semanticsLabel: 'Neue Gewohnheit, $slotsLeft frei',
+          ),
         ),
       ),
     );
@@ -386,6 +369,7 @@ class _VorlagenReiterState extends State<_VorlagenReiter> {
           children: <Widget>[
             Expanded(
               child: _Reiter(
+                icon: Icons.person_rounded,
                 titel: 'Eigene',
                 zaehler: widget.eigeneZaehler,
                 aktiv: _eigene,
@@ -395,6 +379,7 @@ class _VorlagenReiterState extends State<_VorlagenReiter> {
             const SizedBox(width: 8),
             Expanded(
               child: _Reiter(
+                icon: Icons.auto_stories_rounded,
                 titel: 'Vorerstellte',
                 zaehler: widget.vorerstellteZaehler,
                 aktiv: !_eigene,
@@ -412,12 +397,16 @@ class _VorlagenReiterState extends State<_VorlagenReiter> {
 
 class _Reiter extends StatelessWidget {
   const _Reiter({
+    required this.icon,
     required this.titel,
     required this.zaehler,
     required this.aktiv,
     required this.onTap,
   });
 
+  final IconData icon;
+
+  /// Nur für den Vorleser — zu sehen ist das Zeichen.
   final String titel;
   final String zaehler;
   final bool aktiv;
@@ -428,6 +417,7 @@ class _Reiter extends StatelessWidget {
     return Semantics(
       button: true,
       selected: aktiv,
+      label: titel,
       child: Druck(
         child: Material(
           color: aktiv ? Palette.accentOnDark : Palette.surface,
@@ -440,19 +430,8 @@ class _Reiter extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Flexible(
-                    child: Text(
-                      titel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.text,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
+                  Icon(icon, size: 20, color: Palette.text),
+                  const SizedBox(width: 8),
                   Text(
                     zaehler,
                     style: const TextStyle(
@@ -502,13 +481,27 @@ class _RestingCustomTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  _zeile,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.accent,
-                  ),
+                Row(
+                  children: <Widget>[
+                    StatIcon(habit.stat, size: 16),
+                    const SizedBox(width: 8),
+                    _Grad(habit.difficulty),
+                    if (habit.goal case final goal?) ...<Widget>[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          goal.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.accent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -527,22 +520,39 @@ class _RestingCustomTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  String get _zeile {
-    final teile = <String>[
-      '${habit.stat.label} · ${habit.stat.combatLabel}',
-      habit.difficulty.label,
-    ];
-    final goal = habit.goal;
-    if (goal != null) teile.add(goal.label);
-    return teile.join(' · ');
+/// Der Schwierigkeitsgrad als ein bis drei Punkte statt als Wort.
+class _Grad extends StatelessWidget {
+  const _Grad(this.grad);
+
+  final HabitDifficulty grad;
+
+  @override
+  Widget build(BuildContext context) {
+    final stufe = HabitDifficulty.values.indexOf(grad) + 1;
+    return Semantics(
+      label: grad.label,
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          for (var i = 0; i < HabitDifficulty.values.length; i++)
+            Icon(
+              Icons.circle,
+              size: 7,
+              color: i < stufe ? Palette.accent : Palette.surfaceSunken,
+            ),
+        ],
+      ),
+    );
   }
 }
 
+/// „Heute“ als Zeichen, daneben der Stand.
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.trailing});
+  const _SectionHeader({required this.trailing});
 
-  final String title;
   final String trailing;
 
   @override
@@ -550,16 +560,11 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Flexible(
-          child: Text(
-            title,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Palette.textOnDark,
-            ),
-          ),
+        const Icon(
+          Icons.checklist_rounded,
+          size: 22,
+          color: Palette.textOnDark,
+          semanticLabel: 'Heute',
         ),
         const SizedBox(width: 8),
         Flexible(
@@ -574,27 +579,6 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Hint extends StatelessWidget {
-  const _Hint(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          height: 1.4,
-          color: Palette.textOnDarkDim,
-        ),
-      ),
     );
   }
 }

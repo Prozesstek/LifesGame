@@ -28,9 +28,15 @@ class DailyQuest {
     required this.text,
     required this.progress,
     required this.target,
+    this.habitName,
   });
 
   final QuestKind kind;
+
+  /// Um welche Gewohnheit es geht — nur bei [QuestKind.liegengeblieben].
+  /// Der Bildschirm zeigt die Aufgabe als Zeichen und braucht dann nur
+  /// noch diesen Namen.
+  final String? habitName;
 
   /// Wie sie auf dem Bildschirm steht.
   final String text;
@@ -121,6 +127,7 @@ abstract final class DailyQuests {
               text: 'Hol nach, was gestern liegen blieb: ${liegen!.$2}',
               progress: tracker.isChecked(liegen.$1, day) ? 1 : 0,
               target: 1,
+              habitName: liegen.$2,
             ),
           QuestKind.rueckfrage => DailyQuest(
               kind: kind,

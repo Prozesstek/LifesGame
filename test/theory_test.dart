@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/theory/widgets/review_section.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/branch_screen.dart';
@@ -148,7 +149,7 @@ void main() {
         expect(find.text(angekuendigt.title), findsOneWidget);
       }
       expect(find.byType(PlaceholderBubble), findsNWidgets(2));
-      expect(find.text('Inhalt folgt'), findsNWidgets(2));
+      expect(find.byIcon(Icons.hourglass_empty_rounded), findsNWidgets(2));
     });
 
     testWidgets('die anderen Gebiete liegen nicht gleichzeitig im Bild', (
@@ -240,11 +241,9 @@ void main() {
 
       await _pumpTree(tester, container);
 
-      final gesamt = container.read(totalPagesProvider);
-      final bestanden = container.read(passedPagesProvider);
-
-      expect(find.text('0 von 20'), findsOneWidget);
-      expect(find.text('gesamt $bestanden von $gesamt'), findsOneWidget);
+      // Seit die App ohne Lesen auskommen soll: nur noch der Stand des
+      // Gebiets, als Bruch. „gesamt … von …“ sagen die vier Balken.
+      expect(find.text('0 / 20'), findsWidgets);
     });
 
     testWidgets('jeder Aufstieg gibt einen Punkt (ADR-0035)', (tester) async {
@@ -460,6 +459,12 @@ void main() {
       expect(find.byType(NodeActionPanel), findsOneWidget);
     });
 
+    /// Der Rückweg trägt nur noch den Namen; „Zurück zu“ hört der
+    /// Vorleser.
+    Finder rueckweg(String name) => find.byWidgetPredicate(
+      (w) => w is Text && w.semanticsLabel == 'Zurück zu $name',
+    );
+
     testWidgets('der Elternknoten führt zurück', (tester) async {
       useTallView(tester);
       final container = _containerAtLevel(3);
@@ -469,16 +474,16 @@ void main() {
       await tester.tap(find.text(schlaf.name));
       await tester.pumpAndSettle();
 
-      expect(find.text('Zurück zu Körper'), findsOneWidget);
+      expect(rueckweg('Körper'), findsOneWidget);
 
-      await tester.tap(find.text('Zurück zu Körper'));
+      await tester.tap(rueckweg('Körper'));
       await tester.pumpAndSettle();
 
       // Alle Kinder stehen wieder da.
       for (final kind in theoryGraph.childrenOf('koerper')) {
         expect(find.text(kind.name), findsOneWidget, reason: kind.id);
       }
-      expect(find.text('Zurück zu Körper'), findsNothing);
+      expect(rueckweg('Körper'), findsNothing);
     });
 
     testWidgets('an der Wurzel gibt es keinen Rückweg im Baum', (tester) async {
@@ -488,7 +493,12 @@ void main() {
 
       await pumpTree(tester, container);
 
-      expect(find.textContaining('Zurück zu'), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Text && (w.semanticsLabel ?? '').startsWith('Zurück zu'),
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('ein zu teurer Knoten nennt den Grund statt eines Knopfes', (
@@ -530,7 +540,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Fähigkeit'), findsNothing);
-      expect(find.byIcon(Icons.auto_awesome), findsNothing);
+      // Der Funke der Rückfrage oben ist Erfahrung, kein Hinweis.
+      final inDerRueckfrage = find.descendant(
+        of: find.byType(ReviewSection),
+        matching: find.byIcon(Icons.auto_awesome),
+      );
+      expect(
+        find.byIcon(Icons.auto_awesome),
+        findsNWidgets(inDerRueckfrage.evaluate().length),
+      );
     });
 
     testWidgets('eine bestandene Seite bietet keinen Knopf mehr an', (

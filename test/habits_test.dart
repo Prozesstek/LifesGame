@@ -297,7 +297,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(HabitCheckTile),
-          matching: find.text('Wann machst du das?'),
+          matching: find.byIcon(Icons.add_alarm_outlined),
         ),
         findsOneWidget,
       );
@@ -311,7 +311,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(HabitCheckTile),
-          matching: find.text('Wann machst du das?'),
+          matching: find.byIcon(Icons.add_alarm_outlined),
         ),
       );
       await tester.pumpAndSettle();
@@ -659,15 +659,9 @@ void main() {
       await tester.tap(find.byType(HabitCheckTile).first);
       await tester.pump(const Duration(milliseconds: 300));
 
-      // „Heute" steht auch als Abschnitts-Überschrift da — gemeint ist
-      // die Zeile auf der Kachel.
-      expect(
-        find.descendant(
-          of: find.byType(HabitCheckTile),
-          matching: find.text('Heute'),
-        ),
-        findsOneWidget,
-      );
+      // Die Zahlen stehen jetzt ohne „Heute" davor, in der Farbe des
+      // Erfolgs.
+      expect(find.bySemanticsLabel(RegExp('Heute geholt')), findsOneWidget);
       expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
     });
 
@@ -755,7 +749,9 @@ void main() {
       final faktor = naechste.multiplier
           .toStringAsFixed(1)
           .replaceAll('.', ',');
-      expect(find.text('x$faktor in $noch Tagen'), findsOneWidget);
+      expect(find.text('$noch'), findsWidgets);
+      expect(find.text('x$faktor'), findsOneWidget);
+      expect(find.byIcon(Icons.update_rounded), findsOneWidget);
     });
 
     testWidgets('die Leiter und die Werte stehen nicht mehr da', (
@@ -797,7 +793,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(StreakFreezeCard), findsOneWidget);
-      expect(find.textContaining(StreakFreeze.name), findsWidgets);
+      expect(find.byIcon(Icons.ac_unit), findsWidgets);
     });
 
     testWidgets('der Knopf rettet die Kette, ohne sie zu verlängern', (

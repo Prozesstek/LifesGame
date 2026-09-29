@@ -144,6 +144,15 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         earnedXp: ertrag.xp,
         earnedGold: ertrag.gold,
         perStage: true,
+        fakten: <(IconData, String)>[
+          (Icons.stairs_outlined, '$stufe'),
+          (Icons.groups_outlined, '${welt.kills} / ${welt.totalEnemies}'),
+          (
+            welt.isTimedOut ? Icons.timer_off_outlined : Icons.timer_outlined,
+            '$sekunden s',
+          ),
+          if (neueBestzeit) (Icons.star_rounded, ''),
+        ],
         summary: gewonnen
             ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in '
                   '$sekunden s.'

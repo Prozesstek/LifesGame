@@ -84,8 +84,6 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
     final graph = ref.watch(theoryGraphProvider);
     final progress = ref.watch(theoryProgressProvider);
     final available = ref.watch(availableTheoryPointsProvider);
-    final passed = ref.watch(passedPagesProvider);
-    final total = ref.watch(totalPagesProvider);
 
     return PopScope(
       // Steht der Spieler tief im Baum, geht die Zurück-Geste eine Ebene
@@ -139,8 +137,6 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                                 ),
                               ),
                         ],
-                        passed: passed,
-                        total: total,
                         areaIndex: _current,
                         onSelectArea: _goToArea,
                         // Erst im Gebiet, das gerade offen ist, dann irgendwo.
@@ -249,8 +245,6 @@ class _Header extends StatelessWidget {
   const _Header({
     required this.area,
     required this.areas,
-    required this.passed,
-    required this.total,
     required this.areaIndex,
     required this.onSelectArea,
     required this.next,
@@ -259,8 +253,6 @@ class _Header extends StatelessWidget {
 
   final TheoryNode? area;
   final List<(TheoryNode, ({int passed, int total}))> areas;
-  final int passed;
-  final int total;
   final int areaIndex;
   final ValueChanged<int> onSelectArea;
   final TheoryNode? next;
@@ -302,7 +294,7 @@ class _Header extends StatelessWidget {
               Flexible(
                 flex: 2,
                 child: Text(
-                  '${stand.passed} von ${stand.total}',
+                  '${stand.passed} / ${stand.total}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -312,20 +304,9 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               ),
+              // „gesamt 17 von 59“ steht nicht mehr da: Die vier Balken
+              // darunter sagen es schon, je Gebiet.
               const Spacer(),
-              Flexible(
-                flex: 3,
-                child: Text(
-                  'gesamt $passed von $total',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Palette.textOnDarkDim,
-                    fontSize: 11.5,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
               const _LegendKnopf(),
             ],
           ),

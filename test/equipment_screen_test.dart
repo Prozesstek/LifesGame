@@ -77,10 +77,11 @@ void main() {
     return SaveData(loadout: loadout);
   }
 
-  /// Nur die Schrift auf den sechs Plätzen, nicht die im Raster darunter.
+  /// Ein Platz über das, was er dem Vorleser sagt — „Waffe: leer“. Zu
+  /// sehen ist dort kein Wort mehr, nur Umriss oder Bild.
   Finder aufDenPlaetzen(String text) => find.descendant(
     of: find.byType(EquipmentSlotTile),
-    matching: find.text(text),
+    matching: find.bySemanticsLabel(RegExp(RegExp.escape(text))),
   );
 
   Future<void> oeffne(WidgetTester tester, GearItem item) async {
@@ -289,7 +290,9 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       expect(
-        find.textContaining('0 von ${GearCatalog.all.length} im Besitz'),
+        find.bySemanticsLabel(
+          '0 von ${GearCatalog.all.length} Stücken im Besitz',
+        ),
         findsOneWidget,
       );
       for (final item in GearCatalog.all) {
@@ -311,7 +314,7 @@ void main() {
       // Im alphabetischen Raster gibt es keine Überschriften.
       expect(find.text(GearRarity.legendary.label), findsNothing);
 
-      await tester.tap(find.text(GearGrouping.seltenheit.label));
+      await tester.tap(find.byIcon(Icons.diamond_outlined));
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
@@ -326,7 +329,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text(GearGrouping.set.label));
+      await tester.tap(find.byIcon(Icons.link_rounded));
       await tester.pumpAndSettle();
 
       expect(find.text(GearSets.all.first.name), findsOneWidget);

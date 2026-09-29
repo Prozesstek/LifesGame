@@ -81,9 +81,18 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       // Drei gesperrte Plätze nennen ihre Stufe, statt zu fehlen.
-      expect(find.text('ab Level 3'), findsOneWidget);
-      expect(find.text('ab Level 6'), findsOneWidget);
-      expect(find.text('ab Level 10'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 6\$')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 10\$')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('ohne Waffe trägt Platz 1 trotzdem etwas', (tester) async {
@@ -119,19 +128,29 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(aufLevel(3)));
 
-      expect(find.text('ab Level 3'), findsNothing);
-      expect(find.text('ab Level 6'), findsOneWidget);
-      expect(find.text('leer'), findsOneWidget);
-      expect(find.textContaining('Ein Platz ist noch frei'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')),
+        findsNothing,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 6\$')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('auf Level 10 sind alle vier offen', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(aufLevel(10)));
 
-      expect(find.textContaining('ab Level'), findsNothing);
-      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 1));
-      expect(find.textContaining('3 Plätze sind noch frei'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('gesperrt')), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')),
+        findsNWidgets(AbilitySlots.total - 1),
+      );
     });
 
     testWidgets('ein gesperrter Platz lässt sich nicht antippen', (
@@ -140,7 +159,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('ab Level 3'));
+      await tester.tap(find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')));
       await tester.pumpAndSettle();
 
       expect(find.text('Auf welchen Platz?'), findsNothing);
@@ -153,8 +172,11 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(aufLevel(3)));
 
-      await tester.tap(find.text('leer'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')));
+      // Nicht bis zur Ruhe pumpen: Der leere Platz leuchtet dreimal auf,
+      // und bis dahin wäre der Hinweis schon wieder weg.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(
         find.textContaining('gedrückt und zieh sie hierher'),
@@ -217,14 +239,17 @@ void main() {
       await ziehe(
         tester,
         PitAbilities.funkenstoss.name,
-        find.text('leer').first,
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')).first,
       );
 
       expect(
         containerOf(tester).read(chosenAbilitiesProvider).at(0),
         PitAbilities.funkenstoss.id,
       );
-      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 2));
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')),
+        findsNWidgets(AbilitySlots.total - 2),
+      );
     });
 
     testWidgets('ein belegter Platz wird ersetzt', (tester) async {
@@ -262,7 +287,7 @@ void main() {
       await ziehe(
         tester,
         PitAbilities.funkenstoss.name,
-        find.text('leer').last,
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')).last,
       );
 
       expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
@@ -291,7 +316,7 @@ void main() {
       await ziehe(
         tester,
         PitAbilities.sternenfall.name,
-        find.text('leer').first,
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')).first,
       );
 
       expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
@@ -325,7 +350,7 @@ void main() {
 
       // Ohne jeden Fortschritt ist nichts freigeschaltet.
       expect(
-        find.textContaining(
+        find.bySemanticsLabel(
           '0 von ${AbilityCatalog.choosable.length} freigeschaltet',
         ),
         findsOneWidget,
@@ -354,7 +379,7 @@ void main() {
 
       expect(erwartet, greaterThan(0));
       expect(
-        find.textContaining(
+        find.bySemanticsLabel(
           '$erwartet von ${AbilityCatalog.choosable.length} freigeschaltet',
         ),
         findsOneWidget,
@@ -441,7 +466,10 @@ void main() {
       // Der Platz trägt jetzt ihren Namen — im Raster steht er ein
       // zweites Mal.
       expect(find.text(PitAbilities.funkenstoss.name), findsNWidgets(2));
-      expect(find.text('leer'), findsNWidgets(AbilitySlots.total - 2));
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')),
+        findsNWidgets(AbilitySlots.total - 2),
+      );
     });
 
     testWidgets('der Knopf sagt vorher, was er überschreibt', (tester) async {
@@ -488,7 +516,10 @@ void main() {
       await tester.tap(find.text('Platz räumen'));
       await tester.pumpAndSettle();
 
-      expect(find.text('leer'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')),
+        findsOneWidget,
+      );
     });
   });
 

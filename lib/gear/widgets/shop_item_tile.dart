@@ -5,6 +5,7 @@ import '../../ui/palette.dart';
 import 'copy_stats.dart';
 import 'rarity_badge.dart';
 import '../../ui/holz.dart';
+import '../../ui/gold_icon.dart';
 
 /// Ein Angebot des Tages im Laden (ADR-0048). Besessenes zeigt seit
 /// Issue #88 nur noch der Ausrüstungs-Bildschirm.
@@ -52,6 +53,9 @@ class ShopItemTile extends StatelessWidget {
 
   bool get _istVergriffen => block == PurchaseBlock.bereitsGekauft;
 
+  /// Woran man den Kaufknopf findet — er trägt kein Wort mehr.
+  static const Key kaufenKey = ValueKey<String>('laden-kaufen');
+
   @override
   Widget build(BuildContext context) {
     final item = copy.item;
@@ -96,14 +100,36 @@ class ShopItemTile extends StatelessWidget {
                     CopyStats(copy: copy, worn: vergleich),
                     if (set != null) ...<Widget>[
                       const SizedBox(height: 3),
-                      Text(
-                        'Teil von „${set.name}" · $setPieces von '
-                        '${GearSet.fullSize} getragen',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: setPieces >= GearSet.smallSize
-                              ? Palette.accent
-                              : Palette.muted,
+                      Semantics(
+                        label:
+                            'Teil von „${set.name}", $setPieces von '
+                            '${GearSet.fullSize} getragen',
+                        excludeSemantics: true,
+                        child: Row(
+                          children: <Widget>[
+                            Icon(
+                              Icons.link_rounded,
+                              size: 14,
+                              color: setPieces >= GearSet.smallSize
+                                  ? Palette.accent
+                                  : Palette.muted,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                '${set.name} · $setPieces / '
+                                '${GearSet.fullSize}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: setPieces >= GearSet.smallSize
+                                      ? Palette.accent
+                                      : Palette.muted,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -133,22 +159,54 @@ class ShopItemTile extends StatelessWidget {
               color: Palette.textDim,
             ),
           ),
+          // Warum es nicht geht, als Zeichen: Schloss mit Stufe der
+          // Grube, oder die Münze mit dem, was fehlt.
           if (block == PurchaseBlock.gesperrt) ...<Widget>[
             const SizedBox(height: 6),
-            Text(
-              'Verdient ab Stufe $requiredRung der Grube.',
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Palette.muted,
+            Semantics(
+              label: 'Verdient ab Stufe $requiredRung der Grube.',
+              excludeSemantics: true,
+              child: Row(
+                children: <Widget>[
+                  const Icon(Icons.lock, size: 14, color: Palette.muted),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.stairs_outlined,
+                    size: 14,
+                    color: Palette.muted,
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    '$requiredRung',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.muted,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
           if (block == PurchaseBlock.zuWenigGold) ...<Widget>[
             const SizedBox(height: 6),
-            Text(
-              'Noch $missingGold Gold.',
-              style: const TextStyle(fontSize: 11, color: Palette.muted),
+            Semantics(
+              label: 'Noch $missingGold Gold.',
+              excludeSemantics: true,
+              child: Row(
+                children: <Widget>[
+                  const GoldIcon(size: 13),
+                  const SizedBox(width: 3),
+                  Text(
+                    '−$missingGold',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Palette.enemy,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -159,33 +217,28 @@ class ShopItemTile extends StatelessWidget {
   /// Rechts beim Angebot: Preis und Kaufen — oder „gekauft".
   Widget _angebot() {
     if (_istVergriffen) {
-      return const Text(
-        'gekauft',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Palette.muted,
-        ),
+      return const Icon(
+        Icons.check_circle,
+        size: 22,
+        color: Palette.muted,
+        semanticLabel: 'gekauft',
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          '${copy.paid} Gold',
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Palette.gold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        FilledButton(
-          onPressed: block == null ? onBuy : null,
-          style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
-          child: const Text('Kaufen'),
-        ),
-      ],
+    // Der Knopf trägt den Preis: Münze und Zahl, sonst nichts.
+    return FilledButton(
+      key: ShopItemTile.kaufenKey,
+      onPressed: block == null ? onBuy : null,
+      style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Icon(Icons.shopping_cart_outlined, size: 16),
+          const SizedBox(width: 6),
+          const GoldIcon(size: 14),
+          const SizedBox(width: 3),
+          Text('${copy.paid}', semanticsLabel: 'Kaufen für ${copy.paid} Gold'),
+        ],
+      ),
     );
   }
 }

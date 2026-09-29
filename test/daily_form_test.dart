@@ -146,16 +146,14 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Tagesform leer'), findsOneWidget);
+    expect(find.bySemanticsLabel('Tagesform: noch nichts'), findsOneWidget);
     expect(find.byIcon(Icons.bolt), findsOneWidget);
 
     c.read(habitTrackerProvider.notifier).toggle(kraft.id, _heute);
     await tester.pump();
-    expect(find.text('Tagesform leer'), findsNothing);
-    // Alles erledigt: aus dem Blitz wird die Flamme, und statt der
-    // Liste steht ein Wort.
+    expect(find.bySemanticsLabel('Tagesform: noch nichts'), findsNothing);
+    // Alles erledigt: aus dem Blitz wird die Flamme, ganz ohne Wort.
     expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
-    expect(find.text('In Form'), findsOneWidget);
 
     // Ein Tipp zeigt, was sie bringt.
     await tester.tap(find.byType(TagesformKreis));

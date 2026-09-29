@@ -191,6 +191,10 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      // Der Knopf ist schmaler geworden (nur noch Zeichen und Zahl);
+      // ganz ins Bild holen, sonst trifft der Tipp unter den Rand.
+      await tester.ensureVisible(find.byIcon(Icons.playlist_add));
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.playlist_add));
       await tester.pumpAndSettle();
 
@@ -227,7 +231,12 @@ void main() {
       await tester.tap(find.text(kind.name));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Zurück zu'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Text && (w.semanticsLabel ?? '').startsWith('Zurück zu'),
+        ),
+        findsOneWidget,
+      );
 
       for (var i = 0; i < _scrollSchritte; i++) {
         await tester.drag(find.byType(Scaffold), const Offset(0, -400));
@@ -242,7 +251,8 @@ void main() {
     ) async {
       // Der Gegenfall zu oben: `mitInhalt` steht auf hohem Level, dort
       // sind alle Fähigkeitsslots offen und sagen kurz „leer". Gesperrt
-      // sagen sie „ab Level 10" — die breiteste Beschriftung, die in die
+      // tragen sie ihr Level als Abzeichen — früher „ab Level 10", die
+      // breiteste Beschriftung, die in die
       // schmalste Kachel muss. Vier Slots auf 390 Pixeln ist die engste
       // Stelle des Bildschirms.
       //
@@ -265,13 +275,13 @@ void main() {
       // nicht gebaut wird, kann auch nicht überlaufen. Ohne den Scroll
       // prüfte dieser Test nichts (`test/test_view.dart`).
       await tester.dragUntilVisible(
-        find.text('ab Level 10'),
+        find.bySemanticsLabel(RegExp('ab Level 10')),
         find.byType(ListView),
         const Offset(0, -80),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('ab Level 10'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('ab Level 10')), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -75,7 +75,7 @@ void main() {
       // Seit dem 28.09. (Issue #88): abgeholt wird, wo man abhakt.
       await zeige(tester, container(beideErledigt()), const HomeScreen());
       expect(find.byType(DailyQuestsCard), findsOneWidget);
-      expect(find.text('Tagesaufgaben'), findsOneWidget);
+      expect(find.bySemanticsLabel('Tagesaufgaben'), findsOneWidget);
 
       await zeige(tester, container(beideErledigt()), const HabitsScreen());
       expect(find.byType(DailyQuestsCard), findsNothing);
@@ -90,7 +90,7 @@ void main() {
 
     final knopf = find.descendant(
       of: find.byType(DailyQuestsCard),
-      matching: find.text('Abholen'),
+      matching: find.byKey(DailyQuestsCard.abholenKey),
     );
     expect(knopf, findsNWidgets(abholbar));
 
@@ -102,7 +102,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(DailyQuestsCard),
-        matching: find.text('Abgeholt'),
+        matching: find.byIcon(Icons.check_circle),
       ),
       findsOneWidget,
     );
@@ -116,7 +116,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(DailyQuestsCard),
-        matching: find.text('Abholen'),
+        matching: find.byKey(DailyQuestsCard.abholenKey),
       ),
       findsNothing,
     );

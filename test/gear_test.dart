@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/character/widgets/set_card.dart';
+import 'package:lifes_game/habits/stat_icon.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
@@ -299,7 +301,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sets'), findsNothing);
+      expect(find.byType(SetCard), findsNothing);
     });
 
     testWidgets('ein einzelnes Teil steht da, wirkt aber noch nicht', (
@@ -313,10 +315,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sets'), findsOneWidget);
+      expect(find.byType(SetCard), findsOneWidget);
       expect(find.text('1 / ${GearSet.fullSize}'), findsOneWidget);
       expect(
-        find.textContaining('Noch ein Teil bis zur nächsten Stufe'),
+        find.bySemanticsLabel('Noch 1 bis zur nächsten Stufe'),
         findsOneWidget,
       );
     });
@@ -349,8 +351,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Als Zeichen, nicht als Wort.
       for (final stat in HabitStat.values) {
-        expect(find.text(stat.label), findsOneWidget, reason: stat.label);
+        expect(
+          find.byIcon(StatIcons.of(stat)),
+          findsWidgets,
+          reason: stat.label,
+        );
       }
     });
 
@@ -363,13 +370,17 @@ void main() {
       await tester.pumpAndSettle();
 
       for (final slot in GearSlot.values) {
-        expect(find.text(slot.label), findsOneWidget, reason: slot.label);
+        expect(
+          find.bySemanticsLabel(RegExp('^${slot.label}:')),
+          findsOneWidget,
+          reason: slot.label,
+        );
       }
       // Ohne einen einzigen Kauf sagt jede Kachel, *warum* sie leer ist.
       // „leer" heißt gekauft, aber nicht angelegt -- das ist ein anderer
       // Zustand und steht seit dem Umbau aufs Raster auch anders da.
       expect(
-        find.text('nichts gekauft'),
+        find.bySemanticsLabel(RegExp('nichts gekauft')),
         findsNWidgets(GearSlot.values.length),
       );
       expect(find.text('leer'), findsNothing);
@@ -380,8 +391,8 @@ void main() {
       await tester.pumpWidget(appMit(mitGold(), const CharacterScreen()));
       await tester.pumpAndSettle();
 
-      // Ohne Ausrüstung kommt jeder Wert aus dem Alltag.
-      expect(find.text('Alltag'), findsNWidgets(HabitStat.values.length));
+      // Ohne Ausrüstung kommt jeder Wert aus dem Alltag: kein Rucksack.
+      expect(find.byIcon(Icons.backpack_outlined), findsNothing);
 
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CharacterScreen)),
@@ -392,7 +403,8 @@ void main() {
       // Die Zahl kommt aus dem Katalog, nicht aus diesem Test — sonst
       // fällt er bei jeder Preisrunde um, ohne dass etwas kaputt ist.
       final bonus = GearCatalog.byId(klinge)!.bonus.scaled.attack;
-      expect(find.textContaining('+$bonus Ausrüstung'), findsOneWidget);
+      expect(find.text('+$bonus'), findsWidgets);
+      expect(find.byIcon(Icons.backpack_outlined), findsOneWidget);
     });
   });
 }

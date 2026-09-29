@@ -86,21 +86,14 @@ class _Gross extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          titel,
+                          '${woche.activeDays} / 7',
+                          semanticsLabel:
+                              '$titel: ${woche.activeDays} von 7 Tagen, '
+                              '${weekVerdict(woche)}',
                           style: const TextStyle(
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                             color: Palette.text,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${woche.activeDays} von 7 Tagen · '
-                          '${weekVerdict(woche)}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Palette.textDim,
                           ),
                         ),
                       ],
@@ -134,8 +127,10 @@ class _Zeile extends StatelessWidget {
           color: Palette.textOnDarkDim,
         ),
         label: Text(
-          'Diese Woche: ${woche.activeDays} / 7 Tage · Rückblick',
-          style: const TextStyle(fontSize: 12, color: Palette.textOnDarkDim),
+          '${woche.activeDays} / 7',
+          semanticsLabel:
+              'Diese Woche: ${woche.activeDays} von 7 Tagen, Rückblick',
+          style: const TextStyle(fontSize: 13, color: Palette.textOnDarkDim),
         ),
       ),
     );

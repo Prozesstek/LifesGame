@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
+import '../stat_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 
@@ -48,14 +49,7 @@ class HabitTemplateTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${template.stat.label} · ${template.stat.combatLabel}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.accent,
-                  ),
-                ),
+                StatIcon(template.stat, size: 16),
               ],
             ),
           ),

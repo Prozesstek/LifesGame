@@ -52,7 +52,7 @@ void main() {
     testWidgets('nennt den Gegner und die Rundenzahl', (tester) async {
       await pumpDialog(tester, won: true, rounds: 12, enemyName: 'Söldner');
 
-      expect(find.text('Gewonnen'), findsOneWidget);
+      expect(find.bySemanticsLabel('Gewonnen'), findsOneWidget);
       expect(find.textContaining('Söldner'), findsOneWidget);
       expect(find.textContaining('12'), findsOneWidget);
     });
@@ -60,7 +60,7 @@ void main() {
     testWidgets('lässt sich nur über OK schließen', (tester) async {
       await pumpDialog(tester, won: true);
 
-      expect(find.text('OK'), findsOneWidget);
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
     });
   });
 
@@ -68,8 +68,8 @@ void main() {
     testWidgets('sagt es ebenso deutlich', (tester) async {
       await pumpDialog(tester, won: false, rounds: 7);
 
-      expect(find.text('Verloren'), findsOneWidget);
-      expect(find.text('Gewonnen'), findsNothing);
+      expect(find.bySemanticsLabel('Verloren'), findsOneWidget);
+      expect(find.bySemanticsLabel('Gewonnen'), findsNothing);
       expect(find.textContaining('7'), findsOneWidget);
     });
 
@@ -87,8 +87,8 @@ void main() {
     testWidgets('der erste Sieg nennt Erfahrung und Gold', (tester) async {
       await pumpDialog(tester, won: true, earnedXp: 35, earnedGold: 14);
 
-      expect(find.textContaining('+35 Erfahrung'), findsOneWidget);
-      expect(find.textContaining('+14 Gold'), findsOneWidget);
+      expect(find.text('+35'), findsOneWidget);
+      expect(find.text('+14'), findsOneWidget);
     });
 
     testWidgets('ein zweiter Sieg gegen denselben Gegner nennt keine', (
@@ -104,7 +104,7 @@ void main() {
         isFalse,
         reason: 'Ein wiederholter Sieg verspricht eine Belohnung.',
       );
-      expect(find.textContaining('Den hattest du schon'), findsOneWidget);
+      expect(find.byTooltip(RegExp('Den hattest du schon')), findsOneWidget);
     });
 
     testWidgets('eine Niederlage erst recht nicht', (tester) async {
@@ -124,7 +124,7 @@ void main() {
     ) async {
       await pumpDialog(tester, won: true, earnedXp: 35, earnedGold: 14);
 
-      expect(find.textContaining('Gewohnheiten'), findsOneWidget);
+      expect(find.byTooltip(RegExp('Gewohnheiten')), findsOneWidget);
     });
   });
 }

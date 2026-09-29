@@ -21,6 +21,9 @@ class DailyQuestsCard extends StatelessWidget {
     super.key,
   });
 
+  /// Woran man den Knopf zum Abholen findet — er trägt kein Wort mehr.
+  static const Key abholenKey = ValueKey<String>('quest-abholen');
+
   final List<DailyQuest> quests;
   final bool Function(DailyQuest quest) isClaimed;
   final void Function(DailyQuest quest) onClaim;
@@ -36,16 +39,13 @@ class DailyQuestsCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Expanded(
-                child: Text(
-                  'Tagesaufgaben',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
+              const Icon(
+                Icons.flag_rounded,
+                size: 22,
+                color: Palette.text,
+                semanticLabel: 'Tagesaufgaben',
               ),
+              const Spacer(),
               Text(
                 '$fertig / ${quests.length}',
                 style: const TextStyle(
@@ -74,7 +74,7 @@ class DailyQuestsCard extends StatelessWidget {
 /// Ein kleiner Knopf statt der Holzplanke: Die Planke ist für ganze
 /// Zeilen gebaut und drückte in einer Aufgabenzeile den Text weg.
 class _AbholenKnopf extends StatelessWidget {
-  const _AbholenKnopf({required this.onTap});
+  const _AbholenKnopf({required this.onTap, super.key});
 
   final VoidCallback onTap;
 
@@ -91,23 +91,23 @@ class _AbholenKnopf extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(8),
             child: const Padding(
-              padding: EdgeInsets.fromLTRB(8, 6, 10, 6),
+              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  PixelArt(
-                    assetPath: GearIcons.schluessel,
-                    side: 18,
-                    fallback: Icon(Icons.key, size: 16, color: Palette.surface),
-                  ),
-                  SizedBox(width: 4),
                   Text(
-                    'Abholen',
+                    '+1',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Palette.surface,
                     ),
+                  ),
+                  SizedBox(width: 3),
+                  PixelArt(
+                    assetPath: GearIcons.schluessel,
+                    side: 20,
+                    fallback: Icon(Icons.key, size: 16, color: Palette.surface),
                   ),
                 ],
               ),
@@ -137,62 +137,77 @@ class _Zeile extends StatelessWidget {
         ? 0.0
         : (quest.progress / quest.target).clamp(0.0, 1.0);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            claimed ? Icons.check_circle : Icons.flag_outlined,
-            size: 20,
-            color: claimed ? Palette.success : Palette.accent,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  quest.text,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: claimed ? Palette.textDim : Palette.text,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (!claimed) ...<Widget>[
-                  const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: LinearProgressIndicator(
-                      value: anteil,
-                      minHeight: 5,
-                      backgroundColor: Palette.surfaceRaised,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Palette.accent,
-                      ),
+    final name = quest.habitName;
+
+    // Die Aufgabe steht als Zeichen da; der Satz dazu kommt auf Tipp.
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message: quest.text,
+      excludeFromSemantics: true,
+      child: Semantics(
+        label: quest.text,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                claimed ? Icons.check_circle : _zeichen(quest.kind),
+                size: 20,
+                color: claimed ? Palette.success : Palette.accent,
+              ),
+              const SizedBox(width: 10),
+              if (name != null) ...<Widget>[
+                Flexible(
+                  flex: 2,
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: claimed ? Palette.textDim : Palette.text,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 8),
               ],
-            ),
+              Expanded(
+                flex: 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: claimed ? 1 : anteil,
+                    minHeight: 6,
+                    backgroundColor: Palette.surfaceRaised,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      claimed ? Palette.success : Palette.accent,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (claimed)
+                const SizedBox.shrink()
+              else if (quest.isDone)
+                _AbholenKnopf(key: DailyQuestsCard.abholenKey, onTap: onClaim)
+              else
+                Text(
+                  '${quest.progress} / ${quest.target}',
+                  style: const TextStyle(fontSize: 12, color: Palette.textDim),
+                ),
+            ],
           ),
-          const SizedBox(width: 8),
-          if (claimed)
-            const Text(
-              'Abgeholt',
-              style: TextStyle(fontSize: 12, color: Palette.muted),
-            )
-          else if (quest.isDone)
-            _AbholenKnopf(onTap: onClaim)
-          else
-            Text(
-              '${quest.progress} / ${quest.target}',
-              style: const TextStyle(fontSize: 12, color: Palette.textDim),
-            ),
-        ],
+        ),
       ),
     );
   }
+
+  static IconData _zeichen(QuestKind kind) => switch (kind) {
+    QuestKind.zweiHaekchen => Icons.check_circle_outline,
+    QuestKind.dreiHaekchen => Icons.check_circle_outline,
+    QuestKind.alles => Icons.done_all_rounded,
+    QuestKind.liegengeblieben => Icons.history_rounded,
+    QuestKind.rueckfrage => Icons.quiz_outlined,
+  };
 }

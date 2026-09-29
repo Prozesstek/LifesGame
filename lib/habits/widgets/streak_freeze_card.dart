@@ -36,52 +36,45 @@ class StreakFreezeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      color: Palette.surfaceRaised,
-      edgeColor: Palette.accent,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              const Icon(Icons.ac_unit, size: 16, color: Palette.accent),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  'Gestern fehlt etwas',
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _satz,
-            style: const TextStyle(
-              fontSize: 11,
-              height: 1.35,
-              color: Palette.textDim,
+    // Ohne Satz: gerissene Kette mit Länge, daneben das Eis mit Vorrat.
+    // Was es tut, sagt ein Tipp auf die Karte.
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message: _satz,
+      child: HolzKarte(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+        color: Palette.surfaceRaised,
+        edgeColor: Palette.accent,
+        child: Row(
+          children: <Widget>[
+            const Icon(Icons.link_off_rounded, size: 22, color: Palette.enemy),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.local_fire_department,
+              size: 18,
+              color: Palette.gold,
             ),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
+            Text(
+              '$streakAtRisk',
+              semanticsLabel: 'Kette von $streakAtRisk Tagen gerissen',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Palette.text,
+              ),
+            ),
+            const Spacer(),
+            FilledButton.icon(
               onPressed: onUse,
-              icon: const Icon(Icons.ac_unit, size: 16),
+              icon: const Icon(Icons.ac_unit, size: 18),
               label: Text(
-                '${StreakFreeze.name} einsetzen · $freezesLeft übrig',
-                overflow: TextOverflow.ellipsis,
+                '×$freezesLeft',
+                semanticsLabel:
+                    '${StreakFreeze.name} einsetzen, $freezesLeft übrig',
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

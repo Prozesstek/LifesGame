@@ -27,7 +27,12 @@ enum GearGrouping {
 /// eine Gruppe gibt und eine Überschrift darüber nichts sagt.
 /// [rarity] ist nur bei der Gruppierung nach Seltenheit gesetzt: Die
 /// Überschrift steht dann als Marke da, in derselben Farbe wie im Laden.
-typedef GearGroup = ({String? title, GearRarity? rarity, List<GearItem> items});
+typedef GearGroup = ({
+  String? title,
+  GearRarity? rarity,
+  GearSlot? slot,
+  List<GearItem> items,
+});
 
 /// Ordnet [items] nach [grouping]. Leere Gruppen fallen weg.
 ///
@@ -39,13 +44,14 @@ List<GearGroup> groupGear(
 }) {
   final groups = switch (grouping) {
     GearGrouping.alphabetisch => <GearGroup>[
-      (title: null, rarity: null, items: _sorted(items, _byName)),
+      (title: null, rarity: null, slot: null, items: _sorted(items, _byName)),
     ],
     GearGrouping.platz => <GearGroup>[
       for (final slot in GearSlot.values)
         (
           title: slot.label,
           rarity: null,
+          slot: slot,
           items: _sorted(
             items.where((i) => i.slot == slot),
             _byRarityThenPrice,
@@ -57,6 +63,7 @@ List<GearGroup> groupGear(
         (
           title: rarity.label,
           rarity: rarity,
+          slot: null,
           items: _sorted(
             items.where((i) => i.rarity == rarity),
             _bySlotThenName,
@@ -68,6 +75,7 @@ List<GearGroup> groupGear(
         (
           title: set.name,
           rarity: null,
+          slot: null,
           items: _sorted(
             items.where((i) => i.setId == set.id),
             _bySlotThenName,
@@ -76,6 +84,7 @@ List<GearGroup> groupGear(
       (
         title: 'Ohne Set',
         rarity: null,
+        slot: null,
         items: _sorted(items.where((i) => i.setId == null), _bySlotThenName),
       ),
     ],

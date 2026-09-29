@@ -60,6 +60,8 @@ class EquipmentSlotTile extends StatelessWidget {
       label: hasAny || !isEmpty
           ? '${slot.label}: ${item?.name ?? 'leer'}'
           : '${slot.label}: nichts gekauft',
+      onTap: onTap,
+      excludeSemantics: true,
       child: Druck(
         child: Material(
           color: dragState == SlotDragState.darueber
@@ -76,37 +78,34 @@ class EquipmentSlotTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: rand, width: randBreite),
               ),
+              // **Ohne Beschriftung.** Leer steht der Umriss des Platzes
+              // da, belegt das Bild mit seinem Namen. „Helm“ und „nichts
+              // gekauft“ sagt der Umriss selbst.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   _Zeichen(
                     slot: slot,
                     item: item,
-                    color: isEmpty ? Palette.muted : Palette.accent,
-                    side: _bildSeite,
+                    color: isEmpty
+                        ? (hasAny ? Palette.textDim : Palette.muted)
+                        : Palette.accent,
+                    side: isEmpty ? _bildSeite + 8 : _bildSeite + 4,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    slot.label,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Palette.textDim,
+                  if (item != null) ...<Widget>[
+                    const SizedBox(height: 6),
+                    Text(
+                      item.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Palette.text,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item?.name ?? (hasAny ? 'leer' : 'nichts gekauft'),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: isEmpty ? FontWeight.normal : FontWeight.bold,
-                      color: isEmpty ? Palette.muted : Palette.text,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -115,7 +114,11 @@ class EquipmentSlotTile extends StatelessWidget {
       ),
     );
 
-    return PlatzBeimZiehen(zustand: dragState, child: kachel);
+    // Leer, aber etwas da, das passt: Der Platz leuchtet auf.
+    return PlatzBeimZiehen(
+      zustand: dragState,
+      child: PlatzLaedtEin(aktiv: isEmpty && hasAny, child: kachel),
+    );
   }
 }
 

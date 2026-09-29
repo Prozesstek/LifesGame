@@ -19,6 +19,7 @@ import 'shop_screen.dart';
 import 'widgets/character_figure.dart';
 import 'widgets/gear_sheet.dart';
 import 'widgets/rarity_badge.dart';
+import '../ui/gold_icon.dart';
 
 /// Der Ausrüstungs-Bildschirm: sechs Plätze oben, der ganze Katalog
 /// darunter (ADR-0057).
@@ -164,19 +165,6 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const _SectionTitle('Deine sechs Plätze'),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${loadout.equippedCount} von '
-                    '${GearSlot.values.length} Plätzen belegt. Antippen '
-                    'zeigt die Werte. Zum Wechseln ein Stück unten gedrückt '
-                    'halten und auf seinen Platz ziehen.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textOnDarkDim,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   _Anziehpuppe(
                     links: _linkeSeite,
                     rechts: _rechteSeite,
@@ -202,9 +190,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                   // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
                   // „keine Sets" sagt, ist eine Zeile über nichts.
                   if (loadout.wearsAnySetPiece) ...<Widget>[
-                    const SizedBox(height: 18),
-                    const _SectionTitle('Sets'),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     SetCard(loadout: loadout),
                   ],
                   // **Aus dem Laden hierher** (Issue #88): Seit der Laden
@@ -219,27 +205,51 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                         Icons.cleaning_services_outlined,
                         size: 18,
                       ),
-                      label: Text(
-                        'Alles Schlechtere verkaufen · ${ausschuss.length} '
-                        'Stück, +${junkRefund(ausschuss)} Gold',
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            '×${ausschuss.length}',
+                            semanticsLabel:
+                                'Alles Schlechtere verkaufen, '
+                                '${ausschuss.length} Stück, '
+                                '${junkRefund(ausschuss)} Gold',
+                          ),
+                          const SizedBox(width: 10),
+                          const GoldIcon(size: 16),
+                          const SizedBox(width: 3),
+                          Text('+${junkRefund(ausschuss)}', semanticsLabel: ''),
+                        ],
                       ),
                     ),
                   ],
                   const SizedBox(height: 20),
-                  const _SectionTitle('Alle Stücke'),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${besessen.length} von ${GearCatalog.all.length} im '
-                    'Besitz. Antippen zeigt alle Werte, auch bei den grauen.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textOnDarkDim,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _Gruppenwahl(
-                    aktiv: _gruppierung,
-                    onWaehle: (g) => setState(() => _gruppierung = g),
+                  // Wie viel man hat, und wie geordnet wird — ohne Worte.
+                  Row(
+                    children: <Widget>[
+                      const Icon(
+                        Icons.backpack_outlined,
+                        size: 20,
+                        color: Palette.textOnDark,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${besessen.length} / ${GearCatalog.all.length}',
+                        semanticsLabel:
+                            '${besessen.length} von '
+                            '${GearCatalog.all.length} Stücken im Besitz',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.textOnDark,
+                        ),
+                      ),
+                      const Spacer(),
+                      _Gruppenwahl(
+                        aktiv: _gruppierung,
+                        onWaehle: (g) => setState(() => _gruppierung = g),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   for (final gruppe in groupGear(_gruppierung))
@@ -250,14 +260,16 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                       rung: rung,
                     ),
                   const SizedBox(height: 4),
-                  FilledButton.icon(
+                  FilledButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const ShopScreen(),
                       ),
                     ),
-                    icon: const Icon(Icons.storefront_outlined),
-                    label: const Text('Zum Laden'),
+                    child: const Icon(
+                      Icons.storefront_outlined,
+                      semanticLabel: 'Zum Laden',
+                    ),
                   ),
                 ],
               ),
@@ -278,7 +290,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   }) {
     final zaehler =
         '${gruppe.items.where((i) => besessen.contains(i.id)).length} '
-        'von ${gruppe.items.length}';
+        '/ ${gruppe.items.length}';
 
     return <Widget>[
       if (gruppe.title case final String titel)
@@ -288,6 +300,13 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
             children: <Widget>[
               if (gruppe.rarity case final GearRarity stufe)
                 RarityBadge(rarity: stufe)
+              else if (gruppe.slot case final GearSlot platz)
+                Icon(
+                  GearIcons.fallbackFor(platz),
+                  size: 20,
+                  color: Palette.textOnDark,
+                  semanticLabel: titel,
+                )
               else
                 Flexible(
                   child: Text(
@@ -451,29 +470,41 @@ class _Gruppenwahl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 6,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         for (final g in GearGrouping.values)
-          Druck(
-            child: ChoiceChip(
-              label: Text(g.label),
-              selected: g == aktiv,
-              onSelected: (_) => onWaehle(g),
-              selectedColor: Palette.accentOnDark,
-              backgroundColor: Palette.surface,
-              labelStyle: TextStyle(
-                fontSize: 12,
-                fontWeight: g == aktiv ? FontWeight.bold : FontWeight.normal,
-                color: Palette.text,
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Druck(
+              child: ChoiceChip(
+                label: Icon(
+                  _zeichen(g),
+                  size: 18,
+                  color: Palette.text,
+                  semanticLabel: g.label,
+                ),
+                labelPadding: EdgeInsets.zero,
+                padding: const EdgeInsets.all(6),
+                selected: g == aktiv,
+                onSelected: (_) => onWaehle(g),
+                selectedColor: Palette.accentOnDark,
+                backgroundColor: Palette.surface,
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
               ),
-              showCheckmark: false,
             ),
           ),
       ],
     );
   }
+
+  static IconData _zeichen(GearGrouping g) => switch (g) {
+    GearGrouping.alphabetisch => Icons.sort_by_alpha_rounded,
+    GearGrouping.platz => Icons.accessibility_new_rounded,
+    GearGrouping.seltenheit => Icons.diamond_outlined,
+    GearGrouping.set => Icons.link_rounded,
+  };
 }
 
 /// Ein Stück im Raster.
@@ -629,24 +660,6 @@ class _Kachel extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.bold,
-        color: Palette.textOnDark,
       ),
     );
   }

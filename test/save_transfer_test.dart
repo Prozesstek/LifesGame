@@ -104,7 +104,7 @@ void main() {
       final stand = mitHaekchen(2);
       await karte(tester, stand);
 
-      await tester.tap(find.text('Kopieren'));
+      await tester.tap(find.bySemanticsLabel('Kopieren'));
       await tester.pump();
 
       expect(zwischenablage, stand.encode());
@@ -115,7 +115,7 @@ void main() {
       final neu = mitHaekchen(5);
       final eingefuegt = await karte(tester, alt);
 
-      await tester.tap(find.text('Einfügen'));
+      await tester.tap(find.bySemanticsLabel('Einfügen'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), neu.encode());
       await tester.tap(find.text('Weiter'));
@@ -138,7 +138,7 @@ void main() {
     testWidgets('Unsinn wird abgewiesen und ersetzt nichts', (tester) async {
       final eingefuegt = await karte(tester, mitHaekchen(1));
 
-      await tester.tap(find.text('Einfügen'));
+      await tester.tap(find.bySemanticsLabel('Einfügen'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'nicht mein Stand');
       await tester.tap(find.text('Weiter'));
@@ -154,7 +154,7 @@ void main() {
     testWidgets('Abbrechen beim Nachfragen ersetzt nichts', (tester) async {
       final eingefuegt = await karte(tester, mitHaekchen(1));
 
-      await tester.tap(find.text('Einfügen'));
+      await tester.tap(find.bySemanticsLabel('Einfügen'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), mitHaekchen(4).encode());
       await tester.tap(find.text('Weiter'));

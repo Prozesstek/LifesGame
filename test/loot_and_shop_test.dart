@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/gear/widgets/shop_item_tile.dart';
 import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/copy_text.dart';
@@ -301,7 +302,7 @@ void main() {
         expect(zelle.isOutOfReach, isTrue);
       }
       final kaufen = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Kaufen'),
+        find.byKey(ShopItemTile.kaufenKey),
       );
       expect(kaufen.onPressed, isNull);
     });
@@ -315,7 +316,7 @@ void main() {
         tester.element(find.byType(ShopScreen)),
       );
       final angebot = container.read(dailyOffersProvider).first;
-      await tester.tap(find.widgetWithText(FilledButton, 'Kaufen'));
+      await tester.tap(find.byKey(ShopItemTile.kaufenKey));
       await tester.pumpAndSettle();
       while (find
           .widgetWithText(FilledButton, 'Weiter')
@@ -326,7 +327,7 @@ void main() {
       }
 
       expect(container.read(loadoutProvider).owns(angebot.uid), isTrue);
-      expect(find.text('gekauft'), findsWidgets);
+      expect(find.byIcon(Icons.check_circle), findsWidgets);
     });
 
     testWidgets('der Laden hat kein Inventar mehr', (tester) async {
@@ -375,7 +376,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.textContaining('Alles Schlechtere verkaufen'));
+      await tester.tap(find.byIcon(Icons.cleaning_services_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
       await tester.pumpAndSettle();
@@ -385,7 +386,7 @@ void main() {
       );
       expect(container.read(loadoutProvider).owns('w'), isFalse);
       expect(container.read(loadoutProvider).owns('s'), isTrue);
-      expect(find.textContaining('Alles Schlechtere'), findsNothing);
+      expect(find.byIcon(Icons.cleaning_services_outlined), findsNothing);
     });
   });
 }

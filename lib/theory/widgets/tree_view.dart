@@ -318,7 +318,8 @@ class _ParentStrip extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Zurück zu ${node.name}',
+                    node.name,
+                    semanticsLabel: 'Zurück zu ${node.name}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

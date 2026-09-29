@@ -66,7 +66,7 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
       await tester.pumpAndSettle();
 
-      expect(find.text('0 Ruhm'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('0 Ruhm')), findsWidgets);
       expect(find.text('0 / 27'), findsOneWidget);
     });
   });
@@ -159,8 +159,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Errungenschaften'), findsOneWidget);
-      expect(find.textContaining('von 27'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Errungenschaften:')),
+        findsOneWidget,
+      );
+      expect(find.textContaining(' / 27'), findsOneWidget);
 
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();

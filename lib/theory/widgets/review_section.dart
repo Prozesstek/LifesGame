@@ -9,6 +9,7 @@ import '../../ui/palette.dart';
 import '../review_controller.dart';
 import '../review_flow.dart';
 import 'review_card.dart';
+import '../../ui/gold_icon.dart';
 
 /// Die Rückfrage des Tages oben in der Theorie (Issue #88).
 ///
@@ -90,36 +91,59 @@ class _Zeile extends StatelessWidget {
       false => 'Rückfrage des Tages: daneben$wann',
     };
     final farbe = offen ? Palette.accentOnDark : Palette.textOnDarkDim;
+    final stil = TextStyle(
+      fontSize: 12,
+      fontWeight: offen ? FontWeight.bold : FontWeight.normal,
+      color: farbe,
+    );
 
-    return Druck(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                richtig == true ? Icons.check_circle : Icons.menu_book,
-                size: 16,
-                color: richtig == true ? Palette.successOnDark : farbe,
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: offen ? FontWeight.bold : FontWeight.normal,
-                    color: farbe,
-                  ),
+    // Ohne Satz: Offen zeigt sie, was sie bringt; beantwortet, ob es
+    // saß und wann sie wiederkommt. Der Satz bleibt für den Vorleser.
+    final inhalt = <Widget>[
+      if (offen) ...<Widget>[
+        Icon(Icons.auto_awesome, size: 13, color: farbe),
+        const SizedBox(width: 2),
+        Text('+${TheoryRewards.xpForReview}', style: stil),
+        const SizedBox(width: 8),
+        const GoldIcon(size: 13),
+        const SizedBox(width: 2),
+        Text('+${TheoryRewards.goldForReview}', style: stil),
+      ] else ...<Widget>[
+        if (tage case final int t) ...<Widget>[
+          Icon(Icons.update_rounded, size: 14, color: farbe),
+          const SizedBox(width: 2),
+          Text('$t', style: stil),
+        ],
+      ],
+    ];
+
+    return Semantics(
+      button: true,
+      label: text,
+      excludeSemantics: true,
+      child: Druck(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  switch (richtig) {
+                    null => Icons.quiz_outlined,
+                    true => Icons.check_circle,
+                    false => Icons.cancel_outlined,
+                  },
+                  size: 18,
+                  color: richtig == true ? Palette.successOnDark : farbe,
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(Icons.expand_more, size: 16, color: farbe),
-            ],
+                const SizedBox(width: 8),
+                ...inhalt,
+                const SizedBox(width: 4),
+                Icon(Icons.expand_more, size: 16, color: farbe),
+              ],
+            ),
           ),
         ),
       ),
