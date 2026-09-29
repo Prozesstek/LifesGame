@@ -57,14 +57,14 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       expect(find.text('Namenlos'), findsOneWidget);
-      expect(find.text('Name geben'), findsOneWidget);
+      expect(find.bySemanticsLabel('Name geben'), findsOneWidget);
     });
 
     testWidgets('eingeben und der Bildschirm zeigt ihn', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('Name geben'));
+      await tester.tap(find.bySemanticsLabel('Name geben'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'Frederik');
@@ -74,14 +74,14 @@ void main() {
       expect(find.text('Frederik'), findsOneWidget);
       expect(find.text('Namenlos'), findsNothing);
       // Aus „Name geben" wird „Name ändern", sobald einer da ist.
-      expect(find.text('Name ändern'), findsOneWidget);
+      expect(find.bySemanticsLabel('Name ändern'), findsOneWidget);
     });
 
     testWidgets('Abbrechen ändert nichts', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('Name geben'));
+      await tester.tap(find.bySemanticsLabel('Name geben'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'Wirdverworfen');
@@ -98,7 +98,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('Titel'));
+      await tester.tap(find.byIcon(Icons.military_tech_outlined));
       await tester.pumpAndSettle();
 
       // Gesperrte Titel bleiben sichtbar und nennen ihre Bedingung.
@@ -110,7 +110,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.text('Titel'));
+      await tester.tap(find.byIcon(Icons.military_tech_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.text('der Entschlossene'));
       await tester.pumpAndSettle();
@@ -123,13 +123,13 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitStreak(3)));
 
-      await tester.tap(find.text('Name geben'));
+      await tester.tap(find.bySemanticsLabel('Name geben'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Brett');
       await tester.tap(find.text('Übernehmen'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Titel'));
+      await tester.tap(find.byIcon(Icons.military_tech_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.text('der Entschlossene'));
       await tester.pumpAndSettle();
@@ -142,13 +142,13 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitStreak(3)));
 
-      await tester.tap(find.text('Titel'));
+      await tester.tap(find.byIcon(Icons.military_tech_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.text('der Entschlossene'));
       await tester.pumpAndSettle();
       expect(find.textContaining('der Entschlossene'), findsOneWidget);
 
-      await tester.tap(find.text('Titel'));
+      await tester.tap(find.byIcon(Icons.military_tech_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Kein Titel'));
       await tester.pumpAndSettle();
@@ -164,9 +164,8 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      expect(find.text('Beständigkeit'), findsOneWidget);
       expect(
-        find.text('Noch kein Häkchen. Der erste Tag ist der ganze Trick.'),
+        find.byTooltip('Noch kein Häkchen. Der erste Tag ist der ganze Trick.'),
         findsOneWidget,
       );
     });
@@ -186,8 +185,8 @@ void main() {
       );
 
       expect(find.text('5'), findsWidgets);
-      expect(find.text('Tage am Stück'), findsOneWidget);
-      expect(find.text('So beständig warst du noch nie.'), findsOneWidget);
+      expect(find.byIcon(Icons.local_fire_department_rounded), findsOneWidget);
+      expect(find.byTooltip('So beständig warst du noch nie.'), findsOneWidget);
     });
 
     testWidgets('eine gerissene Kette liest sich nicht wie ein Verlust', (
@@ -211,13 +210,13 @@ void main() {
       );
 
       expect(
-        find.text(
+        find.byTooltip(
           'Die Kette ruht gerade. Der Bestwert bleibt — verpasste Tage '
           'nehmen nichts weg.',
         ),
         findsOneWidget,
       );
-      expect(find.text('Bestwert'), findsOneWidget);
+      expect(find.byIcon(Icons.star_outline_rounded), findsOneWidget);
     });
 
     testWidgets('der Abstand zum Bestwert wird genannt', (tester) async {
@@ -244,7 +243,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Noch 2 Tage bis zum Bestwert.'), findsOneWidget);
+      expect(find.byTooltip('Noch 2 Tage bis zum Bestwert.'), findsOneWidget);
     });
   });
 
@@ -267,10 +266,7 @@ void main() {
       // Die Zahlen kommen aus package:progression -- der Bildschirm rechnet
       // sie nicht nach, er zeigt sie nur.
       expect(
-        find.text(
-          '${level.xpIntoLevel} / ${level.xpForLevel} bis Level '
-          '${level.level + 1}',
-        ),
+        find.text('${level.xpIntoLevel} / ${level.xpForLevel}'),
         findsOneWidget,
       );
       expect(find.byType(HolzBalken), findsOneWidget);
@@ -307,11 +303,11 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       await tester.scrollUntilVisible(
-        find.text('Zu den Fähigkeiten'),
+        find.bySemanticsLabel('Zu den Fähigkeiten'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.text('Zu den Fähigkeiten'));
+      await tester.tap(find.bySemanticsLabel('Zu den Fähigkeiten'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AbilitiesScreen), findsOneWidget);
@@ -345,11 +341,11 @@ void main() {
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
       await tester.scrollUntilVisible(
-        find.text('Zur Ausrüstung'),
+        find.bySemanticsLabel('Zur Ausrüstung'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.text('Zur Ausrüstung'));
+      await tester.tap(find.bySemanticsLabel('Zur Ausrüstung'));
       await tester.pumpAndSettle();
 
       expect(find.byType(EquipmentScreen), findsOneWidget);
@@ -363,7 +359,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitWaffe()));
 
-      expect(find.textContaining('Alltag · +'), findsWidgets);
+      expect(find.byIcon(Icons.backpack_outlined), findsWidgets);
     });
   });
 

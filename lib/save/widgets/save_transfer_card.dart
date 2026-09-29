@@ -25,37 +25,47 @@ class SaveTransferCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Spielstand sichern',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Palette.text,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Dein Fortschritt liegt nur auf diesem Gerät. Wer die '
-            'Browserdaten löscht, verliert ihn. Kopier ihn ab und zu in '
-            'eine Notiz — einfügen holt ihn zurück.',
-            style: TextStyle(fontSize: 12, height: 1.4, color: Palette.textDim),
-          ),
-          const SizedBox(height: 10),
+          // Diskette, Kopieren, Einfügen. Warum man das braucht, sagt ein
+          // Tipp auf die Diskette; was Einfügen tut, fragt der Dialog.
           Row(
             children: <Widget>[
+              const Tooltip(
+                triggerMode: TooltipTriggerMode.tap,
+                message:
+                    'Spielstand sichern: Dein Fortschritt liegt nur auf '
+                    'diesem Gerät. Wer die Browserdaten löscht, verliert '
+                    'ihn. Kopier ihn ab und zu in eine Notiz — einfügen '
+                    'holt ihn zurück.',
+                child: Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.save_outlined,
+                    size: 26,
+                    color: Palette.accent,
+                    semanticLabel: 'Spielstand sichern',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () => _kopieren(context, ref),
-                  icon: const Icon(Icons.copy_rounded, size: 18),
-                  label: const Text('Kopieren'),
+                  child: const Icon(
+                    Icons.copy_rounded,
+                    size: 20,
+                    semanticLabel: 'Kopieren',
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () => _einfuegen(context, ref),
-                  icon: const Icon(Icons.content_paste_rounded, size: 18),
-                  label: const Text('Einfügen'),
+                  child: const Icon(
+                    Icons.content_paste_rounded,
+                    size: 20,
+                    semanticLabel: 'Einfügen',
+                  ),
                 ),
               ),
             ],

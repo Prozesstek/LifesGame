@@ -87,9 +87,8 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const _SectionTitle('Deine vier Plätze'),
-                  const SizedBox(height: 10),
                   AbilitySlotsRow(
+                    einladen: offen.any((id) => !chosen.contains(id)),
                     level: level.level,
                     weaponMove: weaponMove,
                     chosen: chosen,
@@ -110,16 +109,27 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const _SectionTitle('Alle Fähigkeiten'),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${offen.length} von ${AbilityCatalog.choosable.length} '
-                    'freigeschaltet. Antippen zeigt alle Werte — auch bei '
-                    'den grauen.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textOnDarkDim,
-                    ),
+                  Row(
+                    children: <Widget>[
+                      const Icon(
+                        Icons.auto_awesome,
+                        size: 20,
+                        color: Palette.textOnDark,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${offen.length} / ${AbilityCatalog.choosable.length}',
+                        semanticsLabel:
+                            '${offen.length} von '
+                            '${AbilityCatalog.choosable.length} '
+                            'freigeschaltet',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.textOnDark,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   for (final rarity in Rarity.values)
@@ -169,7 +179,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
             Expanded(
               child: Text(
                 '${stufe.where((a) => offen.contains(a.moveId)).length} '
-                'von ${stufe.length}',
+                '/ ${stufe.length}',
                 style: const TextStyle(
                   fontSize: 11,
                   color: Palette.textOnDarkDim,
@@ -496,24 +506,6 @@ class _Kachel extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.bold,
-        color: Palette.textOnDark,
       ),
     );
   }

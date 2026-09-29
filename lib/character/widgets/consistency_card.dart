@@ -39,31 +39,38 @@ class ConsistencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HolzKarte(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: _Figure(
-                  value: '$currentStreak',
-                  unit: currentStreak == 1 ? 'Tag am Stück' : 'Tage am Stück',
-                  emphasised: currentStreak > 0,
-                ),
+    // Drei Zeichen mit Zahl; der Satz dazu steht im Tipp.
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message: _summary,
+      child: HolzKarte(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: _Figure(
+                icon: Icons.local_fire_department_rounded,
+                value: '$currentStreak',
+                unit: currentStreak == 1 ? 'Tag am Stück' : 'Tage am Stück',
+                emphasised: currentStreak > 0,
               ),
-              Expanded(
-                child: _Figure(value: '$longestStreak', unit: 'Bestwert'),
+            ),
+            Expanded(
+              child: _Figure(
+                icon: Icons.star_outline_rounded,
+                value: '$longestStreak',
+                unit: 'Bestwert',
               ),
-              Expanded(
-                child: _Figure(value: '$totalChecks', unit: 'Häkchen'),
+            ),
+            Expanded(
+              child: _Figure(
+                icon: Icons.check_circle_outline,
+                value: '$totalChecks',
+                unit: 'Häkchen',
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(_summary, style: _summaryStyle),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -86,24 +93,21 @@ class ConsistencyCard extends StatelessWidget {
     final fehlt = longestStreak - currentStreak;
     return 'Noch $fehlt ${fehlt == 1 ? 'Tag' : 'Tage'} bis zum Bestwert.';
   }
-
-  TextStyle get _summaryStyle {
-    return TextStyle(
-      fontSize: 12,
-      color: currentStreak == 0 ? Palette.textDim : Palette.success,
-    );
-  }
 }
 
 /// Eine Zahl mit ihrer Einheit darunter.
 class _Figure extends StatelessWidget {
   const _Figure({
+    required this.icon,
     required this.value,
     required this.unit,
     this.emphasised = false,
   });
 
+  final IconData icon;
   final String value;
+
+  /// Nur für den Vorleser — zu sehen ist das Zeichen.
   final String unit;
 
   /// Die laufende Kette wird hervorgehoben, solange sie läuft — sie ist
@@ -112,23 +116,26 @@ class _Figure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final farbe = emphasised ? Palette.accent : Palette.text;
     return Semantics(
       label: '$value $unit',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      excludeSemantics: true,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: emphasised ? Palette.accent : Palette.text,
+          Icon(icon, size: 20, color: emphasised ? farbe : Palette.textDim),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: farbe,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            unit,
-            style: const TextStyle(fontSize: 11, color: Palette.textDim),
           ),
         ],
       ),

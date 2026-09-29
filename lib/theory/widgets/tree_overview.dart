@@ -169,25 +169,16 @@ class ContinueReadingTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: <InlineSpan>[
-                          const TextSpan(
-                            text: 'Weiterlesen: ',
-                            style: TextStyle(color: Palette.textOnDarkDim),
-                          ),
-                          TextSpan(
-                            text: node.name,
-                            style: const TextStyle(
-                              color: Palette.textOnDark,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+                    // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
+                    child: Text(
+                      node.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Palette.textOnDark,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   // Nicht der Pfeil des Gebietswechsels: Dieser führt in

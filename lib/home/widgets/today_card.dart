@@ -54,10 +54,9 @@ class TodayCard extends ConsumerWidget {
           ),
           if (liste.isEmpty)
             const _Hinweis(
-              icon: Icons.play_circle_outline,
-              text:
-                  'Noch nichts auf der Liste — starte deine erste '
-                  'Gewohnheit',
+              icon: Icons.add_circle_outline,
+              label: 'Erste Gewohnheit starten',
+              highlight: true,
             )
           else ...<Widget>[
             for (final habit in offen)
@@ -69,16 +68,19 @@ class TodayCard extends ConsumerWidget {
               ),
             if (offen.isEmpty)
               _Hinweis(
-                icon: Icons.inventory_2_outlined,
-                text: tracker.canOpenChest(today)
-                    ? 'Alles erledigt — die Tagestruhe wartet'
+                icon: tracker.canOpenChest(today)
+                    ? Icons.inventory_2_outlined
+                    : Icons.done_all_rounded,
+                label: tracker.canOpenChest(today)
+                    ? 'Alles erledigt, die Tagestruhe wartet'
                     : 'Alles erledigt',
                 highlight: tracker.canOpenChest(today),
               )
             else if (erledigt > 0)
               _Hinweis(
                 icon: Icons.check_circle,
-                text: erledigt == 1 ? '1 erledigt' : '$erledigt erledigt',
+                label: '$erledigt erledigt',
+                zahl: erledigt,
               ),
           ],
         ],
@@ -122,13 +124,11 @@ class _Kopf extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: <Widget>[
-              const Text(
-                'Heute',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.text,
-                ),
+              const Icon(
+                Icons.checklist_rounded,
+                size: 22,
+                color: Palette.text,
+                semanticLabel: 'Heute',
               ),
               if (streak > 0) ...<Widget>[
                 const SizedBox(width: 10),
@@ -262,45 +262,52 @@ class _OffeneZeile extends StatelessWidget {
   }
 }
 
-/// Eine Zeile, die nicht abhakt, sondern hinführt.
+/// Eine Zeile, die nicht abhakt, sondern hinführt — ein Zeichen, höchstens
+/// mit Zahl. Was es heißt, sagt [label] dem Vorleser.
 class _Hinweis extends StatelessWidget {
   const _Hinweis({
     required this.icon,
-    required this.text,
+    required this.label,
+    this.zahl,
     this.highlight = false,
   });
 
   final IconData icon;
-  final String text;
+  final String label;
+  final int? zahl;
   final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     final farbe = highlight ? Palette.accent : Palette.textDim;
+    final anzahl = zahl;
 
-    return Druck(
-      child: InkWell(
-        onTap: () => _oeffneGewohnheiten(context),
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 20, color: farbe),
-              const SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  text,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: farbe,
-                    fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Druck(
+        child: InkWell(
+          onTap: () => _oeffneGewohnheiten(context),
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              children: <Widget>[
+                Icon(icon, size: highlight ? 26 : 20, color: farbe),
+                if (anzahl != null) ...<Widget>[
+                  const SizedBox(width: 6),
+                  Text(
+                    '$anzahl',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: farbe,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              ],
+            ),
           ),
         ),
       ),

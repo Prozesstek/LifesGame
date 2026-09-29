@@ -62,7 +62,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Diese Woche: 2 / 7 Tage · Rückblick'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Diese Woche: 2 von 7')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('sonntags gross', (tester) async {
@@ -74,7 +77,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Deine Woche'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Deine Woche')), findsOneWidget);
     });
 
     testWidgets('montags mit der Woche, die gerade zu Ende ging', (
@@ -89,8 +92,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Deine letzte Woche'), findsOneWidget);
-      await tester.tap(find.text('Deine letzte Woche'));
+      expect(find.bySemanticsLabel(RegExp('^Deine letzte Woche')), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel(RegExp('^Deine letzte Woche')));
       await tester.pumpAndSettle();
 
       expect(find.byType(WeekReviewScreen), findsOneWidget);

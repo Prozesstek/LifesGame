@@ -8,6 +8,7 @@ import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/level_abzeichen.dart';
 
 /// Die vier Fähigkeitsslots nebeneinander.
 ///
@@ -34,8 +35,14 @@ class AbilitySlotsRow extends StatelessWidget {
     this.gezogen,
     this.nimmtAn = _nimmtNichts,
     this.onAblegen = _legtNichts,
+    this.einladen = false,
     super.key,
   });
+
+  /// Ob eine freigeschaltete Fähigkeit noch auf keinem Platz liegt. Dann
+  /// leuchtet der nächste freie Platz auf — statt des Satzes „unten eine
+  /// Fähigkeit halten und hierher ziehen“.
+  final bool einladen;
 
   final int level;
 
@@ -65,8 +72,9 @@ class AbilitySlotsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final open = AbilitySlots.openAt(level);
-    final next = AbilitySlots.nextUnlockAfter(level);
 
+    // **Ohne Satz darunter.** Ein gesperrter Platz trägt sein Level als
+    // Abzeichen, ein freier leuchtet auf, wenn etwas hineinpasst.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -78,27 +86,30 @@ class AbilitySlotsRow extends StatelessWidget {
                 child: DragTarget<String>(
                   onWillAcceptWithDetails: (_) => nimmtAn(slot),
                   onAcceptWithDetails: (d) => onAblegen(slot, d.data),
-                  builder: (context, kandidaten, _) => _Slot(
-                    slot: slot,
-                    isOpen: slot <= open,
-                    isWeaponSlot: slot == 1,
-                    move: _moveIn(slot),
-                    onTap: slot > open ? null : () => onTapSlot(slot),
-                    dragState: SlotDragState.fuer(
-                      zieht: gezogen != null,
-                      passt: nimmtAn(slot),
-                      schwebt: kandidaten.isNotEmpty,
+                  builder: (context, kandidaten, _) => PlatzLaedtEin(
+                    aktiv:
+                        einladen &&
+                        slot > 1 &&
+                        slot <= open &&
+                        _moveIn(slot) == null &&
+                        nimmtAn(slot),
+                    child: _Slot(
+                      slot: slot,
+                      isOpen: slot <= open,
+                      isWeaponSlot: slot == 1,
+                      move: _moveIn(slot),
+                      onTap: slot > open ? null : () => onTapSlot(slot),
+                      dragState: SlotDragState.fuer(
+                        zieht: gezogen != null,
+                        passt: nimmtAn(slot),
+                        schwebt: kandidaten.isNotEmpty,
+                      ),
                     ),
                   ),
                 ),
               ),
             ],
           ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          _hint(next, open),
-          style: const TextStyle(fontSize: 12, color: Palette.textDim),
         ),
       ],
     );
@@ -109,27 +120,6 @@ class AbilitySlotsRow extends StatelessWidget {
   String? _moveIn(int slot) {
     if (slot == 1) return weaponMove;
     return chosen.at(slot - 2);
-  }
-
-  /// Der Satz unter den Slots.
-  ///
-  /// Nennt die nächste Stufe, damit ein gesperrter Platz ein Ziel ist
-  /// statt einer Absage — und sagt bei offenen leeren Plätzen, wo das
-  /// herkommt, was hineingehört.
-  String _hint(int? next, int open) {
-    final frei = open - 1;
-    final belegt = chosen.length;
-
-    if (next != null && belegt >= frei) {
-      return 'Nächster Platz ab Level $next.';
-    }
-    if (belegt < frei) {
-      final offen = frei - belegt;
-      return offen == 1
-          ? 'Ein Platz ist noch frei — unten eine Fähigkeit halten und hierher ziehen.'
-          : '$offen Plätze sind noch frei — unten eine Fähigkeit halten und hierher ziehen.';
-    }
-    return 'Alle vier Plätze offen und belegt.';
   }
 }
 
@@ -187,13 +177,19 @@ class _Slot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final belegt = move;
-    final zeichen = Icon(_icon, size: 18, color: _iconColour);
+    final zeichen = Icon(
+      _icon,
+      size: move == null && isOpen ? 26 : 18,
+      color: _iconColour,
+    );
 
     return PlatzBeimZiehen(
       zustand: dragState,
       child: Semantics(
         button: onTap != null,
         label: _semantics,
+        onTap: onTap,
+        excludeSemantics: true,
         child: Druck(
           enabled: onTap != null,
           child: Material(
@@ -231,16 +227,26 @@ class _Slot extends StatelessWidget {
                         child: Center(child: zeichen),
                       ),
                     const SizedBox(height: 6),
-                    Text(
-                      _caption,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: move == null ? Palette.muted : Palette.text,
-                      ),
-                    ),
+                    // Belegt: der Name. Gesperrt: das Level als Abzeichen.
+                    // Leer: nichts, das Plus sagt es.
+                    if (!isOpen)
+                      LevelAbzeichen(
+                        level: AbilitySlots.levelForSlot(slot) ?? 0,
+                        size: 24,
+                      )
+                    else if (belegt != null)
+                      Text(
+                        _caption,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Palette.text,
+                        ),
+                      )
+                    else
+                      const SizedBox(height: 24),
                   ],
                 ),
               ),

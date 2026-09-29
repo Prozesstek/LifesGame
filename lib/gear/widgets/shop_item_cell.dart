@@ -5,6 +5,7 @@ import '../../ui/palette.dart';
 import '../copy_text.dart';
 import '../gear_icon.dart';
 import '../../ui/druck.dart';
+import '../../ui/gold_icon.dart';
 
 /// Ein Exemplar als Kachel im Raster — ein Angebot des Tages oder ein
 /// Stück im Inventar (ADR-0048).
@@ -141,20 +142,7 @@ class ShopItemCell extends StatelessWidget {
                   const SizedBox(height: 3),
                   // **Preis oder Besitz, nie beides.** Was einem gehört,
                   // hat keinen Preis mehr — es hat einen Zustand.
-                  Text(
-                    _fussnote,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isEquipped
-                          ? Palette.success
-                          : ((isOwned || isOutOfReach)
-                                ? Palette.muted
-                                : Palette.gold),
-                    ),
-                  ),
+                  _fussnote(),
                 ],
               ),
             ),
@@ -164,11 +152,56 @@ class ShopItemCell extends StatelessWidget {
     );
   }
 
-  String get _fussnote {
-    if (isEquipped) return 'getragen';
+  /// Getragen ein Haken, gesperrt ein Schloss, sonst Münze und Preis.
+  Widget _fussnote() {
+    if (isEquipped) {
+      return const Icon(
+        Icons.check_circle,
+        size: 14,
+        color: Palette.success,
+        semanticLabel: 'getragen',
+      );
+    }
     // Im Inventar steht die Güte des Wurfs, im Laden der Preis.
-    if (isOwned) return CopyText.quality(copy);
-    if (isLocked) return 'gesperrt';
-    return '${copy.paid} G';
+    if (isOwned) {
+      return Text(
+        CopyText.quality(copy),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: Palette.muted,
+        ),
+      );
+    }
+    if (isLocked) {
+      return const Icon(
+        Icons.lock,
+        size: 14,
+        color: Palette.muted,
+        semanticLabel: 'gesperrt',
+      );
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        const GoldIcon(size: 12),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            '${copy.paid}',
+            semanticsLabel: '${copy.paid} Gold',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: isOutOfReach ? Palette.muted : Palette.gold,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

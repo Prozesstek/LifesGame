@@ -179,3 +179,93 @@ void zuDenPlaetzen(ScrollController scroll) {
     curve: Curves.easeOutCubic,
   );
 }
+
+/// Ein leerer Platz, der etwas aufnehmen könnte, leuchtet sanft auf.
+///
+/// **Statt des Satzes „halten und hierher ziehen“.** Die App soll ohne
+/// Lesen gehen; das Leuchten sagt „hier gehört etwas hin“, und wer es
+/// antippt, bekommt den Satz doch noch.
+///
+/// **Dreimal, nicht endlos:** Eine Endlos-Animation liesse
+/// `pumpAndSettle` in jedem Test hängen, der einen solchen Platz zeigt —
+/// und nach drei Mal hat man es gesehen. Es beginnt neu, sobald der Platz
+/// wieder frei wird.
+class PlatzLaedtEin extends StatefulWidget {
+  const PlatzLaedtEin({
+    required this.aktiv,
+    required this.child,
+    this.radius = 10,
+    super.key,
+  });
+
+  final bool aktiv;
+  final Widget child;
+  final double radius;
+
+  static const Duration takt = Duration(milliseconds: 700);
+  static const int mal = 3;
+
+  @override
+  State<PlatzLaedtEin> createState() => _PlatzLaedtEinState();
+}
+
+class _PlatzLaedtEinState extends State<PlatzLaedtEin>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _takt = AnimationController(
+    vsync: this,
+    duration: PlatzLaedtEin.takt,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.aktiv) _starte();
+  }
+
+  @override
+  void didUpdateWidget(PlatzLaedtEin alt) {
+    super.didUpdateWidget(alt);
+    if (widget.aktiv && !alt.aktiv) _starte();
+    if (!widget.aktiv) _takt.value = 0;
+  }
+
+  void _starte() {
+    _takt
+      ..value = 0
+      ..repeat(reverse: true, count: PlatzLaedtEin.mal * 2);
+  }
+
+  @override
+  void dispose() {
+    _takt.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _takt,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_takt.value);
+        return DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.radius),
+            border: Border.all(
+              color: Palette.accentOnDark.withValues(alpha: t),
+              width: 2.5,
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Palette.accentOnDark.withValues(alpha: 0.5 * t),
+                blurRadius: 10 * t,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}

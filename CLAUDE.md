@@ -178,7 +178,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
-| `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen. Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
+| `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
+| `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Hantel, Herz, Schild, Tropfen; **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)) | Flutter |
+| `lib/ui/ruhm_zahl.dart` | Ruhm als Zeichen mit Zahl, überall dasselbe | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
@@ -711,6 +713,16 @@ schliesst. Ausgenommen sind Kacheln in Rastern, Knöpfe und Kreise: Zwölf
 Punkte Holz wären dort dicker als der Inhalt. Der Rahmen kostet eine
 Karte 24 Punkte Breite; wer eine Zeile hineinlegt, gibt ihren Texten
 `Flexible` (`gotchas.md`).
+
+**Die App geht ohne Lesen** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)).
+Auf den Bildschirmen stehen Namen und Zahlen mit ihrem Zeichen, keine
+Sätze, Überschriften oder Beschriftungen; die Theorie ist ausgenommen.
+Was erklärt werden muss, kommt **beim Antippen** — im Blatt, im Dialog
+oder als `Tooltip` mit `triggerMode: TooltipTriggerMode.tap`. Der Satz
+bleibt für den Vorleser (`semanticLabel`, `semanticsLabel`,
+`Semantics`), und Knöpfe ohne Wort tragen einen `Key`, damit Tests sie
+finden. **Wer einen neuen Satz auf einen Bildschirm schreibt, fragt
+zuerst, ob ein Zeichen reicht.**
 
 **Jeder Knopf gibt nach, wenn man ihn drückt** (`lib/ui/druck.dart`).
 Planke, Holzknopf, `TextButton` und `OutlinedButton` tun es über das

@@ -101,12 +101,6 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
       children: <Widget>[
-        const Text(
-          'Sechs Stücke, jeden Tag neu gewürfelt. Um Mitternacht kommt '
-          'eine neue Auswahl.',
-          style: TextStyle(fontSize: 12, color: Palette.textOnDarkDim),
-        ),
-        const SizedBox(height: 10),
         _Raster(
           copies: angebote,
           gewaehlteUid: gewaehlt.uid,

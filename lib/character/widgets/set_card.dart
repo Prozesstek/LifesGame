@@ -110,13 +110,34 @@ class _SetRow extends StatelessWidget {
             '${aktiv.labels.join(' · ')} auf ${set.target.label}',
             style: const TextStyle(fontSize: 12, color: Palette.success),
           ),
+        // Statt „Noch ein Teil bis zur nächsten Stufe“: ein Punkt je
+        // Teil, ein Strich nach der ersten Stufe.
         if (fehlt > 0) ...<Widget>[
-          const SizedBox(height: 2),
-          Text(
-            fehlt == 1
-                ? 'Noch ein Teil bis zur nächsten Stufe.'
-                : 'Noch $fehlt Teile bis zur nächsten Stufe.',
-            style: const TextStyle(fontSize: 12, color: Palette.textDim),
+          const SizedBox(height: 4),
+          Semantics(
+            label: 'Noch $fehlt bis zur nächsten Stufe',
+            excludeSemantics: true,
+            child: Row(
+              children: <Widget>[
+                for (var i = 0; i < GearSet.fullSize; i++) ...<Widget>[
+                  if (i == GearSet.smallSize)
+                    Container(
+                      width: 2,
+                      height: 12,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      color: Palette.muted,
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 3),
+                    child: Icon(
+                      i < pieces ? Icons.circle : Icons.circle_outlined,
+                      size: 10,
+                      color: i < pieces ? Palette.accent : Palette.muted,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ],

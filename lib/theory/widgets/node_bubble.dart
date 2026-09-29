@@ -264,15 +264,11 @@ class PlaceholderBubble extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const Text(
-                  'Inhalt folgt',
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 9,
-                    height: 1.2,
-                    color: Palette.textOnDarkDim,
-                    fontStyle: FontStyle.italic,
-                  ),
+                // Statt „Inhalt folgt“ eine Sanduhr: grau und still genug.
+                const Icon(
+                  Icons.hourglass_empty_rounded,
+                  size: 11,
+                  color: Palette.textOnDarkDim,
                 ),
               ],
             ),

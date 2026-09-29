@@ -24,6 +24,7 @@ import 'widgets/title_dialog.dart';
 import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 import '../habits/widgets/week_card.dart';
+import '../habits/stat_icon.dart';
 
 /// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
 /// Fähigkeiten haben eigene Bildschirme (ADR-0049, ADR-0057).
@@ -80,9 +81,7 @@ class CharacterScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   const _DevGrantsCard(),
                 ],
-                const SizedBox(height: 20),
-                const _SectionTitle('Beständigkeit'),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 ConsistencyCard(
                   currentStreak: habits.currentBestStreak(today),
                   longestStreak: habits.longestStreak,
@@ -97,9 +96,7 @@ class CharacterScreen extends ConsumerWidget {
                   thisWeek: ref.watch(thisWeekProvider),
                   lastWeek: ref.watch(lastWeekProvider),
                 ),
-                const SizedBox(height: 20),
-                const _SectionTitle('Werte im Kampf'),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 const _PowerCard(),
                 const SizedBox(height: 8),
                 for (final stat in HabitStat.values) ...<Widget>[
@@ -110,36 +107,30 @@ class CharacterScreen extends ConsumerWidget {
                 // **Die Ausrüstung steht seit ADR-0057 nicht mehr hier**,
                 // genau wie die Fähigkeiten seit ADR-0049. Was sie an den
                 // Werten ändert, steht weiter oben bei „Werte im Kampf“.
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const EquipmentScreen(),
-                    ),
-                  ),
-                  icon: const Icon(Icons.shield_outlined),
-                  label: const Text('Zur Ausrüstung'),
-                ),
-                const SizedBox(height: 10),
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const ShopScreen()),
-                  ),
-                  icon: const Icon(Icons.storefront_outlined),
-                  label: const Text('Zum Laden'),
-                ),
-                const SizedBox(height: 10),
                 // **Die Fähigkeiten stehen seit ADR-0049 nicht mehr hier.**
                 // Der Weg bleibt trotzdem: Wer seinen Charakter ansieht,
-                // sucht sie an dieser Stelle, und der Kreis auf der
-                // Startseite hilft ihm dabei nicht.
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const AbilitiesScreen(),
+                // sucht sie an dieser Stelle. Drei Zeichen statt drei
+                // beschrifteter Planken.
+                Row(
+                  children: <Widget>[
+                    _Weg(
+                      icon: Icons.shield_outlined,
+                      label: 'Zur Ausrüstung',
+                      ziel: () => const EquipmentScreen(),
                     ),
-                  ),
-                  icon: const Icon(Icons.auto_awesome),
-                  label: const Text('Zu den Fähigkeiten'),
+                    const SizedBox(width: 10),
+                    _Weg(
+                      icon: Icons.storefront_outlined,
+                      label: 'Zum Laden',
+                      ziel: () => const ShopScreen(),
+                    ),
+                    const SizedBox(width: 10),
+                    _Weg(
+                      icon: Icons.auto_awesome,
+                      label: 'Zu den Fähigkeiten',
+                      ziel: () => const AbilitiesScreen(),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 // Ganz unten, weil man es selten braucht — und dann
@@ -199,22 +190,34 @@ class _PowerCard extends ConsumerWidget {
     final macht = ref.watch(heroPowerProvider);
     final s = macht.stats;
 
-    return HolzKarte(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              for (final (name, wert) in <(String, int)>[
-                ('Angriff', s.combatAttack),
-                ('Leben', s.combatMaxHp),
-                ('Abwehr', s.combatDefense),
-              ])
-                Expanded(
-                  child: Column(
-                    children: <Widget>[
-                      Text(
+    final form = DailyFormText.summary(macht.form);
+
+    // Drei Zahlen mit ihrem Zeichen; die Faktoren dahinter und die
+    // Tagesform stehen im Tipp, ein Blitz zeigt, dass sie wirkt.
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message:
+          'Level ${_faktor(macht.levelFactor)} · '
+          'Waffe ${_faktor(macht.weaponFactor)} · '
+          'Rüstung ${_faktor(macht.armorFactor)}'
+          '${form == null ? '' : '\n${macht.form.isInForm ? 'In Form' : 'Tagesform'}: $form'}',
+      child: HolzKarte(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: <Widget>[
+            for (final (stat, wert) in <(HabitStat, int)>[
+              (HabitStat.staerke, s.combatAttack),
+              (HabitStat.ausdauer, s.combatMaxHp),
+              (HabitStat.disziplin, s.combatDefense),
+            ])
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    StatIcon(stat, size: 18),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
                         '$wert',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -224,43 +227,14 @@ class _PowerCard extends ConsumerWidget {
                           color: Palette.text,
                         ),
                       ),
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Palette.textDim,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Level ${_faktor(macht.levelFactor)} · '
-            'Waffe ${_faktor(macht.weaponFactor)} · '
-            'Rüstung ${_faktor(macht.armorFactor)}',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11, color: Palette.textDim),
-          ),
-          if (DailyFormText.summary(macht.form) case final form?) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              '${macht.form.isInForm ? 'In Form' : 'Tagesform'}: $form',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Palette.accent,
               ),
-            ),
+            if (form != null)
+              const Icon(Icons.bolt_rounded, size: 20, color: Palette.accent),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -284,61 +258,29 @@ class _StatRow extends StatelessWidget {
           '$bonus aus Ausrüstung',
       child: HolzKarte(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        // Zeichen, Summe, und woher sie kommt: Häkchen und Ausrüstung.
         child: Row(
           children: <Widget>[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    stat.label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.text,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    stat.combatLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textDim,
-                    ),
-                  ),
-                ],
+            StatIcon(stat, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              '$total',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Palette.text,
               ),
             ),
-            const SizedBox(width: 8),
-            // **Darf schrumpfen.** Seit die Karte im Holzrahmen liegt, ist
-            // sie 24 Punkte schmaler, und „18 Alltag · +12 Ausrüstung"
-            // passte nicht mehr neben den Namen des Werts.
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    '$total',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.text,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    bonus > 0 ? '$base Alltag · +$bonus Ausrüstung' : 'Alltag',
-                    textAlign: TextAlign.right,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: bonus > 0 ? Palette.success : Palette.muted,
-                    ),
-                  ),
-                ],
+            const Spacer(),
+            _Herkunft(icon: Icons.check_circle_outline, wert: '$base'),
+            if (bonus > 0) ...<Widget>[
+              const SizedBox(width: 10),
+              _Herkunft(
+                icon: Icons.backpack_outlined,
+                wert: '+$bonus',
+                farbe: Palette.success,
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -346,19 +288,49 @@ class _StatRow extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
+/// Eine Quelle eines Werts: Zeichen und Zahl, klein.
+class _Herkunft extends StatelessWidget {
+  const _Herkunft({
+    required this.icon,
+    required this.wert,
+    this.farbe = Palette.textDim,
+  });
 
-  final String text;
+  final IconData icon;
+  final String wert;
+  final Color farbe;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.bold,
-        color: Palette.textOnDark,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(icon, size: 14, color: farbe),
+        const SizedBox(width: 3),
+        Text(wert, style: TextStyle(fontSize: 12, color: farbe)),
+      ],
+    );
+  }
+}
+
+/// Ein Weg zu einem anderen Bereich — ein Zeichen auf einer Planke.
+class _Weg extends StatelessWidget {
+  const _Weg({required this.icon, required this.label, required this.ziel});
+
+  final IconData icon;
+
+  /// Nur für den Vorleser.
+  final String label;
+  final Widget Function() ziel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: FilledButton(
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => ziel())),
+        child: Icon(icon, semanticLabel: label),
       ),
     );
   }

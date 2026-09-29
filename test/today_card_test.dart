@@ -54,7 +54,7 @@ void main() {
         .setCue(starter.id, 'Nach dem Zähneputzen');
     await startseite(tester, tracker);
 
-    expect(inDerKarte(find.text('Heute')), findsOneWidget);
+    expect(inDerKarte(find.byIcon(Icons.checklist_rounded)), findsOneWidget);
     expect(inDerKarte(find.text('0 / 2')), findsOneWidget);
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
@@ -77,7 +77,7 @@ void main() {
       isTrue,
     );
     expect(inDerKarte(find.text(starter.name)), findsNothing);
-    expect(inDerKarte(find.text('1 erledigt')), findsOneWidget);
+    expect(inDerKarte(find.bySemanticsLabel('1 erledigt')), findsOneWidget);
     expect(inDerKarte(find.text('1 / 2')), findsOneWidget);
   });
 
@@ -89,7 +89,7 @@ void main() {
     await startseite(tester, tracker);
 
     expect(
-      inDerKarte(find.text('Alles erledigt — die Tagestruhe wartet')),
+      inDerKarte(find.bySemanticsLabel('Alles erledigt, die Tagestruhe wartet')),
       findsOneWidget,
     );
   });
@@ -103,13 +103,13 @@ void main() {
         .tracker;
     await startseite(tester, tracker);
 
-    expect(inDerKarte(find.text('Alles erledigt')), findsOneWidget);
+    expect(inDerKarte(find.bySemanticsLabel('Alles erledigt')), findsOneWidget);
   });
 
   testWidgets('ohne Gewohnheit führt sie zum Starten', (tester) async {
     await startseite(tester, const HabitTracker.empty());
 
-    await tester.tap(inDerKarte(find.textContaining('Noch nichts')));
+    await tester.tap(inDerKarte(find.bySemanticsLabel('Erste Gewohnheit starten')));
     await tester.pumpAndSettle();
 
     expect(find.byType(HabitsScreen), findsOneWidget);
@@ -148,7 +148,7 @@ void main() {
   testWidgets('der Kopf führt zum Gewohnheiten-Bildschirm', (tester) async {
     await startseite(tester, const HabitTracker.empty().activate(starter.id));
 
-    await tester.tap(inDerKarte(find.text('Heute')));
+    await tester.tap(inDerKarte(find.byIcon(Icons.checklist_rounded)));
     await tester.pumpAndSettle();
 
     expect(find.byType(HabitsScreen), findsOneWidget);

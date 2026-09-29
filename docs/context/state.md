@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 28.09.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 29.09.2026 · Frederik
 
 ---
 
@@ -83,6 +83,47 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 29.09.2026: die App geht ohne Lesen
+
+Frederik: „so viel Schrift wie möglich entfernen, eine App muss ohne
+Lesen funktionieren (natürlich Theorie etc bleibt drin)“. In einer
+Fragerunde entschieden, [ADR-0060](../decisions/0060-die-app-geht-ohne-lesen.md):
+**Namen und Zahlen bleiben**, Erklärungen kommen **beim Antippen**, wo
+etwas hingezogen werden kann, **leuchtet** der Platz, alles in **einem
+PR**.
+
+| Bildschirm | Was ging, was jetzt dasteht |
+|---|---|
+| Startseite | „Heute“ → Liste-Zeichen; „1 erledigt“ → ✓ 1; Tagesaufgaben als Zeichen je Art mit Balken, Satz auf Tipp; „Abholen“ → +1 Schlüssel |
+| Gewohnheiten | „Wann machst du das?“ → Wecker; „x1,2 in 1 Tag“ → Uhr 1 → x1,2; Reiter als Person / Buch; Wert und Grad als Zeichen und Punkte; Hinweissätze weg; Streak-Eis und Truhe ohne Satz |
+| Charakter | Werte als Hantel, Herz, Schild, Tropfen, Herkunft als ✓ und Rucksack; Beständigkeit als Flamme, Stern, Haken; Überschriften weg; drei Wege als Zeichen; „Spielstand sichern“ als Diskette mit zwei Knöpfen |
+| Ausrüstung | Überschriften und Sätze weg; leere Plätze nur als Umriss, der aufleuchtet, wenn etwas passt; Ordnungen als vier Zeichen; Rucksack 12 / 48 |
+| Fähigkeiten | Überschriften und Satz unter den Plätzen weg; gesperrt trägt das Level-Abzeichen, frei leuchtet auf |
+| Laden | Einleitung weg; Preis als Münze; Kaufen als Wagen mit Preis; Sperre als Schloss mit Stufe, fehlendes Gold rot |
+| Grube | „Stufe 12“ → 12; „neu“ → Kompass; Bestzeit mit Uhr; „Hinab“ → Doppelpfeil; Tagesform zeigt die Zeichen der Werte statt „Abwehr +10 %“ |
+| Ergebnis eines Laufs | Pokal oder Gesicht, Stufe, Gegner, Zeit als Zeichen, Beute als Zahlen; Regeln auf Tipp |
+| Theorie | „gesamt 17 von 59“ weg; Rückfrage als Fragezeichen mit +10 / +3; „Weiterlesen:“ und „Zurück zu“ weg, Name bleibt; „Inhalt folgt“ → Sanduhr |
+
+**Neu:** `lib/habits/stat_icon.dart` (ein Zeichen je Wert, eine
+Tabelle), `lib/ui/ruhm_zahl.dart`, `PlatzLaedtEin` in
+`lib/ui/halten_und_ziehen.dart`. In `habits`: `DailyQuest.habitName`,
+damit die Aufgabe „Hol nach …“ ohne ihren Satz auskommt.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Der
+Pfeil „→“ fehlt in der Schrift und stand als Kästchen da — jetzt ein
+Zeichen. Bestwert und Errungenschaften trugen denselben Pokal.
+
+App 610, habits 227, alle grün. **Nicht am Handy angesehen**, und nicht
+angefasst: Feiern, Beute des Wächters, Wochenrückblick, Formulare,
+Seltenheits-Marken, SnackBars.
+
+### Offen
+
+- Ob die Zeichen ohne Erklärung verstanden werden (Uhr für die nächste
+  Kettenstufe, Kompass für „neu“, Rucksack für „aus der Ausrüstung“).
+- Die Seltenheit steht noch als Wort in der Marke — als Farbe allein?
+- Die Feiern und die Beute haben noch ganze Sätze.
 
 ## 28.09.2026, ganz zuletzt: der Laden kauft nur noch
 

@@ -33,6 +33,12 @@ class LadderScreen extends ConsumerStatefulWidget {
 
   static const double _maxWidth = 560;
 
+  /// Woran man „Hinab“ findet — der Knopf trägt nur noch einen Pfeil.
+  static const Key hinabKey = ValueKey<String>('grube-hinab');
+
+  /// Die Etage einer Stufe im Schacht — sie trägt nur noch ihre Zahl.
+  static Key etageKey(int stufe) => ValueKey<String>('grube-etage-$stufe');
+
   @override
   ConsumerState<LadderScreen> createState() => _LadderScreenState();
 }
@@ -104,7 +110,12 @@ class _LadderScreenState extends ConsumerState<LadderScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      child: const Text('Hinab'),
+                      key: LadderScreen.hinabKey,
+                      child: const Icon(
+                        Icons.keyboard_double_arrow_down_rounded,
+                        size: 26,
+                        semanticLabel: 'Hinab',
+                      ),
                     ),
                   ),
                 ],
@@ -220,6 +231,7 @@ class _SchachtState extends State<_Schacht> {
           final s = i + 1;
           final daily = _LadderScreenState._dailyFuer(widget.dailies, s);
           return _Etage(
+            key: LadderScreen.etageKey(s),
             stufe: s,
             gesperrt: s > offen,
             neu: widget.stand.isNewGround(s) && s <= offen,
@@ -246,6 +258,7 @@ class _Etage extends StatelessWidget {
     required this.zahlen,
     required this.gewaehlt,
     required this.onTap,
+    super.key,
   });
 
   final int stufe;
@@ -273,25 +286,33 @@ class _Etage extends StatelessWidget {
     final farbe = gesperrt ? Palette.muted : Palette.text;
     final rechts = switch ((gesperrt, neu, bestzeit)) {
       (true, _, _) => const Icon(Icons.lock, size: 16, color: Palette.muted),
-      (_, true, _) => const Text(
-        'neu',
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          color: Palette.accent,
-        ),
+      (_, true, _) => const Icon(
+        Icons.explore_outlined,
+        size: 18,
+        color: Palette.accent,
       ),
-      (_, _, final double t) => Text(
-        zeit(t),
-        style: const TextStyle(fontSize: 13, color: Palette.textDim),
+      (_, _, final double t) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Icon(Icons.timer_outlined, size: 14, color: Palette.textDim),
+          const SizedBox(width: 3),
+          Text(
+            zeit(t),
+            style: const TextStyle(fontSize: 13, color: Palette.textDim),
+          ),
+        ],
       ),
-      _ => const Text('—', style: TextStyle(color: Palette.textDim)),
+      _ => const SizedBox.shrink(),
     };
 
     return Semantics(
       button: !gesperrt,
       selected: gewaehlt,
-      label: 'Stufe $stufe${daily != null ? ', Stufe des Tages' : ''}',
+      label:
+          'Stufe $stufe${daily != null ? ', Stufe des Tages' : ''}'
+          '${neu && !gesperrt ? ', neu' : ''}',
+      excludeSemantics: true,
+      onTap: gesperrt ? null : onTap,
       child: Druck(
         child: Material(
           color: gewaehlt ? Palette.surfaceRaised : Colors.transparent,
@@ -329,7 +350,7 @@ class _Etage extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      'Stufe $stufe',
+                      '$stufe',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

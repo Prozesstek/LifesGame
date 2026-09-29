@@ -7,6 +7,7 @@ import 'achievements_controller.dart';
 import 'achievements_screen.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
+import '../ui/ruhm_zahl.dart';
 
 /// Der Weg zu den Errungenschaften, vom Charakter aus.
 ///
@@ -46,25 +47,21 @@ class AchievementsCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
-                        'Errungenschaften',
-                        style: TextStyle(
-                          fontSize: 15,
+                      Text(
+                        '$verdient / $gesamt',
+                        semanticsLabel:
+                            'Errungenschaften: $verdient von $gesamt',
+                        style: const TextStyle(
+                          fontSize: 17,
                           fontWeight: FontWeight.bold,
                           color: Palette.text,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$verdient von $gesamt · $fame Ruhm',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Palette.textDim,
                         ),
                       ),
                     ],
                   ),
                 ),
+                RuhmZahl(fame: fame),
+                const SizedBox(width: 6),
                 const Icon(Icons.chevron_right, size: 22, color: Palette.muted),
               ],
             ),

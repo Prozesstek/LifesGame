@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:habits/habits.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../habits/daily_form_text.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/widgets/daily_form_card.dart';
+import '../../habits/stat_icon.dart';
 import '../../ui/druck.dart';
 import '../../ui/palette.dart';
 
@@ -68,23 +70,19 @@ class TagesformKreis extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    // Voll heisst alles +10 % — das ist ein Wort, keine
-                    // Liste. Die Einzelheiten zeigt der Tipp.
-                    form.isInForm ? 'In Form' : summe ?? 'Tagesform leer',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: summe == null
-                          ? Palette.textOnDarkDim
-                          : Palette.goldOnDark,
-                    ),
-                  ),
-                ),
+                // Statt „Abwehr +10 %“ die Zeichen der Werte, die heute
+                // wirken. Voll sagt die Flamme allein; Zahlen zeigt der Tipp.
+                if (!form.isInForm)
+                  for (final stat in HabitStat.values)
+                    if (form.factorFor(stat) > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: StatIcon(
+                          stat,
+                          size: 18,
+                          color: Palette.goldOnDark,
+                        ),
+                      ),
               ],
             ),
           ),

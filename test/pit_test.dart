@@ -66,10 +66,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('0 / ${PitStage.count}'), findsOneWidget);
-      expect(find.text('Stufe 1'), findsOneWidget);
+      expect(find.byKey(LadderScreen.etageKey(1)), findsOneWidget);
       // Seit dem 28.09. als Zeichen und Zahl, ohne Satz (Issue #88).
       expect(find.text('+${LadderRewards.xpFor(1)}'), findsOneWidget);
-      expect(find.text('neu'), findsOneWidget);
+      expect(find.byIcon(Icons.explore_outlined), findsOneWidget);
     });
 
     /// Ein Stand mit drei geschafften Stufen und einer Bestzeit auf 2.
@@ -94,7 +94,7 @@ void main() {
 
       expect(find.text('42,3 s'), findsOneWidget);
       // Stufe 4 ist die nächste neue, darüber ist zu.
-      expect(find.text('neu'), findsOneWidget);
+      expect(find.byIcon(Icons.explore_outlined), findsOneWidget);
       expect(find.byIcon(Icons.lock), findsWidgets);
     });
 
@@ -104,9 +104,9 @@ void main() {
       await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Stufe 2'));
+      await tester.tap(find.byKey(LadderScreen.etageKey(2)));
       await tester.pump();
-      await tester.tap(find.text('Hinab'));
+      await tester.tap(find.byKey(LadderScreen.hinabKey));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -118,9 +118,9 @@ void main() {
       await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Stufe 5'));
+      await tester.tap(find.byKey(LadderScreen.etageKey(5)));
       await tester.pump();
-      await tester.tap(find.text('Hinab'));
+      await tester.tap(find.byKey(LadderScreen.hinabKey));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -136,7 +136,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Hinab'));
+      await tester.tap(find.byKey(LadderScreen.hinabKey));
       // Kein pumpAndSettle: Flame zeichnet dauerhaft (`gotchas.md`).
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));

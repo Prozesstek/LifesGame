@@ -61,20 +61,26 @@ void main() {
     c.read(habitTrackerProvider.notifier).toggle(id, _heute);
     final goldVorher = c.read(goldProvider);
     await _pump(tester, c);
-    expect(find.text('Deine Tagestruhe'), findsOneWidget);
+    expect(find.byKey(DailyChestCard.oeffnenKey), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Öffnen'));
+    await tester.tap(find.byKey(DailyChestCard.oeffnenKey));
     await tester.pumpAndSettle();
 
-    expect(find.text('+${inhalt.gold} Gold'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('+${inhalt.gold}'),
+      ),
+      findsOneWidget,
+    );
     expect(c.read(goldProvider), goldVorher + inhalt.gold);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Einsacken'));
+    await tester.tap(find.byKey(DailyChestCard.einsackenKey));
     await tester.pumpAndSettle();
 
-    expect(find.text('Deine Tagestruhe'), findsNothing);
+    expect(find.byKey(DailyChestCard.oeffnenKey), findsNothing);
     expect(
-      find.text('Tagestruhe: ${chestSummary(inhalt)}'),
+      find.bySemanticsLabel('Tagestruhe: ${chestSummary(inhalt)}'),
       findsOneWidget,
       reason: 'Die offene Truhe sagt, was drin war.',
     );

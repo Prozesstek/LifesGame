@@ -31,6 +31,10 @@ class DailyChestCard extends StatelessWidget {
 
   final VoidCallback onOpen;
 
+  /// Woran Tests die Knöpfe finden — sie tragen kein Wort mehr.
+  static const Key oeffnenKey = ValueKey<String>('truhe-oeffnen');
+  static const Key einsackenKey = ValueKey<String>('truhe-einsacken');
+
   @override
   Widget build(BuildContext context) {
     final inhalt = opened;
@@ -67,30 +71,15 @@ class _Zu extends StatelessWidget {
               fallback: Icon(Icons.inventory_2, color: Palette.gold, size: 40),
             ),
           ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Deine Tagestruhe',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Alles erledigt. Mal sehen, was drin ist.',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: Palette.textDim),
-                ),
-              ],
+          const Spacer(),
+          FilledButton(
+            key: DailyChestCard.oeffnenKey,
+            onPressed: onOpen,
+            child: const Icon(
+              Icons.lock_open_rounded,
+              semanticLabel: 'Tagestruhe öffnen',
             ),
           ),
-          const SizedBox(width: 8),
-          FilledButton(onPressed: onOpen, child: const Text('Öffnen')),
         ],
       ),
     );
@@ -118,13 +107,10 @@ class _Offen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Flexible(
-            child: Text(
-              'Tagestruhe: ${chestSummary(inhalt)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Palette.textDim),
-            ),
+          Semantics(
+            label: 'Tagestruhe: ${chestSummary(inhalt)}',
+            excludeSemantics: true,
+            child: _Beute(inhalt: inhalt, groesse: 14),
           ),
         ],
       ),
@@ -132,7 +118,41 @@ class _Offen extends StatelessWidget {
   }
 }
 
-/// „+18 Gold" oder „+5 Gold und ein Streak-Eis".
+/// Was drin war, als Zeichen und Zahl: Münze +18, Eis +1.
+class _Beute extends StatelessWidget {
+  const _Beute({required this.inhalt, required this.groesse});
+
+  final ChestContent inhalt;
+  final double groesse;
+
+  @override
+  Widget build(BuildContext context) {
+    final stil = TextStyle(
+      fontSize: groesse,
+      fontWeight: FontWeight.bold,
+      color: Palette.gold,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        GoldIcon(size: groesse + 2),
+        const SizedBox(width: 4),
+        Text('+${inhalt.gold}', style: stil),
+        if (inhalt.freezes > 0) ...<Widget>[
+          SizedBox(width: groesse * 0.8),
+          Icon(Icons.ac_unit, size: groesse + 2, color: Palette.accent),
+          const SizedBox(width: 4),
+          Text(
+            '+${inhalt.freezes}',
+            style: stil.copyWith(color: Palette.accent),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// „+18 Gold" oder „+5 Gold und ein Streak-Eis" — für den Vorleser.
 String chestSummary(ChestContent inhalt) {
   final eis = switch (inhalt.freezes) {
     0 => '',
@@ -154,13 +174,6 @@ class _Enthuellung extends StatelessWidget {
   const _Enthuellung({required this.inhalt});
 
   final ChestContent inhalt;
-
-  String get _titel => switch (inhalt.tier) {
-    ChestTier.schlicht => 'Ein paar Münzen',
-    ChestTier.gut => 'Gut gefüllt!',
-    ChestTier.eis => 'Ein Streak-Eis!',
-    ChestTier.schatz => 'Ein Schatz!',
-  };
 
   bool get _selten => inhalt.tier != ChestTier.schlicht;
 
@@ -186,16 +199,7 @@ class _Enthuellung extends StatelessWidget {
               fallback: Icon(Icons.inventory_2, color: Palette.gold, size: 80),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            _titel,
-            style: TextStyle(
-              fontSize: _selten ? 22 : 18,
-              fontWeight: FontWeight.bold,
-              color: _selten ? Palette.gold : Palette.text,
-            ),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: 1),
             duration: const Duration(milliseconds: 500),
@@ -207,56 +211,19 @@ class _Enthuellung extends StatelessWidget {
                 child: child,
               ),
             ),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const GoldIcon(size: 22),
-                    const SizedBox(width: 6),
-                    Text(
-                      '+${inhalt.gold} Gold',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.gold,
-                      ),
-                    ),
-                  ],
-                ),
-                if (inhalt.freezes > 0) ...<Widget>[
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      const Icon(Icons.ac_unit, color: Palette.accent),
-                      const SizedBox(width: 6),
-                      Text(
-                        '+${inhalt.freezes} ${StreakFreeze.name}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.accent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
+            child: Semantics(
+              label: chestSummary(inhalt),
+              excludeSemantics: true,
+              child: _Beute(inhalt: inhalt, groesse: _selten ? 26 : 20),
             ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Morgen wartet eine neue — wenn wieder alles erledigt ist.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Palette.muted),
           ),
         ],
       ),
       actions: <Widget>[
         FilledButton(
+          key: DailyChestCard.einsackenKey,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Einsacken'),
+          child: const Icon(Icons.check_rounded, semanticLabel: 'Einsacken'),
         ),
       ],
     );

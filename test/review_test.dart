@@ -52,7 +52,7 @@ Future<void> _pump(WidgetTester tester, ProviderContainer c) async {
 
 /// Klappt die Rückfrage auf — sie beginnt als eine Zeile.
 Future<void> _klappeAuf(WidgetTester tester) async {
-  await tester.tap(find.textContaining('Rückfrage des Tages'));
+  await tester.tap(find.byIcon(Icons.quiz_outlined));
   await tester.pumpAndSettle();
 }
 
@@ -128,11 +128,13 @@ void main() {
 
       expect(find.byType(ReviewCard), findsNothing);
       expect(
-        find.textContaining('Rückfrage des Tages: richtig'),
+        find.bySemanticsLabel(RegExp('Rückfrage des Tages: richtig')),
         findsOneWidget,
       );
 
-      await tester.tap(find.textContaining('Rückfrage des Tages: richtig'));
+      await tester.tap(
+        find.bySemanticsLabel(RegExp('Rückfrage des Tages: richtig')),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(ReviewCard), findsOneWidget);
     },

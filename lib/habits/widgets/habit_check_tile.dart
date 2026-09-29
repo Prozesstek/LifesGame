@@ -209,26 +209,25 @@ class _CueLine extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              // Ohne Auslöser steht nur der Wecker da — die Frage dazu
+              // stellt der Dialog, nicht die Kachel.
               Icon(
                 text == null ? Icons.add_alarm_outlined : Icons.link_rounded,
-                size: 14,
+                size: text == null ? 18 : 14,
                 color: farbe,
+                semanticLabel: text == null ? 'Wann machst du das?' : null,
               ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  text ?? 'Wann machst du das?',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: farbe,
-                    fontStyle: text == null
-                        ? FontStyle.italic
-                        : FontStyle.normal,
+              if (text != null) ...<Widget>[
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: farbe),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -286,8 +285,8 @@ class RewardLine extends StatelessWidget {
   final int xp;
   final int gold;
 
-  /// Ob es schon geholt ist. Dann steht „Heute" davor, und die Zahlen
-  /// tragen die Farbe des Erfolgs statt die des Angebots.
+  /// Ob es schon geholt ist. Dann tragen die Zahlen die Farbe des Erfolgs
+  /// statt die des Angebots.
   final bool alreadyEarned;
 
   @override
@@ -309,16 +308,6 @@ class RewardLine extends StatelessWidget {
       // feste Texte nebeneinander sind genau der Fall aus `gotchas.md`.
       child: Row(
         children: <Widget>[
-          if (alreadyEarned) ...<Widget>[
-            Flexible(
-              child: Text(
-                'Heute',
-                overflow: TextOverflow.ellipsis,
-                style: stil.copyWith(fontWeight: FontWeight.normal),
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
           Icon(Icons.auto_awesome, size: 13, color: farbe),
           const SizedBox(width: 3),
           Flexible(
@@ -385,11 +374,31 @@ class _StreakBadge extends StatelessWidget {
               ),
             ],
           ),
+          // Die nächste Stufe ohne Worte: Uhr, Tage, Faktor.
           if (naechste != null)
-            Text(
-              '${_faktor(naechste.multiplier)} in $noch '
-              '${noch == 1 ? 'Tag' : 'Tagen'}',
-              style: const TextStyle(fontSize: 9, color: Palette.textDim),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Icon(
+                  Icons.update_rounded,
+                  size: 10,
+                  color: Palette.textDim,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '$noch',
+                  style: const TextStyle(fontSize: 9, color: Palette.textDim),
+                ),
+                const Icon(
+                  Icons.arrow_right_alt_rounded,
+                  size: 11,
+                  color: Palette.textDim,
+                ),
+                Text(
+                  _faktor(naechste.multiplier),
+                  style: const TextStyle(fontSize: 9, color: Palette.textDim),
+                ),
+              ],
             ),
         ],
       ),

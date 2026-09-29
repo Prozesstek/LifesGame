@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
@@ -21,6 +22,7 @@ class CombatResultDialog extends StatelessWidget {
     this.earnedGold = 0,
     this.summary,
     this.perStage = false,
+    this.fakten,
   });
 
   final bool won;
@@ -42,7 +44,17 @@ class CombatResultDialog extends StatelessWidget {
   /// Gegner — ändert nur den Wortlaut der Fussnote, nicht die Regel.
   final bool perStage;
 
+  /// Was der Lauf war, als Zeichen und Zahl — Stufe, Gegner, Zeit. Ist
+  /// es gesetzt, steht [summary] nur noch für den Vorleser da.
+  final List<(IconData, String)>? fakten;
+
   bool get _hatBelohnung => won && (earnedXp > 0 || earnedGold > 0);
+
+  static const TextStyle _beute = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Palette.gold,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -56,56 +68,88 @@ class CombatResultDialog extends StatelessWidget {
       elevation: 0,
       insetPadding: EdgeInsets.zero,
       shape: const RoundedRectangleBorder(),
-      title: Row(
-        children: <Widget>[
-          Icon(
+      // **Ohne Worte:** Pokal oder Gesicht, darunter die Fakten als
+      // Zeichen und die Beute als Zahlen. Warum ein zweiter Sieg nichts
+      // bringt, sagt ein Tipp auf das Zeichen.
+      title: Center(
+        child: Tooltip(
+          triggerMode: TooltipTriggerMode.tap,
+          message: _fussnote,
+          child: Icon(
             won ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+            size: 56,
             color: won ? Palette.gold : Palette.enemy,
+            semanticLabel: won ? 'Gewonnen' : 'Verloren',
           ),
-          const SizedBox(width: 10),
-          Text(
-            won ? 'Gewonnen' : 'Verloren',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
+        ),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            summary ??
-                (won
-                    ? '$enemyName besiegt — nach $rounds Runden.'
-                    : 'Du bist nach $rounds Runden gefallen.'),
-            style: const TextStyle(fontSize: 15, height: 1.4),
-          ),
-          if (_hatBelohnung) ...<Widget>[
-            const SizedBox(height: 12),
+          if (fakten case final List<(IconData, String)> liste)
+            Semantics(
+              label: summary,
+              excludeSemantics: true,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 16,
+                runSpacing: 8,
+                children: <Widget>[
+                  for (final (icon, wert) in liste)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(icon, size: 20, color: Palette.textDim),
+                        if (wert.isNotEmpty) ...<Widget>[
+                          const SizedBox(width: 4),
+                          Text(
+                            wert,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Palette.text,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                ],
+              ),
+            )
+          else
             Text(
-              '+$earnedXp Erfahrung · +$earnedGold Gold',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Palette.gold,
+              summary ??
+                  (won
+                      ? '$enemyName besiegt — nach $rounds Runden.'
+                      : 'Du bist nach $rounds Runden gefallen.'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15, height: 1.4),
+            ),
+          if (_hatBelohnung) ...<Widget>[
+            const SizedBox(height: 14),
+            Semantics(
+              label: '$earnedXp Erfahrung und $earnedGold Gold',
+              excludeSemantics: true,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Icon(Icons.auto_awesome, size: 20, color: Palette.gold),
+                  const SizedBox(width: 4),
+                  Text('+$earnedXp', style: _beute),
+                  const SizedBox(width: 16),
+                  const GoldIcon(size: 20),
+                  const SizedBox(width: 4),
+                  Text('+$earnedGold', style: _beute),
+                ],
               ),
             ),
           ],
-          const SizedBox(height: 14),
-          Text(
-            _fussnote,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.45,
-              color: Palette.muted,
-            ),
-          ),
         ],
       ),
       actions: <Widget>[
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('OK'),
+          child: const Icon(Icons.check_rounded, semanticLabel: 'OK'),
         ),
       ],
     );

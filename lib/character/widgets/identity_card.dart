@@ -4,6 +4,9 @@ import 'package:progression/progression.dart';
 
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../../ui/gold_icon.dart';
+import '../../ui/level_abzeichen.dart';
+import '../../ui/ruhm_zahl.dart';
 
 /// Der Kopf des Charakterbildschirms: wer der Charakter ist.
 ///
@@ -55,7 +58,7 @@ class IdentityCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.person_outline, size: 30, color: Palette.accent),
+              LevelAbzeichen(level: level.level, size: 40),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -70,45 +73,41 @@ class IdentityCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      title == null
-                          ? 'Level ${level.level}'
-                          : '${title.label} · Level ${level.level}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Palette.textDim,
+                    if (title != null)
+                      Text(
+                        title.label,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Palette.textDim,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  Text(
-                    '$gold Gold',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Palette.gold,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const GoldIcon(size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$gold',
+                        semanticsLabel: '$gold Gold',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.gold,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$fame Ruhm',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textDim,
-                    ),
-                  ),
+                  const SizedBox(height: 4),
+                  RuhmZahl(fame: fame),
                 ],
               ),
             ],
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Alles hier kommt aus dem, was du getan hast.',
-            style: TextStyle(fontSize: 12, color: Palette.muted),
           ),
           const SizedBox(height: 12),
           _LevelBar(level: level),
@@ -152,10 +151,7 @@ class _LevelBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (level.isMaxLevel) {
-      return const Text(
-        'Höchste Stufe erreicht.',
-        style: TextStyle(fontSize: 12, color: Palette.gold),
-      );
+      return const HolzBalken(value: 1, color: Palette.gold);
     }
 
     // Ein frisches Level steht bei 0 — der Balken muss das aushalten,
@@ -170,8 +166,10 @@ class _LevelBar extends StatelessWidget {
         HolzBalken(value: anteil, color: Palette.accent),
         const SizedBox(height: 5),
         Text(
-          '${level.xpIntoLevel} / ${level.xpForLevel} bis Level '
-          '${level.level + 1}',
+          '${level.xpIntoLevel} / ${level.xpForLevel}',
+          semanticsLabel:
+              '${level.xpIntoLevel} von ${level.xpForLevel} Erfahrung bis '
+              'Level ${level.level + 1}',
           style: const TextStyle(fontSize: 11, color: Palette.textDim),
         ),
       ],
@@ -201,16 +199,7 @@ class _Knopf extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(icon, size: 18),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-        ],
-      ),
+      child: Icon(icon, size: 20, semanticLabel: label),
     );
   }
 }
