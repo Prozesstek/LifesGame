@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 611, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 616, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -83,6 +83,18 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 30.09.2026, zuletzt: das Blatt nach einem Sieg
+
+Frederiks Vorgabe, gebaut als `SiegBlatt` (`lib/combat/widgets/sieg_blatt.dart`):
+oben **„Sieg“ in Grün**, darunter ruhig „Ebene: 12“ und die Zeit mit Uhr
+(Stern bei neuer Bestzeit), dann **XP und Gold untereinander** — sie
+gleiten nacheinander herein und blenden von Grün in ihre Farbe —,
+zuletzt mittig **„Weiter“**. Ein zweiter Sieg zeigt keine Beute; der
+Tipp auf „Sieg“ sagt warum. Die Zahl der Gegner steht nicht mehr da.
+Die **Niederlage** bleibt beim alten Blatt.
+
+App 616. Gerendert in 390 × 844, **nicht am Handy**.
 
 ## 30.09.2026, danach: Startseite — Truhe und lesbare Aufgaben
 

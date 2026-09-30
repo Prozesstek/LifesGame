@@ -12,6 +12,7 @@ import '../character/abilities_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/result_dialog.dart';
+import '../combat/widgets/sieg_blatt.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
 import '../ui/on_dark.dart';
@@ -137,32 +138,35 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => CombatResultDialog(
-        won: gewonnen,
-        rounds: 0,
-        enemyName: 'Der Wächter',
-        earnedXp: ertrag.xp,
-        earnedGold: ertrag.gold,
-        perStage: true,
-        fakten: <(IconData, String)>[
-          (Icons.stairs_outlined, '$stufe'),
-          (Icons.groups_outlined, '${welt.kills} / ${welt.totalEnemies}'),
-          (
-            welt.isTimedOut ? Icons.timer_off_outlined : Icons.timer_outlined,
-            '$sekunden s',
-          ),
-          if (neueBestzeit) (Icons.star_rounded, ''),
-        ],
-        summary: gewonnen
-            ? 'Stufe $stufe: Der Wächter liegt — ${welt.kills} Gegner in '
-                  '$sekunden s.'
-                  '${neueBestzeit ? ' Neue Bestzeit!' : ''}'
-            : welt.isTimedOut
-            ? 'Die Zeit ist um auf Stufe $stufe, nach ${welt.kills} von '
-                  '${welt.totalEnemies} Gegnern.'
-            : 'Gefallen auf Stufe $stufe, nach ${welt.kills} von '
-                  '${welt.totalEnemies} Gegnern.',
-      ),
+      builder: (context) => gewonnen
+          ? SiegBlatt(
+              stage: stufe,
+              seconds: sekunden,
+              earnedXp: ertrag.xp,
+              earnedGold: ertrag.gold,
+              newBest: neueBestzeit,
+            )
+          : CombatResultDialog(
+              won: false,
+              rounds: 0,
+              enemyName: 'Der Wächter',
+              perStage: true,
+              fakten: <(IconData, String)>[
+                (Icons.stairs_outlined, '$stufe'),
+                (Icons.groups_outlined, '${welt.kills} / ${welt.totalEnemies}'),
+                (
+                  welt.isTimedOut
+                      ? Icons.timer_off_outlined
+                      : Icons.timer_outlined,
+                  '$sekunden s',
+                ),
+              ],
+              summary: welt.isTimedOut
+                  ? 'Die Zeit ist um auf Stufe $stufe, nach ${welt.kills} von '
+                        '${welt.totalEnemies} Gegnern.'
+                  : 'Gefallen auf Stufe $stufe, nach ${welt.kills} von '
+                        '${welt.totalEnemies} Gegnern.',
+            ),
     );
 
     if (!mounted) return;
