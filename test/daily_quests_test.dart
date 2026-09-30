@@ -87,6 +87,7 @@ void main() {
     await zeige(tester, c, const HomeScreen());
     final vorher = c.read(earnedKeysProvider);
     final abholbar = c.read(claimableQuestsProvider).length;
+    final erste = c.read(claimableQuestsProvider).first;
 
     final knopf = find.descendant(
       of: find.byType(DailyQuestsCard),
@@ -103,6 +104,14 @@ void main() {
       find.descendant(
         of: find.byType(DailyQuestsCard),
         matching: find.byIcon(Icons.check_circle),
+      ),
+      findsOneWidget,
+    );
+    // Abgeholt bleibt lesbar, was es war.
+    expect(
+      find.descendant(
+        of: find.byType(DailyQuestsCard),
+        matching: find.text(erste.text),
       ),
       findsOneWidget,
     );
