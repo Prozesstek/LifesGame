@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/daily_chest_card.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -89,7 +90,9 @@ void main() {
     await startseite(tester, tracker);
 
     expect(
-      inDerKarte(find.bySemanticsLabel('Alles erledigt, die Tagestruhe wartet')),
+      inDerKarte(
+        find.bySemanticsLabel('Alles erledigt, die Tagestruhe wartet'),
+      ),
       findsOneWidget,
     );
   });
@@ -106,10 +109,31 @@ void main() {
     expect(inDerKarte(find.bySemanticsLabel('Alles erledigt')), findsOneWidget);
   });
 
+  testWidgets('die Truhe steht auf der Startseite und geht dort auf', (
+    tester,
+  ) async {
+    final offen = const HabitTracker.empty().activate(starter.id);
+    await startseite(tester, offen);
+    expect(find.byType(DailyChestCard), findsNothing);
+
+    final erledigt = offen.check(starter.id, heute).tracker;
+    final container = await startseite(tester, erledigt);
+    await tester.tap(find.byKey(DailyChestCard.oeffnenKey));
+    await tester.pumpAndSettle();
+
+    expect(container.read(habitTrackerProvider).hasOpenedChest(heute), isTrue);
+    await tester.tap(find.byKey(DailyChestCard.einsackenKey));
+    await tester.pumpAndSettle();
+    expect(find.byKey(DailyChestCard.oeffnenKey), findsNothing);
+    expect(find.byType(DailyChestCard), findsOneWidget);
+  });
+
   testWidgets('ohne Gewohnheit führt sie zum Starten', (tester) async {
     await startseite(tester, const HabitTracker.empty());
 
-    await tester.tap(inDerKarte(find.bySemanticsLabel('Erste Gewohnheit starten')));
+    await tester.tap(
+      inDerKarte(find.bySemanticsLabel('Erste Gewohnheit starten')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(HabitsScreen), findsOneWidget);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 
 import '../character/abilities_screen.dart';
 import '../gear/equipment_screen.dart';
@@ -21,6 +22,7 @@ import 'widgets/today_card.dart';
 import '../ui/druck.dart';
 import '../habits/daily_quests_provider.dart';
 import '../habits/habit_check_flow.dart';
+import '../habits/widgets/daily_chest_card.dart';
 import '../habits/widgets/daily_quests_card.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
@@ -68,6 +70,7 @@ class HomeScreen extends ConsumerWidget {
     final gold = ref.watch(goldProvider);
 
     final tracker = ref.watch(habitTrackerProvider);
+    final today = ref.watch(todayProvider);
     final heute = HubProgress(
       done: tracker.completedOn(ref.watch(todayProvider)),
       total: tracker.activeIds.length,
@@ -137,16 +140,27 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             const TodayCard(),
+                            // Die **Tagestruhe** direkt darunter: Sie ist
+                            // der Lohn für genau diese Liste.
+                            if (tracker.canOpenChest(today) ||
+                                tracker.hasOpenedChest(today)) ...<Widget>[
+                              const SizedBox(height: 10),
+                              DailyChestCard(
+                                canOpen: tracker.canOpenChest(today),
+                                opened: tracker.hasOpenedChest(today)
+                                    ? DailyChest.forDay(today)
+                                    : null,
+                                onOpen: () => openDailyChest(context, ref),
+                              ),
+                            ],
                             if (ref.watch(dailyQuestsProvider)
                                 case final aufgaben
                                 when aufgaben.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 10),
                               DailyQuestsCard(
                                 quests: aufgaben,
-                                isClaimed: (q) => tracker.isQuestClaimed(
-                                  ref.watch(todayProvider),
-                                  q.id,
-                                ),
+                                isClaimed: (q) =>
+                                    tracker.isQuestClaimed(today, q.id),
                                 onClaim: (q) =>
                                     claimDailyQuest(context, ref, q),
                               ),
