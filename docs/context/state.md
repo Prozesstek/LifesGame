@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 616, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 612, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -92,9 +92,15 @@ oben **„Sieg“ in Grün**, darunter ruhig „Ebene: 12“ und die Zeit mit Uh
 gleiten nacheinander herein und blenden von Grün in ihre Farbe —,
 zuletzt mittig **„Weiter“**. Ein zweiter Sieg zeigt keine Beute; der
 Tipp auf „Sieg“ sagt warum. Die Zahl der Gegner steht nicht mehr da.
-Die **Niederlage** bleibt beim alten Blatt.
+Danach die **Niederlage** im selben Aufbau: „Niederlage“ in Rot, Uhr
+durchgestrichen, wenn die Zeit abgelaufen ist. **Neu:** Was in einem
+verlorenen Lauf gefallen ist, steht jetzt da — gebucht wurde es schon
+immer (ADR-0041), das alte Blatt hat es verschwiegen. Beides heisst
+jetzt `LaufErgebnis` (`lauf_ergebnis.dart`); `CombatResultDialog` und
+sein Test sind gelöscht, ihre Zusagen stehen in `lauf_ergebnis_test.dart`.
 
-App 616. Gerendert in 390 × 844, **nicht am Handy**.
+PR #97, #98. App 612. Der Sieg gerendert in 390 × 844, die Niederlage
+nicht; **beides nicht am Handy**.
 
 ## 30.09.2026, danach: Startseite — Truhe und lesbare Aufgaben
 
