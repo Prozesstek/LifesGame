@@ -191,7 +191,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/tagesform_kreis.dart` | die **Tagesform als Blitz**, der sich mit jedem Häkchen auflädt; Tipp zeigt, was sie bringt | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
-| `lib/combat/widgets/result_dialog.dart` | das Blatt am Ende eines Laufs | Flutter |
+| `lib/combat/widgets/result_dialog.dart` | das Blatt nach einer **Niederlage** | Flutter |
+| `lib/combat/widgets/sieg_blatt.dart` | das Blatt nach einem **Sieg**: „Sieg“ in Grün, Ebene und Zeit, XP und Gold gleiten herein, zuletzt „Weiter“ | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile, Handbuch davor | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
@@ -223,7 +224,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 611 Tests
+flutter test             # 616 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
