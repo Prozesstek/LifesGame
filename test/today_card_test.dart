@@ -82,19 +82,17 @@ void main() {
     expect(inDerKarte(find.text('1 / 2')), findsOneWidget);
   });
 
-  testWidgets('alles erledigt weist auf die Truhe', (tester) async {
+  testWidgets('alles erledigt: ein Haken, die Truhe steht darunter', (
+    tester,
+  ) async {
     final tracker = const HabitTracker.empty()
         .activate(starter.id)
         .check(starter.id, heute)
         .tracker;
     await startseite(tester, tracker);
 
-    expect(
-      inDerKarte(
-        find.bySemanticsLabel('Alles erledigt, die Tagestruhe wartet'),
-      ),
-      findsOneWidget,
-    );
+    expect(inDerKarte(find.bySemanticsLabel('Alles erledigt')), findsOneWidget);
+    expect(find.byKey(DailyChestCard.oeffnenKey), findsOneWidget);
   });
 
   testWidgets('nach der Truhe steht nur noch „Alles erledigt"', (tester) async {
