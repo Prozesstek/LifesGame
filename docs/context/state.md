@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 610, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 611, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).

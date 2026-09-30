@@ -17,9 +17,8 @@ import '../../ui/palette.dart';
 /// Kreisen, einen Tipp und einen Bildschirm entfernt. Jede Reibung dort
 /// kostet genau die Tage, an denen die Lust ohnehin knapp ist.
 ///
-/// **Nur, was offen ist.** Erledigtes schrumpft auf eine Zeile, sobald
-/// alles erledigt ist, weist die Karte auf die Truhe. Sie ist damit
-/// kurz, wo sie nichts mehr verlangt, und die Figur behält den Platz.
+/// **Nur, was offen ist.** Erledigtes schrumpft auf eine Zeile; ist
+/// alles erledigt, steht die Tagestruhe direkt unter der Karte.
 ///
 /// Abgehakt wird über [toggleHabit] — dieselbe Stelle wie auf dem
 /// Gewohnheiten-Bildschirm, samt Klang, Feiern und aufsteigenden Zahlen.
@@ -67,14 +66,10 @@ class TodayCard extends ConsumerWidget {
                 onTap: () => toggleHabit(context, ref, habit),
               ),
             if (offen.isEmpty)
-              _Hinweis(
-                icon: tracker.canOpenChest(today)
-                    ? Icons.inventory_2_outlined
-                    : Icons.done_all_rounded,
-                label: tracker.canOpenChest(today)
-                    ? 'Alles erledigt, die Tagestruhe wartet'
-                    : 'Alles erledigt',
-                highlight: tracker.canOpenChest(today),
+              // Die Truhe steht direkt darunter und braucht keinen Hinweis.
+              const _Hinweis(
+                icon: Icons.done_all_rounded,
+                label: 'Alles erledigt',
               )
             else if (erledigt > 0)
               _Hinweis(

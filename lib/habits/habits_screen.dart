@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
-import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
@@ -111,7 +110,7 @@ class HabitsScreen extends ConsumerWidget {
                         opened: tracker.hasOpenedChest(today)
                             ? DailyChest.forDay(today)
                             : null,
-                        onOpen: () => _openChest(context, ref),
+                        onOpen: () => openDailyChest(context, ref),
                       ),
                     ],
                     const SizedBox(height: 18),
@@ -223,23 +222,6 @@ class HabitsScreen extends ConsumerWidget {
     );
     if (text == null || !context.mounted) return;
     ref.read(habitTrackerProvider.notifier).setCue(habit.id, text);
-  }
-
-  /// Öffnet die Tagestruhe — der seltene Moment, der laut sein darf.
-  void _openChest(BuildContext context, WidgetRef ref) {
-    final today = ref.read(todayProvider);
-    final inhalt = ref.read(habitTrackerProvider.notifier).openChest(today);
-    if (inhalt == null) return;
-
-    unawaited(HapticFeedback.heavyImpact());
-    ref
-        .read(soundPlayerProvider)
-        .play(
-          inhalt.tier == ChestTier.schlicht
-              ? SoundEffect.sieg
-              : SoundEffect.errungenschaft,
-        );
-    unawaited(showChestReveal(context, inhalt));
   }
 
   /// Setzt ein Streak-Eis auf [tag].

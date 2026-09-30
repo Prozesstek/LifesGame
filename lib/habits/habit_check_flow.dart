@@ -28,6 +28,7 @@ import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'habits_controller.dart';
+import 'widgets/daily_chest_card.dart';
 
 /// Hakt [habit] ab oder nimmt das Häkchen zurück.
 void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
@@ -83,6 +84,24 @@ void claimDailyQuest(BuildContext context, WidgetRef ref, DailyQuest quest) {
           color: Palette.goldOnDark,
         ),
   ]);
+}
+
+/// Öffnet die Tagestruhe (ADR-0044) — der seltene Moment, der laut sein
+/// darf. **Eine Stelle** für Startseite und Gewohnheiten-Bildschirm.
+void openDailyChest(BuildContext context, WidgetRef ref) {
+  final today = ref.read(todayProvider);
+  final inhalt = ref.read(habitTrackerProvider.notifier).openChest(today);
+  if (inhalt == null) return;
+
+  unawaited(HapticFeedback.heavyImpact());
+  ref
+      .read(soundPlayerProvider)
+      .play(
+        inhalt.tier == ChestTier.schlicht
+            ? SoundEffect.sieg
+            : SoundEffect.errungenschaft,
+      );
+  unawaited(showChestReveal(context, inhalt));
 }
 
 /// Ein Schritt auf ein Tagesziel.
