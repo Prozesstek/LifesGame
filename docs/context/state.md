@@ -84,6 +84,18 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
 ---
 
+## 30.09.2026, danach: Startseite — Truhe und lesbare Aufgaben
+
+Frederik, als Nachtrag zu ADR-0060:
+
+| Was | Wie |
+|---|---|
+| **Abgeholte Tagesaufgaben** | statt ✓ und vollem Balken steht der Satz da, grau und durchgestrichen — vorher war nicht mehr zu sehen, was es war |
+| **Tagestruhe** | auch auf der Startseite, direkt unter „Heute“; geöffnet wird über `openDailyChest` (`habit_check_flow.dart`), eine Stelle für beide Bildschirme |
+| **„Heute“ bei erledigtem Tag** | nur noch ✓ „Alles erledigt“, der Satz zur Truhe ist weg |
+
+PR #94, #95. App 611. **Nicht am Handy angesehen.**
+
 ## 30.09.2026: der Baum wächst aus dem Gelesenen
 
 Frederik liest wieder täglich (*Die 1%-Methode*) und will, was er liest,
