@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 29.09.2026 · Frederik
+**Zuletzt aktualisiert:** 30.09.2026 · Frederik
 
 ---
 
@@ -26,7 +26,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 54 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056 |
+| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
@@ -83,6 +83,32 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 30.09.2026: der Baum wächst aus dem Gelesenen
+
+Frederik liest wieder täglich (*Die 1%-Methode*) und will, was er liest,
+als Theorie in die App bringen — als Überblick über das eigene Wissen
+und als Wissen für andere. [ADR-0061](../decisions/0061-der-baum-waechst-aus-dem-gelesenen.md).
+
+| Knoten | Hängt an | Inhalt |
+|---|---|---|
+| **Gewohnheiten** | Selbstentwicklung | was eine Gewohnheit ist, ein Prozent am Tag |
+| **Die vier Regeln** | Gewohnheiten | offensichtlich, attraktiv, einfach, befriedigend — und umgedreht |
+| **Mach es offensichtlich** | Die vier Regeln | Thorndikes Kantine, Wasserflasche und Gemüse sichtbar hinstellen, Handy aus dem Blick |
+
+Damit ist der Baum zum ersten Mal tiefer als drei Ebenen; die
+Oberfläche konnte das schon. `gewohnheiten_pages.dart`. Beim Schreiben
+hat `question_fairness_test` eine Frage erwischt, deren richtige Antwort
+die längste war — umformuliert.
+
+theory 174, App 610. **Nicht gegengelesen, nicht am Handy angesehen.**
+
+### Offen
+
+- Regeln 2–4 (attraktiv, einfach, befriedigend) als eigene Seiten, sobald
+  sie gelesen sind.
+- Ob der Weg (Wurzel → Selbstentwicklung → Gewohnheiten → Regeln →
+  Seite, fünf Punkte) zu teuer ist für das, was man eigentlich lesen will.
 
 ## 29.09.2026: die App geht ohne Lesen
 
