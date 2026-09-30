@@ -62,7 +62,7 @@ void main() {
     expect(inDerKarte(find.text('Nach dem Zähneputzen')), findsOneWidget);
   });
 
-  testWidgets('ein Tipp hakt ab, und die Zeile wird zu „erledigt"', (
+  testWidgets('ein Tipp hakt ab, und die Zeile bleibt als erledigt stehen', (
     tester,
   ) async {
     final tracker = const HabitTracker.empty()
@@ -77,25 +77,39 @@ void main() {
       container.read(habitTrackerProvider).isChecked(starter.id, heute),
       isTrue,
     );
-    expect(inDerKarte(find.text(starter.name)), findsNothing);
-    expect(inDerKarte(find.bySemanticsLabel('1 erledigt')), findsOneWidget);
+    expect(inDerKarte(find.text(starter.name)), findsOneWidget);
+    expect(inDerKarte(find.byIcon(Icons.check_circle)), findsOneWidget);
     expect(inDerKarte(find.text('1 / 2')), findsOneWidget);
+
+    // Noch ein Tipp nimmt das Häkchen zurück.
+    await tester.tap(inDerKarte(find.text(starter.name)));
+    await tester.pump();
+    expect(
+      container.read(habitTrackerProvider).isChecked(starter.id, heute),
+      isFalse,
+    );
   });
 
-  testWidgets('alles erledigt: ein Haken, die Truhe steht darunter', (
+  testWidgets('alles erledigt: alle stehen noch da, die Truhe darunter', (
     tester,
   ) async {
     final tracker = const HabitTracker.empty()
         .activate(starter.id)
+        .activate(zweite.id)
         .check(starter.id, heute)
+        .tracker
+        .check(zweite.id, heute)
         .tracker;
     await startseite(tester, tracker);
 
-    expect(inDerKarte(find.bySemanticsLabel('Alles erledigt')), findsOneWidget);
+    expect(inDerKarte(find.text(starter.name)), findsOneWidget);
+    expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
+    expect(inDerKarte(find.byIcon(Icons.check_circle)), findsNWidgets(2));
+    expect(inDerKarte(find.text('2 / 2')), findsOneWidget);
     expect(find.byKey(DailyChestCard.oeffnenKey), findsOneWidget);
   });
 
-  testWidgets('nach der Truhe steht nur noch „Alles erledigt"', (tester) async {
+  testWidgets('auch nach der Truhe bleibt die Liste stehen', (tester) async {
     final tracker = const HabitTracker.empty()
         .activate(starter.id)
         .check(starter.id, heute)
@@ -104,7 +118,7 @@ void main() {
         .tracker;
     await startseite(tester, tracker);
 
-    expect(inDerKarte(find.bySemanticsLabel('Alles erledigt')), findsOneWidget);
+    expect(inDerKarte(find.byIcon(Icons.check_circle)), findsOneWidget);
   });
 
   testWidgets('die Truhe steht auf der Startseite und geht dort auf', (

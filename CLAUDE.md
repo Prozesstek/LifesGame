@@ -130,7 +130,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)) | Flutter |
 | `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: offene Gewohnheiten, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
