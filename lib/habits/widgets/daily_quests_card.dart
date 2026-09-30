@@ -156,46 +156,65 @@ class _Zeile extends StatelessWidget {
                 color: claimed ? Palette.success : Palette.accent,
               ),
               const SizedBox(width: 10),
-              if (name != null) ...<Widget>[
-                Flexible(
-                  flex: 2,
+              if (claimed)
+                // Abgeholt braucht es keinen Balken mehr — aber man soll
+                // noch lesen können, was es war.
+                Expanded(
                   child: Text(
-                    name,
+                    quest.text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
-                      color: claimed ? Palette.textDim : Palette.text,
-                      fontWeight: FontWeight.w600,
+                      color: Palette.textDim,
+                      decoration: TextDecoration.lineThrough,
+                      decorationColor: Palette.textDim,
+                    ),
+                  ),
+                )
+              else ...<Widget>[
+                if (name != null) ...<Widget>[
+                  Flexible(
+                    flex: 2,
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Palette.text,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  flex: 3,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: anteil,
+                      minHeight: 6,
+                      backgroundColor: Palette.surfaceRaised,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Palette.accent,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-              ],
-              Expanded(
-                flex: 3,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: claimed ? 1 : anteil,
-                    minHeight: 6,
-                    backgroundColor: Palette.surfaceRaised,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      claimed ? Palette.success : Palette.accent,
+                if (quest.isDone)
+                  _AbholenKnopf(key: DailyQuestsCard.abholenKey, onTap: onClaim)
+                else
+                  Text(
+                    '${quest.progress} / ${quest.target}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Palette.textDim,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              if (claimed)
-                const SizedBox.shrink()
-              else if (quest.isDone)
-                _AbholenKnopf(key: DailyQuestsCard.abholenKey, onTap: onClaim)
-              else
-                Text(
-                  '${quest.progress} / ${quest.target}',
-                  style: const TextStyle(fontSize: 12, color: Palette.textDim),
-                ),
+              ],
             ],
           ),
         ),
