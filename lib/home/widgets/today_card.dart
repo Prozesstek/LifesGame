@@ -17,8 +17,12 @@ import '../../ui/palette.dart';
 /// Kreisen, einen Tipp und einen Bildschirm entfernt. Jede Reibung dort
 /// kostet genau die Tage, an denen die Lust ohnehin knapp ist.
 ///
-/// **Nur, was offen ist.** Erledigtes schrumpft auf eine Zeile; ist
-/// alles erledigt, steht die Tagestruhe direkt unter der Karte.
+/// **Auch, was erledigt ist** (Frederik, 30.09.). Bis dahin schrumpfte
+/// Erledigtes auf „✓ 2“, und am Ende des Tages stand nichts mehr da, was
+/// man geschafft hat. Jetzt bleibt jede Zeile stehen, abgehakt und
+/// durchgestrichen, unter den offenen — die Reihenfolge ist die von
+/// `HabitTracker.dailyListOn`. Ein Tipp auf eine erledigte nimmt das
+/// Häkchen zurück, wie im Gewohnheiten-Bildschirm.
 ///
 /// Abgehakt wird über [toggleHabit] — dieselbe Stelle wie auf dem
 /// Gewohnheiten-Bildschirm, samt Klang, Feiern und aufsteigenden Zahlen.
@@ -33,11 +37,9 @@ class TodayCard extends ConsumerWidget {
     final today = ref.watch(todayProvider);
 
     final liste = tracker.dailyListOn(today);
-    final offen = <Habit>[
-      for (final habit in liste)
-        if (!tracker.isChecked(habit.id, today)) habit,
-    ];
-    final erledigt = liste.length - offen.length;
+    final erledigt = liste
+        .where((habit) => tracker.isChecked(habit.id, today))
+        .length;
 
     return HolzKarte(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -57,27 +59,15 @@ class TodayCard extends ConsumerWidget {
               label: 'Erste Gewohnheit starten',
               highlight: true,
             )
-          else ...<Widget>[
-            for (final habit in offen)
-              _OffeneZeile(
+          else
+            for (final habit in liste)
+              _Zeile(
                 key: ValueKey<String>(habit.id),
                 habit: habit,
+                done: tracker.isChecked(habit.id, today),
                 cue: tracker.cueFor(habit.id),
                 onTap: () => toggleHabit(context, ref, habit),
               ),
-            if (offen.isEmpty)
-              // Die Truhe steht direkt darunter und braucht keinen Hinweis.
-              const _Hinweis(
-                icon: Icons.done_all_rounded,
-                label: 'Alles erledigt',
-              )
-            else if (erledigt > 0)
-              _Hinweis(
-                icon: Icons.check_circle,
-                label: '$erledigt erledigt',
-                zahl: erledigt,
-              ),
-          ],
         ],
       ),
     );
@@ -186,26 +176,29 @@ class _Flamme extends StatelessWidget {
   }
 }
 
-/// Eine offene Gewohnheit: antippen hakt ab.
-class _OffeneZeile extends StatelessWidget {
-  const _OffeneZeile({
+/// Eine Gewohnheit von heute: antippen hakt ab — oder nimmt das Häkchen
+/// zurück. Erledigt steht sie grau und durchgestrichen da, ohne Auslöser.
+class _Zeile extends StatelessWidget {
+  const _Zeile({
     required this.habit,
+    required this.done,
     required this.cue,
     required this.onTap,
     super.key,
   });
 
   final Habit habit;
+  final bool done;
   final String? cue;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final text = cue;
+    final text = done ? null : cue;
 
     return Semantics(
       button: true,
-      label: '${habit.name} abhaken',
+      label: done ? '${habit.name} erledigt' : '${habit.name} abhaken',
       child: Druck(
         child: InkWell(
           onTap: onTap,
@@ -214,10 +207,10 @@ class _OffeneZeile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: Row(
               children: <Widget>[
-                const Icon(
-                  Icons.radio_button_unchecked,
+                Icon(
+                  done ? Icons.check_circle : Icons.radio_button_unchecked,
                   size: 22,
-                  color: Palette.accent,
+                  color: done ? Palette.success : Palette.accent,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -229,10 +222,12 @@ class _OffeneZeile extends StatelessWidget {
                         habit.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Palette.text,
+                          color: done ? Palette.textDim : Palette.text,
+                          decoration: done ? TextDecoration.lineThrough : null,
+                          decorationColor: Palette.textDim,
                         ),
                       ),
                       if (text != null)
@@ -257,25 +252,21 @@ class _OffeneZeile extends StatelessWidget {
   }
 }
 
-/// Eine Zeile, die nicht abhakt, sondern hinführt — ein Zeichen, höchstens
-/// mit Zahl. Was es heißt, sagt [label] dem Vorleser.
+/// Eine Zeile, die nicht abhakt, sondern hinführt — nur ein Zeichen. Was es heißt, sagt [label] dem Vorleser.
 class _Hinweis extends StatelessWidget {
   const _Hinweis({
     required this.icon,
     required this.label,
-    this.zahl,
     this.highlight = false,
   });
 
   final IconData icon;
   final String label;
-  final int? zahl;
   final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     final farbe = highlight ? Palette.accent : Palette.textDim;
-    final anzahl = zahl;
 
     return Semantics(
       button: true,
@@ -290,17 +281,6 @@ class _Hinweis extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Icon(icon, size: highlight ? 26 : 20, color: farbe),
-                if (anzahl != null) ...<Widget>[
-                  const SizedBox(width: 6),
-                  Text(
-                    '$anzahl',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: farbe,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
