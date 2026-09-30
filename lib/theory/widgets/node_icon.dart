@@ -93,6 +93,11 @@ const Map<String, IconData> _icons = <String, IconData>{
   'repeat': Icons.repeat_rounded,
   'psyche': Icons.psychology_alt_outlined,
 
+  // Gewohnheiten
+  'habit': Icons.loop_rounded,
+  'rules': Icons.format_list_numbered_rounded,
+  'eye': Icons.visibility_rounded,
+
   // Wissenschaft
   'question': Icons.help_outline,
   'link': Icons.link_rounded,

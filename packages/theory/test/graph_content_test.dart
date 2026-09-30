@@ -213,15 +213,15 @@ void main() {
   });
 
   group('Der Startbaum in Zahlen', () {
-    test('54 Knoten — vier Wurzeln, zehn Zwischenebenen, 40 Themen', () {
-      expect(theoryGraph.nodeCount, 54);
+    test('57 Knoten — vier Wurzeln, zehn Zwischenebenen, 43 Themen', () {
+      expect(theoryGraph.nodeCount, 57);
       expect(theoryGraph.roots.length, 4);
     });
 
-    test('kostet vierundfünfzig Theoriepunkte', () {
+    test('kostet siebenundfünfzig Theoriepunkte', () {
       final gesamt = nodes.fold(0, (sum, n) => sum + n.cost);
 
-      expect(gesamt, 54);
+      expect(gesamt, 57);
     });
 
     test('fünfzehn Überschriften sind angekündigt', () {
@@ -298,8 +298,8 @@ void main() {
       expect(imGraph.intersection(imHandbuch), isEmpty);
     });
 
-    test('zusammen sind es 59 Seiten', () {
-      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 59);
+    test('zusammen sind es 62 Seiten', () {
+      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 62);
     });
 
     test('ein bestandener Knoten wird gezählt', () {

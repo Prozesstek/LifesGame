@@ -29,6 +29,7 @@ import '../placeholder.dart';
 import 'area_pages.dart';
 import 'ausdauer_pages.dart';
 import 'geist_branch.dart';
+import 'gewohnheiten_pages.dart';
 import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
 import 'koerper_geist_pages.dart';
@@ -264,6 +265,26 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: motivationPage,
       iconId: 'spark',
       parentIds: <String>['selbstentwicklung'],
+    ),
+    // Gewohnheiten -- wächst aus dem, was gerade gelesen wird: Überkapitel,
+    // darunter die vier Regeln, darunter je Regel eine Seite.
+    const TheoryNode(
+      id: 'gewohnheiten',
+      lesson: gewohnheitenPage,
+      iconId: 'habit',
+      parentIds: <String>['selbstentwicklung'],
+    ),
+    const TheoryNode(
+      id: 'gewohnheiten-vier-regeln',
+      lesson: vierRegelnPage,
+      iconId: 'rules',
+      parentIds: <String>['gewohnheiten'],
+    ),
+    const TheoryNode(
+      id: 'gewohnheiten-offensichtlich',
+      lesson: offensichtlichPage,
+      iconId: 'eye',
+      parentIds: <String>['gewohnheiten-vier-regeln'],
     ),
     const TheoryNode(
       id: 'philosophie',
