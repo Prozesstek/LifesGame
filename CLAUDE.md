@@ -101,7 +101,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 233 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 276 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
@@ -112,7 +112,9 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
-| `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen | nur Dart-SDK |
+| `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen, würfelt Wächter und Besetzung | nur Dart-SDK |
+| `packages/action_combat/lib/src/cast.dart` | die **Besetzung** einer Grube: welche Arten in diesem Lauf die Rollen spielen ([ADR-0063](docs/decisions/0063-besetzung-in-rollen.md)) | nur Dart-SDK |
+| `packages/action_combat/lib/src/enemies.dart` | was Kreischpilz, Sporenpilz, Wächterauge und Schleim **tun** — und die Werte der fünf neuen Arten | nur Dart-SDK |
 | `packages/action_combat/lib/src/level_catalog.dart` | die feste Halle des Prototyps, nur noch im Entwicklermodus | nur Dart-SDK |
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
 | `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
@@ -224,7 +226,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 622 Tests
+flutter test             # 623 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -233,7 +235,7 @@ dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausge
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 233 Tests
+dart test                              # 276 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -304,14 +306,54 @@ und Legendäre später eine Fähigkeit verändern. Alle neunzehn Fähigkeiten
 sind aus neun Arten gebaut; `test/pit_test.dart` hält fest, dass jede
 lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
 
-**Sechs Gegnerarten** (`EnemyKind`): Fussvolk `e`, Schütze `s`, Kobold `k`
-(schneller als der Held), Fledermaus `f` (beisst und flattert davon,
-`_batActs`), Troll `t` (gross, zäh, setzt meist der
-Zufallsbau — auf tieferen Stufen öfter) und der Wächter `B`, **allein in
-seinem Raum**. **Ein Gegner kommt nur aus zwei Gründen:** Er sieht den
+**Elf Gegnerarten** (`EnemyKind`), jede mit einem Grund, der an ihrem
+Eintrag steht: Fussvolk `e`, Schütze `s`, Kobold `k` (schneller als der
+Held), Fledermaus `f` (beisst und flattert davon, `_batActs`), Troll `t`
+(gross, zäh, setzt meist der Zufallsbau — auf tieferen Stufen öfter),
+der Wächter `B`, **allein in seinem Raum**, und seit
+[ADR-0063](docs/decisions/0063-besetzung-in-rollen.md) Schleim `j`
+(zerfällt in zwei Schleimlinge), Grimlock `g` (blind, schlägt hart),
+Kreischpilz `p` (weckt den Raum), Sporenpilz `m` (heilt die anderen) und
+Wächterauge `o` (Strahl, als Linie angekündigt). Welches Zeichen welche
+Art setzt, steht in `Level.symbols`.
+
+**Wer in einer Grube steht, sagt ihre Besetzung** (`PitCast`, je Lauf
+gewürfelt, auf jeder Stufe aus demselben Topf). Die Räume im Katalog
+schreiben in **Rollen**, die Besetzung sagt, wer sie spielt:
+
+| Rolle im Raum | Wer sie spielen kann | Antwortet |
+|---|---|---|
+| `e`, wer heranläuft | Fussvolk — und auf der Hälfte der Plätze Schleim, Grimlock oder niemand sonst | `PitCast.secondMelee` |
+| `s`, wer schiesst | Schütze oder Wächterauge | `PitCast.ranged` |
+| `k` und `f`, das Rudel | Kobold oder Fledermaus | `PitCast.swarm` |
+| in jedem zweiten Raum einer, auf einem Platz des Fussvolks | Kreischpilz oder Sporenpilz | `PitCast.special` |
+
+**Das Fussvolk bleibt immer dabei**: Eine Grube nur aus blinden Grimlocks
+liesse sich bis zum Wächter durchschleichen, und der zahlt den ganzen
+Topf. Die Besetzung **ersetzt, sie stellt nicht dazu**, und sie hat
+eigene Würfel, damit sie die Karte nicht verschiebt (`cast_test.dart`).
+`PitCast.classic` lässt jeden Raum, wie er geschrieben ist. Eine neue Art
+braucht: einen Eintrag in `EnemyKind` mit ihrem Grund, ein Zeichen in
+`Level.symbols`, Werte in `ActionBalance`, ein Bild in `GrubeFiguren` und
+einen Platz in einer der vier Listen in `PitCast` — der Analyzer zeigt
+auf die Schalter dazwischen.
+
+**Was im Lauf entsteht, zahlt nichts** (`ActionEntity.lootless`): Die
+Schleimlinge zählen als Gegner, aber nicht für den Topf und lassen keine
+Kugel fallen — sonst hinge der Ertrag einer Stufe daran, wie oft etwas
+zerfällt. **Heilung der Gegner ist ein Anteil des Lebens des Geheilten**,
+nie des Heilers, und kein Sporenpilz heilt sich selbst, einen anderen
+Sporenpilz oder den Wächter. **Ein Schrei ist keine Ankündigung**
+(`ActionWorld.alarms`, nicht `telegraphs`): Er schadet nicht, und aus ihm
+läuft man nicht hinaus, man fällt den Pilz vorher. Im Bild ist er gold.
+Wer an einer Art dreht, liest die dritte Tabelle von `pit_sim` („Je
+Besetzung“).
+
+**Ein Gegner kommt nur aus zwei Gründen:** Er sieht den
 Helden (im Umkreis `aggroRadius` **und** ohne Wand dazwischen), oder er
 wurde von ihm getroffen, dann auch von weiter weg (`_enemiesAct`,
-`aggro_test.dart`). Durch eine Wand bemerkt ihn niemand.
+`aggro_test.dart`). Durch eine Wand bemerkt ihn niemand — ausser ein
+Kreischpilz hat geschrien: Der Schrei geht durch Wände.
 
 **Die Uhr läuft, und sie ist gegen das Kiten**
 ([ADR-0046](docs/decisions/0046-uhr-in-der-grube.md)). Jede Stufe hat

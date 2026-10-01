@@ -16,6 +16,7 @@ import 'vec2.dart';
 
 part 'aim.dart';
 part 'boss.dart';
+part 'enemies.dart';
 
 /// Ein Lauf durch eine Halle.
 ///
@@ -511,9 +512,17 @@ class ActionWorld {
     return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
   }
 
-  /// Was der Wächter gerade ankündigt — ein Ring oder eine Linie, die
-  /// sich füllt. Leer, wenn er nichts vorhat.
-  List<TelegraphView> get telegraphs => _bossTelegraphs();
+  /// Was sich gerade ankündigt und dem Helden schaden wird — die Ringe
+  /// und Linien des Wächters und die Strahlen der Wächteraugen. Leer,
+  /// wenn nichts bevorsteht.
+  List<TelegraphView> get telegraphs => <TelegraphView>[
+        ..._bossTelegraphs(),
+        ..._beamTelegraphs(),
+      ];
+
+  /// Welche Kreischpilze gerade Luft holen. Ein Schrei schadet nicht,
+  /// deshalb steht er nicht in [telegraphs].
+  List<AlarmView> get alarms => _alarms();
 
   /// Ob der Wächter wütend ist (unter halbem Leben).
   bool get isBossEnraged => _bossEnraged;
@@ -803,7 +812,11 @@ class ActionWorld {
       // **Wer weiter schiesst, als er sieht, wäre blind.** Der
       // Fernkämpfer hat eine grössere Reichweite als der Aufmerksamkeits-
       // radius; ohne diese Zeile stünde er da und liesse sich beschiessen.
-      final merkt = math.max(ActionBalance.aggroRadius, gegner.attackRange);
+      // Der Grimlock **ist** blind: Er bemerkt nur, wer ihm fast auf den
+      // Füssen steht.
+      final merkt = gegner.kind == EnemyKind.grimlock
+          ? ActionBalance.grimlockNoticeRadius
+          : math.max(ActionBalance.aggroRadius, gegner.attackRange);
       // **Wer getroffen wurde, weiss, woher.** Schaden kommt nur vom
       // Helden — ein Funke aus der Ferne, eine Fläche, Dauerschaden —,
       // und wer ihn nimmt, kommt. Sonst stünde ein Gegner still da und
@@ -829,20 +842,30 @@ class ActionWorld {
       final takt = dt * gegner.tempo;
       gegner.cooldownLeft -= takt;
 
-      if (gegner.kind == EnemyKind.schuetze) {
-        _archerActs(gegner, abstand, takt);
-        continue;
+      // Jede Art an einer Stelle: Kommt eine dazu, zeigt der Analyzer
+      // hierher.
+      switch (gegner.kind) {
+        case EnemyKind.schuetze:
+          _archerActs(gegner, abstand, takt);
+        case EnemyKind.endgegner:
+          _bossActs(gegner, abstand, takt);
+        case EnemyKind.flatterer:
+          _batActs(gegner, abstand, takt);
+        case EnemyKind.kreischer:
+          _shriekerActs(gegner, takt);
+        case EnemyKind.heiler:
+          _healerActs(gegner, abstand, takt);
+        case EnemyKind.strahler:
+          _beamerActs(gegner, abstand, takt);
+        case EnemyKind.keiner ||
+              EnemyKind.fussvolk ||
+              EnemyKind.flink ||
+              EnemyKind.brocken ||
+              EnemyKind.schleim ||
+              EnemyKind.schleimling ||
+              EnemyKind.grimlock:
+          _meleeActs(gegner, abstand, takt);
       }
-      if (gegner.kind == EnemyKind.endgegner) {
-        _bossActs(gegner, abstand, takt);
-        continue;
-      }
-      if (gegner.kind == EnemyKind.flatterer) {
-        _batActs(gegner, abstand, takt);
-        continue;
-      }
-
-      _meleeActs(gegner, abstand, takt);
     }
   }
 
@@ -1157,9 +1180,11 @@ class ActionWorld {
   /// durch den Raum schiebt, ist kein Koloss — und ein Held, den fünf
   /// Gegner vor sich herschieben, gehört seinem Spieler nicht mehr.
   void _knockBack(ActionEntity attacker, ActionEntity target) {
+    // Der Kreischpilz ist festgewachsen.
     if (target.isHero ||
         target.kind == EnemyKind.endgegner ||
-        target.kind == EnemyKind.brocken) {
+        target.kind == EnemyKind.brocken ||
+        target.kind == EnemyKind.kreischer) {
       return;
     }
 
@@ -1318,6 +1343,9 @@ class ActionWorld {
   // --- Ende ---
 
   void _collectDead() {
+    // Was beim Sterben entsteht, kommt erst nach der Schleife dazu — die
+    // Liste, über die sie läuft, darf dabei nicht wachsen.
+    final entstanden = <ActionEntity>[];
     for (final entity in _entities) {
       if (entity.isAlive || entity.isHero) continue;
       if (_gemeldet.contains(entity.id)) continue;
@@ -1334,7 +1362,15 @@ class ActionWorld {
           at: entity.position,
         ),
       );
+      if (entity.kind == EnemyKind.schleim) {
+        entstanden.addAll(_splitOf(entity));
+      }
     }
+    if (entstanden.isEmpty) return;
+    _entities.addAll(entstanden);
+    // Sie zählen als Gegner — „12 / 14 erledigt“ soll stimmen —, aber
+    // nicht für den Topf (`ActionEntity.lootless`).
+    _totalEnemies += entstanden.length;
   }
 
   final Set<int> _gemeldet = <int>{};
@@ -1347,6 +1383,7 @@ class ActionWorld {
   /// füllt den Topf auf** — mit ihm ist die Grube geschafft, und wer ihn
   /// fällt, bekommt alles, auch den Teil der Gegner, die noch stehen.
   void _dropLoot(ActionEntity gefallen) {
+    if (gefallen.lootless) return;
     if (rewardPot.xp <= 0 && rewardPot.gold <= 0) return;
 
     final int zielXp;
@@ -1454,7 +1491,7 @@ class ActionWorld {
   /// eine Kugel dort wäre eine Belohnung für einen Weg, den niemand mehr
   /// geht. **Ein Troll lässt immer eine fallen** — er hat gekostet.
   void _maybeDropOrb(ActionEntity gefallen) {
-    if (gefallen.kind == EnemyKind.endgegner) return;
+    if (gefallen.kind == EnemyKind.endgegner || gefallen.lootless) return;
     final sicher = gefallen.kind == EnemyKind.brocken;
     if (!sicher && _rng.nextDouble() >= ActionBalance.orbDropChance) return;
 
@@ -1478,6 +1515,7 @@ class ActionWorld {
   /// Sie fällt ein Stück neben die Heilkugel, damit beide zu sehen sind.
   void _maybeDropTime(ActionEntity gefallen) {
     if (stage == null || gefallen.kind == EnemyKind.endgegner) return;
+    if (gefallen.lootless) return;
     if (_rng.nextDouble() >= ActionBalance.timeDropChance) return;
 
     final orb = HealthOrb(
@@ -1728,6 +1766,13 @@ class ActionWorld {
           attackRange: ActionBalance.brockenAttackRange,
           attackCooldown: ActionBalance.brockenAttackCooldown,
         ),
+      EnemyKind.schleim ||
+      EnemyKind.schleimling ||
+      EnemyKind.grimlock ||
+      EnemyKind.kreischer ||
+      EnemyKind.heiler ||
+      EnemyKind.strahler =>
+        _newEnemy(spawn.kind, level.centerOfSpawn(spawn)),
       EnemyKind.fussvolk || EnemyKind.keiner => ActionEntity(
           id: _nextId++,
           faction: Faction.gegner,

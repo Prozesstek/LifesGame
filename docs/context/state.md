@@ -27,7 +27,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
-| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062 |
+| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 622, dazu die acht Packages (theory 174, habits 227, gear
-117, action_combat 233, progression 42, abilities 36, identity 25,
+**Tests:** App 623, dazu die acht Packages (theory 174, habits 227, gear
+117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
@@ -84,6 +84,59 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
 ---
 
+## 01.10.2026, zuletzt: fünf neue Gegner, jede Grube mit eigener Besetzung
+
+Die zwei übrigen Teile von ADR-0062, gebaut in einem Schritt.
+[ADR-0063](../decisions/0063-besetzung-in-rollen.md) hält fest, wie.
+
+| Neu | Was es tut | Der Grund für … |
+|---|---|---|
+| **Schleim** | langsam; zerfällt beim Tod in zwei schnelle Schleimlinge | … Flächenschaden |
+| **Grimlock** | blind, bemerkt den Helden erst aus nächster Nähe; schlägt hart | … hinzusehen, wohin man läuft |
+| **Kreischpilz** | steht; kündigt einen Schrei an, der den Raum weckt, auch durch Wände | … ihn zuerst zu fällen |
+| **Sporenpilz** | hält Abstand und heilt die anderen | … die Reihenfolge der Ziele |
+| **Wächterauge** | lädt einen Strahl auf, als Linie angekündigt | … den Schritt zur Seite |
+
+**Die Besetzung** (`PitCast`, je Lauf gewürfelt, auf jeder Stufe aus
+demselben Topf): Die Räume schreiben weiter Rollen, die Besetzung sagt,
+wer sie spielt — neben dem Fussvolk Schleim, Grimlock oder niemand;
+Schütze oder Wächterauge; Kobold oder Fledermaus; Kreischpilz oder
+Sporenpilz in etwa jedem zweiten Raum. 24 Besetzungen, die Karte zu
+einem Startwert bleibt dieselbe.
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Das Fussvolk bleibt immer dabei.** Eine Grube nur aus blinden
+  Grimlocks liesse sich bis zum Wächter durchschleichen, und der zahlt
+  den ganzen Topf.
+- **Schleimlinge zahlen nichts** und lassen keine Kugel fallen.
+- **Der Sporenpilz heilt nie sich selbst, einen anderen Sporenpilz oder
+  den Wächter.**
+- **Der Schrei ist gold, nicht rot**, und steht nicht bei den
+  Ankündigungen: Aus ihm läuft man nicht hinaus.
+
+**Gemessen** (`pit_sim`, 30 Läufe, neue Tabelle „Je Besetzung“): alles
+gewürfelt Stufe 1 an Tag 0 **93 %**, Stufe 2 **63 %**, Stufe 30 voll
+ausgerüstet **60 %** — fast wie vor der Besetzung (92, 58, 71). Keine
+Art fällt aus der Reihe; Schleim und Grimlock kosten je zehn bis
+fünfzehn Punkte gegenüber Fussvolk allein. Die ganze Tabelle steht im
+ADR.
+
+action_combat 276 (vorher 233), App 623. Die neuen Arten, der Schrei,
+der Strahl und das Zerfallen als Bild aus dem echten Renderer angesehen,
+**nicht gespielt und nicht am Handy**.
+
+### Offen
+
+- Ob sich die Besetzungen im Spielen so verschieden anfühlen, wie die
+  Zahlen gleich sind.
+- **Kein Klang**: Der Schrei ist nur zu sehen.
+- Die Besetzung steht nirgends, bevor man hinabsteigt.
+- Die neuen Arten wippen nur, wie Kobold und Troll.
+- Oger und blauer Slaad sind weiter ungenutzt.
+- `world.dart` ist weiter über der Grenze; das Neue liegt in
+  `enemies.dart` und `cast.dart`.
+
 ## 01.10.2026, danach: vier Wächter, je Lauf gewürfelt
 
 Frederik fragte, ob noch Gegner-Sprites übrig sind (elf, im
@@ -115,9 +168,8 @@ echten Renderer angesehen, **nicht gespielt und nicht am Handy**.
 
 ### Offen
 
-- **Die neuen Gegnerarten** (Kreischpilz, Schleim, Sporenpilz,
-  Wächterauge, Grimlock) und **die Besetzung je Grube** — die zwei
-  übrigen Teile von ADR-0062.
+- ~~**Die neuen Gegnerarten** und **die Besetzung je Grube**~~ —
+  gebaut, siehe oben.
 - Stufe 2 an Tag 0 ist für den Bot härter geworden (58 % statt 83 %).
 - Bestzeiten sagen nicht, gegen welchen Wächter sie gelaufen sind.
 - Die drei neuen Wächter wippen nur; sie haben weder Schlag noch Tod als

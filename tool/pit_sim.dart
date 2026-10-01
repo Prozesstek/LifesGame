@@ -75,6 +75,95 @@ void main(List<String> args) {
   }
 
   _jeWaechter(spalten, laeufe);
+  _jeBesetzung(spalten, laeufe);
+}
+
+/// Dieselbe Rechnung mit **einer festen Rolle** der Besetzung (ADR-0062):
+/// Die übrigen Rollen und der Wächter bleiben, wie der Startwert sie
+/// würfelt. Eine Art, die deutlich unter ihren Nachbarn liegt, ist die,
+/// wegen der man einen Lauf neu würfeln will.
+void _jeBesetzung(Map<String, _Spalte> spalten, int laeufe) {
+  final rollen = <String, List<(String, PitCast Function(PitCast))>>{
+    'Nahkampf neben dem Fussvolk': <(String, PitCast Function(PitCast))>[
+      for (final kind in PitCast.secondMelees)
+        (
+          kind?.name ?? 'niemand',
+          (c) => PitCast(
+            secondMelee: kind,
+            ranged: c.ranged,
+            swarm: c.swarm,
+            special: c.special,
+          ),
+        ),
+    ],
+    'Wer schiesst': <(String, PitCast Function(PitCast))>[
+      for (final kind in PitCast.rangeds)
+        (
+          kind.name,
+          (c) => PitCast(
+            secondMelee: c.secondMelee,
+            ranged: kind,
+            swarm: c.swarm,
+            special: c.special,
+          ),
+        ),
+    ],
+    'Das Rudel': <(String, PitCast Function(PitCast))>[
+      for (final kind in PitCast.swarms)
+        (
+          kind.name,
+          (c) => PitCast(
+            secondMelee: c.secondMelee,
+            ranged: c.ranged,
+            swarm: kind,
+            special: c.special,
+          ),
+        ),
+    ],
+    'Der Sondergegner': <(String, PitCast Function(PitCast))>[
+      for (final kind in <EnemyKind?>[null, ...PitCast.specials])
+        (
+          kind?.name ?? 'niemand',
+          (c) => PitCast(
+            secondMelee: c.secondMelee,
+            ranged: c.ranged,
+            swarm: c.swarm,
+            special: kind,
+          ),
+        ),
+    ],
+  };
+  // Je eine Spalte dort, wo sie etwas sagt: der frische Charakter oben,
+  // der ausgerüstete unten.
+  const felder = <(String, int)>[
+    ('Tag 0', 1),
+    ('Tag 0', 2),
+    ('Tag 30+F', 11),
+    ('T60+G+F', 30),
+  ];
+
+  print('Je Besetzung — eine Rolle fest, der Rest gewürfelt\n');
+  print(
+    '  ${''.padRight(30)}'
+    '${felder.map((f) => '${f.$1} St.${f.$2}'.padLeft(16)).join()}',
+  );
+  for (final rolle in rollen.entries) {
+    print('  ${rolle.key}');
+    for (final (name, umbesetzen) in rolle.value) {
+      final zeile = StringBuffer('    ${name.padRight(28)}');
+      for (final (spalte, stufe) in felder) {
+        final quote = _quote(
+          stufe,
+          spalten[spalte]!,
+          laeufe,
+          umbesetzen: umbesetzen,
+        );
+        zeile.write('$quote %'.padLeft(16));
+      }
+      print(zeile);
+    }
+  }
+  print('');
 }
 
 /// Dieselbe Rechnung, aber mit **festem** Wächter (ADR-0062): Gewürfelt
@@ -127,12 +216,23 @@ class _Spalte {
   final List<PitModifier> modifiers;
 }
 
-int _quote(int stufe, _Spalte spalte, int laeufe, {BossKind? boss}) {
+int _quote(
+  int stufe,
+  _Spalte spalte,
+  int laeufe, {
+  BossKind? boss,
+  PitCast Function(PitCast)? umbesetzen,
+}) {
   var siege = 0;
   for (var seed = 0; seed < laeufe; seed++) {
     final stage = PitStage(stufe);
     final welt = ActionWorld(
-      level: LevelBuilder.build(stage: stage, seed: seed, boss: boss),
+      level: LevelBuilder.build(
+        stage: stage,
+        seed: seed,
+        boss: boss,
+        cast: umbesetzen?.call(PitCast.forSeed(seed)),
+      ),
       heroStats: spalte.stats,
       stage: stage,
       abilityIds: spalte.abilities,

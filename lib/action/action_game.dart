@@ -50,6 +50,9 @@ class ActionGame extends Game {
   final List<SwingMark> _swings = <SwingMark>[];
   final List<Burst> _bursts = <Burst>[];
 
+  /// Die Strahlen der Wächteraugen, solange sie nachleuchten.
+  final List<BeamFlash> _strahlen = <BeamFlash>[];
+
   /// Wer gerade getroffen wurde, und wie lange das noch aufblitzt.
   ///
   /// **Im Renderer, nicht in der Welt.** Ein Trefferblitz ist Anzeige;
@@ -222,6 +225,16 @@ class ActionGame extends Game {
           if (event.amount > 0) {
             _popups.add(DamagePopup.forHeal(event.amount, event.at));
           }
+        case EnemyHealed():
+          // Dieselbe grüne Zahl wie beim Helden — über einem Gegner sagt
+          // sie: Hier wächst nach, was du abträgst. Such den Pilz.
+          if (event.amount > 0) {
+            _popups.add(DamagePopup.forHeal(event.amount, event.at));
+          }
+        case EnemyScreamed():
+          _bursts.add(Burst.scream(event.at, event.radius));
+        case BeamFired():
+          _strahlen.add(BeamFlash(from: event.from, to: event.to));
         case BossSlammed():
           _bursts.add(Burst.slam(event.at, event.radius));
         case BossEnraged():
@@ -255,6 +268,11 @@ class ActionGame extends Game {
       burst.update(dt);
     }
     _bursts.removeWhere((b) => !b.isAlive);
+
+    for (final strahl in _strahlen) {
+      strahl.age += dt;
+    }
+    _strahlen.removeWhere((s) => !s.isAlive);
 
     _updateFiguren(dt);
     for (final leiche in _leichen) {
@@ -305,6 +323,8 @@ class ActionGame extends Game {
     _drawProjectiles(canvas, bilder);
     _drawWard(canvas, held);
     _drawTelegraphs(canvas);
+    _drawAlarms(canvas);
+    _drawBeams(canvas);
     _drawAim(canvas);
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
     if (bilder == null) _drawSwings(canvas);
@@ -634,6 +654,13 @@ class ActionGame extends Game {
       EnemyKind.flink => Palette.enemyOnDark,
       EnemyKind.brocken => Palette.enemy,
       EnemyKind.flatterer => Palette.enemyOnDark,
+      EnemyKind.schleim => Palette.enemyOnDark,
+      EnemyKind.schleimling => Palette.enemyOnDark,
+      EnemyKind.grimlock => Palette.enemy,
+      // Wer nicht selbst schlägt, hebt sich ab wie der Schütze.
+      EnemyKind.kreischer => Palette.goldOnDark,
+      EnemyKind.heiler => Palette.successOnDark,
+      EnemyKind.strahler => Palette.accentOnDark,
     };
   }
 
@@ -815,6 +842,62 @@ class ActionGame extends Game {
         Paint()
           ..color = Palette.enemyOnDark.withValues(alpha: 0.6)
           ..strokeWidth = 3,
+      );
+    }
+  }
+
+  /// Ein Kreischpilz holt Luft: ein goldener Ring um ihn, der sich
+  /// schliesst, und blass der Umkreis, den der Schrei wecken wird.
+  ///
+  /// **Gold, nicht rot.** Rot heisst „lauf hinaus“; hier hilft nur
+  /// hinlaufen und zuschlagen, bevor der Ring zu ist.
+  void _drawAlarms(Canvas canvas) {
+    for (final alarm in sim.alarms) {
+      final mitte = Offset(alarm.origin.x, alarm.origin.y);
+      canvas.drawCircle(
+        mitte,
+        alarm.radius,
+        Paint()
+          ..color = Palette.goldOnDark.withValues(alpha: 0.18)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+      // Von weit aussen auf den Pilz zu — er „zieht Luft“.
+      const aussen = 46.0;
+      const innen = 14.0;
+      canvas.drawCircle(
+        mitte,
+        aussen - (aussen - innen) * alarm.progress,
+        Paint()
+          ..color = Palette.goldOnDark.withValues(
+            alpha: 0.45 + 0.5 * alarm.progress,
+          )
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3,
+      );
+    }
+  }
+
+  /// Ein Strahl, der gerade gefeuert wurde: hell, dann schnell weg.
+  void _drawBeams(Canvas canvas) {
+    for (final strahl in _strahlen) {
+      final von = Offset(strahl.from.x, strahl.from.y);
+      final nach = Offset(strahl.to.x, strahl.to.y);
+      canvas.drawLine(
+        von,
+        nach,
+        Paint()
+          ..color = Palette.enemyOnDark.withValues(alpha: 0.8 * strahl.opacity)
+          ..strokeWidth = 10
+          ..strokeCap = StrokeCap.round,
+      );
+      canvas.drawLine(
+        von,
+        nach,
+        Paint()
+          ..color = Palette.textOnDark.withValues(alpha: strahl.opacity)
+          ..strokeWidth = 3
+          ..strokeCap = StrokeCap.round,
       );
     }
   }

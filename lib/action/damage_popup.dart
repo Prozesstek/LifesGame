@@ -119,6 +119,22 @@ class DamagePopup {
   void update(double dt) => age += dt;
 }
 
+/// Der Strahl eines Wächterauges im Moment, in dem er trifft — er
+/// leuchtet einen Augenblick nach und ist weg.
+class BeamFlash {
+  BeamFlash({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+  double age = 0;
+
+  static const double lifetime = 0.22;
+
+  bool get isAlive => age < lifetime;
+
+  double get opacity => (1 - age / lifetime).clamp(0.0, 1.0);
+}
+
 /// Ein Ring, der aufgeht und verblasst — für alles, was knallt.
 ///
 /// Drei Anlässe, drei Farben: ein gefallener Gegner, der Rundumschlag,
@@ -151,6 +167,18 @@ class Burst {
       maxRadius: radius,
       lifetime: dauer,
       strokeWidth: strich,
+    );
+  }
+
+  /// Der Schrei des Kreischpilzes: ein goldener Ring über den ganzen
+  /// Umkreis, den er geweckt hat.
+  factory Burst.scream(Vec2 at, double radius) {
+    return Burst(
+      at: at,
+      color: Palette.goldOnDark,
+      maxRadius: radius,
+      lifetime: 0.6,
+      strokeWidth: 4,
     );
   }
 

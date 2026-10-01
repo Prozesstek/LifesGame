@@ -37,6 +37,47 @@ enum EnemyKind {
   /// nie lange: Nach jedem Biss flattert sie zurück und kommt im Zickzack
   /// wieder. Ein Funke, eine Fläche oder ein Bogen erwischen sie.
   flatterer,
+
+  // --- Seit ADR-0062: wer davon in einer Grube steht, sagt ihre
+  // Besetzung (`PitCast`). ---
+
+  /// Der Schleim: langsam, und beim Tod zerfällt er in zwei
+  /// [schleimling]e.
+  ///
+  /// **Er ist der Grund für Flächenschaden.** Wer ihn einzeln erschlägt,
+  /// hat danach zwei Gegner statt einem; wer in die Traube wirbelt,
+  /// erledigt die Kleinen gleich mit.
+  schleim,
+
+  /// Was vom Schleim bleibt: klein, flink, schwach. Steht in keinem
+  /// Raum — er entsteht nur aus einem [schleim] und zahlt nichts.
+  schleimling,
+
+  /// Der Grimlock: blind. Er bemerkt den Helden nur aus nächster Nähe
+  /// oder wenn er getroffen wird, schlägt dann aber hart.
+  ///
+  /// **Er ist der Grund, hinzusehen, wohin man läuft.** An ihm vorbei
+  /// kommt man, in ihn hinein besser nicht.
+  grimlock,
+
+  /// Der Kreischpilz: steht still und greift nicht an. Sieht er den
+  /// Helden, kündigt er einen Schrei an, der alle im Umkreis weckt.
+  ///
+  /// **Er ist der Grund, zuerst ihn zu töten** — oder ausser Sicht zu
+  /// bleiben.
+  kreischer,
+
+  /// Der Sporenpilz: hält Abstand und heilt die anderen.
+  ///
+  /// **Er ist der Grund, sich die Reihenfolge zu überlegen.** Solange er
+  /// steht, wächst nach, was man abträgt.
+  heiler,
+
+  /// Das Wächterauge: lädt einen Strahl auf, angekündigt als Linie.
+  ///
+  /// **Es ist der Grund, seitlich auszuweichen.** Vor einem Pfeil hilft
+  /// Abstand, vor dem Strahl nur der Schritt zur Seite.
+  strahler,
 }
 
 /// Welcher Wächter am Ende der Grube wartet (ADR-0062).
@@ -138,6 +179,33 @@ class ActionEntity {
 
   /// Solange das läuft, flattert eine Fledermaus nach ihrem Biss davon.
   double retreatLeft = 0;
+
+  // --- Was sich ankündigt (Schrei des Kreischpilzes, Strahl des Auges) ---
+
+  /// Wie lange die laufende Ankündigung noch dauert. Null oder weniger
+  /// heisst: Es läuft keine.
+  double windupLeft = 0;
+
+  /// Wie lange sie insgesamt dauert — für den Fortschritt im Bild.
+  double windupTotal = 1;
+
+  /// Wohin der Strahl zeigt. Steht mit der Ankündigung fest: Die Linie
+  /// folgt dem Helden nicht.
+  Vec2 aim = Vec2.zero;
+
+  /// Ob ein Kreischpilz schon geschrien hat. Einmal genügt — wer wach
+  /// ist, bleibt wach.
+  bool spent = false;
+
+  /// Ob diese Figur nichts hinterlässt: keinen Anteil am Topf, keine
+  /// Kugel. Für alles, was erst im Lauf entsteht (die [EnemyKind.schleimling]e)
+  /// — sonst liesse sich aus einem Schleim mehr holen, als die Stufe hat.
+  bool lootless = false;
+
+  bool get isWindingUp => windupLeft > 0;
+
+  /// Wie weit die Ankündigung ist, 0 bis 1.
+  double get windupProgress => (1 - windupLeft / windupTotal).clamp(0.0, 1.0);
 
   /// Wohin die Figur zuletzt gesehen hat — nur für die Darstellung.
   Vec2 facing = const Vec2(0, 1);

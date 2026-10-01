@@ -146,6 +146,23 @@ void main() {
       }
     });
 
+    test('keine zwei Arten teilen sich ein Bild', () {
+      // Jede Art verlangt eine andere Antwort (`EnemyKind`). Sähen zwei
+      // gleich aus — der Schleim und sein Schleimling, das Blutauge und
+      // das Wächterauge —, wüsste man nicht, welche gefragt ist.
+      final bilder = <String, EnemyKind>{};
+      for (final kind in EnemyKind.values) {
+        final datei = GrubeFiguren.forKind(kind).stripFor(Pose.idle).file;
+        expect(
+          bilder.containsKey(datei),
+          isFalse,
+          reason: '$kind und ${bilder[datei]} teilen sich $datei',
+        );
+        bilder[datei] = kind;
+        expect(GrubeFiguren.all, contains(GrubeFiguren.forKind(kind)));
+      }
+    });
+
     test('jeder Wächter hat ein eigenes Bild und einen eigenen Namen', () {
       // ADR-0062: Vier Wächter, je Lauf einer. Sähen zwei gleich aus oder
       // hiessen gleich, wüsste man nicht, worauf man sich einstellen muss.
