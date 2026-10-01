@@ -259,6 +259,79 @@ abstract final class ActionBalance {
   static const double bossEnrageAt = 0.5;
   static const double bossEnrageTempo = 1.5;
 
+  // --- Die anderen drei Wächter (ADR-0062) ---
+  //
+  // Leben, Angriff und Grösse teilen sich alle vier; verschieden ist, was
+  // sie tun. **Dieselbe Treppe für jeden:** der erste Angriff ab Stufe 1,
+  // der zweite ab [bossThrowFromStage], der dritte ab
+  // [bossChargeFromStage] und nur in Wut. Und dieselbe Regel: Jede
+  // Ankündigung dauert länger als der Weg hinaus (`boss_test.dart`).
+
+  /// Der Ettin: Nach dem Bodenstoss kommt ein zweiter, grösserer Ring.
+  /// Wer nach dem ersten wieder hineinläuft, steht im zweiten.
+  ///
+  /// **Nicht grösser als der Raum.** Ein Wächterraum ist zehn Felder hoch
+  /// (320 Punkte), der Wächter steht in der Mitte: Bei 140 reichte der
+  /// Ring oben und unten bis an die Wand, und hinaus ging es nur noch
+  /// seitlich. `boss_test.dart` hält fest, dass ringsum Platz bleibt.
+  static const double ettinSecondRadius = 120;
+  static const double ettinSecondWindup = 0.75;
+  static const double ettinSecondPower = 1.8;
+
+  /// So lange wirft er nach dem Nachstoss mindestens nicht. Wer aus dem
+  /// zweiten Ring gelaufen ist, steht genau auf Wurfweite — ohne diese
+  /// Pause folgte auf jeden Doppelstoss sofort der Doppelwurf, und es
+  /// gäbe keinen Moment, um wieder heranzukommen (`pit_sim`, Stufe 30:
+  /// 3 von 40 Siegen statt 27 gegen den Zyklopen).
+  static const double ettinBreathSeconds = 2.5;
+
+  /// Sein Wurf sind zwei Brocken, einer je Kopf — der zweite so viel
+  /// später, neu gezielt. Wer dem ersten ausweicht und stehen bleibt,
+  /// steht im zweiten. Jeder für sich schwächer als der des Zyklopen.
+  static const double ettinSecondThrowDelay = 0.5;
+  static const double ettinThrowPower = 0.6;
+
+  /// Der Slaad springt dorthin, wo der Held beim Absprung steht. Der Ring
+  /// liegt am Landeplatz.
+  static const double slaadJumpRadius = 70;
+  static const double slaadJumpWindup = 1.0;
+  static const double slaadJumpPower = 1.4;
+  static const double slaadJumpCooldown = 6.5;
+
+  /// Wie hoch er im Scheitel über dem Boden ist — nur fürs Bild.
+  static const double slaadJumpHeight = 70;
+
+  /// Sein zweiter Angriff: Er spuckt. Schneller als ein Pfeil, schwächer
+  /// als ein Brocken.
+  static const double slaadSpitPower = 0.8;
+  static const double slaadSpitSpeed = 300;
+  static const double slaadSpitRadius = 7;
+  static const double slaadSpitCooldown = 4.5;
+
+  /// Der Sumpftroll wirft Gift. Der Ring liegt, wo es landet; danach
+  /// bleibt dort eine Pfütze, die schadet, solange man drinsteht.
+  static const double swampPuddleRadius = 60;
+  static const double swampPuddleWindup = 0.9;
+  static const double swampPuddleCooldown = 6;
+
+  /// Der Aufschlag, als Vielfaches des Angriffs.
+  static const double swampPuddleHitPower = 0.6;
+
+  /// Was die Pfütze je Sekunde anrichtet, als Vielfaches des Angriffs —
+  /// nie eine feste Zahl — und wie lange sie liegt. **Kürzer als die
+  /// Abklingzeit**: Sonst stünde der Troll, den ein Nahkämpfer angreift,
+  /// dauerhaft in seinem eigenen Gift, und es gäbe keinen Moment, in dem
+  /// man gefahrlos an ihn herankommt.
+  static const double swampPuddlePerSecond = 0.35;
+  static const double swampPuddleSeconds = 4;
+
+  /// In Wut wirft er drei: eine auf den Helden, zwei daneben, so weit
+  /// entfernt. Mehr als ein Durchmesser, damit dazwischen Platz bleibt.
+  static const double swampPuddleSpread = 135;
+
+  /// In welchem Takt eine feindliche Fläche schadet.
+  static const double hostileZoneTick = 0.5;
+
   // --- Die Uhr ---
 
   /// Wie viel Zeit ein Lauf hat: ein Sockel plus je Raum vor dem Wächter

@@ -192,7 +192,7 @@ class ActionGame extends Game {
           _flashes.remove(event.id);
           _leichen.add(
             FallenFigure(
-              figure: GrubeFiguren.forKind(event.kind),
+              figure: _figurFuer(event.kind),
               at: event.at,
               facesLeft: _figuren[event.id]?.facesLeft ?? false,
             ),
@@ -459,14 +459,19 @@ class ActionGame extends Game {
       _figuren
           .putIfAbsent(
             view.id,
-            () => FigureState(
-              view.position,
-              figure: GrubeFiguren.forKind(view.kind),
-            ),
+            () => FigureState(view.position, figure: _figurFuer(view.kind)),
           )
           .update(view, dt);
     }
     _figuren.removeWhere((id, _) => !lebend.contains(id));
+  }
+
+  /// Das Bild zu einer Art — beim Wächter das des Wächters, der in
+  /// dieser Grube wartet (ADR-0062).
+  Figure _figurFuer(EnemyKind kind) {
+    return kind == EnemyKind.endgegner
+        ? GrubeFiguren.forBoss(sim.bossKind)
+        : GrubeFiguren.forKind(kind);
   }
 
   /// Wo die Füsse stehen: an der Unterkante des Kreises, auf dem Schatten.
@@ -485,7 +490,7 @@ class ActionGame extends Game {
     for (final view in views) {
       final zustand = _figuren[view.id];
       if (zustand == null) continue;
-      final figur = GrubeFiguren.forKind(view.kind);
+      final figur = _figurFuer(view.kind);
       final fuss = _fussVon(view.position, view.radius);
 
       canvas.drawOval(
@@ -675,9 +680,17 @@ class ActionGame extends Game {
   /// wie keiner.
   /// Die liegenden Flächen: gefüllt in ihrer Farbe, mit Rand, und zum
   /// Ende hin blasser.
+  ///
+  /// **Was dem Helden schadet, trägt einen roten Rand** — die Pfütze des
+  /// Sumpftrolls. Rot ist dem Wächter vorbehalten (`palette.dart`), und
+  /// das hier ist seins. Gefüllt ist sie trotzdem giftgrün und dichter
+  /// als eine eigene Fläche: Ganz in Rot sah sie aus wie eine
+  /// Ankündigung, die nie einschlägt.
   void _drawZones(Canvas canvas) {
     for (final zone in sim.zones) {
       final farbe = tintColor(zone.tint);
+      final rand = zone.hostile ? Palette.enemyOnDark : farbe;
+      final dichte = zone.hostile ? 0.42 : 0.22;
       final mitte = Offset(zone.center.x, zone.center.y);
       final aus = zone.remaining.clamp(0.0, 1.0);
       // Die letzte halbe Sekunde blendet aus, sonst verschwindet sie
@@ -686,13 +699,13 @@ class ActionGame extends Game {
       canvas.drawCircle(
         mitte,
         zone.radius,
-        Paint()..color = farbe.withValues(alpha: 0.22 * deckkraft),
+        Paint()..color = farbe.withValues(alpha: dichte * deckkraft),
       );
       canvas.drawCircle(
         mitte,
         zone.radius,
         Paint()
-          ..color = farbe.withValues(alpha: 0.7 * deckkraft)
+          ..color = rand.withValues(alpha: 0.7 * deckkraft)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2,
       );

@@ -9,7 +9,10 @@ erlaubt die Verwendung im Spiel.
 | `Soldier_*.png` | `Characters/Soldier/Soldier/` — der Held |
 | `Orc_*.png` | `Characters/Orc/Orc/` — das Fussvolk |
 | `BloodshotEye.png` | `Characters/Basic Monster Animations/Bloodshot Eye/` — der Schütze |
-| `CrushingCyclops.png` | `Characters/Basic Monster Animations/Crushing Cyclops/` — der Wächter |
+| `CrushingCyclops.png` | `Characters/Basic Monster Animations/Crushing Cyclops/` — der Wächter „Zyklop“ |
+| `HumongousEttin.png` | `Characters/Basic Monster Animations/Humongous Ettin/` — der Wächter „Zweikopf“ (01.10.2026) |
+| `CrimsonSlaad.png` | `Characters/Basic Monster Animations/Crimson Slaad/` — der Wächter „Schlund“ (01.10.2026) |
+| `SwampTroll.png` | `Characters/Basic Monster Animations/Swamp Troll/` — der Wächter „Sumpftroll“ (01.10.2026) |
 | `RedCap.png` | `Characters/Basic Monster Animations/Red Cap/` — der Kobold (schnell) |
 | `StoneTroll.png` | `Characters/Basic Monster Animations/Stone Troll/` — der Troll (gross) |
 

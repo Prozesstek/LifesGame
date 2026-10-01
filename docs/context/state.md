@@ -27,7 +27,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
-| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
+| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 620, dazu die acht Packages (theory 174, habits 227, gear
-117, action_combat 206, progression 42, abilities 36, identity 25,
+**Tests:** App 622, dazu die acht Packages (theory 174, habits 227, gear
+117, action_combat 233, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
@@ -83,6 +83,46 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 01.10.2026, danach: vier Wächter, je Lauf gewürfelt
+
+Frederik fragte, ob noch Gegner-Sprites übrig sind (elf, im
+Download-Paket), und wollte daraus: neue Gegner und Wächter, **gewürfelt**
+statt nach Stufen gestaffelt.
+[ADR-0062](../decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md),
+drei Entscheidungen: eigene Angriffe je Wächter, je Grube eine
+**Besetzung** aus Gegnerarten, alles ab Stufe 1. **Gebaut ist der erste
+Teil, die Wächter.**
+
+| Wächter | Erster Angriff | Ab Stufe 4 | Ab Stufe 8, in Wut |
+|---|---|---|---|
+| Zyklop (wie bisher) | Bodenstoß | Felswurf | Ansturm |
+| **Zweikopf** | Bodenstoß, danach ein zweiter, größerer Ring | zwei Brocken nacheinander | — |
+| **Schlund** | springt dorthin, wo der Held steht | spuckt | springt zweimal |
+| **Sumpftroll** | wirft Gift, das als Pfütze liegen bleibt | Bodenstoß | drei Pfützen |
+
+Welcher kommt, würfelt `LevelBuilder.bossFor` aus dem Startwert, mit
+eigenem Würfel. Name und Zeile beim Auftritt stehen in
+`lib/action/boss_text.dart`, die Pfütze ist grün mit rotem Rand.
+
+**Gemessen, nicht geschätzt** (`pit_sim`, neue Tabelle „Je Wächter“):
+Stufe 1 an Tag 0 zwischen 92 und 100 %, Stufe 30 voll ausgerüstet
+zwischen 50 und 75 %. Der erste Entwurf lag weit daneben (Zweikopf 3 von
+40 auf Stufe 30); die drei Ursachen stehen im ADR.
+
+action_combat 233 (vorher 206), App 622. Jeder Wächter als Bild aus dem
+echten Renderer angesehen, **nicht gespielt und nicht am Handy**.
+
+### Offen
+
+- **Die neuen Gegnerarten** (Kreischpilz, Schleim, Sporenpilz,
+  Wächterauge, Grimlock) und **die Besetzung je Grube** — die zwei
+  übrigen Teile von ADR-0062.
+- Stufe 2 an Tag 0 ist für den Bot härter geworden (58 % statt 83 %).
+- Bestzeiten sagen nicht, gegen welchen Wächter sie gelaufen sind.
+- Die drei neuen Wächter wippen nur; sie haben weder Schlag noch Tod als
+  Bild.
+- Ob der Sprung des Schlunds sich fair anfühlt, zeigt erst das Spielen.
 
 ## 01.10.2026: Stücke tragen Rahmen und Namen ihrer Seltenheit
 

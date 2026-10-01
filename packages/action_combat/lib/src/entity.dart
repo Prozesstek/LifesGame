@@ -39,6 +39,27 @@ enum EnemyKind {
   flatterer,
 }
 
+/// Welcher Wächter am Ende der Grube wartet (ADR-0062).
+///
+/// **Vier, und jeder Lauf würfelt einen** (`LevelBuilder`). Jeder hat
+/// einen eigenen ersten Angriff, den man an seiner Ankündigung erkennt;
+/// was er sonst kann, steht in `boss.dart`. Für die Simulation sind alle
+/// vier [EnemyKind.endgegner] — die Art sagt, *dass* er der Wächter ist,
+/// dies hier, *welcher*.
+enum BossKind {
+  /// Bodenstoss, Felswurf, Ansturm — der erste, den es gab.
+  zyklop,
+
+  /// Zwei Köpfe, zwei Stösse: Nach dem ersten Ring kommt ein grösserer.
+  ettin,
+
+  /// Springt dorthin, wo der Held steht.
+  slaad,
+
+  /// Wirft Gift, das als Pfütze liegen bleibt.
+  sumpftroll,
+}
+
 /// Eine Figur in der Halle.
 ///
 /// **Veränderlich — und das ist hier richtig.** Alle anderen Packages

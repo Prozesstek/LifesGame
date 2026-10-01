@@ -102,6 +102,9 @@ class ActionWorld {
   int _fussvolkGefallen = 0;
 
   ActionEntity? _boss;
+
+  /// Welcher Wächter in dieser Halle wartet — für Bild und Namen.
+  BossKind get bossKind => _level.boss;
   _BossPhase _bossPhase = _BossPhase.wach;
   double _entranceTime = 0;
 
@@ -199,7 +202,7 @@ class ActionWorld {
   /// davon wissen muss.
   EntityView _viewOf(ActionEntity entity) {
     final view = EntityView.of(entity);
-    final hoehe = entity == _boss ? _dropHeight : 0.0;
+    final hoehe = entity == _boss ? _dropHeight + _hopHeight : 0.0;
     if (hoehe == 0) return view;
     return EntityView(
       id: view.id,
@@ -244,6 +247,7 @@ class ActionWorld {
           radius: zone.radius,
           tint: zone.tint,
           remaining: (zone.secondsLeft / zone.seconds).clamp(0.0, 1.0),
+          hostile: zone.hostile,
         ),
     ];
   }

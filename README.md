@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 620 Tests
+flutter test                       # 622 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
@@ -42,7 +42,7 @@ dart run tool/pit_sim.dart
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/action_combat
-dart test                          # 206 Tests
+dart test                          # 233 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
@@ -81,7 +81,7 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/action_combat` | die Grube: 30 Stufen, 6 Gegnerarten, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 206 |
+| `packages/action_combat` | die Grube: 30 Stufen, 6 Gegnerarten, 4 Wächter, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 233 |
 | `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 148 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte, Machtkurve | 36 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 191 |

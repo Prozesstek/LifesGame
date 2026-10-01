@@ -7,6 +7,15 @@ enum BossMove {
 
   /// Eine Linie zeigt die Richtung, dann rennt er los. Erst ab Wut.
   ansturm,
+
+  /// Der zweite, grössere Ring des Ettins, gleich nach dem ersten.
+  nachstoss,
+
+  /// Der Slaad springt: Der Ring liegt dort, wo er landet.
+  sprung,
+
+  /// Der Sumpftroll wirft Gift: Der Ring liegt dort, wo es aufschlägt.
+  pfuetze,
 }
 
 /// Eine Ankündigung, wie der Renderer sie zeichnet: ein Ring oder eine
@@ -42,7 +51,9 @@ class TelegraphView {
   /// 0 bei Beginn, 1 im Moment des Treffers.
   final double progress;
 
-  bool get isRing => move == BossMove.bodenstoss;
+  /// Alles ausser dem Ansturm ist ein Ring — um den Wächter oder dort,
+  /// wo er oder sein Wurf landet.
+  bool get isRing => move != BossMove.ansturm;
 
   /// Ob [point] mit einem Kreis von [pointRadius] in der Zone liegt.
   bool covers(Vec2 point, double pointRadius) {
@@ -74,23 +85,42 @@ class _BossState {
   double throwCooldown = ActionBalance.bossFirstThrow;
   double chargeCooldown = 0;
 
+  /// Der eigene Angriff von Slaad und Sumpftroll — Sprung und Pfütze.
+  /// Auch er kommt früh, aus demselben Grund wie der erste Wurf.
+  double signatureCooldown = ActionBalance.bossFirstThrow;
+
   Vec2 chargeDirection = Vec2.zero;
   double chargeLeft = 0;
   bool chargeHit = false;
 
+  /// Wo die angekündigten Ringe liegen, wenn nicht um den Wächter:
+  /// der Landeplatz des Sprungs, die Aufschläge der Pfützen.
+  List<Vec2> targets = const <Vec2>[];
+
+  /// Von wo der Slaad abgesprungen ist.
+  Vec2 jumpFrom = Vec2.zero;
+
+  /// Ob der laufende Sprung schon der zweite ist — sonst spränge er in
+  /// Wut ohne Ende.
+  bool secondJump = false;
+
+  /// Wie lange noch, bis der zweite Kopf des Ettins wirft. Null oder
+  /// weniger heisst: Es steht keiner aus.
+  double secondThrowIn = 0;
+
   bool get isCharging => chargeLeft > 0;
+
+  /// Wie weit die laufende Ankündigung ist, 0 bis 1.
+  double get progress => (1 - windupLeft / windupTotal).clamp(0.0, 1.0);
 }
 
 extension _BossBrain on ActionWorld {
   /// Ein Schritt des Wächters.
   ///
-  /// Welche Angriffe er kennt, hängt an der Stufe
-  /// ([ActionBalance.bossThrowFromStage], [ActionBalance.bossChargeFromStage]).
-  ///
   /// **Vorrang hat, was schon läuft:** ein Ansturm, dann eine Ankündigung.
-  /// Erst danach wird neu gewählt — Bodenstoss, wenn der Held nah ist;
-  /// Felswurf, wenn er weit weg ist; Ansturm, wenn er wütend ist. Sonst
-  /// läuft er heran und schlägt wie jeder andere.
+  /// Erst danach wird neu gewählt — und was zur Wahl steht, hängt daran,
+  /// welcher Wächter es ist ([BossKind]) und wie tief die Stufe liegt.
+  /// Findet er nichts, läuft er heran und schlägt wie jeder andere.
   void _bossActs(ActionEntity boss, double abstand, double takt) {
     final zustand = _bossState ??= _BossState();
     final wut = boss.hpRatio <= ActionBalance.bossEnrageAt;
@@ -102,62 +132,151 @@ extension _BossBrain on ActionWorld {
     zustand.slamCooldown -= uhr;
     zustand.throwCooldown -= uhr;
     zustand.chargeCooldown -= uhr;
+    zustand.signatureCooldown -= uhr;
 
     if (zustand.isCharging) {
       _bossCharge(boss, zustand, takt);
       return;
     }
 
+    if (zustand.secondThrowIn > 0) {
+      zustand.secondThrowIn -= takt;
+      if (zustand.secondThrowIn <= 0) {
+        _bossThrow(boss, power: ActionBalance.ettinThrowPower);
+      }
+    }
+
     final geplant = zustand.windingUp;
     if (geplant != null) {
       zustand.windupLeft -= takt;
+      if (geplant == BossMove.sprung) _bossFly(boss, zustand);
       if (zustand.windupLeft > 0) return;
       zustand.windingUp = null;
-      switch (geplant) {
-        case BossMove.bodenstoss:
-          _bossSlam(boss);
-        case BossMove.ansturm:
-          zustand.chargeLeft = ActionBalance.bossChargeDuration;
-          zustand.chargeHit = false;
-      }
+      _bossResolve(boss, zustand, geplant, wut);
       return;
     }
 
-    final sieht = _canSee(boss.position, _hero.position);
-    // Ohne Stufe (Prototyp, Tests) kann er alles.
-    final stufe = stage?.number ?? PitStage.count;
-    final kannWerfen = stufe >= ActionBalance.bossThrowFromStage;
-    final kannStuermen = stufe >= ActionBalance.bossChargeFromStage;
+    final lage = _BossLage(
+      abstand: abstand,
+      sieht: _canSee(boss.position, _hero.position),
+      wut: wut,
+      // Ohne Stufe (Prototyp, Tests) kann er alles.
+      stufe: stage?.number ?? PitStage.count,
+    );
+    final gewaehlt = switch (bossKind) {
+      BossKind.zyklop => _zyklopWaehlt(boss, zustand, lage),
+      BossKind.ettin => _ettinWaehlt(boss, zustand, lage),
+      BossKind.slaad => _slaadWaehlt(boss, zustand, lage),
+      BossKind.sumpftroll => _sumpftrollWaehlt(boss, zustand, lage),
+    };
+    if (!gewaehlt) _meleeActs(boss, abstand, takt);
+  }
 
-    if (zustand.slamCooldown <= 0 &&
-        abstand <= ActionBalance.bossSlamRadius + _hero.radius) {
-      zustand.slamCooldown = ActionBalance.bossSlamCooldown;
-      _windUp(zustand, BossMove.bodenstoss, ActionBalance.bossSlamWindup);
-      return;
-    }
+  // --- Was jeder wählt ---
 
-    if (wut &&
-        kannStuermen &&
-        sieht &&
+  /// Bodenstoss, wenn der Held nah ist; Ansturm, wenn er wütend ist;
+  /// Felswurf, wenn er weit weg ist.
+  bool _zyklopWaehlt(ActionEntity boss, _BossState zustand, _BossLage lage) {
+    if (_waehltStoss(zustand, lage)) return true;
+
+    if (lage.wut &&
+        lage.kenntDritten &&
+        lage.sieht &&
         zustand.chargeCooldown <= 0 &&
-        abstand > ActionBalance.bossSlamRadius) {
+        lage.abstand > ActionBalance.bossSlamRadius) {
       zustand.chargeCooldown = ActionBalance.bossChargeCooldown;
       zustand.chargeDirection = (_hero.position - boss.position).normalized;
       boss.facing = zustand.chargeDirection;
       _windUp(zustand, BossMove.ansturm, ActionBalance.bossChargeWindup);
-      return;
+      return true;
     }
 
-    if (kannWerfen &&
-        sieht &&
-        zustand.throwCooldown <= 0 &&
-        abstand >= ActionBalance.bossThrowMinRange) {
+    if (_darfWerfen(zustand, lage)) {
       zustand.throwCooldown = ActionBalance.bossThrowCooldown;
       _bossThrow(boss);
-      return;
+      return true;
+    }
+    return false;
+  }
+
+  /// Der Bodenstoss wie beim Zyklopen — der Nachstoss folgt von selbst
+  /// ([_bossResolve]). Sein Wurf sind zwei Brocken, einer je Kopf: Der
+  /// zweite kommt kurz danach und zielt neu.
+  bool _ettinWaehlt(ActionEntity boss, _BossState zustand, _BossLage lage) {
+    if (_waehltStoss(zustand, lage)) return true;
+
+    if (_darfWerfen(zustand, lage)) {
+      zustand.throwCooldown = ActionBalance.bossThrowCooldown;
+      zustand.secondThrowIn = ActionBalance.ettinSecondThrowDelay;
+      _bossThrow(boss, power: ActionBalance.ettinThrowPower);
+      return true;
+    }
+    return false;
+  }
+
+  /// Springt, sobald er darf — auch aus der Nähe: Dann liegt der Ring
+  /// auf dem Helden, und er muss weg. Dazwischen spuckt er.
+  bool _slaadWaehlt(ActionEntity boss, _BossState zustand, _BossLage lage) {
+    if (lage.sieht && zustand.signatureCooldown <= 0) {
+      zustand.signatureCooldown = ActionBalance.slaadJumpCooldown;
+      zustand.secondJump = false;
+      _slaadSpringt(boss, zustand);
+      return true;
     }
 
-    _meleeActs(boss, abstand, takt);
+    if (_darfWerfen(zustand, lage)) {
+      zustand.throwCooldown = ActionBalance.slaadSpitCooldown;
+      _bossSpit(boss);
+      return true;
+    }
+    return false;
+  }
+
+  /// Wirft Gift, sobald er darf; in Wut drei Pfützen statt einer. Aus der
+  /// Nähe stampft er ab seiner zweiten Stufe.
+  bool _sumpftrollWaehlt(
+    ActionEntity boss,
+    _BossState zustand,
+    _BossLage lage,
+  ) {
+    if (lage.kenntZweiten && _waehltStoss(zustand, lage)) return true;
+
+    if (lage.sieht && zustand.signatureCooldown <= 0) {
+      zustand.signatureCooldown = ActionBalance.swampPuddleCooldown;
+      final mitte = _hero.position;
+      final ziele = <Vec2>[mitte];
+      if (lage.wut && lage.kenntDritten) {
+        // Zwei weitere quer zur Wurfrichtung — wer seitlich ausweicht,
+        // muss sich für eine Lücke entscheiden.
+        final hin = (mitte - boss.position).normalized;
+        final quer = Vec2(-hin.y, hin.x) * ActionBalance.swampPuddleSpread;
+        ziele
+          ..add(mitte + quer)
+          ..add(mitte - quer);
+      }
+      zustand.targets = List<Vec2>.unmodifiable(ziele);
+      boss.facing = (mitte - boss.position).normalized;
+      _windUp(zustand, BossMove.pfuetze, ActionBalance.swampPuddleWindup);
+      return true;
+    }
+    return false;
+  }
+
+  bool _waehltStoss(_BossState zustand, _BossLage lage) {
+    if (zustand.slamCooldown > 0 ||
+        lage.abstand > ActionBalance.bossSlamRadius + _hero.radius) {
+      return false;
+    }
+    zustand.slamCooldown = ActionBalance.bossSlamCooldown;
+    _windUp(zustand, BossMove.bodenstoss, ActionBalance.bossSlamWindup);
+    return true;
+  }
+
+  bool _darfWerfen(_BossState zustand, _BossLage lage) {
+    return lage.kenntZweiten &&
+        lage.sieht &&
+        zustand.throwCooldown <= 0 &&
+        lage.abstand >= ActionBalance.bossThrowMinRange;
   }
 
   void _windUp(_BossState zustand, BossMove move, double dauer) {
@@ -166,17 +285,124 @@ extension _BossBrain on ActionWorld {
     zustand.windupTotal = dauer;
   }
 
-  void _bossSlam(ActionEntity boss) {
-    const radius = ActionBalance.bossSlamRadius;
-    _events.add(BossSlammed(at: boss.position, radius: radius));
-    final reichweite = radius + _hero.radius;
-    if (boss.position.distanceSquaredTo(_hero.position) <=
-        reichweite * reichweite) {
-      _hit(boss, _hero, powerFactor: ActionBalance.bossSlamPower);
+  // --- Was am Ende einer Ankündigung geschieht ---
+
+  void _bossResolve(
+    ActionEntity boss,
+    _BossState zustand,
+    BossMove move,
+    bool wut,
+  ) {
+    switch (move) {
+      case BossMove.bodenstoss:
+        _ringHit(
+          boss,
+          boss.position,
+          ActionBalance.bossSlamRadius,
+          ActionBalance.bossSlamPower,
+        );
+        if (bossKind == BossKind.ettin) {
+          _windUp(zustand, BossMove.nachstoss, ActionBalance.ettinSecondWindup);
+        }
+      case BossMove.nachstoss:
+        _ringHit(
+          boss,
+          boss.position,
+          ActionBalance.ettinSecondRadius,
+          ActionBalance.ettinSecondPower,
+        );
+        zustand.throwCooldown = math.max(
+          zustand.throwCooldown,
+          ActionBalance.ettinBreathSeconds,
+        );
+      case BossMove.ansturm:
+        zustand.chargeLeft = ActionBalance.bossChargeDuration;
+        zustand.chargeHit = false;
+      case BossMove.sprung:
+        boss.position = zustand.targets.first;
+        _ringHit(
+          boss,
+          boss.position,
+          ActionBalance.slaadJumpRadius,
+          ActionBalance.slaadJumpPower,
+        );
+        final stufe = stage?.number ?? PitStage.count;
+        if (wut &&
+            !zustand.secondJump &&
+            stufe >= ActionBalance.bossChargeFromStage) {
+          zustand.secondJump = true;
+          // Die Pause zählt ab dem zweiten Sprung, nicht ab dem ersten —
+          // sonst folgte auf zwei Sprünge fast sofort der nächste.
+          zustand.signatureCooldown = ActionBalance.slaadJumpCooldown;
+          _slaadSpringt(boss, zustand);
+        }
+      case BossMove.pfuetze:
+        for (final ziel in zustand.targets) {
+          _ringHit(
+            boss,
+            ziel,
+            ActionBalance.swampPuddleRadius,
+            ActionBalance.swampPuddleHitPower,
+          );
+          _zones.add(
+            _Zone(
+              center: ziel,
+              radius: ActionBalance.swampPuddleRadius,
+              seconds: ActionBalance.swampPuddleSeconds,
+              tint: PitTint.gift,
+              hostile: true,
+            )..dotPerSecond = boss.attack * ActionBalance.swampPuddlePerSecond,
+          );
+        }
     }
   }
 
-  void _bossThrow(ActionEntity boss) {
+  /// Ein Ring schlägt ein: Wer drinsteht, wird getroffen.
+  void _ringHit(ActionEntity boss, Vec2 mitte, double radius, double power) {
+    _events.add(BossSlammed(at: mitte, radius: radius));
+    final reichweite = radius + _hero.radius;
+    if (mitte.distanceSquaredTo(_hero.position) <= reichweite * reichweite) {
+      _hit(boss, _hero, powerFactor: power);
+    }
+  }
+
+  /// Kündigt einen Sprung dorthin an, wo der Held gerade steht.
+  ///
+  /// **Der Landeplatz steht mit der Ankündigung fest** und wird schon
+  /// hier aus der Wand gedrückt: Der Ring zeigt genau die Stelle, an der
+  /// er aufkommt, nicht eine, die sich im Flug noch verschiebt.
+  void _slaadSpringt(ActionEntity boss, _BossState zustand) {
+    final landung = _pushOut(_hero.position, boss.radius) ?? boss.position;
+    zustand.jumpFrom = boss.position;
+    zustand.targets = <Vec2>[landung];
+    final richtung = landung - boss.position;
+    if (!richtung.isZero) boss.facing = richtung.normalized;
+    _windUp(zustand, BossMove.sprung, ActionBalance.slaadJumpWindup);
+  }
+
+  /// Der Slaad in der Luft: Er rückt vom Absprung zum Landeplatz, über
+  /// alles hinweg, was dazwischen steht. Die Höhe dazu kommt in
+  /// [_hopHeight] — nur fürs Bild.
+  void _bossFly(ActionEntity boss, _BossState zustand) {
+    final ziel = zustand.targets.first;
+    boss.position =
+        zustand.jumpFrom + (ziel - zustand.jumpFrom) * zustand.progress;
+  }
+
+  /// Wie hoch der Wächter gerade springt — eine Parabel über die Dauer
+  /// der Ankündigung, null ausserhalb eines Sprungs.
+  double get _hopHeight {
+    final zustand = _bossState;
+    if (zustand == null || zustand.windingUp != BossMove.sprung) return 0;
+    final t = zustand.progress;
+    return ActionBalance.slaadJumpHeight * 4 * t * (1 - t);
+  }
+
+  /// Ein Felsbrocken auf den Helden.
+  void _bossThrow(
+    ActionEntity boss, {
+    double power = ActionBalance.bossThrowPower,
+  }) {
     final richtung = (_hero.position - boss.position).normalized;
     boss.facing = richtung;
     _events.add(
@@ -193,9 +419,33 @@ extension _BossBrain on ActionWorld {
         faction: Faction.gegner,
         position: boss.position,
         velocity: richtung * ActionBalance.bossBoulderSpeed,
-        damage: (boss.attack * ActionBalance.bossThrowPower).round(),
+        damage: (boss.attack * power).round(),
         radius: ActionBalance.bossBoulderRadius,
         isBoulder: true,
+      ),
+    );
+  }
+
+  /// Der Slaad spuckt — kein Brocken, sondern ein schnelles Geschoss.
+  void _bossSpit(ActionEntity boss) {
+    final richtung = (_hero.position - boss.position).normalized;
+    boss.facing = richtung;
+    _events.add(
+      AttackSwung(
+        attackerId: boss.id,
+        faction: Faction.gegner,
+        from: boss.position,
+        direction: richtung,
+      ),
+    );
+    _projectiles.add(
+      Projectile(
+        id: _nextId++,
+        faction: Faction.gegner,
+        position: boss.position,
+        velocity: richtung * ActionBalance.slaadSpitSpeed,
+        damage: (boss.attack * ActionBalance.slaadSpitPower).round(),
+        radius: ActionBalance.slaadSpitRadius,
       ),
     );
   }
@@ -229,36 +479,67 @@ extension _BossBrain on ActionWorld {
   List<TelegraphView> _bossTelegraphs() {
     final zustand = _bossState;
     final geplant = zustand?.windingUp;
+    final boss = _boss;
     if (zustand == null || geplant == null) return const <TelegraphView>[];
+    if (boss == null || !boss.isAlive) return const <TelegraphView>[];
 
-    ActionEntity? boss;
-    for (final e in _entities) {
-      if (e.kind == EnemyKind.endgegner && e.isAlive) boss = e;
-    }
-    if (boss == null) return const <TelegraphView>[];
+    TelegraphView ring(Vec2 mitte, double radius) => TelegraphView(
+          move: geplant,
+          origin: mitte,
+          radius: radius,
+          direction: Vec2.zero,
+          length: 0,
+          progress: zustand.progress,
+        );
 
-    final fortschritt =
-        (1 - zustand.windupLeft / zustand.windupTotal).clamp(0.0, 1.0);
-    return <TelegraphView>[
-      switch (geplant) {
-        BossMove.bodenstoss => TelegraphView(
-            move: geplant,
-            origin: boss.position,
-            radius: ActionBalance.bossSlamRadius,
-            direction: Vec2.zero,
-            length: 0,
-            progress: fortschritt,
-          ),
-        BossMove.ansturm => TelegraphView(
+    return switch (geplant) {
+      BossMove.bodenstoss => <TelegraphView>[
+          ring(boss.position, ActionBalance.bossSlamRadius),
+        ],
+      BossMove.nachstoss => <TelegraphView>[
+          ring(boss.position, ActionBalance.ettinSecondRadius),
+        ],
+      BossMove.sprung => <TelegraphView>[
+          for (final ziel in zustand.targets)
+            ring(ziel, ActionBalance.slaadJumpRadius),
+        ],
+      BossMove.pfuetze => <TelegraphView>[
+          for (final ziel in zustand.targets)
+            ring(ziel, ActionBalance.swampPuddleRadius),
+        ],
+      BossMove.ansturm => <TelegraphView>[
+          TelegraphView(
             move: geplant,
             origin: boss.position,
             radius: boss.radius,
             direction: zustand.chargeDirection,
             length: ActionBalance.bossChargeSpeed *
                 ActionBalance.bossChargeDuration,
-            progress: fortschritt,
+            progress: zustand.progress,
           ),
-      },
-    ];
+        ],
+    };
   }
+}
+
+/// Was der Wächter in diesem Schritt über seine Lage weiss — einmal
+/// ausgerechnet, damit alle vier dieselben Fragen stellen.
+class _BossLage {
+  const _BossLage({
+    required this.abstand,
+    required this.sieht,
+    required this.wut,
+    required this.stufe,
+  });
+
+  final double abstand;
+  final bool sieht;
+  final bool wut;
+  final int stufe;
+
+  /// **Jeder lernt mit der Tiefe dazu**, auf denselben zwei Stufen: Der
+  /// zweite Angriff kommt, wo der Zyklop zu werfen beginnt, der dritte,
+  /// wo er anzustürmen beginnt.
+  bool get kenntZweiten => stufe >= ActionBalance.bossThrowFromStage;
+  bool get kenntDritten => stufe >= ActionBalance.bossChargeFromStage;
 }

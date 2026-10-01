@@ -68,11 +68,16 @@ class ZoneView {
     required this.radius,
     required this.tint,
     required this.remaining,
+    this.hostile = false,
   });
 
   final Vec2 center;
   final double radius;
   final PitTint tint;
+
+  /// Ob sie dem Helden schadet statt den Gegnern — die Pfütze des
+  /// Sumpftrolls. Der Renderer zeichnet sie rot statt in [tint].
+  final bool hostile;
 
   /// Wie viel ihrer Zeit noch übrig ist, 1 bis 0 — zum Ausblenden.
   final double remaining;
@@ -88,13 +93,20 @@ class _Zone {
     required this.radius,
     required this.seconds,
     required this.tint,
+    this.hostile = false,
   }) : secondsLeft = seconds;
 
   final Vec2 center;
   final double radius;
   final double seconds;
   final PitTint tint;
+
+  /// Ob sie dem Helden schadet statt den Gegnern.
+  final bool hostile;
   double secondsLeft;
+
+  /// Zeit seit dem letzten Schaden einer feindlichen Fläche.
+  double hostileTick = 0;
 
   /// 1 heisst: bremst nicht.
   double slowFactor = 1;
@@ -263,7 +275,11 @@ extension _Aim on ActionWorld {
     for (final zone in _zones) {
       zone.secondsLeft -= dt;
       if (zone.secondsLeft <= 0) continue;
-      _affect(zone);
+      if (zone.hostile) {
+        _affectHero(zone, dt);
+      } else {
+        _affect(zone);
+      }
     }
     _zones.removeWhere((z) => z.secondsLeft <= 0);
   }
@@ -281,6 +297,36 @@ extension _Aim on ActionWorld {
         _applyDot(ziel, zone.dotPerSecond, ActionBalance.zoneLinger);
       }
     }
+  }
+
+  /// Eine feindliche Fläche schadet dem Helden, solange er drinsteht —
+  /// im Takt von [ActionBalance.hostileZoneTick], wie jeder Dauerschaden.
+  void _affectHero(_Zone zone, double dt) {
+    final reichweite = zone.radius + _hero.radius;
+    if (zone.center.distanceSquaredTo(_hero.position) >
+        reichweite * reichweite) {
+      // Wer hinausläuft, fängt beim nächsten Betreten neu an zu zählen.
+      zone.hostileTick = 0;
+      return;
+    }
+    zone.hostileTick += dt;
+    if (zone.hostileTick < ActionBalance.hostileZoneTick) return;
+    zone.hostileTick -= ActionBalance.hostileZoneTick;
+
+    final menge = math.max(
+      ActionBalance.minDamage,
+      (zone.dotPerSecond * ActionBalance.hostileZoneTick).round(),
+    );
+    final wirklich = _hero.takeDamage(_mitigate(_hero, menge));
+    _events.add(
+      HitLanded(
+        targetId: _hero.id,
+        targetFaction: _hero.faction,
+        at: _hero.position,
+        amount: wirklich,
+        isCrit: false,
+      ),
+    );
   }
 
   /// Was beim Loslassen geschähe — für die Vorschau.
