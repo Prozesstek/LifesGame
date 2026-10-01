@@ -86,7 +86,7 @@ class ShopItemTile extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               color: _istVergriffen
                                   ? Palette.textDim
-                                  : Palette.text,
+                                  : RarityBadge.colorOf(item.rarity),
                             ),
                           ),
                         ),

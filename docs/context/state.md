@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 30.09.2026 · Frederik
+**Zuletzt aktualisiert:** 01.10.2026 · Frederik
 
 ---
 
@@ -29,13 +29,13 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, Wächter mit Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
-| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
+| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
 | **Errungenschaften** | 19 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 612, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 620, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 206, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -83,6 +83,49 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 01.10.2026: Stücke tragen Rahmen und Namen ihrer Seltenheit
+
+Frederik: „Items besser erkennbar machen, also mit der Seltenheit:
+Rahmen in der Farbe der Seltenheit und den Namen in der Farbe.“ Drei
+Varianten als Bild verglichen (farbiger Name, dunkles Namensschild,
+getönte Fläche), gewählt: **Rahmen und Name farbig, überall bei
+Ausrüstung, die Wort-Marke bleibt.**
+
+| Wo | Was |
+|---|---|
+| Katalog in der Ausrüstung | Rahmen 2 Punkte in der Stufe, Name fett in der Stufe; nicht Besessenes bleibt grau, sein Rahmen blass |
+| Die sechs Plätze | belegt: Rahmen und Name des getragenen Stücks |
+| Laden | jede Kachel ebenso; **die Wahl ist ein heller Ring außen herum**, statt den Rahmen umzufärben; Name in der Detailkarte farbig |
+| Blatt eines Stücks | Name farbig, das Bild im Rahmen |
+| Beute des Wächters | Name farbig, das Leuchten im Rahmenton |
+
+**Die Farbtabelle hat jetzt zwei Spalten** (`RarityBadge`): Schriftton
+(`colorOf`) und Rahmenton (`rahmenOf`). Der Grund ist gemessen: Das
+bisherige Gold hatte auf Pergament 2,4 : 1 und wäre als Name nicht
+lesbar gewesen. Der Schriftton für Legendär ist deshalb ein gebranntes
+Gold (4,5 : 1), der Rahmen ein leuchtendes. `rarity_test.dart` hält
+beide Grenzen fest.
+
+**Nebenwirkung:** Die Marke „Legendär“ und der Rahmen legendärer
+Fähigkeiten sind damit ebenfalls dunkler — dieselbe Tabelle. Der
+Fähigkeiten-Bildschirm selbst ist nicht angefasst (AktivesBrett).
+**Geändert:** „Angelegt“ färbt den Rahmen im Katalog nicht mehr um; das
+sagt nur noch der Haken.
+
+Damit ist der offene Punkt aus ADR-0060 beantwortet: Die Seltenheit
+steht als Farbe **und** weiter als Wort in der Marke.
+
+App 620. Gerendert in 390 × 844 (Ausrüstung, Katalog, Laden, Blatt),
+die Beute nicht; **nicht am Handy**.
+
+### Offen
+
+- „Gewöhnlich“ als Name sieht fast aus wie normale Tinte, und das
+  gebrannte Gold liegt nah am Akzent („Angelegt“). Der Rahmen trägt den
+  Unterschied.
+- Fette Namen brechen im Katalog weiter mitten im Wort um.
+- Ob die Fähigkeiten dasselbe bekommen sollen.
 
 ## 30.09.2026, zuletzt: das Blatt nach einem Sieg
 

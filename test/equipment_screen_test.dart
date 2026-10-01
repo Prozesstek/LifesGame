@@ -11,9 +11,11 @@ import 'package:lifes_game/gear/gear_grouping.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
 import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/gear/widgets/gear_sheet.dart';
+import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/ui/palette.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
 
 import 'gear_helpers.dart';
@@ -339,6 +341,88 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Ohne Set'), findsOneWidget);
+    });
+
+    /// Die Randfarbe der Kachel, in der [name] steht.
+    Color randUm(WidgetTester tester, Finder name) {
+      final kachel = tester.widget<Container>(
+        find.ancestor(of: name, matching: find.byType(Container)).first,
+      );
+      return (kachel.decoration! as BoxDecoration).border!.top.color;
+    }
+
+    testWidgets('ein Stück im Besitz trägt Rahmen und Namen seiner Stufe', (
+      tester,
+    ) async {
+      // **Der Wunsch** (Frederik, 01.10.): Man soll die Seltenheit sehen,
+      // ohne das Blatt zu öffnen. Alle acht Waffen decken alle fünf
+      // Stufen ab.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final waffen = GearCatalog.forSlot(GearSlot.waffe);
+      expect(waffen.map((w) => w.rarity).toSet(), GearRarity.values.toSet());
+      for (final item in waffen) {
+        // Die letzte Fundstelle ist die Kachel im Katalog, die erste
+        // kann der Platz oben sein.
+        final name = find.text(item.name).last;
+        expect(
+          tester.widget<Text>(name).style!.color,
+          RarityBadge.colorOf(item.rarity),
+          reason: item.name,
+        );
+        expect(
+          randUm(tester, name),
+          RarityBadge.rahmenOf(item.rarity),
+          reason: item.name,
+        );
+      }
+    });
+
+    testWidgets('auch das angelegte behält den Rahmen seiner Stufe', (
+      tester,
+    ) async {
+      // Bis zum 01.10. färbte „angelegt“ den Rand um, und das getragene
+      // Stück war das einzige ohne Seltenheit. Dass es anliegt, sagt der
+      // Haken.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final getragen = GearCatalog.forSlot(GearSlot.waffe).first;
+      final amPlatz = find.descendant(
+        of: find.byType(EquipmentSlotTile),
+        matching: find.text(getragen.name),
+      );
+
+      expect(
+        tester.widget<Text>(amPlatz).style!.color,
+        RarityBadge.colorOf(getragen.rarity),
+      );
+      expect(
+        randUm(tester, find.text(getragen.name).last),
+        RarityBadge.rahmenOf(getragen.rarity),
+      );
+    });
+
+    testWidgets('was man nicht hat, bleibt grau', (tester) async {
+      // Der Name leuchtet erst, wenn das Stück einem gehört — sonst
+      // sähe der leere Katalog aus wie ein voller.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      final fremd = GearCatalog.all.firstWhere(
+        (i) => i.rarity == GearRarity.legendary,
+      );
+      await tester.scrollUntilVisible(
+        find.text(fremd.name),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(
+        tester.widget<Text>(find.text(fremd.name)).style!.color,
+        Palette.muted,
+      );
     });
 
     testWidgets('mehrere Exemplare stehen als Zahl auf der Kachel', (

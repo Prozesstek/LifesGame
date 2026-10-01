@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:lifes_game/gear/widgets/rarity_badge.dart';
+import 'package:lifes_game/ui/palette.dart';
 
 /// Die Seltenheit eines Ausrüstungsstücks — im Katalog und im Bild.
 ///
@@ -49,6 +52,56 @@ void main() {
           reason: 'Stufe ${rarity.index} heißt zweimal verschieden.',
         );
       }
+    });
+  });
+
+  group('Rahmen und Name tragen die Seltenheit', () {
+    double kontrast(Color a, Color b) {
+      final la = a.computeLuminance();
+      final lb = b.computeLuminance();
+      return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
+    }
+
+    test('ein Name in der Farbe seiner Stufe ist auf Pergament lesbar', () {
+      // **Der Anlass:** Das Gold der Marke hatte auf Pergament 2,4 : 1.
+      // Als Marke fiel das nicht auf, als Name eines Stücks wäre es der
+      // eine, den man nicht lesen kann — und zwar der des besten.
+      for (final rarity in GearRarity.values) {
+        expect(
+          kontrast(RarityBadge.colorOf(rarity), Palette.surface),
+          greaterThanOrEqualTo(4.5),
+          reason: rarity.label,
+        );
+      }
+    });
+
+    test('jeder Rahmen hebt sich vom Leder ab', () {
+      // Die Kacheln liegen auf Leder; dort muss der Rand zu sehen sein.
+      for (final rarity in GearRarity.values) {
+        expect(
+          kontrast(RarityBadge.rahmenOf(rarity), Palette.background),
+          greaterThanOrEqualTo(3),
+          reason: rarity.label,
+        );
+      }
+    });
+
+    test('keine zwei Stufen teilen sich einen Rahmen', () {
+      final rahmen = <int>{
+        for (final rarity in GearRarity.values)
+          RarityBadge.rahmenOf(rarity).toARGB32(),
+      };
+
+      expect(rahmen, hasLength(GearRarity.values.length));
+    });
+
+    test('der Name der höchsten Stufe ist nicht die Tinte', () {
+      // Gold muss für Schrift dunkel sein, und dunkles Gold ist braun.
+      // Es darf trotzdem nicht in der gewöhnlichen Schrift untergehen.
+      expect(
+        kontrast(RarityBadge.colorOf(GearRarity.legendary), Palette.text),
+        greaterThan(1.5),
+      );
     });
   });
 

@@ -78,7 +78,7 @@ Future<bool> showLoot(
         title: Text(headline),
         content: LootReveal(
           withKey: usedKey,
-          glow: RarityBadge.colorOf(item.rarity),
+          glow: RarityBadge.rahmenOf(item.rarity),
           onBurst: onReveal,
           item: bild == null
               ? ersatz
@@ -94,10 +94,10 @@ Future<bool> showLoot(
                     child: Text(
                       item.name,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Palette.text,
+                        color: RarityBadge.colorOf(item.rarity),
                       ),
                     ),
                   ),
