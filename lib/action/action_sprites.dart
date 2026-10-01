@@ -152,6 +152,45 @@ abstract final class GrubeFiguren {
     scale: 5,
   );
 
+  /// Der Zweikopf — der Humongous Ettin aus dem Paket (ADR-0062). So
+  /// gross wie der Zyklop: Alle vier Wächter teilen sich Radius und
+  /// Massstab, verschieden ist, was sie tun.
+  static const Figure ettin = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('HumongousEttin.png', 4, fps: 5),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 0,
+    scale: 5,
+  );
+
+  /// Der Schlund — der Crimson Slaad. Er springt; die Höhe dazu kommt
+  /// aus der Simulation, nicht aus dem Bild.
+  static const Figure slaad = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('CrimsonSlaad.png', 4, fps: 6),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 1,
+    scale: 5,
+  );
+
+  /// Der Sumpftroll — der Swamp Troll, der türkise Bruder des Steintrolls.
+  static const Figure sumpftroll = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('SwampTroll.png', 4, fps: 5),
+    },
+    frameSize: 16,
+    footX: 8,
+    footY: 16,
+    topY: 1,
+    scale: 5,
+  );
+
   /// Der Kobold — der Red Cap aus dem Paket. Kleiner als der Ork, damit
   /// man ihn im Rudel als das erkennt, was er ist: viele, schnell, schwach.
   ///
@@ -252,11 +291,28 @@ abstract final class GrubeFiguren {
     };
   }
 
+  /// Wie der Wächter dieser Grube aussieht (ADR-0062).
+  ///
+  /// **[forKind] kennt nur „der Wächter“** und gibt den Zyklopen zurück;
+  /// welcher es wirklich ist, weiss die Simulation
+  /// (`ActionWorld.bossKind`). Wer einen Wächter zeichnet, fragt hier.
+  static Figure forBoss(BossKind kind) {
+    return switch (kind) {
+      BossKind.zyklop => endgegner,
+      BossKind.ettin => ettin,
+      BossKind.slaad => slaad,
+      BossKind.sumpftroll => sumpftroll,
+    };
+  }
+
   static const List<Figure> all = <Figure>[
     held,
     fussvolk,
     schuetze,
     endgegner,
+    ettin,
+    slaad,
+    sumpftroll,
     flink,
     brocken,
     fledermaus,

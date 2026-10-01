@@ -4,6 +4,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_sprites.dart';
+import 'package:lifes_game/action/boss_text.dart';
 import 'package:lifes_game/action/figure_state.dart';
 
 EntityView _view({
@@ -143,6 +144,40 @@ void main() {
       for (final kind in EnemyKind.values) {
         expect(GrubeFiguren.forKind(kind).has(Pose.idle), isTrue);
       }
+    });
+
+    test('jeder Wächter hat ein eigenes Bild und einen eigenen Namen', () {
+      // ADR-0062: Vier Wächter, je Lauf einer. Sähen zwei gleich aus oder
+      // hiessen gleich, wüsste man nicht, worauf man sich einstellen muss.
+      final bilder = <String>{
+        for (final boss in BossKind.values)
+          GrubeFiguren.forBoss(boss).stripFor(Pose.idle).file,
+      };
+      final namen = <String>{
+        for (final boss in BossKind.values) BossText.nameOf(boss),
+      };
+      final zeilen = <String>{
+        for (final boss in BossKind.values) BossText.hintOf(boss),
+      };
+
+      expect(bilder, hasLength(BossKind.values.length));
+      expect(namen, hasLength(BossKind.values.length));
+      expect(zeilen, hasLength(BossKind.values.length));
+      for (final boss in BossKind.values) {
+        expect(GrubeFiguren.all, contains(GrubeFiguren.forBoss(boss)));
+      }
+    });
+
+    test('alle vier Wächter sind gleich gross gezeichnet', () {
+      // Sie teilen sich den Radius (`ActionBalance.bossRadius`). Ein
+      // Bild, das grösser wäre als sein Kreis, liesse sich dort treffen,
+      // wo nichts ist.
+      final hoehen = <double>{
+        for (final boss in BossKind.values)
+          GrubeFiguren.forBoss(boss).frameSize *
+              GrubeFiguren.forBoss(boss).scale,
+      };
+      expect(hoehen, hasLength(1));
     });
 
     test('die Füsse liegen im Bild, der Kopf darüber', () {

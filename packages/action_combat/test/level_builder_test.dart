@@ -142,4 +142,96 @@ void main() {
       expect(leichterDurch, isTrue);
     });
   });
+
+  group('Der Wächter wird gewürfelt (ADR-0062)', () {
+    /// Die Karte als Text — Wände, Boden und wo wer steht.
+    String bild(Level level) {
+      final zeilen = <String>[
+        for (var y = 0; y < level.height; y++)
+          <String>[
+            for (var x = 0; x < level.width; x++)
+              level.tileAt(x, y) == Tile.wand ? '#' : '.',
+          ].join(),
+        for (final s in level.spawns) '${s.kind.name}@${s.tileX},${s.tileY}',
+      ];
+      return zeilen.join('\n');
+    }
+
+    test('derselbe Startwert ergibt denselben Wächter', () {
+      for (var seed = 0; seed < 50; seed++) {
+        expect(LevelBuilder.bossFor(seed), LevelBuilder.bossFor(seed));
+        expect(
+          LevelBuilder.build(stage: PitStage(1), seed: seed).boss,
+          LevelBuilder.bossFor(seed),
+        );
+      }
+    });
+
+    test('schon auf Stufe 1 kommt jeder der vier vor', () {
+      // Frederik, 01.10.: alles ab Stufe 1. Die Tiefe regelt, was ein
+      // Wächter kann, nicht, welcher kommt.
+      final gesehen = <BossKind>{
+        for (var seed = 0; seed < 60; seed++)
+          LevelBuilder.build(stage: PitStage(1), seed: seed).boss,
+      };
+      expect(gesehen, BossKind.values.toSet());
+    });
+
+    test('keiner kommt viel öfter als die anderen', () {
+      final zaehler = <BossKind, int>{};
+      const wuerfe = 4000;
+      for (var seed = 0; seed < wuerfe; seed++) {
+        zaehler.update(
+          LevelBuilder.bossFor(seed),
+          (n) => n + 1,
+          ifAbsent: () => 1,
+        );
+      }
+      const erwartet = wuerfe / 4;
+      for (final boss in BossKind.values) {
+        expect(
+          zaehler[boss],
+          inInclusiveRange(erwartet * 0.85, erwartet * 1.15),
+          reason: boss.name,
+        );
+      }
+    });
+
+    test('der Wächter verschiebt die Karte nicht', () {
+      // Er hat einen eigenen Würfel. Zöge er aus dem der Karte, ergäbe
+      // derselbe Startwert je Wächter eine andere Grube — und jeder
+      // Startwert eine andere als vor ADR-0062.
+      for (var seed = 0; seed < 20; seed++) {
+        Level mit(BossKind boss) =>
+            LevelBuilder.build(stage: PitStage(12), seed: seed, boss: boss);
+        final karten = <String>{
+          for (final boss in BossKind.values) bild(mit(boss)),
+        };
+        expect(karten, hasLength(1), reason: 'Startwert $seed');
+      }
+    });
+
+    test('das Tor zu schliessen ändert den Wächter nicht', () {
+      // `withGates` baut eine zweite Karte; ein vergessenes Feld fiele
+      // dort still auf den Zyklopen zurück (`gotchas.md`).
+      for (final boss in BossKind.values) {
+        final level =
+            LevelBuilder.build(stage: PitStage(1), seed: 1, boss: boss);
+        expect(level.withGates(closed: true).boss, boss);
+      }
+    });
+
+    test('jeder Wächter steht in einer Grube, die trägt', () {
+      for (final boss in BossKind.values) {
+        for (var seed = 0; seed < 10; seed++) {
+          final level = LevelBuilder.build(
+            stage: PitStage(30),
+            seed: seed,
+            boss: boss,
+          );
+          expect(level.problems, isEmpty, reason: '$boss, Startwert $seed');
+        }
+      }
+    });
+  });
 }

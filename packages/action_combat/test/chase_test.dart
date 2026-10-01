@@ -109,7 +109,15 @@ void main() {
 
       for (final stufe in <int>[10, 30]) {
         for (var seed = 0; seed < 10; seed++) {
-          final level = LevelBuilder.build(stage: PitStage(stufe), seed: seed);
+          // **Immer der Zyklop.** Gemessen wird das Verfolgen, nicht der
+          // Wächter: Ein Slaad landet mitten in der Traube und schiebt
+          // einen Troll beiseite, der dann eine Sekunde lang nicht
+          // vorankommt — das ist Gedränge, kein Hängen an einer Ecke.
+          final level = LevelBuilder.build(
+            stage: PitStage(stufe),
+            seed: seed,
+            boss: BossKind.zyklop,
+          );
           final welt = ActionWorld(level: level, heroStats: zaeh, seed: seed);
           final feld = welt.fieldTo(welt.sleepingBossAt!);
           final gemerkt = <int>{};

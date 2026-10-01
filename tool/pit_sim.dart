@@ -73,6 +73,42 @@ void main(List<String> args) {
     }
     print(zeile);
   }
+
+  _jeWaechter(spalten, laeufe);
+}
+
+/// Dieselbe Rechnung, aber mit **festem** Wächter (ADR-0062): Gewürfelt
+/// wird er im Spiel, hier steht jeder einzeln da. Ein Wächter, der auf
+/// einer Stufe deutlich unter den anderen liegt, ist dort der Lauf, den
+/// man neu würfeln will — und das ist der Befund, den diese Tabelle
+/// sichtbar machen soll.
+///
+/// Die Stufen sind die, an denen sich etwas ändert: 1 (nur der erste
+/// Angriff), 4 (der zweite), 8 (der dritte, in Wut), dazu Mitte und Ende.
+void _jeWaechter(Map<String, _Spalte> spalten, int laeufe) {
+  const stufen = <int>[1, 4, 8, 15, 22, 30];
+  const gezeigt = <String>['Tag 0', 'Tag 30+F', 'T60+G+F'];
+
+  print('\nJe Wächter — derselbe Startwert, derselbe Bau, anderer Wächter\n');
+  for (final name in gezeigt) {
+    final spalte = spalten[name];
+    if (spalte == null) continue;
+    print('  $name');
+    print(
+      '  ${'Stufe'.padRight(7)}'
+      '${BossKind.values.map((b) => b.name.padLeft(12)).join()}',
+    );
+    for (final stufe in stufen) {
+      final zeile = StringBuffer('  ${stufe.toString().padRight(7)}');
+      for (final boss in BossKind.values) {
+        zeile.write(
+          '${_quote(stufe, spalte, laeufe, boss: boss)} %'.padLeft(12),
+        );
+      }
+      print(zeile);
+    }
+    print('');
+  }
 }
 
 class _Spalte {
@@ -91,12 +127,12 @@ class _Spalte {
   final List<PitModifier> modifiers;
 }
 
-int _quote(int stufe, _Spalte spalte, int laeufe) {
+int _quote(int stufe, _Spalte spalte, int laeufe, {BossKind? boss}) {
   var siege = 0;
   for (var seed = 0; seed < laeufe; seed++) {
     final stage = PitStage(stufe);
     final welt = ActionWorld(
-      level: LevelBuilder.build(stage: stage, seed: seed),
+      level: LevelBuilder.build(stage: stage, seed: seed, boss: boss),
       heroStats: spalte.stats,
       stage: stage,
       abilityIds: spalte.abilities,

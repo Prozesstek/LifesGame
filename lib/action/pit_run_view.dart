@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../ui/palette.dart';
 import 'ability_buttons.dart';
 import 'action_game.dart';
+import 'boss_text.dart';
 import 'minimap.dart';
 import 'damage_popup.dart';
 import 'action_joystick.dart';
@@ -228,7 +229,7 @@ class _Hud extends StatelessWidget {
         if (boss != null) ...<Widget>[
           const SizedBox(height: 10),
           BossBar(
-            name: 'Der Wächter',
+            name: BossText.nameOf(sim.bossKind),
             ratio: boss.hpRatio * sim.bossBarFill,
             // Wut ändert, was er tut — das soll man lesen können, nicht
             // erst merken, wenn er anstürmt.
@@ -363,12 +364,13 @@ class _BossTitle extends StatelessWidget {
           alignment: const Alignment(0, -0.35),
           child: Opacity(
             opacity: deckkraft,
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  'DER WÄCHTER',
-                  style: TextStyle(
+                  BossText.nameOf(game.sim.bossKind).toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontSize: 30,
                     letterSpacing: 6,
                     fontWeight: FontWeight.bold,
@@ -376,10 +378,11 @@ class _BossTitle extends StatelessWidget {
                     shadows: <Shadow>[Shadow(blurRadius: 12)],
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Hüter der Tiefe',
-                  style: TextStyle(
+                  BossText.hintOf(game.sim.bossKind),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontSize: 14,
                     letterSpacing: 2,
                     color: Palette.enemyOnDark,

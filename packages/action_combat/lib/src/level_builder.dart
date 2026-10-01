@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'balance.dart';
+import 'entity.dart';
 import 'level.dart';
 import 'room_catalog.dart';
 import 'stage.dart';
@@ -32,7 +33,13 @@ abstract final class LevelBuilder {
   static const int cellWidth = RoomCatalog.width + 2;
   static const int cellHeight = RoomCatalog.height + 2;
 
-  static Level build({required PitStage stage, required int seed}) {
+  /// [boss] legt den Wächter fest; ohne Angabe wird er aus [seed]
+  /// gewürfelt ([bossFor]).
+  static Level build({
+    required PitStage stage,
+    required int seed,
+    BossKind? boss,
+  }) {
     final rng = math.Random(seed);
     final pfad = _path(rng, stage.roomCount + 2);
 
@@ -60,8 +67,26 @@ abstract final class LevelBuilder {
     final start = _centerOf(pfad.first);
     feld[start.y][start.x] = '@';
 
-    return Level.parse('Die Grube · Stufe ${stage.number}', _crop(feld, pfad));
+    return Level.parse(
+      'Die Grube · Stufe ${stage.number}',
+      _crop(feld, pfad),
+      boss: boss ?? bossFor(seed),
+    );
   }
+
+  /// Welcher Wächter zu [seed] gehört — jeder gleich oft, auf jeder Stufe
+  /// (ADR-0062).
+  ///
+  /// **Ein eigener Würfel**, nicht der der Karte (`gotchas.md`, „Ein
+  /// Generator je Rolle“): Zöge der Wächter aus demselben, verschöbe er
+  /// jeden Wurf danach, und jeder Startwert ergäbe eine andere Grube als
+  /// vorher.
+  static BossKind bossFor(int seed) {
+    final wurf = math.Random(seed ^ _bossSalt).nextInt(BossKind.values.length);
+    return BossKind.values[wurf];
+  }
+
+  static const int _bossSalt = 0x5eed;
 
   /// Ein Pfad aus [length] Zellen, der keine zweimal betritt.
   ///

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'balance.dart';
 import 'entity.dart';
 import 'pit_ability.dart';
@@ -8,8 +10,8 @@ import 'world.dart';
 ///
 /// **Bewusst dumm.** Er läuft auf den nächsten Gegner zu und drückt seine
 /// Plätze nach der Art ihrer Wirkung — Fläche bei einer Traube, Heilung
-/// bei wenig Leben. Aus einer Ankündigung des Wächters läuft er heraus;
-/// einem Felswurf weicht er nicht aus. Er weicht keinem Pfeil aus, er kitet
+/// bei wenig Leben. Aus einer Ankündigung des Wächters läuft er heraus,
+/// aus einer Giftpfütze ebenso; einem Felswurf weicht er nicht aus. Er weicht keinem Pfeil aus, er kitet
 /// nicht, er sammelt Heilkugeln nur ein, wenn sie zufällig im Weg liegen.
 /// Alles, was ein Mensch besser macht, fehlt — Zahlen aus seinen Läufen
 /// sind eine **untere** Schranke, genau wie bei `tool/balance_sim.dart`.
@@ -70,6 +72,73 @@ abstract final class PitBot {
     }
   }
 
+  /// Die Richtung aus einem Kreis um [mitte] mit [radius] hinaus.
+  ///
+  /// Geradewegs von der Mitte weg — es sei denn, auf dem Weg bis über den
+  /// Rand steht eine Wand, oder der Held steht genau in der Mitte (der
+  /// Ring eines Sprungs liegt auf ihm). Dann unter den acht Richtungen
+  /// die freie, die am ehesten von der Mitte wegführt. Ohne das lief er
+  /// vor einem Sprung zuverlässig in die nächste Wand und nahm ihn voll.
+  static Vec2 _hinaus(
+    ActionWorld welt,
+    EntityView held,
+    Vec2 mitte,
+    double radius,
+  ) {
+    final weg = held.position - mitte;
+
+    /// Ob der Weg in [richtung] bis über den Rand frei ist — abgetastet
+    /// in halben Feldern, mit der Breite des Helden.
+    bool frei(Vec2 richtung) {
+      // Wie weit es in dieser Richtung bis zum Rand ist: die Sehne des
+      // Kreises vom Helden aus.
+      final laengs = weg.x * richtung.x + weg.y * richtung.y;
+      final quer2 = weg.x * weg.x + weg.y * weg.y - laengs * laengs;
+      final r = radius + held.radius;
+      final sehne = -laengs + _wurzel(r * r - quer2);
+      const schritt = ActionBalance.tileSize / 2;
+      for (var d = schritt; d < sehne + schritt; d += schritt) {
+        final punkt = held.position + richtung * d;
+        for (final seite in <Vec2>[
+          Vec2.zero,
+          Vec2(-richtung.y, richtung.x) * held.radius,
+          Vec2(richtung.y, -richtung.x) * held.radius,
+        ]) {
+          if (welt.level.isWallAtPoint(punkt + seite)) return false;
+        }
+      }
+      return true;
+    }
+
+    if (weg.length > 1 && frei(weg.normalized)) return weg.normalized;
+
+    const s = 0.7071;
+    const richtungen = <Vec2>[
+      Vec2(1, 0),
+      Vec2(-1, 0),
+      Vec2(0, 1),
+      Vec2(0, -1),
+      Vec2(s, s),
+      Vec2(-s, s),
+      Vec2(s, -s),
+      Vec2(-s, -s),
+    ];
+    Vec2? beste;
+    var besteNaehe = double.negativeInfinity;
+    for (final richtung in richtungen) {
+      if (!frei(richtung)) continue;
+      // Unter den freien die, die am ehesten von der Mitte wegführt.
+      final naehe = weg.x * richtung.x + weg.y * richtung.y;
+      if (naehe > besteNaehe) {
+        besteNaehe = naehe;
+        beste = richtung;
+      }
+    }
+    return beste ?? (weg.isZero ? const Vec2(1, 0) : weg.normalized);
+  }
+
+  static double _wurzel(double wert) => wert <= 0 ? 0 : math.sqrt(wert);
+
   /// Lauf auf den nächsten Gegner zu — **am Weg entlang**, nicht
   /// Luftlinie. Der erste Versuch ohne Wegfindung kam über zwei Gegner
   /// nicht hinaus.
@@ -83,14 +152,23 @@ abstract final class PitBot {
     for (final zone in welt.telegraphs) {
       if (!zone.covers(held.position, held.radius)) continue;
       if (zone.isRing) {
-        final weg = held.position - zone.origin;
-        return weg.isZero ? const Vec2(1, 0) : weg.normalized;
+        return _hinaus(welt, held, zone.origin, zone.radius);
       }
       // Zur Seite, auf die kürzere.
       final quer = Vec2(-zone.direction.y, zone.direction.x);
       final seite = (held.position - zone.origin).x * quer.x +
           (held.position - zone.origin).y * quer.y;
       return seite >= 0 ? quer : quer * -1;
+    }
+
+    // Und raus aus allem, was liegt und schadet — die Pfütze des
+    // Sumpftrolls. Wer darin stehen bleibt, misst nicht den Wächter,
+    // sondern die eigene Sturheit.
+    for (final flaeche in welt.zones) {
+      if (!flaeche.hostile) continue;
+      final r = flaeche.radius + held.radius;
+      if (flaeche.center.distanceSquaredTo(held.position) > r * r) continue;
+      return _hinaus(welt, held, flaeche.center, flaeche.radius);
     }
 
     Vec2? ziel;

@@ -32,6 +32,7 @@ class Level {
     required this.tiles,
     required this.heroStart,
     required this.spawns,
+    required this.boss,
     required Set<int> gates,
     required this.gatesClosed,
   }) : _gates = gates;
@@ -54,7 +55,15 @@ class Level {
   /// Zeichen wirft — anders als beim Spielstand ist das hier kein fremdes
   /// Datum, sondern ein Tippfehler im eigenen Repo, und der soll laut
   /// werden.
-  factory Level.parse(String name, List<String> rows) {
+  ///
+  /// [boss] sagt, welcher Wächter auf dem `B` steht. Ohne Angabe der
+  /// Zyklop — so bleiben handgeschriebene Hallen und Tests, was sie waren;
+  /// gewürfelt wird nur in `LevelBuilder`.
+  factory Level.parse(
+    String name,
+    List<String> rows, {
+    BossKind boss = BossKind.zyklop,
+  }) {
     if (rows.isEmpty) throw ArgumentError('Die Halle "$name" ist leer.');
 
     final width =
@@ -115,6 +124,7 @@ class Level {
       tiles: List<List<Tile>>.unmodifiable(tiles),
       heroStart: start,
       spawns: List<Spawn>.unmodifiable(spawns),
+      boss: boss,
       gates: Set<int>.unmodifiable(gates),
       gatesClosed: false,
     );
@@ -124,6 +134,9 @@ class Level {
   final List<List<Tile>> tiles;
   final Vec2 heroStart;
   final List<Spawn> spawns;
+
+  /// Welcher Wächter hier wartet (ADR-0062).
+  final BossKind boss;
 
   /// Die Tor-Felder vor dem Wächterraum, als [_key].
   final Set<int> _gates;
@@ -145,6 +158,7 @@ class Level {
       tiles: tiles,
       heroStart: heroStart,
       spawns: spawns,
+      boss: boss,
       gates: _gates,
       gatesClosed: closed,
     );

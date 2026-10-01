@@ -101,14 +101,14 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 206 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 233 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
 | `packages/action_combat/lib/src/dailies.dart` | **die vier Stufen des Tages** — gewürfelt aus dem Datum ([ADR-0040](docs/decisions/0040-vier-dailies-je-tag.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
-| `packages/action_combat/lib/src/boss.dart` | **der Wächter**: Bodenstoss, Felswurf, Ansturm, Wut — und was er ankündigt | nur Dart-SDK |
+| `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
@@ -123,7 +123,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
 | `lib/action/pit_text.dart` | Name, Beschreibung **und alle Werte** einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
-| `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart, **eine Tabelle** | Flutter |
+| `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart und je Wächter (`forBoss`), **eine Tabelle** | Flutter |
+| `lib/action/boss_text.dart` | wie die vier Wächter heißen, und die Zeile unter dem Namen beim Auftritt | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
@@ -223,7 +224,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 620 Tests
+flutter test             # 622 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -232,7 +233,7 @@ dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausge
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 206 Tests
+dart test                              # 233 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -335,11 +336,35 @@ Balken läuft über `bossBarFill` voll. Eine Halle ohne Tor hat keinen
 Auftritt; dort ist er von Anfang an da. `gate_test.dart` hält alles
 fest.
 
+**Es gibt vier Wächter, und jeder Lauf würfelt einen**
+([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)):
+Zyklop, Zweikopf, Schlund, Sumpftroll (`BossKind`). Für die Simulation
+sind alle `EnemyKind.endgegner`; welcher es ist, steht an der Karte
+(`Level.boss`), gewürfelt in `LevelBuilder.bossFor` mit **eigenem
+Würfel**, damit der Wächter die Karte nicht verschiebt. Eine
+handgeschriebene Halle hat ohne Angabe den Zyklopen. Leben, Angriff und
+Größe teilen sich alle vier, verschieden ist, was sie tun:
+
+| Frage | Antwortet |
+|---|---|
+| Welcher Wächter wartet? | `Level.boss`, im Lauf `ActionWorld.bossKind` |
+| Was wählt er als Nächstes? | `_zyklopWaehlt` und seine drei Geschwister in `boss.dart` |
+| Was kann er auf dieser Stufe? | `_BossLage.kenntZweiten` / `kenntDritten` — dieselben zwei Stufen für alle |
+| Wie sieht er aus, wie heißt er? | `GrubeFiguren.forBoss`, `BossText` |
+
+Ein fünfter Wächter ist ein Eintrag in `BossKind`; der Analyzer zeigt
+dann auf jede Stelle, die ihn kennen muss. **Eine Fläche kann dem Helden
+schaden** (`_Zone.hostile`, die Pfütze des Sumpftrolls): Sie trifft nie
+die Gegner, liegt kürzer als ihre Abklingzeit und ist im Bild grün mit
+rotem Rand. Wer an einem Wächter dreht, liest die zweite Tabelle von
+`pit_sim` („Je Wächter“).
+
 **Jeder Angriff des Wächters ist angekündigt** (`TelegraphView`: ein Ring
 oder eine Linie, die sich füllt) und lässt sich durch Laufen umgehen — es
 gibt keinen Sturmschritt mehr. Wer einen Angriff dazubaut, gibt ihm eine
 Ankündigung, die länger dauert als der Weg hinaus; `boss_test.dart` prüft
-das für den Bodenstoss. Welche Angriffe er kennt, hängt an der Stufe
+das für jeden Ring, und dass keiner um den Wächter bis an die Wand seines
+Raums reicht. Welche Angriffe er kennt, hängt an der Stufe
 (`bossThrowFromStage`, `bossChargeFromStage`). Ihre Zahlen
 stehen in `ActionBalance`, ihr Bild in `GrubeFiguren`.
 
