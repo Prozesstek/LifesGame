@@ -190,6 +190,104 @@ abstract final class ActionBalance {
   static const int brockenAttack = 18;
   static const int brockenDefense = 4;
 
+  // --- Die Gegner der Besetzung (ADR-0062) ---
+  //
+  // Jeder hat einen Grund (`EnemyKind`). Die Zahlen sind an denen des
+  // Fussvolks ausgerichtet (34 Leben, 9 Angriff, Tempo 68): Was mehr
+  // kann, hält weniger aus oder ist langsamer.
+
+  /// Der Schleim: etwas weniger Leben als Fussvolk, deutlich langsamer.
+  /// Dazu kommen die zwei Schleimlinge — zusammen hält er mehr aus als
+  /// ein Ork, wenn man ihn einzeln abarbeitet.
+  static const double schleimRadius = 11;
+  static const double schleimSpeed = 50;
+  static const double schleimAttackRange = 28;
+  static const double schleimAttackCooldown = 1.4;
+  static const int schleimHp = 26;
+  static const int schleimAttack = 8;
+  static const int schleimDefense = 0;
+
+  /// In wie viele er zerfällt, und wie weit sie auseinander entstehen.
+  static const int schleimSplit = 2;
+  static const double schleimSplitOffset = 10;
+
+  /// Der Schleimling: ein Schlag, und er ist weg — aber er ist schnell.
+  static const double schleimlingRadius = 7;
+  static const double schleimlingSpeed = 95;
+  static const double schleimlingAttackRange = 24;
+  static const double schleimlingAttackCooldown = 1.0;
+  static const int schleimlingHp = 10;
+  static const int schleimlingAttack = 5;
+  static const int schleimlingDefense = 0;
+
+  /// Der Grimlock: anderthalbmal so viel Leben und Schlag wie Fussvolk — und
+  /// blind. Er bemerkt den Helden nur innerhalb von
+  /// [grimlockNoticeRadius], ein Drittel von [aggroRadius].
+  static const double grimlockRadius = 11;
+  static const double grimlockSpeed = 74;
+  static const double grimlockAttackRange = 32;
+  static const double grimlockAttackCooldown = 1.5;
+  static const int grimlockHp = 50;
+  static const int grimlockAttack = 14;
+  static const int grimlockDefense = 2;
+  static const double grimlockNoticeRadius = 70;
+
+  /// Der Kreischpilz: steht, schlägt nicht, hält wenig aus. Sein Schrei
+  /// ist angekündigt — wer ihn in dieser Zeit fällt, hat Ruhe.
+  static const double kreischerRadius = 10;
+  static const int kreischerHp = 26;
+  static const int kreischerDefense = 0;
+  static const double kreischerWindup = 1.6;
+
+  /// Wie weit der Schrei reicht: etwa ein Raum (14 × 10 Felder), auch
+  /// durch Wände.
+  static const double kreischerRadiusOfScream = 330;
+
+  /// Der Sporenpilz: hält Abstand wie ein Schütze und heilt im Takt.
+  static const double heilerRadius = 9;
+  static const double heilerSpeed = 55;
+  static const int heilerHp = 28;
+  static const int heilerDefense = 0;
+
+  /// Näher will er nicht heran; weiter weg läuft er hinterher.
+  static const double heilerPreferredRange = 150;
+  static const double heilerFollowRange = 230;
+
+  /// Wie oft er heilt, wie weit, und wie viel — **ein Anteil des Lebens
+  /// des Geheilten**, nie eine feste Zahl. Klein genug, dass ein Held
+  /// schneller abträgt, als nachwächst: Sonst endete der Lauf nie
+  /// (`gotchas.md`, Heilung als Anteil).
+  static const double heilerCooldown = 2.5;
+  static const double heilerHealRadius = 130;
+  static const double heilerHealShare = 0.12;
+
+  /// Das Wächterauge: bleibt auf Abstand wie der Schütze. Der Strahl ist
+  /// angekündigt und trifft dann sofort die ganze Linie.
+  static const double strahlerRadius = 10;
+  static const double strahlerSpeed = 52;
+  static const int strahlerHp = 30;
+  static const int strahlerAttack = 11;
+  static const int strahlerDefense = 0;
+  static const double strahlerCooldown = 3.4;
+  static const double strahlerWindup = 0.9;
+
+  /// Als Vielfaches seines Angriffs. Mehr als ein Pfeil, weil man ihm
+  /// ausweichen kann.
+  static const double strahlerBeamPower = 1.7;
+  static const double strahlerBeamLength = 280;
+
+  /// Die halbe Breite des Strahls. Schmal: ein Schritt zur Seite genügt.
+  static const double strahlerBeamHalfWidth = 9;
+
+  /// Wie oft ein gewöhnlicher Raum den Sondergegner der Besetzung
+  /// bekommt (Kreischpilz oder Sporenpilz). Er ersetzt dort einen Platz
+  /// des Fussvolks.
+  static const double castSpecialChance = 0.5;
+
+  /// Welcher Anteil der Nahkampf-Plätze an den zweiten Nahkämpfer der
+  /// Besetzung geht. Der Rest bleibt Fussvolk.
+  static const double castSecondMeleeShare = 0.5;
+
   /// Wie wahrscheinlich ein gewöhnlicher Raum einen Troll bekommt — auf
   /// Stufe 1 und auf Stufe 30. Er ersetzt dort einen Fussvolk-Platz, die
   /// Zahl der Gegner bleibt also gleich.

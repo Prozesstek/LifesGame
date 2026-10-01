@@ -13,6 +13,12 @@ erlaubt die Verwendung im Spiel.
 | `HumongousEttin.png` | `Characters/Basic Monster Animations/Humongous Ettin/` — der Wächter „Zweikopf“ (01.10.2026) |
 | `CrimsonSlaad.png` | `Characters/Basic Monster Animations/Crimson Slaad/` — der Wächter „Schlund“ (01.10.2026) |
 | `SwampTroll.png` | `Characters/Basic Monster Animations/Swamp Troll/` — der Wächter „Sumpftroll“ (01.10.2026) |
+| `DeathSlime.png` | `…/Death Slime/` — der Schleim (01.10.2026) |
+| `OchreJelly.png` | `…/Ochre Jelly/` — der Schleimling, in den er zerfällt (01.10.2026) |
+| `BlindedGrimlock.png` | `…/Blinded Grimlock/` — der Grimlock (01.10.2026) |
+| `ShriekerMushroom.png` | `…/Shrieker Mushroom/` — der Kreischpilz (01.10.2026) |
+| `FungalMyconid.png` | `…/Fungal Myconid/` — der Sporenpilz (01.10.2026) |
+| `OcularWatcher.png` | `…/Ocular Watcher/` — das Wächterauge (01.10.2026) |
 | `RedCap.png` | `Characters/Basic Monster Animations/Red Cap/` — der Kobold (schnell) |
 | `StoneTroll.png` | `Characters/Basic Monster Animations/Stone Troll/` — der Troll (gross) |
 

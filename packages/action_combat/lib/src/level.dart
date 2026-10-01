@@ -49,6 +49,12 @@ class Level {
   /// | `B` | Endgegner |
   /// | `k` | Kobold — schnell, schwach |
   /// | `t` | Troll — gross, zäh |
+  /// | `f` | Fledermaus |
+  /// | `j` | Schleim |
+  /// | `g` | Grimlock |
+  /// | `p` | Kreischpilz |
+  /// | `m` | Sporenpilz |
+  /// | `o` | Wächterauge |
   /// | `=` | Tor zum Wächterraum — Boden, bis der Held drin ist |
   ///
   /// Kürzere Zeilen werden rechts mit Wand aufgefüllt. Ein unbekanntes
@@ -88,28 +94,15 @@ class Level {
           case '@':
             row.add(Tile.boden);
             start = _centerOf(x, y);
-          case 'e':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.fussvolk, tileX: x, tileY: y));
-          case 's':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.schuetze, tileX: x, tileY: y));
-          case 'B':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.endgegner, tileX: x, tileY: y));
-          case 'k':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.flink, tileX: x, tileY: y));
-          case 'f':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.flatterer, tileX: x, tileY: y));
-          case 't':
-            row.add(Tile.boden);
-            spawns.add(Spawn(kind: EnemyKind.brocken, tileX: x, tileY: y));
           default:
-            throw ArgumentError(
-              'Unbekanntes Zeichen "$zeichen" in "$name" bei $x,$y.',
-            );
+            final kind = symbols[zeichen];
+            if (kind == null) {
+              throw ArgumentError(
+                'Unbekanntes Zeichen "$zeichen" in "$name" bei $x,$y.',
+              );
+            }
+            row.add(Tile.boden);
+            spawns.add(Spawn(kind: kind, tileX: x, tileY: y));
         }
       }
       tiles.add(List<Tile>.unmodifiable(row));
@@ -128,6 +121,33 @@ class Level {
       gates: Set<int>.unmodifiable(gates),
       gatesClosed: false,
     );
+  }
+
+  /// Welches Zeichen welche Art setzt — **eine Tabelle** für das Lesen
+  /// einer Karte und für `LevelBuilder`, der Rollen umbesetzt.
+  ///
+  /// Der Schleimling fehlt mit Absicht: Er steht in keinem Raum.
+  static const Map<String, EnemyKind> symbols = <String, EnemyKind>{
+    'e': EnemyKind.fussvolk,
+    's': EnemyKind.schuetze,
+    'B': EnemyKind.endgegner,
+    'k': EnemyKind.flink,
+    'f': EnemyKind.flatterer,
+    't': EnemyKind.brocken,
+    'j': EnemyKind.schleim,
+    'g': EnemyKind.grimlock,
+    'p': EnemyKind.kreischer,
+    'm': EnemyKind.heiler,
+    'o': EnemyKind.strahler,
+  };
+
+  /// Das Zeichen zu [kind]. Wirft für eine Art ohne Zeichen — das ist
+  /// ein Fehler im eigenen Repo und soll laut werden.
+  static String symbolOf(EnemyKind kind) {
+    for (final e in symbols.entries) {
+      if (e.value == kind) return e.key;
+    }
+    throw ArgumentError('Für $kind gibt es kein Zeichen.');
   }
 
   final String name;

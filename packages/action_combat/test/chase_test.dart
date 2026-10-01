@@ -132,7 +132,17 @@ void main() {
             final held = welt.heroView.position;
             for (final v in welt.views) {
               if (!gemerkt.contains(v.id)) continue;
-              if (v.kind == EnemyKind.schuetze) continue;
+              // Wer nicht verfolgt, kann dabei nicht hängen bleiben: Der
+              // Schütze, das Auge und der Sporenpilz halten Abstand, der
+              // Kreischpilz steht.
+              if (const <EnemyKind>{
+                EnemyKind.schuetze,
+                EnemyKind.strahler,
+                EnemyKind.heiler,
+                EnemyKind.kreischer,
+              }.contains(v.kind)) {
+                continue;
+              }
               final weg = welt.pathDistanceTo(v.position);
               final start = anker[v.id] ??= v.position;
               if (weg == null ||

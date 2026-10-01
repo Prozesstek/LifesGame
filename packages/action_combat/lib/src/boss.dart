@@ -16,6 +16,12 @@ enum BossMove {
 
   /// Der Sumpftroll wirft Gift: Der Ring liegt dort, wo es aufschlägt.
   pfuetze,
+
+  /// Kein Angriff des Wächters: die Linie eines Wächterauges, bevor sein
+  /// Strahl trifft (`enemies.dart`). Sie steht hier, weil sie dasselbe
+  /// sagt wie die anderen — „hier schlägt gleich etwas ein“ — und der
+  /// Renderer sie genauso zeichnet.
+  strahl,
 }
 
 /// Eine Ankündigung, wie der Renderer sie zeichnet: ein Ring oder eine
@@ -51,9 +57,9 @@ class TelegraphView {
   /// 0 bei Beginn, 1 im Moment des Treffers.
   final double progress;
 
-  /// Alles ausser dem Ansturm ist ein Ring — um den Wächter oder dort,
-  /// wo er oder sein Wurf landet.
-  bool get isRing => move != BossMove.ansturm;
+  /// Alles ausser Ansturm und Strahl ist ein Ring — um den Wächter oder
+  /// dort, wo er oder sein Wurf landet.
+  bool get isRing => move != BossMove.ansturm && move != BossMove.strahl;
 
   /// Ob [point] mit einem Kreis von [pointRadius] in der Zone liegt.
   bool covers(Vec2 point, double pointRadius) {
@@ -318,6 +324,9 @@ extension _BossBrain on ActionWorld {
       case BossMove.ansturm:
         zustand.chargeLeft = ActionBalance.bossChargeDuration;
         zustand.chargeHit = false;
+      case BossMove.strahl:
+        // Den lädt kein Wächter auf.
+        break;
       case BossMove.sprung:
         boss.position = zustand.targets.first;
         _ringHit(
@@ -507,6 +516,7 @@ extension _BossBrain on ActionWorld {
           for (final ziel in zustand.targets)
             ring(ziel, ActionBalance.swampPuddleRadius),
         ],
+      BossMove.strahl => const <TelegraphView>[],
       BossMove.ansturm => <TelegraphView>[
           TelegraphView(
             move: geplant,

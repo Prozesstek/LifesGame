@@ -169,6 +169,39 @@ class BossLanded extends ActionEvent {
   final Vec2 at;
 }
 
+/// Ein Kreischpilz hat geschrien: Alle Gegner im Umkreis sind wach.
+class EnemyScreamed extends ActionEvent {
+  const EnemyScreamed({required this.at, required this.radius});
+
+  final Vec2 at;
+  final double radius;
+}
+
+/// Ein Sporenpilz hat einen Gegner geheilt. Für eine grüne Zahl über ihm.
+class EnemyHealed extends ActionEvent {
+  const EnemyHealed({
+    required this.targetId,
+    required this.at,
+    required this.amount,
+  });
+
+  final int targetId;
+  final Vec2 at;
+  final int amount;
+}
+
+/// Ein Wächterauge hat seinen Strahl abgefeuert — von [from] nach [to].
+/// Ob er getroffen hat, sagt ein [HitLanded] daneben.
+class BeamFired extends ActionEvent {
+  const BeamFired({required this.from, required this.to, required this.width});
+
+  final Vec2 from;
+  final Vec2 to;
+
+  /// Die ganze Breite des Strahls.
+  final double width;
+}
+
 /// Ein Gegner hat bei seinem Tod Erfahrung und Gold gebracht — sein Teil
 /// am Topf der Stufe (ADR-0041). Für eine Zahl über der Stelle.
 class LootDropped extends ActionEvent {

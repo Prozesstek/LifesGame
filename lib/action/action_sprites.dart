@@ -220,6 +220,85 @@ abstract final class GrubeFiguren {
     scale: 4,
   );
 
+  // --- Die Gegner der Besetzung (ADR-0062), alle aus demselben Paket:
+  // 16 × 16, vier Bilder, ein Streifen für alles. ---
+
+  /// Der Schleim — der Death Slime. Flach: Sein Kopf beginnt erst auf
+  /// halber Höhe des Bildes.
+  static const Figure schleim = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('DeathSlime.png', 4, fps: 6),
+    },
+    frameSize: 16,
+    footX: 8,
+    footY: 16,
+    topY: 6,
+    scale: 3,
+  );
+
+  /// Der Schleimling — der Ochre Jelly, gelb und kleiner. Man soll
+  /// sehen, dass er aus dem grünen kam und nicht derselbe ist.
+  static const Figure schleimling = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('OchreJelly.png', 4, fps: 9),
+    },
+    frameSize: 16,
+    footX: 8,
+    footY: 16,
+    topY: 7,
+    scale: 2,
+  );
+
+  /// Der Grimlock — grau, mit Knochenkeule. Etwas grösser als der Ork:
+  /// Er schlägt härter, und das soll man ihm ansehen.
+  static const Figure grimlock = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('BlindedGrimlock.png', 4, fps: 6),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 2,
+    scale: 3,
+  );
+
+  /// Der Kreischpilz — der Shrieker Mushroom, schmal und unscheinbar.
+  static const Figure kreischer = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('ShriekerMushroom.png', 4, fps: 5),
+    },
+    frameSize: 16,
+    footX: 7.5,
+    footY: 16,
+    topY: 3,
+    scale: 3,
+  );
+
+  /// Der Sporenpilz — der Fungal Myconid mit dem rosa Hut.
+  static const Figure heiler = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('FungalMyconid.png', 4, fps: 5),
+    },
+    frameSize: 16,
+    footX: 8,
+    footY: 16,
+    topY: 0,
+    scale: 3,
+  );
+
+  /// Das Wächterauge — der Ocular Watcher. Grösser als das Blutauge und
+  /// mit rotem Mantel: Wer beide kennt, hält sie nicht für dasselbe.
+  static const Figure strahler = Figure(
+    strips: <Pose, SpriteStrip>{
+      Pose.idle: SpriteStrip('OcularWatcher.png', 4, fps: 6),
+    },
+    frameSize: 16,
+    footX: 8,
+    footY: 16,
+    topY: 1,
+    scale: 3,
+  );
+
   /// Die Fledermaus — Frederiks eigene Zeichnung, ein Bild, 256 × 256.
   /// Sie schwebt über ihrem Schatten und wippt dabei.
   static const Figure fledermaus = Figure(
@@ -288,6 +367,12 @@ abstract final class GrubeFiguren {
       EnemyKind.flink => flink,
       EnemyKind.brocken => brocken,
       EnemyKind.flatterer => fledermaus,
+      EnemyKind.schleim => schleim,
+      EnemyKind.schleimling => schleimling,
+      EnemyKind.grimlock => grimlock,
+      EnemyKind.kreischer => kreischer,
+      EnemyKind.heiler => heiler,
+      EnemyKind.strahler => strahler,
     };
   }
 
@@ -316,6 +401,12 @@ abstract final class GrubeFiguren {
     flink,
     brocken,
     fledermaus,
+    schleim,
+    schleimling,
+    grimlock,
+    kreischer,
+    heiler,
+    strahler,
   ];
 
   /// Alle Dateien, die geladen werden müssen.

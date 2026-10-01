@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'balance.dart';
+import 'cast.dart';
 import 'entity.dart';
 import 'level.dart';
 import 'room_catalog.dart';
@@ -33,14 +34,17 @@ abstract final class LevelBuilder {
   static const int cellWidth = RoomCatalog.width + 2;
   static const int cellHeight = RoomCatalog.height + 2;
 
-  /// [boss] legt den Wächter fest; ohne Angabe wird er aus [seed]
-  /// gewürfelt ([bossFor]).
+  /// [boss] legt den Wächter fest, [cast] die Besetzung; ohne Angabe
+  /// werden beide aus [seed] gewürfelt ([bossFor], [PitCast.forSeed]).
   static Level build({
     required PitStage stage,
     required int seed,
     BossKind? boss,
+    PitCast? cast,
   }) {
     final rng = math.Random(seed);
+    final besetzung = cast ?? PitCast.forSeed(seed);
+    final platzWuerfel = PitCast.diceFor(seed);
     final pfad = _path(rng, stage.roomCount + 2);
 
     const breite = gridColumns * cellWidth;
@@ -55,7 +59,11 @@ abstract final class LevelBuilder {
           ? RoomCatalog.startRoom
           : i == pfad.length - 1
               ? _pick(rng, RoomCatalog.bossRooms)
-              : _mitTroll(rng, _pick(rng, RoomCatalog.rooms), stage);
+              : _besetzt(
+                  platzWuerfel,
+                  _mitTroll(rng, _pick(rng, RoomCatalog.rooms), stage),
+                  besetzung,
+                );
       _stamp(feld, raum, pfad[i]);
     }
 
@@ -166,6 +174,61 @@ abstract final class LevelBuilder {
       for (var i = 0; i < raum.length; i++)
         i == y ? raum[i].replaceRange(x, x + 1, 't') : raum[i],
     ];
+  }
+
+  /// Besetzt die Rollen eines Raums mit den Arten dieser Grube
+  /// (ADR-0062).
+  ///
+  /// **Er ersetzt, statt dazuzustellen** — wie der Troll: Die Zahl der
+  /// Gegner hängt weiter nur an den Räumen. Und er würfelt mit [wuerfel],
+  /// nicht mit dem der Karte: Die Besetzung verschiebt keinen Raum.
+  ///
+  /// Die Reihenfolge ist fest: erst die Rollen, dann der Sondergegner auf
+  /// einen Platz, der danach noch Fussvolk ist.
+  static List<String> _besetzt(
+    math.Random wuerfel,
+    List<String> raum,
+    PitCast cast,
+  ) {
+    final zweiter = cast.secondMelee;
+    final schuetze = Level.symbolOf(cast.ranged);
+    final rudel = cast.swarm == null ? null : Level.symbolOf(cast.swarm!);
+
+    final zeilen = <List<String>>[
+      for (final zeile in raum) zeile.split(''),
+    ];
+    final fussvolk = <(int, int)>[];
+    for (var y = 0; y < zeilen.length; y++) {
+      for (var x = 0; x < zeilen[y].length; x++) {
+        switch (zeilen[y][x]) {
+          case 'e':
+            // Immer würfeln, auch ohne zweiten Nahkämpfer — sonst hinge
+            // jeder spätere Wurf daran, wer in der Besetzung steht.
+            final wurf = wuerfel.nextDouble();
+            if (zweiter != null && wurf < ActionBalance.castSecondMeleeShare) {
+              zeilen[y][x] = Level.symbolOf(zweiter);
+            } else {
+              fussvolk.add((x, y));
+            }
+          case 's':
+            zeilen[y][x] = schuetze;
+          case 'k' || 'f':
+            if (rudel != null) zeilen[y][x] = rudel;
+        }
+      }
+    }
+
+    final wurf = wuerfel.nextDouble();
+    final platz = wuerfel.nextInt(1 << 16);
+    final sonder = cast.special;
+    if (sonder != null &&
+        fussvolk.isNotEmpty &&
+        wurf < ActionBalance.castSpecialChance) {
+      final (x, y) = fussvolk[platz % fussvolk.length];
+      zeilen[y][x] = Level.symbolOf(sonder);
+    }
+
+    return <String>[for (final zeile in zeilen) zeile.join()];
   }
 
   static List<String> _pick(math.Random rng, List<List<String>> auswahl) {
