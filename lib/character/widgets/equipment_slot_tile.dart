@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../gear/gear_icon.dart';
+import '../../gear/widgets/rarity_badge.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
@@ -50,10 +51,14 @@ class EquipmentSlotTile extends StatelessWidget {
     final item = equipped?.item;
     final isEmpty = item == null;
 
+    // Ein belegter Platz trägt den Rahmen seines Stücks, in der Farbe
+    // der Seltenheit — derselbe wie im Katalog darunter.
     final rand = dragState.randFarbe(
-      isEmpty ? Palette.surfaceRaised : Palette.accent,
+      isEmpty ? Palette.surfaceRaised : RarityBadge.rahmenOf(item.rarity),
     );
-    final randBreite = dragState.randBreite(isEmpty ? 1.0 : 1.5);
+    final randBreite = dragState.randBreite(
+      isEmpty ? 1.0 : RarityBadge.rahmenBreite,
+    );
 
     final kachel = Semantics(
       button: true,
@@ -99,10 +104,10 @@ class EquipmentSlotTile extends StatelessWidget {
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: Palette.text,
+                        color: RarityBadge.colorOf(item.rarity),
                       ),
                     ),
                   ],

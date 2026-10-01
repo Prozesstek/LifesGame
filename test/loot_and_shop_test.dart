@@ -11,6 +11,7 @@ import 'package:lifes_game/gear/copy_text.dart';
 import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
+import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -269,6 +270,41 @@ void main() {
       expect(
         zellen.map((z) => z.copy.item!.slot).toSet(),
         GearSlot.values.toSet(),
+      );
+    });
+
+    testWidgets('jedes Angebot trägt Rahmen und Namen seiner Seltenheit', (
+      tester,
+    ) async {
+      // Auch das gewählte: Die Wahl liegt als Ring außen herum, statt
+      // den Rahmen umzufärben.
+      useTallView(tester);
+      await tester.pumpWidget(app(stand()));
+      await tester.pumpAndSettle();
+
+      final zellen = find.byType(ShopItemCell);
+      for (var i = 0; i < GearSlot.values.length; i++) {
+        final zelle = zellen.at(i);
+        final item = tester.widget<ShopItemCell>(zelle).copy.item!;
+        final name = find.descendant(of: zelle, matching: find.text(item.name));
+        final kachel = tester.widget<Container>(
+          find.ancestor(of: name, matching: find.byType(Container)).first,
+        );
+
+        expect(
+          tester.widget<Text>(name).style!.color,
+          RarityBadge.colorOf(item.rarity),
+          reason: item.name,
+        );
+        expect(
+          (kachel.decoration! as BoxDecoration).border!.top.color,
+          RarityBadge.rahmenOf(item.rarity),
+          reason: item.name,
+        );
+      }
+      expect(
+        tester.widgetList<ShopItemCell>(zellen).where((z) => z.isSelected),
+        hasLength(1),
       );
     });
 

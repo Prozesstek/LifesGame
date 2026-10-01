@@ -92,7 +92,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
-| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten | Flutter |
+| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; zwei Spalten: Schriftton (`colorOf`, Marke und Name) und Rahmenton (`rahmenOf`, der Rand um ein Stück) | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
@@ -223,7 +223,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 612 Tests
+flutter test             # 620 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

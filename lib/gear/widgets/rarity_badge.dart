@@ -47,12 +47,18 @@ class RarityBadge extends StatelessWidget {
   /// sonst leuchtet sie über einer grauen Karte.
   final bool faded;
 
-  /// Welche Farbe zu welcher Stufe gehört — **die einzige Tabelle**.
+  /// Welche Farbe zu welcher Stufe gehört — **die einzige Tabelle**, in
+  /// zwei Spalten: [_farben] für Schrift, [_rahmen] für Ränder.
   ///
   /// Die Reihenfolge grau → grün → blau → lila → gold ist die aus
   /// Rollenspielen; `rarity_test.dart` hält fest, dass beide
   /// Aufzählungen gleich viele Stufen haben und keine zwei sich eine
   /// Farbe teilen.
+  ///
+  /// **Der Schriftton ist dunkel genug für Pergament.** Ein Name in
+  /// dieser Farbe muss sich lesen lassen wie jeder andere Text. Das Gold
+  /// ist deshalb ein gebranntes: Ein leuchtendes hätte auf Beige kaum
+  /// halb so viel Kontrast wie nötig.
   static const List<Color> _farben = <Color>[
     Color(0xFF5A4E3C),
     Color(0xFF265A31),
@@ -60,14 +66,37 @@ class RarityBadge extends StatelessWidget {
     // Lila und Gold, wie in jedem Spiel, das die beiden Stufen kennt --
     // eine Konvention, die man nicht erklaeren muss.
     Color(0xFF6A2E9A),
-    Color(0xFFA8781A),
+    Color(0xFF804400),
   ];
+
+  /// Dieselben fünf Stufen, **kräftiger, für den Rahmen eines Stücks**.
+  ///
+  /// Ein Rand trägt keine Schrift und steht zwischen Pergament und
+  /// Leder; er darf leuchten, wo der Schriftton es nicht darf. An ihm
+  /// erkennt man die Stufe, bevor man den Namen liest.
+  static const List<Color> _rahmen = <Color>[
+    Color(0xFF7D7466),
+    Color(0xFF2E8B3D),
+    Color(0xFF2F6FD0),
+    Color(0xFF8E3FD0),
+    Color(0xFFD9900A),
+  ];
+
+  /// Wie breit der Rahmen eines Stücks ist — überall derselbe.
+  static const double rahmenBreite = 2;
 
   /// Die Farbe zu einer Stufennummer — für alles, was keine
   /// [GearRarity] hat.
   static Color colorOfStufe(int stufe) => _farben[stufe];
 
+  /// Der Schriftton einer Stufe: die Marke und der Name eines Stücks.
   static Color colorOf(GearRarity rarity) => colorOfStufe(rarity.index);
+
+  /// Der Rahmenton zu einer Stufennummer.
+  static Color rahmenOfStufe(int stufe) => _rahmen[stufe];
+
+  /// Der Rahmenton einer Stufe: der Rand um ein Stück.
+  static Color rahmenOf(GearRarity rarity) => rahmenOfStufe(rarity.index);
 
   @override
   Widget build(BuildContext context) {

@@ -342,7 +342,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
             HaltenUndZiehen<GearItem>(
               data: item,
               bild: _schwebeBild(item),
-              rahmenFarbe: RarityBadge.colorOf(item.rarity),
+              rahmenFarbe: RarityBadge.rahmenOf(item.rarity),
               // **Nur was man hat, lässt sich ziehen.** Ein graues Stück
               // auf einen Platz zu legen hieße, etwas anzulegen, das es
               // nicht gibt.
@@ -542,11 +542,14 @@ class _Kachel extends StatelessWidget {
 
   static const double _bildSeite = 36;
 
+  /// Wie deckend der Rahmen eines Stücks ist, das man nicht hat.
+  static const double _rahmenOhneBesitz = 0.4;
+
   bool get _besessen => anzahl > 0;
 
   @override
   Widget build(BuildContext context) {
-    final farbe = RarityBadge.colorOf(item.rarity);
+    final rahmen = RarityBadge.rahmenOf(item.rarity);
     final pfad = GearIcons.forItemId(item.id);
     final ersatz = SizedBox.square(
       dimension: _bildSeite,
@@ -572,13 +575,16 @@ class _Kachel extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
+                // **Der Rahmen gehört der Seltenheit**, auch beim
+                // angelegten Stück: Dass es anliegt, sagt der Haken am
+                // Bild. Was man nicht hat, trägt ihn blasser.
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: angelegt
-                        ? Palette.accent
-                        : farbe.withValues(alpha: _besessen ? 0.7 : 0.25),
-                    width: angelegt ? 2 : 1,
+                    color: rahmen.withValues(
+                      alpha: _besessen ? 1 : _rahmenOhneBesitz,
+                    ),
+                    width: RarityBadge.rahmenBreite,
                   ),
                 ),
                 child: Column(
@@ -651,7 +657,10 @@ class _Kachel extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 9,
                         height: 1.15,
-                        color: _besessen ? Palette.text : Palette.muted,
+                        fontWeight: FontWeight.bold,
+                        color: _besessen
+                            ? RarityBadge.colorOf(item.rarity)
+                            : Palette.muted,
                       ),
                     ),
                   ],

@@ -77,14 +77,26 @@ class GearSheet extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  if (pfad != null)
-                    PixelArt(
-                      assetPath: pfad,
-                      side: _bildSeite,
-                      fallback: _ersatz(),
-                    )
-                  else
-                    _ersatz(),
+                  // Das Bild im Rahmen seiner Seltenheit, wie auf der
+                  // Kachel, von der man kommt.
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Palette.surfaceRaised,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: RarityBadge.rahmenOf(item.rarity),
+                        width: RarityBadge.rahmenBreite,
+                      ),
+                    ),
+                    child: pfad != null
+                        ? PixelArt(
+                            assetPath: pfad,
+                            side: _bildSeite,
+                            fallback: _ersatz(),
+                          )
+                        : _ersatz(),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -94,10 +106,10 @@ class GearSheet extends ConsumerWidget {
                           item.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Palette.text,
+                            color: RarityBadge.colorOf(item.rarity),
                           ),
                         ),
                         const SizedBox(height: 4),

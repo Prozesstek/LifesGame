@@ -6,6 +6,7 @@ import '../copy_text.dart';
 import '../gear_icon.dart';
 import '../../ui/druck.dart';
 import '../../ui/gold_icon.dart';
+import 'rarity_badge.dart';
 
 /// Ein Exemplar als Kachel im Raster — ein Angebot des Tages oder ein
 /// Stück im Inventar (ADR-0048).
@@ -17,7 +18,8 @@ import '../../ui/gold_icon.dart';
 /// offener Punkt in `state.md`.
 ///
 /// Was sie zeigen muss, damit die Wahl überhaupt eine ist: den Namen, die
-/// Seltenheit als Rand, und ob das Stück schon einem gehört.
+/// Seltenheit als Rand **und als Farbe des Namens**, und ob das Stück
+/// schon einem gehört.
 class ShopItemCell extends StatelessWidget {
   const ShopItemCell({
     required this.copy,
@@ -62,6 +64,10 @@ class ShopItemCell extends StatelessWidget {
   /// Abstand zwischen zwei Kacheln.
   static const double gap = 10;
 
+  /// Wie breit der helle Ring um die gewählte Kachel ist. Schmaler als
+  /// der halbe [gap], sonst berührten sich zwei Ringe.
+  static const double wahlRing = 3;
+
   /// Wie viele Kacheln nebeneinander stehen.
   ///
   /// Drei sind bei 390 Pixeln Breite die letzte Zahl, bei der ein
@@ -78,9 +84,6 @@ class ShopItemCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = copy.item;
     if (item == null) return const SizedBox.shrink();
-    final rand = isSelected
-        ? Palette.accent
-        : (isEquipped ? Palette.success : Palette.surfaceRaised);
     final bild = GearIcons.forItemId(item.id);
 
     return Semantics(
@@ -88,62 +91,85 @@ class ShopItemCell extends StatelessWidget {
       selected: isSelected,
       label: item.name,
       child: Druck(
-        child: Material(
-          color: Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            onTap: onTap,
+        // **Der Rahmen gehört der Seltenheit, die Wahl liegt außen
+        // herum.** Bis zum 01.10. färbte die Wahl den Rand selbst; dann
+        // hätte das gewählte Stück als einziges seine Seltenheit
+        // verloren.
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: rand, width: isSelected ? 2 : 1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Opacity(
-                      opacity: isOutOfReach ? outOfReachOpacity : 1,
-                      child: bild == null
-                          ? Icon(
-                              GearIcons.fallbackFor(item.slot),
-                              size: 30,
-                              color: isOwned ? Palette.muted : Palette.textDim,
-                            )
-                          : Image.asset(
-                              bild,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.none,
-                              errorBuilder: (context, error, stack) => Icon(
+            boxShadow: <BoxShadow>[
+              if (isSelected)
+                const BoxShadow(
+                  color: Palette.textOnDark,
+                  spreadRadius: wahlRing,
+                ),
+            ],
+          ),
+          child: Material(
+            color: Palette.surface,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: RarityBadge.rahmenOf(item.rarity),
+                    width: RarityBadge.rahmenBreite,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Opacity(
+                        opacity: isOutOfReach ? outOfReachOpacity : 1,
+                        child: bild == null
+                            ? Icon(
                                 GearIcons.fallbackFor(item.slot),
                                 size: 30,
-                                color: Palette.muted,
+                                color: isOwned
+                                    ? Palette.muted
+                                    : Palette.textDim,
+                              )
+                            : Image.asset(
+                                bild,
+                                fit: BoxFit.contain,
+                                filterQuality: FilterQuality.none,
+                                errorBuilder: (context, error, stack) => Icon(
+                                  GearIcons.fallbackFor(item.slot),
+                                  size: 30,
+                                  color: Palette.muted,
+                                ),
                               ),
-                            ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      height: 1.15,
-                      fontWeight: FontWeight.bold,
-                      color: (isOwned || isOutOfReach)
-                          ? Palette.textDim
-                          : Palette.text,
+                    const SizedBox(height: 4),
+                    Text(
+                      item.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        height: 1.15,
+                        fontWeight: FontWeight.bold,
+                        // Die Farbe der Seltenheit, auch wenn das Stück
+                        // gerade nicht zu haben ist: Dass es nicht geht,
+                        // sagen das blasse Bild und die Fußnote.
+                        color: RarityBadge.colorOf(item.rarity),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  // **Preis oder Besitz, nie beides.** Was einem gehört,
-                  // hat keinen Preis mehr — es hat einen Zustand.
-                  _fussnote(),
-                ],
+                    const SizedBox(height: 3),
+                    // **Preis oder Besitz, nie beides.** Was einem gehört,
+                    // hat keinen Preis mehr — es hat einen Zustand.
+                    _fussnote(),
+                  ],
+                ),
               ),
             ),
           ),
