@@ -118,6 +118,45 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('jede Aufgabe steht als Satz da, auch die offene', (
+    tester,
+  ) async {
+    // Vorher stand eine offene nur als Zeichen mit Balken da, und was zu
+    // tun ist, kam erst auf Tipp.
+    final offen = const HabitTracker.empty().activate(a.id).activate(b.id);
+    final c = container(offen);
+    await zeige(tester, c, const HomeScreen());
+
+    final aufgaben = c.read(dailyQuestsProvider);
+    expect(aufgaben.where((q) => !q.isDone), isNotEmpty);
+    for (final aufgabe in aufgaben) {
+      expect(
+        find.descendant(
+          of: find.byType(DailyQuestsCard),
+          matching: find.text(aufgabe.text),
+        ),
+        findsOneWidget,
+        reason: aufgabe.text,
+      );
+    }
+  });
+
+  testWidgets('eine erledigte, nicht abgeholte bleibt lesbar', (tester) async {
+    final c = container(beideErledigt());
+    await zeige(tester, c, const HomeScreen());
+
+    for (final aufgabe in c.read(claimableQuestsProvider)) {
+      expect(
+        find.descendant(
+          of: find.byType(DailyQuestsCard),
+          matching: find.text(aufgabe.text),
+        ),
+        findsOneWidget,
+        reason: aufgabe.text,
+      );
+    }
+  });
+
   testWidgets('eine offene Aufgabe hat keinen Knopf', (tester) async {
     final offen = const HabitTracker.empty().activate(a.id).activate(b.id);
     await zeige(tester, container(offen), const HomeScreen());
