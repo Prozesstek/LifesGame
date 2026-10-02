@@ -51,6 +51,11 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
   will stattdessen das **Haus** ausbauen (Möbel, Haustiere). Braucht
   AktivesBrett und einen ADR.
 
+**Vor einer Veröffentlichung** (Durchsicht vom 02.10., nichts
+entschieden): Datenverlust, Erinnerung und Android-App, der lange Weg
+zum ersten Kampf, nur tägliche Gewohnheiten, Lizenzen der Assets,
+Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
+
 **Inhalt und Balance:**
 
 - Gegenlesen: neun Einführungen und zwanzig Themen im Wissensbaum
@@ -83,6 +88,62 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.10.2026, danach: kritische Durchsicht vor einer Veröffentlichung
+
+Frederik hat die neuen Gegner, Besetzungen und Wächter gespielt („ist
+super“) und gefragt: Was hat die Konkurrenz voraus, und was demotiviert
+Spieler, wenn das jetzt auf den Markt geht? **Entschieden ist nichts**,
+das hier ist die Liste. Die Aussagen über Habitica, Duolingo und Finch
+stammen aus Claudes Wissen, nicht aus frischer Recherche.
+
+**Der Befund in einem Satz:** Es scheitert nicht am Spiel, sondern an
+allem drumherum — ein gutes Spiel für zwei Erbauer, noch kein Produkt
+für Fremde.
+
+| Was der Konkurrenz voraus ist | Stand bei uns |
+|---|---|
+| Erinnerungen | keine; seit dem 27.09. zurückgestellt |
+| Konto und Sync | Stand im Browser-Speicher, Sicherung als Text (ADR-0054); Browserdaten löschen heißt alles verlieren |
+| Echte App | Web auf GitHub Pages, Android nicht eingerichtet, Startsymbol ist das Flutter-Logo, kein Widget, kein iOS |
+| Soziales | nichts |
+| Flexible Gewohnheiten | jede Gewohnheit ist täglich (`habit.dart`); „dreimal die Woche“ geht nicht, ein Ruhetag reißt die Kette |
+| Sprache, Zugänglichkeit | nur deutsch, kein Übersetzungsgerüst; große Schrift auf der Sperrliste |
+| Messung | keine Analytik, keine Absturzmeldungen |
+| Politur | Level-Rahmen und Rüstung auf der Figur sind Platzhalter, neun Gegner und drei Wächter wippen nur |
+
+**Was Spieler demotiviert:**
+
+- **Der Weg zum ersten Kampf**: Handbuch, drei Knoten, anlegen. Wer
+  wegen des Kampfs kommt, muss zuerst lesen.
+- **Zu viele Systeme ohne Erklärung**: zwölf Dinge von XP bis
+  Tagesladen, und seit ADR-0060 stehen fast nur Zeichen da.
+- **Tägliche Pflichtlast**: Abhaken, Truhe, Aufgaben, Rückfrage, vier
+  Dailies, Laden — alles verfällt um Mitternacht.
+- **Kettenverlust**: Eis nur aus etwa jeder zwölften Truhe, deckt nur
+  gestern. Eine Woche krank heißt alles weg.
+- **Der Kampf verlangt Geschick**: Stufe 2 an Tag 0 bei 58 % für den
+  Bot. Wer abgehakt hat und am Daumen scheitert, fühlt sich bestraft.
+- **Der Inhalt endet**: Baum um Tag 50–58 gelesen, 30 Stufen zahlen
+  einmal, Level 50 nach 188–240 Tagen.
+- **Schummeln ist gratis**: Ein Häkchen ist eine Behauptung.
+
+**Rechtlich offen:** Lizenzen der Asset-Pakete (Quelle und Urheber
+fehlen in HERKUNFT), ungelesene Gesundheitsaussagen im Baum, und die
+Gewohnheiten-Seiten folgen dem Aufbau von *Die 1%-Methode*.
+
+**Was besser ist als bei den anderen:** Der Kampf ist ein echtes Spiel,
+Lernen gehört zur Schleife, keine Werbung, alles offline.
+
+**Vorgeschlagene Reihenfolge** (Claude, nicht beschlossen):
+
+1. Datenverlust ausschließen (Konto oder automatische Sicherung).
+2. Android-App mit Erinnerung.
+3. Erster Kampf in den ersten zwei Minuten, Handbuch danach.
+4. Wochenrhythmus für Gewohnheiten, großzügigere Eis-Regel.
+5. Lizenzen und Inhalte klären.
+6. Fünf bis zehn Fremde spielen lassen und zählen, wer an Tag 7 noch
+   da ist — **vor** jeder weiteren Funktion.
 
 ## 02.10.2026: offene Tagesaufgaben stehen als Satz da
 
@@ -147,8 +208,8 @@ der Strahl und das Zerfallen als Bild aus dem echten Renderer angesehen,
 
 ### Offen
 
-- Ob sich die Besetzungen im Spielen so verschieden anfühlen, wie die
-  Zahlen gleich sind.
+- ~~Ob sich die Besetzungen im Spielen so verschieden anfühlen, wie die
+  Zahlen gleich sind.~~ Gespielt am 02.10. (Frederik): „ist super“.
 - **Kein Klang**: Der Schrei ist nur zu sehen.
 - Die Besetzung steht nirgends, bevor man hinabsteigt.
 - Die neuen Arten wippen nur, wie Kobold und Troll.
@@ -193,7 +254,8 @@ echten Renderer angesehen, **nicht gespielt und nicht am Handy**.
 - Bestzeiten sagen nicht, gegen welchen Wächter sie gelaufen sind.
 - Die drei neuen Wächter wippen nur; sie haben weder Schlag noch Tod als
   Bild.
-- Ob der Sprung des Schlunds sich fair anfühlt, zeigt erst das Spielen.
+- ~~Ob der Sprung des Schlunds sich fair anfühlt, zeigt erst das
+  Spielen.~~ Gespielt am 02.10. (Frederik), keine Beanstandung.
 
 ## 01.10.2026: Stücke tragen Rahmen und Namen ihrer Seltenheit
 
