@@ -53,11 +53,17 @@ class TodayCard extends ConsumerWidget {
             streak: tracker.currentDayStreak(today),
             heuteGetan: tracker.hasCheckOn(today),
           ),
-          if (liste.isEmpty)
+          if (tracker.activeIds.isEmpty)
             const _Hinweis(
               icon: Icons.add_circle_outline,
               label: 'Erste Gewohnheit starten',
               highlight: true,
+            )
+          else if (liste.isEmpty)
+            // Es läuft etwas, aber heute ist nichts dran (ADR-0064).
+            const _Hinweis(
+              icon: Icons.self_improvement_rounded,
+              label: 'Ruhetag — heute ist nichts fällig',
             )
           else
             for (final habit in liste)

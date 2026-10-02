@@ -166,7 +166,7 @@ void main() {
 
     test('stoppen behält sie und ihre Historie', () {
       final tracker = mitEigener(eigene()).check('eigen-1', heute).tracker;
-      final gestoppt = tracker.deactivate('eigen-1');
+      final gestoppt = tracker.deactivate('eigen-1', today: heute);
 
       expect(gestoppt.isActive('eigen-1'), isFalse);
       expect(gestoppt.customHabits, hasLength(1));

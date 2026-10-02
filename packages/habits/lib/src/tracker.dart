@@ -5,8 +5,10 @@ import 'daily_form.dart';
 import 'daily_quests.dart';
 import 'day.dart';
 import 'habit.dart';
+import 'plan.dart';
 import 'rewards.dart';
 import 'streak_freeze.dart';
+import 'streak_rule.dart';
 import 'week_summary.dart';
 
 /// Was ein Häkchen eingebracht hat — inklusive des daraus folgenden
@@ -81,6 +83,7 @@ class HabitTracker {
     Set<Day> openedChests = const <Day>{},
     Map<String, String> cues = const <String, String>{},
     Map<Day, Set<String>> claimedQuests = const <Day, Set<String>>{},
+    Map<String, HabitPlan> plans = const <String, HabitPlan>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
@@ -91,6 +94,10 @@ class HabitTracker {
         _claimedQuests = Map<Day, Set<String>>.unmodifiable(<Day, Set<String>>{
           for (final entry in claimedQuests.entries)
             entry.key: Set<String>.unmodifiable(entry.value),
+        }),
+        _plans = Map<String, HabitPlan>.unmodifiable(<String, HabitPlan>{
+          for (final entry in plans.entries)
+            if (!entry.value.isEmpty) entry.key: entry.value,
         });
 
   const HabitTracker.empty()
@@ -101,7 +108,8 @@ class HabitTracker {
         _frozenDays = const <Day>{},
         _openedChests = const <Day>{},
         _cues = const <String, String>{},
-        _claimedQuests = const <Day, Set<String>>{};
+        _claimedQuests = const <Day, Set<String>>{},
+        _plans = const <String, HabitPlan>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -248,6 +256,30 @@ class HabitTracker {
         ? ids.sublist(0, HabitRewards.maxActiveHabits)
         : ids;
 
+    final plaene = <String, HabitPlan>{};
+    final rawPlans = json['plans'];
+    if (rawPlans is Map) {
+      for (final entry in rawPlans.entries) {
+        final habitId = entry.key;
+        if (habitId is! String) continue;
+        final plan = HabitPlan.fromJson(entry.value);
+        if (!plan.isEmpty) plaene[habitId] = plan;
+      }
+    }
+    // Ein Stand von vor dem Wochenplan (ADR-0064) kennt keine Pausen. Was
+    // dort gestoppt ist, gälte ohne Eintrag als jeden Tag fällig und
+    // jeden Tag verpasst — und machte jeden Ruhetag der anderen zunichte.
+    // Es pausiert deshalb seit dem Tag nach seinem letzten Häkchen.
+    for (final entry in checks.entries) {
+      if (begrenzt.contains(entry.key) || plaene.containsKey(entry.key)) {
+        continue;
+      }
+      final letzter = entry.value.reduce((a, b) => a > b ? a : b);
+      plaene[entry.key] = HabitPlan(<PlanChange>[
+        PlanChange(from: letzter.next, weekdays: const <int>{}),
+      ]);
+    }
+
     return HabitTracker(
       activeIds: begrenzt,
       checks: checks,
@@ -257,6 +289,7 @@ class HabitTracker {
       openedChests: truhen,
       cues: cues,
       claimedQuests: abgeholt,
+      plans: plaene,
     );
   }
 
@@ -307,6 +340,11 @@ class HabitTracker {
   /// nur das bringt etwas ein.
   final Map<Day, Set<String>> _claimedQuests;
 
+  /// Je Gewohnheit der **Wochenplan** (ADR-0064): an welchen Wochentagen
+  /// sie fällig ist, seit wann — und wann sie pausiert. Eine Historie wie
+  /// alles andere hier; ohne Eintrag ist jeder Tag fällig.
+  final Map<String, HabitPlan> _plans;
+
   /// Der Stand als JSON.
   ///
   /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
@@ -347,6 +385,10 @@ class HabitTracker {
         'quests': <String, Object?>{
           for (final day in _claimedQuests.keys.toList()..sort())
             day.toString(): (_claimedQuests[day]!.toList()..sort()),
+        },
+      if (_plans.isNotEmpty)
+        'plans': <String, Object?>{
+          for (final entry in _plans.entries) entry.key: entry.value.toJson(),
         },
     };
   }
@@ -465,8 +507,12 @@ class HabitTracker {
   /// Die Tagesliste für [day]: **offene oben, erledigte unten**, in jeder
   /// Hälfte nach [activeHabitsByPriority]. Wer abhakt, sieht die Kachel
   /// nach unten wandern — was oben steht, ist das, was noch zu tun ist.
+  ///
+  /// Nur, was an [day] **fällig** ist (ADR-0064): Eine Gewohnheit mit
+  /// Montag, Mittwoch, Freitag steht dienstags nicht da.
   List<Habit> dailyListOn(Day day) {
-    final sortiert = activeHabitsByPriority;
+    final sortiert =
+        activeHabitsByPriority.where((h) => isDueOn(h.id, day)).toList();
     return List<Habit>.unmodifiable(<Habit>[
       ...sortiert.where((h) => !isChecked(h.id, day)),
       ...sortiert.where((h) => isChecked(h.id, day)),
@@ -523,9 +569,35 @@ class HabitTracker {
   ///
   /// Gibt unverändert zurück, wenn [canActivate] false ist — die
   /// Oberfläche fragt vorher und schaltet den Knopf ab.
-  HabitTracker activate(String habitId) {
+  ///
+  /// [today] trägt den Start in den Wochenplan ein und **beendet eine
+  /// Pause**: Ab heute gelten wieder die zuletzt gewählten Wochentage. Die
+  /// App reicht ihn immer herein. Ohne ihn geht es nur bei einer
+  /// Gewohnheit, die nie gestoppt wurde — eine pausierte ohne Datum
+  /// fortzusetzen wirft, statt still weiter zu pausieren.
+  HabitTracker activate(String habitId, {Day? today}) {
     if (!canActivate(habitId)) return this;
-    return _copyWith(activeIds: <String>[..._activeIds, habitId]);
+
+    final plan = _plans[habitId] ?? const HabitPlan.empty();
+    if (today == null) {
+      if (plan.changes.any((change) => change.isPause)) {
+        throw StateError(
+          'Gewohnheit "$habitId" pausiert — activate braucht today.',
+        );
+      }
+      return _copyWith(activeIds: <String>[..._activeIds, habitId]);
+    }
+
+    // Erst die Zukunft räumen (eine Pause, die morgen begonnen hätte),
+    // dann eintragen, ab wann sie läuft.
+    final bisHeute = plan.withoutChangesAfter(today);
+    final next = bisHeute.hasEntryBy(today) && !bisHeute.isPausedOn(today)
+        ? bisHeute
+        : bisHeute.withChange(today, plan.chosenWeekdays);
+    return _copyWith(
+      activeIds: <String>[..._activeIds, habitId],
+      plans: <String, HabitPlan>{..._plans, habitId: next},
+    );
   }
 
   /// Nimmt eine Gewohnheit aus der täglichen Liste.
@@ -539,11 +611,107 @@ class HabitTracker {
   /// **nicht**: Sie bleibt in [customHabits] und lässt sich wieder
   /// aufnehmen. Es gibt bewusst kein Löschen — gelöscht wäre ihre Historie
   /// keinem Wert mehr zuzuordnen.
-  HabitTracker deactivate(String habitId) {
+  ///
+  /// **Die Kette bleibt stehen** (ADR-0064): Ab morgen pausiert die
+  /// Gewohnheit, und eine Pause trägt die Kette wie ein Ruhetag. Heute
+  /// bleibt fällig — wer eine offene Gewohnheit stoppt, hat sie heute
+  /// verpasst, und der Tag gilt nicht als erledigt.
+  HabitTracker deactivate(String habitId, {required Day today}) {
     if (!isActive(habitId)) return this;
+    final plan = _plans[habitId] ?? const HabitPlan.empty();
     return _copyWith(
       activeIds: _activeIds.where((id) => id != habitId).toList(),
+      plans: <String, HabitPlan>{
+        ..._plans,
+        habitId: plan.withChange(today.next, const <int>{}),
+      },
     );
+  }
+
+  // --- Wochenplan (ADR-0064) ---
+
+  /// Ob [habitId] an [day] nach ihrem Plan fällig ist. Ohne Plan: jeden
+  /// Tag. **Die einzige Stelle, die das beantwortet** — Tagesliste, Truhe,
+  /// Tagesform, Aufgaben und Ketten fragen alle hier.
+  bool isDueOn(String habitId, Day day) {
+    return _plans[habitId]?.isPlannedOn(day) ?? true;
+  }
+
+  /// Die Wochentage, die der Spieler für [habitId] gewählt hat — auch
+  /// wenn die Änderung erst morgen gilt.
+  Set<int> weekdaysFor(String habitId) {
+    return _plans[habitId]?.chosenWeekdays ?? HabitPlan.everyDay;
+  }
+
+  /// Legt die Wochentage von [habitId] fest.
+  ///
+  /// **Gilt ab morgen.** Gälte es ab heute, nähme man abends den heutigen
+  /// Tag aus dem Plan und öffnete die Truhe ohne Häkchen. Nur eine
+  /// Gewohnheit, an der noch nie etwas abgehakt wurde, bekommt ihren Plan
+  /// sofort — sie hat nichts, was sich damit retten ließe.
+  ///
+  /// Gibt unverändert zurück, wenn die Gewohnheit nicht läuft oder
+  /// [weekdays] kein gültiger Plan ist.
+  HabitTracker setWeekdays(
+    String habitId,
+    Set<int> weekdays, {
+    required Day today,
+  }) {
+    if (!isActive(habitId) || !HabitPlan.isValid(weekdays)) return this;
+    final gewaehlt = weekdaysFor(habitId);
+    if (gewaehlt.length == weekdays.length && gewaehlt.containsAll(weekdays)) {
+      return this;
+    }
+
+    final ab = weekdaysChangeFrom(habitId, today);
+    final plan = _plans[habitId] ?? const HabitPlan.empty();
+    return _copyWith(
+      plans: <String, HabitPlan>{
+        ..._plans,
+        habitId: plan.withChange(ab, weekdays),
+      },
+    );
+  }
+
+  /// Ab welchem Tag eine Änderung der Wochentage an [today] gälte — die
+  /// Oberfläche sagt es, bevor jemand bestätigt.
+  Day weekdaysChangeFrom(String habitId, Day today) {
+    return checksFor(habitId) == 0 ? today : today.next;
+  }
+
+  /// Was an [day] zu erledigen ist: die laufenden Gewohnheiten, die fällig
+  /// sind — **und** die, die heute gestoppt wurden. Stoppen gilt ab
+  /// morgen; sonst wäre es der Knopf, der den Tag fertig macht.
+  List<String> dueIdsOn(Day day) {
+    return <String>[
+      for (final id in <String>{..._activeIds, ..._plans.keys})
+        if (isDueOn(id, day) && (isActive(id) || _stoppedAfter(id, day))) id,
+    ];
+  }
+
+  /// Ob eine nicht laufende Gewohnheit erst **nach** [day] pausiert — an
+  /// [day] selbst lief sie dann noch.
+  bool _stoppedAfter(String habitId, Day day) {
+    final plan = _plans[habitId];
+    if (plan == null || plan.isEmpty) return false;
+    final letzte = plan.changes.last;
+    return letzte.isPause && letzte.from > day;
+  }
+
+  Day? _firstCheck(String habitId) {
+    final days = _checks[habitId];
+    if (days == null || days.isEmpty) return null;
+    return days.reduce((a, b) => a < b ? a : b);
+  }
+
+  /// Ob [habitId] an [day] **für die Tageskette** fällig war: nach Plan,
+  /// und überhaupt schon im Spiel — seit dem ersten Eintrag im Plan oder
+  /// dem ersten Häkchen. Davor gab es sie nicht, und was es nicht gab,
+  /// kann niemand verpasst haben.
+  bool _wasDueOn(String habitId, Day? firstCheck, Day day) {
+    if (!isDueOn(habitId, day)) return false;
+    if (_plans[habitId]?.hasEntryBy(day) ?? false) return true;
+    return firstCheck != null && firstCheck <= day;
   }
 
   // --- Abhaken ---
@@ -573,8 +741,14 @@ class HabitTracker {
     return _activeIds.where((id) => isChecked(id, day)).length;
   }
 
+  /// Ob an [day] alles Fällige erledigt ist ([dueIdsOn]).
+  ///
+  /// Ein Tag, an dem **nichts** fällig ist, ist nicht erledigt, sondern
+  /// ein Ruhetag: keine Truhe, keine Tagesform (ADR-0064). Sonst lohnte
+  /// es sich, möglichst viele freie Tage einzuplanen.
   bool isDayComplete(Day day) {
-    return _activeIds.isNotEmpty && completedOn(day) == _activeIds.length;
+    final due = dueIdsOn(day);
+    return due.isNotEmpty && due.every((id) => isChecked(id, day));
   }
 
   /// Die Tagesform an [day]: die dort abgehakten **laufenden**
@@ -598,9 +772,7 @@ class HabitTracker {
   /// Erfahrung, Gold und Streak: Halb getan ist nicht getan, sonst wäre
   /// die Streak nichts mehr wert.
   CheckResult advance(String habitId, Day day) {
-    if (!isActive(habitId)) {
-      throw StateError('Gewohnheit "$habitId" läuft nicht.');
-    }
+    _mussAbhakbarSein(habitId, day);
     if (isChecked(habitId, day)) return check(habitId, day);
 
     final required = requiredFor(habitId);
@@ -626,13 +798,12 @@ class HabitTracker {
   /// Hakt eine Gewohnheit für [day] ab — unabhängig davon, wie weit ein
   /// Tagesziel gefüllt war.
   ///
-  /// Wirft, wenn die Gewohnheit gar nicht läuft — das wäre ein Fehler in
-  /// der Oberfläche, kein Nutzerfehler. Ein zweites Häkchen am selben Tag
-  /// ist dagegen harmlos und ändert nichts.
+  /// Wirft, wenn die Gewohnheit gar nicht läuft oder an [day] nicht
+  /// fällig ist — das wäre ein Fehler in der Oberfläche, kein
+  /// Nutzerfehler. Ein zweites Häkchen am selben Tag ist dagegen harmlos
+  /// und ändert nichts.
   CheckResult check(String habitId, Day day) {
-    if (!isActive(habitId)) {
-      throw StateError('Gewohnheit "$habitId" läuft nicht.');
-    }
+    _mussAbhakbarSein(habitId, day);
 
     final required = requiredFor(habitId);
     final difficulty =
@@ -687,6 +858,18 @@ class HabitTracker {
       required: required,
       tracker: next,
     );
+  }
+
+  /// **Nicht fällig heißt nicht abhakbar** (ADR-0064). Ein freiwilliges
+  /// Häkchen am falschen Tag wäre der Weg, eine Kette zu bauen, die an
+  /// sechs von sieben Tagen nicht fallen kann.
+  void _mussAbhakbarSein(String habitId, Day day) {
+    if (!isActive(habitId)) {
+      throw StateError('Gewohnheit "$habitId" läuft nicht.');
+    }
+    if (!isDueOn(habitId, day)) {
+      throw StateError('Gewohnheit "$habitId" ist am $day nicht fällig.');
+    }
   }
 
   /// Nimmt ein Häkchen zurück. Erfahrung und Gold sind abgeleitet und
@@ -756,6 +939,7 @@ class HabitTracker {
     Set<Day>? openedChests,
     Map<String, String>? cues,
     Map<Day, Set<String>>? claimedQuests,
+    Map<String, HabitPlan>? plans,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -766,6 +950,7 @@ class HabitTracker {
       openedChests: openedChests ?? _openedChests,
       cues: cues ?? _cues,
       claimedQuests: claimedQuests ?? _claimedQuests,
+      plans: plans ?? _plans,
     );
   }
 
@@ -778,28 +963,31 @@ class HabitTracker {
 
   // --- Streaks ---
 
-  /// Länge der ununterbrochenen Kette, die an [day] endet. 0, wenn an
-  /// [day] weder abgehakt noch ein Streak-Eis gelegt wurde.
+  /// Die Kette von [habitId] am Ende von [day] (ADR-0064).
   ///
-  /// **Ein gedeckter Tag trägt die Kette, verlängert sie aber nicht**
-  /// ([StreakFreeze]). Eine Kette über dreißig Kalendertage mit einem Eis
-  /// darin ist neunundzwanzig lang — das Eis bewahrt, was da war, und
-  /// schenkt nichts dazu.
+  /// Gezählt werden **erledigte fällige Tage**, nicht Kalendertage:
+  ///
+  /// - Ein Tag außerhalb des Wochenplans, eine Pause und ein Streak-Eis
+  ///   **tragen** die Kette, verlängern sie aber nicht ([StreakFreeze]).
+  /// - Ein verpasster fälliger Tag lässt sie auf die **Stufe darunter**
+  ///   fallen, nicht auf null ([HabitRewards.streakAfterMiss]).
   int streakEndingAt(String habitId, Day day) {
-    final days = _checks[habitId];
-    if (days == null || days.isEmpty) return 0;
+    final first = _firstCheck(habitId);
+    if (first == null || day < first) return 0;
+    return StreakRule.walk(
+      from: first,
+      to: day,
+      stateOf: (cursor) => _habitDay(habitId, cursor),
+    );
+  }
 
-    var streak = 0;
-    var cursor = day;
-    while (true) {
-      if (days.contains(cursor)) {
-        streak++;
-      } else if (!_frozenDays.contains(cursor)) {
-        break;
-      }
-      cursor = cursor.previous;
-    }
-    return streak;
+  /// Was [day] für die Kette von [habitId] bedeutet — **die einzige
+  /// Stelle, die das entscheidet**. [streakEndingAt], [longestStreak] und
+  /// [totalXp] fragen alle hier.
+  StreakDay _habitDay(String habitId, Day day) {
+    if (isChecked(habitId, day)) return StreakDay.done;
+    if (_frozenDays.contains(day)) return StreakDay.carried;
+    return isDueOn(habitId, day) ? StreakDay.missed : StreakDay.carried;
   }
 
   /// Die Streak, die heute noch zählt.
@@ -819,26 +1007,6 @@ class HabitTracker {
       return HabitRewards.multiplierFor(streakEndingAt(habitId, today));
     }
     return HabitRewards.multiplierFor(currentStreak(habitId, today) + 1);
-  }
-
-  /// Ob die Kette von [previous] nach [day] durchläuft.
-  ///
-  /// Entweder folgen die Tage direkt aufeinander, oder jeder Tag
-  /// dazwischen ist mit einem Streak-Eis gedeckt. **Die einzige Stelle,
-  /// die das entscheidet** — [streakEndingAt], [longestStreak] und
-  /// [totalXp] fragen alle hier. Stünde die Regel dreimal da, zeigte die
-  /// Kachel irgendwann eine andere Kette an, als die Erfahrung unterstellt.
-  bool _continues(Day previous, Day day) {
-    final gap = previous.daysUntil(day);
-    if (gap == 1) return true;
-    if (gap < 1) return false;
-
-    var cursor = previous.next;
-    while (cursor < day) {
-      if (!_frozenDays.contains(cursor)) return false;
-      cursor = cursor.next;
-    }
-    return true;
   }
 
   // --- Tagestruhe (ADR-0044) ---
@@ -920,16 +1088,23 @@ class HabitTracker {
   /// Aussetzer, es ersetzt kein Aufhören.
   ///
   /// Gibt nur dann einen Tag zurück, wenn dort auch etwas zu retten ist:
-  /// Vorgestern muss eine Kette enden. Bei zwei Fehltagen hintereinander
-  /// ist sie ohnehin gerissen, und ein Eis dort wäre verschenkt.
+  /// Gestern muss eine Gewohnheit fällig gewesen sein, deren Kette
+  /// vorgestern noch stand. Wo nichts fällig war, fällt auch nichts.
   Day? rescuableDay(Day today) {
     final gestern = today.previous;
     if (!canFreeze(gestern, today: today)) return null;
 
     final vorgestern = gestern.previous;
+    var etwasFaellig = false;
     for (final habitId in _checks.keys) {
+      if (!isDueOn(habitId, gestern)) continue;
+      etwasFaellig = true;
       if (streakEndingAt(habitId, vorgestern) > 0) return gestern;
     }
+    // Die Tageskette kann auch dann fallen, wenn die fällige Gewohnheit
+    // selbst keine Kette hatte — getragen von einer anderen, die gestern
+    // frei hatte.
+    if (etwasFaellig && dayStreakEndingAt(vorgestern) > 0) return gestern;
     return null;
   }
 
@@ -1012,8 +1187,8 @@ class HabitTracker {
   /// Ob an [day] irgendetwas abgehakt ist.
   bool hasCheckOn(Day day) => _checks.values.any((d) => d.contains(day));
 
-  /// Die **Tageskette**, die an [day] endet: Tage am Stück mit mindestens
-  /// einem Häkchen, egal an welcher Gewohnheit.
+  /// Die **Tageskette** am Ende von [day]: Tage mit mindestens einem
+  /// Häkchen, egal an welcher Gewohnheit.
   ///
   /// **Warum es sie neben den Ketten je Gewohnheit gibt.** Die eine Zahl,
   /// die man schützen will — die Flamme bei Duolingo. Wer eine von fünf
@@ -1021,23 +1196,49 @@ class HabitTracker {
   /// Kette sagt das. Die Ketten je Gewohnheit bleiben für die
   /// Multiplikatoren.
   ///
-  /// Das Streak-Eis gilt hier wie dort: Ein gedeckter Tag trägt die Kette,
-  /// verlängert sie aber nicht.
+  /// Dieselbe Regel wie dort ([StreakRule]): Ein Streak-Eis und ein
+  /// **Ruhetag** — ein Tag, an dem nichts fällig war — tragen die Kette,
+  /// verlängern sie aber nicht; ein verpasster Tag lässt sie eine Stufe
+  /// fallen.
   int dayStreakEndingAt(Day day) {
+    final first = _firstActiveDay;
+    if (first == null || day < first) return 0;
     final days = _activeDays;
-    if (days.isEmpty) return 0;
+    final ersteHaekchen = _firstChecks;
+    return StreakRule.walk(
+      from: first,
+      to: day,
+      stateOf: (cursor) => _dayState(days, ersteHaekchen, cursor),
+    );
+  }
 
-    var streak = 0;
-    var cursor = day;
-    while (true) {
-      if (days.contains(cursor)) {
-        streak++;
-      } else if (!_frozenDays.contains(cursor)) {
-        break;
+  /// Je Gewohnheit ihr erstes Häkchen — einmal je Gang durch die Tage
+  /// gerechnet, nicht an jedem Tag neu.
+  Map<String, Day> get _firstChecks => <String, Day>{
+        for (final id in _checks.keys)
+          if (_firstCheck(id) case final first?) id: first,
+      };
+
+  Day? get _firstActiveDay {
+    Day? first;
+    for (final days in _checks.values) {
+      for (final day in days) {
+        if (first == null || day < first) first = day;
       }
-      cursor = cursor.previous;
     }
-    return streak;
+    return first;
+  }
+
+  StreakDay _dayState(
+    Set<Day> activeDays,
+    Map<String, Day> firstChecks,
+    Day day,
+  ) {
+    if (activeDays.contains(day)) return StreakDay.done;
+    if (_frozenDays.contains(day)) return StreakDay.carried;
+    final faellig = <String>{...firstChecks.keys, ..._plans.keys}
+        .any((id) => _wasDueOn(id, firstChecks[id], day));
+    return faellig ? StreakDay.missed : StreakDay.carried;
   }
 
   /// Die Tageskette, die heute noch zählt — dieselbe Regel wie bei
@@ -1049,15 +1250,20 @@ class HabitTracker {
 
   /// Die längste Tageskette, die je gelaufen ist. Darf nur steigen.
   int get longestDayStreak {
-    final sorted = _activeDays.toList()..sort();
+    final first = _firstActiveDay;
+    if (first == null) return 0;
+    final days = _activeDays;
+    final ersteHaekchen = _firstChecks;
+    final last = days.reduce((a, b) => a > b ? a : b);
     var best = 0;
-    var streak = 0;
-    Day? previous;
-    for (final day in sorted) {
-      streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
-      if (streak > best) best = streak;
-      previous = day;
-    }
+    StreakRule.walk(
+      from: first,
+      to: last,
+      stateOf: (cursor) => _dayState(days, ersteHaekchen, cursor),
+      onDone: (_, streak) {
+        if (streak > best) best = streak;
+      },
+    );
     return best;
   }
 
@@ -1090,17 +1296,25 @@ class HabitTracker {
   /// (ADR-0008).
   int get longestStreak {
     var best = 0;
-    for (final days in _checks.values) {
-      final sorted = days.toList()..sort();
-      var streak = 0;
-      Day? previous;
-      for (final day in sorted) {
-        streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
-        if (streak > best) best = streak;
-        previous = day;
-      }
-    }
+    _walkAll((_, __, streak) {
+      if (streak > best) best = streak;
+    });
     return best;
+  }
+
+  /// Geht die Kette jeder Gewohnheit von ihrem ersten bis zu ihrem
+  /// letzten Häkchen ab und meldet jeden erledigten Tag.
+  void _walkAll(void Function(String habitId, Day day, int streak) onDone) {
+    for (final entry in _checks.entries) {
+      if (entry.value.isEmpty) continue;
+      final habitId = entry.key;
+      StreakRule.walk(
+        from: entry.value.reduce((a, b) => a < b ? a : b),
+        to: entry.value.reduce((a, b) => a > b ? a : b),
+        stateOf: (cursor) => _habitDay(habitId, cursor),
+        onDone: (day, streak) => onDone(habitId, day, streak),
+      );
+    }
   }
 
   // --- Ertrag ---
@@ -1124,18 +1338,12 @@ class HabitTracker {
   /// immer über die ganze Historie, gezählt wird nur, was [counts] will.
   int _xpWhere(bool Function(Day day) counts) {
     var sum = 0;
-    for (final entry in _checks.entries) {
+    _walkAll((habitId, day, streak) {
+      if (!counts(day)) return;
       final difficulty =
-          definitionFor(entry.key)?.difficulty ?? HabitDifficulty.mittel;
-      final sorted = entry.value.toList()..sort();
-      var streak = 0;
-      Day? previous;
-      for (final day in sorted) {
-        streak = previous != null && _continues(previous, day) ? streak + 1 : 1;
-        if (counts(day)) sum += HabitRewards.xpFor(streak, difficulty);
-        previous = day;
-      }
-    }
+          definitionFor(habitId)?.difficulty ?? HabitDifficulty.mittel;
+      sum += HabitRewards.xpFor(streak, difficulty);
+    });
     return sum;
   }
 

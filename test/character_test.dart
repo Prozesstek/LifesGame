@@ -365,15 +365,21 @@ void main() {
 
   group('Verdient bleibt verdient', () {
     test('eine gerissene Kette nimmt den Titel nicht weg', () {
-      // Fünf Tage Kette, dann eine Woche Pause. Die laufende Streak ist 0,
-      // der Titel bleibt trotzdem tragbar -- das ist der Grund, warum die
-      // Bedingung an longestStreak haengt und nicht an der laufenden
-      // Kette (konzept.md 3.7). Seit ADR-0033 steht sie im
-      // Errungenschaftskatalog statt in `package:identity`.
+      // Fuenf Tage Kette, dann eine Woche nichts. Seit ADR-0064 faellt die
+      // Kette je verpasstem Tag eine Stufe (5 -> 3 -> 0) statt sofort auf
+      // null; nach einer Woche steht sie bei 0. Der Titel bleibt trotzdem
+      // tragbar -- das ist der Grund, warum die Bedingung an longestStreak
+      // haengt und nicht an der laufenden Kette (konzept.md 3.7). Seit
+      // ADR-0033 steht sie im Errungenschaftskatalog statt in
+      // `package:identity`.
+      var eineWocheSpaeter = tag;
+      for (var i = 0; i < 12; i++) {
+        eineWocheSpaeter = eineWocheSpaeter.next;
+      }
       final container = ProviderContainer(
         overrides: [
           savedGameProvider.overrideWithValue(mitStreak(5)),
-          todayProvider.overrideWithValue(tag.next.next.next.next.next.next),
+          todayProvider.overrideWithValue(eineWocheSpaeter),
         ],
       );
       addTearDown(container.dispose);
@@ -384,7 +390,7 @@ void main() {
       expect(
         container
             .read(habitTrackerProvider)
-            .currentStreak(habitId, tag.next.next.next.next.next.next),
+            .currentStreak(habitId, eineWocheSpaeter),
         0,
       );
       expect(stats.longestStreak, 5);

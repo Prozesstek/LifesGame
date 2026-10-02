@@ -39,12 +39,26 @@ class HabitsController extends Notifier<HabitTracker> {
   @override
   HabitTracker build() => ref.watch(savedGameProvider).habits;
 
+  /// Nimmt eine Gewohnheit auf die Liste. Der Tag geht mit: Er beendet
+  /// eine Pause und trägt den Start in den Wochenplan ein (ADR-0064).
   void activate(String habitId) {
-    state = state.activate(habitId);
+    state = state.activate(habitId, today: ref.read(todayProvider));
   }
 
+  /// Stoppt eine Gewohnheit — ab morgen pausiert sie, ihre Kette bleibt
+  /// stehen.
   void deactivate(String habitId) {
-    state = state.deactivate(habitId);
+    state = state.deactivate(habitId, today: ref.read(todayProvider));
+  }
+
+  /// Legt die Wochentage von [habitId] fest (ADR-0064). Ab wann das gilt,
+  /// entscheidet `HabitTracker.setWeekdays`.
+  void setWeekdays(String habitId, Set<int> weekdays) {
+    state = state.setWeekdays(
+      habitId,
+      weekdays,
+      today: ref.read(todayProvider),
+    );
   }
 
   /// Holt eine erledigte Tagesaufgabe ab (ADR-0055). Gibt zurück, ob
@@ -145,7 +159,7 @@ class HabitsController extends Notifier<HabitTracker> {
 
     final angelegt = state.addCustom(habit, slots: slots);
     state = angelegt.canActivate(habit.id)
-        ? angelegt.activate(habit.id)
+        ? angelegt.activate(habit.id, today: ref.read(todayProvider))
         : angelegt;
     return habit;
   }

@@ -84,8 +84,10 @@ void main() {
   });
 
   test('eine gestoppte Gewohnheit zählt nicht mehr', () {
-    final tracker =
-        dreiLaufende().check('kraft-1', heute).tracker.deactivate('kraft-1');
+    final tracker = dreiLaufende()
+        .check('kraft-1', heute)
+        .tracker
+        .deactivate('kraft-1', today: heute);
 
     expect(tracker.formOn(heute).factorFor(HabitStat.staerke), 1);
   });

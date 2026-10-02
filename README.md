@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 625 Tests
+flutter test                       # 637 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
@@ -46,7 +46,7 @@ dart test                          # 276 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
-dart test                          # 227 Tests
+dart test                          # 265 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear

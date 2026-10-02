@@ -284,7 +284,7 @@ class _Kopf extends ConsumerWidget {
     final tracker = ref.watch(habitTrackerProvider);
     final heute = ref.watch(todayProvider);
     final erledigt = tracker.completedOn(heute);
-    final gesamt = tracker.activeIds.length;
+    final gesamt = tracker.dailyListOn(heute).length;
 
     return OnDark(
       child: Padding(

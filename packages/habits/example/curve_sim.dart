@@ -13,6 +13,17 @@ void main() {
   _run('realistisch — 5 von 7 Tagen', quote: 5 / 7);
   _run('wackelig — jeden zweiten Tag', quote: 0.5);
 
+  // Seit ADR-0064: derselbe Aufwand wie „5 von 7", aber als Plan. Die
+  // freien Tage reißen nichts, die Kette wächst an jedem fälligen Tag.
+  _run(
+    'geplant — Montag bis Freitag, jeden davon',
+    quote: 1.0,
+    weekdays: const <int>{1, 2, 3, 4, 5},
+  );
+  // Und was der Rückfall auf die Stufe darunter ausmacht: Wer einmal die
+  // Woche vergisst, fiel bis ADR-0064 jedes Mal auf null.
+  _run('fast immer — ein Tag je Woche fehlt', quote: 6 / 7);
+
   print('\nWie lange bis zu einem Wert:');
   for (final stat in HabitStat.values) {
     final rule = StatCurve.ruleFor(stat);
@@ -27,18 +38,24 @@ void main() {
 
 /// Hakt [days] Tage lang alle laufenden Gewohnheiten mit Wahrscheinlichkeit
 /// [quote] ab — deterministisch, damit zwei Läufe vergleichbar bleiben.
-void _run(String label, {required double quote}) {
+///
+/// Mit [weekdays] bekommen alle einen Wochenplan (ADR-0064); abgehakt wird
+/// dann nur an fälligen Tagen.
+void _run(String label, {required double quote, Set<int>? weekdays}) {
   final chosen = HabitCatalog.all
       .take(HabitRewards.maxActiveHabits)
       .map((t) => t.id)
       .toList();
 
+  var day = const Day(2026, 1, 1);
   var tracker = const HabitTracker.empty();
   for (final id in chosen) {
-    tracker = tracker.activate(id);
+    tracker = tracker.activate(id, today: day);
+    if (weekdays != null) {
+      tracker = tracker.setWeekdays(id, weekdays, today: day);
+    }
   }
 
-  var day = const Day(2026, 1, 1);
   final marks = <int, HabitTracker>{};
 
   for (var i = 1; i <= 90; i++) {
@@ -47,6 +64,7 @@ void _run(String label, {required double quote}) {
     final zaehlt = (i * quote).floor() > ((i - 1) * quote).floor();
     if (zaehlt) {
       for (final id in chosen) {
+        if (!tracker.isDueOn(id, day)) continue;
         tracker = tracker.check(id, day).tracker;
       }
     }

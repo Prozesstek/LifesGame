@@ -15,6 +15,7 @@ import 'widgets/daily_chest_card.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
 import 'widgets/streak_freeze_card.dart';
+import 'widgets/weekday_picker.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
@@ -38,6 +39,12 @@ class HabitsScreen extends ConsumerWidget {
     // Der Tag, den ein Streak-Eis gerade noch retten kann. Die Regel
     // dafür steht in `package:habits`, nicht hier.
     final zuRetten = tracker.rescuableDay(today);
+    // Was läuft, aber heute nicht dran ist (ADR-0064). Es steht nicht in
+    // „Heute", muss aber irgendwo stehen — sonst ließe es sich an sechs
+    // von sieben Tagen weder ändern noch stoppen.
+    final nichtHeute = tracker.activeHabitsByPriority
+        .where((h) => !tracker.isDueOn(h.id, today))
+        .toList(growable: false);
     final availableTemplates = unlocked
         .where((t) => !tracker.isActive(t.id))
         .toList(growable: false);
@@ -98,9 +105,36 @@ class HabitsScreen extends ConsumerWidget {
                             .read(habitTrackerProvider.notifier)
                             .deactivate(habit.id),
                         cue: tracker.cueFor(habit.id),
+                        days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
                         onEditCue: () => _editCue(context, ref, habit),
                       ),
                       const SizedBox(height: 8),
+                    ],
+                    if (nichtHeute.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 8),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Icon(
+                          Icons.event_busy_rounded,
+                          size: 20,
+                          color: Palette.textOnDarkDim,
+                          semanticLabel: 'Heute nicht fällig',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      for (final habit in nichtHeute) ...<Widget>[
+                        _NichtHeuteTile(
+                          key: ValueKey<String>('nicht-heute-${habit.id}'),
+                          habit: habit,
+                          weekdays: tracker.weekdaysFor(habit.id),
+                          streak: tracker.currentStreak(habit.id, today),
+                          onEdit: () => _editCue(context, ref, habit),
+                          onStop: () => ref
+                              .read(habitTrackerProvider.notifier)
+                              .deactivate(habit.id),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ],
                     if (tracker.canOpenChest(today) ||
                         tracker.hasOpenedChest(today)) ...<Widget>[
@@ -215,13 +249,20 @@ class HabitsScreen extends ConsumerWidget {
     WidgetRef ref,
     Habit habit,
   ) async {
-    final text = await showCueDialog(
+    final tracker = ref.read(habitTrackerProvider);
+    final today = ref.read(todayProvider);
+    final wahl = await showCueDialog(
       context,
       habitName: habit.name,
-      current: ref.read(habitTrackerProvider).cueFor(habit.id),
+      current: tracker.cueFor(habit.id),
+      weekdays: tracker.weekdaysFor(habit.id),
+      weekdaysFromTomorrow:
+          tracker.weekdaysChangeFrom(habit.id, today) != today,
     );
-    if (text == null || !context.mounted) return;
-    ref.read(habitTrackerProvider.notifier).setCue(habit.id, text);
+    if (wahl == null || !context.mounted) return;
+    ref.read(habitTrackerProvider.notifier)
+      ..setCue(habit.id, wahl.cue)
+      ..setWeekdays(habit.id, wahl.weekdays);
   }
 
   /// Setzt ein Streak-Eis auf [tag].
@@ -499,6 +540,104 @@ class _RestingCustomTile extends StatelessWidget {
                 : 'Erst eine andere Gewohnheit beenden',
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Eine laufende Gewohnheit, die heute nicht dran ist: ihr Name, ihre
+/// Tage, ihre Kette. Antippen ändert Auslöser und Tage, das Kreuz stoppt.
+///
+/// **Nicht abhakbar**, und so sieht sie auch aus: matt und ohne Kreis
+/// links (ADR-0064).
+class _NichtHeuteTile extends StatelessWidget {
+  const _NichtHeuteTile({
+    required this.habit,
+    required this.weekdays,
+    required this.streak,
+    required this.onEdit,
+    required this.onStop,
+    super.key,
+  });
+
+  final Habit habit;
+  final Set<int> weekdays;
+  final int streak;
+  final VoidCallback onEdit;
+  final VoidCallback onStop;
+
+  @override
+  Widget build(BuildContext context) {
+    return Druck(
+      child: HolzKarte(
+        padding: EdgeInsets.zero,
+        color: Palette.surfaceRaised,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onEdit,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          habit.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.textDim,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          Wochentage.zeile(weekdays) ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Palette.textDim,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (streak > 0) ...<Widget>[
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.local_fire_department,
+                      size: 14,
+                      color: Palette.gold,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      '$streak',
+                      semanticsLabel: '$streak am Stück',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Palette.gold,
+                      ),
+                    ),
+                  ],
+                  DruckSperre(
+                    child: IconButton(
+                      onPressed: onStop,
+                      icon: const Icon(Icons.close, size: 18),
+                      color: Palette.muted,
+                      tooltip: 'Nicht mehr verfolgen',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

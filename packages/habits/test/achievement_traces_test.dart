@@ -92,7 +92,10 @@ void main() {
 
     test('ein gestopptes Häkchen zählt weiter mit', () {
       var tracker = abhaken(mitAktiven(3), start: _tag1, tage: 4, proTag: 3);
-      tracker = tracker.deactivate(vorlagen.first.id);
+      tracker = tracker.deactivate(
+        vorlagen.first.id,
+        today: _tag1.next.next.next,
+      );
 
       // Gestoppt heißt nicht gelöscht: Die Historie bleibt, und damit die
       // Errungenschaft (ADR-0028).

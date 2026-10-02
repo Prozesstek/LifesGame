@@ -24,7 +24,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, Streaks, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055 |
+| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 625, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 637, dazu die acht Packages (theory 174, habits 265, gear
 117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -51,10 +51,12 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
   will stattdessen das **Haus** ausbauen (Möbel, Haustiere). Braucht
   AktivesBrett und einen ADR.
 
-**Vor einer Veröffentlichung** (Durchsicht vom 02.10., nichts
-entschieden): Datenverlust, Erinnerung und Android-App, der lange Weg
-zum ersten Kampf, nur tägliche Gewohnheiten, Lizenzen der Assets,
-Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
+**Vor einer Veröffentlichung** (Durchsicht vom 02.10.). **Entschieden
+am 02.10. (Frederik): Ziel ist eine Android- und iOS-App, aber erst
+später — zuerst wird das Konzept weiter ausgebaut.** Store bleibt auf
+der Sperrliste in `ziele.md`. Offen bis dahin: Datenverlust, Erinnerung und Android-App, der lange Weg
+zum ersten Kampf, ~~nur tägliche Gewohnheiten~~ (gebaut, ADR-0064),
+Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
 
 **Inhalt und Balance:**
 
@@ -81,13 +83,76 @@ Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
-- `world.dart` (1.754 Zeilen), `tracker.dart` (1.227) und
+- `world.dart` (1.754 Zeilen), `tracker.dart` (1.557) und
   `action_game.dart` (1.024) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.10.2026, zuletzt: Wochenplan, und Ketten fallen statt zu reißen
+
+Der erste Konzeptpunkt aus der Durchsicht unten, in zwei Fragerunden mit
+Frederik entschieden und gebaut:
+[ADR-0064](../decisions/0064-wochenplan-und-kette-die-faellt.md).
+
+| Was | Wie |
+|---|---|
+| **Wochentage je Gewohnheit** | sieben Kreise im Dialog „Wann machst du das?“; Standard jeden Tag. Was heute nicht dran ist, steht nicht in „Heute“ und lässt sich nicht abhaken |
+| **Kette** | zählt erledigte fällige Tage; freie Tage tragen sie, verlängern sie nicht |
+| **Verpasst** | die Kette fällt auf die Stufe darunter (45 → 30, 10 → 7, 7 → 3), jeder weitere verpasste Tag wieder eine. Gilt auch für die Tageskette |
+| **Ruhetag** | nichts fällig: keine Truhe, keine Tagesform, die Tageskette steht still |
+| **Ertrag** | jedes Häkchen zahlt wie bisher; wer seltener plant, bekommt weniger |
+| **Stoppen** | Pause ab morgen, die Kette bleibt stehen, bis die Gewohnheit wieder läuft |
+| **Planänderung** | gilt ab morgen; sofort nur, solange nichts abgehakt ist |
+
+**Der Plan ist eine Historie** („ab Tag X gelten diese Wochentage“),
+sonst schriebe jede Änderung Erfahrung und Level der Vergangenheit um.
+Neu in `habits`: `plan.dart`, `streak_rule.dart`. In der App:
+`weekday_picker.dart`, auf dem Gewohnheiten-Bildschirm ein Abschnitt für
+Laufendes, das heute nicht fällig ist (ändern, stoppen), auf der
+Startseite ein Zeichen für den Ruhetag.
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **„Stufe darunter“ ist streng**: Wer genau auf 7 steht, fällt auf 3.
+  Die Folge: Wer jeden zweiten Tag abhakt, hält seine Stufe, steigt
+  aber nicht (8 → 7 → 8).
+- **Die Tageskette bekommt dieselbe Regel.**
+- **Eine heute gestoppte, offene Gewohnheit zählt heute weiter als
+  fällig** — sonst wäre Stoppen der Knopf für die Truhe.
+- **Alte Stände:** Was gestoppt war, pausiert seit dem Tag nach seinem
+  letzten Häkchen. Frühere Lücken zählen rückwirkend als Rückfall, es
+  gibt also etwas mehr Erfahrung als bisher, nie weniger.
+
+**Gemessen** (`curve_sim`, 90 Tage, fünf Gewohnheiten): Der fleißige
+Spieler bleibt bei 11.865 XP, „5 von 7 ohne Plan“ bei 4.980. Neu:
+**Montag bis Freitag geplant 7.965**, **ein Tag je Woche fehlt 7.920**
+(vorher 6.540). Die Obergrenze, auf die Levelkurve und Laden gerechnet
+sind, bewegt sich nicht.
+
+habits 265 (vorher 227), App 637 (vorher 625). Gewohnheiten-Bildschirm,
+Dialog und Startseite gerendert in 390 × 844 und angesehen; dabei
+gefunden und behoben: Der Auslöser wurde neben den Wochentagen auf drei
+Wörter gekürzt, und sieben feste Kreise wären auf einem schmalen Handy
+übergelaufen. **Nicht am Handy, nicht im Browser gespielt.**
+
+### Offen
+
+- **Eine Woche krank bleibt ein Totalverlust** (sechs verpasste Tage),
+  wenn man nicht am Tag vorher stoppt. Frederik hat „jeder verpasste Tag
+  eine Stufe“ gewählt; ob das im Alltag zu hart ist, zeigt das Spielen.
+- **Verschieben geht nicht**: Montag geplant, Dienstag gemacht heißt
+  Montag verpasst.
+- An einem Ruhetag sind auch die Dailies der Grube zu (sie hängen an
+  einem Häkchen).
+- Die Kachel zeigt „noch 2“ bis zur nächsten Stufe; bei drei Tagen die
+  Woche sind das Häkchen, keine Tage.
+- Der Wochenrückblick kennt keinen Ruhetag.
+- Wochentage wählt man erst im Dialog nach dem Anlegen, nicht im
+  Formular einer eigenen Gewohnheit.
+- `tracker.dart` ist auf 1.557 Zeilen gewachsen.
 
 ## 02.10.2026, danach: kritische Durchsicht vor einer Veröffentlichung
 
