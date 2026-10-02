@@ -124,6 +124,15 @@ void main() {
           today: vorgestern,
         );
 
+    // **Ein Stapel** (ADR-0065): Die dritte hängt an der vierten, und die
+    // ist heute schon abgehakt — damit ist die eingerückte Kachel gebaut,
+    // die gerade aufleuchtet, samt der Zeile „Nach: …" mit dem Namen
+    // einer anderen Gewohnheit darin.
+    tracker = tracker
+        .setAnchor(HabitCatalog.all[2].id, HabitCatalog.all[3].id)
+        .check(HabitCatalog.all[3].id, _heute)
+        .tracker;
+
     // Jeder Platz belegt. Ein leeres Ausrüstungsraster zeigt sechsmal
     // „leer" -- die echten Namen sind das, was in der schmalen Kachel
     // überläuft, und „Schuppenpanzer" ist der längste davon.

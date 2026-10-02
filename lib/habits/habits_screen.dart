@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
 import '../ui/palette.dart';
+import 'cue_text.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
 import 'stat_icon.dart';
@@ -19,6 +20,7 @@ import 'widgets/weekday_picker.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
+import '../ui/halten_und_ziehen.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
 /// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
@@ -35,7 +37,7 @@ class HabitsScreen extends ConsumerWidget {
     final slots = ref.watch(customSlotsProvider);
     final slotsLeft = ref.watch(customSlotsLeftProvider);
 
-    final active = tracker.dailyListOn(today);
+    final active = tracker.stackOn(today);
     // Der Tag, den ein Streak-Eis gerade noch retten kann. Die Regel
     // dafür steht in `package:habits`, nicht hier.
     final zuRetten = tracker.rescuableDay(today);
@@ -89,24 +91,15 @@ class HabitsScreen extends ConsumerWidget {
                     // Der Schlüssel hält den Sprung des Häkchens
                     // an der Gewohnheit, wenn die Kachel die Reihe
                     // wechselt.
-                    for (final habit in active) ...<Widget>[
-                      HabitCheckTile(
-                        key: ValueKey<String>(habit.id),
-                        habit: habit,
-                        isChecked: tracker.isChecked(habit.id, today),
-                        streak: tracker.currentStreak(habit.id, today),
-                        nextMultiplier: tracker.nextMultiplier(habit.id, today),
-                        xpGain: tracker.xpForNextCheck(habit.id, today),
-                        goldGain: tracker.goldForNextCheck(habit.id, today),
-                        progress: tracker.progressOn(habit.id, today),
-                        onToggle: () => toggleHabit(context, ref, habit),
-                        onAdvance: () => advanceHabit(context, ref, habit),
-                        onStop: () => ref
-                            .read(habitTrackerProvider.notifier)
-                            .deactivate(habit.id),
-                        cue: tracker.cueFor(habit.id),
-                        days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
-                        onEditCue: () => _editCue(context, ref, habit),
+                    // Gekoppeltes steht eingerückt unter seinem Anker
+                    // und leuchtet auf, sobald der abgehakt ist
+                    // (ADR-0065). Die Ordnung kommt aus `stackOn`.
+                    for (final eintrag in active) ...<Widget>[
+                      _ImStapel(
+                        key: ValueKey<String>(eintrag.habit.id),
+                        depth: eintrag.depth,
+                        cued: eintrag.isCued,
+                        child: _kachel(context, ref, tracker, today, eintrag),
                       ),
                       const SizedBox(height: 8),
                     ],
@@ -191,6 +184,33 @@ class HabitsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _kachel(
+    BuildContext context,
+    WidgetRef ref,
+    HabitTracker tracker,
+    Day today,
+    StackedHabit eintrag,
+  ) {
+    final habit = eintrag.habit;
+    return HabitCheckTile(
+      habit: habit,
+      isChecked: tracker.isChecked(habit.id, today),
+      streak: tracker.currentStreak(habit.id, today),
+      nextMultiplier: tracker.nextMultiplier(habit.id, today),
+      xpGain: tracker.xpForNextCheck(habit.id, today),
+      goldGain: tracker.goldForNextCheck(habit.id, today),
+      progress: tracker.progressOn(habit.id, today),
+      onToggle: () => toggleHabit(context, ref, habit),
+      onAdvance: () => advanceHabit(context, ref, habit),
+      onStop: () =>
+          ref.read(habitTrackerProvider.notifier).deactivate(habit.id),
+      cue: CueText.lineFor(tracker, habit.id),
+      days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
+      cued: eintrag.isCued,
+      onEditCue: () => _editCue(context, ref, habit),
+    );
+  }
+
   /// Legt eine eigene Gewohnheit an — Formular auf, Ergebnis hinein.
   Future<void> _createCustom(BuildContext context, WidgetRef ref) async {
     final draft = await CustomHabitSheet.show(context);
@@ -238,7 +258,9 @@ class HabitsScreen extends ConsumerWidget {
   ) async {
     ref.read(habitTrackerProvider.notifier).activate(habit.id);
     final tracker = ref.read(habitTrackerProvider);
-    if (!tracker.isActive(habit.id) || tracker.cueFor(habit.id) != null) {
+    if (!tracker.isActive(habit.id) ||
+        tracker.cueFor(habit.id) != null ||
+        tracker.anchorFor(habit.id) != null) {
       return;
     }
     await _editCue(context, ref, habit);
@@ -258,11 +280,22 @@ class HabitsScreen extends ConsumerWidget {
       weekdays: tracker.weekdaysFor(habit.id),
       weekdaysFromTomorrow:
           tracker.weekdaysChangeFrom(habit.id, today) != today,
+      anchors: tracker.anchorCandidatesFor(habit.id),
+      currentAnchorId: tracker.anchorFor(habit.id),
     );
     if (wahl == null || !context.mounted) return;
-    ref.read(habitTrackerProvider.notifier)
-      ..setCue(habit.id, wahl.cue)
-      ..setWeekdays(habit.id, wahl.weekdays);
+    final controller = ref.read(habitTrackerProvider.notifier);
+    // Satz oder Anker — welcher den anderen ersetzt, entscheidet der
+    // Tracker; hier wird nur das Gewählte hingereicht.
+    final anker = wahl.anchorId;
+    if (anker != null) {
+      controller.setAnchor(habit.id, anker);
+    } else {
+      controller
+        ..setAnchor(habit.id, null)
+        ..setCue(habit.id, wahl.cue);
+    }
+    controller.setWeekdays(habit.id, wahl.weekdays);
   }
 
   /// Setzt ein Streak-Eis auf [tag].
@@ -541,6 +574,35 @@ class _RestingCustomTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Rückt eine Kachel unter ihren Anker und lässt sie aufleuchten, wenn
+/// sie **jetzt dran** ist (ADR-0065).
+class _ImStapel extends StatelessWidget {
+  const _ImStapel({
+    required this.depth,
+    required this.cued,
+    required this.child,
+    super.key,
+  });
+
+  /// Je Stufe so weit nach rechts — und nie weiter als drei Stufen: Ein
+  /// Stapel aus fünf Gliedern ließe der letzten Kachel sonst keine Breite.
+  static const double _schritt = 14;
+  static const int _hoechstens = 3;
+
+  final int depth;
+  final bool cued;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final stufen = depth > _hoechstens ? _hoechstens : depth;
+    return Padding(
+      padding: EdgeInsets.only(left: _schritt * stufen),
+      child: PlatzLaedtEin(aktiv: cued, child: child),
     );
   }
 }
