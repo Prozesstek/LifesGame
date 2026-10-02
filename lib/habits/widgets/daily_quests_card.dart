@@ -137,61 +137,50 @@ class _Zeile extends StatelessWidget {
         ? 0.0
         : (quest.progress / quest.target).clamp(0.0, 1.0);
 
-    final name = quest.habitName;
-
-    // Die Aufgabe steht als Zeichen da; der Satz dazu kommt auf Tipp.
-    return Tooltip(
-      triggerMode: TooltipTriggerMode.tap,
-      message: quest.text,
-      excludeFromSemantics: true,
-      child: Semantics(
-        label: quest.text,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                claimed ? Icons.check_circle : _zeichen(quest.kind),
-                size: 20,
-                color: claimed ? Palette.success : Palette.accent,
+    // Der Satz steht immer da, offen wie abgeholt: Ein Zeichen mit Balken
+    // sagt nicht, was zu tun ist.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            claimed ? Icons.check_circle : _zeichen(quest.kind),
+            size: 20,
+            color: claimed ? Palette.success : Palette.accent,
+          ),
+          const SizedBox(width: 10),
+          if (claimed)
+            // Abgeholt braucht es keinen Balken mehr.
+            Expanded(
+              child: Text(
+                quest.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Palette.textDim,
+                  decoration: TextDecoration.lineThrough,
+                  decorationColor: Palette.textDim,
+                ),
               ),
-              const SizedBox(width: 10),
-              if (claimed)
-                // Abgeholt braucht es keinen Balken mehr — aber man soll
-                // noch lesen können, was es war.
-                Expanded(
-                  child: Text(
+            )
+          else ...<Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
                     quest.text,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Palette.textDim,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: Palette.textDim,
+                      color: Palette.text,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                )
-              else ...<Widget>[
-                if (name != null) ...<Widget>[
-                  Flexible(
-                    flex: 2,
-                    child: Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Palette.text,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  flex: 3,
-                  child: ClipRRect(
+                  const SizedBox(height: 4),
+                  ClipRRect(
                     borderRadius: BorderRadius.circular(3),
                     child: LinearProgressIndicator(
                       value: anteil,
@@ -202,22 +191,19 @@ class _Zeile extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                if (quest.isDone)
-                  _AbholenKnopf(key: DailyQuestsCard.abholenKey, onTap: onClaim)
-                else
-                  Text(
-                    '${quest.progress} / ${quest.target}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textDim,
-                    ),
-                  ),
-              ],
-            ],
-          ),
-        ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (quest.isDone)
+              _AbholenKnopf(key: DailyQuestsCard.abholenKey, onTap: onClaim)
+            else
+              Text(
+                '${quest.progress} / ${quest.target}',
+                style: const TextStyle(fontSize: 12, color: Palette.textDim),
+              ),
+          ],
+        ],
       ),
     );
   }

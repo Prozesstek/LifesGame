@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 01.10.2026 · Frederik
+**Zuletzt aktualisiert:** 02.10.2026 · Frederik
 
 ---
 
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 623, dazu die acht Packages (theory 174, habits 227, gear
+**Tests:** App 625, dazu die acht Packages (theory 174, habits 227, gear
 117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -83,6 +83,25 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.10.2026: offene Tagesaufgaben stehen als Satz da
+
+Frederik: „Die täglichen Aufgaben müssen natürlich auch lesbar sein,
+wenn sie noch nicht abgehakt sind.“ Seit ADR-0060 stand eine offene
+Aufgabe nur als Zeichen mit Balken da, der Satz kam erst auf Tipp; am
+30.09. bekam nur die **abgeholte** ihren Satz zurück.
+
+Jetzt steht der Satz in jeder Zeile: offen fett über dem Balken (bis
+zwei Zeilen), rechts der Stand oder der Knopf zum Abholen; abgeholt wie
+bisher grau und durchgestrichen. Der Tooltip ist damit weg, ebenso
+`DailyQuest.habitName` in `habits` — der Name steht im Satz.
+
+Das ist eine zweite Ausnahme von ADR-0060 neben der Theorie: Eine
+Aufgabe ist ein Satz, kein Wert mit Zeichen.
+
+App 625 (vorher 623), habits 227. **Nicht angesehen**, weder gerendert
+noch am Handy — die Karte ist mit drei offenen Aufgaben rund 40 Punkte
+höher als vorher.
 
 ## 01.10.2026, zuletzt: fünf neue Gegner, jede Grube mit eigener Besetzung
 
