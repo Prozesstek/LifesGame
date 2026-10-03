@@ -24,7 +24,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064 |
+| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 637, dazu die acht Packages (theory 174, habits 265, gear
+**Tests:** App 646, dazu die acht Packages (theory 174, habits 285, gear
 117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -83,13 +83,53 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
-- `world.dart` (1.754 Zeilen), `tracker.dart` (1.557) und
+- `world.dart` (1.754 Zeilen), `tracker.dart` (1.652) und
   `action_game.dart` (1.024) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.10.2026, ganz zuletzt: Gewohnheiten koppeln
+
+Frederik: „Ich fände es noch cool, wenn man Gewohnheiten aneinander
+koppeln kann wie im Buch *Die 1%-Methode*.“ In einer Fragerunde
+entschieden: [ADR-0065](../decisions/0065-gewohnheiten-koppeln.md).
+Gebaut **auf dem Wochenplan-Branch** (PR #103), weil beides denselben
+Dialog umbaut.
+
+| Was | Wie |
+|---|---|
+| **Koppeln** | im Dialog „Wann machst du das?“ stehen unter den Textvorschlägen die anderen laufenden Gewohnheiten; eine antippen macht sie zum Anker |
+| **Anzeigen** | die gekoppelte steht in „Heute“ eingerückt unter ihrem Anker, auf der Kachel „Nach: Zähne putzen“; Stapel beliebiger Länge |
+| **Auslösen** | ist der Anker abgehakt, leuchtet die nächste dreimal auf und behält eine farbige Kante, bis sie erledigt ist |
+| **Kein Schloss, keine Zahl** | alles bleibt jederzeit abhakbar; Erfahrung, Gold und Ketten ändern sich nicht (`stack_test.dart` hält das fest) |
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Satz oder Anker, nie beides** — der eine ersetzt den anderen.
+- **Ein Stapel bleibt zusammen**: Er steht oben, solange ein Glied offen
+  ist, und wandert als Ganzes nach unten. Sonst rutschte der abgehakte
+  Anker von seiner offenen Folge weg.
+- **Fehlt der Anker** (gestoppt, heute nicht fällig), steht die
+  gekoppelte ohne Einrückung da; die Kopplung bleibt gespeichert.
+- **Kein Kreis**: Was einen schlösse, steht im Dialog nicht zur Wahl.
+- **Eingerückt wird höchstens drei Stufen.**
+
+Neu: `packages/habits/lib/src/stack.dart`, `lib/habits/cue_text.dart`.
+habits 285 (vorher 265), App 646 (vorher 637). Stapel, Dialog und
+Startseite gerendert in 390 × 844 und angesehen; dabei behoben: Der
+gewählte Anker im Dialog trug das blasse Rosa von Material statt der
+Farben der App. **Nicht am Handy, nicht im Browser gespielt.**
+
+### Offen
+
+- Ob das Aufleuchten reicht oder zu leise ist; es hat keinen Klang.
+- Die Priorität ordnet nur noch Stapel untereinander: Eine „wichtige“
+  Gewohnheit unter einem „nebenbei“-Anker steht unter ihm.
+- Die Theorie-Seite „Mach es offensichtlich“ nennt die Kopplung nicht.
+- `tracker.dart` ist auf 1.652 Zeilen gewachsen.
 
 ## 02.10.2026, zuletzt: Wochenplan, und Ketten fallen statt zu reißen
 

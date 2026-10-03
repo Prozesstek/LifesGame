@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
+import '../../habits/cue_text.dart';
 import '../../habits/habit_check_flow.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/habits_screen.dart';
 import '../../ui/druck.dart';
+import '../../ui/halten_und_ziehen.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
@@ -36,9 +38,10 @@ class TodayCard extends ConsumerWidget {
     final tracker = ref.watch(habitTrackerProvider);
     final today = ref.watch(todayProvider);
 
-    final liste = tracker.dailyListOn(today);
+    // Samt Einrückung und „jetzt dran" (ADR-0065).
+    final liste = tracker.stackOn(today);
     final erledigt = liste
-        .where((habit) => tracker.isChecked(habit.id, today))
+        .where((eintrag) => tracker.isChecked(eintrag.habit.id, today))
         .length;
 
     return HolzKarte(
@@ -66,13 +69,15 @@ class TodayCard extends ConsumerWidget {
               label: 'Ruhetag — heute ist nichts fällig',
             )
           else
-            for (final habit in liste)
+            for (final eintrag in liste)
               _Zeile(
-                key: ValueKey<String>(habit.id),
-                habit: habit,
-                done: tracker.isChecked(habit.id, today),
-                cue: tracker.cueFor(habit.id),
-                onTap: () => toggleHabit(context, ref, habit),
+                key: ValueKey<String>(eintrag.habit.id),
+                habit: eintrag.habit,
+                done: tracker.isChecked(eintrag.habit.id, today),
+                cue: CueText.lineFor(tracker, eintrag.habit.id),
+                depth: eintrag.depth,
+                cued: eintrag.isCued,
+                onTap: () => toggleHabit(context, ref, eintrag.habit),
               ),
         ],
       ),
@@ -190,21 +195,45 @@ class _Zeile extends StatelessWidget {
     required this.done,
     required this.cue,
     required this.onTap,
+    this.depth = 0,
+    this.cued = false,
     super.key,
   });
+
+  /// Je Stufe im Stapel so weit nach rechts, höchstens drei Stufen.
+  static const double _schritt = 14;
+  static const int _hoechstens = 3;
 
   final Habit habit;
   final bool done;
   final String? cue;
   final VoidCallback onTap;
 
+  /// Wie tief die Gewohnheit unter ihrem Anker hängt (ADR-0065).
+  final int depth;
+
+  /// Ob sie jetzt dran ist, weil ihr Anker abgehakt wurde.
+  final bool cued;
+
   @override
   Widget build(BuildContext context) {
     final text = done ? null : cue;
+    final stufen = depth > _hoechstens ? _hoechstens : depth;
 
+    return Padding(
+      padding: EdgeInsets.only(left: _schritt * stufen),
+      child: PlatzLaedtEin(aktiv: cued, radius: 6, child: _zeile(text)),
+    );
+  }
+
+  Widget _zeile(String? text) {
     return Semantics(
       button: true,
-      label: done ? '${habit.name} erledigt' : '${habit.name} abhaken',
+      label: done
+          ? '${habit.name} erledigt'
+          : (cued
+                ? '${habit.name} abhaken, jetzt dran'
+                : '${habit.name} abhaken'),
       child: Druck(
         child: InkWell(
           onTap: onTap,

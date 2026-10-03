@@ -40,6 +40,7 @@ class HabitCheckTile extends StatelessWidget {
     required this.onStop,
     this.cue,
     this.days,
+    this.cued = false,
     this.onEditCue,
     super.key,
   });
@@ -88,6 +89,10 @@ class HabitCheckTile extends StatelessWidget {
   /// fällig ist. Steht vor dem Auslöser in derselben Zeile.
   final String? days;
 
+  /// Ob sie **jetzt dran** ist, weil ihr Anker abgehakt wurde
+  /// (ADR-0065). Dann trägt der Kreis links die Akzentfarbe.
+  final bool cued;
+
   /// Öffnet die Frage nach dem Auslöser. Null blendet die Zeile aus.
   final VoidCallback? onEditCue;
 
@@ -103,7 +108,11 @@ class HabitCheckTile extends StatelessWidget {
       child: HolzKarte(
         padding: EdgeInsets.zero,
         color: isChecked ? Palette.surfaceRaised : Palette.surface,
-        edgeColor: isChecked ? Palette.success : Holz.kante,
+        // Grün, wenn erledigt; in der Akzentfarbe, solange sie dran ist
+        // — das Aufleuchten vergeht, die Kante bleibt.
+        edgeColor: isChecked
+            ? Palette.success
+            : (cued ? Palette.accent : Holz.kante),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -112,7 +121,11 @@ class HabitCheckTile extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
               child: Row(
                 children: <Widget>[
-                  _CheckMark(isChecked: isChecked, label: habit.name),
+                  _CheckMark(
+                    isChecked: isChecked,
+                    cued: cued,
+                    label: habit.name,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -265,16 +278,21 @@ class _CueLine extends StatelessWidget {
 /// Zustand: Die Kachel bleibt damit zustandslos, und die Animation läuft
 /// auch dann, wenn der Tracker von woanders geändert wird.
 class _CheckMark extends StatelessWidget {
-  const _CheckMark({required this.isChecked, required this.label});
+  const _CheckMark({
+    required this.isChecked,
+    required this.cued,
+    required this.label,
+  });
 
   final bool isChecked;
+  final bool cued;
   final String label;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       checked: isChecked,
-      label: label,
+      label: cued ? '$label, jetzt dran' : label,
       child: AnimatedSwitcher(
         duration: HabitCheckTile.checkDuration,
         transitionBuilder: (child, animation) => ScaleTransition(
@@ -285,7 +303,9 @@ class _CheckMark extends StatelessWidget {
           isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
           key: ValueKey<bool>(isChecked),
           size: 26,
-          color: isChecked ? Palette.success : Palette.muted,
+          color: isChecked
+              ? Palette.success
+              : (cued ? Palette.accent : Palette.muted),
         ),
       ),
     );

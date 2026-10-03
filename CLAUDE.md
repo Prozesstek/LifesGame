@@ -70,10 +70,11 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 265 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 285 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
+| `packages/habits/lib/src/stack.dart` | **Gewohnheiten koppeln**: wie die Tagesliste zu Stapeln geordnet wird, was „jetzt dran“ ist, und dass kein Kreis entsteht ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_rule.dart` | **wie eine Kette läuft**: erledigt, getragen, verpasst — eine Stelle für Kette, Tageskette und Erfahrung | nur Dart-SDK |
 | `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
@@ -150,7 +151,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben mit Stand und Knopf „Abholen“ — **auf der Startseite** unter „Heute“ | Flutter |
-| `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **und ihre Wochentage** | Flutter |
+| `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage und woran sie gekoppelt ist** | Flutter |
+| `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
@@ -229,7 +231,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 637 Tests
+flutter test             # 646 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -243,7 +245,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 265 Tests
+dart test                              # 285 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -512,7 +514,9 @@ stehen und dort bleiben müssen:
 | Wie viele eigene darf jemand anlegen? | `HabitRewards.customSlotsFor` — ein Platz je freigeschalteter Vorlage |
 | Was ändert der Schwierigkeitsgrad? | `HabitDifficulty.xpFactor` — nur Erfahrung, nie Gold |
 | Was darf sich nachträglich ändern? | `CustomHabit.editable` — nur, was keine Zahl erzeugt |
-| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.dailyListOn` — offene oben, erledigte unten, je nach Priorität |
+| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **Stapel** mit Offenem oben, ganz erledigte unten, je nach Priorität |
+| Woran hängt eine Gewohnheit? | `HabitTracker.anchorFor` — höchstens ein Anker, nie im Kreis (`canAnchor`); **Satz oder Anker**, `setAnchor` und `setCue` ersetzen einander ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) |
+| Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
 | Wann kommt eine Gewohnheit dran? | `HabitTracker.cueFor` — eine Zeile Text, für Vorlagen **und** eigene, erzeugt keine Zahl ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) |
 | Welche Vorlage ist ab Start offen? | `HabitCatalog.starter` — Zwei Minuten lesen, samt Platz für eine eigene |
 | Wie lang ist die Tageskette? | `HabitTracker.currentDayStreak` — Tage mit mindestens einem Häkchen, dieselbe Eis-Regel ([ADR-0055](docs/decisions/0055-tageskette-aufgaben-und-wiederholen.md)) |

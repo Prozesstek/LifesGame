@@ -75,6 +75,11 @@ class HabitsController extends Notifier<HabitTracker> {
     state = state.setCue(habitId, text);
   }
 
+  /// Koppelt [habitId] an [anchorId]; null löst die Kopplung (ADR-0065).
+  void setAnchor(String habitId, String? anchorId) {
+    state = state.setAnchor(habitId, anchorId);
+  }
+
   /// Hakt ab oder nimmt das Häkchen zurück.
   ///
   /// Gibt das Ergebnis zurück, wenn dabei etwas verdient wurde — sonst

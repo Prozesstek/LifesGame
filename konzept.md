@@ -284,6 +284,12 @@ der Tag vorbei ist, nicht beim Aufwachen.
 > ihre Kette bleibt stehen. Die Meilensteine oben zählen damit Häkchen,
 > nicht Kalendertage.
 
+> **Seit ADR-0065 (02.10.2026):** Gewohnheiten lassen sich **koppeln** —
+> „Nach [Gewohnheit] mache ich [Gewohnheit]“, der Gewohnheitsstapel aus
+> *Die 1%-Methode*. Die gekoppelte steht unter ihrem Anker und leuchtet
+> auf, sobald der abgehakt ist. Keine Zahl hängt daran, und nichts ist
+> gesperrt.
+
 Der Multiplikator ist bei **x2 gedeckelt** — die Empfehlung wurde
 übernommen: Bei x3 wird der Verlust einer langen Streak so schmerzhaft, dass
 Nutzer aufgeben statt neu anzufangen. **Gold folgt dem Streak bewusst

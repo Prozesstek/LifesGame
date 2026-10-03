@@ -7,6 +7,7 @@ import 'day.dart';
 import 'habit.dart';
 import 'plan.dart';
 import 'rewards.dart';
+import 'stack.dart';
 import 'streak_freeze.dart';
 import 'streak_rule.dart';
 import 'week_summary.dart';
@@ -84,6 +85,7 @@ class HabitTracker {
     Map<String, String> cues = const <String, String>{},
     Map<Day, Set<String>> claimedQuests = const <Day, Set<String>>{},
     Map<String, HabitPlan> plans = const <String, HabitPlan>{},
+    Map<String, String> anchors = const <String, String>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
@@ -98,7 +100,8 @@ class HabitTracker {
         _plans = Map<String, HabitPlan>.unmodifiable(<String, HabitPlan>{
           for (final entry in plans.entries)
             if (!entry.value.isEmpty) entry.key: entry.value,
-        });
+        }),
+        _anchors = Map<String, String>.unmodifiable(anchors);
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
@@ -109,7 +112,8 @@ class HabitTracker {
         _openedChests = const <Day>{},
         _cues = const <String, String>{},
         _claimedQuests = const <Day, Set<String>>{},
-        _plans = const <String, HabitPlan>{};
+        _plans = const <String, HabitPlan>{},
+        _anchors = const <String, String>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -256,6 +260,23 @@ class HabitTracker {
         ? ids.sublist(0, HabitRewards.maxActiveHabits)
         : ids;
 
+    // Kopplungen (ADR-0065): nur zwischen Bekanntem, und nie im Kreis.
+    // Ein Auslöser als Satz gewinnt gegen einen Anker — beides zugleich
+    // gibt es nicht.
+    final anker = <String, String>{};
+    final rawAnchors = json['anchors'];
+    if (rawAnchors is Map) {
+      for (final entry in rawAnchors.entries) {
+        final habitId = entry.key;
+        final anchorId = entry.value;
+        if (habitId is! String || anchorId is! String) continue;
+        if (!bekannt(habitId) || !bekannt(anchorId)) continue;
+        if (cues.containsKey(habitId)) continue;
+        if (HabitStacks.wouldCycle(anker, habitId, anchorId)) continue;
+        anker[habitId] = anchorId;
+      }
+    }
+
     final plaene = <String, HabitPlan>{};
     final rawPlans = json['plans'];
     if (rawPlans is Map) {
@@ -290,6 +311,7 @@ class HabitTracker {
       cues: cues,
       claimedQuests: abgeholt,
       plans: plaene,
+      anchors: anker,
     );
   }
 
@@ -345,6 +367,12 @@ class HabitTracker {
   /// alles andere hier; ohne Eintrag ist jeder Tag fällig.
   final Map<String, HabitPlan> _plans;
 
+  /// Je Gewohnheit ihr **Anker** (ADR-0065): die Gewohnheit, nach der
+  /// sie drankommt. Wie der Auslöser ein Stück Nutzerzustand, das keine
+  /// Zahl erzeugt — und sein Gegenstück: Eine Gewohnheit hat einen Satz
+  /// **oder** einen Anker, nie beides.
+  final Map<String, String> _anchors;
+
   /// Der Stand als JSON.
   ///
   /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
@@ -386,6 +414,7 @@ class HabitTracker {
           for (final day in _claimedQuests.keys.toList()..sort())
             day.toString(): (_claimedQuests[day]!.toList()..sort()),
         },
+      if (_anchors.isNotEmpty) 'anchors': <String, Object?>{..._anchors},
       if (_plans.isNotEmpty)
         'plans': <String, Object?>{
           for (final entry in _plans.entries) entry.key: entry.value.toJson(),
@@ -510,13 +539,71 @@ class HabitTracker {
   ///
   /// Nur, was an [day] **fällig** ist (ADR-0064): Eine Gewohnheit mit
   /// Montag, Mittwoch, Freitag steht dienstags nicht da.
+  ///
+  /// Gekoppelte Gewohnheiten stehen unter ihrem Anker, und ein Stapel
+  /// bleibt zusammen ([stackOn], ADR-0065).
   List<Habit> dailyListOn(Day day) {
-    final sortiert =
-        activeHabitsByPriority.where((h) => isDueOn(h.id, day)).toList();
     return List<Habit>.unmodifiable(<Habit>[
-      ...sortiert.where((h) => !isChecked(h.id, day)),
-      ...sortiert.where((h) => isChecked(h.id, day)),
+      for (final eintrag in stackOn(day)) eintrag.habit,
     ]);
+  }
+
+  /// Die Tagesliste für [day] samt Einrückung — und was **jetzt dran**
+  /// ist, weil sein Anker abgehakt wurde. Die Ordnung selbst steht in
+  /// [HabitStacks.order].
+  List<StackedHabit> stackOn(Day day) {
+    final faellig =
+        activeHabitsByPriority.where((h) => isDueOn(h.id, day)).toList();
+    return HabitStacks.order(
+      faellig,
+      _anchors,
+      isDone: (habit) => isChecked(habit.id, day),
+    );
+  }
+
+  // --- Koppeln (ADR-0065) ---
+
+  /// Die Gewohnheit, nach der [habitId] drankommt — oder null.
+  String? anchorFor(String habitId) => _anchors[habitId];
+
+  /// Ob [habitId] an [anchorId] hängen darf: beide bekannt, nicht
+  /// dieselbe, und kein Kreis über die Kette der Anker.
+  bool canAnchor(String habitId, String anchorId) {
+    if (definitionFor(habitId) == null) return false;
+    if (definitionFor(anchorId) == null) return false;
+    return !HabitStacks.wouldCycle(_anchors, habitId, anchorId);
+  }
+
+  /// Woran sich [habitId] koppeln ließe: die laufenden Gewohnheiten, in
+  /// der Reihenfolge der Liste, ohne sie selbst und ohne alles, was
+  /// einen Kreis schlösse.
+  List<Habit> anchorCandidatesFor(String habitId) {
+    return List<Habit>.unmodifiable(<Habit>[
+      for (final habit in activeHabitsByPriority)
+        if (canAnchor(habitId, habit.id)) habit,
+    ]);
+  }
+
+  /// Koppelt [habitId] an [anchorId]; null löst die Kopplung.
+  ///
+  /// **Ein Anker ersetzt den Satz** — und umgekehrt ([setCue]). Beides
+  /// beantwortet dieselbe Frage, „wann machst du das?", und zwei
+  /// Antworten wären eine zu viel.
+  ///
+  /// Gibt unverändert zurück, wenn [canAnchor] es verbietet.
+  HabitTracker setAnchor(String habitId, String? anchorId) {
+    if (anchorId == null) {
+      if (!_anchors.containsKey(habitId)) return this;
+      return _copyWith(anchors: <String, String>{..._anchors}..remove(habitId));
+    }
+    if (!canAnchor(habitId, anchorId)) return this;
+    if (_anchors[habitId] == anchorId && !_cues.containsKey(habitId)) {
+      return this;
+    }
+    return _copyWith(
+      anchors: <String, String>{..._anchors, habitId: anchorId},
+      cues: <String, String>{..._cues}..remove(habitId),
+    );
   }
 
   /// Wie lang ein Auslöser höchstens sein darf.
@@ -541,10 +628,16 @@ class HabitTracker {
     final next = <String, String>{..._cues};
     if (bereinigt == null) {
       next.remove(habitId);
-    } else {
-      next[habitId] = bereinigt;
+      return _copyWith(cues: next);
     }
-    return _copyWith(cues: next);
+    next[habitId] = bereinigt;
+    // Ein Satz ersetzt den Anker (ADR-0065).
+    return _copyWith(
+      cues: next,
+      anchors: _anchors.containsKey(habitId)
+          ? (<String, String>{..._anchors}..remove(habitId))
+          : null,
+    );
   }
 
   static String? _cleanCue(String text) {
@@ -940,6 +1033,7 @@ class HabitTracker {
     Map<String, String>? cues,
     Map<Day, Set<String>>? claimedQuests,
     Map<String, HabitPlan>? plans,
+    Map<String, String>? anchors,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -951,6 +1045,7 @@ class HabitTracker {
       cues: cues ?? _cues,
       claimedQuests: claimedQuests ?? _claimedQuests,
       plans: plans ?? _plans,
+      anchors: anchors ?? _anchors,
     );
   }
 

@@ -8,17 +8,22 @@ import 'weekday_picker.dart';
 
 /// Was im Dialog gewählt wurde: der Auslöser und die Wochentage.
 class CueChoice {
-  const CueChoice({required this.cue, required this.weekdays});
+  const CueChoice({required this.cue, required this.weekdays, this.anchorId});
 
   /// Leer heißt „entfernen".
   final String cue;
+
+  /// Die Gewohnheit, nach der diese drankommt (ADR-0065) — oder null.
+  /// Mit Anker ist [cue] leer: Es gibt einen Satz **oder** einen Anker.
+  final String? anchorId;
 
   /// Wochentage wie bei `Day.weekday`, nie leer.
   final Set<int> weekdays;
 }
 
-/// Fragt, **wann** eine Gewohnheit drankommt: woran sie hängt (ADR-0052)
-/// und an welchen Wochentagen (ADR-0064).
+/// Fragt, **wann** eine Gewohnheit drankommt: woran sie hängt — ein Satz
+/// (ADR-0052) oder eine andere Gewohnheit (ADR-0065) — und an welchen
+/// Wochentagen (ADR-0064).
 ///
 /// Gibt die Wahl zurück — oder null, wenn abgebrochen wurde. Ein leerer
 /// Auslöser heißt „entfernen". Kürzen und Leerraum entfernen tut
@@ -35,6 +40,8 @@ Future<CueChoice?> showCueDialog(
   required String habitName,
   required Set<int> weekdays,
   required bool weekdaysFromTomorrow,
+  List<Habit> anchors = const <Habit>[],
+  String? currentAnchorId,
   String? current,
 }) {
   return showDialog<CueChoice>(
@@ -45,10 +52,15 @@ Future<CueChoice?> showCueDialog(
         current: current,
         weekdays: weekdays,
         weekdaysFromTomorrow: weekdaysFromTomorrow,
+        anchors: anchors,
+        currentAnchorId: currentAnchorId,
       ),
     ),
   );
 }
+
+/// Woran ein Test den Knopf findet, der an [habitId] koppelt.
+Key cueAnchorKey(String habitId) => ValueKey<String>('anker-$habitId');
 
 /// Vorschläge zum Antippen — alles Dinge, die ohnehin jeden Tag
 /// passieren. Ankoppeln statt neu erfinden.
@@ -66,8 +78,16 @@ class _CueDialog extends StatefulWidget {
     required this.habitName,
     required this.weekdays,
     required this.weekdaysFromTomorrow,
+    required this.anchors,
+    this.currentAnchorId,
     this.current,
   });
+
+  /// Woran sich koppeln lässt — die laufenden Gewohnheiten ohne diese
+  /// selbst und ohne alles, was einen Kreis schlösse
+  /// (`HabitTracker.anchorCandidatesFor`).
+  final List<Habit> anchors;
+  final String? currentAnchorId;
 
   final String habitName;
   final String? current;
@@ -86,10 +106,30 @@ class _CueDialogState extends State<_CueDialog> {
     text: widget.current ?? '',
   );
 
+  late String? _anchorId = widget.currentAnchorId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Satz oder Anker: Wer tippt, löst die Kopplung.
+    _controller.addListener(() {
+      if (_anchorId != null && _controller.text.isNotEmpty) {
+        setState(() => _anchorId = null);
+      }
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _kopple(String habitId) {
+    setState(() {
+      _anchorId = _anchorId == habitId ? null : habitId;
+      if (_anchorId != null) _controller.clear();
+    });
   }
 
   late Set<int> _weekdays = <int>{...widget.weekdays};
@@ -98,15 +138,21 @@ class _CueDialogState extends State<_CueDialog> {
       _weekdays.length != widget.weekdays.length ||
       !_weekdays.containsAll(widget.weekdays);
 
-  void _schliesse(String cue) {
-    Navigator.of(context).pop(CueChoice(cue: cue, weekdays: _weekdays));
+  void _schliesse(String cue, {String? anchorId}) {
+    Navigator.of(context).pop(
+      CueChoice(
+        cue: anchorId == null ? cue : '',
+        weekdays: _weekdays,
+        anchorId: anchorId,
+      ),
+    );
   }
 
-  void _submit() => _schliesse(_controller.text);
+  void _submit() => _schliesse(_controller.text, anchorId: _anchorId);
 
   @override
   Widget build(BuildContext context) {
-    final hatteEinen = widget.current != null;
+    final hatteEinen = widget.current != null || widget.currentAnchorId != null;
 
     return AlertDialog(
       backgroundColor: Palette.surfaceRaised,
@@ -163,6 +209,49 @@ class _CueDialogState extends State<_CueDialog> {
                   ),
               ],
             ),
+            if (widget.anchors.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 12),
+              const Text(
+                'Oder direkt nach einer deiner Gewohnheiten:',
+                style: TextStyle(fontSize: 13, color: Palette.textDim),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: <Widget>[
+                  for (final habit in widget.anchors)
+                    Druck(
+                      child: ChoiceChip(
+                        key: cueAnchorKey(habit.id),
+                        // Die Farben der App statt des blassen Rosa, das
+                        // Material für „gewählt" mitbringt.
+                        showCheckmark: false,
+                        selectedColor: Palette.accent,
+                        avatar: Icon(
+                          Icons.link_rounded,
+                          size: 16,
+                          color: _anchorId == habit.id
+                              ? Palette.surface
+                              : Palette.textDim,
+                        ),
+                        label: Text(
+                          habit.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _anchorId == habit.id
+                                ? Palette.surface
+                                : Palette.text,
+                          ),
+                        ),
+                        selected: _anchorId == habit.id,
+                        onSelected: (_) => _kopple(habit.id),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
