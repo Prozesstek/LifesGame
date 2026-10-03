@@ -26,7 +26,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
+| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 58 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
@@ -118,13 +118,22 @@ habits 298 (vorher 285), App 656 (vorher 646). Kachel, Dialog,
 Startseite und das Häkchen gerendert und angesehen. **Nicht am Handy,
 nicht im Browser gespielt.**
 
+**Dazu die Theorie-Seite „Mach es attraktiv“** (Frederik: „Theorie
+Seite auch bauen“), als Knoten unter „Die vier Regeln“: Vorfreude statt
+Belohnung, das Versuchungsbündel, die Menschen um einen herum, umdeuten
+und umdrehen. Der Baum hat damit 58 Knoten. **Anders als bei Regel 1
+kommt der Inhalt nicht aus Frederiks Notizen, sondern von Claude** nach
+dem Aufbau des Kapitels — gegenlesen. `question_fairness_test` hat zwei
+zu kurze richtige Antworten erwischt, beide angeglichen.
+
 ### Offen
 
+- Die Seite „Mach es attraktiv“ ist nicht gegengelesen; die Aussage
+  über Dopamin ist vereinfacht.
 - Die App gibt die Belohnung nicht und prüft sie nicht; ob „Jetzt: …“
   trägt, zeigt das Spielen.
 - „Jetzt: …“ steht in der Leiste unten, nicht bei den aufsteigenden
   Zahlen am Finger — dort wäre ein langer Satz übergelaufen.
-- Die Theorie-Seite „Mach es attraktiv“ fehlt (Regel 2, ADR-0061).
 - Die Wochentage, der Auslöser, der Anker und die Belohnung stehen in
   **einem** Dialog; er ist voll.
 
