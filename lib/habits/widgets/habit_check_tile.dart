@@ -39,6 +39,7 @@ class HabitCheckTile extends StatelessWidget {
     required this.onAdvance,
     required this.onStop,
     this.cue,
+    this.treat,
     this.days,
     this.cued = false,
     this.onEditCue,
@@ -84,6 +85,11 @@ class HabitCheckTile extends StatelessWidget {
   /// machte aus einem Häkchen einen Dialog. Auf einer erledigten Kachel
   /// fällt er weg — dort hat er seine Arbeit getan.
   final String? cue;
+
+  /// Was es danach gibt — „Kaffee" (ADR-0066). Steht unter dem Auslöser,
+  /// solange die Kachel offen ist: Die Vorfreude gehört **vor** das
+  /// Häkchen.
+  final String? treat;
 
   /// Die Wochentage als „Mo Mi Fr" (ADR-0064) — null, wenn jeder Tag
   /// fällig ist. Steht vor dem Auslöser in derselben Zeile.
@@ -159,7 +165,12 @@ class HabitCheckTile extends StatelessWidget {
                         ],
                         if (!isChecked && onEditCue != null) ...<Widget>[
                           const SizedBox(height: 4),
-                          _CueLine(cue: cue, days: days, onTap: onEditCue!),
+                          _CueLine(
+                            cue: cue,
+                            days: days,
+                            treat: treat,
+                            onTap: onEditCue!,
+                          ),
                         ],
                       ],
                     ),
@@ -208,9 +219,15 @@ class HabitCheckTile extends StatelessWidget {
 /// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
 /// Kachel darum bleibt stehen.
 class _CueLine extends StatelessWidget {
-  const _CueLine({required this.cue, required this.days, required this.onTap});
+  const _CueLine({
+    required this.cue,
+    required this.days,
+    required this.treat,
+    required this.onTap,
+  });
 
   final String? cue;
+  final String? treat;
   final String? days;
   final VoidCallback onTap;
 
@@ -219,6 +236,7 @@ class _CueLine extends StatelessWidget {
     final text = cue;
     final tage = days;
     final farbe = text == null ? Palette.muted : Palette.textDim;
+    final danach = treat;
 
     return Druck(
       child: InkWell(
@@ -226,48 +244,95 @@ class _CueLine extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              // Ohne Auslöser steht nur der Wecker da — die Frage dazu
-              // stellt der Dialog, nicht die Kachel.
-              Icon(
-                text == null ? Icons.add_alarm_outlined : Icons.link_rounded,
-                size: text == null ? 18 : 14,
-                color: farbe,
-                semanticLabel: text == null ? 'Wann machst du das?' : null,
-              ),
-              // Tage und Auslöser als **ein** Text über zwei Zeilen: Neben
-              // Kette und Knöpfen bleiben der Spalte rund 130 Punkte, und
-              // zwei Texte nebeneinander kürzten den Auslöser auf drei
-              // Wörter.
-              if (tage != null || text != null) ...<Widget>[
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text.rich(
-                    TextSpan(
-                      children: <InlineSpan>[
-                        if (tage != null)
-                          TextSpan(
-                            text: text == null ? tage : '$tage  ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Palette.textDim,
-                            ),
-                          ),
-                        if (text != null) TextSpan(text: text),
-                      ],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: farbe),
-                  ),
+          child: danach == null
+              ? _wann(text, tage, farbe)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _wann(text, tage, farbe),
+                    const SizedBox(height: 2),
+                    TreatLine(text: danach),
+                  ],
                 ),
-              ],
-            ],
-          ),
         ),
       ),
+    );
+  }
+
+  Widget _wann(String? text, String? tage, Color farbe) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Ohne Auslöser steht nur der Wecker da — die Frage dazu
+        // stellt der Dialog, nicht die Kachel.
+        Icon(
+          text == null ? Icons.add_alarm_outlined : Icons.link_rounded,
+          size: text == null ? 18 : 14,
+          color: farbe,
+          semanticLabel: text == null ? 'Wann machst du das?' : null,
+        ),
+        // Tage und Auslöser als **ein** Text über zwei Zeilen: Neben
+        // Kette und Knöpfen bleiben der Spalte rund 130 Punkte, und
+        // zwei Texte nebeneinander kürzten den Auslöser auf drei
+        // Wörter.
+        if (tage != null || text != null) ...<Widget>[
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  if (tage != null)
+                    TextSpan(
+                      text: text == null ? tage : '$tage  ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Palette.textDim,
+                      ),
+                    ),
+                  if (text != null) TextSpan(text: text),
+                ],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: farbe),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Die Belohnung danach mit ihrem Zeichen, dem Geschenk (ADR-0066).
+///
+/// **Eine Stelle** für Kachel und Startseite, damit das Geschenk überall
+/// dasselbe ist.
+class TreatLine extends StatelessWidget {
+  const TreatLine({required this.text, this.fontSize = 12, super.key});
+
+  static const IconData icon = Icons.redeem_rounded;
+
+  final String text;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(icon, size: fontSize + 2, color: Palette.gold),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            semanticsLabel: 'Danach: $text',
+            style: TextStyle(fontSize: fontSize, color: Palette.textDim),
+          ),
+        ),
+      ],
     );
   }
 }

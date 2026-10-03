@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/cue_dialog.dart';
 import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
 import 'package:lifes_game/habits/widgets/streak_freeze_card.dart';
 import 'package:lifes_game/habits/widgets/custom_habit_sheet.dart';
@@ -322,7 +323,7 @@ void main() {
             .isChecked(HabitCatalog.starterId, _heute),
         isFalse,
       );
-      await tester.enterText(find.byType(TextField), 'Nach dem Kaffee');
+      await tester.enterText(find.byKey(cueFieldKey), 'Nach dem Kaffee');
       await tester.tap(find.widgetWithText(FilledButton, 'Festlegen'));
       await tester.pumpAndSettle();
 

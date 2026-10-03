@@ -287,6 +287,12 @@ final TheoryGraph theoryGraph = TheoryGraph(
       parentIds: <String>['gewohnheiten-vier-regeln'],
     ),
     const TheoryNode(
+      id: 'gewohnheiten-attraktiv',
+      lesson: attraktivPage,
+      iconId: 'spark',
+      parentIds: <String>['gewohnheiten-vier-regeln'],
+    ),
+    const TheoryNode(
       id: 'philosophie',
       lesson: philosophiePage,
       iconId: 'philosophy',

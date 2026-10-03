@@ -110,7 +110,7 @@ void main() {
 
       await tester.tap(find.byKey(cueAnchorKey(anker.id)));
       await tester.pump();
-      await tester.enterText(find.byType(TextField), 'Nach dem Kaffee');
+      await tester.enterText(find.byKey(cueFieldKey), 'Nach dem Kaffee');
       await tester.pump();
       await tester.tap(find.widgetWithText(FilledButton, 'Festlegen'));
       await tester.pumpAndSettle();

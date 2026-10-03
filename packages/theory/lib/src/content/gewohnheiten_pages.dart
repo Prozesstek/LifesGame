@@ -2,7 +2,7 @@
 /// dem wächst, was Frederik gerade liest (*Die 1%-Methode*, James Clear).
 ///
 /// Drei Ebenen tief: das Überkapitel, darunter die vier Regeln, darunter
-/// je Regel eine Seite. Befüllt ist bisher die erste Regel. Die Seiten
+/// je Regel eine Seite. Befüllt sind die ersten zwei Regeln. Die Seiten
 /// setzen das Handbuch voraus („Die Schleife hinter jeder Gewohnheit“)
 /// und wiederholen es nicht.
 library;
@@ -228,6 +228,94 @@ const Lesson offensichtlichPage = Lesson(
       correctIndex: 0,
       explanation: 'Umgedreht heißt die Regel: unsichtbar machen. Was nicht '
           'in Reichweite liegt, löst nichts aus.',
+    ),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// 2. Regel: Mach es attraktiv
+// ---------------------------------------------------------------------------
+
+const Lesson attraktivPage = Lesson(
+  id: 'gewohnheiten-04-attraktiv',
+  title: 'Mach es attraktiv',
+  summary: 'Häng das, was du tun musst, an etwas, das du tun willst.',
+  sections: <LessonSection>[
+    LessonSection(
+      heading: 'Die Vorfreude zieht, nicht die Belohnung',
+      body: 'Dopamin gilt als Botenstoff des Glücks, treibt aber vor allem '
+          'das Wollen an. Es steigt nicht erst, wenn die Belohnung da ist, '
+          'sondern schon, wenn sie sich ankündigt: beim Geruch des '
+          'Kaffees, beim Ton der Nachricht. Diese Erwartung bringt dich '
+          'in Bewegung. Eine Gewohnheit, auf die du dich freust, beginnst '
+          'du deshalb leichter als eine, die du nur für richtig hältst.',
+    ),
+    LessonSection(
+      heading: 'Das Versuchungsbündel',
+      body: 'Daraus folgt ein einfacher Griff: Verbinde, was du tun musst, '
+          'mit etwas, das du ohnehin willst. Die Lieblingsserie nur auf '
+          'dem Heimtrainer. Der Podcast nur beim Aufräumen. Zusammen mit '
+          'der Kopplung ergibt das einen ganzen Satz: Nach dem Frühstück '
+          'lese ich zwei Minuten — und danach gibt es den Kaffee. Die '
+          'Belohnung muss klein sein und sofort kommen. Ein Ausflug am '
+          'Wochenende zieht am Montagmorgen niemanden vom Sofa.',
+    ),
+    LessonSection(
+      heading: 'Die Menschen um dich herum',
+      body: 'Attraktiv ist auch, was die eigene Gruppe für normal hält. '
+          'Menschen übernehmen Gewohnheiten von denen, die ihnen nah '
+          'sind, von der Mehrheit und von denen, die sie bewundern. Wer '
+          'laufen will, hat es in einer Laufgruppe leichter als allein: '
+          'Dort ist Laufen nichts Besonderes, sondern das, was man eben '
+          'tut. Such dir Umgebungen, in denen dein Wunschverhalten der '
+          'Normalfall ist.',
+    ),
+    LessonSection(
+      heading: 'Umdeuten — und umdrehen',
+      body: 'Oft genügt ein anderes Wort. „Ich muss trainieren“ beschreibt '
+          'eine Last, „ich darf trainieren“ eine Gelegenheit, und beides '
+          'meint dieselbe halbe Stunde. Gegen eine schlechte Gewohnheit '
+          'wirkt die Regel rückwärts: Mach sie unattraktiv. Führ dir vor '
+          'Augen, was sie dich kostet, statt was sie dir für den Moment '
+          'gibt.',
+    ),
+  ],
+  questions: <Question>[
+    Question(
+      prompt: 'Wann steigt das Verlangen nach einer Belohnung am stärksten?',
+      options: <String>[
+        'Erst lange nachdem die Belohnung vorbei ist',
+        'Schon wenn sie sich deutlich ankündigt',
+        'Nur wenn andere dabei zusehen können',
+        'Genau in dem Moment, in dem man sie hat',
+      ],
+      correctIndex: 1,
+      explanation: 'Die Erwartung bringt in Bewegung. Deshalb hilft es, '
+          'wenn an einer Gewohnheit etwas hängt, auf das man sich freut.',
+    ),
+    Question(
+      prompt: 'Welches Beispiel ist ein Versuchungsbündel?',
+      options: <String>[
+        'Die Laufschuhe abends sichtbar neben die Tür stellen',
+        'Sich am Jahresende einen großen Urlaub versprechen',
+        'Die Lieblingsserie nur auf dem Heimtrainer schauen',
+        'Sich fest vornehmen, diesmal wirklich durchzuhalten',
+      ],
+      correctIndex: 2,
+      explanation: 'Müssen und Wollen hängen zusammen, und die Belohnung '
+          'kommt sofort. Die Schuhe an der Tür gehören zur ersten Regel.',
+    ),
+    Question(
+      prompt: 'Warum hilft eine Laufgruppe beim Dranbleiben?',
+      options: <String>[
+        'Dort ist Laufen das, was alle ohnehin tun',
+        'Dort läuft man automatisch schneller als allein',
+        'Dort wird jedes Fehlen mit einer Strafe belegt',
+        'Dort braucht man keinen eigenen Plan mehr',
+      ],
+      correctIndex: 0,
+      explanation: 'Was die eigene Gruppe für normal hält, wirkt '
+          'anziehend. Man übernimmt, was die Menschen um einen herum tun.',
     ),
   ],
 );
