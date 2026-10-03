@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 02.10.2026 · Frederik
+**Zuletzt aktualisiert:** 03.10.2026 · Frederik
 
 ---
 
@@ -24,7 +24,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065 |
+| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 57 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 646, dazu die acht Packages (theory 174, habits 285, gear
+**Tests:** App 656, dazu die acht Packages (theory 174, habits 298, gear
 117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -90,6 +90,43 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 03.10.2026: „Mach es attraktiv“ — eine Belohnung je Gewohnheit
+
+Frederik: „Können wir ‚eine Gewohnheit muss attraktiv sein‘ irgendwie
+einbauen?“ Vier Wege vorgeschlagen, in einer Fragerunde gewählt: das
+**Versuchungsbündel**,
+[ADR-0066](../decisions/0066-versuchungsbuendel.md). Vorher gemergt:
+PR #103 (Wochenplan) und #104 (Koppeln).
+
+| Was | Wie |
+|---|---|
+| **Eintragen** | im Dialog „Wann machst du das?“ ein Feld „Und danach gönnst du dir:“, fünf Vorschläge zum Antippen |
+| **Vorfreude** | auf der Kachel und in „Heute“ steht die Belohnung mit einem Geschenk, solange die Gewohnheit offen ist |
+| **Einlösen** | beim Abhaken steht unten drei Sekunden „Jetzt: Kaffee“ |
+| **Keine Zahl** | Erfahrung, Gold und Ketten ändern sich nicht (`treat_test.dart`) |
+
+Sie steht neben Satz **und** Anker: nach X mache ich Y, danach gönne
+ich mir Z.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Im
+Dialog lag das neue Feld erst nach zwei Bildschirmen Rollen, weil sechs
+Vorschläge in sechs Zeilen umbrachen. Die Vorschläge stehen jetzt in
+einer Zeile zum Wischen, das Feld ist ohne Rollen zu sehen.
+
+habits 298 (vorher 285), App 656 (vorher 646). Kachel, Dialog,
+Startseite und das Häkchen gerendert und angesehen. **Nicht am Handy,
+nicht im Browser gespielt.**
+
+### Offen
+
+- Die App gibt die Belohnung nicht und prüft sie nicht; ob „Jetzt: …“
+  trägt, zeigt das Spielen.
+- „Jetzt: …“ steht in der Leiste unten, nicht bei den aufsteigenden
+  Zahlen am Finger — dort wäre ein langer Satz übergelaufen.
+- Die Theorie-Seite „Mach es attraktiv“ fehlt (Regel 2, ADR-0061).
+- Die Wochentage, der Auslöser, der Anker und die Belohnung stehen in
+  **einem** Dialog; er ist voll.
 
 ## 02.10.2026, ganz zuletzt: Gewohnheiten koppeln
 

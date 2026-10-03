@@ -86,6 +86,7 @@ class HabitTracker {
     Map<Day, Set<String>> claimedQuests = const <Day, Set<String>>{},
     Map<String, HabitPlan> plans = const <String, HabitPlan>{},
     Map<String, String> anchors = const <String, String>{},
+    Map<String, String> treats = const <String, String>{},
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
@@ -101,7 +102,8 @@ class HabitTracker {
           for (final entry in plans.entries)
             if (!entry.value.isEmpty) entry.key: entry.value,
         }),
-        _anchors = Map<String, String>.unmodifiable(anchors);
+        _anchors = Map<String, String>.unmodifiable(anchors),
+        _treats = Map<String, String>.unmodifiable(treats);
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
@@ -113,7 +115,8 @@ class HabitTracker {
         _cues = const <String, String>{},
         _claimedQuests = const <Day, Set<String>>{},
         _plans = const <String, HabitPlan>{},
-        _anchors = const <String, String>{};
+        _anchors = const <String, String>{},
+        _treats = const <String, String>{};
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -236,6 +239,20 @@ class HabitTracker {
       }
     }
 
+    final belohnungen = <String, String>{};
+    final rawTreats = json['treats'];
+    if (rawTreats is Map) {
+      for (final entry in rawTreats.entries) {
+        final habitId = entry.key;
+        final text = entry.value;
+        if (habitId is! String || text is! String || !bekannt(habitId)) {
+          continue;
+        }
+        final bereinigt = _cleanCue(text);
+        if (bereinigt != null) belohnungen[habitId] = bereinigt;
+      }
+    }
+
     final abgeholt = <Day, Set<String>>{};
     final rawQuests = json['quests'];
     if (rawQuests is Map) {
@@ -312,6 +329,7 @@ class HabitTracker {
       claimedQuests: abgeholt,
       plans: plaene,
       anchors: anker,
+      treats: belohnungen,
     );
   }
 
@@ -373,6 +391,10 @@ class HabitTracker {
   /// **oder** einen Anker, nie beides.
   final Map<String, String> _anchors;
 
+  /// Je Gewohnheit, was es danach gibt (ADR-0066) — eine Zeile Text wie
+  /// der Auslöser, und wie er ohne jede Zahl.
+  final Map<String, String> _treats;
+
   /// Der Stand als JSON.
   ///
   /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
@@ -415,6 +437,7 @@ class HabitTracker {
             day.toString(): (_claimedQuests[day]!.toList()..sort()),
         },
       if (_anchors.isNotEmpty) 'anchors': <String, Object?>{..._anchors},
+      if (_treats.isNotEmpty) 'treats': <String, Object?>{..._treats},
       if (_plans.isNotEmpty)
         'plans': <String, Object?>{
           for (final entry in _plans.entries) entry.key: entry.value.toJson(),
@@ -638,6 +661,35 @@ class HabitTracker {
           ? (<String, String>{..._anchors}..remove(habitId))
           : null,
     );
+  }
+
+  /// Was es **danach** gibt — „Kaffee", „eine Folge" (ADR-0066) — oder
+  /// null, wenn nichts festgelegt ist.
+  ///
+  /// Das Versuchungsbündel aus der zweiten Regel: Was man tun muss, hängt
+  /// an etwas, das man tun will. Wie der Auslöser eine Zeile Text, die
+  /// **keine Zahl erzeugt** — die App gibt die Belohnung nicht und prüft
+  /// sie nicht, sie erinnert nur daran.
+  String? treatFor(String habitId) => _treats[habitId];
+
+  /// Legt die Belohnung von [habitId] fest; leer oder null entfernt sie.
+  ///
+  /// Dieselben Regeln wie [setCue]: eine Zeile, höchstens
+  /// [maxCueLength] Zeichen, eine unbekannte Id ändert nichts. Vom
+  /// Auslöser unabhängig — sie steht neben Satz **und** Anker.
+  HabitTracker setTreat(String habitId, String? text) {
+    if (definitionFor(habitId) == null) return this;
+
+    final bereinigt = text == null ? null : _cleanCue(text);
+    if (bereinigt == _treats[habitId]) return this;
+
+    final next = <String, String>{..._treats};
+    if (bereinigt == null) {
+      next.remove(habitId);
+    } else {
+      next[habitId] = bereinigt;
+    }
+    return _copyWith(treats: next);
   }
 
   static String? _cleanCue(String text) {
@@ -1034,6 +1086,7 @@ class HabitTracker {
     Map<Day, Set<String>>? claimedQuests,
     Map<String, HabitPlan>? plans,
     Map<String, String>? anchors,
+    Map<String, String>? treats,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -1046,6 +1099,7 @@ class HabitTracker {
       claimedQuests: claimedQuests ?? _claimedQuests,
       plans: plans ?? _plans,
       anchors: anchors ?? _anchors,
+      treats: treats ?? _treats,
     );
   }
 

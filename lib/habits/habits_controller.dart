@@ -75,6 +75,11 @@ class HabitsController extends Notifier<HabitTracker> {
     state = state.setCue(habitId, text);
   }
 
+  /// Legt fest, was es nach [habitId] gibt; leer entfernt es (ADR-0066).
+  void setTreat(String habitId, String? text) {
+    state = state.setTreat(habitId, text);
+  }
+
   /// Koppelt [habitId] an [anchorId]; null löst die Kopplung (ADR-0065).
   void setAnchor(String habitId, String? anchorId) {
     state = state.setAnchor(habitId, anchorId);

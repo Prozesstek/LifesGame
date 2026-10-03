@@ -53,6 +53,7 @@ void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
   sayHabitFeedback(
     context,
     _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
+    treat: _danach(ref, habit),
   );
   _steigen(
     context,
@@ -136,6 +137,7 @@ void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
   sayHabitFeedback(
     context,
     _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
+    treat: _danach(ref, habit),
   );
   _steigen(
     context,
@@ -174,7 +176,15 @@ void _celebrate(
   });
 }
 
+/// Was es nach [habit] gibt — die Belohnung, die sich jemand selbst
+/// versprochen hat (ADR-0066), oder null.
+String? _danach(WidgetRef ref, Habit habit) =>
+    ref.read(habitTrackerProvider).treatFor(habit.id);
+
 /// Die Rückmeldung unten.
+///
+/// Mit [treat] steht darunter groß „Jetzt: Kaffee" — das Versprechen wird
+/// in dem Moment fällig, in dem das Häkchen sitzt.
 ///
 /// Das Zeichen ist bewusst **nicht** `Icons.check_circle`: Das trägt
 /// die Kachel, und zwei gleiche Zeichen im selben Bild lesen sich als
@@ -183,6 +193,7 @@ void sayHabitFeedback(
   BuildContext context,
   String text, {
   IconData icon = Icons.auto_awesome,
+  String? treat,
 }) {
   final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
   messenger.showSnackBar(
@@ -192,7 +203,38 @@ void sayHabitFeedback(
           Icon(icon, size: 18, color: Palette.success),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: const TextStyle(color: Palette.text)),
+            child: treat == null
+                ? Text(text, style: const TextStyle(color: Palette.text))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(text, style: const TextStyle(color: Palette.text)),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: <Widget>[
+                          const Icon(
+                            Icons.redeem_rounded,
+                            size: 18,
+                            color: Palette.gold,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'Jetzt: $treat',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Palette.text,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),

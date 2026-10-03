@@ -205,6 +205,7 @@ class HabitsScreen extends ConsumerWidget {
       onStop: () =>
           ref.read(habitTrackerProvider.notifier).deactivate(habit.id),
       cue: CueText.lineFor(tracker, habit.id),
+      treat: tracker.treatFor(habit.id),
       days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
       cued: eintrag.isCued,
       onEditCue: () => _editCue(context, ref, habit),
@@ -282,6 +283,7 @@ class HabitsScreen extends ConsumerWidget {
           tracker.weekdaysChangeFrom(habit.id, today) != today,
       anchors: tracker.anchorCandidatesFor(habit.id),
       currentAnchorId: tracker.anchorFor(habit.id),
+      currentTreat: tracker.treatFor(habit.id),
     );
     if (wahl == null || !context.mounted) return;
     final controller = ref.read(habitTrackerProvider.notifier);
@@ -295,7 +297,9 @@ class HabitsScreen extends ConsumerWidget {
         ..setAnchor(habit.id, null)
         ..setCue(habit.id, wahl.cue);
     }
-    controller.setWeekdays(habit.id, wahl.weekdays);
+    controller
+      ..setTreat(habit.id, wahl.treat)
+      ..setWeekdays(habit.id, wahl.weekdays);
   }
 
   /// Setzt ein Streak-Eis auf [tag].

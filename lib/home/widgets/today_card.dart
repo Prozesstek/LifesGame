@@ -6,6 +6,7 @@ import '../../habits/cue_text.dart';
 import '../../habits/habit_check_flow.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/habits_screen.dart';
+import '../../habits/widgets/habit_check_tile.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/holz.dart';
@@ -75,6 +76,7 @@ class TodayCard extends ConsumerWidget {
                 habit: eintrag.habit,
                 done: tracker.isChecked(eintrag.habit.id, today),
                 cue: CueText.lineFor(tracker, eintrag.habit.id),
+                treat: tracker.treatFor(eintrag.habit.id),
                 depth: eintrag.depth,
                 cued: eintrag.isCued,
                 onTap: () => toggleHabit(context, ref, eintrag.habit),
@@ -195,6 +197,7 @@ class _Zeile extends StatelessWidget {
     required this.done,
     required this.cue,
     required this.onTap,
+    this.treat,
     this.depth = 0,
     this.cued = false,
     super.key,
@@ -207,6 +210,9 @@ class _Zeile extends StatelessWidget {
   final Habit habit;
   final bool done;
   final String? cue;
+
+  /// Was es danach gibt (ADR-0066) — nur solange offen.
+  final String? treat;
   final VoidCallback onTap;
 
   /// Wie tief die Gewohnheit unter ihrem Anker hängt (ADR-0065).
@@ -222,11 +228,15 @@ class _Zeile extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(left: _schritt * stufen),
-      child: PlatzLaedtEin(aktiv: cued, radius: 6, child: _zeile(text)),
+      child: PlatzLaedtEin(
+        aktiv: cued,
+        radius: 6,
+        child: _zeile(text, done ? null : treat),
+      ),
     );
   }
 
-  Widget _zeile(String? text) {
+  Widget _zeile(String? text, String? danach) {
     return Semantics(
       button: true,
       label: done
@@ -275,6 +285,7 @@ class _Zeile extends StatelessWidget {
                             color: Palette.textDim,
                           ),
                         ),
+                      if (danach != null) TreatLine(text: danach, fontSize: 11),
                     ],
                   ),
                 ),
