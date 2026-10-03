@@ -72,8 +72,11 @@ abstract final class DailyQuests {
     required bool reviewAvailable,
     required bool reviewCorrect,
   }) {
-    final aktiv = tracker.activeIds.length;
-    final erledigt = tracker.completedOn(day);
+    // Gezählt wird, was an [day] **fällig** ist (ADR-0064): „Hake 3 ab"
+    // an einem Tag, an dem nur zwei dran sind, wäre nicht zu schaffen.
+    final faellig = tracker.dueIdsOn(day);
+    final aktiv = faellig.length;
+    final erledigt = faellig.where((id) => tracker.isChecked(id, day)).length;
     final liegen = _liegengeblieben(tracker, day);
 
     final verfuegbar = <QuestKind>[
@@ -134,9 +137,16 @@ abstract final class DailyQuests {
 
   /// Die erste laufende Gewohnheit, die gestern offen blieb — in der
   /// Reihenfolge der Tagesliste. Id und Name, oder null.
+  ///
+  /// Sie muss gestern fällig gewesen sein, sonst blieb nichts liegen, und
+  /// heute wieder, sonst lässt sie sich nicht nachholen.
   static (String, String)? _liegengeblieben(HabitTracker tracker, Day day) {
     final gestern = day.previous;
+    // Nicht über die Tagesliste: Die sortiert Erledigtes nach unten, und
+    // die Aufgabe nennte nach dem Häkchen plötzlich eine andere.
     for (final habit in tracker.activeHabitsByPriority) {
+      if (!tracker.isDueOn(habit.id, day)) continue;
+      if (!tracker.isDueOn(habit.id, gestern)) continue;
       if (!tracker.isChecked(habit.id, gestern)) return (habit.id, habit.name);
     }
     return null;

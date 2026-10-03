@@ -93,6 +93,56 @@ void main() {
     });
   });
 
+  group('Mit Wochenplan (ADR-0064)', () {
+    // Der 27.09.2026 ist ein Sonntag.
+    const sonntag = heute;
+    final montag = heute.next;
+
+    /// Drei laufen, aber sonntags ist nur die erste fällig.
+    HabitTracker nurEineSonntags() {
+      var t = const HabitTracker.empty();
+      for (final h in alle.take(3)) {
+        t = t.activate(h.id, today: sonntag);
+      }
+      for (final h in alle.skip(1).take(2)) {
+        t = t.setWeekdays(h.id, const <int>{1}, today: sonntag);
+      }
+      return t;
+    }
+
+    test('gezählt wird, was heute fällig ist', () {
+      final kinds = aufgaben(nurEineSonntags()).map((q) => q.kind);
+
+      expect(kinds, isNot(contains(QuestKind.zweiHaekchen)));
+      expect(kinds, isNot(contains(QuestKind.dreiHaekchen)));
+      final alles = aufgaben(nurEineSonntags())
+          .singleWhere((q) => q.kind == QuestKind.alles);
+      expect(alles.target, 1);
+    });
+
+    test('an einem Ruhetag gibt es keine Aufgabe zum Abhaken', () {
+      final t = const HabitTracker.empty()
+          .activate(alle.first.id, today: sonntag)
+          .setWeekdays(alle.first.id, const <int>{1}, today: sonntag);
+
+      expect(aufgaben(t).where((q) => q.kind.isHabitCount), isEmpty);
+    });
+
+    test('liegen geblieben ist nur, was gestern fällig war', () {
+      // Die zwei Montags-Gewohnheiten waren sonntags nicht dran; am
+      // Montag blieb also höchstens die erste liegen.
+      var tag = montag;
+      for (var i = 0; i < 30; i++) {
+        final liegen = aufgaben(nurEineSonntags(), day: tag)
+            .where((q) => q.kind == QuestKind.liegengeblieben);
+        for (final q in liegen) {
+          expect(q.text, contains(alle.first.name), reason: '$tag');
+        }
+        tag = tag.next;
+      }
+    });
+  });
+
   group('Der Stand kommt aus der Historie', () {
     DailyQuest suche(List<DailyQuest> qs, QuestKind kind) =>
         qs.firstWhere((q) => q.kind == kind);

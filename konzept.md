@@ -276,6 +276,14 @@ Meilensteinen steigen (3 / 7 / 14 / 30 / 60 Tage). Verpasste Habits werden
 nicht bestraft — der Bonus fehlt einfach, und die Kette stirbt erst, wenn
 der Tag vorbei ist, nicht beim Aufwachen.
 
+> **Seit ADR-0064 (02.10.2026):** Jede Gewohnheit hat einen **Wochenplan**
+> (Standard: jeden Tag). Die Kette zählt erledigte *fällige* Tage; freie
+> Tage tragen sie, ohne sie zu verlängern. Ein verpasster fälliger Tag
+> lässt sie auf die **Stufe darunter** fallen statt auf null (45 → 30,
+> 10 → 7), jeder weitere wieder eine. Eine gestoppte Gewohnheit pausiert,
+> ihre Kette bleibt stehen. Die Meilensteine oben zählen damit Häkchen,
+> nicht Kalendertage.
+
 Der Multiplikator ist bei **x2 gedeckelt** — die Empfehlung wurde
 übernommen: Bei x3 wird der Verlust einer langen Streak so schmerzhaft, dass
 Nutzer aufgeben statt neu anzufangen. **Gold folgt dem Streak bewusst

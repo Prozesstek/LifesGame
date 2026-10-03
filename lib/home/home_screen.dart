@@ -72,8 +72,9 @@ class HomeScreen extends ConsumerWidget {
     final tracker = ref.watch(habitTrackerProvider);
     final today = ref.watch(todayProvider);
     final heute = HubProgress(
-      done: tracker.completedOn(ref.watch(todayProvider)),
-      total: tracker.activeIds.length,
+      done: tracker.completedOn(today),
+      // Was heute fällig ist, nicht was läuft (ADR-0064).
+      total: tracker.dailyListOn(today).length,
     );
 
     final combatOpen = ref.watch(combatUnlockedProvider);

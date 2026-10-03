@@ -39,6 +39,7 @@ class HabitCheckTile extends StatelessWidget {
     required this.onAdvance,
     required this.onStop,
     this.cue,
+    this.days,
     this.onEditCue,
     super.key,
   });
@@ -82,6 +83,10 @@ class HabitCheckTile extends StatelessWidget {
   /// machte aus einem Häkchen einen Dialog. Auf einer erledigten Kachel
   /// fällt er weg — dort hat er seine Arbeit getan.
   final String? cue;
+
+  /// Die Wochentage als „Mo Mi Fr" (ADR-0064) — null, wenn jeder Tag
+  /// fällig ist. Steht vor dem Auslöser in derselben Zeile.
+  final String? days;
 
   /// Öffnet die Frage nach dem Auslöser. Null blendet die Zeile aus.
   final VoidCallback? onEditCue;
@@ -141,7 +146,7 @@ class HabitCheckTile extends StatelessWidget {
                         ],
                         if (!isChecked && onEditCue != null) ...<Widget>[
                           const SizedBox(height: 4),
-                          _CueLine(cue: cue, onTap: onEditCue!),
+                          _CueLine(cue: cue, days: days, onTap: onEditCue!),
                         ],
                       ],
                     ),
@@ -190,14 +195,16 @@ class HabitCheckTile extends StatelessWidget {
 /// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
 /// Kachel darum bleibt stehen.
 class _CueLine extends StatelessWidget {
-  const _CueLine({required this.cue, required this.onTap});
+  const _CueLine({required this.cue, required this.days, required this.onTap});
 
   final String? cue;
+  final String? days;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final text = cue;
+    final tage = days;
     final farbe = text == null ? Palette.muted : Palette.textDim;
 
     return Druck(
@@ -217,12 +224,28 @@ class _CueLine extends StatelessWidget {
                 color: farbe,
                 semanticLabel: text == null ? 'Wann machst du das?' : null,
               ),
-              if (text != null) ...<Widget>[
+              // Tage und Auslöser als **ein** Text über zwei Zeilen: Neben
+              // Kette und Knöpfen bleiben der Spalte rund 130 Punkte, und
+              // zwei Texte nebeneinander kürzten den Auslöser auf drei
+              // Wörter.
+              if (tage != null || text != null) ...<Widget>[
                 const SizedBox(width: 4),
                 Flexible(
-                  child: Text(
-                    text,
-                    maxLines: 1,
+                  child: Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        if (tage != null)
+                          TextSpan(
+                            text: text == null ? tage : '$tage  ',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Palette.textDim,
+                            ),
+                          ),
+                        if (text != null) TextSpan(text: text),
+                      ],
+                    ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 12, color: farbe),
                   ),

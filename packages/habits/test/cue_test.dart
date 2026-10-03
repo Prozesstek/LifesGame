@@ -70,8 +70,8 @@ void main() {
       // Häkchen, die beim Stoppen auch bleiben.
       final t = mitVorlage()
           .setCue(vorlage.id, 'abends')
-          .deactivate(vorlage.id)
-          .activate(vorlage.id);
+          .deactivate(vorlage.id, today: heute)
+          .activate(vorlage.id, today: heute);
 
       expect(t.cueFor(vorlage.id), 'abends');
     });

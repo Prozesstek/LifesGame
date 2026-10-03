@@ -106,6 +106,24 @@ void main() {
       tracker = tracker.check(id, _heute.previous.previous).tracker;
     }
 
+    // **Zwei mit Wochenplan** (ADR-0064), sonst wären weder die Tage auf
+    // der Kachel noch die Kachel „heute nicht fällig" je gebaut: Die
+    // erste ist heute (ein Freitag) dran und trägt ihre Tage neben dem
+    // längsten Auslöser, die zweite hat heute frei und die längste
+    // Zeile, die es gibt.
+    final vorgestern = _heute.previous.previous;
+    tracker = tracker
+        .setWeekdays(
+          HabitCatalog.all[0].id,
+          const <int>{1, 3, 5},
+          today: vorgestern,
+        )
+        .setWeekdays(
+          HabitCatalog.all[1].id,
+          const <int>{1, 2, 3, 4, 6, 7},
+          today: vorgestern,
+        );
+
     // Jeder Platz belegt. Ein leeres Ausrüstungsraster zeigt sechsmal
     // „leer" -- die echten Namen sind das, was in der schmalen Kachel
     // überläuft, und „Schuppenpanzer" ist der längste davon.

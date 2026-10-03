@@ -82,7 +82,7 @@ void main() {
     test('deaktivieren nimmt aus der Liste, behält aber die Historie', () {
       var tracker = _withActive(<String>[staerke.id]);
       tracker = tracker.check(staerke.id, _tag1).tracker;
-      final stopped = tracker.deactivate(staerke.id);
+      final stopped = tracker.deactivate(staerke.id, today: _tag1);
 
       expect(stopped.activeIds, isEmpty);
       expect(stopped.checksFor(staerke.id), 1);

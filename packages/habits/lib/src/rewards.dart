@@ -95,6 +95,21 @@ abstract final class HabitRewards {
     return value > multiplierCap ? multiplierCap : value;
   }
 
+  /// Die Kette nach einem verpassten fälligen Tag (ADR-0064): Sie fällt
+  /// auf die **Stufe darunter**, nicht auf null — aus 45 werden 30, aus
+  /// 10 werden 7, aus 7 werden 3. Unter der ersten Stufe bleibt nichts.
+  ///
+  /// „Darunter" ist streng gemeint: Wer genau auf einer Stufe steht,
+  /// verliert sie. Sonst kostete ein verpasster Tag auf der höchsten Stufe
+  /// nie wieder etwas.
+  static int streakAfterMiss(int streak) {
+    var value = 0;
+    for (final milestone in streakMilestones) {
+      if (milestone.days < streak) value = milestone.days;
+    }
+    return value;
+  }
+
   /// Der nächste Meilenstein nach einer Streak von [streak] Tagen.
   /// Null, wenn der Deckel erreicht ist.
   static StreakMilestone? nextMilestoneAfter(int streak) {
