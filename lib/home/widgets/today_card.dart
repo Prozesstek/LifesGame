@@ -7,6 +7,7 @@ import '../../habits/habit_check_flow.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/habits_screen.dart';
 import '../../habits/widgets/habit_check_tile.dart';
+import '../../habits/widgets/habit_countdown.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/holz.dart';
@@ -27,8 +28,10 @@ import '../../ui/palette.dart';
 /// `HabitTracker.dailyListOn`. Ein Tipp auf eine erledigte nimmt das
 /// Häkchen zurück, wie im Gewohnheiten-Bildschirm.
 ///
-/// Abgehakt wird über [toggleHabit] — dieselbe Stelle wie auf dem
+/// Abgehakt wird über [tapHabit] — dieselbe Stelle wie auf dem
 /// Gewohnheiten-Bildschirm, samt Klang, Feiern und aufsteigenden Zahlen.
+/// Ein Zeitziel öffnet dort seinen Timer (ADR-0067); die Restzeit steht
+/// rechts in der Zeile.
 /// Alles Weitere (Ziele Schritt für Schritt, Auslöser ändern, Vorlagen)
 /// bleibt dort; ein Tipp auf „Heute" führt hin.
 class TodayCard extends ConsumerWidget {
@@ -79,7 +82,10 @@ class TodayCard extends ConsumerWidget {
                 treat: tracker.treatFor(eintrag.habit.id),
                 depth: eintrag.depth,
                 cued: eintrag.isCued,
-                onTap: () => toggleHabit(context, ref, eintrag.habit),
+                timed: tracker.hasTimer(eintrag.habit.id),
+                onTap: () => tapHabit(context, ref, eintrag.habit),
+                onTimerDone: () =>
+                    finishHabitTimer(context, ref, eintrag.habit),
               ),
         ],
       ),
@@ -200,6 +206,8 @@ class _Zeile extends StatelessWidget {
     this.treat,
     this.depth = 0,
     this.cued = false,
+    this.timed = false,
+    this.onTimerDone,
     super.key,
   });
 
@@ -221,6 +229,12 @@ class _Zeile extends StatelessWidget {
   /// Ob sie jetzt dran ist, weil ihr Anker abgehakt wurde.
   final bool cued;
 
+  /// Ob sie ein Zeitziel hat — dann steht rechts die Restzeit.
+  final bool timed;
+
+  /// Der laufende Timer ist bei null angekommen.
+  final VoidCallback? onTimerDone;
+
   @override
   Widget build(BuildContext context) {
     final text = done ? null : cue;
@@ -241,9 +255,8 @@ class _Zeile extends StatelessWidget {
       button: true,
       label: done
           ? '${habit.name} erledigt'
-          : (cued
-                ? '${habit.name} abhaken, jetzt dran'
-                : '${habit.name} abhaken'),
+          : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
+                '${cued ? ', jetzt dran' : ''}',
       child: Druck(
         child: InkWell(
           onTap: onTap,
@@ -289,11 +302,53 @@ class _Zeile extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (timed && !done) ...<Widget>[
+                  const SizedBox(width: 8),
+                  HabitCountdown(
+                    habit: habit,
+                    onDone: onTimerDone,
+                    builder: (context, uhr) => _Restzeit(uhr: uhr),
+                  ),
+                ],
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Die Restzeit eines Zeitziels: blass, solange nichts läuft, in der
+/// Akzentfarbe, sobald der Timer läuft.
+class _Restzeit extends StatelessWidget {
+  const _Restzeit({required this.uhr});
+
+  final HabitClock uhr;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = uhr.isRunning ? Palette.accent : Palette.textDim;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          uhr.isRunning ? Icons.timer_rounded : Icons.timer_outlined,
+          size: 15,
+          color: farbe,
+        ),
+        const SizedBox(width: 3),
+        Text(
+          uhr.label,
+          semanticsLabel: uhr.semanticLabel,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: uhr.isRunning ? FontWeight.bold : FontWeight.w600,
+            color: farbe,
+            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
     );
   }
 }

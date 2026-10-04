@@ -111,6 +111,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
+      await schonErledigt(tester);
 
       final habitId = tracker.activeIds.first;
       expect(
@@ -149,6 +150,7 @@ void main() {
         ),
       );
       await tester.pump();
+      await schonErledigt(tester);
 
       expect(
         oben(erste.name),
@@ -169,6 +171,7 @@ void main() {
       await _vorlageStarten(tester);
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
+      await schonErledigt(tester);
 
       // **Das erste Haekchen ueberhaupt loest „Erster Schritt" aus**
       // (ADR-0033). Der Meilenstein steht als eigener Summand da, statt
@@ -193,6 +196,10 @@ void main() {
       await _vorlageStarten(tester);
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
+      await schonErledigt(tester);
+      // Die Feier zum ersten Häkchen liegt jetzt über der Liste.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.check_circle));
       await tester.pump();
 
@@ -347,6 +354,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pumpAndSettle();
+      await schonErledigt(tester);
 
       expect(find.text('Nach dem Kaffee'), findsNothing);
     });
@@ -658,7 +666,7 @@ void main() {
 
       await _vorlageStarten(tester);
       await tester.tap(find.byType(HabitCheckTile).first);
-      await tester.pump(const Duration(milliseconds: 300));
+      await schonErledigt(tester);
 
       // Die Zahlen stehen jetzt ohne „Heute" davor, in der Farbe des
       // Erfolgs.

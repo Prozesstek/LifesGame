@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 03.10.2026 · Frederik
+**Zuletzt aktualisiert:** 04.10.2026 · Frederik
 
 ---
 
@@ -24,7 +24,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066 |
+| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 58 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 656, dazu die acht Packages (theory 174, habits 298, gear
+**Tests:** App 670, dazu die acht Packages (theory 174, habits 324, gear
 117, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -83,13 +83,68 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
-- `world.dart` (1.754 Zeilen), `tracker.dart` (1.652) und
+- `world.dart` (1.754 Zeilen), `tracker.dart` (1.858) und
   `action_game.dart` (1.024) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 04.10.2026: Zeitziele laufen als Timer
+
+Die Sitzung begann bei Regel 3, „Mach es einfach“. Zwei Vorschläge für
+eine **kleine Fassung** je Gewohnheit (zählt voll / trägt nur die Kette)
+hat Frederik abgelehnt („find ich beides nicht so gut“), drei weitere
+(Wiederholungen zählen, Ziel in Stufen, Vorbereiten) nicht aufgegriffen.
+Stattdessen: „wenn die Zeit-Sachen als richtiger Timer angezeigt
+werden“. In einer Fragerunde entschieden:
+[ADR-0067](../decisions/0067-zeitziele-als-timer.md).
+
+| Was | Wie |
+|---|---|
+| **Starten** | eine Zeit-Gewohnheit trägt statt des Plus einen Timer-Knopf; ein Tipp auf sie öffnet das Blatt mit dem Ring |
+| **Laufen** | gerechnet aus der Startzeit, nicht aus Ticks: läuft weiter, wenn das Blatt zu ist, die App im Hintergrund liegt oder neu lädt; Restzeit auf der Kachel und in „Heute“ |
+| **Fertig** | bei null von selbst abgehakt, mit Klang und aufsteigenden Zahlen; war die App zu, beim Zurückkommen |
+| **Anhalten** | was gelaufen ist, bleibt als Minuten stehen, der nächste Start macht dort weiter |
+| **Von Hand** | „schon erledigt“ im Blatt |
+| **Startvorlage** | „Zwei Minuten lesen“ läuft zwei Minuten, als einzige Vorlage |
+| **Nur einer** | ein zweiter Start hält den ersten an |
+| **Keine Zahl** | Erfahrung, Gold und Ketten ändern sich nicht (`timer_test.dart`) |
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Über Mitternacht gehört die Zeit dem Tag des Starts**: Wer um 23:50
+  zwanzig Minuten liest, hat gestern gelesen.
+- **Ein laufender Timer ist eine Behauptung wie ein Häkchen**: Wer
+  startet und die App schließt, ist nach Ablauf abgehakt.
+- **Das Plus „+5 Minuten“ gibt es nicht mehr**, nur noch für Mengen.
+- Ein zweiter Start kostet den ersten seinen Rest unter einer Minute.
+
+Neu: `packages/habits/lib/src/timer.dart`,
+`lib/habits/widgets/habit_countdown.dart`, `habit_timer_sheet.dart`. Der
+Ablauf eines Häkchens steht jetzt an einer Stelle für Tipp, Plus und
+Timer (`_mitFeier` in `habit_check_flow.dart`).
+
+habits 324 (vorher 298), App 670 (vorher 656). Blatt, Kacheln und
+Startseite gerendert in 390 × 844 und angesehen, nichts gefunden.
+**Nicht am Handy, nicht im Browser gespielt** — und gerade hier zählt
+das: Ob der Timer eine Nacht im Hintergrund eines Handy-Browsers
+übersteht, zeigt nur das Gerät.
+
+### Offen
+
+- **Regel 3 selbst hat weiter weder Mechanik noch Theorie-Seite.**
+- **Kein Klang im Hintergrund**: Die Web-Fassung meldet null erst beim
+  Zurückkommen. Eine Meldung kann erst die Android-App.
+- Abgerechnet wird nur, wo eine Anzeige steht (Kachel, „Heute“, Blatt).
+  Wer in der Grube ist, bekommt Häkchen und Tagesform erst danach.
+- „Zwei Minuten lesen“ kostet von Hand jetzt zwei Tipps statt einem.
+- Angehalten mitten in einer Minute zeigt die Kachel „12 / 20 Minuten“,
+  das Blatt „07:20“.
+- Eigene Gewohnheiten bekommen ihr Zeitziel nur beim Anlegen; eine
+  bestehende ohne Ziel bekommt keinen Timer (ADR-0028).
+- `tracker.dart` ist auf 1.858 Zeilen gewachsen.
 
 ## 03.10.2026: „Mach es attraktiv“ — eine Belohnung je Gewohnheit
 

@@ -16,5 +16,6 @@ export 'src/rewards.dart';
 export 'src/stack.dart';
 export 'src/streak_freeze.dart';
 export 'src/streak_rule.dart';
+export 'src/timer.dart';
 export 'src/tracker.dart';
 export 'src/week_summary.dart';

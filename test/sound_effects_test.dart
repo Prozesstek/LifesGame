@@ -76,6 +76,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
+      await schonErledigt(tester);
       expect(mitschrift.gespielt.first, SoundEffect.haekchen);
 
       // Das erste Häkchen überhaupt ist „Erster Schritt" — die Feier

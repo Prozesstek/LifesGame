@@ -70,11 +70,12 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 298 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 324 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/stack.dart` | **Gewohnheiten koppeln**: wie die Tagesliste zu Stapeln geordnet wird, was „jetzt dran“ ist, und dass kein Kreis entsteht ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) | nur Dart-SDK |
+| `packages/habits/lib/src/timer.dart` | der **Timer** eines Zeitziels: ein Zeitpunkt, kein Zähler — gerechnet wird aus der Startzeit ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_rule.dart` | **wie eine Kette läuft**: erledigt, getragen, verpasst — eine Stelle für Kette, Tageskette und Erfahrung | nur Dart-SDK |
 | `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
@@ -147,6 +148,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | **„Heute“ oben**, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
 | `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen; **eine Stelle** für Startseite und Gewohnheiten | Flutter |
+| `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
+| `lib/habits/widgets/habit_timer_sheet.dart` | das Blatt mit dem Ring: Start, Pause, „schon erledigt“ — meldet nur, **hakt nicht ab** | Flutter |
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
@@ -231,7 +234,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 656 Tests
+flutter test             # 670 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -245,7 +248,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 298 Tests
+dart test                              # 324 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -519,7 +522,9 @@ stehen und dort bleiben müssen:
 | Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
 | Wann kommt eine Gewohnheit dran? | `HabitTracker.cueFor` — eine Zeile Text, für Vorlagen **und** eigene, erzeugt keine Zahl ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) |
 | Was gibt es danach? | `HabitTracker.treatFor` — eine Zeile Text neben Satz **oder** Anker, erzeugt keine Zahl; beim Abhaken sagt `sayHabitFeedback` „Jetzt: …“ ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) |
-| Welche Vorlage ist ab Start offen? | `HabitCatalog.starter` — Zwei Minuten lesen, samt Platz für eine eigene |
+| Wie läuft ein Zeitziel? | `HabitTracker.startTimer`, `pauseTimer`, `settleTimer` — aus der Startzeit, höchstens einer, Minuten bleiben stehen ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) |
+| Was tut ein Tipp auf eine Gewohnheit? | `tapHabit` in `habit_check_flow.dart` — ein offenes Zeitziel öffnet den Timer, alles andere hakt ab |
+| Welche Vorlage ist ab Start offen? | `HabitCatalog.starter` — Zwei Minuten lesen, samt Platz für eine eigene; die einzige Vorlage mit Timer |
 | Wie lang ist die Tageskette? | `HabitTracker.currentDayStreak` — Tage mit mindestens einem Häkchen, dieselbe Eis-Regel ([ADR-0055](docs/decisions/0055-tageskette-aufgaben-und-wiederholen.md)) |
 | Welche Aufgaben gibt es heute? | `DailyQuests.forDay` — nie aus der Grube, sonst kämen Schlüssel aus dem Spielen (ADR-0048); gezählt wird, was heute fällig ist |
 

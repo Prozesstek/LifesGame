@@ -25,6 +25,8 @@ abstract final class HabitCatalog {
       branchId: 'habits',
       why: 'So klein, dass kein Tag zu voll dafür ist. Die Länge ist nicht '
           'der Punkt — dass es überhaupt stattfindet, ist der Punkt.',
+      // Die Zeit steht im Namen, also läuft sie auch (ADR-0067).
+      timerMinutes: 2,
     ),
     HabitTemplate(
       id: 'habit-abendnotiz',

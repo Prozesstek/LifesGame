@@ -199,6 +199,7 @@ void main() {
 
       await tester.tap(find.text(andere.name));
       await tester.pump();
+      await schonErledigt(tester);
       await tester.pump(const Duration(milliseconds: 800));
 
       expect(c.read(habitTrackerProvider).isChecked(andere.id, heute), isTrue);
