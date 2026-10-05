@@ -111,6 +111,10 @@ enum HabitGoalKind {
 /// [step] ist, was **ein Tippen** auf das Plus hinzufügt. Bei einer Menge
 /// ist das eins — ein Glas ist ein Glas. Bei Zeit wären zehn Tipps für
 /// zehn Minuten Unfug, deshalb sind es [zeitSchritt] Minuten am Stück.
+///
+/// Seit ADR-0067 füllt die Oberfläche ein Zeitziel nicht mehr über das
+/// Plus, sondern über einen Timer (`HabitTracker.startTimer`); der
+/// Schritt gilt nur noch für `advance`.
 class HabitGoal {
   const HabitGoal._({
     required this.kind,
@@ -241,9 +245,11 @@ sealed class Habit {
 /// gebunden und ändern sich nur mit einer neuen Programmversion. Was der
 /// Spieler selbst erfindet, ist ein [CustomHabit] und liegt im Spielstand.
 ///
-/// Vorlagen haben bewusst immer [HabitDifficulty.mittel] und kein Ziel:
-/// Damit ist ihr Ertrag exakt derselbe wie vor ADR-0028, und die
-/// Levelkurve bleibt unverändert gültig.
+/// Vorlagen haben bewusst immer [HabitDifficulty.mittel] und keine
+/// Menge als Ziel: Damit ist ihr Ertrag exakt derselbe wie vor ADR-0028,
+/// und die Levelkurve bleibt unverändert gültig. Eine **Dauer** dürfen
+/// sie tragen ([timerMinutes], ADR-0067) — sie ändert, wie abgehakt
+/// wird, nicht, was ein Häkchen bringt.
 class HabitTemplate extends Habit {
   const HabitTemplate({
     required this.id,
@@ -251,6 +257,7 @@ class HabitTemplate extends Habit {
     required this.stat,
     required this.branchId,
     required this.why,
+    this.timerMinutes,
   });
 
   @override
@@ -274,8 +281,15 @@ class HabitTemplate extends Habit {
   @override
   HabitDifficulty get difficulty => HabitDifficulty.mittel;
 
+  /// Wie viele Minuten der Timer dieser Vorlage läuft — null für alle,
+  /// die mit einem Tipp abgehakt werden.
+  final int? timerMinutes;
+
   @override
-  HabitGoal? get goal => null;
+  HabitGoal? get goal {
+    final minuten = timerMinutes;
+    return minuten == null ? null : HabitGoal.zeit(target: minuten);
+  }
 
   @override
   HabitPriority get priority => HabitPriority.normal;

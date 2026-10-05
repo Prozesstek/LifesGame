@@ -72,6 +72,7 @@ void main() {
 
     await tester.tap(inDerKarte(find.text(starter.name)));
     await tester.pump();
+    await schonErledigt(tester);
 
     expect(
       container.read(habitTrackerProvider).isChecked(starter.id, heute),
@@ -80,6 +81,10 @@ void main() {
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.byIcon(Icons.check_circle)), findsOneWidget);
     expect(inDerKarte(find.text('1 / 2')), findsOneWidget);
+
+    // Die Feier zum ersten Häkchen liegt jetzt über der Karte.
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
 
     // Noch ein Tipp nimmt das Häkchen zurück.
     await tester.tap(inDerKarte(find.text(starter.name)));

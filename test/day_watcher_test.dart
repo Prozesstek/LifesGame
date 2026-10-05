@@ -63,6 +63,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
+      await schonErledigt(tester);
 
       final tracker = container.read(habitTrackerProvider);
       expect(tracker.isChecked(habitId, const Day(2026, 9, 21)), isTrue);

@@ -10,6 +10,7 @@ import 'rewards.dart';
 import 'stack.dart';
 import 'streak_freeze.dart';
 import 'streak_rule.dart';
+import 'timer.dart';
 import 'week_summary.dart';
 
 /// Was ein Häkchen eingebracht hat — inklusive des daraus folgenden
@@ -87,6 +88,7 @@ class HabitTracker {
     Map<String, HabitPlan> plans = const <String, HabitPlan>{},
     Map<String, String> anchors = const <String, String>{},
     Map<String, String> treats = const <String, String>{},
+    HabitTimer? timer,
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
         _progress = _frozenProgress(progress),
@@ -103,7 +105,8 @@ class HabitTracker {
             if (!entry.value.isEmpty) entry.key: entry.value,
         }),
         _anchors = Map<String, String>.unmodifiable(anchors),
-        _treats = Map<String, String>.unmodifiable(treats);
+        _treats = Map<String, String>.unmodifiable(treats),
+        _timer = timer;
 
   const HabitTracker.empty()
       : _activeIds = const <String>[],
@@ -116,7 +119,8 @@ class HabitTracker {
         _claimedQuests = const <Day, Set<String>>{},
         _plans = const <String, HabitPlan>{},
         _anchors = const <String, String>{},
-        _treats = const <String, String>{};
+        _treats = const <String, String>{},
+        _timer = null;
 
   /// Liest einen gespeicherten Stand.
   ///
@@ -318,6 +322,8 @@ class HabitTracker {
       ]);
     }
 
+    final uhr = HabitTimer.fromJson(json['timer']);
+
     return HabitTracker(
       activeIds: begrenzt,
       checks: checks,
@@ -330,6 +336,7 @@ class HabitTracker {
       plans: plaene,
       anchors: anker,
       treats: belohnungen,
+      timer: uhr != null && bekannt(uhr.habitId) ? uhr : null,
     );
   }
 
@@ -395,6 +402,10 @@ class HabitTracker {
   /// der Auslöser, und wie er ohne jede Zahl.
   final Map<String, String> _treats;
 
+  /// Der eine Timer, der läuft oder angehalten ist (ADR-0067) — oder
+  /// keiner. Ganze Minuten stehen in [_progress], hier nur der Rest.
+  final HabitTimer? _timer;
+
   /// Der Stand als JSON.
   ///
   /// Gespeichert wird nur, was der Nutzer getan hat: welche Gewohnheiten
@@ -438,6 +449,7 @@ class HabitTracker {
         },
       if (_anchors.isNotEmpty) 'anchors': <String, Object?>{..._anchors},
       if (_treats.isNotEmpty) 'treats': <String, Object?>{..._treats},
+      if (_timer case final uhr?) 'timer': uhr.toJson(),
       if (_plans.isNotEmpty)
         'plans': <String, Object?>{
           for (final entry in _plans.entries) entry.key: entry.value.toJson(),
@@ -770,6 +782,7 @@ class HabitTracker {
         ..._plans,
         habitId: plan.withChange(today.next, const <int>{}),
       },
+      clearTimer: _timer?.habitId == habitId,
     );
   }
 
@@ -925,6 +938,22 @@ class HabitTracker {
     final erreicht = (_progress[habitId]?[day] ?? 0) + step;
     if (erreicht >= required) return check(habitId, day);
 
+    return _partial(
+      habitId,
+      day,
+      erreicht,
+      _copyWith(progress: _withProgress(habitId, day, erreicht)),
+    );
+  }
+
+  /// Ein Schritt, der das Ziel noch nicht erreicht: kein Ertrag, die
+  /// Kette steht, wo sie gestern stand.
+  CheckResult _partial(
+    String habitId,
+    Day day,
+    int erreicht,
+    HabitTracker next,
+  ) {
     return CheckResult(
       habitId: habitId,
       day: day,
@@ -935,9 +964,123 @@ class HabitTracker {
       reachedMilestone: null,
       wasAlreadyChecked: false,
       progress: erreicht,
-      required: required,
-      tracker: _copyWith(progress: _withProgress(habitId, day, erreicht)),
+      required: requiredFor(habitId),
+      tracker: next,
     );
+  }
+
+  // --- Timer (ADR-0067) ---
+
+  /// Ob [habitId] ein Zeitziel hat und damit über einen Timer läuft.
+  bool hasTimer(String habitId) {
+    return definitionFor(habitId)?.goal?.kind == HabitGoalKind.zeit;
+  }
+
+  /// Der eine Timer, falls es gerade einen gibt.
+  HabitTimer? get timer => _timer;
+
+  /// Der Timer von [habitId] an [day] — laufend oder angehalten.
+  HabitTimer? timerFor(String habitId, Day day) {
+    final uhr = _timer;
+    return uhr != null && uhr.isFor(habitId, day) ? uhr : null;
+  }
+
+  /// Der Tag, dem die Zeit von [habitId] gerade gehört: [today] — oder
+  /// der Tag eines Timers, der vor Mitternacht gestartet wurde und noch
+  /// läuft. Wer um 23:50 anfängt zu lesen, liest für den Tag, an dem er
+  /// angefangen hat.
+  Day timerDayFor(String habitId, Day today) {
+    final uhr = _timer;
+    final laeuftVonFrueher = uhr != null &&
+        uhr.habitId == habitId &&
+        uhr.isRunning &&
+        uhr.day < today;
+    return laeuftVonFrueher ? uhr.day : today;
+  }
+
+  /// Wie viele Sekunden des Zeitziels an [day] bis [now] gefüllt sind:
+  /// die verbuchten Minuten und dazu, was der Timer seitdem gelaufen
+  /// ist. Nie mehr als das Ziel.
+  int timedSecondsOn(String habitId, Day day, DateTime now) {
+    final ziel = requiredFor(habitId) * 60;
+    if (isChecked(habitId, day)) return ziel;
+    final summe = (_progress[habitId]?[day] ?? 0) * 60 +
+        (timerFor(habitId, day)?.secondsAt(now) ?? 0);
+    return summe > ziel ? ziel : summe;
+  }
+
+  /// Startet den Timer von [habitId] oder lässt ihn weiterlaufen.
+  ///
+  /// **Es läuft nur einer.** Ein anderer wird angehalten und behält
+  /// seine ganzen Minuten; sein Rest unter einer Minute geht verloren,
+  /// weil der eine Timer jetzt dieser Gewohnheit gehört.
+  ///
+  /// Gibt unverändert zurück, wenn es nichts zu starten gibt: kein
+  /// Zeitziel, nicht fällig, schon erledigt oder schon laufend.
+  HabitTracker startTimer(String habitId, Day day, DateTime now) {
+    if (!hasTimer(habitId) || !_timerErlaubt(habitId, day)) return this;
+    if (isChecked(habitId, day)) return this;
+
+    final uhr = timerFor(habitId, day);
+    if (uhr != null) {
+      return uhr.isRunning ? this : _copyWith(timer: uhr.startedAt(now));
+    }
+    final basis = pauseTimer(now)?.tracker ?? this;
+    return basis._copyWith(
+      timer: HabitTimer(habitId: habitId, day: day).startedAt(now),
+    );
+  }
+
+  /// Hält den laufenden Timer an und verbucht seine ganzen Minuten.
+  ///
+  /// **Was gelaufen ist, bleibt stehen**: Zwölf von zwanzig Minuten sind
+  /// zwölf Minuten Fortschritt, und der nächste Start macht dort weiter.
+  /// Reicht es schon für das Ziel, ist die Gewohnheit damit abgehakt.
+  ///
+  /// Null, wenn nichts läuft.
+  CheckResult? pauseTimer(DateTime now) {
+    final uhr = _timer;
+    if (uhr == null || !uhr.isRunning) return null;
+    if (!_timerErlaubt(uhr.habitId, uhr.day)) return null;
+
+    final sekunden = uhr.secondsAt(now);
+    final erreicht = (_progress[uhr.habitId]?[uhr.day] ?? 0) + sekunden ~/ 60;
+    if (erreicht >= requiredFor(uhr.habitId)) {
+      return check(uhr.habitId, uhr.day);
+    }
+    return _partial(
+      uhr.habitId,
+      uhr.day,
+      erreicht,
+      _copyWith(
+        progress:
+            erreicht > 0 ? _withProgress(uhr.habitId, uhr.day, erreicht) : null,
+        timer: uhr.pausedWith(sekunden % 60),
+      ),
+    );
+  }
+
+  /// Hakt ab, wenn der laufende Timer bis [now] sein Ziel erreicht hat.
+  ///
+  /// Null, solange er das nicht hat — die Oberfläche ruft das jede
+  /// Sekunde und beim Zurückkommen, ohne dass sich etwas ändert. Das
+  /// Häkchen landet auf dem **Tag des Starts**, auch wenn inzwischen
+  /// Mitternacht war: Dort wurde die Zeit begonnen.
+  CheckResult? settleTimer(DateTime now) {
+    final uhr = _timer;
+    if (uhr == null || !uhr.isRunning) return null;
+    if (!_timerErlaubt(uhr.habitId, uhr.day)) return null;
+
+    final offen =
+        requiredFor(uhr.habitId) - (_progress[uhr.habitId]?[uhr.day] ?? 0);
+    if (uhr.secondsAt(now) < offen * 60) return null;
+    return check(uhr.habitId, uhr.day);
+  }
+
+  /// Dieselbe Bedingung wie beim Abhaken, nur ohne zu werfen: Ein Timer,
+  /// dessen Gewohnheit inzwischen gestoppt wurde, läuft ins Leere.
+  bool _timerErlaubt(String habitId, Day day) {
+    return isActive(habitId) && isDueOn(habitId, day);
   }
 
   /// Hakt eine Gewohnheit für [day] ab — unabhängig davon, wie weit ein
@@ -978,6 +1121,8 @@ class HabitTracker {
       },
       // Der angefangene Tag ist erledigt, sein Zähler damit erledigt.
       progress: _withoutProgress(habitId, day),
+      // Die Zeit ist erfüllt, ihr Timer damit erledigt (ADR-0067).
+      clearTimer: timerFor(habitId, day) != null,
       // Ein Tag, an dem etwas steht, braucht keine Deckung — das Eis
       // kommt zurück. Im Spiel kann der Fall nicht eintreten (gedeckt
       // wird nur die Vergangenheit, abgehakt nur heute); die Invariante
@@ -1024,9 +1169,13 @@ class HabitTracker {
   /// „3 von 5" stehen zu lassen wäre ein halber Widerruf.
   HabitTracker uncheck(String habitId, Day day) {
     final hatteFortschritt = (_progress[habitId]?[day] ?? 0) > 0;
+    final hatteTimer = timerFor(habitId, day) != null;
     if (!isChecked(habitId, day)) {
-      if (!hatteFortschritt) return this;
-      return _copyWith(progress: _withoutProgress(habitId, day));
+      if (!hatteFortschritt && !hatteTimer) return this;
+      return _copyWith(
+        progress: _withoutProgress(habitId, day),
+        clearTimer: hatteTimer,
+      );
     }
 
     final remaining = <Day>{...?_checks[habitId]}..remove(day);
@@ -1087,6 +1236,8 @@ class HabitTracker {
     Map<String, HabitPlan>? plans,
     Map<String, String>? anchors,
     Map<String, String>? treats,
+    HabitTimer? timer,
+    bool clearTimer = false,
   }) {
     return HabitTracker(
       activeIds: activeIds ?? _activeIds,
@@ -1100,6 +1251,7 @@ class HabitTracker {
       plans: plans ?? _plans,
       anchors: anchors ?? _anchors,
       treats: treats ?? _treats,
+      timer: clearTimer ? null : (timer ?? _timer),
     );
   }
 

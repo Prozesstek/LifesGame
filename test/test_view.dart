@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/habits/widgets/habit_timer_sheet.dart';
 
 /// Gibt dem Test ein hohes Fenster.
 ///
@@ -22,4 +23,15 @@ void usePhoneView(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
+}
+
+/// Hakt im offenen Timer-Blatt von Hand ab („schon erledigt“).
+///
+/// Eine Gewohnheit mit Zeitziel öffnet auf Tipp ihren Timer statt
+/// abzuhaken (ADR-0067) — und die Startvorlage hat eins. Tests, die nur
+/// „ein Häkchen“ brauchen, gehen diesen Weg, statt zwei Minuten zu warten.
+Future<void> schonErledigt(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(HabitTimerSheet.doneKey));
+  await tester.pumpAndSettle();
 }

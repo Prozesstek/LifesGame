@@ -5,6 +5,7 @@ import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 import '../../ui/druck.dart';
+import 'habit_countdown.dart';
 
 /// Eine laufende Gewohnheit: abhaken, Streak sehen, ein Tagesziel füllen.
 ///
@@ -13,6 +14,11 @@ import '../../ui/druck.dart';
 /// einzige für alles ohne Ziel. Das Plus daneben füllt ein Ziel um einen
 /// Schritt. Wer fünf Gläser trinkt, tippt fünfmal auf das Plus; wer schon
 /// weiß, dass der Tag steht, tippt einmal auf die Kachel.
+///
+/// **Ein Zeitziel läuft als Timer** (ADR-0067). Statt des Plus steht dort
+/// der Knopf zum Timer, und solange er läuft, zeigt der Balken die
+/// Restzeit. Was der Tipp auf die Kachel dann tut, entscheidet
+/// `tapHabit`, nicht die Kachel.
 ///
 /// **Ohne Untertexte seit Issue #35 — mit Zahlen seit Issue #46.** Unter
 /// dem Namen stand bis #35 eine Zeile Prosa („+1 Stärke · 3 Tage am
@@ -38,6 +44,8 @@ class HabitCheckTile extends StatelessWidget {
     required this.onToggle,
     required this.onAdvance,
     required this.onStop,
+    this.onTimer,
+    this.onTimerDone,
     this.cue,
     this.treat,
     this.days,
@@ -78,6 +86,12 @@ class HabitCheckTile extends StatelessWidget {
 
   final VoidCallback onStop;
 
+  /// Öffnet den Timer — nur bei einem Zeitziel gesetzt.
+  final VoidCallback? onTimer;
+
+  /// Der laufende Timer ist bei null angekommen.
+  final VoidCallback? onTimerDone;
+
   /// Wann die Gewohnheit drankommt — „nach dem Zähneputzen" (ADR-0052).
   ///
   /// Steht **unten** auf der Kachel, nicht unter dem Namen: Die Mitte
@@ -107,7 +121,8 @@ class HabitCheckTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final goal = _goal;
-    final zeigtPlus = goal != null && !isChecked;
+    final timer = goal?.kind == HabitGoalKind.zeit ? onTimer : null;
+    final zeigtPlus = goal != null && !isChecked && timer == null;
     final zeigtBalken = goal != null && !isChecked;
 
     return Druck(
@@ -157,11 +172,31 @@ class HabitCheckTile extends StatelessWidget {
                         ),
                         if (zeigtBalken) ...<Widget>[
                           const SizedBox(height: 7),
-                          _GoalBar(
-                            done: progress,
-                            target: goal.target,
-                            label: goal.progressLabel(progress),
-                          ),
+                          if (timer == null)
+                            _GoalBar(
+                              anteil: goal.target <= 0
+                                  ? 0
+                                  : progress / goal.target,
+                              label: goal.progressLabel(progress),
+                            )
+                          else
+                            HabitCountdown(
+                              habit: habit,
+                              onDone: onTimerDone,
+                              builder: (context, uhr) => _GoalBar(
+                                anteil: uhr.fraction,
+                                // Läuft er oder steht er mitten in
+                                // einer Minute, zählt die Restzeit;
+                                // sonst steht da, was verbucht ist.
+                                label: uhr.isRunning
+                                    ? uhr.label
+                                    : goal.progressLabel(progress),
+                                semanticLabel: uhr.isRunning
+                                    ? uhr.semanticLabel
+                                    : null,
+                                laeuft: uhr.isRunning,
+                              ),
+                            ),
                         ],
                         if (!isChecked && onEditCue != null) ...<Widget>[
                           const SizedBox(height: 4),
@@ -182,6 +217,16 @@ class HabitCheckTile extends StatelessWidget {
                       nextMultiplier: nextMultiplier,
                     ),
                   ],
+                  if (timer != null && !isChecked)
+                    DruckSperre(
+                      child: IconButton(
+                        key: timerKey(habit.id),
+                        onPressed: timer,
+                        icon: const Icon(Icons.timer_outlined, size: 22),
+                        color: Palette.accent,
+                        tooltip: 'Timer',
+                      ),
+                    ),
                   if (zeigtPlus)
                     DruckSperre(
                       child: IconButton(
@@ -206,6 +251,11 @@ class HabitCheckTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Der Knopf zum Timer von [habitId] — ohne Wort, also mit Schlüssel.
+  static Key timerKey(String habitId) {
+    return ValueKey<String>('timer-oeffnen-$habitId');
   }
 
   static String _plusTooltip(HabitGoal goal) {
@@ -526,26 +576,29 @@ class _StreakBadge extends StatelessWidget {
 /// dritten oder vierten steht.
 class _GoalBar extends StatelessWidget {
   const _GoalBar({
-    required this.done,
-    required this.target,
+    required this.anteil,
     required this.label,
+    this.semanticLabel,
+    this.laeuft = false,
   });
 
-  final int done;
-  final int target;
+  /// Wie voll der Balken ist, null bis eins.
+  final double anteil;
   final String label;
+  final String? semanticLabel;
+
+  /// Ob gerade ein Timer läuft — dann steht die Zahl kräftig da.
+  final bool laeuft;
 
   @override
   Widget build(BuildContext context) {
-    final anteil = target <= 0 ? 0.0 : (done / target).clamp(0.0, 1.0);
-
     return Row(
       children: <Widget>[
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
-              value: anteil,
+              value: anteil.clamp(0.0, 1.0),
               minHeight: 4,
               backgroundColor: Palette.surfaceRaised,
               valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
@@ -556,8 +609,13 @@ class _GoalBar extends StatelessWidget {
         Flexible(
           child: Text(
             label,
+            semanticsLabel: semanticLabel,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11, color: Palette.textDim),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: laeuft ? FontWeight.bold : FontWeight.normal,
+              color: laeuft ? Palette.accent : Palette.textDim,
+            ),
           ),
         ),
       ],

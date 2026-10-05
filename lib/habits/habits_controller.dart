@@ -114,6 +114,33 @@ class HabitsController extends Notifier<HabitTracker> {
     return result;
   }
 
+  /// Startet den Timer von [habitId] oder lässt ihn weiterlaufen
+  /// (ADR-0067). Die Uhr kommt aus [clockProvider] — der Timer rechnet
+  /// aus der Startzeit, nicht aus Ticks.
+  void startTimer(String habitId) {
+    state = state.startTimer(
+      habitId,
+      ref.read(todayProvider),
+      ref.read(clockProvider)(),
+    );
+  }
+
+  /// Hält den laufenden Timer an; was gelaufen ist, bleibt stehen. Null,
+  /// wenn nichts lief.
+  CheckResult? pauseTimer() {
+    final result = state.pauseTimer(ref.read(clockProvider)());
+    if (result != null) state = result.tracker;
+    return result;
+  }
+
+  /// Hakt ab, wenn der laufende Timer sein Ziel erreicht hat. Null,
+  /// solange nicht — dann ändert sich nichts.
+  CheckResult? settleTimer() {
+    final result = state.settleTimer(ref.read(clockProvider)());
+    if (result != null) state = result.tracker;
+    return result;
+  }
+
   /// Öffnet die Tagestruhe von [day] (ADR-0044). Null, wenn sie nicht
   /// offen steht — nicht alles erledigt, oder schon geöffnet.
   ChestContent? openChest(Day day) {

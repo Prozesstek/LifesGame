@@ -29,10 +29,78 @@ import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'habits_controller.dart';
 import 'widgets/daily_chest_card.dart';
+import 'widgets/habit_timer_sheet.dart';
 
 /// Hakt [habit] ab oder nimmt das Häkchen zurück.
 void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
   final today = ref.read(todayProvider);
+  _mitFeier(context, ref, habit, (tracker) => tracker.toggle(habit.id, today));
+}
+
+/// **Der Tipp auf eine Gewohnheit** — auf der Kachel wie in „Heute“.
+///
+/// Eine offene Gewohnheit mit Zeitziel öffnet ihren Timer (ADR-0067):
+/// Zwanzig Minuten hakt man nicht mit einem Tipp ab. Alles andere hakt
+/// ab oder nimmt zurück, wie immer.
+void tapHabit(BuildContext context, WidgetRef ref, Habit habit) {
+  final tracker = ref.read(habitTrackerProvider);
+  final offen = !tracker.isChecked(habit.id, ref.read(todayProvider));
+  if (offen && tracker.hasTimer(habit.id)) {
+    unawaited(openHabitTimer(context, ref, habit));
+    return;
+  }
+  toggleHabit(context, ref, habit);
+}
+
+/// Öffnet den Timer von [habit] und hakt ab, wenn das Blatt es meldet —
+/// weil die Zeit abgelaufen ist oder weil jemand „schon erledigt“ sagt.
+///
+/// Gefeiert wird **hier**, mit dem Kontext dessen, der geöffnet hat: Der
+/// des Blatts ist dann schon weg.
+Future<void> openHabitTimer(
+  BuildContext context,
+  WidgetRef ref,
+  Habit habit,
+) async {
+  final ende = await showHabitTimerSheet(context, habit);
+  if (ende == null || !context.mounted) return;
+
+  // Einen Bildaufbau später, wie nach jedem Dialog (`gotchas.md`).
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!context.mounted) return;
+    switch (ende) {
+      case HabitTimerEnde.abgelaufen:
+        finishHabitTimer(context, ref, habit);
+      case HabitTimerEnde.erledigt:
+        final heute = ref.read(todayProvider);
+        if (ref.read(habitTrackerProvider).isChecked(habit.id, heute)) return;
+        toggleHabit(context, ref, habit);
+    }
+  });
+}
+
+/// Rechnet den laufenden Timer ab: Ist er bei null, ist [habit] damit
+/// abgehakt — mit allem, was ein Häkchen von Hand auslöst.
+///
+/// Harmlos, wenn es nichts abzurechnen gibt. Blatt und Kachel dürfen
+/// beide rufen; gefeiert wird nur beim ersten.
+void finishHabitTimer(BuildContext context, WidgetRef ref, Habit habit) {
+  _mitFeier(context, ref, habit, (tracker) => tracker.settleTimer());
+}
+
+/// Führt [tat] aus und macht daraus ein Häkchen, das sich anfühlt wie
+/// eins — **die eine Stelle** für Tipp, Plus und Timer.
+///
+/// [tat] gibt null zurück, wenn nichts verdient wurde (zurückgenommen,
+/// Timer noch nicht fertig). Ein Schritt, der das Ziel noch nicht
+/// erreicht, geht an [halb].
+void _mitFeier(
+  BuildContext context,
+  WidgetRef ref,
+  Habit habit,
+  CheckResult? Function(HabitsController tracker) tat, {
+  void Function(CheckResult result)? halb,
+}) {
   final vorher = ref.read(unlockedAbilitiesProvider);
   final vorherErrungen = achievementsBefore(ref);
   final vorherLevel = levelBefore(ref);
@@ -40,10 +108,12 @@ void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
   final formVorher = ref.read(dailyFormProvider);
   final schluesselVorher = ref.read(availableKeysProvider);
 
-  final result = ref
-      .read(habitTrackerProvider.notifier)
-      .toggle(habit.id, today);
+  final result = tat(ref.read(habitTrackerProvider.notifier));
   if (result == null) return;
+  if (!result.isComplete) {
+    halb?.call(result);
+    return;
+  }
 
   // Ein Häkchen soll sich anfühlen wie eins. Auf einem Handy ist das
   // ein kurzer Stoß; im Browser und im Test passiert nichts.
@@ -108,45 +178,21 @@ void openDailyChest(BuildContext context, WidgetRef ref) {
 /// Ein Schritt auf ein Tagesziel.
 void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
   final today = ref.read(todayProvider);
-  final vorher = ref.read(unlockedAbilitiesProvider);
-  final vorherErrungen = achievementsBefore(ref);
-  final vorherLevel = levelBefore(ref);
-  final werteVorher = ref.read(characterStatsProvider);
-  final formVorher = ref.read(dailyFormProvider);
-  final schluesselVorher = ref.read(availableKeysProvider);
-
-  final result = ref
-      .read(habitTrackerProvider.notifier)
-      .advance(habit.id, today);
-
-  if (!result.isComplete) {
-    unawaited(HapticFeedback.selectionClick());
-    final goal = habit.goal;
-    sayHabitFeedback(
-      context,
-      goal == null
-          ? '${result.progress} / ${result.required}'
-          : goal.progressLabel(result.progress),
-    );
-    return;
-  }
-
-  unawaited(HapticFeedback.mediumImpact());
-  ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
-  _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
-  sayHabitFeedback(
-    context,
-    _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
-    treat: _danach(ref, habit),
-  );
-  _steigen(
+  _mitFeier(
     context,
     ref,
-    result,
     habit,
-    werteVorher,
-    formVorher,
-    schluesselVorher,
+    (tracker) => tracker.advance(habit.id, today),
+    halb: (result) {
+      unawaited(HapticFeedback.selectionClick());
+      final goal = habit.goal;
+      sayHabitFeedback(
+        context,
+        goal == null
+            ? '${result.progress} / ${result.required}'
+            : goal.progressLabel(result.progress),
+      );
+    },
   );
 }
 

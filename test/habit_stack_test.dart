@@ -190,6 +190,7 @@ void main() {
 
       await tester.tap(find.text(folge.name));
       await tester.pumpAndSettle();
+      await schonErledigt(tester);
 
       expect(c.read(habitTrackerProvider).isChecked(folge.id, heute), isTrue);
     });
@@ -218,8 +219,9 @@ void main() {
       await tester.tap(zeile(anker));
       await tester.pumpAndSettle();
 
+      // Die Folge ist die Startvorlage und öffnet ihren Timer (ADR-0067).
       expect(
-        find.bySemanticsLabel(RegExp('${folge.name} abhaken, jetzt dran')),
+        find.bySemanticsLabel(RegExp('${folge.name}.*jetzt dran')),
         findsOneWidget,
       );
     });
