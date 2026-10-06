@@ -60,7 +60,7 @@ class SaveTransferCard extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _einfuegen(context, ref),
+                  onPressed: () => spielstandEinfuegen(context, ref),
                   child: const Icon(
                     Icons.content_paste_rounded,
                     size: 20,
@@ -85,56 +85,62 @@ class SaveTransferCard extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Future<void> _einfuegen(BuildContext context, WidgetRef ref) async {
-    final neu = await showDialog<SaveData>(
-      context: context,
-      builder: (_) => const HolzDialog(child: _EinfuegenDialog()),
-    );
-    if (neu == null || !context.mounted) return;
+/// Fragt nach einem gesicherten Stand und setzt ihn ein.
+///
+/// **Eine freie Funktion, weil es zwei Wege hierher gibt:** die Karte im
+/// Charakter und die erste Frage auf der Startseite (ADR-0068). Wer auf
+/// einem neuen Gerät anfängt, hat noch keinen Charakter-Kreis und käme
+/// sonst nicht an seinen Stand.
+Future<void> spielstandEinfuegen(BuildContext context, WidgetRef ref) async {
+  final neu = await showDialog<SaveData>(
+    context: context,
+    builder: (_) => const HolzDialog(child: _EinfuegenDialog()),
+  );
+  if (neu == null || !context.mounted) return;
 
-    final alt = currentSave(ref);
-    final ersetzen = await showDialog<bool>(
-      context: context,
-      builder: (context) => HolzDialog(
-        child: AlertDialog(
-          backgroundColor: Palette.surfaceRaised,
-          title: const Text('Stand ersetzen?'),
-          content: Text(
-            'Jetzt: ${_kurz(alt)}\n'
-            'Eingefügt: ${_kurz(neu)}\n\n'
-            'Der jetzige Stand liegt danach in der Zwischenablage — falls '
-            'du doch zurückwillst.',
-            style: const TextStyle(fontSize: 13, height: 1.4),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Abbrechen'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Ersetzen'),
-            ),
-          ],
+  final alt = currentSave(ref);
+  final ersetzen = await showDialog<bool>(
+    context: context,
+    builder: (context) => HolzDialog(
+      child: AlertDialog(
+        backgroundColor: Palette.surfaceRaised,
+        title: const Text('Stand ersetzen?'),
+        content: Text(
+          'Jetzt: ${_kurz(alt)}\n'
+          'Eingefügt: ${_kurz(neu)}\n\n'
+          'Der jetzige Stand liegt danach in der Zwischenablage — falls '
+          'du doch zurückwillst.',
+          style: const TextStyle(fontSize: 13, height: 1.4),
         ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Ersetzen'),
+          ),
+        ],
       ),
-    );
-    if (ersetzen != true || !context.mounted) return;
+    ),
+  );
+  if (ersetzen != true || !context.mounted) return;
 
-    // Der alte Stand wandert in die Zwischenablage, **bevor** er ersetzt
-    // wird: Ein Irrtum ist so ein Einfügen entfernt, nicht verloren.
-    await Clipboard.setData(ClipboardData(text: alt.encode()));
-    if (!context.mounted) return;
-    await ref.read(saveImporterProvider)(neu);
-  }
+  // Der alte Stand wandert in die Zwischenablage, **bevor** er ersetzt
+  // wird: Ein Irrtum ist so ein Einfügen entfernt, nicht verloren.
+  await Clipboard.setData(ClipboardData(text: alt.encode()));
+  if (!context.mounted) return;
+  await ref.read(saveImporterProvider)(neu);
+}
 
-  /// Was zwei Stände unterscheidet, in einer Zeile.
-  static String _kurz(SaveData stand) {
-    final haekchen = stand.habits.totalChecks;
-    final gewohnheiten = stand.habits.activeIds.length;
-    return '$haekchen Häkchen, $gewohnheiten laufende Gewohnheiten';
-  }
+/// Was zwei Stände unterscheidet, in einer Zeile.
+String _kurz(SaveData stand) {
+  final haekchen = stand.habits.totalChecks;
+  final gewohnheiten = stand.habits.activeIds.length;
+  return '$haekchen Häkchen, $gewohnheiten laufende Gewohnheiten';
 }
 
 /// Ein Feld zum Einfügen; gibt den gelesenen Stand zurück.

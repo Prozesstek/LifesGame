@@ -7,7 +7,6 @@ import '../gear/equipment_screen.dart';
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
-import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
@@ -16,6 +15,9 @@ import '../progression/level_provider.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
+import 'erster_start.dart';
+import 'erster_start_provider.dart';
+import 'widgets/erste_gewohnheit.dart';
 import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
@@ -34,9 +36,12 @@ import '../habits/widgets/daily_quests_card.dart';
 /// Mitte. Dort stand bis zum 28.09. der Charakter; jetzt steht dort, was
 /// heute zu tun ist, und die Figur ist in der Ausrüstung.
 ///
-/// Gesperrte Bereiche stehen bewusst mit dabei. Ein Startbildschirm, der
-/// nur zeigt, was schon fertig ist, verschweigt, worum es geht — und der
-/// Kreis nennt beim Antippen den Weg (ADR-0020).
+/// **Die Kreise kommen nach und nach** (ADR-0068). Bis dahin standen
+/// alle sieben vom ersten Start an da, der Kampf gesperrt; ein neuer
+/// Spieler sah zwölf Systeme, bevor er eine Gewohnheit hatte. Jetzt
+/// fragt die Seite zuerst nach einer, und jeder Bereich erscheint, wenn
+/// es dort etwas zu tun gibt. Was als Nächstes dran ist, leuchtet. Wer
+/// was sieht, rechnet [ErsterStart] aus dem Stand.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -77,8 +82,15 @@ class HomeScreen extends ConsumerWidget {
       total: tracker.dailyListOn(today).length,
     );
 
-    final combatOpen = ref.watch(combatUnlockedProvider);
-    final combatBlock = ref.watch(combatBlockReasonProvider);
+    final start = ref.watch(ersterStartProvider);
+
+    // Ein Kreis an seinem Platz: versteckt, bis er dran ist.
+    Widget kreis(Bereich bereich, Widget Function(bool leuchtet) bauen) {
+      return Aufgedeckt(
+        sichtbar: start.zeigt(bereich),
+        child: bauen(start.leuchtet == bereich),
+      );
+    }
 
     return Scaffold(
       // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
@@ -102,24 +114,30 @@ class HomeScreen extends ConsumerWidget {
                           progress: heute,
                           onTap: () => _open(context, const HabitsScreen()),
                         ),
-                        HubCircle(
-                          icon: Icons.account_tree_outlined,
-                          label: 'Theorie',
-                          image: HubCircleImage.plain,
-                          symbol: theorySymbol,
-                          onTap: () => _open(context, const SkillTreeScreen()),
+                        kreis(
+                          Bereich.theorie,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.account_tree_outlined,
+                            label: 'Theorie',
+                            image: HubCircleImage.plain,
+                            symbol: theorySymbol,
+                            leuchtet: leuchtet,
+                            onTap: () =>
+                                _open(context, const SkillTreeScreen()),
+                          ),
                         ),
-                        HubCircle(
-                          icon: Icons.sports_martial_arts,
-                          label: 'Kampf',
-                          image: HubCircleImage.plain,
-                          // Der Kampf hängt am Moveset (ADR-0025). Ist es zu
-                          // dünn, nennt der Kreis beim Antippen, woran es
-                          // liegt — der Satz unterscheidet drei Fälle, und
-                          // der dritte ist der wichtigste: gelernt, aber
-                          // nicht angelegt.
-                          lockedReason: combatOpen ? null : combatBlock,
-                          onTap: () => _open(context, const LadderScreen()),
+                        // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
+                        // Waffe allein schlagbar, und wer zuerst kämpft,
+                        // weiß danach, wofür er liest.
+                        kreis(
+                          Bereich.kampf,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.sports_martial_arts,
+                            label: 'Kampf',
+                            image: HubCircleImage.plain,
+                            leuchtet: leuchtet,
+                            onTap: () => _open(context, const LadderScreen()),
+                          ),
                         ),
                       ],
                     ),
@@ -140,7 +158,12 @@ class HomeScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            const TodayCard(),
+                            // Ohne Gewohnheit ist „Heute“ die erste
+                            // Frage, keine leere Liste.
+                            if (start.fragtNachGewohnheit)
+                              const ErsteGewohnheitKarte()
+                            else
+                              const TodayCard(),
                             // Die **Tagestruhe** direkt darunter: Sie ist
                             // der Lohn für genau diese Liste.
                             if (tracker.canOpenChest(today) ||
@@ -156,7 +179,8 @@ class HomeScreen extends ConsumerWidget {
                             ],
                             if (ref.watch(dailyQuestsProvider)
                                 case final aufgaben
-                                when aufgaben.isNotEmpty) ...<Widget>[
+                                when start.zeigtTagesaufgaben &&
+                                    aufgaben.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 10),
                               DailyQuestsCard(
                                 quests: aufgaben,
@@ -176,32 +200,40 @@ class HomeScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        HubCircle(
-                          icon: Icons.storefront_outlined,
-                          label: 'Laden',
-                          image: HubCircleImage.plain,
-                          size: bottomCircleSize,
-                          onTap: () => _open(context, const ShopScreen()),
+                        kreis(
+                          Bereich.laden,
+                          (_) => HubCircle(
+                            icon: Icons.storefront_outlined,
+                            label: 'Laden',
+                            image: HubCircleImage.plain,
+                            size: bottomCircleSize,
+                            onTap: () => _open(context, const ShopScreen()),
+                          ),
                         ),
-                        // **Nie gesperrt**, obwohl auf Level 1 nur der
-                        // Waffenplatz offen ist: Der Bildschirm zeigt vor
-                        // allem, was es zu holen gibt, und das ist genau
-                        // dann am nützlichsten, wenn man noch nichts hat.
-                        HubCircle(
-                          icon: Icons.auto_awesome,
-                          label: 'Fähigkeiten',
-                          image: HubCircleImage.plain,
-                          size: bottomCircleSize,
-                          symbol: abilitySymbol,
-                          onTap: () => _open(context, const AbilitiesScreen()),
+                        kreis(
+                          Bereich.faehigkeiten,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.auto_awesome,
+                            label: 'Fähigkeiten',
+                            image: HubCircleImage.plain,
+                            size: bottomCircleSize,
+                            symbol: abilitySymbol,
+                            leuchtet: leuchtet,
+                            onTap: () =>
+                                _open(context, const AbilitiesScreen()),
+                          ),
                         ),
-                        HubCircle(
-                          icon: Icons.shield_outlined,
-                          label: 'Ausrüstung',
-                          image: HubCircleImage.plain,
-                          size: bottomCircleSize,
-                          symbol: gearSymbol,
-                          onTap: () => _open(context, const EquipmentScreen()),
+                        kreis(
+                          Bereich.ausruestung,
+                          (_) => HubCircle(
+                            icon: Icons.shield_outlined,
+                            label: 'Ausrüstung',
+                            image: HubCircleImage.plain,
+                            size: bottomCircleSize,
+                            symbol: gearSymbol,
+                            onTap: () =>
+                                _open(context, const EquipmentScreen()),
+                          ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -212,15 +244,18 @@ class HomeScreen extends ConsumerWidget {
                             // (ADR-0021), und an dieser Stelle steht dann
                             // nichts.
                             if (devModeAvailable) const _DevKnopf(),
-                            HubCircle(
-                              icon: Icons.person_outline,
-                              label: 'Charakter',
-                              size: bottomCircleSize,
-                              // Die einzige Flaeche, die ihr Zeichen selbst
-                              // mitbringt.
-                              image: HubCircleImage.character,
-                              onTap: () =>
-                                  _open(context, const CharacterScreen()),
+                            kreis(
+                              Bereich.charakter,
+                              (_) => HubCircle(
+                                icon: Icons.person_outline,
+                                label: 'Charakter',
+                                size: bottomCircleSize,
+                                // Die einzige Flaeche, die ihr Zeichen
+                                // selbst mitbringt.
+                                image: HubCircleImage.character,
+                                onTap: () =>
+                                    _open(context, const CharacterScreen()),
+                              ),
                             ),
                           ],
                         ),
@@ -238,6 +273,41 @@ class HomeScreen extends ConsumerWidget {
 
   void _open(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+  }
+}
+
+/// Ein Kreis, der erst erscheint, wenn er dran ist (ADR-0068).
+///
+/// **Der Platz bleibt frei, auch wenn nichts zu sehen ist.** Die Kreise
+/// springen sonst bei jedem neuen um; so wächst jeder an seiner Stelle
+/// heran. Solange er versteckt ist, nimmt er keinen Tipp an und steht
+/// für den Vorleser nicht da.
+class Aufgedeckt extends StatelessWidget {
+  const Aufgedeckt({required this.sichtbar, required this.child, super.key});
+
+  final bool sichtbar;
+  final Widget child;
+
+  static const Duration dauer = Duration(milliseconds: 450);
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !sichtbar,
+      child: ExcludeSemantics(
+        excluding: !sichtbar,
+        child: AnimatedOpacity(
+          opacity: sichtbar ? 1 : 0,
+          duration: dauer,
+          child: AnimatedScale(
+            scale: sichtbar ? 1 : 0.6,
+            duration: dauer,
+            curve: Curves.easeOutBack,
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -7,6 +7,8 @@ import 'package:lifes_game/habits/daily_quests_provider.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/daily_quests_card.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -37,6 +39,9 @@ void main() {
       overrides: [
         savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
         todayProvider.overrideWithValue(heute),
+        // Vor dem ersten Häkchen stehen die Aufgaben noch nicht da
+        // (ADR-0068); hier geht es um die Aufgaben selbst.
+        ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
       ],
     );
     addTearDown(c.dispose);

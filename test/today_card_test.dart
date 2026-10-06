@@ -5,6 +5,8 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/daily_chest_card.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -24,13 +26,16 @@ void main() {
 
   Future<ProviderContainer> startseite(
     WidgetTester tester,
-    HabitTracker tracker,
-  ) async {
+    HabitTracker tracker, {
+    bool allesOffen = false,
+  }) async {
     useTallView(tester);
     final container = ProviderContainer(
       overrides: [
         savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
         todayProvider.overrideWithValue(heute),
+        if (allesOffen)
+          ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
       ],
     );
     addTearDown(container.dispose);
@@ -146,7 +151,10 @@ void main() {
   });
 
   testWidgets('ohne Gewohnheit führt sie zum Starten', (tester) async {
-    await startseite(tester, const HabitTracker.empty());
+    // Ein Stand, der weiter ist, aber gerade nichts laufen hat. Ein
+    // frischer bekommt statt dieser Karte die erste Frage (ADR-0068,
+    // `erster_start_test.dart`).
+    await startseite(tester, const HabitTracker.empty(), allesOffen: true);
 
     await tester.tap(
       inDerKarte(find.bySemanticsLabel('Erste Gewohnheit starten')),

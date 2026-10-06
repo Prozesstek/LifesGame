@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import '../../ui/druck.dart';
+import '../../ui/halten_und_ziehen.dart';
 
 /// Ein Bereich des Spiels als runder Knopf.
 ///
@@ -35,8 +36,18 @@ class HubCircle extends StatelessWidget {
     this.progress,
     this.symbol,
     this.size = diameter,
+    this.leuchtet = false,
     super.key,
   });
+
+  /// Ob dieser Kreis als Nächstes dran ist (ADR-0068).
+  ///
+  /// **Ein Punkt, der bleibt, und drei Pulse dazu.** Der Puls allein wäre
+  /// nach zwei Sekunden vorbei, und wer dann erst hinsieht, sähe nichts;
+  /// endlos darf er nicht laufen, sonst hängt `pumpAndSettle`. Ein Ring
+  /// statt des Punkts sähe aus wie der Fortschritt der Gewohnheiten
+  /// daneben.
+  final bool leuchtet;
 
   /// Wie gross dieser Kreis gezeichnet wird. Standard ist [diameter].
   ///
@@ -90,6 +101,9 @@ class HubCircle extends StatelessWidget {
 
   bool get isLocked => lockedReason != null;
 
+  /// Der Punkt am Kreis, der dran ist — damit Tests ihn finden.
+  static const Key leuchtKey = ValueKey<String>('hub-leuchtet');
+
   /// Kantenlänge des Kreises. Drei davon plus Abstand passen bei 390
   /// Pixeln Breite nebeneinander, und 72 liegt über den 48 Pixeln, die
   /// eine Tippfläche mindestens braucht.
@@ -131,6 +145,20 @@ class HubCircle extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: <Widget>[
+                    if (leuchtet)
+                      Positioned(
+                        left: -_ringAbstand,
+                        top: -_ringAbstand,
+                        right: -_ringAbstand,
+                        bottom: -_ringAbstand,
+                        child: IgnorePointer(
+                          child: PlatzLaedtEin(
+                            aktiv: true,
+                            radius: size,
+                            child: const SizedBox.expand(),
+                          ),
+                        ),
+                      ),
                     if (bild == null)
                       _SchlichterKreis(icon: icon, farbe: farbe, size: size)
                     else
@@ -173,6 +201,24 @@ class HubCircle extends StatelessWidget {
                       ),
                       Positioned(right: -6, bottom: -4, child: _Marke(p)),
                     ],
+                    if (leuchtet)
+                      Positioned(
+                        right: -3,
+                        top: -3,
+                        child: Container(
+                          key: leuchtKey,
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Palette.accentOnDark,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Palette.background,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
                     if (isLocked)
                       Positioned(
                         right: -2,
