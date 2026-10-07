@@ -14,10 +14,15 @@ import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/lauf_ergebnis.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
+import '../home/erster_start_provider.dart';
+import '../home/home_screen.dart' show HomeScreen;
+import '../theory/skill_tree_screen.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import '../ui/pixel_art.dart';
 import 'action_game.dart';
 import 'hero_power.dart';
+import 'lauf_zeichen.dart';
 import 'pit_run_view.dart';
 
 /// Ein Lauf durch eine Stufe der Grube — der Kampf des Spiels (ADR-0039).
@@ -33,6 +38,9 @@ class PitScreen extends ConsumerStatefulWidget {
   const PitScreen({super.key, required this.stage});
 
   final PitStage stage;
+
+  /// Woran Tests den Weg zur Theorie nach einer Niederlage finden.
+  static const Key lesenKey = ValueKey<String>('grube-lesen');
 
   @override
   ConsumerState<PitScreen> createState() => _PitScreenState();
@@ -94,6 +102,12 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
     return ActionGame(
       sim: welt,
+      // Bis die erste Stufe geschafft ist, erklärt sich die Grube
+      // (ADR-0069). Ein neuer Stand je Lauf: Wer verliert und „Nochmal“
+      // drückt, sieht die Zeichen wieder.
+      zeichen: ref.read(ersterStartProvider).grubeErklaertSich
+          ? LaufZeichen()
+          : null,
       onRunEnded: () {
         // **Erst nach dem Bild.** Das Ende wird aus der Flame-Schleife
         // gemeldet, also mitten in einem Frame; eine Route von dort aus
@@ -203,6 +217,15 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     if (anlegen && mounted) controller.equip(beute.uid);
   }
 
+  /// Nach einer Niederlage zur Theorie — an die Stelle der Grube, damit
+  /// „Zurück“ von dort zum Eingang führt und nicht in den verlorenen
+  /// Lauf.
+  void _zurTheorie() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const SkillTreeScreen()),
+    );
+  }
+
   void _nochmal() {
     _game.frame.dispose();
     setState(() {
@@ -214,6 +237,11 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // **Die Niederlage zeigt den Weg** (ADR-0069): Solange keine Stufe
+    // geschafft ist, steht neben „Nochmal“ das Buch. Wer zuerst kämpft,
+    // soll danach wissen, wofür er liest (ADR-0068).
+    final zeigtWeg = ref.watch(ersterStartProvider).grubeErklaertSich;
+
     return Scaffold(
       backgroundColor: Palette.background,
       appBar: AppBar(
@@ -240,9 +268,31 @@ class _PitScreenState extends ConsumerState<PitScreen> {
                         onPressed: _nochmal,
                         child: const Text('Nochmal'),
                       ),
+                      if (zeigtWeg) ...<Widget>[
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          key: PitScreen.lesenKey,
+                          onPressed: _zurTheorie,
+                          // Auf Leder, nicht auf Pergament: Die Farben
+                          // des Themes wären hier kaum zu lesen.
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Palette.textOnDark,
+                            side: const BorderSide(color: Palette.goldOnDark),
+                          ),
+                          icon: const PixelArt(
+                            assetPath: HomeScreen.theorySymbol,
+                            side: 22,
+                            fallback: Icon(Icons.menu_book_outlined, size: 20),
+                          ),
+                          label: const Text('Stärker werden'),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: () => Navigator.of(context).maybePop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Palette.textOnDarkDim,
+                        ),
                         child: const Text('Zurück'),
                       ),
                     ],

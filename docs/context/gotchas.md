@@ -3,6 +3,37 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Flame ruft `update(0)` mitten im Bau
+
+`ActionGame.update` zählte am Ende jedes Bildes `frame.value++`, damit
+Kopfzeile und Knöpfe sich neu bauen. Flames `GameWidget` ruft `update(0)`
+aber auch **aus seinem `LayoutBuilder` heraus**, sobald das Widget neu
+gebaut wird:
+
+```dart
+// flame-1.38.0, game_widget.dart
+if (!currentGame.paused && currentGame.isAttached) {
+  currentGame.update(0);
+}
+```
+
+Der Zähler weckte dann die `ValueListenableBuilder` der Kopfzeile, die
+**neben** dem Spielfeld liegen, während gebaut wird: „setState() or
+markNeedsBuild() called during build“. Das geschah bei jedem Neubau von
+`PitScreen`, also schon immer nach einer Niederlage (`setState` für
+„Nochmal“). Gemerkt hat es niemand, weil kein Test eine Niederlage in
+der Grube durchspielte und der Release-Build die Prüfung nicht hat.
+
+Aufgefallen ist es mit ADR-0069: `PitScreen` liest seitdem einen
+Provider und baut sich neu, sobald ein Lauf gebucht ist.
+
+**Abhilfe:** nur zählen, wenn Zeit vergangen ist (`if (dt > 0)`). Ohne
+vergangene Zeit hat sich nichts geändert, was jemand neu zeichnen müsste.
+
+**Regel:** Was in `Game.update` nach außen meldet (Notifier, Callback),
+muss `dt == 0` aushalten. `test/erster_lauf_test.dart` geht jetzt durch
+eine Niederlage.
+
 ## Über einem Spielfeld gehört jede Leiste ausdrücklich angeheftet
 
 Im Dorf lag die Kopfzeile (Zurück, Level, „Heute“) als freies Kind in

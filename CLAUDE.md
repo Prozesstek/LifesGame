@@ -124,6 +124,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
+| `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
+| `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
@@ -236,7 +238,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 691 Tests
+flutter test             # 707 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -684,6 +686,7 @@ tun gibt; der nächste trägt einen Punkt:
 | Welcher Kreis steht da? | `ErsterStart.aus` — Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf (oder dem dritten Häkchen), Fähigkeiten mit dem Handbuch, Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
 | Welcher leuchtet? | `ErsterStart.leuchtet` — höchstens einer, und jede Bedingung erledigt sich selbst |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
+| Erklärt sich die Grube noch? | `ErsterStart.grubeErklaertSich` — bis die erste Stufe geschafft ist ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) |
 
 **Abgeleitet, nie gespeichert, und jede Zahl darf nur wachsen** — sonst
 verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in
@@ -691,6 +694,16 @@ verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in
 aus einen Kreis antippen**, überschreiben `ersterStartProvider` mit
 `ErsterStart.allesOffen`; `test/erster_start_test.dart` geht den Weg vom
 leeren Stand bis in die Grube.
+
+**Die Grube erklärt sich, bis die erste Stufe geschafft ist**
+([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)): ein
+Geister-Steuerkreuz, das mit dem ersten Schritt geht, und die Waffe in
+zwei drehenden Pfeilen beim ersten Schlag. Nach einer Niederlage steht
+neben „Nochmal“ das Buch und führt in die Theorie. Was ein Lauf davon
+zeigt, steht in `LaufZeichen`; `ActionGame` meldet nur Weg und Schlag.
+**Ein neues Zeichen nimmt keinen Tipp an und hat keinen eigenen Takt** —
+es liegt über dem Steuerkreuz und läuft aus `ActionWorld.elapsed`.
+`test/erster_lauf_test.dart`.
 
 **Das Handbuch sperrt weiter den Baum.** Solange es offen ist, *ist* es
 der Theorie-Bildschirm: ohne Handbuch kein Baum, ohne Baum keine

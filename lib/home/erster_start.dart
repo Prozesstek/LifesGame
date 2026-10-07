@@ -20,6 +20,7 @@ class ErsterStartStand {
     this.hatGewohnheit = false,
     this.haekchen = 0,
     this.hatGekaempft = false,
+    this.stufenGeschafft = 0,
     this.seiten = 0,
     this.handbuchFertig = false,
     this.gelernt = 0,
@@ -38,6 +39,9 @@ class ErsterStartStand {
 
   /// Ob ein Lauf in der Grube zu Ende ging, gewonnen oder verloren.
   final bool hatGekaempft;
+
+  /// Die tiefste geschaffte Stufe der Grube, 0 heißt: noch keine.
+  final int stufenGeschafft;
 
   /// Bestandene Seiten aus Handbuch und Baum.
   final int seiten;
@@ -73,7 +77,12 @@ class ErsterStartStand {
 /// Fähigkeit anlegen. Laden, Ausrüstung und Charakter kommen dazu, sobald
 /// es dort etwas zu tun gibt.
 class ErsterStart {
-  const ErsterStart._(this.sichtbar, this.leuchtet, this.fragtNachGewohnheit);
+  const ErsterStart._(
+    this.sichtbar,
+    this.leuchtet,
+    this.fragtNachGewohnheit,
+    this.grubeErklaertSich,
+  );
 
   /// Alles offen, nichts leuchtet — für Tests anderer Bereiche und für
   /// jeden Stand, der durch ist.
@@ -88,6 +97,7 @@ class ErsterStart {
       Bereich.charakter,
     },
     null,
+    false,
     false,
   );
 
@@ -109,6 +119,13 @@ class ErsterStart {
 
   /// Ob „Heute“ statt einer Liste die erste Frage stellt.
   final bool fragtNachGewohnheit;
+
+  /// Ob die Grube sich noch erklärt (ADR-0069): das Geister-Steuerkreuz,
+  /// das Zeichen am Helden und nach einer Niederlage der Weg zur Theorie.
+  ///
+  /// **Bis die erste Stufe geschafft ist**, nicht nur im allerersten
+  /// Lauf: Wer ihn verliert, hat die Hilfe im zweiten am nötigsten.
+  final bool grubeErklaertSich;
 
   bool zeigt(Bereich bereich) => sichtbar.contains(bereich);
 
@@ -146,6 +163,7 @@ class ErsterStart {
       Set<Bereich>.unmodifiable(sichtbar),
       _naechster(s, kampf: kampf, theorie: theorie, faehigkeiten: faehigkeiten),
       !s.hatGewohnheit && s.haekchen == 0,
+      s.stufenGeschafft == 0,
     );
   }
 

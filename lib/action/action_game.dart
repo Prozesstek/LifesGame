@@ -10,6 +10,7 @@ import '../ui/palette.dart';
 import 'action_sprites.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
+import 'lauf_zeichen.dart';
 import 'minimap.dart';
 import 'pit_tints.dart';
 
@@ -24,9 +25,14 @@ import 'pit_tints.dart';
 /// Für dreissig Quadrate ist ein Baum aus Komponenten mehr Buchhaltung
 /// als Nutzen, und ein Prototyp soll an einer Stelle lesbar sein.
 class ActionGame extends Game {
-  ActionGame({required this.sim, this.onRunEnded});
+  ActionGame({required this.sim, this.onRunEnded, this.zeichen});
 
   final ActionWorld sim;
+
+  /// Die Zeichen des ersten Laufs (ADR-0069), oder null, wenn die Grube
+  /// sich nicht mehr erklärt. Gezeichnet werden sie über dem Spielfeld
+  /// (`LaufZeichenView`); hier erfahren sie nur, was geschehen ist.
+  final LaufZeichen? zeichen;
 
   /// Wird genau einmal gerufen, wenn der Lauf vorbei ist.
   final VoidCallback? onRunEnded;
@@ -157,6 +163,14 @@ class ActionGame extends Game {
     return Vec2(punkt.dx - kamera.x, punkt.dy - kamera.y);
   }
 
+  /// Wo der Held im Bild steht — für Zeichen, die über dem Spielfeld
+  /// liegen und ihm folgen.
+  Offset get heroOnScreen {
+    final held = sim.heroView.position;
+    final kamera = _cameraOffset(held);
+    return Offset(held.x + kamera.x, held.y + kamera.y);
+  }
+
   /// Nur für Tests: was gerade an Zahlen in der Luft steht.
   int get popupCount => _popups.length;
 
@@ -170,8 +184,10 @@ class ActionGame extends Game {
 
   @override
   void update(double dt) {
+    final vorher = sim.heroView.position;
     sim.advance(dt, moveInput);
     fog.reveal(sim.level, sim.heroView.position);
+    zeichen?.advance(dt, gelaufen: (sim.heroView.position - vorher).length);
     if (_beben > 0) _beben -= dt;
 
     for (final event in sim.drainEvents()) {
@@ -182,6 +198,7 @@ class ActionGame extends Game {
           _flashes[event.targetId] = Burst.flashTime;
           _figuren[event.targetId]?.hit();
         case AttackSwung():
+          if (event.faction == Faction.held) zeichen?.heldSchlaegt();
           _figuren[event.attackerId]?.swing(Pose.attack);
           _swings.add(
             SwingMark(
@@ -285,7 +302,12 @@ class ActionGame extends Game {
       _flashes[id] = _flashes[id]! - dt;
     }
 
-    frame.value++;
+    // **Nicht aus einem Bau heraus.** Flame ruft `update(0)`, sobald das
+    // Spielfeld neu gebaut wird — mitten im Layout. Wer dann zählt, weckt
+    // die Kopfzeile neben dem Spielfeld, während gebaut wird
+    // (`gotchas.md`). Ohne vergangene Zeit hat sich ohnehin nichts
+    // geändert.
+    if (dt > 0) frame.value++;
     if (_endeGemeldet) {
       _endeGemeldet = false;
       onRunEnded?.call();

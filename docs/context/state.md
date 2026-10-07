@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.10.2026 · Frederik
+**Zuletzt aktualisiert:** 07.10.2026 · Frederik
 
 ---
 
@@ -27,7 +27,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 58 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
-| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
+| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner, **zwei Zeichen im ersten Lauf** | ADR-0039, -0040, -0041, -0046, -0062, -0063, -0069 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 691, dazu die acht Packages (theory 174, habits 324, gear
+**Tests:** App 707, dazu die acht Packages (theory 174, habits 324, gear
 118, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -93,6 +93,64 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 
 ---
 
+## 07.10.2026: die Grube erklärt sich im ersten Lauf
+
+Frederik: „bau gerne weiter“. Der nächste Block war die Lücke, die
+ADR-0068 selbst offen ließ: Wer nach dem ersten Häkchen hinabsteigt,
+sah eine stehende Figur und keinen Knopf. In einer Fragerunde
+entschieden:
+[ADR-0069](../decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md).
+
+| Was | Wie |
+|---|---|
+| **Laufen** | ein Geister-Steuerkreuz links unten, ein Finger zieht reihum in alle vier Richtungen; weg nach anderthalb Feldern |
+| **Schlägt von selbst** | beim ersten Schlag steht vier Sekunden die Waffe in zwei drehenden Pfeilen über dem Helden |
+| **Wie lange** | bis die erste Stufe geschafft ist, abgeleitet aus der Reihe; unsere Stände sehen nichts davon |
+| **Niederlage** | solange keine Stufe geschafft ist, steht neben „Nochmal“ das Buch „Stärker werden“ und führt in die Theorie |
+
+**Nicht gewählt** (Frederik): Zeichen für die Uhr und für „Rot heißt
+weg“.
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Die Zeichen nehmen keinen Tipp an**; das echte Steuerkreuz liegt
+  darunter.
+- **Das Zeichen am Helden weicht der Kopfzeile aus** und sitzt dann
+  unter ihm.
+- **Das Buch ersetzt die Grube im Stapel**: „Zurück“ aus der Theorie
+  führt zum Eingang, nicht in den verlorenen Lauf.
+- **„Zurück“ nach einer Niederlage trägt jetzt die Farbe für Leder.**
+
+**Beim Bauen gefunden, ein alter Fehler:** Flame ruft im Bau
+`update(0)`, und der Bildzähler weckte die Kopfzeile mitten im Layout.
+Das geschah nach jeder Niederlage, nur im Debug-Build sichtbar, und kein
+Test ging durch eine Niederlage (`gotchas.md`).
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Das Zeichen am
+Helden lag unter der Kopfzeile, wenn die Kamera am Rand der Grube
+anhält. Und der neue Knopf war in den Farben des Themes auf Leder kaum
+zu lesen.
+
+Neu: `lib/action/lauf_zeichen.dart`, `lauf_zeichen_view.dart`,
+`test/erster_lauf_test.dart`. App 707 (vorher 691). Geisterkreuz,
+Zeichen am Helden und die Niederlage mit Buch gerendert und angesehen,
+**mit Würfeln statt Figuren. Nicht gespielt, nicht am Handy.**
+
+**PR #107 (erster Start) ist noch offen**; dieser Block liegt als
+eigener PR darauf.
+
+### Offen
+
+- Ob zwei drehende Pfeile um die Waffe als „von selbst“ gelesen werden.
+- Uhr, Zeitkugeln, Tor und die Ankündigungen des Wächters erklärt weiter
+  nichts.
+- Wer mit einer Fähigkeit hinabsteigt, erfährt nicht, dass Halten und
+  Ziehen zielt.
+- Steht der Held am oberen Rand der Grube, liegt er selbst unter der
+  Kopfzeile; der Zähler „0 / 17 erledigt“ ist auf heller Wand schwer zu
+  lesen. Beides älter als dieser Block.
+- AktivesBrett hat weder ADR-0068 noch diesen gesehen.
+
 ## 06.10.2026: der erste Start — Frage, dann Kreis für Kreis
 
 Frederik: „weiter an der UX und UI arbeiten“, aus vier Blöcken gewählt:
@@ -134,8 +192,8 @@ Lauf gerendert und angesehen. **Nicht gespielt, nicht am Handy.**
 
 - Ob Stufe 1 am ersten Tag für einen Menschen so leicht ist wie für den
   Bot, und was eine Niederlage im allerersten Lauf auslöst.
-- **Die Grube erklärt nichts**: Steuerung, Uhr und Tor stehen ohne
-  Einführung da.
+- ~~**Die Grube erklärt nichts**~~: Laufen und Schlagen seit ADR-0069;
+  Uhr und Tor weiter ohne Einführung.
 - Das Handbuch ist weiter fünf Lektionen lang, bevor der Baum aufgeht.
 - Auslöser, Wochentage und Belohnung fragt am ersten Tag niemand von
   selbst; das geht erst über die Kachel.
