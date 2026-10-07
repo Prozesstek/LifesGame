@@ -118,6 +118,18 @@ class LessonResult {
   bool get isPerfect => total > 0 && correct == total;
 }
 
+/// Ein nächster Schritt im Baum (ADR-0070): eine Seite — und ob ihr
+/// Knoten dafür erst geöffnet werden muss.
+class TheoryStep {
+  const TheoryStep(this.node, {required this.needsOpening});
+
+  final TheoryNode node;
+
+  /// Ob der Knoten noch zu ist. Dann kostet der Schritt
+  /// [TheoryNode.cost] Punkte, und wer ihn anbietet, zeigt das.
+  final bool needsOpening;
+}
+
 /// Lernfortschritt über alle Lektionen hinweg.
 ///
 /// Unveränderlich: [submit] gibt einen neuen Fortschritt zurück, statt
@@ -266,6 +278,86 @@ class TheoryProgress {
     final offen = openIdsIn(graph);
     for (final node in kandidaten) {
       if (offen.contains(node.id) && !isPassed(node.lesson.id)) return node;
+    }
+    return null;
+  }
+
+  /// Die Seite, die nach [nodeId] dran ist (ADR-0070): die nächste in
+  /// der Reihenfolge des Graphen, die sich lesen lässt — weil sie offen
+  /// ist, oder weil sie sich mit [availablePoints] öffnen lässt.
+  ///
+  /// **Ein Durchgang, einmal herum.** Was offen ist, hat keinen Vorrang
+  /// vor dem, was kaufbar ist: Nach „Systeme schlagen Vorsätze" kommt
+  /// „Die Schleife", auch wenn irgendwo anders eine Wurzel offen
+  /// herumliegt. Null, wenn nichts zu lesen und nichts zu bezahlen ist.
+  TheoryStep? nextAfter(
+    String nodeId,
+    TheoryGraph graph, {
+    required int availablePoints,
+  }) {
+    final start = graph.nodes.indexWhere((n) => n.id == nodeId);
+    if (start < 0) return null;
+
+    final offen = openIdsIn(graph);
+    for (var i = 1; i < graph.nodes.length; i++) {
+      final node = graph.nodes[(start + i) % graph.nodes.length];
+      final step = _stepFor(node, graph, offen, availablePoints);
+      if (step != null) return step;
+    }
+    return null;
+  }
+
+  /// Was der Baum als Nächstes vorschlägt (ADR-0070): erst lesen, was
+  /// offen ist — unter [under] zuerst, dann irgendwo —, sonst den
+  /// nächsten Schritt auf [path].
+  ///
+  /// Der Weg kommt zuletzt: Wer schon etwas geöffnet hat, hat gewählt,
+  /// und ein Vorschlag soll keine Wahl überstimmen.
+  TheoryStep? suggestedStep(
+    TheoryGraph graph, {
+    required List<String> path,
+    required int availablePoints,
+    String? under,
+  }) {
+    final offen = (under == null ? null : nextToRead(graph, under: under)) ??
+        nextToRead(graph);
+    if (offen != null) return TheoryStep(offen, needsOpening: false);
+
+    return nextOnPath(path, graph, availablePoints: availablePoints);
+  }
+
+  /// Der nächste Schritt auf einem festen Weg — die erste Seite aus
+  /// [path], die noch nicht bestanden ist.
+  ///
+  /// Null, wenn der Weg durch ist **oder** der nächste Knoten gerade
+  /// nicht zu haben ist. Dahinter wird nicht weitergesucht: Ein Weg, der
+  /// einen Schritt überspringt, ist keiner mehr.
+  TheoryStep? nextOnPath(
+    List<String> path,
+    TheoryGraph graph, {
+    required int availablePoints,
+  }) {
+    final offen = openIdsIn(graph);
+    for (final id in path) {
+      final node = graph.nodeById(id);
+      if (node == null || isPassed(node.lesson.id)) continue;
+      return _stepFor(node, graph, offen, availablePoints);
+    }
+    return null;
+  }
+
+  TheoryStep? _stepFor(
+    TheoryNode node,
+    TheoryGraph graph,
+    Set<String> offen,
+    int availablePoints,
+  ) {
+    if (isPassed(node.lesson.id)) return null;
+    if (offen.contains(node.id)) {
+      return TheoryStep(node, needsOpening: false);
+    }
+    if (node.cost <= availablePoints && graph.canOpen(node.id, offen)) {
+      return TheoryStep(node, needsOpening: true);
     }
     return null;
   }

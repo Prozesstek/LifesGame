@@ -3,21 +3,23 @@ import 'package:test/test.dart';
 
 void main() {
   group('Theoriepunkte entstehen beim Aufstieg', () {
-    test('Level 1 hat den Startpunkt (ADR-0051)', () {
+    test('Level 1 hat die Startpunkte (ADR-0070)', () {
       expect(TheoryPoints.earnedAt(1), TheoryPoints.atStart);
-      expect(TheoryPoints.earnedAt(1), 1);
+      expect(TheoryPoints.earnedAt(1), 9);
     });
 
     test('jeder Aufstieg gibt einen Punkt dazu (ADR-0035)', () {
-      expect(TheoryPoints.earnedAt(2), 2);
-      expect(TheoryPoints.earnedAt(3), 3);
-      expect(TheoryPoints.earnedAt(10), 10);
+      const start = TheoryPoints.atStart;
+      expect(TheoryPoints.earnedAt(2), start + 1);
+      expect(TheoryPoints.earnedAt(3), start + 2);
+      expect(TheoryPoints.earnedAt(10), start + 9);
     });
 
-    test('auf Level 3 reicht es für Wurzel, Zwischenebene und Thema', () {
-      // Das Handbuch führt auf Level 3, dort geht der zweite Platz auf.
+    test('schon am Anfang reicht es für Wurzel, Zwischenebene und Thema', () {
       // Der Weg zur ersten Fähigkeit kostet seit ADR-0051 drei Punkte.
-      expect(TheoryPoints.earnedAt(3), greaterThanOrEqualTo(3));
+      // Seit ADR-0070 gibt es sie vom Start weg — wer sie dort ausgibt,
+      // hat sechs weniger für die Grundlagen.
+      expect(TheoryPoints.earnedAt(1), greaterThanOrEqualTo(3));
     });
 
     test('unter Level 1 gibt es nichts', () {
@@ -33,8 +35,8 @@ void main() {
   });
 
   group('Der Vorrat über ein Spielerleben', () {
-    test('sind 50 Punkte — der Startpunkt und einer je Aufstieg', () {
-      expect(TheoryPoints.lifetimeTotal, 50);
+    test('sind 58 Punkte — neun vom Start und einer je Aufstieg', () {
+      expect(TheoryPoints.lifetimeTotal, 58);
       expect(
         TheoryPoints.lifetimeTotal,
         TheoryPoints.atStart +
@@ -47,12 +49,12 @@ void main() {
     });
 
     test('der Baum ist größer als ein Spielerleben (ADR-0037)', () {
-      // Seit Philosophie befüllt ist, hat der Baum 54 Knoten, jeder
-      // kostet einen Punkt — mehr, als es über 50 Level je gibt. Das ist
-      // das Zielbild aus ADR-0037: Man kann nicht alles lernen, man
-      // wählt. Wer Knoten entfernt, bis diese Zusage fällt, soll es hier
-      // merken.
-      const knotenImBaum = 54;
+      // Mit den fünf Seiten des Handbuchs hat der Baum 63 Knoten
+      // (ADR-0070), jeder kostet einen Punkt — mehr, als es über 50
+      // Level je gibt. Das ist das Zielbild aus ADR-0037: Man kann nicht
+      // alles lernen, man wählt. Wer Knoten entfernt oder Startpunkte
+      // verschenkt, bis diese Zusage fällt, soll es hier merken.
+      const knotenImBaum = 63;
 
       expect(TheoryPoints.lifetimeTotal, lessThan(knotenImBaum));
     });
@@ -60,7 +62,10 @@ void main() {
 
   group('Ausgeben', () {
     test('verfügbar ist verdient minus ausgegeben', () {
-      expect(TheoryPoints.availableAt(level: 5, spent: 3), 2);
+      final verdient = TheoryPoints.earnedAt(5);
+
+      expect(TheoryPoints.availableAt(level: 5, spent: 3), verdient - 3);
+      expect(TheoryPoints.availableAt(level: 5, spent: verdient), 0);
     });
 
     test('nie negativ, auch wenn ein Spielstand mehr ausgibt als er hat', () {
@@ -68,11 +73,19 @@ void main() {
     });
 
     test('leisten kann man sich, was man übrig hat', () {
-      expect(TheoryPoints.canAfford(level: 2, spent: 1, cost: 1), isTrue);
-      expect(TheoryPoints.canAfford(level: 2, spent: 2, cost: 1), isFalse);
+      final verdient = TheoryPoints.earnedAt(2);
+
+      expect(
+        TheoryPoints.canAfford(level: 2, spent: verdient - 1, cost: 1),
+        isTrue,
+      );
+      expect(
+        TheoryPoints.canAfford(level: 2, spent: verdient, cost: 1),
+        isFalse,
+      );
     });
 
-    test('was nichts kostet, kann man immer — das Handbuch', () {
+    test('was nichts kostet, kann man immer', () {
       expect(TheoryPoints.canAfford(level: 1, spent: 0, cost: 0), isTrue);
     });
   });

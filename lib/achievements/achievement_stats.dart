@@ -56,7 +56,6 @@ AchievementStats buildAchievementStats({
   required HabitTracker habits,
   required TheoryProgress theory,
   required TheoryGraph graph,
-  required TheoryBranch handbook,
   required int passedPages,
   required LadderProgress ladder,
   required Loadout loadout,
@@ -82,16 +81,14 @@ AchievementStats buildAchievementStats({
     // --- Theorie ---
     //
     // Die Seitenzahl kommt von außen, aus `passedPagesProvider`. Sie hier
-    // noch einmal aus Handbuch und Graph zu addieren wären zwei Stellen
-    // für dieselbe Frage — und die eine hat sich schon einmal verzählt
-    // (`passedCountIn(theoryTree)` nach ADR-0019).
+    // noch einmal zu zählen wären zwei Stellen für dieselbe Frage — und
+    // die eine hat sich schon einmal verzählt (`passedCountIn(theoryTree)`
+    // nach ADR-0019). Gezählt wird überall nur der Graph (ADR-0070).
     passedLessons: passedPages,
-    perfectLessons:
-        theory.perfectCount(handbook) + theory.perfectNodeCount(graph),
+    perfectLessons: theory.perfectNodeCount(graph),
     completedAreas: theory.completedAreaCount(graph),
     areasWithPassedNode: theory.areasWithPassedNodeCount(graph),
-    retriedLessons:
-        theory.retriedCount(handbook) + theory.retriedNodeCount(graph),
+    retriedLessons: theory.retriedNodeCount(graph),
 
     // --- Kampf ---
     highestRung: ladder.highestDefeated,
@@ -121,7 +118,6 @@ AchievementStats achievementStatsWithLoadout(Ref ref, Loadout loadout) {
     habits: ref.read(habitTrackerProvider),
     theory: ref.read(theoryProgressProvider),
     graph: ref.read(theoryGraphProvider),
-    handbook: ref.read(handbookProvider),
     passedPages: ref.read(passedPagesProvider),
     ladder: ref.read(ladderProvider),
     loadout: loadout,

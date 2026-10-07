@@ -52,24 +52,25 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 174 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 193 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
-| `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — und die **angekündigten** Überschriften (`theoryPlaceholders`) | nur Dart-SDK |
+| `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
 | `packages/theory/lib/src/content/area_pages.dart` | die Einführungsseiten der **Zwischenebenen** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet | nur Dart-SDK |
 | `packages/theory/lib/src/content/ausdauer_pages.dart` | **Ausdauer & Fitness**: Einführung und fünf Themen | nur Dart-SDK |
 | `packages/theory/lib/src/content/philosophie_pages.dart` | **Philosophie**: Einführung, Stoizismus, Ethik, Fehlschlüsse, Sokrates, Existenzialismus | nur Dart-SDK |
 | `packages/theory/lib/src/content/gewohnheiten_pages.dart` | **Gewohnheiten** unter Selbstentwicklung: Überkapitel → vier Regeln → je Regel eine Seite (bisher: offensichtlich, attraktiv), **aus dem Gelesenen** ([ADR-0061](docs/decisions/0061-der-baum-waechst-aus-dem-gelesenen.md)) | nur Dart-SDK |
+| `packages/theory/lib/src/content/habits_lessons.dart` | die fünf Seiten des **früheren Handbuchs** — seit [ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md) Knoten unter Gewohnheiten, „Zwei Minuten reichen“ als Regel 3 | nur Dart-SDK |
 | `packages/theory/lib/src/content/psychologie_pages.dart` | **Psychologie**: fünf Themen an Experimenten — Asch, Milgram, Bystander, Loftus, Gefühle | nur Dart-SDK |
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
-| `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — trägt nur noch das Handbuch | nur Dart-SDK |
+| `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
 | `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 42 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
-| `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)) | nur Dart-SDK |
+| `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **neun zum Start** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)) | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 324 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
@@ -208,15 +209,14 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
 | `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein, zuletzt „Weiter“ | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile, Handbuch davor | Flutter |
+| `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile — **immer offen**, schlägt den Weg der Grundlagen vor | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
 | `lib/theory/widgets/tree_painter.dart` | die Verbindungslinien | Flutter |
 | `lib/theory/widgets/node_action_panel.dart` | der Knopf **über** dem Startknoten | Flutter |
 | `lib/theory/widgets/tree_overview.dart` | **der Überblick**: vier Gebiete mit Stand, „Weiterlesen“, Legende ([ADR-0056](docs/decisions/0056-ueberblick-im-wissensbaum.md)) | Flutter |
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
-| `lib/theory/branch_screen.dart` | nur noch das Handbuch: Reihenfolge statt Graph | Flutter |
-| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis | Flutter |
+| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite** | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
 | `lib/theory/review_flow.dart` | was eine Antwort auf die Rückfrage auslöst | Flutter |
 
@@ -238,7 +238,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 707 Tests
+flutter test             # 716 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -256,7 +256,7 @@ dart test                              # 324 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 174 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 193 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 42 Tests
 cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
@@ -474,10 +474,22 @@ und trägt sie mit **derselben Id** als Knoten ein — samt Einführungsseite
 in `area_pages.dart`.
 
 **Jeder Knoten kostet einen Punkt, auch die Wurzeln**
-([ADR-0051](docs/decisions/0051-wurzeln-kosten-einen-punkt.md)), dafür
-beginnt jeder mit einem (`TheoryPoints.atStart`). Der Weg zur ersten
-Fähigkeit — Wurzel, Zwischenebene, Thema — kostet drei Punkte, und
-Level 3 gibt genau drei; `abilities_seam_test.dart` rechnet ihn aus.
+([ADR-0051](docs/decisions/0051-wurzeln-kosten-einen-punkt.md)) **und
+das frühere Handbuch** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)).
+Kein Knoten ist kostenlos: Er wäre von Anfang an offen und zöge seine
+Eltern mit auf. Dafür **beginnt jeder mit neun Punkten**
+(`TheoryPoints.atStart`) — so viel, wie der **Weg der Grundlagen**
+kostet (`theoryBasicsPath`: Geist, Selbstentwicklung, Gewohnheiten, Die
+vier Regeln und die fünf Seiten). `abilities_seam_test.dart` hält fest,
+dass beide Zahlen dieselbe sind; wer einen Knoten auf den Weg legt oder
+die Startpunkte ändert, zieht das andere nach.
+
+| Frage | Antwortet |
+|---|---|
+| Was schlägt der Baum als Nächstes vor? | `TheoryProgress.suggestedStep` — erst lesen, was offen ist, sonst der nächste Schritt auf dem Weg der Grundlagen |
+| Welche Seite kommt nach dieser? | `TheoryProgress.nextAfter` — die nächste im Buch, offen oder bezahlbar; ein Durchgang, einmal herum |
+| Wie viele Seiten sind bestanden? | `passedPagesProvider` — **nur der Graph**; die flachen Zweige dazuzuzählen zählt doppelt |
+
 **Offen ist, was gekauft, bestanden oder einziger Eltern eines Offenen
 ist** (`TheoryProgress.openIdsIn`, `TheoryGraph.withSoleParents`). Damit
 behalten alte Stände alles, ohne dass der Spielstand umgeschrieben wird.
@@ -683,7 +695,7 @@ tun gibt; der nächste trägt einen Punkt:
 
 | Frage | Antwortet |
 |---|---|
-| Welcher Kreis steht da? | `ErsterStart.aus` — Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf (oder dem dritten Häkchen), Fähigkeiten mit dem Handbuch, Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
+| Welcher Kreis steht da? | `ErsterStart.aus` — Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf (oder dem dritten Häkchen), Fähigkeiten mit der ersten gelernten Fähigkeit (oder den fünf Grundlagen-Seiten), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
 | Welcher leuchtet? | `ErsterStart.leuchtet` — höchstens einer, und jede Bedingung erledigt sich selbst |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
 | Erklärt sich die Grube noch? | `ErsterStart.grubeErklaertSich` — bis die erste Stufe geschafft ist ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) |
@@ -705,20 +717,21 @@ zeigt, steht in `LaufZeichen`; `ActionGame` meldet nur Weg und Schlag.
 es liegt über dem Steuerkreuz und läuft aus `ActionWorld.elapsed`.
 `test/erster_lauf_test.dart`.
 
-**Das Handbuch sperrt weiter den Baum.** Solange es offen ist, *ist* es
-der Theorie-Bildschirm: ohne Handbuch kein Baum, ohne Baum keine
-Fähigkeit. Nur der Kampf hängt nicht mehr daran.
+**Das Handbuch sperrt nichts mehr** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)).
+Seine fünf Seiten stehen als Knoten unter *Gewohnheiten*, der Baum ist
+immer offen, und einen eigenen Handbuch-Bildschirm gibt es nicht. Bis
+dahin hing daran erst der Kampf (ADR-0018), dann der Baum (ADR-0025).
+**Niemand muss die Grundlagen lesen**: Der Baum schlägt den Weg vor,
+solange nichts offen ist, und wer die neun Punkte woanders ausgibt, hat
+gewählt.
 
-Das Handbuch war nie der Grund, immer ein Stellvertreter, und das war
-kein Zufall: Die fünf Lektionen geben 275 Erfahrung und damit Level 3 —
-die Stufe, auf der der zweite Fähigkeitsslot aufgeht (vier Lektionen
-reichen **nicht**, 220 XP). Bis ADR-0019 passte in den Slot immer etwas,
-weil vier Fähigkeiten von Anfang an offen waren; seit sie an
-Theorieknoten hängen, kann er aufgehen und leer bleiben.
-
-Die Arithmetik gilt weiter und wird weiter geprüft: Wer an
-`TheoryRewards`, der Levelkurve oder der Länge des Zweigs dreht, lässt
-`flutter test test/progression_test.dart` laufen. Wer an den
+Die Arithmetik hat sich verschoben und wird weiter geprüft. Früher gab
+das Handbuch kostenlos 275 Erfahrung und damit Level 3, die Stufe des
+zweiten Fähigkeitsplatzes. Jetzt muss gelten: Wer den Weg der Grundlagen
+liest, hat danach den zweiten Platz, einen Punkt übrig, für den es eine
+Fähigkeit gibt, und stand unterwegs nie ohne Punkt da. Wer an
+`TheoryRewards`, der Levelkurve, den Startpunkten oder dem Weg dreht,
+lässt `flutter test test/progression_test.dart` laufen. Wer an den
 Fähigkeitsquellen oder den Theoriepunkten dreht, zusätzlich
 `flutter test test/abilities_seam_test.dart` — dort steht, dass auf der
 Stufe, auf der der zweite Platz aufgeht, ein Knoten mit Fähigkeit
@@ -780,7 +793,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 | `abilityProgressProvider` | Waffe, Streak, Theorie **und Errungenschaft** für die Freischaltung |
 | `activeMovesProvider` | die Ids, mit denen in die Grube gegangen wird — Waffenzug zuerst |
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
-| `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
+| `passedPagesProvider` | bestandene Seiten — **der Graph ist die ganze Wahrheit** (ADR-0070) |
 | `ersterStartProvider` | welche Bereiche die Startseite zeigt (ADR-0068) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
@@ -813,9 +826,11 @@ höchste Stufe statt der nächsten. Wer eine ergänzt, lässt
 `flutter test test/achievements_seam_test.dart` laufen.
 
 **`passedPagesProvider` gibt es, weil `passedCountIn(theoryTree)` seit
-ADR-0019 zu wenig zählt** — zwölf von neunundzwanzig Seiten liegen nur
-im Graphen. Wer bestandene Seiten braucht, nimmt diesen Provider und
-nicht den Baum.
+ADR-0019 zu wenig zählt** — die meisten Seiten liegen nur im Graphen.
+Seit ADR-0070 liegt **jede** Seite im Graphen, auch die fünf des
+früheren Handbuchs; sie stehen zusätzlich noch im flachen Zweig. Wer
+bestandene Seiten braucht, nimmt diesen Provider und zählt weder
+`theoryTree` noch einen Zweig dazu, sonst zählt er doppelt.
 
 `activeMovesProvider` ist die einzige Stelle, an der die Freischaltbedingung
 für Fähigkeiten **gilt** — der Spielstand hält eine Wahl, geprüft wird

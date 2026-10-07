@@ -5,7 +5,6 @@ import 'package:theory/theory.dart';
 import '../ui/druck.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
-import 'branch_screen.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
 import 'widgets/node_action_panel.dart';
@@ -25,20 +24,16 @@ import 'widgets/review_section.dart';
 /// ein Gebiet je Bildschirm ist dieselbe Einsicht wie in ADR-0019, nur zu
 /// Ende geführt.
 ///
-/// **Vorher steht das Handbuch** (ADR-0025). Solange es offen ist, ist es
-/// dieser Bildschirm: Erst verstehen, wie das Spiel gemeint ist, dann den
-/// Stoff lernen. Aus der schmalen Textzeile über einem unbenutzbaren Baum
-/// wird damit der Bildschirm selbst.
+/// **Der Baum ist immer offen** (ADR-0070). Bis dahin stand das Handbuch
+/// davor (ADR-0025); seine fünf Seiten sind jetzt Knoten unter
+/// *Gewohnheiten*. Wer noch nichts gelesen hat, bekommt den Weg dorthin
+/// vorgeschlagen (`TheoryProgress.suggestedStep`), muss ihn aber nicht
+/// gehen.
 class SkillTreeScreen extends ConsumerWidget {
   const SkillTreeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(handbookDoneProvider)) {
-      return BranchScreen(branch: ref.watch(handbookProvider));
-    }
-    return const _AreaPager();
-  }
+  Widget build(BuildContext context, WidgetRef ref) => const _AreaPager();
 }
 
 /// Die vier Gebiete nebeneinander.
@@ -139,11 +134,10 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                         ],
                         areaIndex: _current,
                         onSelectArea: _goToArea,
-                        // Erst im Gebiet, das gerade offen ist, dann irgendwo.
-                        next:
-                            progress.nextToRead(graph, under: _areaId) ??
-                            progress.nextToRead(graph),
-                        onRead: (node) => _act(node, NodeAction.read),
+                        // Erst im Gebiet, das gerade offen ist, dann
+                        // irgendwo, zuletzt der Weg der Grundlagen.
+                        next: ref.watch(suggestedStepProvider(_areaId)),
+                        onRead: _go,
                       ),
                       Expanded(
                         child: PageView.builder(
@@ -211,6 +205,20 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
     });
   }
 
+  /// Geht einen vorgeschlagenen Schritt: öffnen, falls nötig, dann lesen.
+  Future<void> _go(TheoryStep schritt) async {
+    if (schritt.needsOpening) {
+      final offen = ref
+          .read(theoryProgressProvider.notifier)
+          .openNode(
+            schritt.node.id,
+            availablePoints: ref.read(availableTheoryPointsProvider),
+          );
+      if (!offen) return;
+    }
+    await _act(schritt.node, NodeAction.read);
+  }
+
   Future<void> _act(TheoryNode node, NodeAction action) async {
     switch (action) {
       case NodeAction.read:
@@ -255,8 +263,8 @@ class _Header extends StatelessWidget {
   final List<(TheoryNode, ({int passed, int total}))> areas;
   final int areaIndex;
   final ValueChanged<int> onSelectArea;
-  final TheoryNode? next;
-  final ValueChanged<TheoryNode> onRead;
+  final TheoryStep? next;
+  final ValueChanged<TheoryStep> onRead;
 
   @override
   Widget build(BuildContext context) {
@@ -324,7 +332,8 @@ class _Header extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ContinueReadingTile(
-                node: naechste,
+                node: naechste.node,
+                cost: naechste.needsOpening ? naechste.node.cost : null,
                 onTap: () => onRead(naechste),
               ),
             ),

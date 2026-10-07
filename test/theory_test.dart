@@ -4,14 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/theory/widgets/review_section.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
-import 'package:lifes_game/theory/branch_screen.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
+import 'package:lifes_game/theory/widgets/lesson_result_view.dart';
+import 'package:lifes_game/theory/review_controller.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/node_action_panel.dart';
 import 'package:lifes_game/theory/widgets/node_bubble.dart';
 import 'package:lifes_game/theory/widgets/node_state.dart';
-import 'package:lifes_game/theory/widgets/lesson_tile.dart';
+import 'package:lifes_game/theory/widgets/tree_overview.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 
@@ -34,16 +35,18 @@ ProviderContainer _containerAtLevel(int level) {
   );
 }
 
-/// Bringt das Handbuch hinter sich.
+/// Gibt alle Startpunkte bis auf einen aus, auf dem Weg der Grundlagen.
 ///
-/// **Ohne das gibt es keinen Baum zu sehen** (ADR-0025): Solange das
-/// Handbuch offen ist, *ist* es der Theorie-Bildschirm.
-void _passHandbook(ProviderContainer container) {
+/// Seit ADR-0070 beginnt jeder mit neun Punkten. Tests, die „kein Punkt
+/// mehr übrig“ brauchen, kaufen danach noch eine Wurzel und stehen bei
+/// null.
+void _bisAufEinenPunkt(ProviderContainer container) {
   final notifier = container.read(theoryProgressProvider.notifier);
-  for (final lesson in habitsBranch.lessons) {
-    notifier.submit(lesson, <int?>[
-      for (final question in lesson.questions) question.correctIndex,
-    ]);
+  for (final id in theoryBasicsPath.take(TheoryPoints.atStart - 1)) {
+    notifier.openNode(
+      id,
+      availablePoints: container.read(availableTheoryPointsProvider),
+    );
   }
 }
 
@@ -86,43 +89,71 @@ void main() {
     });
   });
 
-  group('SkillTreeScreen — das Handbuch steht davor (ADR-0025)', () {
-    testWidgets('solange es offen ist, ist es der Bildschirm', (tester) async {
+  group('SkillTreeScreen — der Baum ist immer offen (ADR-0070)', () {
+    testWidgets('ein neuer Stand sieht den Baum, kein Handbuch davor', (
+      tester,
+    ) async {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
 
       await _pumpTree(tester, container);
 
-      // Aus der schmalen Zeile über einem unbenutzbaren Baum ist der
-      // Bildschirm selbst geworden.
-      expect(find.byType(BranchScreen), findsOneWidget);
-      expect(find.byType(NodeBubble), findsNothing);
+      expect(find.byType(NodeBubble), findsWidgets);
+      expect(find.text('Das Handbuch'), findsNothing);
     });
 
-    testWidgets('danach steht der Baum da', (tester) async {
+    testWidgets('solange nichts gelesen ist, schlägt er den Weg der '
+        'Grundlagen vor — mit Preis', (tester) async {
       useTallView(tester);
-      final container = _containerAtLevel(3);
+      final container = _containerAtLevel(1);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
-      expect(find.byType(BranchScreen), findsNothing);
-      expect(find.byType(NodeBubble), findsWidgets);
+      final vorschlag = tester.widget<ContinueReadingTile>(
+        find.byType(ContinueReadingTile),
+      );
+      expect(vorschlag.node.id, theoryBasicsPath.first);
+      expect(vorschlag.cost, 1);
+      expect(
+        find.bySemanticsLabel(RegExp('Öffnen und lesen: .*kostet 1 Punkt')),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('das Handbuch steht nicht mehr als Zeile über dem Baum', (
+    testWidgets('ein Tipp darauf öffnet den Knoten und die Seite', (
       tester,
     ) async {
       useTallView(tester);
-      final container = _containerAtLevel(3);
+      final container = _containerAtLevel(1);
       addTearDown(container.dispose);
-      _passHandbook(container);
+      final vorher = container.read(availableTheoryPointsProvider);
+
+      await _pumpTree(tester, container);
+      await tester.tap(find.byType(ContinueReadingTile));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LessonScreen), findsOneWidget);
+      expect(
+        container
+            .read(theoryProgressProvider)
+            .isNodeOpened(theoryBasicsPath.first, theoryGraph),
+        isTrue,
+      );
+      expect(container.read(availableTheoryPointsProvider), vorher - 1);
+    });
+
+    testWidgets('ohne Punkt gibt es keinen Vorschlag', (tester) async {
+      useTallView(tester);
+      final container = ProviderContainer(
+        overrides: [availableTheoryPointsProvider.overrideWithValue(0)],
+      );
+      addTearDown(container.dispose);
 
       await _pumpTree(tester, container);
 
-      expect(find.text('Das Handbuch'), findsNothing);
+      expect(find.byType(ContinueReadingTile), findsNothing);
     });
   });
 
@@ -135,7 +166,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -158,7 +188,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -177,7 +206,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -191,7 +219,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -209,7 +236,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -224,7 +250,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -237,7 +262,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -250,8 +274,11 @@ void main() {
       final container = _containerAtLevel(4);
       addTearDown(container.dispose);
 
-      // Der Startpunkt und drei Aufstiege (ADR-0051).
-      expect(container.read(availableTheoryPointsProvider), 4);
+      // Die Startpunkte und drei Aufstiege (ADR-0070).
+      expect(
+        container.read(availableTheoryPointsProvider),
+        TheoryPoints.atStart + 3,
+      );
     });
   });
 
@@ -260,13 +287,12 @@ void main() {
     final schlaf = theoryGraph.nodeById('schlaf-regeneration')!;
     final schlafThema = theoryGraph.nodeById('koerper-schlaf')!;
 
-    /// Handbuch durch und die Wurzel Körper gekauft — seit ADR-0051
-    /// kostet sie einen Punkt, und erst dahinter beginnt das Erkunden.
+    /// Die Wurzel Körper gekauft — seit ADR-0051 kostet sie einen Punkt,
+    /// und erst dahinter beginnt das Erkunden.
     Future<void> pumpTree(
       WidgetTester tester,
       ProviderContainer container,
     ) async {
-      _passHandbook(container);
       container
           .read(theoryProgressProvider.notifier)
           .openNode(
@@ -282,7 +308,6 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
-      _passHandbook(container);
 
       await _pumpTree(tester, container);
 
@@ -312,6 +337,7 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
+      _bisAufEinenPunkt(container);
 
       await pumpTree(tester, container);
 
@@ -507,6 +533,7 @@ void main() {
       useTallView(tester);
       final container = _containerAtLevel(1);
       addTearDown(container.dispose);
+      _bisAufEinenPunkt(container);
 
       await pumpTree(tester, container);
       await tester.tap(find.text(schlaf.name));
@@ -562,7 +589,6 @@ void main() {
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      _passHandbook(container);
       final wurzel = theoryGraph.nodeById(theoryRootIds.first)!;
       container.read(theoryProgressProvider.notifier).submit(
         wurzel.lesson,
@@ -586,7 +612,6 @@ void main() {
       final container = _containerAtLevel(3);
       addTearDown(container.dispose);
 
-      _passHandbook(container);
       final wurzel = theoryGraph.nodeById(theoryRootIds.first)!;
       container.read(theoryProgressProvider.notifier).submit(
         wurzel.lesson,
@@ -656,61 +681,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LessonScreen), findsOneWidget);
-    });
-  });
-
-  group('BranchScreen', () {
-    Future<void> pump(WidgetTester tester, ProviderContainer container) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(home: BranchScreen(branch: habitsBranch)),
-        ),
-      );
-      await tester.pump();
-    }
-
-    testWidgets('nur die erste Lektion ist zu Beginn offen', (tester) async {
-      useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await pump(tester, container);
-
-      final tiles = tester.widgetList<LessonTile>(find.byType(LessonTile));
-      expect(tiles.length, habitsBranch.lessonCount);
-      expect(tiles.where((t) => t.isUnlocked).length, 1);
-      expect(tiles.first.isUnlocked, isTrue);
-    });
-
-    testWidgets('nach bestandener Lektion öffnet sich die nächste', (
-      tester,
-    ) async {
-      useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final answers = _first.questions.map((q) => q.correctIndex).toList();
-      container.read(theoryProgressProvider.notifier).submit(_first, answers);
-
-      await pump(tester, container);
-
-      final tiles = tester.widgetList<LessonTile>(find.byType(LessonTile));
-      expect(tiles.where((t) => t.isUnlocked).length, 2);
-      expect(find.text('1 von 5 Lektionen bestanden'), findsOneWidget);
-    });
-
-    testWidgets('freigeschaltete Habit-Vorlage wird angezeigt', (tester) async {
-      useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final answers = _first.questions.map((q) => q.correctIndex).toList();
-      container.read(theoryProgressProvider.notifier).submit(_first, answers);
-
-      await pump(tester, container);
-
-      expect(find.text(_first.unlocksHabit ?? ''), findsOneWidget);
     });
   });
 
@@ -995,23 +965,156 @@ void main() {
 
       expect(find.text('Frage 1 von ${_first.questionCount}'), findsOneWidget);
     });
+
+    group('Direkt zur nächsten Seite (ADR-0070)', () {
+      final schleife = theoryGraph.nodeById('gewohnheiten-schleife')!;
+
+      Future<void> bestehe(WidgetTester tester) async {
+        await tester.tap(
+          find.text('${_first.questionCount} Fragen beantworten'),
+        );
+        await tester.pumpAndSettle();
+        await answerAll(tester, correctly: true);
+      }
+
+      testWidgets('nach einer bestandenen Seite steht die nächste da, mit '
+          'ihrem Preis', (tester) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await pump(tester, container);
+        await bestehe(tester);
+
+        expect(find.byKey(LessonResultView.nextKey), findsOneWidget);
+        expect(find.text(schleife.name), findsOneWidget);
+        expect(
+          find.bySemanticsLabel('Weiter zu ${schleife.name}, kostet 1 Punkt'),
+          findsOneWidget,
+        );
+        // Der alte Hauptknopf heißt dann „Fertig“.
+        expect(find.text('Fertig'), findsOneWidget);
+        expect(find.text('Weiter'), findsNothing);
+      });
+
+      testWidgets('ein Tipp öffnet sie, zahlt den Punkt und zeigt sie', (
+        tester,
+      ) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await pump(tester, container);
+        await bestehe(tester);
+        final vorher = container.read(spentTheoryPointsProvider);
+
+        await tester.tap(find.byKey(LessonResultView.nextKey));
+        await tester.pumpAndSettle();
+
+        expect(container.read(spentTheoryPointsProvider), vorher + 1);
+        expect(
+          container
+              .read(theoryProgressProvider)
+              .isNodeOpened(schleife.id, theoryGraph),
+          isTrue,
+        );
+        // An der Stelle der gelesenen Seite, nicht darüber.
+        expect(find.byType(LessonScreen), findsOneWidget);
+        expect(find.text(schleife.summary), findsOneWidget);
+      });
+
+      testWidgets('ist sie schon offen, kostet der Tipp nichts', (
+        tester,
+      ) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        final notifier = container.read(theoryProgressProvider.notifier);
+        for (final id in theoryBasicsPath.take(5)) {
+          notifier.openNode(
+            id,
+            availablePoints: container.read(availableTheoryPointsProvider),
+          );
+        }
+        final vorher = container.read(spentTheoryPointsProvider);
+
+        await pump(tester, container);
+        await bestehe(tester);
+
+        expect(
+          find.bySemanticsLabel('Weiter zu ${schleife.name}'),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(LessonResultView.nextKey));
+        await tester.pumpAndSettle();
+
+        expect(container.read(spentTheoryPointsProvider), vorher);
+        expect(find.text(schleife.summary), findsOneWidget);
+      });
+
+      testWidgets('ohne Punkt und ohne offene Seite bleibt es bei „Weiter“', (
+        tester,
+      ) async {
+        useTallView(tester);
+        final container = ProviderContainer(
+          overrides: [availableTheoryPointsProvider.overrideWithValue(0)],
+        );
+        addTearDown(container.dispose);
+        // Der Weg bis hierher ist gelesen, sonst läge noch eine offene
+        // Seite herum — und die wäre zu Recht die nächste.
+        final notifier = container.read(theoryProgressProvider.notifier);
+        for (final id in theoryBasicsPath.take(3)) {
+          final seite = theoryGraph.nodeById(id)!.lesson;
+          notifier.openNode(id, availablePoints: 1);
+          notifier.submit(seite, <int?>[
+            for (final q in seite.questions) q.correctIndex,
+          ]);
+        }
+
+        await pump(tester, container);
+        await bestehe(tester);
+
+        expect(find.byKey(LessonResultView.nextKey), findsNothing);
+        expect(find.text('Weiter'), findsOneWidget);
+        expect(find.text('Fertig'), findsNothing);
+      });
+
+      testWidgets('wer durchfällt, bekommt keine nächste Seite', (
+        tester,
+      ) async {
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await pump(tester, container);
+        await tester.tap(
+          find.text('${_first.questionCount} Fragen beantworten'),
+        );
+        await tester.pumpAndSettle();
+        await answerAll(tester, correctly: false);
+
+        expect(find.text('Noch nicht bestanden'), findsOneWidget);
+        expect(find.byKey(LessonResultView.nextKey), findsNothing);
+      });
+    });
   });
 
-  group('Zählen über Handbuch und Graph', () {
-    // Der Umbau auf den Graphen (ADR-0019) hat zwölf von neunundzwanzig
-    // Seiten aus `theoryTree` herausgenommen. Wer weiter nur die Zweige
-    // zählt, unterschlägt sie — genau das war nach dem Umbau kurz der
-    // Fall, bei den Titeln und auf dem Startbildschirm.
-    test('die Gesamtzahl umfasst Handbuch und Graph', () {
+  group('Gezählt wird der Graph, und nichts doppelt (ADR-0070)', () {
+    // Der Umbau auf den Graphen (ADR-0019) hat Seiten aus `theoryTree`
+    // herausgenommen; wer danach weiter die Zweige zählte, unterschlug
+    // sie. ADR-0070 dreht die Gefahr um: Die fünf Seiten des früheren
+    // Handbuchs stehen jetzt im Graphen **und** im Zweig. Wer beide
+    // zusammenzählt, zählt sie doppelt.
+    List<int?> richtig(Lesson lesson) => <int?>[
+      for (final q in lesson.questions) q.correctIndex,
+    ];
+
+    test('die Gesamtzahl ist die Zahl der Knoten', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       expect(container.read(totalPagesProvider), 63);
-      expect(
-        container.read(totalPagesProvider),
-        greaterThan(theoryTree.lessonCount),
-        reason: 'Sonst zählt jemand wieder nur die alten Zweige.',
-      );
+      expect(container.read(totalPagesProvider), theoryGraph.nodeCount);
     });
 
     test('eine bestandene Knotenseite zählt mit', () {
@@ -1024,26 +1127,41 @@ void main() {
 
       expect(container.read(passedPagesProvider), 0);
 
-      container.read(theoryProgressProvider.notifier).submit(knoten.lesson, [
-        for (final q in knoten.lesson.questions) q.correctIndex,
-      ]);
+      container
+          .read(theoryProgressProvider.notifier)
+          .submit(knoten.lesson, richtig(knoten.lesson));
 
       expect(container.read(passedPagesProvider), 1);
+      expect(container.read(achievementStatsProvider).passedLessons, 1);
     });
 
-    test('sie zählt auch für die Titel', () {
+    test('eine Seite des früheren Handbuchs zählt genau einmal', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final knoten = theoryGraph.nodes.firstWhere(
-        (n) => !theoryTree.branches.any((b) => b.indexOf(n.lesson.id) >= 0),
-      );
+      container
+          .read(theoryProgressProvider.notifier)
+          .submit(_first, richtig(_first));
 
-      container.read(theoryProgressProvider.notifier).submit(knoten.lesson, [
-        for (final q in knoten.lesson.questions) q.correctIndex,
-      ]);
+      expect(container.read(passedPagesProvider), 1);
+      final zahlen = container.read(achievementStatsProvider);
+      expect(zahlen.passedLessons, 1);
+      expect(zahlen.perfectLessons, 1);
+      // Auch die Rückfrage des Tages zieht sie nur einmal.
+      expect(container.read(passedLessonsProvider), <Lesson>[_first]);
+    });
 
-      expect(container.read(achievementStatsProvider).passedLessons, 1);
+    test('alle fünf zusammen sind fünf Seiten und fünfmal perfekt', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(theoryProgressProvider.notifier);
+      for (final lesson in habitsBranch.lessons) {
+        notifier.submit(lesson, richtig(lesson));
+      }
+
+      expect(container.read(passedPagesProvider), 5);
+      expect(container.read(achievementStatsProvider).perfectLessons, 5);
+      expect(container.read(grundlagenGelesenProvider), isTrue);
     });
   });
 }

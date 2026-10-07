@@ -9,16 +9,10 @@ import 'package:theory/theory.dart';
 /// gibt Erfahrung, Gold und Habit-Vorlagen für Mustererkennung statt
 /// für Wissen.
 ///
-/// Der Test läuft über **Handbuch und Graph**. `graph_content_test.dart`
-/// sieht nur den Graphen; die fünf Handbuchseiten liest aber jeder als
-/// Erstes.
+/// Der Test läuft über **den ganzen Graphen** — seit ADR-0070 stehen
+/// auch die fünf Seiten des früheren Handbuchs darin.
 void main() {
-  // Handbuch und Graph überschneiden sich nicht — das prüft
-  // `graph_content_test.dart` eigens.
-  final seiten = <Lesson>[
-    ...theoryGraph.nodes.map((n) => n.lesson),
-    ...habitsBranch.lessons,
-  ];
+  final seiten = <Lesson>[...theoryGraph.nodes.map((n) => n.lesson)];
 
   /// Jede Frage einmal, mit einer Herkunft für die Fehlermeldung.
   final fragen = <({String quelle, Question frage})>[

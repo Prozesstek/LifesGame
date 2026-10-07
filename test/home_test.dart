@@ -17,7 +17,6 @@ import 'package:lifes_game/ui/level_abzeichen.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
-import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/ui/gold_icon.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
 import 'package:abilities/abilities.dart';
@@ -480,12 +479,8 @@ void main() {
 /// der der zweite Fähigkeitsslot aufgeht. Vier Lektionen wären 220 und
 /// damit fünf Punkte zu wenig.
 TheoryProgress _mitHandbuch() {
-  final branch = theoryTree.branches.firstWhere(
-    (b) => b.id == handbookBranchId,
-  );
-
   var progress = const TheoryProgress.empty();
-  for (final lesson in branch.lessons) {
+  for (final lesson in habitsBranch.lessons) {
     progress = progress.submit(lesson, <int?>[
       for (final question in lesson.questions) question.correctIndex,
     ]).progress;

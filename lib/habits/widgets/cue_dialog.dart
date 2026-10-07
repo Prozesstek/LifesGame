@@ -41,8 +41,8 @@ class CueChoice {
 ///
 /// **Warum das eine Frage ist und kein Pflichtfeld.** Ein Vorsatz, der an
 /// eine Situation gebunden ist, wird deutlich zuverlässiger umgesetzt als
-/// einer ohne — die Handbuch-Lektion „Die Schleife hinter jeder
-/// Gewohnheit" sagt es selbst. Wer nicht will, tippt „Später" und hat
+/// einer ohne — die Seite „Die Schleife hinter jeder Gewohnheit"
+/// sagt es selbst. Wer nicht will, tippt „Später" und hat
 /// dieselbe Gewohnheit wie vorher.
 Future<CueChoice?> showCueDialog(
   BuildContext context, {

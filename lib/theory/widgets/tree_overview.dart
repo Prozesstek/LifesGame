@@ -136,21 +136,34 @@ class _AreaTile extends StatelessWidget {
 /// einen Tipp entfernt (ADR-0056).
 ///
 /// Der Baum bleibt eine Wahl; wer nicht wählen will, muss es nicht.
+///
+/// **Mit [cost] ist es ein Vorschlag, der etwas kostet** (ADR-0070): Der
+/// Knoten ist noch zu, und der Tipp öffnet ihn. Dann steht der Preis
+/// davor, mit dem Zeichen der Punkte.
 class ContinueReadingTile extends StatelessWidget {
   const ContinueReadingTile({
     required this.node,
     required this.onTap,
+    this.cost,
     super.key,
   });
 
   final TheoryNode node;
   final VoidCallback onTap;
 
+  /// Was der Tipp kostet, oder null, wenn der Knoten schon offen ist.
+  final int? cost;
+
   @override
   Widget build(BuildContext context) {
+    final preis = cost;
+
     return Semantics(
       button: true,
-      label: 'Weiterlesen: ${node.name}',
+      label: preis == null
+          ? 'Weiterlesen: ${node.name}'
+          : 'Öffnen und lesen: ${node.name}, kostet $preis '
+                '${preis == 1 ? 'Punkt' : 'Punkte'}',
       child: Druck(
         child: Material(
           color: Palette.accentOnDark.withValues(alpha: 0.16),
@@ -181,6 +194,11 @@ class ContinueReadingTile extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (preis != null) ...<Widget>[
+                    const SizedBox(width: 8),
+                    PunktPreis(cost: preis),
+                    const SizedBox(width: 6),
+                  ],
                   // Nicht der Pfeil des Gebietswechsels: Dieser führt in
                   // eine Seite, jener zum nächsten Gebiet.
                   const Icon(
@@ -194,6 +212,39 @@ class ContinueReadingTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Der Preis eines Knotens: das Zeichen der Punkte und die Zahl — wie im
+/// [PointsChip], nur ohne Rahmen. Eine Stelle für „Weiterlesen“ im Baum
+/// und für den Knopf nach einer Seite.
+class PunktPreis extends StatelessWidget {
+  const PunktPreis({required this.cost, this.color, super.key});
+
+  final int cost;
+
+  /// Standard ist das Gold für Leder.
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = color ?? Palette.goldOnDark;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(Icons.hexagon_rounded, size: 15, color: farbe),
+        const SizedBox(width: 3),
+        Text(
+          '$cost',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: farbe,
+          ),
+        ),
+      ],
     );
   }
 }

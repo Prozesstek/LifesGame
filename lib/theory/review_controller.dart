@@ -28,13 +28,11 @@ final reviewLogProvider = NotifierProvider<ReviewController, ReviewLog>(
   ReviewController.new,
 );
 
-/// Alle bestandenen Seiten, aus Handbuch **und** Graph — aus diesen kommt
-/// die Rückfrage. Dieselbe Doppelung wie bei `passedPagesProvider`.
+/// Alle bestandenen Seiten — aus diesen kommt die Rückfrage. Der Graph
+/// ist die ganze Wahrheit (ADR-0070), wie bei `passedPagesProvider`.
 final passedLessonsProvider = Provider<List<Lesson>>((ref) {
   final fortschritt = ref.watch(theoryProgressProvider);
   return <Lesson>[
-    for (final lesson in ref.watch(handbookProvider).lessons)
-      if (fortschritt.isPassed(lesson.id)) lesson,
     for (final node in ref.watch(theoryGraphProvider).nodes)
       if (fortschritt.isPassed(node.lesson.id)) node.lesson,
   ];

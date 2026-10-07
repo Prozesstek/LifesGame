@@ -22,7 +22,7 @@ class ErsterStartStand {
     this.hatGekaempft = false,
     this.stufenGeschafft = 0,
     this.seiten = 0,
-    this.handbuchFertig = false,
+    this.grundlagenGelesen = false,
     this.gelernt = 0,
     this.angelegt = 0,
     this.goldVerdient = 0,
@@ -43,10 +43,13 @@ class ErsterStartStand {
   /// Die tiefste geschaffte Stufe der Grube, 0 heißt: noch keine.
   final int stufenGeschafft;
 
-  /// Bestandene Seiten aus Handbuch und Baum.
+  /// Bestandene Seiten im Baum.
   final int seiten;
 
-  final bool handbuchFertig;
+  /// Ob die fünf Seiten des früheren Handbuchs bestanden sind. Seit
+  /// ADR-0070 sperrt das nichts mehr; es hält nur den Kreis der
+  /// Fähigkeiten bei Ständen, die ihn darüber bekommen hatten.
+  final bool grundlagenGelesen;
 
   /// Freigeschaltete Fähigkeiten.
   final int gelernt;
@@ -140,7 +143,7 @@ class ErsterStart {
     // **Jede Bedingung nennt auch, was erst später kommen kann.** So
     // bleibt die Reihe geschlossen, auch wenn ein Stand einen Schritt
     // übersprungen hat (Entwicklermodus, eingefügter Stand).
-    final faehigkeiten = s.handbuchFertig || s.gelernt > 0 || s.angelegt > 0;
+    final faehigkeiten = s.grundlagenGelesen || s.gelernt > 0 || s.angelegt > 0;
     final theorie =
         faehigkeiten ||
         s.hatGekaempft ||

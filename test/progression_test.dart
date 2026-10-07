@@ -259,61 +259,88 @@ void _goldZuflussPasstZuDenPreisen() {
     });
   });
 
-  group('Das Handbuch öffnet genau den zweiten Slot', () {
-    // **Der Zusammenhang, auf dem ADR-0018 steht.** Der Kampf ist
-    // gesperrt, bis der freie Zweig durch ist -- und das ist nur
-    // deshalb die richtige Bedingung, weil derselbe Zweig genug
-    // Erfahrung für Level 3 gibt. Auf Level 3 geht der zweite
-    // Fähigkeitsslot auf, und erst mit zwei Moves ist der erste Kampf
-    // überhaupt zu gewinnen (0 % gegen 100 % in der Simulation).
+  group('Die Grundlagen führen zum zweiten Platz (ADR-0070)', () {
+    // **Der Zusammenhang, der die alte Kette ersetzt.** Bis ADR-0070
+    // gab das Handbuch kostenlos 275 Erfahrung und damit Level 3, die
+    // Stufe des zweiten Fähigkeitsplatzes (ADR-0018). Jetzt kosten seine
+    // Seiten Punkte, und der Weg zu ihnen ist neun Knoten lang.
     //
-    // Das ist gemessen, nicht entworfen: Wer an TheoryRewards, an der
-    // Levelkurve oder an der Länge des Zweigs dreht, kann den
-    // Zusammenhang zerstören, ohne es zu merken. Deshalb steht er hier
-    // und nicht als Kommentar.
+    // Was gelten muss, damit daraus keine Sackgasse wird: Wer diesen Weg
+    // liest und sonst nichts tut, hat danach den zweiten Platz offen
+    // **und** einen Punkt übrig, für den es eine Fähigkeit gibt. Wer an
+    // TheoryRewards, der Levelkurve, den Startpunkten oder dem Weg
+    // dreht, soll es hier merken.
 
-    TheoryProgress durchgearbeitet(TheoryBranch branch) {
+    TheoryProgress gelesen(Iterable<String> ids) {
       var progress = const TheoryProgress.empty();
-      for (final lesson in branch.lessons) {
+      for (final id in ids) {
+        final lesson = theoryGraph.nodeById(id)!.lesson;
+        progress = progress.openNode(id);
         progress = progress.submit(lesson, _perfect(lesson)).progress;
       }
       return progress;
     }
 
-    final handbuch = theoryTree.branches.firstWhere(
-      (b) => b.id == handbookBranchId,
-    );
-
-    test('das durchgearbeitete Handbuch reicht für Level 3', () {
-      final xp = durchgearbeitet(handbuch).totalXp;
+    test('wer den Weg der Grundlagen liest, hat den zweiten Platz', () {
+      final xp = gelesen(theoryBasicsPath).totalXp;
       final level = LevelCurve.levelFor(xp).level;
 
       expect(
         level,
         greaterThanOrEqualTo(AbilitySlots.levelForSlot(2)!),
         reason:
-            'Das Handbuch gibt $xp Erfahrung und damit nur Level $level. '
-            'Der zweite Fähigkeitsslot braucht Level ${AbilitySlots.levelForSlot(2)} '
-            '-- ohne ihn ist der erste Kampf nicht zu gewinnen (ADR-0018).',
+            'Die Grundlagen geben $xp Erfahrung und damit nur Level '
+            '$level. Der zweite Fähigkeitsplatz braucht Level '
+            '${AbilitySlots.levelForSlot(2)}.',
       );
     });
 
-    test('ohne die letzte Lektion reicht es nicht', () {
-      // Die Probe aufs Exempel: Die Bedingung ist der *abgeschlossene*
-      // Zweig, nicht ein Teil davon. Wäre schon die Hälfte genug,
-      // stünde die Sperre an der falschen Stelle.
-      var progress = const TheoryProgress.empty();
-      for (final lesson in handbuch.lessons.take(handbuch.lessons.length - 1)) {
-        progress = progress.submit(lesson, _perfect(lesson)).progress;
-      }
-
-      expect(
-        LevelCurve.levelFor(progress.totalXp).level,
-        lessThan(AbilitySlots.levelForSlot(2)!),
-        reason:
-            'Wenn schon vier Lektionen für Level 3 reichen, ist die '
-            'Sperre auf den ganzen Zweig unnötig streng.',
+    test('und danach einen Punkt übrig, für den es eine Fähigkeit gibt', () {
+      final stand = gelesen(theoryBasicsPath);
+      final level = LevelCurve.levelFor(stand.totalXp).level;
+      final frei = TheoryPoints.availableAt(
+        level: level,
+        spent: stand.spentPointsIn(theoryGraph),
       );
+
+      final zuHaben = theoryGraph.nodes.where(
+        (node) =>
+            node.unlocksAbility != null &&
+            stand.canOpenNode(node.id, theoryGraph, availablePoints: frei),
+      );
+
+      expect(frei, greaterThan(0));
+      expect(
+        zuHaben,
+        isNotEmpty,
+        reason:
+            'Nach den Grundlagen sind $frei Punkte frei, aber kein Knoten '
+            'mit Fähigkeit ist dafür zu haben.',
+      );
+    });
+
+    test('die Punkte reichen auf dem ganzen Weg, Seite für Seite', () {
+      // Niemand soll mitten in den Grundlagen ohne Punkt dastehen: Vor
+      // jedem Schritt muss der nächste Knoten bezahlbar sein, allein aus
+      // den Startpunkten und dem, was die gelesenen Seiten an Leveln
+      // gebracht haben.
+      for (var i = 0; i < theoryBasicsPath.length; i++) {
+        final stand = gelesen(theoryBasicsPath.take(i));
+        final frei = TheoryPoints.availableAt(
+          level: LevelCurve.levelFor(stand.totalXp).level,
+          spent: stand.spentPointsIn(theoryGraph),
+        );
+
+        expect(
+          stand.canOpenNode(
+            theoryBasicsPath[i],
+            theoryGraph,
+            availablePoints: frei,
+          ),
+          isTrue,
+          reason: 'Schritt ${i + 1}: ${theoryBasicsPath[i]}',
+        );
+      }
     });
   });
 }

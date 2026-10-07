@@ -26,7 +26,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 58 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
+| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner, **zwei Zeichen im ersten Lauf** | ADR-0039, -0040, -0041, -0046, -0062, -0063, -0069 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 707, dazu die acht Packages (theory 174, habits 324, gear
+**Tests:** App 716, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
@@ -62,6 +62,9 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 
 - Gegenlesen: neun Einführungen und zwanzig Themen im Wissensbaum
   (Kraft, Ausdauer, Psychologie, Philosophie) — mit Gesundheitsaussagen.
+  Dazu die Einführung „Gewohnheiten“, am 07.10. umgeschrieben.
+- **Der erste Lauf ist härter als gedacht**: Stufe 1 auf Level 1 steht
+  für den Bot bei 67 %, nicht bei 93 % (Eintrag vom 07.10.).
 - Wie viel XP und Gold Theorie künftig bringt (ADR-0037, Punkt 1);
   welches Gebiet als Nächstes befüllt wird.
 - Ob vier bis fünf Beutestücke am Tag das Inventar fluten;
@@ -92,6 +95,79 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 07.10.2026, danach: das Handbuch steht im Baum
+
+Frederik: „Ja“ zum Handbuch als nächstem Block. In zwei Fragerunden
+entschieden, zweimal gegen Claudes Empfehlung:
+[ADR-0070](../decisions/0070-das-handbuch-steht-im-baum.md).
+
+| Was | Wie |
+|---|---|
+| **Kein Handbuch-Bildschirm mehr** | die fünf Seiten sind Knoten unter *Gewohnheiten*, der Baum ist immer offen |
+| **Sie kosten einen Punkt** | nichts im Baum ist kostenlos; dafür beginnt jeder mit **neun Punkten** statt einem |
+| **Ins Buch einsortiert** | „Zwei Minuten reichen“ ist Regel 3 unter „Die vier Regeln“, die anderen vier hängen unter *Gewohnheiten* |
+| **Direkt zur nächsten** | nach einer bestandenen Seite steht ein Knopf mit der nächsten; ist sie noch zu, öffnet der Tipp sie, der Preis steht darauf |
+| **Der Baum schlägt vor** | solange nichts offen ist, steht bei „Weiterlesen“ der nächste Schritt zu den Grundlagen: zuerst „Geist“, ein Punkt |
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Neun, weil der Weg neun kostet**: Geist, Selbstentwicklung,
+  Gewohnheiten, Die vier Regeln und die fünf Seiten
+  (`theoryBasicsPath`). Ein Test hält beide Zahlen zusammen.
+- **Gezählt wird nur noch der Graph.** Die fünf Seiten stehen im Graphen
+  und im alten Zweig; beides zusammen zählte sie doppelt.
+- **Alte Stände behalten alles** und bekommen acht Punkte dazu. Wer das
+  Handbuch bestanden hatte, hat die Seiten und ihren Weg offen, ohne
+  dafür bezahlt zu haben.
+- **Die Einführung „Gewohnheiten“ ist umgeschrieben**: Sie verwies auf
+  das Handbuch als schon Gelesenes und steht jetzt davor.
+- **Der Kreis der Fähigkeiten erscheint wie bisher** (fünf Seiten
+  bestanden oder eine Fähigkeit gelernt).
+
+Gelöscht: `branch_screen.dart`, `lesson_tile.dart`, `handbookProvider`
+und die zwei Provider daran. ADR-0025 ist abgelöst.
+
+**Gemessen** (`runway_sim`, fleißiger Spieler): an Tag 60 sind 41 Seiten
+gelesen statt 38, Level und Gold bleiben praktisch gleich. Die acht
+Punkte mehr stehen gegen fünf Seiten, die vorher nichts kosteten.
+
+**Dabei gefunden: Der erste Lauf ist härter, als ADR-0068 sagt.** Die
+93 % für Stufe 1 an Tag 0 enthielten die 275 Erfahrung des Handbuchs,
+also Level 3. Seit ADR-0068 geht es aber vor jeder Seite hinab. Auf
+Level 1 gemessen (`pit_sim`, 12 Läufe je Feld): **Stufe 1 bei 67 %,
+Stufe 2 bei 17 %** (vorher 92 % und 75 %); je Wächter zwischen 42 %
+(Schlund) und 100 % (Sumpftroll). Das ist keine Folge dieses Umbaus,
+sondern eine Annahme der Simulation, die seit gestern nicht mehr
+stimmte; `pit_sim` rechnet Tag 0 jetzt auf Level 1. **Nicht
+nachgestellt**, Balance ist zurückgestellt.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Der Preis auf dem
+Knopf zur nächsten Seite ging im Holz unter, er ist jetzt hell.
+
+theory 193 (vorher 174), App 716 (vorher 707). Der Baum eines neuen
+Stands, *Gewohnheiten* mit den neuen Knoten, „Die vier Regeln“ und das
+Ergebnis mit dem Knopf gerendert und angesehen. **Nicht gespielt, nicht
+am Handy.**
+
+**PR #107 und #108 sind noch offen**; dieser Block liegt als eigener PR
+auf #108.
+
+### Offen
+
+- **Stufe 1 am ersten Tag** gewinnt der Bot in zwei von drei Läufen. Ob
+  das als erster Eindruck trägt, und ob eine Niederlage dort jetzt zu
+  oft kommt, zeigt das Spielen.
+- Neun Punkte auf einmal sind eine große Wahl beim ersten Blick auf den
+  Baum. Der Vorschlag führt, erklärt aber nicht, warum.
+- Ein Tipp auf den Knopf zur nächsten Seite gibt einen Punkt aus, ohne
+  Rückfrage.
+- Wer die neun Punkte woanders ausgibt, hat die drei Vorlagen aus den
+  Grundlagen und ihre Plätze für eigene Gewohnheiten erst später.
+- Die umgeschriebene Einführung „Gewohnheiten“ ist nicht gegengelesen.
+- `konzept.md` zeigt den Baum noch mit zwei Wurzeln und dem Handbuch
+  davor.
+- AktivesBrett hat weder ADR-0068 noch -0069 noch diesen gesehen.
 
 ## 07.10.2026: die Grube erklärt sich im ersten Lauf
 
@@ -194,7 +270,8 @@ Lauf gerendert und angesehen. **Nicht gespielt, nicht am Handy.**
   Bot, und was eine Niederlage im allerersten Lauf auslöst.
 - ~~**Die Grube erklärt nichts**~~: Laufen und Schlagen seit ADR-0069;
   Uhr und Tor weiter ohne Einführung.
-- Das Handbuch ist weiter fünf Lektionen lang, bevor der Baum aufgeht.
+- ~~Das Handbuch ist weiter fünf Lektionen lang, bevor der Baum
+  aufgeht.~~ Seit ADR-0070 steht es im Baum.
 - Auslöser, Wochentage und Belohnung fragt am ersten Tag niemand von
   selbst; das geht erst über die Kachel.
 - Level 2 für den Charakter und drei Häkchen für die Theorie sind

@@ -1,12 +1,18 @@
 import '../branch.dart';
 import 'habits_lessons.dart';
 
-/// Das Handbuch — der Zweig, der erklärt, wie die App funktioniert.
+/// Das frühere Handbuch — die fünf Seiten, die erklären, wie die App
+/// funktioniert.
 ///
-/// Warum ausgerechnet Gewohnheiten: siehe ADR-0005. Kurz — dieser Zweig
-/// erklärt genau das, was der Tracker verlangt. Theorie und Anwendung
-/// fallen zusammen, statt nebeneinanderzustehen. Genau deshalb ist er
-/// von Anfang an offen und kostet keinen Theoriepunkt.
+/// Warum ausgerechnet Gewohnheiten: siehe ADR-0005. Kurz — diese Seiten
+/// erklären genau das, was der Tracker verlangt. Theorie und Anwendung
+/// fallen zusammen, statt nebeneinanderzustehen.
+///
+/// **Seit ADR-0070 nur noch ein Behälter**, wie die anderen flachen
+/// Zweige: Die Seiten stehen als Knoten im Baum unter *Gewohnheiten*
+/// (`theory_graph_content.dart`), kosten einen Punkt und haben keine
+/// verbindliche Reihenfolge mehr. Wer Seiten zählt, zählt den Graphen —
+/// diesen Zweig dazuzunehmen zählte sie doppelt.
 const TheoryBranch habitsBranch = TheoryBranch(
   id: 'habits',
   name: 'Gewohnheiten',

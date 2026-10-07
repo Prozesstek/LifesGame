@@ -29,7 +29,7 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       hatGekaempft: reihe.highestDefeated > 0 || reihe.defeats.isNotEmpty,
       stufenGeschafft: reihe.highestDefeated,
       seiten: zahlen.passedLessons,
-      handbuchFertig: ref.watch(handbookDoneProvider),
+      grundlagenGelesen: ref.watch(grundlagenGelesenProvider),
       gelernt: ref.watch(unlockedAbilitiesProvider).length,
       // Der erste Eintrag ist immer der Waffenzug.
       angelegt: ref.watch(activeMovesProvider).length - 1,

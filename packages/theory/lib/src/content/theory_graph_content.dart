@@ -13,10 +13,10 @@
 /// sieht, wie groß der Baum wird. Wird eine befüllt, wandert sie mit
 /// derselben Id nach oben in die Knoten.
 ///
-/// **Das Handbuch steht bewusst nicht hier.** Es bleibt der Zweig
-/// `habitsBranch` mit verbindlicher Reihenfolge, weil ADR-0018 den
-/// Zugang zum Kampf daran hängt. Ein zweites Modell dafür wäre eine
-/// zweite Wahrheit.
+/// **Das Handbuch steht seit ADR-0070 hier**, als fünf Knoten unter
+/// *Gewohnheiten*: Seine Seiten stammen aus demselben Buch wie die vier
+/// Regeln daneben. Sie kosten wie alles einen Punkt; dafür beginnt jeder
+/// mit so vielen, wie [theoryBasicsPath] kostet.
 ///
 /// Die Themen der ersten Stunde stammen aus den alten flachen Zweigen und
 /// werden hier nur verdrahtet — der Inhalt steht weiterhin in
@@ -30,6 +30,7 @@ import 'area_pages.dart';
 import 'ausdauer_pages.dart';
 import 'geist_branch.dart';
 import 'gewohnheiten_pages.dart';
+import 'habits_branch.dart';
 import 'gesellschaft_branch.dart';
 import 'koerper_branch.dart';
 import 'koerper_geist_pages.dart';
@@ -268,11 +269,29 @@ final TheoryGraph theoryGraph = TheoryGraph(
     ),
     // Gewohnheiten -- wächst aus dem, was gerade gelesen wird: Überkapitel,
     // darunter die vier Regeln, darunter je Regel eine Seite.
+    //
+    // **Dazwischen die fünf Seiten des früheren Handbuchs** (ADR-0070),
+    // mit ihren alten Lektions-Ids: Wer sie bestanden hat, behält sie.
+    // „Zwei Minuten reichen" ist Regel 3, „Mach es einfach", und hängt
+    // deshalb bei den Regeln. Die Reihenfolge hier ist die, in der
+    // „Weiterlesen" vorschlägt.
     const TheoryNode(
       id: 'gewohnheiten',
       lesson: gewohnheitenPage,
       iconId: 'habit',
       parentIds: <String>['selbstentwicklung'],
+    ),
+    TheoryNode(
+      id: 'gewohnheiten-systeme',
+      lesson: habitsBranch.lessons[0],
+      iconId: 'plan',
+      parentIds: const <String>['gewohnheiten'],
+    ),
+    TheoryNode(
+      id: 'gewohnheiten-schleife',
+      lesson: habitsBranch.lessons[1],
+      iconId: 'repeat',
+      parentIds: const <String>['gewohnheiten'],
     ),
     const TheoryNode(
       id: 'gewohnheiten-vier-regeln',
@@ -291,6 +310,24 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: attraktivPage,
       iconId: 'spark',
       parentIds: <String>['gewohnheiten-vier-regeln'],
+    ),
+    TheoryNode(
+      id: 'gewohnheiten-zwei-minuten',
+      lesson: habitsBranch.lessons[2],
+      iconId: 'intervals',
+      parentIds: const <String>['gewohnheiten-vier-regeln'],
+    ),
+    TheoryNode(
+      id: 'gewohnheiten-nie-zweimal',
+      lesson: habitsBranch.lessons[3],
+      iconId: 'link',
+      parentIds: const <String>['gewohnheiten'],
+    ),
+    TheoryNode(
+      id: 'gewohnheiten-identitaet',
+      lesson: habitsBranch.lessons[4],
+      iconId: 'psyche',
+      parentIds: const <String>['gewohnheiten'],
     ),
     const TheoryNode(
       id: 'philosophie',
@@ -525,6 +562,29 @@ const List<TheoryPlaceholder> theoryPlaceholders = <TheoryPlaceholder>[
     iconId: 'planet',
     parentIds: <String>['wissenschaft'],
   ),
+];
+
+/// **Der Weg der Grundlagen** (ADR-0070): die fünf Seiten des früheren
+/// Handbuchs und alles, was auf dem Weg zu ihnen liegt — in der
+/// Reihenfolge, in der man sie öffnen kann.
+///
+/// Er ist der Grund für die Zahl der Startpunkte
+/// (`TheoryPoints.atStart`): Wer nichts anderes kauft, kann genau diesen
+/// Weg gehen. Und er ist das, was der Baum vorschlägt, solange noch
+/// nichts gelesen ist (`TheoryProgress.nextOnPath`).
+///
+/// „Mach es offensichtlich" und „Mach es attraktiv" gehören nicht dazu:
+/// Sie liegen daneben, nicht auf dem Weg.
+const List<String> theoryBasicsPath = <String>[
+  'geist',
+  'selbstentwicklung',
+  'gewohnheiten',
+  'gewohnheiten-systeme',
+  'gewohnheiten-schleife',
+  'gewohnheiten-vier-regeln',
+  'gewohnheiten-zwei-minuten',
+  'gewohnheiten-nie-zweimal',
+  'gewohnheiten-identitaet',
 ];
 
 /// Die Ids der vier Wurzeln, in Anzeigereihenfolge.

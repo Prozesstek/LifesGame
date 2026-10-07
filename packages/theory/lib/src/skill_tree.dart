@@ -9,8 +9,9 @@ import 'lesson.dart';
 /// Alle flachen Theoriezweige zusammen.
 ///
 /// Seit ADR-0019 ist das nicht mehr der Skillbaum — der ist `theoryGraph`.
-/// Hier stehen noch das Handbuch und die Lektionen, auf die Knoten im
-/// Graphen zeigen. Eine Levelsperre gibt es nicht mehr.
+/// Hier stehen nur noch Lektionen, auf die Knoten im Graphen zeigen; seit
+/// ADR-0070 gilt das auch für das frühere Handbuch. Gebraucht wird die
+/// Liste, um zu einer Lektion ihre Vorlage zu finden.
 class SkillTree {
   const SkillTree(this.branches);
 
@@ -49,8 +50,7 @@ class SkillTree {
 /// Der Baum, wie er im Spiel steht.
 ///
 /// „Gewohnheiten" steht vorn: Der Zweig erklärt, wie die App selbst
-/// funktioniert (ADR-0005), und ist das Handbuch, an dem seit ADR-0018 der
-/// Kampf hängt.
+/// funktioniert (ADR-0005).
 const SkillTree theoryTree = SkillTree(<TheoryBranch>[
   habitsBranch,
   koerperBranch,

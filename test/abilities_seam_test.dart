@@ -197,9 +197,10 @@ void main() {
       // einer kostenlosen Wurzel mit den Punkten dieser Stufe bezahlbar
       // ist.
       //
-      // Seit ADR-0050 ist der Weg zwei Schritte lang: Zwischenebene und
-      // Thema, zwei Punkte. Auf Level 3 gibt es genau zwei — ein Punkt
-      // mehr, und der zweite Platz ginge leer auf.
+      // Seit ADR-0051 ist der Weg drei Schritte lang: Wurzel,
+      // Zwischenebene und Thema, drei Punkte. Seit ADR-0070 gibt es sie
+      // vom Start weg; knapp wird es hier nur, wenn jemand die
+      // Startpunkte wieder kürzt.
       final level = AbilitySlots.levelForSlot(2)!;
       final punkte = TheoryPoints.earnedAt(level);
 
@@ -219,6 +220,36 @@ void main() {
             'erreichbaren Knoten mit Fähigkeit. Der zweite Platz ginge '
             'auf ein leeres Versprechen auf.',
       );
+    });
+  });
+
+  group('Startpunkte und der Weg der Grundlagen (ADR-0070)', () {
+    // `packages/progression` kennt den Baum nicht und `packages/theory`
+    // die Punkte nicht. Dass beide Zahlen dieselbe sind, kann nur hier
+    // stehen.
+    test('jeder beginnt mit so vielen Punkten, wie die Grundlagen '
+        'kosten', () {
+      final kosten = theoryBasicsPath.fold(
+        0,
+        (sum, id) => sum + theoryGraph.nodeById(id)!.cost,
+      );
+
+      expect(
+        TheoryPoints.atStart,
+        kosten,
+        reason:
+            'Der Weg der Grundlagen kostet $kosten Punkte, zum Start gibt '
+            'es ${TheoryPoints.atStart}. Wer einen Knoten auf den Weg '
+            'legt oder die Startpunkte ändert, zieht das andere nach.',
+      );
+    });
+
+    test('die fünf Seiten des früheren Handbuchs liegen alle darauf', () {
+      final aufDemWeg = <String>{
+        for (final id in theoryBasicsPath) theoryGraph.nodeById(id)!.lesson.id,
+      };
+
+      expect(aufDemWeg, containsAll(habitsBranch.lessons.map((l) => l.id)));
     });
   });
 }

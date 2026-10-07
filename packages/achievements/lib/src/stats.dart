@@ -77,7 +77,7 @@ class AchievementStats {
 
   // --- Theorie ---
 
-  /// Bestandene Seiten aus Handbuch **und** Graph.
+  /// Bestandene Seiten im Graphen.
   final int passedLessons;
 
   /// Seiten, bei denen alle Fragen saßen.
