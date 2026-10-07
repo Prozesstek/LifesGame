@@ -27,6 +27,7 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       haekchen: zahlen.totalChecks,
       // Gewonnen oder verloren — beides ist „war unten“.
       hatGekaempft: reihe.highestDefeated > 0 || reihe.defeats.isNotEmpty,
+      stufenGeschafft: reihe.highestDefeated,
       seiten: zahlen.passedLessons,
       handbuchFertig: ref.watch(handbookDoneProvider),
       gelernt: ref.watch(unlockedAbilitiesProvider).length,

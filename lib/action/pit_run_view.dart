@@ -10,6 +10,7 @@ import 'boss_text.dart';
 import 'minimap.dart';
 import 'damage_popup.dart';
 import 'action_joystick.dart';
+import 'lauf_zeichen_view.dart';
 
 /// Ein laufender Lauf durch die Grube: Spielfeld, Steuerkreuz, Kopfzeile
 /// und Knöpfe.
@@ -115,6 +116,7 @@ class _PitRunViewState extends State<PitRunView> {
   @override
   Widget build(BuildContext context) {
     final game = widget.game;
+    final zeichen = game.zeichen;
 
     return Focus(
       autofocus: true,
@@ -139,6 +141,14 @@ class _PitRunViewState extends State<PitRunView> {
                 onChanged: (richtung) => game.moveInput = richtung,
               ),
             ),
+            // Über dem Steuerkreuz, aber ohne Tipp: Der Daumen landet
+            // darunter (ADR-0069).
+            if (zeichen != null)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: LaufZeichenView(game: game, zeichen: zeichen),
+                ),
+              ),
             Positioned(top: 8, left: 12, right: 12, child: _Hud(game: game)),
             Positioned.fill(
               child: IgnorePointer(child: _BossTitle(game: game)),
