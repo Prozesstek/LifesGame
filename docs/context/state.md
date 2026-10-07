@@ -150,8 +150,7 @@ Stands, *Gewohnheiten* mit den neuen Knoten, „Die vier Regeln“ und das
 Ergebnis mit dem Knopf gerendert und angesehen. **Nicht gespielt, nicht
 am Handy.**
 
-**PR #107 und #108 sind noch offen**; dieser Block liegt als eigener PR
-auf #108.
+Gemergt am 07.10. als PR #109, zusammen mit #107 und #108.
 
 ### Offen
 
@@ -212,8 +211,7 @@ Neu: `lib/action/lauf_zeichen.dart`, `lauf_zeichen_view.dart`,
 Zeichen am Helden und die Niederlage mit Buch gerendert und angesehen,
 **mit Würfeln statt Figuren. Nicht gespielt, nicht am Handy.**
 
-**PR #107 (erster Start) ist noch offen**; dieser Block liegt als
-eigener PR darauf.
+Gemergt am 07.10. als PR #108.
 
 ### Offen
 
