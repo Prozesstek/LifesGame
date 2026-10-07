@@ -15,21 +15,18 @@ import 'test_view.dart';
 /// Der Überblick im Wissensbaum (ADR-0056): Ring und Zähler an jedem
 /// Knoten mit Unterpunkten, vier Gebiete oben, „Weiterlesen“, Legende.
 void main() {
-  ProviderContainer container() {
+  /// Ein Stand auf Level 10, nichts gelesen. Mit [ohnePunkte] ist kein
+  /// Punkt frei — dann schlägt der Baum auch nichts vor (ADR-0070).
+  ProviderContainer container({bool ohnePunkte = false}) {
     final c = ProviderContainer(
       overrides: [
         playerLevelProvider.overrideWithValue(
           LevelCurve.levelFor(LevelCurve.totalXpFor(10)),
         ),
+        if (ohnePunkte) availableTheoryPointsProvider.overrideWithValue(0),
       ],
     );
     addTearDown(c.dispose);
-    final notifier = c.read(theoryProgressProvider.notifier);
-    for (final lesson in habitsBranch.lessons) {
-      notifier.submit(lesson, <int?>[
-        for (final q in lesson.questions) q.correctIndex,
-      ]);
-    }
     return c;
   }
 
@@ -84,7 +81,8 @@ void main() {
   });
 
   testWidgets('ein Gebiet oben antippen wechselt dorthin', (tester) async {
-    final c = container();
+    // Ohne Punkte: Sonst stünde „Geist“ schon als Vorschlag da.
+    final c = container(ohnePunkte: true);
     await baum(tester, c);
     final geist = theoryGraph.nodeById(theoryRootIds[1])!;
     expect(find.text(geist.name), findsNothing);
@@ -117,10 +115,39 @@ void main() {
     expect(seite.lesson.id, theoryGraph.nodeById('koerper')!.lesson.id);
   });
 
-  testWidgets('ohne offene Seite kein „Weiterlesen“', (tester) async {
-    await baum(tester, container());
+  testWidgets('ohne offene Seite und ohne Punkt kein „Weiterlesen“', (
+    tester,
+  ) async {
+    await baum(tester, container(ohnePunkte: true));
 
     expect(find.byType(ContinueReadingTile), findsNothing);
+  });
+
+  testWidgets('ohne offene Seite schlägt er den Weg der Grundlagen vor', (
+    tester,
+  ) async {
+    await baum(tester, container());
+
+    final vorschlag = tester.widget<ContinueReadingTile>(
+      find.byType(ContinueReadingTile),
+    );
+    expect(vorschlag.node.id, theoryBasicsPath.first);
+    expect(vorschlag.cost, 1);
+  });
+
+  testWidgets('wer etwas geöffnet hat, bekommt das vorgeschlagen und nicht '
+      'den Weg', (tester) async {
+    final c = container();
+    c
+        .read(theoryProgressProvider.notifier)
+        .openNode('koerper', availablePoints: 5);
+    await baum(tester, c);
+
+    final vorschlag = tester.widget<ContinueReadingTile>(
+      find.byType(ContinueReadingTile),
+    );
+    expect(vorschlag.node.id, 'koerper');
+    expect(vorschlag.cost, isNull);
   });
 
   testWidgets('die Legende erklärt die Zeichen', (tester) async {

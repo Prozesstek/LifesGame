@@ -23,7 +23,6 @@ final achievementStatsProvider = Provider<AchievementStats>((ref) {
     habits: ref.watch(habitTrackerProvider),
     theory: ref.watch(theoryProgressProvider),
     graph: ref.watch(theoryGraphProvider),
-    handbook: ref.watch(handbookProvider),
     passedPages: ref.watch(passedPagesProvider),
     ladder: ref.watch(ladderProvider),
     loadout: ref.watch(loadoutProvider),

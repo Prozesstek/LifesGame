@@ -5,6 +5,7 @@ import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 import '../../ui/pixel_art.dart';
 import '../../gear/gear_icon.dart';
+import 'tree_overview.dart';
 
 /// Was nach der letzten Frage steht: Ergebnis, Ertrag, nächster Schritt.
 class LessonResultView extends StatelessWidget {
@@ -14,6 +15,8 @@ class LessonResultView extends StatelessWidget {
     required this.onRetry,
     required this.onDone,
     this.keyGained = false,
+    this.next,
+    this.onNext,
     super.key,
   });
 
@@ -22,6 +25,15 @@ class LessonResultView extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onDone;
 
+  /// Die Seite danach (ADR-0070), oder null. Mit ihr wird sie der
+  /// Hauptknopf, und [onDone] heißt „Fertig“.
+  final TheoryStep? next;
+  final VoidCallback? onNext;
+
+  /// Woran Tests die beiden Knöpfe finden.
+  static const Key nextKey = ValueKey<String>('seite-weiter');
+  static const Key doneKey = ValueKey<String>('seite-fertig');
+
   /// Ob die Seite einen Schlüssel gebracht hat (ADR-0048).
   final bool keyGained;
 
@@ -29,6 +41,7 @@ class LessonResultView extends StatelessWidget {
   Widget build(BuildContext context) {
     final passed = result.isPassed;
     final color = passed ? Palette.success : Palette.enemy;
+    final weiter = next;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -75,7 +88,20 @@ class LessonResultView extends StatelessWidget {
           _HabitUnlock(habit: lesson.unlocksHabit ?? ''),
         ],
         const SizedBox(height: 28),
-        FilledButton(onPressed: onDone, child: const Text('Weiter')),
+        if (weiter != null) ...<Widget>[
+          _NaechsteSeite(schritt: weiter, onTap: onNext),
+          const SizedBox(height: 8),
+          TextButton(
+            key: doneKey,
+            onPressed: onDone,
+            child: const Text('Fertig'),
+          ),
+        ] else
+          FilledButton(
+            key: doneKey,
+            onPressed: onDone,
+            child: const Text('Weiter'),
+          ),
         const SizedBox(height: 8),
         if (!result.isPerfect)
           TextButton(
@@ -83,6 +109,55 @@ class LessonResultView extends StatelessWidget {
             child: Text(passed ? 'Nochmal für alle Punkte' : 'Nochmal'),
           ),
       ],
+    );
+  }
+}
+
+/// Der Knopf zur nächsten Seite: Pfeil, Name — und der Preis, wenn ihr
+/// Knoten noch zu ist. Der Tipp öffnet ihn dann; deshalb steht der Punkt
+/// **auf** dem Knopf und nicht daneben.
+class _NaechsteSeite extends StatelessWidget {
+  const _NaechsteSeite({required this.schritt, required this.onTap});
+
+  final TheoryStep schritt;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = schritt.node;
+    final preis = schritt.needsOpening ? node.cost : null;
+
+    return Semantics(
+      button: true,
+      label: preis == null
+          ? 'Weiter zu ${node.name}'
+          : 'Weiter zu ${node.name}, kostet $preis '
+                '${preis == 1 ? 'Punkt' : 'Punkte'}',
+      excludeSemantics: true,
+      child: FilledButton(
+        key: LessonResultView.nextKey,
+        onPressed: onTap,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(Icons.arrow_forward_rounded, size: 18),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                node.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (preis != null) ...<Widget>[
+              const SizedBox(width: 10),
+              // Auf der Planke, also hell wie ihre Schrift: Das Gold für
+              // Pergament ginge im Holz unter.
+              PunktPreis(cost: preis, color: Palette.textOnDark),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

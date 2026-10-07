@@ -16,6 +16,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:progression/progression.dart';
+import 'package:theory/theory.dart';
 
 void main(List<String> args) {
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
@@ -246,13 +247,24 @@ int _quote(
   return (siege * 100 / laeufe).round();
 }
 
+/// Was der Weg der Grundlagen an Erfahrung bringt, jede Seite fehlerfrei
+/// (ADR-0070): neun Knoten, vom Start weg bezahlbar.
+const int _grundlagenXp =
+    TheoryPoints.atStart *
+    (TheoryRewards.xpForPass + TheoryRewards.xpPerfectBonus);
+
 /// Derselbe Aufbau wie in `tool/balance_sim.dart`: die ersten fünf
 /// Vorlagen, jeden Tag abgehakt.
 ///
 /// **Seit ADR-0042 mit Level und Seltenheit**, zusammengesetzt über
 /// `PitPower.hero` wie in der App. Das Level zählt nur Gewohnheiten und
-/// das Handbuch — Baum, Reihe und Errungenschaften brächten mehr. Die
-/// Quoten bleiben damit eine **untere** Schranke.
+/// den Weg der Grundlagen — der übrige Baum, Reihe und Errungenschaften
+/// brächten mehr. Die Quoten bleiben damit eine **untere** Schranke.
+///
+/// **An Tag 0 ist nichts gelesen** (ADR-0070). Bis dahin stand hier das
+/// Handbuch mit 275 Erfahrung für jeden Tag, also Level 3 schon im
+/// ersten Lauf. Seit ADR-0068 geht es aber nach dem ersten Häkchen
+/// hinab, vor jeder Seite — „Tag 0" ist jetzt wirklich Level 1.
 ActionStats _statsNach(
   int tage, {
   GearBonus bonus = const GearBonus(),
@@ -276,8 +288,8 @@ ActionStats _statsNach(
     tag = tag.next;
   }
 
-  const handbuch = 275;
-  final level = LevelCurve.levelFor(tracker.totalXp + handbuch).level;
+  final gelesen = tage == 0 ? 0 : _grundlagenXp;
+  final level = LevelCurve.levelFor(tracker.totalXp + gelesen).level;
   final waffe = _bestesIn(GearSlot.waffe).rarity.powerFactor;
   final ruestung = _bestesIn(GearSlot.ruestung).rarity.powerFactor;
 

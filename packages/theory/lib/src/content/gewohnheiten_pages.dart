@@ -2,9 +2,11 @@
 /// dem wächst, was Frederik gerade liest (*Die 1%-Methode*, James Clear).
 ///
 /// Drei Ebenen tief: das Überkapitel, darunter die vier Regeln, darunter
-/// je Regel eine Seite. Befüllt sind die ersten zwei Regeln. Die Seiten
-/// setzen das Handbuch voraus („Die Schleife hinter jeder Gewohnheit“)
-/// und wiederholen es nicht.
+/// je Regel eine Seite. Hier stehen das Überkapitel, die Regeln und die
+/// ersten zwei. Regel 3 ist „Zwei Minuten reichen“ aus dem früheren
+/// Handbuch (`habits_lessons.dart`), dessen fünf Seiten seit ADR-0070
+/// unter diesem Kapitel hängen — darunter „Die Schleife hinter jeder
+/// Gewohnheit“, auf der die Regeln aufbauen.
 library;
 
 import '../lesson.dart';
@@ -36,10 +38,10 @@ const Lesson gewohnheitenPage = Lesson(
     ),
     LessonSection(
       heading: 'Worum es hier geht',
-      body: 'Das Handbuch hat die Schleife erklärt: Auslöser, Routine, '
-          'Belohnung. Dieses Gebiet geht weiter und fragt, an welchen '
-          'Stellen der Schleife man eingreifen kann — und wie das im '
-          'eigenen Alltag aussieht, in der eigenen Wohnung.',
+      body: 'Jede Gewohnheit läuft in einer Schleife: Auslöser, Routine, '
+          'Belohnung. Die Seiten unter diesem Kapitel zeigen sie und '
+          'fragen, an welchen Stellen der Schleife man eingreifen kann — '
+          'und wie das im eigenen Alltag aussieht, in der eigenen Wohnung.',
     ),
   ],
   questions: <Question>[
@@ -68,7 +70,7 @@ const Lesson gewohnheitenPage = Lesson(
           'für gute wie für schlechte Gewohnheiten.',
     ),
     Question(
-      prompt: 'Was fragt dieses Gebiet über das Handbuch hinaus?',
+      prompt: 'Was fragen die Seiten unter diesem Kapitel?',
       options: <String>[
         'Wie man ganz ohne jede Gewohnheit auskommen kann',
         'Warum Gewohnheiten für Erwachsene kaum wichtig sind',
@@ -76,8 +78,8 @@ const Lesson gewohnheitenPage = Lesson(
         'Welche Gewohnheiten andere Menschen besser haben',
       ],
       correctIndex: 2,
-      explanation: 'Die Schleife ist bekannt. Jetzt geht es um die Hebel '
-          'an jeder ihrer Stellen.',
+      explanation: 'Erst die Schleife selbst, dann die Hebel an jeder '
+          'ihrer Stellen.',
     ),
   ],
 );

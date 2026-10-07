@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 707 Tests
+flutter test                       # 716 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
@@ -53,7 +53,7 @@ cd packages/gear
 dart test                          # 112 Tests, prüft Preise, Sets, Würfel, Laden und Beute
 
 cd packages/theory
-dart test                          # 148 Tests, prüft auch den Inhalt
+dart test                          # 193 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 25 Tests, nur noch der Wortlaut
@@ -82,7 +82,7 @@ Danach `flutter doctor` bis alles grün ist.
 | Pfad | Inhalt | Tests |
 |---|---|---|
 | `packages/action_combat` | die Grube: 30 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte | 276 |
-| `packages/theory` | Skillbaum-Graph: 30 Seiten, 90 Fragen, Lernfortschritt | 148 |
+| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 193 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte, Machtkurve | 36 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 191 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute | 112 |

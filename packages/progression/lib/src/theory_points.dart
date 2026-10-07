@@ -17,18 +17,25 @@ abstract final class TheoryPoints {
   /// Regel wie bei der Kurve und den Slots.
   static const int perLevel = 1;
 
-  /// Der Punkt, mit dem jeder anfängt (ADR-0051).
+  /// Die Punkte, mit denen jeder anfängt (ADR-0070).
   ///
-  /// **Seit die Wurzeln einen Punkt kosten**, ist der Weg zur ersten
-  /// Fähigkeit drei Schritte lang: Wurzel, Zwischenebene, Thema. Auf
-  /// Level 3 — dort, wo das Handbuch hinführt und der zweite Platz
-  /// aufgeht — gäbe es ohne ihn nur zwei. Der Platz ginge leer auf, und
-  /// die Grube bliebe zu (ADR-0020).
-  static const int atStart = 1;
+  /// **Neun: so viel, wie die Grundlagen kosten.** Seit das Handbuch im
+  /// Baum steht, kosten seine fünf Seiten wie alles einen Punkt, und der
+  /// Weg zu ihnen — Geist, Selbstentwicklung, Gewohnheiten, Die vier
+  /// Regeln — vier weitere (`theoryBasicsPath` in `package:theory`).
+  /// Vorher gab es einen Punkt (ADR-0051), und das Handbuch war
+  /// kostenlos.
+  ///
+  /// **Niemand muss sie dort ausgeben.** Wer sie in ein anderes Gebiet
+  /// steckt, hat die Grundlagen nicht gelesen; das ist die Wahl, die
+  /// diese Zahl kauft. Dass sie zum Weg passt, prüft
+  /// `test/abilities_seam_test.dart` in der App — dieses Package kennt
+  /// den Baum nicht.
+  static const int atStart = 9;
 
   /// Alle Punkte, die ein Spielerleben hergibt.
   ///
-  /// **50: der Startpunkt und einer je Aufstieg.** Der Baum ist seit
+  /// **58: die neun vom Start und einer je Aufstieg.** Der Baum ist seit
   /// ADR-0050 größer, als diese Zahl je öffnen kann — die Knappheit ist
   /// der Zweck (ADR-0037).
   static const int lifetimeTotal =
@@ -36,8 +43,8 @@ abstract final class TheoryPoints {
 
   /// Wie viele Punkte ein Charakter auf [level] insgesamt verdient hat.
   ///
-  /// Level 1 hat nur den Startpunkt ([atStart]); jeder weitere kommt für
-  /// einen *Aufstieg*.
+  /// Level 1 hat nur die Startpunkte ([atStart]); jeder weitere kommt
+  /// für einen *Aufstieg*.
   static int earnedAt(int level) {
     if (level < LevelCurve.minLevel) return 0;
 

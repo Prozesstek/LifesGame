@@ -213,15 +213,18 @@ void main() {
   });
 
   group('Der Startbaum in Zahlen', () {
-    test('58 Knoten — vier Wurzeln, zehn Zwischenebenen, 44 Themen', () {
-      expect(theoryGraph.nodeCount, 58);
+    test('63 Knoten — vier Wurzeln, zehn Zwischenebenen, 49 Themen', () {
+      expect(theoryGraph.nodeCount, 63);
       expect(theoryGraph.roots.length, 4);
     });
 
-    test('kostet achtundfünfzig Theoriepunkte', () {
+    test('kostet dreiundsechzig Theoriepunkte — nichts ist umsonst', () {
       final gesamt = nodes.fold(0, (sum, n) => sum + n.cost);
 
-      expect(gesamt, 58);
+      expect(gesamt, 63);
+      // Seit ADR-0070 auch das frühere Handbuch nicht. Ein kostenloser
+      // Knoten wäre von Anfang an offen und zöge seine Eltern mit auf.
+      expect(nodes.where((n) => n.isFree), isEmpty);
     });
 
     test('fünfzehn Überschriften sind angekündigt', () {
@@ -291,15 +294,21 @@ void main() {
   });
 
   group('Zählen über Zweige und Graph', () {
-    test('Handbuch und Graph überschneiden sich nicht', () {
+    test('das frühere Handbuch steht ganz im Graphen (ADR-0070)', () {
+      // Wer Seiten zählt, zählt den Graphen. Stünde eine der fünf nicht
+      // darin, gäbe es sie für niemanden mehr zu lesen.
       final imGraph = theoryGraph.nodes.map((n) => n.lesson.id).toSet();
       final imHandbuch = habitsBranch.lessons.map((l) => l.id).toSet();
 
-      expect(imGraph.intersection(imHandbuch), isEmpty);
+      expect(imHandbuch, hasLength(5));
+      expect(imGraph, containsAll(imHandbuch));
     });
 
-    test('zusammen sind es 63 Seiten', () {
-      expect(theoryGraph.nodeCount + habitsBranch.lessonCount, 63);
+    test('es sind 63 Seiten, und keine steht zweimal im Graphen', () {
+      final seiten = theoryGraph.nodes.map((n) => n.lesson.id).toList();
+
+      expect(seiten, hasLength(63));
+      expect(seiten.toSet(), hasLength(63));
     });
 
     test('ein bestandener Knoten wird gezählt', () {

@@ -4,6 +4,12 @@
 **Status:** Aktiv
 **Entschieden von:** Frederik
 
+> **Was ADR-0070 ändert:** Jeder beginnt mit neun Punkten statt mit
+> einem, weil das Handbuch jetzt im Baum steht und seine Seiten kosten.
+> **Was hier gültig bleibt:** Jeder Knoten kostet einen Punkt, auch die
+> Wurzeln, und offen ist, was gekauft, bestanden oder einziger Eltern
+> eines Offenen ist.
+
 ## Kontext
 
 Nachdem das Gerüst aus [ADR-0050](0050-zwischenebenen-und-angekuendigte-gebiete.md)

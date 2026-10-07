@@ -7,7 +7,9 @@ import 'lesson.dart';
 ///
 /// Eine Levelsperre für den Zweig als Ganzes gab es bis ADR-0019. Seitdem
 /// öffnet der Graph über Theoriepunkte, und die flachen Zweige tragen nur
-/// noch das Handbuch und die Lektionen, auf die der Graph zeigt.
+/// noch die Lektionen, auf die der Graph zeigt — seit ADR-0070 auch die
+/// des früheren Handbuchs. Die Reihenfolge darin sperrt im Spiel nichts
+/// mehr.
 class TheoryBranch {
   const TheoryBranch({
     required this.id,

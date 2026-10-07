@@ -337,12 +337,41 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final result = _result;
     if (result == null) return const SizedBox.shrink();
 
+    // **Direkt zur nächsten** (ADR-0070): Wer im Fluss ist, liest weiter,
+    // ohne über den Baum zu gehen. Nur nach bestandener Seite — sonst ist
+    // „Nochmal“ der nächste Schritt.
+    final weiter = result.isPassed
+        ? ref.watch(stepAfterLessonProvider(_lesson.id))
+        : null;
+
     return LessonResultView(
       lesson: _lesson,
       result: result,
       keyGained: _schluessel,
+      next: weiter,
+      onNext: weiter == null ? null : () => _zurNaechsten(weiter),
       onRetry: _startQuiz,
       onDone: () => Navigator.of(context).pop(),
+    );
+  }
+
+  /// Öffnet die nächste Seite, falls sie noch zu ist, und liest sie an
+  /// der Stelle dieser — „Zurück“ führt von dort in den Baum, nicht durch
+  /// alle gelesenen Seiten.
+  void _zurNaechsten(TheoryStep schritt) {
+    if (schritt.needsOpening) {
+      final offen = ref
+          .read(theoryProgressProvider.notifier)
+          .openNode(
+            schritt.node.id,
+            availablePoints: ref.read(availableTheoryPointsProvider),
+          );
+      if (!offen) return;
+    }
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => LessonScreen(lesson: schritt.node.lesson),
+      ),
     );
   }
 }

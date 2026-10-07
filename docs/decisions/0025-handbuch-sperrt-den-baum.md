@@ -1,7 +1,7 @@
 # ADR-0025: Das Handbuch sperrt den Baum, nicht den Kampf
 
 **Datum:** 31.08.2026
-**Status:** Aktiv
+**Status:** Abgelöst durch ADR-0070
 **Entschieden von:** Frederik
 
 ## Kontext

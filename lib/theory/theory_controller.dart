@@ -46,7 +46,7 @@ class TheoryController extends Notifier<TheoryProgress> {
     return true;
   }
 
-  /// Öffnet jeden Knoten und besteht jede Seite — Handbuch wie Graph.
+  /// Öffnet jeden Knoten und besteht jede Seite.
   ///
   /// **Nur für den Entwicklermodus** (ADR-0021), und bewusst über
   /// [TheoryProgress.submit] statt über einen Abkürzungspfad: So gelten
@@ -81,39 +81,14 @@ class TheoryController extends Notifier<TheoryProgress> {
 final theoryProgressProvider =
     NotifierProvider<TheoryController, TheoryProgress>(TheoryController.new);
 
-/// Der freie Zweig — das Handbuch der App.
+/// Ob die fünf Seiten des früheren Handbuchs bestanden sind.
 ///
-/// Er kostet keinen Theoriepunkt (ADR-0012), weil er erklärt, wie das
-/// Spiel funktioniert. Seit ADR-0018 ist er zusätzlich der Einstieg: Der
-/// Kampf öffnet sich erst, wenn er durch ist.
-final handbookProvider = Provider<TheoryBranch>((ref) {
-  return theoryTree.branches.firstWhere(
-    (branch) => branch.id == handbookBranchId,
-    orElse: () => theoryTree.branches.first,
-  );
-});
-
-/// Die Id des Handbuch-Zweigs. Steht hier und nicht verstreut im Code —
-/// an ihr hängt seit ADR-0018 der Zugang zum Kampf.
-const String handbookBranchId = 'habits';
-
-/// Ob das Handbuch durchgearbeitet ist.
-///
-/// **Abschliessen, nicht anfangen.** Ein halb gelesener Zweig ist genau
-/// das Verhalten, vor dem `konzept.md` warnt — und vier der fünf
-/// Lektionen reichen rechnerisch nicht für Level 3 (ADR-0018).
-final handbookDoneProvider = Provider<bool>((ref) {
-  return ref
-      .watch(theoryProgressProvider)
-      .isBranchComplete(ref.watch(handbookProvider));
-});
-
-/// Wie viele Lektionen des Handbuchs noch fehlen. 0, wenn es durch ist.
-final handbookRemainingProvider = Provider<int>((ref) {
-  final branch = ref.watch(handbookProvider);
-  final progress = ref.watch(theoryProgressProvider);
-
-  return branch.lessons.length - progress.passedCount(branch);
+/// **Sperrt nichts mehr** (ADR-0070): Bis dahin hing daran der Baum
+/// (ADR-0025), davor der Kampf (ADR-0018). Übrig ist eine Bedingung der
+/// Startseite — wer sie vor dem Umbau gelesen hatte, behält den Kreis der
+/// Fähigkeiten.
+final grundlagenGelesenProvider = Provider<bool>((ref) {
+  return ref.watch(theoryProgressProvider).isBranchComplete(habitsBranch);
 });
 
 /// Der Theoriegraph aus ADR-0019 — vier Wurzeln, einundzwanzig Knoten darunter.
@@ -147,26 +122,57 @@ final availableTheoryPointsProvider = Provider<int>((ref) {
   return verdient + geschenkt;
 });
 
-/// Bestandene Seiten insgesamt — Handbuch **und** Graph.
+/// Bestandene Seiten insgesamt.
 ///
-/// **Warum es diesen Provider gibt.** Bis ADR-0019 lagen alle Lektionen
-/// in `theoryTree`, und `passedCountIn(theoryTree)` war die ganze
-/// Wahrheit. Seither liegen zwölf der neunundzwanzig Seiten nur im
-/// Graphen — wer weiter die Zweige zählt, unterschlägt sie. Genau das
-/// war nach dem Umbau kurzzeitig der Fall, beim Titelfortschritt und auf
-/// dem Startbildschirm.
+/// **Der Graph ist die ganze Wahrheit** (ADR-0070). Bis dahin stand das
+/// Handbuch daneben und wurde dazugezählt; seit seine fünf Seiten Knoten
+/// sind, zählte das sie doppelt. Wer bestandene Seiten braucht, nimmt
+/// diesen Provider und weder `theoryTree` noch einen einzelnen Zweig.
 final passedPagesProvider = Provider<int>((ref) {
-  final progress = ref.watch(theoryProgressProvider);
-
-  return progress.passedCount(ref.watch(handbookProvider)) +
-      progress.passedNodeCount(ref.watch(theoryGraphProvider));
+  return ref
+      .watch(theoryProgressProvider)
+      .passedNodeCount(ref.watch(theoryGraphProvider));
 });
 
 /// Wie viele Seiten es insgesamt gibt.
-///
-/// Handbuch und Graph überschneiden sich nicht — das prüft
-/// `graph_content_test.dart`, damit hier nichts doppelt gezählt wird.
 final totalPagesProvider = Provider<int>((ref) {
-  return ref.watch(handbookProvider).lessonCount +
-      ref.watch(theoryGraphProvider).nodeCount;
+  return ref.watch(theoryGraphProvider).nodeCount;
+});
+
+/// Was der Baum als Nächstes vorschlägt, wenn man im Gebiet [under]
+/// steht — **rechnet nichts**: Die Regel steht in
+/// `TheoryProgress.suggestedStep`, der Weg in `theoryBasicsPath`.
+final suggestedStepProvider = Provider.family<TheoryStep?, String>((
+  ref,
+  under,
+) {
+  return ref
+      .watch(theoryProgressProvider)
+      .suggestedStep(
+        ref.watch(theoryGraphProvider),
+        path: theoryBasicsPath,
+        availablePoints: ref.watch(availableTheoryPointsProvider),
+        under: under,
+      );
+});
+
+/// Die Seite nach der Lektion [lessonId] (ADR-0070) — für den Knopf auf
+/// dem Ergebnis. Null, wenn die Lektion an keinem Knoten hängt oder
+/// nichts zu lesen und nichts zu bezahlen ist.
+final stepAfterLessonProvider = Provider.family<TheoryStep?, String>((
+  ref,
+  lessonId,
+) {
+  final graph = ref.watch(theoryGraphProvider);
+  for (final node in graph.nodes) {
+    if (node.lesson.id != lessonId) continue;
+    return ref
+        .watch(theoryProgressProvider)
+        .nextAfter(
+          node.id,
+          graph,
+          availablePoints: ref.watch(availableTheoryPointsProvider),
+        );
+  }
+  return null;
 });
