@@ -7,6 +7,8 @@ import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/home/widgets/status_leiste.dart';
@@ -30,7 +32,14 @@ void main() {
   group('HomeScreen', () {
     testWidgets('zeigt alle Bereiche des Konzepts', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       for (final title in <String>[
@@ -46,11 +55,13 @@ void main() {
       }
     });
 
-    testWidgets('nur der Kampf ist zu Beginn gesperrt', (tester) async {
-      // Der Startbildschirm hatte lange gesperrte Kacheln, damit
-      // sichtbar blieb, wohin es geht. Seit ADR-0018 ist genau eine
-      // wieder zu: Mit nur einem Move ist der erste Kampf nicht knapp,
-      // sondern unmöglich.
+    testWidgets('kein Kreis ist gesperrt, auch der Kampf nicht', (
+      tester,
+    ) async {
+      // **Bis ADR-0068 war der Kampf zu**, solange keine Fähigkeit auf
+      // einem Platz lag (ADR-0020). Stufe 1 ist mit der Waffe allein
+      // schlagbar; die Sperre trug nur noch die Kette Handbuch → Baum →
+      // Kampf, und die hält jetzt das Aufdecken der Kreise.
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
@@ -62,37 +73,9 @@ void main() {
       final kreise = tester
           .widgetList<HubCircle>(find.byType(HubCircle))
           .toList();
-      final locked = kreise
-          .where((k) => k.isLocked)
-          .map((k) => k.label)
-          .toList();
 
       expect(kreise, hasLength(7));
-      expect(locked, <String>['Kampf']);
-    });
-
-    testWidgets('der gesperrte Kreis nennt den Weg, nicht die Absage', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
-      await tester.pump();
-
-      // **Der Satz steht seit Issue #35 nicht mehr dauerhaft da.** Ein
-      // Kreis hat keinen Platz für ihn; ADR-0020 nennt ihn trotzdem
-      // wichtig, weil eine Sperre ohne Weg jemanden in die Theorie
-      // zurückschickt, wo er nichts mehr zu tun hat. Also kommt er beim
-      // Antippen — und dieser Test geht deshalb genau diesen Weg.
-      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsNothing);
-
-      await tester.tap(find.text('Kampf'));
-      await tester.pump();
-
-      // **Seit ADR-0025 nennt er nicht mehr das Handbuch.** Der Kampf
-      // hängt nur noch am Moveset; das Handbuch sperrt den Baum. Die
-      // Kette ist dieselbe, sie steht nur nicht mehr zweimal da.
-      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
-      expect(find.textContaining('Erst das Handbuch'), findsNothing);
+      expect(kreise.where((k) => k.isLocked), isEmpty);
     });
 
     testWidgets('das Handbuch sperrt den Kampf nicht mehr (ADR-0025)', (
@@ -101,7 +84,7 @@ void main() {
       // Der Gegenbeweis zur alten Sperre: Ein Stand **ohne** Handbuch,
       // aber mit zwei Moves, darf kämpfen. Bis ADR-0025 war das
       // ausgeschlossen -- und zwar aus einem Grund, der nie der echte
-      // war (siehe `combatUnlockedProvider`).
+      // war (ADR-0020, abgelöst durch ADR-0068).
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
@@ -147,7 +130,14 @@ void main() {
 
     testWidgets('Theorie führt zum Skillbaum', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Theorie'));
@@ -177,15 +167,11 @@ void main() {
       expect(find.byType(LadderScreen), findsOneWidget);
     });
 
-    testWidgets('ohne Fähigkeit bleibt der Kampf zu (ADR-0020)', (
+    testWidgets('ohne Fähigkeit steht der Kampf offen (ADR-0068)', (
       tester,
     ) async {
-      // **Der Grund für diesen Test.** Bis ADR-0019 waren vier
-      // Fähigkeiten von Anfang an offen — das Handbuch öffnete den
-      // zweiten Platz, und es passte immer etwas hinein. Seit sie an
-      // Knoten hängen, kann der Platz aufgehen und leer bleiben. Dann
-      // stünde der Spieler mit einem Move vor einem Gegner, den die
-      // Simulation bei 0 % ausweist (ADR-0018).
+      // Der Gegenbeweis zu ADR-0020: Handbuch gelesen, nichts gelernt,
+      // nichts angelegt — und die Grube geht trotzdem auf.
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
@@ -199,56 +185,20 @@ void main() {
       );
       await tester.pump();
 
-      final locked = tester
-          .widgetList<HubCircle>(find.byType(HubCircle))
-          .where((k) => k.isLocked)
-          .map((k) => k.label)
-          .toList();
-
-      expect(locked, <String>['Kampf']);
-
       await tester.tap(find.text('Kampf'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.textContaining('Erst eine Fähigkeit lernen'), findsOneWidget);
+      expect(find.byType(LadderScreen), findsOneWidget);
     });
 
-    testWidgets('gelernt, aber nicht angelegt nennt den anderen Weg', (
-      tester,
-    ) async {
-      // Wer die Fähigkeit hat, sie aber auf keinem Platz liegen hat,
-      // darf nicht in die Theorie zurückgeschickt werden — dort ist
-      // nichts mehr zu tun.
-      useTallView(tester);
-
-      var progress = _mitHandbuch();
-      final lesson = _ersterFaehigkeitsknoten.lesson;
-      progress = progress.submit(lesson, <int?>[
-        for (final question in lesson.questions) question.correctIndex,
-      ]).progress;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            savedGameProvider.overrideWithValue(SaveData(theory: progress)),
-          ],
-          child: const LifesGameApp(),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Kampf'));
-      await tester.pump();
-
-      expect(find.textContaining('Leg eine Fähigkeit'), findsOneWidget);
-    });
-
-    testWidgets('ein gesperrter Kampf führt nirgendwohin', (tester) async {
+    testWidgets('vor dem ersten Häkchen gibt es keinen Kampf', (tester) async {
+      // Der Kreis steht an seinem Platz, ist aber noch nicht aufgedeckt:
+      // Ein Tipp dorthin geht ins Leere (ADR-0068).
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      await tester.tap(find.text('Kampf'));
+      await tester.tap(find.text('Kampf'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(find.byType(LadderScreen), findsNothing);
@@ -256,7 +206,14 @@ void main() {
 
     testWidgets('Laden führt zum Shop', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Laden'));
@@ -271,7 +228,14 @@ void main() {
       // holen gibt — und das ist genau dann nützlich, wenn man noch
       // nichts hat.
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Fähigkeiten'));
@@ -305,7 +269,14 @@ void main() {
 
     testWidgets('Ausrüstung führt zum eigenen Bildschirm', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Ausrüstung'));
@@ -360,7 +331,14 @@ void main() {
 
     testWidgets('Charakter führt zum Charakterbildschirm', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Charakter'));

@@ -147,6 +147,18 @@ void main() {
       expect(tage, lessThan(45), reason: 'zu teuer, der Shop bleibt Deko');
     });
 
+    test('das billigste Stück ist nach wenigen Tagen bezahlbar', () {
+      // Ab diesem Betrag zeigt die Startseite den Laden (ADR-0068). Zu
+      // teuer, und der Kreis fehlt eine Woche lang.
+      final tage = GearCatalog.cheapestPrice / goldProTag;
+
+      expect(GearCatalog.cheapestPrice, greaterThan(0));
+      expect(tage, lessThan(5));
+      for (final item in GearCatalog.all) {
+        expect(item.price, greaterThanOrEqualTo(GearCatalog.cheapestPrice));
+      }
+    });
+
     test('das teuerste offene Stück ist in etwa einem Monat tragbar', () {
       // **Nur die Stücke, die von Anfang an kaufbar sind.** Die drei
       // verdienten je Platz haben ihre eigene Grenze im nächsten Test.

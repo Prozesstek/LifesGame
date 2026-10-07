@@ -83,7 +83,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 117 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 118 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
@@ -125,7 +125,6 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
-| `lib/action/pit_gate.dart` | ob die Grube offensteht, und warum nicht | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
 | `lib/action/pit_text.dart` | Name, Beschreibung **und alle Werte** einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
@@ -134,7 +133,10 @@ durch die Grube ersetzt und gelöscht.
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)) | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
+| `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint und welcher leuchtet — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)) | Flutter |
+| `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
+| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
 | `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
@@ -234,7 +236,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 670 Tests
+flutter test             # 691 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -254,7 +256,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 174 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 42 Tests
-cd packages/gear        ; dart test    # 117 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
+cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 36 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -667,18 +669,32 @@ und nirgends gelesen (`gotchas.md`). Deshalb prüft `pit_test.dart`, dass
 eine Stufe die Gegner **wirklich** härter macht, nicht nur, dass der
 Faktor steigt.
 
-**Die Grube hängt am Moveset** — Waffe plus eine Fähigkeit
-(`lib/action/pit_gate.dart`). Gemessen wurde die Zahl im Rundenkampf, wo
-ein einzelner Zug den ersten Gegner unschlagbar machte. In der Grube ist
-Stufe 1 auch ohne Fähigkeit schlagbar; die Sperre bleibt, weil sie die
-Kette trägt, und ADR-0039 vermerkt sie als offen. Seit
-[ADR-0025](docs/decisions/0025-handbuch-sperrt-den-baum.md) ist sie die
-**einzige** Bedingung.
+**Die Grube ist nie gesperrt**
+([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)).
+Bis dahin hing sie am Moveset, Waffe plus eine Fähigkeit (ADR-0020);
+gemessen war das im Rundenkampf, und in der Grube ist Stufe 1 mit der
+Waffe allein schlagbar. Wer zuerst kämpft, weiß danach, wofür er liest.
 
-**Das Handbuch sperrt dafür den Baum.** Solange es offen ist, *ist* es
-der Theorie-Bildschirm. Die Kette greift damit unverändert — ohne
-Handbuch kein Baum, ohne Baum keine zweite Fähigkeit, ohne zweite
-Fähigkeit kein Kampf. Sie steht nur nicht mehr an zwei Stellen.
+**Dafür kommen die Bereiche nach und nach.** Die Startseite fragt zuerst
+nach einer Gewohnheit, und jeder Kreis erscheint, wenn es dort etwas zu
+tun gibt; der nächste trägt einen Punkt:
+
+| Frage | Antwortet |
+|---|---|
+| Welcher Kreis steht da? | `ErsterStart.aus` — Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf (oder dem dritten Häkchen), Fähigkeiten mit dem Handbuch, Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
+| Welcher leuchtet? | `ErsterStart.leuchtet` — höchstens einer, und jede Bedingung erledigt sich selbst |
+| Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
+
+**Abgeleitet, nie gespeichert, und jede Zahl darf nur wachsen** — sonst
+verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in
+`Bereich` und eine Bedingung dort. **Tests, die von einem leeren Stand
+aus einen Kreis antippen**, überschreiben `ersterStartProvider` mit
+`ErsterStart.allesOffen`; `test/erster_start_test.dart` geht den Weg vom
+leeren Stand bis in die Grube.
+
+**Das Handbuch sperrt weiter den Baum.** Solange es offen ist, *ist* es
+der Theorie-Bildschirm: ohne Handbuch kein Baum, ohne Baum keine
+Fähigkeit. Nur der Kampf hängt nicht mehr daran.
 
 Das Handbuch war nie der Grund, immer ein Stellvertreter, und das war
 kein Zufall: Die fünf Lektionen geben 275 Erfahrung und damit Level 3 —
@@ -752,7 +768,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 | `activeMovesProvider` | die Ids, mit denen in die Grube gegangen wird — Waffenzug zuerst |
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten aus Handbuch **und** Graph |
-| `combatUnlockedProvider` | ob die Grube offensteht (ADR-0020) |
+| `ersterStartProvider` | welche Bereiche die Startseite zeigt (ADR-0068) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |

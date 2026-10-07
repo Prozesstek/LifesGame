@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../action/pit_gate.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
@@ -48,17 +47,6 @@ class VillageScreen extends ConsumerWidget {
     return WalkScreen(
       scene: VillageScene.dorf,
       onEnter: (context, ort) async {
-        // Die Höhle ist zu, solange der Kampf es ist — derselbe Satz wie
-        // auf dem Kreis der Startseite (ADR-0020).
-        if (ort == VillagePlace.hoehle && !ref.read(combatUnlockedProvider)) {
-          final grund = ref.read(combatBlockReasonProvider);
-          if (grund != null) {
-            ScaffoldMessenger.of(context)
-              ..clearSnackBars()
-              ..showSnackBar(SnackBar(content: Text(grund)));
-          }
-          return;
-        }
         final ziel = _ziel(ort);
         if (ziel == null) return;
         await Navigator.of(

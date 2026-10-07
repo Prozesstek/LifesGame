@@ -192,9 +192,10 @@ void main() {
       expect(find.byType(SkillTreeScreen), findsOneWidget);
     });
 
-    testWidgets('die Höhle bleibt zu, solange der Kampf es ist', (
+    testWidgets('die Höhle steht von Anfang an offen (ADR-0068)', (
       tester,
     ) async {
+      // Bis dahin blieb sie zu, solange keine Fähigkeit angelegt war.
       final spiel = await pumpDorf(tester);
       spiel.walker.walkTo(
         VillageMap.centerOf(village.doors[VillagePlace.hoehle]!),
@@ -204,8 +205,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byType(LadderScreen), findsNothing);
-      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byType(LadderScreen), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
     });
 
     testWidgets('jedes Dorfbild ist abgelegt und angemeldet', (tester) async {

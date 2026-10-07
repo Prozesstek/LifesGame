@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 04.10.2026 · Frederik
+**Zuletzt aktualisiert:** 06.10.2026 · Frederik
 
 ---
 
@@ -25,7 +25,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
-| **Startseite** | sieben Kreise, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken | ADR-0049, -0053, -0057, -0058 |
+| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 58 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner | ADR-0039, -0040, -0041, -0046, -0062, -0063 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 670, dazu die acht Packages (theory 174, habits 324, gear
-117, action_combat 276, progression 42, abilities 36, identity 25,
+**Tests:** App 691, dazu die acht Packages (theory 174, habits 324, gear
+118, action_combat 276, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
@@ -54,8 +54,8 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 **Vor einer Veröffentlichung** (Durchsicht vom 02.10.). **Entschieden
 am 02.10. (Frederik): Ziel ist eine Android- und iOS-App, aber erst
 später — zuerst wird das Konzept weiter ausgebaut.** Store bleibt auf
-der Sperrliste in `ziele.md`. Offen bis dahin: Datenverlust, Erinnerung und Android-App, der lange Weg
-zum ersten Kampf, ~~nur tägliche Gewohnheiten~~ (gebaut, ADR-0064),
+der Sperrliste in `ziele.md`. Offen bis dahin: Datenverlust, Erinnerung und Android-App, ~~der lange Weg
+zum ersten Kampf~~ (gebaut, ADR-0068), ~~nur tägliche Gewohnheiten~~ (gebaut, ADR-0064),
 Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
 
 **Inhalt und Balance:**
@@ -67,7 +67,9 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 - Ob vier bis fünf Beutestücke am Tag das Inventar fluten;
   `runway_sim` zählt den Laden noch als Katalogsumme.
 - Ob die Uhr in der Grube beim ersten Erkunden reicht.
-- Der Weg zum ersten Kampf ist lang (Handbuch, drei Knoten, anlegen).
+- ~~Der Weg zum ersten Kampf ist lang~~ — seit ADR-0068 geht es nach
+  dem ersten Häkchen in die Grube. Ob Stufe 1 am ersten Tag für einen
+  Menschen so leicht ist wie für den Bot, ist nicht gespielt.
 
 **Oberfläche, nicht am Handy geprüft:**
 
@@ -90,6 +92,57 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 06.10.2026: der erste Start — Frage, dann Kreis für Kreis
+
+Frederik: „weiter an der UX und UI arbeiten“, aus vier Blöcken gewählt:
+**der erste Start**. In drei Fragerunden entschieden:
+[ADR-0068](../decisions/0068-erster-start-deckt-die-bereiche-auf.md).
+
+| Was | Wie |
+|---|---|
+| **Die erste Frage** | statt „Heute“ steht „Was willst du jeden Tag tun?“: sechs Vorschläge (ein Tipp legt an) und ein Feld für Eigenes mit den vier Werten als Zeichen |
+| **Kreise nach und nach** | Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf, Fähigkeiten mit dem Handbuch, Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2; jeder wächst an seinem Platz heran |
+| **Der nächste leuchtet** | ein Punkt am Kreis und drei Pulse: Kampf, dann Theorie, dann Fähigkeiten |
+| **Kampf früh** | die Grube ist nie mehr gesperrt, Stufe 1 geht mit der Waffe allein (`pit_sim` Tag 0: 93 % für den Bot) |
+| **Abgeleitet** | kein Feld im Spielstand; eure Stände und jeder eingefügte sehen sofort alles |
+
+**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
+
+- **Die Frage ist eine Karte, kein Dialog.**
+- **Der erste Vorschlag startet die Startvorlage**; die anderen und das
+  freie Feld verbrauchen den einen Platz für eine eigene Gewohnheit.
+- **Die Theorie kommt auch ohne Kampf**, mit dem dritten Häkchen.
+- **„Ich habe schon einen Stand“ steht in der ersten Frage** — Einfügen
+  gab es sonst nur im Charakter, und der kommt erst mit Level 2.
+- **Tagesaufgaben stehen erst ab dem ersten Häkchen da.**
+
+Gelöscht: `lib/action/pit_gate.dart`, `combatUnlockedProvider` und der
+Satz am gesperrten Kreis; auch die Höhle im Dorf ist offen. ADR-0020 ist
+abgelöst, das Handbuch sperrt weiter den Baum (ADR-0025).
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Der
+Leuchtring sah aus wie der Fortschrittsring der Gewohnheiten daneben,
+jetzt ist es ein Punkt. Die Vorschläge standen mit doppeltem Abstand
+untereinander.
+
+App 691 (vorher 670), gear 118 (vorher 117). Die Frage, das Feld für
+Eigenes und die Startseite nach dem ersten Häkchen und nach dem ersten
+Lauf gerendert und angesehen. **Nicht gespielt, nicht am Handy.**
+
+### Offen
+
+- Ob Stufe 1 am ersten Tag für einen Menschen so leicht ist wie für den
+  Bot, und was eine Niederlage im allerersten Lauf auslöst.
+- **Die Grube erklärt nichts**: Steuerung, Uhr und Tor stehen ohne
+  Einführung da.
+- Das Handbuch ist weiter fünf Lektionen lang, bevor der Baum aufgeht.
+- Auslöser, Wochentage und Belohnung fragt am ersten Tag niemand von
+  selbst; das geht erst über die Kachel.
+- Level 2 für den Charakter und drei Häkchen für die Theorie sind
+  gesetzt, nicht gemessen.
+- AktivesBrett hat das nicht gesehen; die Kette aus ADR-0020/-0025 war
+  eine gemeinsame Linie.
 
 ## 04.10.2026: Zeitziele laufen als Timer
 

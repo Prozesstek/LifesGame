@@ -652,4 +652,17 @@ abstract final class GearCatalog {
     }
     return sum;
   }
+
+  /// Was das billigste Stück kostet.
+  ///
+  /// Der Maßstab für „im Laden gibt es etwas für mich“: Vorher ist er
+  /// für einen neuen Spieler ein Schaufenster, in dem nichts bezahlbar
+  /// ist (ADR-0068).
+  static int get cheapestPrice {
+    var min = all.first.price;
+    for (final item in all) {
+      if (item.price < min) min = item.price;
+    }
+    return min;
+  }
 }
