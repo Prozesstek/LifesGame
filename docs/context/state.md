@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 07.10.2026 · Frederik
+**Zuletzt aktualisiert:** 09.10.2026 · Frederik
 
 ---
 
@@ -42,6 +42,11 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 
 ## Offen, gesammelt
 
+**Die Richtung** (09.10., [ADR-0071](../decisions/0071-das-naechste-level.md)):
+Tagesgrube, Lagerfeuer, Schatten, Saisons, Seilschaft — nach und nach,
+jede mit eigener Konzeptrunde. Die Fragen dafür stehen in der Vorlage
+[`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
+
 **Braucht euch beide:**
 
 - ~~**Was der Testlauf misst.**~~ Entschieden am 27.09. (Frederik):
@@ -50,13 +55,15 @@ der alle prüft, wartet auf den `workflow`-Scope (Eintrag vom 27.09.).
 - **Das Dorf** statt der Kreise? Frederik lehnt es ab (Issue #88) und
   will stattdessen das **Haus** ausbauen (Möbel, Haustiere). Braucht
   AktivesBrett und einen ADR.
+- **Die fünf Ideen** aus ADR-0071 hat AktivesBrett nicht gesehen.
 
 **Vor einer Veröffentlichung** (Durchsicht vom 02.10.). **Entschieden
 am 02.10. (Frederik): Ziel ist eine Android- und iOS-App, aber erst
 später — zuerst wird das Konzept weiter ausgebaut.** Store bleibt auf
 der Sperrliste in `ziele.md`. Offen bis dahin: Datenverlust, Erinnerung und Android-App, ~~der lange Weg
 zum ersten Kampf~~ (gebaut, ADR-0068), ~~nur tägliche Gewohnheiten~~ (gebaut, ADR-0064),
-Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.10.
+Lizenzen der Assets, Fremde als Tester (mit der Tagesgrube ohne Store
+möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 
 **Inhalt und Balance:**
 
@@ -95,6 +102,45 @@ Lizenzen der Assets, Fremde als Tester. Die ganze Liste steht im Eintrag vom 02.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 09.10.2026: das nächste Level — fünf Ideen, nach und nach
+
+Frederik fragte, was das Konzept auf das nächste Level bringt und Erfolg
+sichert. Claude hat fünf Ideen vorgeschlagen, Frederik: „finde alle Ideen
+super, halt die auf jeden Fall fest, das bauen wir nach und nach.“ Die
+Richtung steht in [ADR-0071](../decisions/0071-das-naechste-level.md),
+die Einzelheiten und die Fragen für die Konzeptrunden in der Vorlage
+[`docs/vorlagen/das-naechste-level.md`](../vorlagen/das-naechste-level.md).
+
+| Idee | in einem Satz |
+|---|---|
+| **Tagesgrube** | dieselbe Grube für alle, aus dem Datum gesät, ein Versuch, ein Einheitsheld; stärker macht nur, ob man heute in Form ist; danach ein Text zum Teilen, wie bei Wordle |
+| **Lagerfeuer** | abends eine Minute für Rückfrage, Truhe, Aufgaben und Wochenrückblick statt fünf Dingen, die um Mitternacht verfallen |
+| **Schatten** | ganz unten wartet man selbst, wie man vor 30 Tagen war; die vier Wächter werden innere Gegner |
+| **Saisons** | sechs Wochen, ein Thema aus einem gelesenen Buch: Seiten, Vorlagen, ein Wächter, etwas fürs Haus |
+| **Seilschaft** | zwei bis vier an einem Seil; wer einen fälligen Tag verpasst, wird einmal die Woche gehalten; der erste Server |
+
+**Positionierung:** das Spiel, das dich wegschickt. **Grundsatz:**
+weniger Systeme, die enger zusammenhängen — vier der fünf bündeln, was
+es schon gibt. **Nichts davon ist gebaut**; jede Idee bekommt vor dem
+Bau ihre Konzeptrunde.
+
+**Beim Nachsehen im Code gefunden**, beides steht in der Vorlage:
+
+- **Die Tagesgrube ist fast da.** Karte, Wächter und Besetzung kommen
+  schon aus dem Startwert; nur `PitScreen._neuerLauf` würfelt ihn frei.
+- **Der Schatten kann nicht an den Werten von damals hängen**: Sie sind
+  nach 32 bis 40 Häkchen je Wert gedeckelt. Und nicht jede Erfahrung
+  trägt ein Datum — Häkchen und Rückfragen schon, Seiten und erste Siege
+  nicht.
+
+### Offen
+
+- Reihenfolge (Tagesgrube, Lagerfeuer, Schatten, Saisons, Seilschaft)
+  und Messlatte (zehn Fremde, zwei Wochen, drei teilen noch) sind
+  Claudes Vorschlag, nicht ausdrücklich bestätigt.
+- Ob die vier Dailies in der Tagesgrube aufgehen (ADR-0040).
+- AktivesBrett hat ADR-0071 nicht gesehen.
 
 ## 07.10.2026, danach: das Handbuch steht im Baum
 
