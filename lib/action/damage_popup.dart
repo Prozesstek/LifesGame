@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 
 import '../ui/palette.dart';
 
-/// Eine Zahl, die über einem Treffer aufsteigt und verblasst.
+/// Eine Zahl, die über einem Treffer aufploppt, im Bogen davonfliegt und
+/// erst am Ende verblasst.
 ///
 /// **Eine reine Rechnung, kein Flame-Gebilde.** Dieselbe Trennung wie bei
 /// `damageReadoutFor` im rundenbasierten Kampf, und aus demselben
@@ -16,6 +19,10 @@ class DamagePopup {
     required this.color,
     required this.origin,
     required this.scale,
+    this.side = 0,
+    this.isCrit = false,
+    this.amount = 0,
+    this.mergeKey,
   });
 
   /// Was ein gefallener Gegner einbringt (ADR-0041): golden, etwas höher
@@ -45,20 +52,37 @@ class DamagePopup {
   ///
   /// Ein Schlag, der nichts anrichtet, bekommt keine Null über den Kopf:
   /// Eine Null liest sich wie ein Fehler, nicht wie ein Ergebnis.
-  static DamagePopup? forHit(HitLanded hit) {
+  ///
+  /// [scale] sagt, wie gross der Treffer gemessen an den letzten ist
+  /// ([HitAverage]), [side], nach welcher Seite er fliegt.
+  static DamagePopup? forHit(HitLanded hit, {double scale = 1, int side = 0}) {
     if (hit.amount <= 0) return null;
 
     final amSpieler = hit.targetFaction == Faction.held;
     return DamagePopup(
       text: '${hit.amount}',
-      color: amSpieler
-          ? Palette.enemyOnDark
-          : (hit.isCrit ? Palette.goldOnDark : Palette.textOnDark),
+      color: colorOf(hit),
       origin: hit.at,
       // Ein kritischer Treffer ist grösser. Er ist der seltene Fall, und
       // Seltenes darf auffallen.
-      scale: hit.isCrit ? 1.6 : 1,
+      scale: hit.isCrit ? scale * critScale : scale,
+      side: side,
+      isCrit: hit.isCrit,
+      amount: hit.amount,
+      // Ein kritischer Treffer bleibt für sich: In einer Summe wäre er
+      // kein Moment mehr.
+      mergeKey: hit.isCrit ? null : (hit.targetId, hit.overTime, amSpieler),
     );
+  }
+
+  /// **Eine Farbe je Sache.** Rot kommt beim Helden an, Gold ist
+  /// kritisch, Violett frisst über Zeit, Hell ist ein Schlag. Grün bleibt
+  /// der Heilung — deshalb trägt Dauerschaden nicht das Grün des Gifts.
+  static Color colorOf(HitLanded hit) {
+    if (hit.targetFaction == Faction.held) return Palette.enemyOnDark;
+    if (hit.isCrit) return Palette.goldOnDark;
+    if (hit.overTime) return Palette.tintSeele;
+    return Palette.textOnDark;
   }
 
   /// Was eine Heilung über dem Kopf zeigt — von einer Kugel oder von
@@ -88,35 +112,215 @@ class DamagePopup {
     );
   }
 
-  final String text;
+  String text;
   final Color color;
   final Vec2 origin;
-  final double scale;
+  double scale;
+
+  /// Nach welcher Seite sie fliegt: -1 links, 1 rechts, 0 gerade hoch.
+  /// Treffer wechseln sich ab, damit sie sich nicht stapeln; Heilung,
+  /// Zeit und Beute steigen gerade.
+  final int side;
+
+  final bool isCrit;
+
+  /// Der Schaden, den sie zeigt — wächst, wenn Treffer dazukommen.
+  int amount;
+
+  /// Was zusammengezählt werden darf, trägt denselben Schlüssel. Ohne
+  /// Schlüssel bleibt eine Zahl für sich.
+  final Object? mergeKey;
 
   /// Wie lange eine Zahl steht.
   static const double lifetime = 0.8;
 
-  /// Wie weit sie dabei steigt, in Weltpunkten.
-  static const double rise = 26;
+  /// Wie hoch der Wurf ansetzt und wie stark er wieder fällt, in
+  /// Weltpunkten. Der Scheitel liegt nach zwei Dritteln.
+  static const double _wurf = 70;
+  static const double _fall = 52;
+
+  /// Wie weit sie dabei zur Seite treibt.
+  static const double drift = 16;
+
+  /// Wie gross sie geboren wird, und wie schnell sie sich setzt.
+  static const double popScale = 1.6;
+  static const double popTime = 0.12;
+
+  /// Ab wann sie verblasst. Bis dahin steht sie voll da — sonst ist sie
+  /// weg, bevor man sie gelesen hat.
+  static const double fadeFrom = 0.7;
+
+  /// Was einen kritischen Treffer zum Moment macht: grösser, schräg, und
+  /// er zittert kurz.
+  static const double critScale = 1.6;
+  static const double critTilt = 0.18;
+  static const double shakeTime = 0.3;
+  static const double _shakeWeite = 2.5;
+
+  /// Wie lange ein weiterer Treffer noch dazugezählt wird.
+  ///
+  /// **Kürzer als der Takt des Grundangriffs.** Zählte jede Zahl mit,
+  /// solange sie in der Luft steht, stünde über einem Gegner nur noch
+  /// eine wachsende Summe. So fällt zusammen, was zusammen trifft
+  /// (Wirbel, Schlag und Tick im selben Augenblick), und jeder Schlag
+  /// für sich bleibt seine eigene Zahl.
+  static const double mergeWindow = 0.3;
 
   double age = 0;
+  double _seitPop = 0;
 
   bool get isAlive => age < lifetime;
 
   double get progress => (age / lifetime).clamp(0.0, 1.0);
 
-  /// Wo die Zahl gerade steht.
-  Vec2 get position => Vec2(origin.x, origin.y - rise * progress);
+  bool canAbsorb(Object key) => mergeKey == key && age < mergeWindow;
 
-  /// Sie verblasst erst auf der zweiten Hälfte — sonst ist sie weg,
-  /// bevor man sie gelesen hat.
-  double get opacity {
-    final p = progress;
-    if (p < 0.5) return 1;
-    return (1 - (p - 0.5) * 2).clamp(0.0, 1.0);
+  /// Ein weiterer Treffer kommt dazu: Die Zahl wird zur Summe und ploppt
+  /// noch einmal. Sie lebt dadurch nicht länger.
+  void absorb(int more, {required double scale}) {
+    amount += more;
+    text = '$amount';
+    this.scale = scale;
+    _seitPop = 0;
   }
 
-  void update(double dt) => age += dt;
+  /// Wo die Zahl gerade steht: ein Wurf zur Seite, kein Aufzug.
+  Vec2 get position {
+    final p = progress;
+    return Vec2(
+      origin.x + side * drift * p + _zittern,
+      origin.y - (_wurf * p - _fall * p * p),
+    );
+  }
+
+  double get _zittern {
+    if (!isCrit || age >= shakeTime) return 0;
+    return math.sin(age * 90) * _shakeWeite * (1 - age / shakeTime);
+  }
+
+  /// Wie gross sie gerade gezeichnet wird: gross geboren, sofort gesetzt.
+  double get size {
+    if (_seitPop >= popTime) return scale;
+    return scale * (popScale - (popScale - 1) * (_seitPop / popTime));
+  }
+
+  /// Wie schräg sie steht, im Bogenmass.
+  double get tilt => isCrit ? critTilt * (side == 0 ? 1 : side) : 0;
+
+  double get opacity {
+    final p = progress;
+    if (p < fadeFrom) return 1;
+    return (1 - (p - fadeFrom) / (1 - fadeFrom)).clamp(0.0, 1.0);
+  }
+
+  void update(double dt) {
+    age += dt;
+    _seitPop += dt;
+  }
+}
+
+/// Der Schnitt der letzten Treffer des Helden.
+///
+/// **Gross ist, was grösser ist als zuletzt** — nicht, was über einer
+/// festen Zahl liegt. Der Schaden wächst von Stufe 1 bis 30 um ein
+/// Vielfaches (ADR-0042); eine feste Schwelle wäre am Anfang nie und am
+/// Ende immer erreicht.
+class HitAverage {
+  static const int _fenster = 12;
+  static const double smallest = 0.8;
+  static const double biggest = 1.6;
+
+  final List<int> _letzte = <int>[];
+
+  double get value {
+    if (_letzte.isEmpty) return 0;
+    return _letzte.reduce((a, b) => a + b) / _letzte.length;
+  }
+
+  void record(int amount) {
+    _letzte.add(amount);
+    if (_letzte.length > _fenster) _letzte.removeAt(0);
+  }
+
+  /// Der doppelte Schnitt ist anderthalbmal so gross, der halbe ein
+  /// Viertel kleiner. Ohne Vorgeschichte ist jeder Treffer normal.
+  double scaleFor(int amount) {
+    final schnitt = value;
+    if (schnitt <= 0) return 1;
+    return (1 + 0.5 * (amount / schnitt - 1)).clamp(smallest, biggest);
+  }
+}
+
+/// Alle Zahlen, die gerade in der Luft stehen.
+///
+/// Hier fällt, was eine einzelne Zahl nicht wissen kann: nach welcher
+/// Seite die nächste fliegt, was zusammengezählt wird, und dass es nie
+/// mehr als [maxLive] werden.
+class DamagePopups {
+  /// Mehr stehen nie zugleich da; kommt eine dazu, geht die älteste.
+  static const int maxLive = 40;
+
+  /// Wie gross steht, was über Zeit frisst oder beim Helden ankommt.
+  /// Beides wird nicht am Schnitt gemessen: Ticks zögen ihn herunter,
+  /// und was der Held einsteckt, hat einen anderen Massstab.
+  static const double overTimeScale = 0.85;
+  static const double onHeroScale = 1.1;
+
+  final List<DamagePopup> _live = <DamagePopup>[];
+  final HitAverage _schnitt = HitAverage();
+  int _seite = 1;
+
+  Iterable<DamagePopup> get live => _live;
+  int get count => _live.length;
+
+  void hit(HitLanded hit) {
+    final neu = DamagePopup.forHit(hit);
+    if (neu == null) return;
+
+    final key = neu.mergeKey;
+    if (key != null) {
+      for (final popup in _live.reversed) {
+        if (!popup.canAbsorb(key)) continue;
+        final summe = popup.amount + hit.amount;
+        popup.absorb(hit.amount, scale: _scaleFor(hit, summe));
+        _merken(hit);
+        return;
+      }
+    }
+
+    final popup = DamagePopup.forHit(
+      hit,
+      scale: _scaleFor(hit, hit.amount),
+      side: _seite,
+    );
+    _seite = -_seite;
+    _merken(hit);
+    add(popup);
+  }
+
+  void add(DamagePopup? popup) {
+    if (popup == null) return;
+    _live.add(popup);
+    if (_live.length > maxLive) _live.removeAt(0);
+  }
+
+  void update(double dt) {
+    for (final popup in _live) {
+      popup.update(dt);
+    }
+    _live.removeWhere((p) => !p.isAlive);
+  }
+
+  double _scaleFor(HitLanded hit, int amount) {
+    if (hit.targetFaction == Faction.held) return onHeroScale;
+    if (hit.overTime) return overTimeScale;
+    return _schnitt.scaleFor(amount);
+  }
+
+  void _merken(HitLanded hit) {
+    if (hit.targetFaction == Faction.held || hit.overTime) return;
+    _schnitt.record(hit.amount);
+  }
 }
 
 /// Der Strahl eines Wächterauges im Moment, in dem er trifft — er

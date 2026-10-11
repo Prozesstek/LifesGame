@@ -721,6 +721,7 @@ class ActionWorld {
           at: ziel.position,
           amount: wirklich,
           isCrit: false,
+          overTime: true,
         ),
       );
     }
@@ -1061,6 +1062,7 @@ class ActionWorld {
             at: ziel.position,
             amount: wirklich,
             isCrit: false,
+            overTime: false,
           ),
         );
         break;
@@ -1151,6 +1153,7 @@ class ActionWorld {
         at: target.position,
         amount: wirklich,
         isCrit: kritisch,
+        overTime: false,
       ),
     );
 
@@ -1168,6 +1171,7 @@ class ActionWorld {
           at: attacker.position,
           amount: zurueck,
           isCrit: false,
+          overTime: false,
         ),
       );
     }
