@@ -5,10 +5,17 @@
 // Spielt 60 Tage durch: jeden Tag alle fünf Gewohnheiten und die Truhe,
 // bis zu zwei Seiten, solange Punkte da sind (am ersten Tag sieben, wie
 // früher mit dem Handbuch — seit ADR-0070 kosten auch sie einen Punkt
-// und kommen aus den neun vom Start), eine Rückfrage, eine neue
-// Stufe der Grube, soweit die Reichweite reicht, und vier Dailies. Seit
-// ADR-0048 auch die Beute: Jeder Sieg über den Wächter setzt einen
-// Schlüssel ein, der erste auf einer Stufe keinen.
+// und kommen aus den neun vom Start), eine Rückfrage und eine neue
+// Stufe der Grube, soweit die Reichweite reicht. Seit ADR-0048 auch die
+// Beute: Jeder Sieg über den Wächter setzt einen Schlüssel ein, der
+// erste auf einer Stufe keinen.
+//
+// **Seit ADR-0072 ohne Dailies.** Bis dahin zahlten vier Stufen des
+// Tages je ein Viertel ihres Erstsiegs — rund ein Fünftel von Erfahrung
+// und Gold eines fleissigen Spielers. Die Tagesgrube, die sie ablöst,
+// zahlt nur Ruhm und steht deshalb hier nicht. Für die Beute nimmt die
+// Rechnung weiter vier Läufe am Tag auf geschafften Stufen an; wer
+// seltener spielt, findet weniger.
 //
 // **Zwei Annahmen, die man kennen muss:** Die Reichweite in der Grube ist
 // aus `pit_sim` abgelesen (siehe [reichweite]), also eine untere Schranke,
@@ -55,7 +62,7 @@ void main() {
   var geoeffnet = 0; // bezahlte Knoten
   var graphSeiten = 0;
   var stufe = 0;
-  var reiheXp = 0, reiheGold = 0, dailyXp = 0, dailyGold = 0;
+  var reiheXp = 0, reiheGold = 0;
   var rueckXp = 0, rueckGold = 0;
   final ereignisse = <String>[];
   var baumVoll = false, ladenLeer = false, deckel = false;
@@ -63,8 +70,9 @@ void main() {
   final alle = GearCatalog.all;
 
   // Beute (ADR-0048): Schlüssel aus Häkchen, Seiten und Rückfragen,
-  // eingesetzt bei jedem Sieg über den Wächter — der neuen Stufe und den
-  // vier Dailies. Der erste Sieg auf einer Stufe bringt ohne Schlüssel.
+  // eingesetzt bei jedem Sieg über den Wächter — der neuen Stufe und
+  // vier weiteren Läufen. Der erste Sieg auf einer Stufe bringt ohne
+  // Schlüssel.
   var schluesselVerdient = 0;
   var schluesselVerbraucht = 0;
   var beuteNr = 0;
@@ -81,8 +89,7 @@ void main() {
     truhenGold += DailyChest.forDay(day).gold;
 
     // Stand vor dem Lesen, um Punkte zu kennen.
-    int xpGesamt() =>
-        tracker.totalXp + seiten * seiteXp + reiheXp + dailyXp + rueckXp;
+    int xpGesamt() => tracker.totalXp + seiten * seiteXp + reiheXp + rueckXp;
     var level = LevelCurve.levelFor(xpGesamt()).level;
 
     // Lesen: bis zu zwei Seiten am Tag, am ersten sieben — der fleissige
@@ -141,7 +148,8 @@ void main() {
     for (final a in DailyShop.offersFor(dayIndex, highestRung: stufe)) {
       merke('Laden ${a.item!.rarity.label}', tag);
     }
-    // Vier Dailies aus dem Geschafften, jede mit einem Schlüssel.
+    // Vier Läufe auf geschafften Stufen, jeder mit einem Schlüssel —
+    // sie zahlen nichts mehr (ADR-0072), lassen aber Beute fallen.
     if (stufe > 0) {
       for (final r in <int>[
         1,
@@ -149,8 +157,6 @@ void main() {
         (stufe * 0.75).ceil(),
         stufe,
       ]) {
-        dailyXp += LadderRewards.dailyXpFor(r);
-        dailyGold += LadderRewards.dailyGoldFor(r);
         beute(r, frei: false);
       }
     }
@@ -161,7 +167,6 @@ void main() {
         truhenGold +
         seiten * seiteGold +
         reiheGold +
-        dailyGold +
         rueckGold;
     final offen = alle
         .where((i) => stufe >= GearGates.rungFor(i.rarity))

@@ -1,4 +1,3 @@
-import 'dailies.dart';
 import 'stage.dart';
 
 /// Was ein erstmals besiegter Gegner einbringt.
@@ -36,29 +35,16 @@ abstract final class LadderRewards {
 
   static int goldFor(int rung) => baseGold + goldPerRung * (rung - 1);
 
-  /// **Ein Daily zahlt ein Viertel des Erstsiegs** (ADR-0040). Vier davon
-  /// liegen damit in der Grössenordnung eines Tags Gewohnheiten, nicht
-  /// darüber — sonst wäre der Kampf die Quelle des Fortschritts statt
-  /// seiner Auszahlung (`konzept.md` Abschnitt 2).
+  /// **Nur noch für alte Stände** (ADR-0072). Bis dahin zahlten vier
+  /// Stufen des Tages je ein Viertel ihres Erstsiegs (ADR-0040). Was ein
+  /// Stand damals verdient hat, bleibt gespeichert und zählt weiter —
+  /// sonst fiele nachträglich ein Level. Neues kommt hier nicht mehr an:
+  /// Der eine Kampf des Tages ist die Tagesgrube, und die zahlt Ruhm.
   static const double dailyShare = 0.25;
 
   static int dailyXpFor(int rung) => (xpFor(rung) * dailyShare).round();
 
   static int dailyGoldFor(int rung) => (goldFor(rung) * dailyShare).round();
-
-  /// Was vier Dailies an einem Tag höchstens einbringen — die vier
-  /// obersten Stufen. Die Obergrenze, gegen die die Kurven rechnen.
-  static int get maxDailyXpPerDay => _obersteVier(dailyXpFor);
-
-  static int get maxDailyGoldPerDay => _obersteVier(dailyGoldFor);
-
-  static int _obersteVier(int Function(int) je) {
-    var summe = 0;
-    for (var i = 0; i < PitDailies.perDay; i++) {
-      summe += je(PitStage.count - i);
-    }
-    return summe;
-  }
 
   /// Alles, was die ganze Reihe ueber ein Spielerleben hergibt.
   static int get lifetimeXp => _summe(xpFor);
@@ -131,13 +117,15 @@ class LadderProgress {
   final Map<int, int> defeats;
 
   /// Welche vier Stufen an welchem Tag die Dailies waren (Tage seit dem
-  /// 1.1.1970). **Eingefroren**, sobald sie zum ersten Mal gebraucht
-  /// werden: Sie hängen an der höchsten geschafften Stufe, und wer mittags
-  /// eine neue schafft, soll nicht plötzlich andere vier vor sich haben.
+  /// 1.1.1970).
+  ///
+  /// **Nur noch Historie** (ADR-0072): Dailies gibt es nicht mehr, aber
+  /// was ein Stand damit verdient hat, zählt weiter. Diese drei Felder
+  /// werden gelesen und geschrieben, nie mehr verändert.
   final Map<int, List<int>> dailyPicks;
 
-  /// Welche Dailies an welchem Tag geschafft wurden — eine **Historie**,
-  /// wie die Häkchen. Erfahrung und Gold daraus werden gerechnet.
+  /// Welche Dailies an welchem Tag geschafft wurden. Erfahrung und Gold
+  /// daraus werden gerechnet.
   final Map<int, Set<int>> dailyClears;
 
   /// Was aus dem Topf einer **noch nicht** geschafften Stufe schon gezahlt
@@ -145,7 +133,7 @@ class LadderProgress {
   /// Sieg zählt der volle Betrag, und der Eintrag ist bedeutungslos.
   final Map<int, Payout> partial;
 
-  /// Dasselbe für die Dailies, je Tag und Stufe.
+  /// Dasselbe für die Dailies von damals, je Tag und Stufe.
   final Map<int, Map<int, Payout>> dailyPartial;
 
   /// Die schnellste gewonnene Zeit je Stufe, in Sekunden (ADR-0048).
@@ -167,122 +155,45 @@ class LadderProgress {
     );
   }
 
-  /// Was ein Lauf auf [rung] am Tag [day] noch einbringen kann — der
-  /// **Rest** des Topfs. Eine neue Stufe: ihr Erstsieg; ein Daily, falls
-  /// [dailyAllowed]: sein Viertel; sonst nichts.
-  Payout potFor(int day, int rung, {required bool dailyAllowed}) {
-    if (rung == highestDefeated + 1 && rung <= PitStage.count) {
-      final voll =
-          (xp: LadderRewards.xpFor(rung), gold: LadderRewards.goldFor(rung));
-      return _minus(voll, partial[rung] ?? _nichts);
-    }
-    if (!dailyAllowed) return _nichts;
-    if (!dailiesOn(day).contains(rung) || isDailyCleared(day, rung)) {
-      return _nichts;
-    }
-    final voll = (
-      xp: LadderRewards.dailyXpFor(rung),
-      gold: LadderRewards.dailyGoldFor(rung),
-    );
-    return _minus(voll, dailyPartial[day]?[rung] ?? _nichts);
+  /// Was ein Lauf auf [rung] noch einbringen kann — der **Rest** des
+  /// Topfs.
+  ///
+  /// **Nur eine neue Stufe hat einen**: ihren Erstsieg, abzüglich dessen,
+  /// was verlorene Läufe schon gesammelt haben (ADR-0041). Eine geschaffte
+  /// Stufe zahlt nichts mehr (ADR-0032) — seit ADR-0072 auch nicht mehr
+  /// als Stufe des Tages.
+  Payout potFor(int rung) {
+    if (rung != highestDefeated + 1 || rung > PitStage.count) return _nichts;
+    final voll =
+        (xp: LadderRewards.xpFor(rung), gold: LadderRewards.goldFor(rung));
+    return _minus(voll, partial[rung] ?? _nichts);
   }
 
   /// Trägt einen Lauf ein: was er aus dem Topf gesammelt hat, und ob er
   /// gewonnen wurde. **Mehr als der Topf zählt nie** — was die Welt meldet,
   /// wird auf [potFor] gekappt.
   LadderProgress bookRun(
-    int day,
     int rung, {
     required bool won,
     required Payout collected,
-    required bool dailyAllowed,
   }) {
-    final stand = withDailiesFrozen(day);
-    final neu = rung == stand.highestDefeated + 1;
-    final topf = stand.potFor(day, rung, dailyAllowed: dailyAllowed);
-    final gesammelt = _hoechstens(collected, topf);
+    // Eine geschaffte Stufe ändert nur noch, wie oft dort verloren wurde.
+    if (rung != highestDefeated + 1) return won ? this : recordDefeat(rung);
 
-    if (neu) {
-      if (won) {
-        final ohne = Map<int, Payout>.of(stand.partial)..remove(rung);
-        return stand.defeat(rung).copyWith(partial: ohne);
-      }
-      final bisher = stand.partial[rung] ?? _nichts;
-      return stand.recordDefeat(rung).copyWith(
-        partial: <int, Payout>{
-          ...stand.partial,
-          rung: _plus(bisher, gesammelt),
-        },
-      );
-    }
-
-    final gezahlt = topf.xp > 0 || topf.gold > 0;
     if (won) {
-      if (!gezahlt) return stand;
-      final heute = Map<int, Payout>.of(stand.dailyPartial[day] ?? const {})
-        ..remove(rung);
-      return stand.claimDaily(day, rung).copyWith(
-        dailyPartial: <int, Map<int, Payout>>{
-          ...stand.dailyPartial,
-          day: heute,
-        },
-      );
+      final ohne = Map<int, Payout>.of(partial)..remove(rung);
+      return defeat(rung).copyWith(partial: ohne);
     }
-
-    final verloren = stand.recordDefeat(rung);
-    if (!gezahlt) return verloren;
-    final bisher = stand.dailyPartial[day]?[rung] ?? _nichts;
-    return verloren.copyWith(
-      dailyPartial: <int, Map<int, Payout>>{
-        ...stand.dailyPartial,
-        day: <int, Payout>{
-          ...?stand.dailyPartial[day],
-          rung: _plus(bisher, gesammelt),
-        },
-      },
+    final gesammelt = _hoechstens(collected, potFor(rung));
+    final bisher = partial[rung] ?? _nichts;
+    return recordDefeat(rung).copyWith(
+      partial: <int, Payout>{...partial, rung: _plus(bisher, gesammelt)},
     );
   }
 
-  /// Die Dailies des Tages [day] — eingefroren, falls schon geschehen,
-  /// sonst so, wie sie jetzt gewürfelt würden.
-  List<int> dailiesOn(int day) {
-    return dailyPicks[day] ?? PitDailies.forDay(day, highestDefeated);
-  }
-
-  /// Ob [rung] am Tag [day] schon als Daily gezahlt hat.
-  bool isDailyCleared(int day, int rung) {
+  /// Ob [rung] am Tag [day] als Daily gezahlt hat — für alte Stände.
+  bool _dailyCleared(int day, int rung) {
     return dailyClears[day]?.contains(rung) ?? false;
-  }
-
-  /// Friert die Dailies des Tages [day] ein. Ändert nichts, wenn sie
-  /// schon feststehen — oder wenn es noch keine gibt.
-  LadderProgress withDailiesFrozen(int day) {
-    if (dailyPicks.containsKey(day)) return this;
-    final heute = PitDailies.forDay(day, highestDefeated);
-    if (heute.isEmpty) return this;
-    return copyWith(
-      dailyPicks: <int, List<int>>{
-        ...dailyPicks,
-        day: List<int>.unmodifiable(heute),
-      },
-    );
-  }
-
-  /// Trägt einen Sieg in einem Daily ein. Zahlt nur, wenn [rung] an [day]
-  /// zu den eingefrorenen Stufen gehört und heute noch nicht gezahlt hat.
-  ///
-  /// **Ob an diesem Tag abgehakt wurde, prüft der Aufrufer** — die Reihe
-  /// kennt die Gewohnheiten nicht.
-  LadderProgress claimDaily(int day, int rung) {
-    final heute = withDailiesFrozen(day);
-    if (!heute.dailiesOn(day).contains(rung)) return heute;
-    if (heute.isDailyCleared(day, rung)) return heute;
-    return heute.copyWith(
-      dailyClears: <int, Set<int>>{
-        ...heute.dailyClears,
-        day: Set<int>.unmodifiable(<int>{...?heute.dailyClears[day], rung}),
-      },
-    );
   }
 
   /// **`copyWith` statt des Konstruktors**: Ein neues Feld mit
@@ -321,10 +232,10 @@ class LadderProgress {
   /// Ob ein Sieg gegen [rung] noch etwas einbringt.
   bool isNewGround(int rung) => rung > highestDefeated;
 
-  /// Erstsiege plus alle Dailies — gerechnet, nie gezählt.
+  /// Erstsiege plus die Dailies von damals — gerechnet, nie gezählt.
   ///
-  /// Dazu, was aus den Töpfen noch nicht geschaffter Stufen und Dailies
-  /// schon gefallen ist (ADR-0041).
+  /// Dazu, was aus den Töpfen noch nicht geschaffter Stufen schon
+  /// gefallen ist (ADR-0041).
   int get earnedXp =>
       _summeBis(LadderRewards.xpFor) +
       _dailies(LadderRewards.dailyXpFor) +
@@ -342,7 +253,7 @@ class LadderProgress {
     }
     for (final tag in dailyPartial.entries) {
       for (final entry in tag.value.entries) {
-        if (!isDailyCleared(tag.key, entry.key)) summe += je(entry.value);
+        if (!_dailyCleared(tag.key, entry.key)) summe += je(entry.value);
       }
     }
     return summe;

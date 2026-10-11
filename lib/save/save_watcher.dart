@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../character/abilities_controller.dart';
 import '../character/identity_controller.dart';
+import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
@@ -43,6 +44,7 @@ SaveData currentSave(WidgetRef ref) {
     ladder: ref.read(ladderProvider),
     grants: ref.read(devGrantsProvider),
     reviews: ref.read(reviewLogProvider),
+    dailyPit: ref.read(dailyPitProvider),
   );
 }
 
@@ -53,7 +55,7 @@ class SaveWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Acht Bereiche, acht Zeilen. Kommt ein neunter dazu, gehört er
+    // Neun Bereiche, neun Zeilen. Kommt ein zehnter dazu, gehört er
     // hier dazu — sonst überlebt er keinen Neustart.
     ref.listen(theoryProgressProvider, (_, _) => _save(ref));
     ref.listen(habitTrackerProvider, (_, _) => _save(ref));
@@ -63,6 +65,7 @@ class SaveWatcher extends ConsumerWidget {
     ref.listen(ladderProvider, (_, _) => _save(ref));
     ref.listen(devGrantsProvider, (_, _) => _save(ref));
     ref.listen(reviewLogProvider, (_, _) => _save(ref));
+    ref.listen(dailyPitProvider, (_, _) => _save(ref));
 
     return child;
   }

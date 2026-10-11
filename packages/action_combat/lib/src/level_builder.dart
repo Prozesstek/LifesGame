@@ -79,7 +79,24 @@ abstract final class LevelBuilder {
       'Die Grube · Stufe ${stage.number}',
       _crop(feld, pfad),
       boss: boss ?? bossFor(seed),
+      rooms: _areas(pfad),
     );
+  }
+
+  /// Wo die Zellen des Pfads in der zugeschnittenen Karte liegen — in
+  /// der Reihenfolge des Wegs (ADR-0072).
+  static List<RoomArea> _areas(List<_Cell> pfad) {
+    final links = pfad.map((c) => c.x).reduce(math.min) * cellWidth;
+    final oben = pfad.map((c) => c.y).reduce(math.min) * cellHeight;
+    return <RoomArea>[
+      for (final c in pfad)
+        RoomArea(
+          left: c.x * cellWidth - links,
+          top: c.y * cellHeight - oben,
+          width: cellWidth,
+          height: cellHeight,
+        ),
+    ];
   }
 
   /// Welcher Wächter zu [seed] gehört — jeder gleich oft, auf jeder Stufe

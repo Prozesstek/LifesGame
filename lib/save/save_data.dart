@@ -30,6 +30,7 @@ class SaveData {
     this.ladder = const LadderProgress.empty(),
     this.grants = const DebugGrants.none(),
     this.reviews = const ReviewLog.empty(),
+    this.dailyPit = const DailyPitLog.empty(),
   });
 
   const SaveData.empty() : this();
@@ -67,6 +68,10 @@ class SaveData {
   /// Die Rückfragen des Tages (ADR-0045) — eine Historie der Antworten.
   final ReviewLog reviews;
 
+  /// Die Versuche in der Tagesgrube (ADR-0072), je Tag einer. Ruhm daraus
+  /// steht nicht hier, er wird gerechnet.
+  final DailyPitLog dailyPit;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
@@ -76,7 +81,8 @@ class SaveData {
         !identity.hasName &&
         abilities.isEmpty &&
         ladder.highestDefeated == 0 &&
-        reviews.isEmpty;
+        reviews.isEmpty &&
+        dailyPit.isEmpty;
   }
 
   Map<String, Object?> toJson() {
@@ -90,6 +96,9 @@ class SaveData {
       'ladder': ladder.toJson(),
       'grants': grants.toJson(),
       'reviews': reviews.toJson(),
+      // Nur schreiben, wenn etwas drinsteht: Ein Stand ohne Tagesgrube
+      // sieht aus wie vor ADR-0072.
+      if (!dailyPit.isEmpty) 'dailyPit': dailyPit.toJson(),
     };
   }
 
@@ -107,6 +116,7 @@ class SaveData {
     final ladder = json['ladder'];
     final grants = json['grants'];
     final reviews = json['reviews'];
+    final dailyPit = json['dailyPit'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -133,6 +143,9 @@ class SaveData {
       reviews: reviews is Map<String, Object?>
           ? ReviewLog.fromJson(reviews)
           : const ReviewLog.empty(),
+      dailyPit: dailyPit is Map<String, Object?>
+          ? DailyPitLog.fromJson(dailyPit)
+          : const DailyPitLog.empty(),
     );
   }
 
@@ -185,6 +198,7 @@ class SaveData {
     LadderProgress? ladder,
     DebugGrants? grants,
     ReviewLog? reviews,
+    DailyPitLog? dailyPit,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
@@ -195,6 +209,7 @@ class SaveData {
       ladder: ladder ?? this.ladder,
       grants: grants ?? this.grants,
       reviews: reviews ?? this.reviews,
+      dailyPit: dailyPit ?? this.dailyPit,
     );
   }
 }

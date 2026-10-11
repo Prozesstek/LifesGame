@@ -13,6 +13,7 @@ import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'ladder_controller.dart';
 import 'widgets/tagesform_kreis.dart';
+import 'widgets/tagesgrube_karte.dart';
 
 /// Der Eingang zur Grube — dreissig Stufen als **Fahrstuhl** (Issue #88).
 ///
@@ -25,9 +26,13 @@ import 'widgets/tagesform_kreis.dart';
 /// **Seit dem 28.09. ein Schacht statt Text.** Vorher standen hier eine
 /// Karte mit den vier Stufen des Tages, eine Leiste mit Bestzeiten, ein
 /// leeres Bild und drei Sätze. Jetzt stehen alle dreissig Stufen
-/// untereinander, jede mit Stern (Stufe des Tages) und Bestzeit; ein Tipp
-/// wählt, „Hinab“ fährt hin. Was die gewählte Stufe einbringt, steht als
-/// Zeichen und Zahl darunter.
+/// untereinander, jede mit ihrer Bestzeit; ein Tipp wählt, „Hinab“ fährt
+/// hin. Was die gewählte Stufe einbringt, steht als Zeichen und Zahl
+/// darunter.
+///
+/// **Seit ADR-0072 steht darüber die Tagesgrube** (`TagesgrubeKarte`).
+/// Die vier Stufen des Tages und ihre Sterne gibt es nicht mehr: Der eine
+/// Kampf des Tages ist jetzt eine Grube für alle.
 class LadderScreen extends ConsumerStatefulWidget {
   const LadderScreen({super.key});
 
@@ -51,8 +56,6 @@ class _LadderScreenState extends ConsumerState<LadderScreen> {
   @override
   Widget build(BuildContext context) {
     final stand = ref.watch(ladderProvider);
-    final dailies = ref.watch(todayDailiesProvider);
-    final zahlen = ref.watch(dailiesUnlockedProvider);
     final stufe = _gewaehlt ?? stand.nextRung;
 
     return Scaffold(
@@ -65,24 +68,18 @@ class _LadderScreenState extends ConsumerState<LadderScreen> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: Column(
                 children: <Widget>[
+                  const TagesgrubeKarte(),
                   _Fortschritt(stand: stand),
                   const SizedBox(height: 14),
                   Expanded(
                     child: _Schacht(
                       stand: stand,
-                      dailies: dailies,
-                      zahlen: zahlen,
                       gewaehlt: stufe,
                       onWaehle: (s) => setState(() => _gewaehlt = s),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _Belohnung(
-                    stand: stand,
-                    stufe: stufe,
-                    daily: _dailyFuer(dailies, stufe),
-                    zahlen: zahlen,
-                  ),
+                  _Belohnung(stand: stand, stufe: stufe),
                   const SizedBox(height: 8),
                   // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
                   // kann lang werden („Angriff +10 %, Leben +10 %, …“).
@@ -126,13 +123,6 @@ class _LadderScreenState extends ConsumerState<LadderScreen> {
       ),
     );
   }
-
-  static DailyStage? _dailyFuer(List<DailyStage> dailies, int stufe) {
-    for (final d in dailies) {
-      if (d.stage == stufe) return d;
-    }
-    return null;
-  }
 }
 
 /// „7 / 30" mit Balken — die Zahl, die zwei Spieler vergleichen.
@@ -174,15 +164,11 @@ class _Fortschritt extends StatelessWidget {
 class _Schacht extends StatefulWidget {
   const _Schacht({
     required this.stand,
-    required this.dailies,
-    required this.zahlen,
     required this.gewaehlt,
     required this.onWaehle,
   });
 
   final LadderProgress stand;
-  final List<DailyStage> dailies;
-  final bool zahlen;
   final int gewaehlt;
   final ValueChanged<int> onWaehle;
 
@@ -229,15 +215,12 @@ class _SchachtState extends State<_Schacht> {
         itemCount: PitStage.count,
         itemBuilder: (context, i) {
           final s = i + 1;
-          final daily = _LadderScreenState._dailyFuer(widget.dailies, s);
           return _Etage(
             key: LadderScreen.etageKey(s),
             stufe: s,
             gesperrt: s > offen,
             neu: widget.stand.isNewGround(s) && s <= offen,
             bestzeit: widget.stand.bestTimes[s],
-            daily: daily,
-            zahlen: widget.zahlen,
             gewaehlt: s == widget.gewaehlt,
             onTap: () => widget.onWaehle(s),
           );
@@ -254,8 +237,6 @@ class _Etage extends StatelessWidget {
     required this.gesperrt,
     required this.neu,
     required this.bestzeit,
-    required this.daily,
-    required this.zahlen,
     required this.gewaehlt,
     required this.onTap,
     super.key,
@@ -265,8 +246,6 @@ class _Etage extends StatelessWidget {
   final bool gesperrt;
   final bool neu;
   final double? bestzeit;
-  final DailyStage? daily;
-  final bool zahlen;
   final bool gewaehlt;
   final VoidCallback onTap;
 
@@ -308,9 +287,7 @@ class _Etage extends StatelessWidget {
     return Semantics(
       button: !gesperrt,
       selected: gewaehlt,
-      label:
-          'Stufe $stufe${daily != null ? ', Stufe des Tages' : ''}'
-          '${neu && !gesperrt ? ', neu' : ''}',
+      label: 'Stufe $stufe${neu && !gesperrt ? ', neu' : ''}',
       excludeSemantics: true,
       onTap: gesperrt ? null : onTap,
       child: Druck(
@@ -331,21 +308,6 @@ class _Etage extends StatelessWidget {
                             color: Palette.accent,
                           )
                         : null,
-                  ),
-                  SizedBox(
-                    width: 22,
-                    child: switch (daily) {
-                      null => null,
-                      final d => Icon(
-                        Icons.star,
-                        size: 18,
-                        // Offen und zahlend gold, sonst blass: geschafft
-                        // oder heute noch ohne Häkchen.
-                        color: !d.cleared && zahlen
-                            ? Palette.gold
-                            : Palette.muted,
-                      ),
-                    },
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -373,49 +335,30 @@ class _Etage extends StatelessWidget {
   }
 }
 
-/// Was die gewählte Stufe einbringt, als Zeichen und Zahl: Erstsieg oder
-/// Stufe des Tages. Zahlt sie nichts, steht nichts da.
+/// Was die gewählte Stufe einbringt, als Zeichen und Zahl. Zahlt sie
+/// nichts mehr — jede geschaffte Stufe —, steht nichts da.
 ///
 /// **Die Zeile gehört vor den Kampf, nicht nur danach.** Seit ADR-0041
-/// ist es beim Erstsieg der **Rest** des Topfs: Was ein verlorener Lauf
-/// schon eingesammelt hat, ist abgezogen.
-class _Belohnung extends ConsumerWidget {
-  const _Belohnung({
-    required this.stand,
-    required this.stufe,
-    required this.daily,
-    required this.zahlen,
-  });
+/// ist es der **Rest** des Topfs: Was ein verlorener Lauf schon
+/// eingesammelt hat, ist abgezogen.
+class _Belohnung extends StatelessWidget {
+  const _Belohnung({required this.stand, required this.stufe});
 
   final LadderProgress stand;
   final int stufe;
-  final DailyStage? daily;
-  final bool zahlen;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ({int xp, int gold, bool stern})? topf;
-    if (stand.isNewGround(stufe)) {
-      final t = ref.read(ladderProvider.notifier).potFor(stufe);
-      topf = (xp: t.xp, gold: t.gold, stern: false);
-    } else if (daily case final d? when zahlen && !d.cleared) {
-      topf = (xp: d.xp, gold: d.gold, stern: true);
-    } else {
-      topf = null;
-    }
+  Widget build(BuildContext context) {
+    final topf = stand.potFor(stufe);
 
     // Die Höhe bleibt, auch wenn nichts zahlt — sonst springt „Hinab“.
     return SizedBox(
       height: 22,
-      child: topf == null || (topf.xp == 0 && topf.gold == 0)
+      child: topf.xp == 0 && topf.gold == 0
           ? null
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                if (topf.stern) ...<Widget>[
-                  const Icon(Icons.star, size: 16, color: Palette.goldOnDark),
-                  const SizedBox(width: 6),
-                ],
                 const Icon(
                   Icons.auto_awesome,
                   size: 16,

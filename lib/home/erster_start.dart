@@ -85,6 +85,7 @@ class ErsterStart {
     this.leuchtet,
     this.fragtNachGewohnheit,
     this.grubeErklaertSich,
+    this.zeigtTagesgrube,
   );
 
   /// Alles offen, nichts leuchtet — für Tests anderer Bereiche und für
@@ -102,6 +103,7 @@ class ErsterStart {
     null,
     false,
     false,
+    true,
   );
 
   /// Ab so vielen Häkchen zeigt sich die Theorie auch ohne Kampf.
@@ -129,6 +131,13 @@ class ErsterStart {
   /// **Bis die erste Stufe geschafft ist**, nicht nur im allerersten
   /// Lauf: Wer ihn verliert, hat die Hilfe im zweiten am nötigsten.
   final bool grubeErklaertSich;
+
+  /// Ob im Eingang der Grube die Tagesgrube steht (ADR-0072).
+  ///
+  /// **Nach dem ersten Lauf, gewonnen oder verloren.** Sie hat einen
+  /// Versuch am Tag; wer die Steuerung noch nie in der Hand hatte,
+  /// verbrauchte ihn beim Ausprobieren.
+  final bool zeigtTagesgrube;
 
   bool zeigt(Bereich bereich) => sichtbar.contains(bereich);
 
@@ -167,6 +176,7 @@ class ErsterStart {
       _naechster(s, kampf: kampf, theorie: theorie, faehigkeiten: faehigkeiten),
       !s.hatGewohnheit && s.haekchen == 0,
       s.stufenGeschafft == 0,
+      s.hatGekaempft,
     );
   }
 

@@ -72,6 +72,8 @@ class ActionWorld {
       critFactor: heroStats.critFactor,
     );
     _entities.add(_hero);
+    _hpZuvor = _hero.hp;
+    _damageByRoom = List<int>.filled(level.rooms.length, 0);
 
     for (final spawn in level.spawns) {
       _entities.add(_enemyFor(spawn));
@@ -86,6 +88,41 @@ class ActionWorld {
       boss.untouchable = true;
     }
     _rebuildPath();
+  }
+
+  // --- Wo es weh tat (ADR-0072) ---
+
+  /// Wie viel Leben der Held in welchem Raum verloren hat, in der
+  /// Reihenfolge von [Level.rooms]. Leer in einer Halle ohne Räume.
+  ///
+  /// **Gezählt wird, was ankam** — Heilung zieht nichts ab. Die Raumzeile
+  /// der Tagesgrube erzählt damit den Lauf, nicht den Stand am Ende.
+  List<int> get damageByRoom => List<int>.unmodifiable(_damageByRoom);
+  late final List<int> _damageByRoom;
+  int _hpZuvor = 0;
+
+  /// Der Raum, in dem der Held steht, und der tiefste, den er betreten
+  /// hat. 0 ist der Start.
+  int get currentRoom => _room;
+  int get deepestRoom => _deepestRoom;
+  int _room = 0;
+  int _deepestRoom = 0;
+
+  /// **Über den Unterschied des Lebens, nicht an jeder Stelle, die
+  /// schadet.** Schlag, Geschoss, Pfütze und Strahl treffen an vier
+  /// Stellen; hier steht eine, und eine fünfte Art zu schaden zählt von
+  /// selbst mit.
+  void _trackRoom() {
+    final raum = _level.roomIndexAt(_hero.position);
+    if (raum != null) {
+      _room = raum;
+      if (raum > _deepestRoom) _deepestRoom = raum;
+    }
+    final verlust = _hpZuvor - _hero.hp;
+    if (verlust > 0 && _room < _damageByRoom.length) {
+      _damageByRoom[_room] += verlust;
+    }
+    _hpZuvor = _hero.hp;
   }
 
   /// Was dieser Lauf höchstens einbringt — der Rest des Topfs der Stufe,
@@ -666,6 +703,7 @@ class ActionWorld {
     _collectDead();
     _updateGate();
     _tickEntrance(dt);
+    _trackRoom();
     _checkEnd();
   }
 
