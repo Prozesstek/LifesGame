@@ -17,6 +17,10 @@ Fortschritt eingebaut, nicht danebengestellt.
 > und Items. Sonst kann man den Habit-Teil umgehen, indem man grindet.
 > Habits und Theorie = Einnahme, Kämpfe = Ausgabe.
 
+> **Positionierung seit [ADR-0071](docs/decisions/0071-das-naechste-level.md)
+> (09.10.2026): das Spiel, das dich wegschickt.** Ein Versuch am Tag, ein
+> Feuer am Abend. Geplant, nicht gebaut — siehe Abschnitt 8.
+
 ---
 
 ## 2. Kern-Loop
@@ -333,6 +337,12 @@ Offen, und der einzige geplante Teil, der einen **Server** braucht — alles
 andere läuft offline (ADR-0010). Steht als Weg auf der Kommandozentrale,
 ohne dass damit über Umfang oder Zeitpunkt entschieden wäre.
 
+> **Seit ADR-0071 (09.10.2026) geplant, ungebaut:** die **Seilschaft** als
+> erste Form. Zwei bis vier Leute an einem Seil; man sieht, ob die anderen
+> heute dran waren, und wer einen fälligen Tag verpasst, wird einmal die
+> Woche gehalten. Sie bringt den ersten Server, vorgeschlagen erst mit der
+> App (Abschnitt 8).
+
 ---
 
 ## 4. Ausrüstungsquellen — Rollen trennen
@@ -391,6 +401,9 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 10. **Titel-Katalog** — welche Titel es gibt und woran sie hängen
 11. **Inhalt für die neuen Baumknoten** — der Engpass des Projekts, siehe
     den Risikokasten in 3.3
+12. **Die fünf Ideen aus ADR-0071** — jede braucht vor dem Bau ihre
+    Konzeptrunde; die Fragen stehen in
+    [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md)
 
 ---
 
@@ -411,3 +424,22 @@ Cloud-Sync
 Ziel des MVP: Beantwortet die Frage, ob sich der Kampf gut genug
 anfühlt, um am nächsten Tag wieder Habits abzuhaken. Alles andere ist
 Ausbau.
+
+---
+
+## 8. Das nächste Level
+
+**Entschieden am 09.10.2026, nichts davon gebaut**
+([ADR-0071](docs/decisions/0071-das-naechste-level.md)). Fünf Ideen,
+nach und nach, jede mit eigener Konzeptrunde. Der Grundsatz: weniger
+Systeme, die enger zusammenhängen. Einzelheiten und offene Fragen:
+[`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md).
+
+- **Tagesgrube** — dieselbe Grube für alle, aus dem Datum gesät, ein
+  Versuch, ein Einheitsheld; danach ein Text zum Teilen.
+- **Lagerfeuer** — abends eine Minute für Rückfrage, Truhe, Aufgaben und
+  Wochenrückblick; zum Schluss, was morgen zuerst drankommt.
+- **Schatten** — ganz unten wartet man selbst, wie man vor 30 Tagen war;
+  die Wächter werden innere Gegner.
+- **Saisons** — sechs Wochen, ein Thema aus einem gelesenen Buch.
+- **Seilschaft** — siehe 3.9.

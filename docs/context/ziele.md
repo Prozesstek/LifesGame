@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 27.09.2026 · Frederik
+**Zuletzt aktualisiert:** 09.10.2026 · Frederik
 
 ---
 
@@ -507,6 +507,13 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **09.10.2026** — **Die nächste Richtung steht**
+  ([ADR-0071](../decisions/0071-das-naechste-level.md)): fünf Ideen,
+  nach und nach — Tagesgrube, Lagerfeuer, Schatten, Saisons,
+  Seilschaft. **Kein neues Ziel und kein Termin**: Jede Idee bekommt vor
+  dem Bau ihre Konzeptrunde, ein Termin entsteht dort. Nichts davon steht
+  auf der Sperrliste. Die Messlatte der Tagesgrube — zehn Fremde, nach
+  zwei Wochen teilen noch drei — wird ein Ziel, sobald sie steht.
 - **27.09.2026** — **Weiterbauen im Testlauf** (Frederik). Die Frage war,
   ob bis zum 20.10. eingefroren und Ziel 7 gezählt wird; entschieden ist,
   weiterzubauen. Seit dem 21.09. hat sich das Spiel täglich geändert —
