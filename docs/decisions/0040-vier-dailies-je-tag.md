@@ -1,7 +1,7 @@
 # ADR-0040: Vier Stufen des Tages zahlen noch einmal — gedeckelt und nur mit Häkchen
 
 **Datum:** 22.09.2026
-**Status:** Aktiv — ergänzt ADR-0032 (dort: Belohnung genau einmal je Stufe)
+**Status:** Abgelöst durch [ADR-0072](0072-die-tagesgrube.md) — die Dailies gibt es nicht mehr; was sie gezahlt haben, zählt weiter
 **Entschieden von:** Prozesstek
 
 ## Kontext

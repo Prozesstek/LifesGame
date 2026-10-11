@@ -12,8 +12,9 @@
 /// sein, und das teuerste Einzelstück ebenso.
 ///
 /// **Seit ADR-0047 ein Drittel billiger.** Die 25 Gold sind nur noch der
-/// Sockel: Truhe, Dailies und Rückfrage bringen einen fleissigen Spieler
-/// auf rund 80 am Tag (`tool/runway_sim.dart`), und trotzdem kam im Test
+/// Sockel: Truhe, Seiten, Rückfrage und die Stufen der Grube bringen
+/// einen fleissigen Spieler auf rund 70 am Tag (`tool/runway_sim.dart`;
+/// bis ADR-0072 mit den Dailies rund 95), und trotzdem kam im Test
 /// tagelang kein Kauf. Die Grenzen oben rechnen weiter mit dem Sockel —
 /// wer nur abhakt, soll den Laden auch erreichen.
 ///

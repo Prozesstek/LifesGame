@@ -53,6 +53,10 @@ Auszahlung des Fortschritts, nicht seine Quelle.
 
 ## 1. Die Tagesgrube — Wordle für Gewohnheiten
 
+> **Gebaut am 11.10.2026.** Die sieben Fragen unten sind in
+> [ADR-0072](../decisions/0072-die-tagesgrube.md) entschieden; was hier
+> steht, ist der Entwurf davor und bleibt, wie er war.
+
 **Gegen:** Niemand erfährt davon.
 
 Jeden Tag gibt es **dieselbe Grube für alle**, gesät aus dem Datum, und

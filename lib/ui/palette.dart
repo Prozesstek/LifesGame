@@ -108,6 +108,24 @@ abstract final class Palette {
   static const Color manaOnDark = Color(0xFF7FA8D9);
 
   // ---------------------------------------------------------------
+  // Die Raumzeile der Tagesgrube (ADR-0072) — nur auf Pergament
+  // ---------------------------------------------------------------
+  //
+  // Dieselben drei Farben wie 🟩🟨🟥 im geteilten Text. **Flächen, keine
+  // Schrift**: [success], [gold] und [enemy] sind für Buchstaben auf
+  // Pergament gemacht und deshalb dunkel — als Feld gelesen wäre das
+  // Gold ein Braun, und aus „grün, gelb, rot“ würde „dunkel, dunkel,
+  // dunkel“. Ein Feld trägt dazu einen dunklen Rand, damit das Gelb sich
+  // vom Pergament löst.
+
+  static const Color raumSauber = Color(0xFF5E9E36);
+  static const Color raumAngekratzt = Color(0xFFE6B422);
+  static const Color raumBlutig = Color(0xFFC23B2E);
+
+  /// Der Pokal über dem gefallenen Wächter.
+  static const Color raumKrone = Color(0xFFA6740A);
+
+  // ---------------------------------------------------------------
   // Die Flächen der Fähigkeiten — nur auf dem dunklen Boden der Grube
   // ---------------------------------------------------------------
   //

@@ -12,6 +12,8 @@ import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
+import 'test_view.dart';
+
 /// Die Grube als Kampf des Spiels (ADR-0039).
 void main() {
   group('Die Naht zur Reihe', () {
@@ -73,6 +75,11 @@ void main() {
     });
 
     /// Ein Stand mit drei geschafften Stufen und einer Bestzeit auf 2.
+    ///
+    /// **Im Handyformat ansehen** (`usePhoneView`): Wer einmal unten war,
+    /// sieht über dem Schacht die Tagesgrube (ADR-0072). Im Testfenster
+    /// von 600 Punkten Höhe bleiben dem Schacht dann drei Zeilen, und die
+    /// geschafften Stufen rollen aus dem Bild.
     Widget mitDreiStufen() {
       const stand = LadderProgress(
         highestDefeated: 3,
@@ -89,6 +96,7 @@ void main() {
     testWidgets('der Schacht zeigt Bestzeit, neue Stufe und Sperre', (
       tester,
     ) async {
+      usePhoneView(tester);
       await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 
@@ -101,6 +109,7 @@ void main() {
     testWidgets('eine geschaffte Stufe wählen, „Hinab“ fährt dorthin', (
       tester,
     ) async {
+      usePhoneView(tester);
       await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 
@@ -115,6 +124,7 @@ void main() {
     });
 
     testWidgets('eine gesperrte Stufe lässt sich nicht wählen', (tester) async {
+      usePhoneView(tester);
       await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 

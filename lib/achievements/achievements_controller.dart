@@ -1,6 +1,7 @@
 import 'package:achievements/achievements.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
@@ -57,8 +58,12 @@ final earnedTitleIdsProvider = Provider<Set<String>>((ref) {
 /// steht auf dem Charakter neben Level und Gold, und niemand kann sie
 /// ausgeben. Ihr Zweck ist Ziel 7: „340 gegen 410", wie „17 / 30" bei der
 /// Reihe.
+///
+/// **Zwei Quellen** seit ADR-0072: die Errungenschaften und die
+/// Tagesgrube. Beide werden gerechnet, keine gezählt.
 final fameProvider = Provider<int>((ref) {
-  return AchievementCatalog.fameFor(ref.watch(achievementStatsProvider));
+  return AchievementCatalog.fameFor(ref.watch(achievementStatsProvider)) +
+      ref.watch(dailyPitProvider).fame;
 });
 
 /// Erfahrung aus Errungenschaften — der fünfte Zufluss in die Kurven.

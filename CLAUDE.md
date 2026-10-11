@@ -106,11 +106,11 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 276 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 305 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
-| `packages/action_combat/lib/src/dailies.dart` | **die vier Stufen des Tages** — gewürfelt aus dem Datum ([ADR-0040](docs/decisions/0040-vier-dailies-je-tag.md)) | nur Dart-SDK |
+| `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
@@ -124,6 +124,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
 | `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
+| `lib/action/daily_pit_screen.dart` | der **eine Lauf des Tages** durch die Tagesgrube — trägt ein, wie er ausging; „Zurück“ fragt nach und hält den Lauf an | Flutter |
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
@@ -135,6 +136,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/boss_text.dart` | wie die vier Wächter heißen, und die Zeile unter dem Namen beim Auftritt | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
+| `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint und welcher leuchtet — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)) | Flutter |
@@ -203,7 +205,13 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: „17 / 30", der **Fahrstuhl** (alle 30 Stufen, Stern für die des Tages, Bestzeit), Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter „17 / 30", der **Fahrstuhl** (alle 30 Stufen, Bestzeit), Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/daily_pit_controller.dart` | Riverpod-Brücke Tagesgrube ↔ UI, **enthält keine Regeln**; `dailyConditionProvider` sagt, in welcher Verfassung es heute hinabginge | Flutter |
+| `lib/combat/widgets/tagesgrube_karte.dart` | die Tagesgrube im Eingang: Satz des Tages, Verfassung, „Hinab“ — **trägt den Versuch ein, bevor der Lauf beginnt**; danach Ergebnis und Teilen | Flutter |
+| `lib/combat/widgets/tagesgrube_ergebnis.dart` | das Blatt am Ende der Tagesgrube: Raumzeile, Zeit, Verfassung, Tageskette, Ruhm, Teilen | Flutter |
+| `lib/combat/widgets/raumzeile.dart` | die Raumzeile als Bild — gezeichnet, nicht als Emoji; dieselben Felder wie im Text | Flutter |
+| `lib/combat/tagesgrube_text.dart` | **der Text zum Teilen** — reine Rechnung, verrät weder Karte noch Satz | Flutter |
+| `lib/combat/widgets/teilen_knopf.dart` | kopiert einen Text und bleibt auf „Kopiert“ stehen | Flutter |
 | `lib/combat/widgets/tagesform_kreis.dart` | die **Tagesform als Blitz**, der sich mit jedem Häkchen auflädt; Tipp zeigt, was sie bringt | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
@@ -238,16 +246,17 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 736 Tests
+flutter test             # 768 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
+dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 276 Tests
+dart test                              # 305 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -755,15 +764,43 @@ einmal, und der Gesamtbetrag steht deshalb als Zahl fest
 `flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
 mit in den vier Kurven.
 
-**Seit [ADR-0040](docs/decisions/0040-vier-dailies-je-tag.md) zahlen vier
-Stufen des Tages noch einmal** — ein Viertel des Erstsiegs
-(`LadderRewards.dailyShare`), einmal je Stufe und Tag, und **nur an Tagen
-mit einem Häkchen** (`dailiesUnlockedProvider`). Welche vier, würfelt
-`PitDailies.forDay` aus dem Datum; `LadderProgress` friert sie beim
-ersten Gebrauch ein und hält die geschafften als Historie. Die
-Obergrenze je Tag steht als `maxDailyXpPerDay` und `maxDailyGoldPerDay`.
-Wer an `dailyShare` dreht, rechnet gegen die 25 Gold am Tag, auf die der
-Laden ausgelegt ist.
+**Seit [ADR-0072](docs/decisions/0072-die-tagesgrube.md) gibt es einen
+Kampf des Tages: die Tagesgrube** — dieselbe Grube für alle, ein Versuch
+am Tag, und sie zahlt **nur Ruhm**. Die vier Stufen des Tages aus
+ADR-0040 gibt es nicht mehr; eine geschaffte Stufe zahlt nichts, an
+keinem Tag. Was ein Stand mit Dailies verdient hat, bleibt als Historie
+in `LadderProgress` und zählt weiter (`dailies_test.dart`), sonst fiele
+nachträglich ein Level.
+
+| Frage | Antwortet |
+|---|---|
+| Welche Grube ist heute dran? | `DailyPit.seedFor(tag)` → `LevelBuilder`; Karte, Wächter und Besetzung folgen aus dem Datum |
+| Womit geht der Held hinab? | `DailyPit.loadoutFor(tag)` — sieben Sätze, Montag bis Sonntag, jeder mit **gemessener** Stufe |
+| Wie stark ist er? | `PitPower.dailyHero(inForm:)` — für alle derselbe, die Werte stehen in `ActionBalance` |
+| Ist jemand in Form? | `dailyConditionProvider` → `HabitTracker.isDayComplete`; ja oder nein, ein Ruhetag ist es nicht |
+| Wann ist der Versuch gebraucht? | `DailyPitLog.start` — **mit dem Hinabsteigen**; der Eintrag steht als „abgebrochen“, bis `finish` ihn überschreibt |
+| Was bringt er? | `DailyPitRewards` — antreten 1, Sieg 3, Sieg in Form 5 |
+| Wie lief es je Raum? | `ActionWorld.damageByRoom` → `DailyRun.marksOf` |
+| Was steht im geteilten Text? | `TagesgrubeText.teilen` |
+| Ab wann ist sie zu sehen? | `ErsterStart.zeigtTagesgrube` — nach dem ersten Lauf |
+
+**Ein Tag hat einen Eintrag, also gibt es keinen Platz für einen zweiten
+Versuch.** Die Karte im Eingang trägt ihn ein, *bevor* sie die Seite des
+Laufs öffnet — sonst reichte Neuladen. Verfassung und Tag gelten vom
+Hinabsteigen: Wer danach abhakt, war nicht in Form, und wer um 23:59
+hinabsteigt, hat gestern gekämpft.
+
+**Wer einen Satz, den Einheitshelden oder `dailyFormBonus` ändert, lässt
+`dart run tool/tagesgrube_sim.dart` laufen** und stellt die Stufe nach:
+Gesucht ist die, auf der der Bot ohne Form etwa jeden zweiten Lauf
+gewinnt und in Form fast jeden. Die Grube hat eine scharfe Kante — zwei
+Stufen trennen „fast immer“ von „fast nie“.
+
+**Wer den Bau der Grube ändert, ändert die Tagesgrube mit.**
+`daily_pit_test.dart` hält die Karte eines Tages als Zahl fest; fällt
+der Test um, gehört die neue Zahl hinein, und er läuft danach auch im
+Browser (`dart test -p chrome test/daily_pit_test.dart`) — nur so gilt
+„dieselbe Grube für alle“ auf jedem Gerät.
 
 **Seit [ADR-0041](docs/decisions/0041-beute-je-gegner.md) fällt der
 Betrag je Gegner** — derselbe Topf, anders ausgeschüttet. Die Reihe
@@ -781,7 +818,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und vier
 Fähigkeiten vergeben.
 
-Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -798,6 +835,7 @@ Es gibt genau **dreizehn** Stellen, an denen etwas zusammenläuft:
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |
+| `fameProvider` | Ruhm aus Errungenschaften **und der Tagesgrube** (ADR-0072) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt

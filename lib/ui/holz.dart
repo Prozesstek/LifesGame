@@ -49,6 +49,10 @@ abstract final class Holz {
   /// hängenden Rahmen, damit beide aus einem Satz wirken.
   static const Color kante = Color(0xFF3A1F0C);
 
+  /// Wie breit diese Kante im hängenden Rahmen ist. Der Inhalt bleibt um
+  /// genau so viel von ihr weg, sonst malt er sie zu.
+  static const double kantenBreite = 2;
+
   /// Das Seil über dem Rahmen, 61 × 23.
   static const Size seilGroesse = Size(61 * pixel, 23 * pixel);
 
@@ -321,9 +325,19 @@ class HolzRahmen extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Palette.surface,
-                  border: Border.all(color: Holz.kante, width: 2),
+                  border: Border.all(
+                    color: Holz.kante,
+                    width: Holz.kantenBreite,
+                  ),
                 ),
-                child: child,
+                // **Um die Breite der Kante eingerückt.** Ein
+                // `DecoratedBox` malt sein Kind über den eigenen Rand; ein
+                // Dialog, der die ganze Breite füllt, deckte die Kante
+                // sonst auf seiner Höhe zu, und der Rahmen hatte Lücken.
+                child: Padding(
+                  padding: const EdgeInsets.all(Holz.kantenBreite),
+                  child: child,
+                ),
               ),
             ),
           ),
@@ -440,7 +454,10 @@ class HolzDialog extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, platz) {
           final hoehe =
-              platz.maxHeight - Holz.seilGroesse.height - 2 * Holz.rahmenRand;
+              platz.maxHeight -
+              Holz.seilGroesse.height -
+              2 * Holz.rahmenRand -
+              2 * Holz.kantenBreite;
           return HolzRahmen(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: hoehe > 0 ? hoehe : 0),

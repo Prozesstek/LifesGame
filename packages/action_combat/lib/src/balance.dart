@@ -586,6 +586,41 @@ abstract final class ActionBalance {
   static const int stageBaseRooms = 3;
   static const int stageExtraRooms = 2;
 
+  // --- Die Tagesgrube (ADR-0072) ---
+
+  /// **Der Einheitsheld.** In die Tagesgrube gehen alle mit denselben
+  /// Werten: denen eines fleissigen Spielers nach dreissig Tagen (fünf
+  /// Vorlagen, Level 15, ohne Ausrüstung). Im Alltagsmassstab, wie sie
+  /// aus den Gewohnheiten kämen — in den Kampf gehen sie über
+  /// `PitPower.dailyHero` und damit mal [powerScale].
+  ///
+  /// Wer hier dreht, lässt `dart run tool/tagesgrube_sim.dart` laufen:
+  /// Die Stufen der sieben Sätze (`DailyPit.loadouts`) sind gegen genau
+  /// diesen Helden gemessen.
+  static const int dailyHeroAttack = 19;
+  static const int dailyHeroMaxHp = 216;
+  static const int dailyHeroDefense = 14;
+  static const int dailyHeroEnergy = 11;
+
+  /// Was beim eigenen Helden Level und Seltenheit wären: so viel wie
+  /// Level 15 ohne Ausrüstung.
+  static const double dailyHeroPower = 1.73;
+
+  /// **In Form:** der Aufschlag auf alle vier Werte, wenn heute alles
+  /// Fällige erledigt ist. Ja oder nein, egal ob eine Gewohnheit oder
+  /// fünf — nur so ist der Vergleich unter Freunden fair.
+  ///
+  /// Die Grube hat eine scharfe Kante: Zwei Stufen trennen „fast immer“
+  /// von „fast nie“. Ein Viertel reicht deshalb, um aus einem Lauf, den
+  /// der Bot jedes zweite Mal verliert, einen zu machen, den er fast
+  /// immer gewinnt.
+  static const double dailyFormBonus = 0.25;
+
+  /// Ab welchem Anteil des vollen Lebens ein Raum in der Raumzeile des
+  /// geteilten Texts gelb steht, und ab welchem rot.
+  static const double dailyRoomLightShare = 0.10;
+  static const double dailyRoomHeavyShare = 0.30;
+
   // --- Trennung ---
 
   /// Wie hart sich zwei Figuren auseinanderschieben, die sich

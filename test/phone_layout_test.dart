@@ -152,7 +152,7 @@ void main() {
       theory: progress,
       habits: tracker,
       loadout: loadout,
-      // Zwölf Stufen: Damit steht auf dem Eingang die Karte der Dailies.
+      // Zwölf Stufen: Damit steht im Eingang die Tagesgrube (ADR-0072).
       ladder: const LadderProgress(highestDefeated: 12),
     );
   }

@@ -6,7 +6,10 @@ import 'package:gear/gear.dart';
 
 import '../action/action_prototype_screen.dart';
 import '../action/pit_text.dart';
+import '../combat/daily_pit_controller.dart';
+import '../combat/ladder_controller.dart';
 import '../gear/gear_controller.dart';
+import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import '../ui/palette.dart';
@@ -107,6 +110,20 @@ class DevScreen extends ConsumerWidget {
                   },
                 ),
                 _AbilityPicker(onPick: _grants(ref).grantAbility),
+
+                const _SectionTitle('Tagesgrube'),
+                _ButtonRow(
+                  entries: <String, VoidCallback>{
+                    'Versuch von heute freigeben': () => ref
+                        .read(dailyPitProvider.notifier)
+                        .reset(dayNumberOf(ref.read(todayProvider))),
+                  },
+                ),
+                const _Note(
+                  'Ein Versuch am Tag (ADR-0072). Der Knopf löscht den von '
+                  'heute, damit sich die Tagesgrube mehrmals ausprobieren '
+                  'lässt — die Karte bleibt dieselbe.',
+                ),
 
                 const SizedBox(height: 24),
                 const _SectionTitle('Prototypen'),

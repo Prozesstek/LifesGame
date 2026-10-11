@@ -2,7 +2,6 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
-import '../habits/habits_controller.dart';
 import '../save/save_providers.dart';
 
 /// Wie weit die Gegnerreihe gegangen ist — die Riverpod-Brücke zum
@@ -31,16 +30,9 @@ class LadderController extends Notifier<LadderProgress> {
     state = state.recordDefeat(rung);
   }
 
-  /// Was ein Lauf auf [stage] heute noch einbringen kann — der Rest des
-  /// Topfs (ADR-0041). Geht in die Welt, die ihn je Gegner ausschüttet.
-  Payout potFor(int stage) {
-    final tag = dayNumberOf(ref.read(todayProvider));
-    return state.potFor(
-      tag,
-      stage,
-      dailyAllowed: ref.read(dailiesUnlockedProvider),
-    );
-  }
+  /// Was ein Lauf auf [stage] noch einbringen kann — der Rest des Topfs
+  /// (ADR-0041). Geht in die Welt, die ihn je Gegner ausschüttet.
+  Payout potFor(int stage) => state.potFor(stage);
 
   /// Trägt einen Lauf durch die Grube ein und sagt, was er eingebracht
   /// hat (ADR-0039).
@@ -52,9 +44,8 @@ class LadderController extends Notifier<LadderProgress> {
   /// - [collected] ist, was die Welt je Gegner ausgeschüttet hat. Ein
   ///   verlorener Lauf behält es (ADR-0041), ein gewonnener bekommt den
   ///   ganzen Topf.
-  /// - Ein Sieg auf geschaffter Stufe zählt als Daily (ADR-0040), wenn
-  ///   sie heute dazugehört und heute abgehakt wurde. Die vier des Tages
-  ///   werden dabei eingefroren — sonst verschöbe ein Erstsieg sie.
+  /// - Eine geschaffte Stufe zahlt nichts mehr (ADR-0032) — seit ADR-0072
+  ///   auch nicht mehr als Stufe des Tages.
   Payout recordRun(
     int stage, {
     required bool won,
@@ -62,13 +53,7 @@ class LadderController extends Notifier<LadderProgress> {
     double? seconds,
   }) {
     final vorher = state;
-    var neu = state.bookRun(
-      dayNumberOf(ref.read(todayProvider)),
-      stage,
-      won: won,
-      collected: collected,
-      dailyAllowed: ref.read(dailiesUnlockedProvider),
-    );
+    var neu = state.bookRun(stage, won: won, collected: collected);
     // Nur ein Sieg hat eine Zeit, die zählt (ADR-0048).
     if (won && seconds != null) neu = neu.recordTime(stage, seconds);
     state = neu;
@@ -93,7 +78,8 @@ final nextRungProvider = Provider<int>((ref) {
   return ref.watch(ladderProvider).nextRung;
 });
 
-/// Tage seit dem 1.1.1970 — die Zahl, an der die Dailies hängen.
+/// Tage seit dem 1.1.1970 — die Zahl, an der alles hängt, was aus dem
+/// Datum gewürfelt wird: die Tagesgrube, die Rückfrage, die Beute.
 ///
 /// In UTC gerechnet, wie `Day` selbst: Eine Zeitumstellung darf keinen
 /// Tag verschlucken (`gotchas.md`).
@@ -104,30 +90,3 @@ int dayNumberOf(Day day) {
     day.day,
   ).difference(DateTime.utc(1970)).inDays;
 }
-
-/// Ob die Dailies heute zahlen: **nur an Tagen mit einem Häkchen**
-/// (ADR-0040). Der Kampf bleibt so die Auszahlung der Gewohnheiten, nicht
-/// ihr Ersatz — wer nichts abhakt, darf trotzdem spielen.
-final dailiesUnlockedProvider = Provider<bool>((ref) {
-  final heute = ref.watch(todayProvider);
-  return ref.watch(habitTrackerProvider).checksOn(heute) > 0;
-});
-
-/// Eine Stufe des Tages, wie der Eingang sie zeigt.
-typedef DailyStage = ({int stage, bool cleared, int xp, int gold});
-
-/// Die vier Stufen des Tages — **rechnet nicht**, fragt `LadderProgress`
-/// und `LadderRewards`.
-final todayDailiesProvider = Provider<List<DailyStage>>((ref) {
-  final stand = ref.watch(ladderProvider);
-  final tag = dayNumberOf(ref.watch(todayProvider));
-  return <DailyStage>[
-    for (final stufe in stand.dailiesOn(tag))
-      (
-        stage: stufe,
-        cleared: stand.isDailyCleared(tag, stufe),
-        xp: LadderRewards.dailyXpFor(stufe),
-        gold: LadderRewards.dailyGoldFor(stufe),
-      ),
-  ];
-});

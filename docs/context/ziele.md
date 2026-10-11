@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 09.10.2026 · Frederik
+**Zuletzt aktualisiert:** 11.10.2026 · Frederik
 
 ---
 
@@ -507,6 +507,14 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **11.10.2026** — **Die Tagesgrube steht**
+  ([ADR-0072](../decisions/0072-die-tagesgrube.md)), die erste der fünf
+  Ideen aus ADR-0071: dieselbe Grube für alle, ein Versuch am Tag, danach
+  ein Text zum Teilen. Die vier Dailies sind dafür gestrichen (ADR-0040
+  abgelöst). **Kein neues Ziel:** Die Messlatte aus ADR-0071 — zehn
+  Fremde, nach zwei Wochen teilen noch drei — ist jetzt prüfbar, steht
+  hier aber erst, wenn sie einen Termin hat und Frederik sie bestätigt.
+  Die Sperrliste ist unberührt.
 - **09.10.2026** — **Die nächste Richtung steht**
   ([ADR-0071](../decisions/0071-das-naechste-level.md)): fünf Ideen,
   nach und nach — Tagesgrube, Lagerfeuer, Schatten, Saisons,

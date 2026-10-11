@@ -192,4 +192,27 @@ abstract final class PitPower {
       manaMultiplier: formMana,
     );
   }
+
+  /// **Der Einheitsheld der Tagesgrube** (ADR-0072): für alle dieselben
+  /// Werte, aus [ActionBalance]. Stärker macht nur [inForm] — ein fester
+  /// Aufschlag auf alle vier.
+  ///
+  /// Zusammengesetzt über [hero] wie jeder andere: Auch er rechnet mal
+  /// [ActionBalance.powerScale], eine feste Kampfzahl gibt es hier nicht.
+  static ActionStats dailyHero({required bool inForm}) {
+    final form = inForm ? 1 + ActionBalance.dailyFormBonus : 1.0;
+    return hero(
+      attack: ActionBalance.dailyHeroAttack,
+      maxHp: ActionBalance.dailyHeroMaxHp,
+      defense: ActionBalance.dailyHeroDefense,
+      energy: ActionBalance.dailyHeroEnergy,
+      levelFactor: ActionBalance.dailyHeroPower,
+      weaponFactor: 1,
+      armorFactor: 1,
+      formAttack: form,
+      formHp: form,
+      formDefense: form,
+      formMana: form,
+    );
+  }
 }

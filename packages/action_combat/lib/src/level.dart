@@ -16,6 +16,34 @@ class Spawn {
   final int tileY;
 }
 
+/// Ein Raum der Grube als Rechteck in Feldern (ADR-0072).
+///
+/// **Die ganze Zelle, nicht nur der Raum darin.** `LevelBuilder` legt
+/// jeden Raum in eine Zelle mit einem Feld Fels ringsum; die Gänge laufen
+/// von Mitte zu Mitte. Mit der Zelle gehört jedes begehbare Feld zu genau
+/// einem Raum, auch die halben Gänge — sonst gäbe es Schritte, die
+/// nirgends stattfinden.
+class RoomArea {
+  const RoomArea({
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+  });
+
+  final int left;
+  final int top;
+  final int width;
+  final int height;
+
+  bool contains(int tileX, int tileY) {
+    return tileX >= left &&
+        tileX < left + width &&
+        tileY >= top &&
+        tileY < top + height;
+  }
+}
+
 /// Eine Halle als Karte.
 ///
 /// **Als Text geschrieben, nicht als Zahlenliste.** Ein Prototyp lebt
@@ -33,6 +61,7 @@ class Level {
     required this.heroStart,
     required this.spawns,
     required this.boss,
+    required this.rooms,
     required Set<int> gates,
     required this.gatesClosed,
   }) : _gates = gates;
@@ -65,10 +94,14 @@ class Level {
   /// [boss] sagt, welcher Wächter auf dem `B` steht. Ohne Angabe der
   /// Zyklop — so bleiben handgeschriebene Hallen und Tests, was sie waren;
   /// gewürfelt wird nur in `LevelBuilder`.
+  ///
+  /// [rooms] sagt, wo die Räume liegen, in der Reihenfolge des Wegs. Eine
+  /// handgeschriebene Halle hat keine.
   factory Level.parse(
     String name,
     List<String> rows, {
     BossKind boss = BossKind.zyklop,
+    List<RoomArea> rooms = const <RoomArea>[],
   }) {
     if (rows.isEmpty) throw ArgumentError('Die Halle "$name" ist leer.');
 
@@ -118,6 +151,7 @@ class Level {
       heroStart: start,
       spawns: List<Spawn>.unmodifiable(spawns),
       boss: boss,
+      rooms: List<RoomArea>.unmodifiable(rooms),
       gates: Set<int>.unmodifiable(gates),
       gatesClosed: false,
     );
@@ -158,6 +192,22 @@ class Level {
   /// Welcher Wächter hier wartet (ADR-0062).
   final BossKind boss;
 
+  /// Die Räume in der Reihenfolge des Wegs: der Start, die Räume davor,
+  /// zuletzt der des Wächters (ADR-0072). Leer in einer Halle, die nicht
+  /// gesteckt wurde.
+  final List<RoomArea> rooms;
+
+  /// In welchem Raum der Weltpunkt [point] liegt, oder null.
+  int? roomIndexAt(Vec2 point) {
+    if (rooms.isEmpty) return null;
+    final x = (point.x / ActionBalance.tileSize).floor();
+    final y = (point.y / ActionBalance.tileSize).floor();
+    for (var i = 0; i < rooms.length; i++) {
+      if (rooms[i].contains(x, y)) return i;
+    }
+    return null;
+  }
+
   /// Die Tor-Felder vor dem Wächterraum, als [_key].
   final Set<int> _gates;
 
@@ -179,6 +229,7 @@ class Level {
       heroStart: heroStart,
       spawns: spawns,
       boss: boss,
+      rooms: rooms,
       gates: _gates,
       gatesClosed: closed,
     );

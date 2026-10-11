@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 09.10.2026 · Frederik
+**Zuletzt aktualisiert:** 11.10.2026 · Frederik
 
 ---
 
@@ -27,7 +27,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
 | **Wissensbaum** | vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
-| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, vier Dailies, Beute je Gegner, **zwei Zeichen im ersten Lauf** | ADR-0039, -0040, -0041, -0046, -0062, -0063, -0069 |
+| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
 | **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
@@ -35,16 +35,17 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 736, dazu die acht Packages (theory 193, habits 324, gear
-118, action_combat 276, progression 42, abilities 36, identity 25,
+**Tests:** App 768, dazu die acht Packages (theory 193, habits 324, gear
+118, action_combat 305, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
 ## Offen, gesammelt
 
 **Die Richtung** (09.10., [ADR-0071](../decisions/0071-das-naechste-level.md)):
-Tagesgrube, Lagerfeuer, Schatten, Saisons, Seilschaft — nach und nach,
-jede mit eigener Konzeptrunde. Die Fragen dafür stehen in der Vorlage
+~~Tagesgrube~~ (gebaut am 11.10., ADR-0072), Lagerfeuer, Schatten,
+Saisons, Seilschaft — nach und nach, jede mit eigener Konzeptrunde. Die
+Fragen dafür stehen in der Vorlage
 [`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
 
 **Braucht euch beide:**
@@ -55,7 +56,12 @@ jede mit eigener Konzeptrunde. Die Fragen dafür stehen in der Vorlage
 - **Das Dorf** statt der Kreise? Frederik lehnt es ab (Issue #88) und
   will stattdessen das **Haus** ausbauen (Möbel, Haustiere). Braucht
   AktivesBrett und einen ADR.
-- **Die fünf Ideen** aus ADR-0071 hat AktivesBrett nicht gesehen.
+- **Die fünf Ideen** aus ADR-0071 hat AktivesBrett nicht gesehen —
+  und nicht, dass für die Tagesgrube die Dailies gestrichen sind
+  (ADR-0072).
+- **Die Messlatte der Tagesgrube** (zehn Fremde, nach zwei Wochen teilen
+  noch drei) ist Claudes Vorschlag. Als Ziel in `ziele.md` braucht sie
+  einen Termin und eine Bestätigung.
 
 **Vor einer Veröffentlichung** (Durchsicht vom 02.10.). **Entschieden
 am 02.10. (Frederik): Ziel ist eine Android- und iOS-App, aber erst
@@ -80,10 +86,16 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 - ~~Der Weg zum ersten Kampf ist lang~~ — seit ADR-0068 geht es nach
   dem ersten Häkchen in die Grube. Ob Stufe 1 am ersten Tag für einen
   Menschen so leicht ist wie für den Bot, ist nicht gespielt.
+- **Ohne Dailies fehlt rund ein Viertel des Goldes** (ADR-0072): an
+  Tag 60 Level 29 statt 33 und 4.286 Gold statt 5.759. Nicht
+  ausgeglichen.
+- **Wie schwer die Tagesgrube für Menschen ist**, weiß niemand. Der Bot
+  gewinnt ohne Form je nach Wochentag 20 % bis 78 %, in Form immer.
 
 **Oberfläche, nicht am Handy geprüft:**
 
-- Kopieren und Einfügen des Spielstands im Handy-Browser.
+- Kopieren und Einfügen des Spielstands im Handy-Browser — und damit
+  auch das Teilen der Tagesgrube, das denselben Weg nimmt.
 - Ob der kontrastreichere Boden die dunkle Fledermaus schluckt.
 - Drei Reihen „Inhalt folgt“ im Baum: Versprechen oder Baustelle?
 
@@ -95,13 +107,130 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
-- `world.dart` (1.754 Zeilen), `tracker.dart` (1.858) und
-  `action_game.dart` (1.024) liegen über der 800-Zeilen-Grenze.
+- `world.dart` (1.845 Zeilen), `tracker.dart` (1.858) und
+  `action_game.dart` (1.136) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 11.10.2026, danach: die Tagesgrube — eine Grube für alle, ein Versuch am Tag
+
+Frederik: „Tagesgrube lets go.“ Die erste der fünf Ideen aus ADR-0071,
+in zwei Fragerunden entschieden und gebaut:
+[ADR-0072](../decisions/0072-die-tagesgrube.md).
+
+| Was | Wie |
+|---|---|
+| **Dieselbe Grube für alle** | der Startwert kommt aus dem Datum, daraus Karte, Wächter und Besetzung |
+| **Ein Held für alle** | die Werte eines fleißigen Spielers an Tag 30; je Wochentag ein fester Satz aus Waffe und drei Fähigkeiten |
+| **In Form** | alles Fällige erledigt: +25 % auf alle vier Werte, ja oder nein; ein Ruhetag geht ohne Aufschlag |
+| **Ein Versuch** | zählt mit dem Start; wer mittendrin schließt, hat abgebrochen; „Zurück“ fragt nach und hält den Lauf an |
+| **Nur Ruhm** | antreten 1, Sieg 3, Sieg in Form 5 — weder Erfahrung noch Gold, keine Beute |
+| **Der Text** | Raumzeile, Zeit, Form, Tageskette und die Adresse, in die Zwischenablage |
+| **Wo** | im Eingang der Grube ganz oben, sobald jemand einmal unten war |
+| **Die Dailies** | gestrichen (ADR-0040 abgelöst); was sie gezahlt haben, zählt weiter |
+
+Achtmal entschieden, siebenmal wie empfohlen. **Bei den Dailies gegen
+Claudes Empfehlung**: Sie lautete, sie eine Woche neben der Tagesgrube
+stehen zu lassen.
+
+**Gemessen:**
+
+- **Die Grube hat eine scharfe Kante.** Derselbe Held gewinnt Stufe 11
+  zu 92 % und Stufe 13 zu 8 %; ein Viertel mehr auf alle Werte macht
+  aus den 8 % 96 %. Deshalb reicht ein Viertel als Aufschlag.
+- **Die sieben Sätze** stehen auf Stufe 11 bis 13
+  (`tool/tagesgrube_sim.dart`, 40 Läufe je Feld). Ohne Form gewinnt der
+  Bot zwischen 20 % (Sonntag) und 78 % (Donnerstag), im Mittel jeden
+  zweiten Lauf; in Form jeden. Ein Sieg dauert ihm rund eine Minute.
+- **Ohne Dailies** (`runway_sim`, fleißiger Spieler): an Tag 30 Level 18
+  statt 21 und 1.991 Gold statt 2.482; an Tag 60 Level 29 statt 33,
+  37 Seiten statt 41, 4.286 Gold statt 5.759. Nicht ausgeglichen.
+- **Dieselbe Grube auf jedem Gerät:** Ein Test hält die Karte vom 12.10.
+  als Zahl fest. Er läuft in der VM und im Browser
+  (`dart test -p chrome`), beide ergeben dieselbe.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto):
+
+- **Die Raumzeile war „dunkel, dunkel, dunkel“.** Die Farben der Palette
+  sind für Schrift gemacht; als Feld wurde das Gold ein Braun. Sie hat
+  jetzt drei eigene Farben und einen Rand.
+- Das Zeichen der Form hing am Titel statt am rechten Rand.
+- **Breite Dialoge deckten die Kante ihres Holzrahmens zu**, links und
+  rechts eine Lücke so hoch wie der Text. Das traf jeden Dialog mit
+  einem Satz und ist jetzt in `HolzRahmen` behoben (`gotchas.md`).
+
+Neu: `packages/action_combat/lib/src/daily_pit.dart`,
+`tool/tagesgrube_sim.dart`, `lib/action/daily_pit_screen.dart`,
+`lib/combat/daily_pit_controller.dart`, `tagesgrube_text.dart` und vier
+Widgets unter `lib/combat/widgets/`. Die Karte kennt jetzt ihre Räume
+(`Level.rooms`), die Welt zählt den Schaden je Raum. Gelöscht:
+`dailies.dart`, `dailiesUnlockedProvider`, `todayDailiesProvider` und
+die Sterne im Fahrstuhl.
+
+App 768 (vorher 736), action_combat 305 (vorher 276). Eingang in fünf
+Zuständen, beide Rückfragen, beide Ergebnisblätter und der Lauf
+gerendert und angesehen, **der Lauf mit Würfeln statt Figuren. Nicht
+gespielt, nicht am Handy.**
+
+### Offen
+
+- **Wie schwer sie für Menschen ist.** Der Bot ist eine untere Schranke;
+  ob „ohne Form“ ein fairer Kampf ist oder eine Wand, zeigt das Spielen.
+- **Teilen geht über die Zwischenablage**, nicht über das Teilen-Blatt
+  des Handys. Das sind am Handy drei Schritte statt einem, und es ist
+  dort nicht geprüft.
+- Die Startseite zeigt nicht, dass die Tagesgrube heute noch offen ist;
+  man findet sie erst im Eingang der Grube.
+- Ob ein Blitz mit einer Zahl daneben als „noch 2 offen“ gelesen wird.
+- **Schlüssel**: Beute fiel bisher nebenbei bei den vier Dailies. Jetzt
+  muss man dafür eine geschaffte Stufe von sich aus noch einmal spielen.
+- Die Stufen sind grob: Donnerstag ist ohne Form deutlich leichter als
+  Sonntag. Genauer ginge es nur über eigene Werte je Satz.
+- Ein Deploy mitten am Tag kann die Grube für den Rest des Tages ändern,
+  wenn er am Bau der Grube etwas ändert.
+- `konzept.md` kennt die Tagesgrube nicht.
+- Die Dialoge im hängenden Rahmen füllen die ganze Höhe des Bildschirms,
+  auch wenn sie zwei Zeilen tragen. Das war vorher schon so.
+- AktivesBrett hat ADR-0072 nicht gesehen.
+
+## 11.10.2026: Schadenszahlen, die man lesen kann
+
+Frederik schickte ein Reel über Schadenszahlen in einem Roguelike
+(„damage numbers that feel good and don't break your game“). Die Zahlen
+der Grube stiegen gerade hoch, waren immer gleich groß und stapelten
+sich. Als Prototyp gebaut, dann „Sehr gut mach das“: PR #111.
+
+| Aus dem Reel | In der Grube |
+|---|---|
+| Punch bei der Geburt | die Zahl erscheint 1,6-fach und setzt sich in 0,12 s |
+| Bogen, Seiten wechseln | Treffer fliegen abwechselnd links und rechts im Wurf; Heilung, Zeit und Beute steigen weiter gerade |
+| erst am Ende verblassen | voll sichtbar bis 70 % der Lebenszeit, vorher 50 % |
+| eine Farbe je Sache | neu: Dauerschaden ist violett |
+| Größe folgt dem Schaden | gemessen am Schnitt der letzten zwölf Treffer des Helden, 0,8- bis 1,6-fach |
+| ein kritischer Treffer als Moment | größer, schräg, zittert 0,3 s — kritische gibt es weiter nur im Prototyp |
+| zusammenzählen | Treffer auf denselben Gegner binnen 0,3 s werden eine Summe |
+| nie zu viele | höchstens 40 zugleich |
+
+**Anders als im Reel:** Zusammengezählt wird nur 0,3 s lang, nicht
+solange die Zahl in der Luft ist — der Grundangriff fällt etwa jede
+halbe Sekunde, sonst stünde über jedem Gegner nur eine wachsende Summe.
+Dauerschaden ist violett und nicht giftgrün, weil Grün die Heilung ist.
+Und die Zahlen werden nicht wiederverwendet; bei höchstens 40 lohnt es
+nicht.
+
+`HitLanded` trägt dafür ein Pflichtfeld `overTime`, das nur die Anzeige
+liest. Die Rechnung steht in `lib/action/damage_popup.dart`
+(`DamagePopup`, `HitAverage`, `DamagePopups`).
+
+App 736 (vorher 716). **Nicht angesehen**, weder gerendert noch
+gespielt.
+
+### Offen
+
+- Ob Bogen, Größe und das Fenster von 0,3 s sich gut anfühlen.
 
 ## 09.10.2026: das nächste Level — fünf Ideen, nach und nach
 
@@ -142,7 +271,8 @@ wortgleich in [`verlauf.md`](verlauf.md).
 - Reihenfolge (Tagesgrube, Lagerfeuer, Schatten, Saisons, Seilschaft)
   und Messlatte (zehn Fremde, zwei Wochen, drei teilen noch) sind
   Claudes Vorschlag, nicht ausdrücklich bestätigt.
-- Ob die vier Dailies in der Tagesgrube aufgehen (ADR-0040).
+- ~~Ob die vier Dailies in der Tagesgrube aufgehen (ADR-0040).~~
+  Entschieden am 11.10.: Sie gehen (ADR-0072).
 - AktivesBrett hat ADR-0071 nicht gesehen.
 
 ## 07.10.2026, danach: das Handbuch steht im Baum
@@ -380,230 +510,6 @@ das: Ob der Timer eine Nacht im Hintergrund eines Handy-Browsers
 - Eigene Gewohnheiten bekommen ihr Zeitziel nur beim Anlegen; eine
   bestehende ohne Ziel bekommt keinen Timer (ADR-0028).
 - `tracker.dart` ist auf 1.858 Zeilen gewachsen.
-
-## 03.10.2026: „Mach es attraktiv“ — eine Belohnung je Gewohnheit
-
-Frederik: „Können wir ‚eine Gewohnheit muss attraktiv sein‘ irgendwie
-einbauen?“ Vier Wege vorgeschlagen, in einer Fragerunde gewählt: das
-**Versuchungsbündel**,
-[ADR-0066](../decisions/0066-versuchungsbuendel.md). Vorher gemergt:
-PR #103 (Wochenplan) und #104 (Koppeln).
-
-| Was | Wie |
-|---|---|
-| **Eintragen** | im Dialog „Wann machst du das?“ ein Feld „Und danach gönnst du dir:“, fünf Vorschläge zum Antippen |
-| **Vorfreude** | auf der Kachel und in „Heute“ steht die Belohnung mit einem Geschenk, solange die Gewohnheit offen ist |
-| **Einlösen** | beim Abhaken steht unten drei Sekunden „Jetzt: Kaffee“ |
-| **Keine Zahl** | Erfahrung, Gold und Ketten ändern sich nicht (`treat_test.dart`) |
-
-Sie steht neben Satz **und** Anker: nach X mache ich Y, danach gönne
-ich mir Z.
-
-**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Im
-Dialog lag das neue Feld erst nach zwei Bildschirmen Rollen, weil sechs
-Vorschläge in sechs Zeilen umbrachen. Die Vorschläge stehen jetzt in
-einer Zeile zum Wischen, das Feld ist ohne Rollen zu sehen.
-
-habits 298 (vorher 285), App 656 (vorher 646). Kachel, Dialog,
-Startseite und das Häkchen gerendert und angesehen. **Nicht am Handy,
-nicht im Browser gespielt.**
-
-**Dazu die Theorie-Seite „Mach es attraktiv“** (Frederik: „Theorie
-Seite auch bauen“), als Knoten unter „Die vier Regeln“: Vorfreude statt
-Belohnung, das Versuchungsbündel, die Menschen um einen herum, umdeuten
-und umdrehen. Der Baum hat damit 58 Knoten. **Anders als bei Regel 1
-kommt der Inhalt nicht aus Frederiks Notizen, sondern von Claude** nach
-dem Aufbau des Kapitels — gegenlesen. `question_fairness_test` hat zwei
-zu kurze richtige Antworten erwischt, beide angeglichen.
-
-### Offen
-
-- Die Seite „Mach es attraktiv“ ist nicht gegengelesen; die Aussage
-  über Dopamin ist vereinfacht.
-- Die App gibt die Belohnung nicht und prüft sie nicht; ob „Jetzt: …“
-  trägt, zeigt das Spielen.
-- „Jetzt: …“ steht in der Leiste unten, nicht bei den aufsteigenden
-  Zahlen am Finger — dort wäre ein langer Satz übergelaufen.
-- Die Wochentage, der Auslöser, der Anker und die Belohnung stehen in
-  **einem** Dialog; er ist voll.
-
-## 02.10.2026, ganz zuletzt: Gewohnheiten koppeln
-
-Frederik: „Ich fände es noch cool, wenn man Gewohnheiten aneinander
-koppeln kann wie im Buch *Die 1%-Methode*.“ In einer Fragerunde
-entschieden: [ADR-0065](../decisions/0065-gewohnheiten-koppeln.md).
-Gebaut **auf dem Wochenplan-Branch** (PR #103), weil beides denselben
-Dialog umbaut.
-
-| Was | Wie |
-|---|---|
-| **Koppeln** | im Dialog „Wann machst du das?“ stehen unter den Textvorschlägen die anderen laufenden Gewohnheiten; eine antippen macht sie zum Anker |
-| **Anzeigen** | die gekoppelte steht in „Heute“ eingerückt unter ihrem Anker, auf der Kachel „Nach: Zähne putzen“; Stapel beliebiger Länge |
-| **Auslösen** | ist der Anker abgehakt, leuchtet die nächste dreimal auf und behält eine farbige Kante, bis sie erledigt ist |
-| **Kein Schloss, keine Zahl** | alles bleibt jederzeit abhakbar; Erfahrung, Gold und Ketten ändern sich nicht (`stack_test.dart` hält das fest) |
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **Satz oder Anker, nie beides** — der eine ersetzt den anderen.
-- **Ein Stapel bleibt zusammen**: Er steht oben, solange ein Glied offen
-  ist, und wandert als Ganzes nach unten. Sonst rutschte der abgehakte
-  Anker von seiner offenen Folge weg.
-- **Fehlt der Anker** (gestoppt, heute nicht fällig), steht die
-  gekoppelte ohne Einrückung da; die Kopplung bleibt gespeichert.
-- **Kein Kreis**: Was einen schlösse, steht im Dialog nicht zur Wahl.
-- **Eingerückt wird höchstens drei Stufen.**
-
-Neu: `packages/habits/lib/src/stack.dart`, `lib/habits/cue_text.dart`.
-habits 285 (vorher 265), App 646 (vorher 637). Stapel, Dialog und
-Startseite gerendert in 390 × 844 und angesehen; dabei behoben: Der
-gewählte Anker im Dialog trug das blasse Rosa von Material statt der
-Farben der App. **Nicht am Handy, nicht im Browser gespielt.**
-
-### Offen
-
-- Ob das Aufleuchten reicht oder zu leise ist; es hat keinen Klang.
-- Die Priorität ordnet nur noch Stapel untereinander: Eine „wichtige“
-  Gewohnheit unter einem „nebenbei“-Anker steht unter ihm.
-- Die Theorie-Seite „Mach es offensichtlich“ nennt die Kopplung nicht.
-- `tracker.dart` ist auf 1.652 Zeilen gewachsen.
-
-## 02.10.2026, zuletzt: Wochenplan, und Ketten fallen statt zu reißen
-
-Der erste Konzeptpunkt aus der Durchsicht unten, in zwei Fragerunden mit
-Frederik entschieden und gebaut:
-[ADR-0064](../decisions/0064-wochenplan-und-kette-die-faellt.md).
-
-| Was | Wie |
-|---|---|
-| **Wochentage je Gewohnheit** | sieben Kreise im Dialog „Wann machst du das?“; Standard jeden Tag. Was heute nicht dran ist, steht nicht in „Heute“ und lässt sich nicht abhaken |
-| **Kette** | zählt erledigte fällige Tage; freie Tage tragen sie, verlängern sie nicht |
-| **Verpasst** | die Kette fällt auf die Stufe darunter (45 → 30, 10 → 7, 7 → 3), jeder weitere verpasste Tag wieder eine. Gilt auch für die Tageskette |
-| **Ruhetag** | nichts fällig: keine Truhe, keine Tagesform, die Tageskette steht still |
-| **Ertrag** | jedes Häkchen zahlt wie bisher; wer seltener plant, bekommt weniger |
-| **Stoppen** | Pause ab morgen, die Kette bleibt stehen, bis die Gewohnheit wieder läuft |
-| **Planänderung** | gilt ab morgen; sofort nur, solange nichts abgehakt ist |
-
-**Der Plan ist eine Historie** („ab Tag X gelten diese Wochentage“),
-sonst schriebe jede Änderung Erfahrung und Level der Vergangenheit um.
-Neu in `habits`: `plan.dart`, `streak_rule.dart`. In der App:
-`weekday_picker.dart`, auf dem Gewohnheiten-Bildschirm ein Abschnitt für
-Laufendes, das heute nicht fällig ist (ändern, stoppen), auf der
-Startseite ein Zeichen für den Ruhetag.
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **„Stufe darunter“ ist streng**: Wer genau auf 7 steht, fällt auf 3.
-  Die Folge: Wer jeden zweiten Tag abhakt, hält seine Stufe, steigt
-  aber nicht (8 → 7 → 8).
-- **Die Tageskette bekommt dieselbe Regel.**
-- **Eine heute gestoppte, offene Gewohnheit zählt heute weiter als
-  fällig** — sonst wäre Stoppen der Knopf für die Truhe.
-- **Alte Stände:** Was gestoppt war, pausiert seit dem Tag nach seinem
-  letzten Häkchen. Frühere Lücken zählen rückwirkend als Rückfall, es
-  gibt also etwas mehr Erfahrung als bisher, nie weniger.
-
-**Gemessen** (`curve_sim`, 90 Tage, fünf Gewohnheiten): Der fleißige
-Spieler bleibt bei 11.865 XP, „5 von 7 ohne Plan“ bei 4.980. Neu:
-**Montag bis Freitag geplant 7.965**, **ein Tag je Woche fehlt 7.920**
-(vorher 6.540). Die Obergrenze, auf die Levelkurve und Laden gerechnet
-sind, bewegt sich nicht.
-
-habits 265 (vorher 227), App 637 (vorher 625). Gewohnheiten-Bildschirm,
-Dialog und Startseite gerendert in 390 × 844 und angesehen; dabei
-gefunden und behoben: Der Auslöser wurde neben den Wochentagen auf drei
-Wörter gekürzt, und sieben feste Kreise wären auf einem schmalen Handy
-übergelaufen. **Nicht am Handy, nicht im Browser gespielt.**
-
-### Offen
-
-- **Eine Woche krank bleibt ein Totalverlust** (sechs verpasste Tage),
-  wenn man nicht am Tag vorher stoppt. Frederik hat „jeder verpasste Tag
-  eine Stufe“ gewählt; ob das im Alltag zu hart ist, zeigt das Spielen.
-- **Verschieben geht nicht**: Montag geplant, Dienstag gemacht heißt
-  Montag verpasst.
-- An einem Ruhetag sind auch die Dailies der Grube zu (sie hängen an
-  einem Häkchen).
-- Die Kachel zeigt „noch 2“ bis zur nächsten Stufe; bei drei Tagen die
-  Woche sind das Häkchen, keine Tage.
-- Der Wochenrückblick kennt keinen Ruhetag.
-- Wochentage wählt man erst im Dialog nach dem Anlegen, nicht im
-  Formular einer eigenen Gewohnheit.
-- `tracker.dart` ist auf 1.557 Zeilen gewachsen.
-
-## 02.10.2026, danach: kritische Durchsicht vor einer Veröffentlichung
-
-Frederik hat die neuen Gegner, Besetzungen und Wächter gespielt („ist
-super“) und gefragt: Was hat die Konkurrenz voraus, und was demotiviert
-Spieler, wenn das jetzt auf den Markt geht? **Entschieden ist nichts**,
-das hier ist die Liste. Die Aussagen über Habitica, Duolingo und Finch
-stammen aus Claudes Wissen, nicht aus frischer Recherche.
-
-**Der Befund in einem Satz:** Es scheitert nicht am Spiel, sondern an
-allem drumherum — ein gutes Spiel für zwei Erbauer, noch kein Produkt
-für Fremde.
-
-| Was der Konkurrenz voraus ist | Stand bei uns |
-|---|---|
-| Erinnerungen | keine; seit dem 27.09. zurückgestellt |
-| Konto und Sync | Stand im Browser-Speicher, Sicherung als Text (ADR-0054); Browserdaten löschen heißt alles verlieren |
-| Echte App | Web auf GitHub Pages, Android nicht eingerichtet, Startsymbol ist das Flutter-Logo, kein Widget, kein iOS |
-| Soziales | nichts |
-| Flexible Gewohnheiten | jede Gewohnheit ist täglich (`habit.dart`); „dreimal die Woche“ geht nicht, ein Ruhetag reißt die Kette |
-| Sprache, Zugänglichkeit | nur deutsch, kein Übersetzungsgerüst; große Schrift auf der Sperrliste |
-| Messung | keine Analytik, keine Absturzmeldungen |
-| Politur | Level-Rahmen und Rüstung auf der Figur sind Platzhalter, neun Gegner und drei Wächter wippen nur |
-
-**Was Spieler demotiviert:**
-
-- **Der Weg zum ersten Kampf**: Handbuch, drei Knoten, anlegen. Wer
-  wegen des Kampfs kommt, muss zuerst lesen.
-- **Zu viele Systeme ohne Erklärung**: zwölf Dinge von XP bis
-  Tagesladen, und seit ADR-0060 stehen fast nur Zeichen da.
-- **Tägliche Pflichtlast**: Abhaken, Truhe, Aufgaben, Rückfrage, vier
-  Dailies, Laden — alles verfällt um Mitternacht.
-- **Kettenverlust**: Eis nur aus etwa jeder zwölften Truhe, deckt nur
-  gestern. Eine Woche krank heißt alles weg.
-- **Der Kampf verlangt Geschick**: Stufe 2 an Tag 0 bei 58 % für den
-  Bot. Wer abgehakt hat und am Daumen scheitert, fühlt sich bestraft.
-- **Der Inhalt endet**: Baum um Tag 50–58 gelesen, 30 Stufen zahlen
-  einmal, Level 50 nach 188–240 Tagen.
-- **Schummeln ist gratis**: Ein Häkchen ist eine Behauptung.
-
-**Rechtlich offen:** Lizenzen der Asset-Pakete (Quelle und Urheber
-fehlen in HERKUNFT), ungelesene Gesundheitsaussagen im Baum, und die
-Gewohnheiten-Seiten folgen dem Aufbau von *Die 1%-Methode*.
-
-**Was besser ist als bei den anderen:** Der Kampf ist ein echtes Spiel,
-Lernen gehört zur Schleife, keine Werbung, alles offline.
-
-**Vorgeschlagene Reihenfolge** (Claude, nicht beschlossen):
-
-1. Datenverlust ausschließen (Konto oder automatische Sicherung).
-2. Android-App mit Erinnerung.
-3. Erster Kampf in den ersten zwei Minuten, Handbuch danach.
-4. Wochenrhythmus für Gewohnheiten, großzügigere Eis-Regel.
-5. Lizenzen und Inhalte klären.
-6. Fünf bis zehn Fremde spielen lassen und zählen, wer an Tag 7 noch
-   da ist — **vor** jeder weiteren Funktion.
-
-## 02.10.2026: offene Tagesaufgaben stehen als Satz da
-
-Frederik: „Die täglichen Aufgaben müssen natürlich auch lesbar sein,
-wenn sie noch nicht abgehakt sind.“ Seit ADR-0060 stand eine offene
-Aufgabe nur als Zeichen mit Balken da, der Satz kam erst auf Tipp; am
-30.09. bekam nur die **abgeholte** ihren Satz zurück.
-
-Jetzt steht der Satz in jeder Zeile: offen fett über dem Balken (bis
-zwei Zeilen), rechts der Stand oder der Knopf zum Abholen; abgeholt wie
-bisher grau und durchgestrichen. Der Tooltip ist damit weg, ebenso
-`DailyQuest.habitName` in `habits` — der Name steht im Satz.
-
-Das ist eine zweite Ausnahme von ADR-0060 neben der Theorie: Eine
-Aufgabe ist ein Satz, kein Wert mit Zeichen.
-
-App 625 (vorher 623), habits 227. **Nicht angesehen**, weder gerendert
-noch am Handy — die Karte ist mit drei offenen Aufgaben rund 40 Punkte
-höher als vorher.
 
 ---
 

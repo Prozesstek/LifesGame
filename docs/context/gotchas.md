@@ -3,6 +3,40 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein `DecoratedBox` malt sein Kind über den eigenen Rand
+
+Der hängende Holzrahmen (`HolzRahmen`) legt sein Kind auf Pergament mit
+einer dunklen Kante:
+
+```dart
+DecoratedBox(
+  decoration: BoxDecoration(
+    color: Palette.surface,
+    border: Border.all(color: Holz.kante, width: 2),
+  ),
+  child: child,
+)
+```
+
+Ein `DecoratedBox` rückt sein Kind **nicht** um den Rand ein — das tut
+nur ein `Container`. Das Kind liegt über der Kante. Solange ein Dialog
+schmaler war als der Rahmen (das Ergebnisblatt), sah man nichts. Jeder
+Dialog mit einem Satz, der die Breite füllt, deckte die Kante auf seiner
+Höhe zu: Der Rahmen hatte links und rechts eine Lücke, genau so hoch wie
+der Text.
+
+Kein Test kann das finden, es ist kein Überlauf. Aufgefallen ist es beim
+Ansehen der Rückfrage vor der Tagesgrube, gerendert in 390 × 844 — und
+es traf jeden Dialog im Rahmen, dessen Inhalt die Breite füllt.
+
+**Abhilfe:** das Kind um die Breite der Kante einrücken
+(`Holz.kantenBreite`) und dieselbe Zahl bei der Höhe abziehen, die
+`HolzDialog` seinem Inhalt lässt.
+
+**Regel:** Wer einen Rand mit `DecoratedBox` zeichnet, gibt dem Kind ein
+`Padding` in derselben Breite. Und: Ein Rahmen wird mit einem **breiten**
+Inhalt angesehen, nicht nur mit dem, für den er gebaut wurde.
+
 ## Flame ruft `update(0)` mitten im Bau
 
 `ActionGame.update` zählte am Ende jedes Bildes `frame.value++`, damit
