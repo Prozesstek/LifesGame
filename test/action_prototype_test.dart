@@ -166,6 +166,7 @@ void main() {
         at: const Vec2(100, 100),
         amount: amount,
         isCrit: isCrit,
+        overTime: false,
       );
     }
 
@@ -195,7 +196,7 @@ void main() {
 
       popup.update(DamagePopup.lifetime / 2);
       expect(popup.position.y, lessThan(start));
-      expect(popup.opacity, 1, reason: 'die erste Hälfte bleibt lesbar');
+      expect(popup.opacity, 1, reason: 'sie verblasst erst am Ende');
 
       popup.update(DamagePopup.lifetime / 2 + 0.01);
       expect(popup.isAlive, isFalse);

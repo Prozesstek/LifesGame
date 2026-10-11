@@ -52,7 +52,7 @@ class ActionGame extends Game {
   /// Die Laufrichtung, gesetzt von Steuerkreuz oder Tastatur.
   Vec2 moveInput = Vec2.zero;
 
-  final List<DamagePopup> _popups = <DamagePopup>[];
+  final DamagePopups _popups = DamagePopups();
   final List<SwingMark> _swings = <SwingMark>[];
   final List<Burst> _bursts = <Burst>[];
 
@@ -172,7 +172,7 @@ class ActionGame extends Game {
   }
 
   /// Nur für Tests: was gerade an Zahlen in der Luft steht.
-  int get popupCount => _popups.length;
+  int get popupCount => _popups.count;
 
   @override
   Color backgroundColor() => Palette.background;
@@ -193,8 +193,7 @@ class ActionGame extends Game {
     for (final event in sim.drainEvents()) {
       switch (event) {
         case HitLanded():
-          final popup = DamagePopup.forHit(event);
-          if (popup != null) _popups.add(popup);
+          _popups.hit(event);
           _flashes[event.targetId] = Burst.flashTime;
           _figuren[event.targetId]?.hit();
         case AttackSwung():
@@ -226,8 +225,7 @@ class ActionGame extends Game {
             _popups.add(DamagePopup.forHeal(event.healed, event.at));
           }
         case TimeGained():
-          final popup = DamagePopup.forTime(event.seconds, event.at);
-          if (popup != null) _popups.add(popup);
+          _popups.add(DamagePopup.forTime(event.seconds, event.at));
         case AbilityCast():
           _figuren[sim.heroView.id]?.swing(Pose.attack2);
           // Ein Flächentreffer bekommt den goldenen Ring, so gross wie
@@ -260,8 +258,7 @@ class ActionGame extends Game {
           // Staub, wo das Gitter fällt.
           _bursts.add(Burst.slam(event.at, ActionBalance.tileSize * 1.5));
         case LootDropped():
-          final popup = DamagePopup.forLoot(event);
-          if (popup != null) _popups.add(popup);
+          _popups.add(DamagePopup.forLoot(event));
         case BossLanded():
           // Er schlägt auf: ein grosser Ring und ein Beben.
           _bursts.add(Burst.slam(event.at, 110));
@@ -271,10 +268,7 @@ class ActionGame extends Game {
       }
     }
 
-    for (final popup in _popups) {
-      popup.update(dt);
-    }
-    _popups.removeWhere((p) => !p.isAlive);
+    _popups.update(dt);
 
     for (final swing in _swings) {
       swing.update(dt);
@@ -1114,12 +1108,12 @@ class ActionGame extends Game {
   }
 
   void _drawPopups(Canvas canvas) {
-    for (final popup in _popups) {
+    for (final popup in _popups.live) {
       final painter = TextPainter(
         text: TextSpan(
           text: popup.text,
           style: TextStyle(
-            fontSize: 13 * popup.scale,
+            fontSize: 13 * popup.size,
             fontWeight: FontWeight.bold,
             color: popup.color.withValues(alpha: popup.opacity),
             shadows: const <ui.Shadow>[
@@ -1130,13 +1124,13 @@ class ActionGame extends Game {
         textDirection: TextDirection.ltr,
       )..layout();
 
-      painter.paint(
-        canvas,
-        Offset(
-          popup.position.x - painter.width / 2,
-          popup.position.y - painter.height,
-        ),
-      );
+      final ort = popup.position;
+      canvas
+        ..save()
+        ..translate(ort.x, ort.y)
+        ..rotate(popup.tilt);
+      painter.paint(canvas, Offset(-painter.width / 2, -painter.height));
+      canvas.restore();
     }
   }
 }

@@ -325,6 +325,7 @@ extension _Aim on ActionWorld {
         at: _hero.position,
         amount: wirklich,
         isCrit: false,
+        overTime: false,
       ),
     );
   }
