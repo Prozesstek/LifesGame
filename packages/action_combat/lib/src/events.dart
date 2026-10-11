@@ -39,6 +39,7 @@ class HitLanded extends ActionEvent {
     required this.at,
     required this.amount,
     required this.isCrit,
+    required this.overTime,
   });
 
   final int targetId;
@@ -49,6 +50,10 @@ class HitLanded extends ActionEvent {
   /// Ob es ein kritischer Treffer war. Die gibt es heute nur über
   /// [ActionStats.mitPotenz] — also im Prototyp, nicht im Spiel.
   final bool isCrit;
+
+  /// Ob es ein Tick Dauerschaden war statt eines Schlags. Die Anzeige
+  /// gibt ihm eine eigene Farbe; an der Rechnung ändert es nichts.
+  final bool overTime;
 }
 
 /// Eine Figur ist gefallen.
