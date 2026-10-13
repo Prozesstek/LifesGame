@@ -403,7 +403,8 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
     den Risikokasten in 3.3
 12. **Die fünf Ideen aus ADR-0071** — jede braucht vor dem Bau ihre
     Konzeptrunde; die Fragen stehen in
-    [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md)
+    [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md).
+    Die Tagesgrube hat ihre gehabt (ADR-0072), vier stehen aus.
 
 ---
 
@@ -429,14 +430,19 @@ Ausbau.
 
 ## 8. Das nächste Level
 
-**Entschieden am 09.10.2026, nichts davon gebaut**
+**Entschieden am 09.10.2026**
 ([ADR-0071](docs/decisions/0071-das-naechste-level.md)). Fünf Ideen,
-nach und nach, jede mit eigener Konzeptrunde. Der Grundsatz: weniger
+nach und nach, jede mit eigener Konzeptrunde. **Gebaut ist seit dem
+11.10.2026 die Tagesgrube, die anderen vier nicht.** Der Grundsatz: weniger
 Systeme, die enger zusammenhängen. Einzelheiten und offene Fragen:
 [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md).
 
 - **Tagesgrube** — dieselbe Grube für alle, aus dem Datum gesät, ein
-  Versuch, ein Einheitsheld; danach ein Text zum Teilen.
+  Versuch, ein Einheitsheld; danach ein Text zum Teilen. **Gebaut am
+  11.10.2026** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): je
+  Wochentag ein fester Satz aus Waffe und drei Fähigkeiten, in Form
+  +25 % auf alle vier Werte, und sie bringt nur Ruhm. Die vier Stufen
+  des Tages (ADR-0040) sind dafür gestrichen.
 - **Lagerfeuer** — abends eine Minute für Rückfrage, Truhe, Aufgaben und
   Wochenrückblick; zum Schluss, was morgen zuerst drankommt.
 - **Schatten** — ganz unten wartet man selbst, wie man vor 30 Tagen war;

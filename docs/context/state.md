@@ -175,6 +175,8 @@ Zuständen, beide Rückfragen, beide Ergebnisblätter und der Lauf
 gerendert und angesehen, **der Lauf mit Würfeln statt Figuren. Nicht
 gespielt, nicht am Handy.**
 
+Gemergt am 11.10. als PR #112, zusammen mit #110 und #111.
+
 ### Offen
 
 - **Wie schwer sie für Menschen ist.** Der Bot ist eine untere Schranke;
@@ -191,7 +193,9 @@ gespielt, nicht am Handy.**
   Sonntag. Genauer ginge es nur über eigene Werte je Satz.
 - Ein Deploy mitten am Tag kann die Grube für den Rest des Tages ändern,
   wenn er am Bau der Grube etwas ändert.
-- `konzept.md` kennt die Tagesgrube nicht.
+- ~~`konzept.md` kennt die Tagesgrube nicht.~~ Das stimmte nicht:
+  Abschnitt 8 nannte sie seit PR #110 als ungebaut. Nach dem Merge
+  nachgezogen.
 - Die Dialoge im hängenden Rahmen füllen die ganze Höhe des Bildschirms,
   auch wenn sie zwei Zeilen tragen. Das war vorher schon so.
 - AktivesBrett hat ADR-0072 nicht gesehen.
@@ -226,7 +230,7 @@ liest. Die Rechnung steht in `lib/action/damage_popup.dart`
 (`DamagePopup`, `HitAverage`, `DamagePopups`).
 
 App 736 (vorher 716). **Nicht angesehen**, weder gerendert noch
-gespielt.
+gespielt. Gemergt am 11.10. als PR #111.
 
 ### Offen
 
