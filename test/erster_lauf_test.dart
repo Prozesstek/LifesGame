@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_game.dart';
+import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/action/action_joystick.dart';
 import 'package:lifes_game/action/lauf_zeichen.dart';
 import 'package:lifes_game/action/lauf_zeichen_view.dart';
@@ -133,6 +134,7 @@ void main() {
   group('im Lauf', () {
     ActionGame lauf({LaufZeichen? zeichen}) {
       return ActionGame(
+        klang: const SilentSoundPlayer(),
         sim: ActionWorld(
           level: LevelCatalog.grube,
           heroStats: ActionStats.gereift,

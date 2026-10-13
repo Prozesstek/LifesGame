@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_game.dart';
+import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/action/damage_popup.dart';
 import 'package:lifes_game/action/pit_run_view.dart';
 import 'package:lifes_game/ui/palette.dart';
@@ -46,6 +47,7 @@ void main() {
     testWidgets('mit Stufe läuft die Uhr rückwärts', (tester) async {
       final stufe = PitStage(1);
       final game = ActionGame(
+        klang: const SilentSoundPlayer(),
         sim: ActionWorld(
           level: LevelBuilder.build(stage: stufe, seed: 1),
           heroStats: ActionStats.gereift,

@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../audio/sound_effects.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'action_game.dart';
@@ -54,6 +55,7 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
       _gewaehlt = stats;
       _fertig = false;
       _game = ActionGame(
+        klang: ref.read(soundPlayerProvider),
         sim: sim,
         onRunEnded: () {
           if (mounted) setState(() => _fertig = true);

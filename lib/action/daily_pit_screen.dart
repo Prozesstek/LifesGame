@@ -59,6 +59,7 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
         widget.day,
         inForm: widget.condition == DailyCondition.inForm,
       ),
+      klang: ref.read(soundPlayerProvider),
       // Dieselbe Regel wie in der Grube (ADR-0069): Bis die erste Stufe
       // geschafft ist, erklärt sich der Lauf.
       zeichen: ref.read(ersterStartProvider).grubeErklaertSich

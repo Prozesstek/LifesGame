@@ -30,7 +30,30 @@ enum SoundEffect {
   /// Die Beute des Wächters springt auf (ADR-0048). **Vorerst dieselbe
   /// Datei wie die Lektion**; ab Selten klingt stattdessen die
   /// Errungenschaft.
-  beute('Sound/Win.mp3');
+  beute('Sound/Win.mp3'),
+
+  // --- Die Grube ---
+  //
+  // Diese fünf sind **gerechnet, nicht aufgenommen**
+  // (`tool/kampf_klaenge.py`) — Platzhalter, die dem Projekt gehören.
+  // Wann welcher fällt, steht in `ActionGame`; wie dicht sie aufeinander
+  // folgen dürfen, in `KampfKlang`.
+
+  /// Der Held trifft einen Gegner. Der häufigste Klang der Grube,
+  /// deshalb der kürzeste und leiseste.
+  treffer('Sound/Treffer.wav'),
+
+  /// Der Held wird getroffen.
+  getroffen('Sound/Getroffen.wav'),
+
+  /// Ein Gegner fällt.
+  gefallen('Sound/Gefallen.wav'),
+
+  /// Eine Fähigkeit aus einem Platz wird gewirkt.
+  faehigkeit('Sound/Faehigkeit.wav'),
+
+  /// Der Wächter oder ein Wächterauge kündigt einen Angriff an.
+  ankuendigung('Sound/Ankuendigung.wav');
 
   const SoundEffect(this.asset);
 

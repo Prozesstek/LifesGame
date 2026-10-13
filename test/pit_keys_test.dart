@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_game.dart';
+import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/action/pit_run_view.dart';
 
 /// Auf dem Rechner liegen die Fähigkeiten auf der Zahlenreihe: 1–3 die
@@ -12,6 +13,7 @@ void main() {
   /// Taste sofort, egal wo die Gegner stehen.
   ActionGame lauf() {
     return ActionGame(
+      klang: const SilentSoundPlayer(),
       sim: ActionWorld(
         level: LevelCatalog.grube,
         heroStats: ActionStats.gereift,

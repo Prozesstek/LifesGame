@@ -6,10 +6,12 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
 import 'action_sprites.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
+import 'kampfgefuehl.dart';
 import 'lauf_zeichen.dart';
 import 'minimap.dart';
 import 'pit_tints.dart';
@@ -25,9 +27,19 @@ import 'pit_tints.dart';
 /// Für dreissig Quadrate ist ein Baum aus Komponenten mehr Buchhaltung
 /// als Nutzen, und ein Prototyp soll an einer Stelle lesbar sein.
 class ActionGame extends Game {
-  ActionGame({required this.sim, this.onRunEnded, this.zeichen});
+  ActionGame({
+    required this.sim,
+    required this.klang,
+    this.onRunEnded,
+    this.zeichen,
+  });
 
   final ActionWorld sim;
+
+  /// Womit die Grube klingt. **Pflicht, ohne Standardwert**: Mit einem
+  /// stillen Standard bliebe ein Lauf stumm, sobald eine Stelle vergisst,
+  /// ihn zu reichen, und nichts meldete es (`gotchas.md`).
+  final SoundPlayer klang;
 
   /// Die Zeichen des ersten Laufs (ADR-0069), oder null, wenn die Grube
   /// sich nicht mehr erklärt. Gezeichnet werden sie über dem Spielfeld
@@ -177,22 +189,38 @@ class ActionGame extends Game {
   @override
   Color backgroundColor() => Palette.background;
 
-  /// Wie lange das Bild nach der Landung des Wächters noch bebt.
-  double _beben = 0;
-  static const double _bebenDauer = 0.45;
-  static const double _bebenStaerke = 7;
+  /// Stopp, Beben und Klänge — wie laut das Bild auf die Welt antwortet
+  /// (`kampfgefuehl.dart`).
+  final Trefferstopp _stopp = Trefferstopp();
+  final Beben _beben = Beben();
+  final KampfKlang _klaenge = KampfKlang();
+
+  /// Wie viele Angriffe beim letzten Bild angekündigt waren. Die Welt
+  /// meldet eine Ankündigung nicht als Ereignis; eine mehr als eben heisst,
+  /// dass jemand ausholt.
+  int _angekuendigt = 0;
+
+  /// Nur für Tests: ob das Bild gerade steht, und wie stark es bebt.
+  bool get haelt => _stopp.haelt;
+  double get bebenStaerke => _beben.staerke;
 
   @override
-  void update(double dt) {
+  void update(double wirklich) {
+    // **Der Trefferstopp.** Solange er hält, vergeht für Welt und Bild
+    // keine Zeit. `update(0)` aus Flames Bau läuft wie bisher durch.
+    final dt = _stopp.zeit(wirklich);
+    if (wirklich > 0 && dt <= 0) return;
+
     final vorher = sim.heroView.position;
     sim.advance(dt, moveInput);
     fog.reveal(sim.level, sim.heroView.position);
     zeichen?.advance(dt, gelaufen: (sim.heroView.position - vorher).length);
-    if (_beben > 0) _beben -= dt;
+    _beben.advance(dt);
 
     for (final event in sim.drainEvents()) {
       switch (event) {
         case HitLanded():
+          _trefferGefuehl(event);
           _popups.hit(event);
           _flashes[event.targetId] = Burst.flashTime;
           _figuren[event.targetId]?.hit();
@@ -207,6 +235,10 @@ class ActionGame extends Game {
             ),
           );
         case EntityDied():
+          if (event.faction != Faction.held) {
+            _stopp.ausloesen();
+            _klaenge.melde(SoundEffect.gefallen);
+          }
           _bursts.add(Burst.death(event.at, event.kind));
           _flashes.remove(event.id);
           _leichen.add(
@@ -227,6 +259,7 @@ class ActionGame extends Game {
         case TimeGained():
           _popups.add(DamagePopup.forTime(event.seconds, event.at));
         case AbilityCast():
+          _klaenge.melde(SoundEffect.faehigkeit);
           _figuren[sim.heroView.id]?.swing(Pose.attack2);
           // Ein Flächentreffer bekommt den goldenen Ring, so gross wie
           // seine Reichweite — sonst sähe man nicht, was er erfasst hat.
@@ -262,11 +295,23 @@ class ActionGame extends Game {
         case BossLanded():
           // Er schlägt auf: ein grosser Ring und ein Beben.
           _bursts.add(Burst.slam(event.at, 110));
-          _beben = _bebenDauer;
+          _beben.stoss(
+            dauer: Beben.landungDauer,
+            staerke: Beben.landungStaerke,
+          );
         case RunEnded():
           _endeGemeldet = true;
       }
     }
+
+    final angekuendigt = sim.telegraphs.length;
+    if (angekuendigt > _angekuendigt) {
+      _klaenge.melde(SoundEffect.ankuendigung);
+    }
+    _angekuendigt = angekuendigt;
+    // Mit der wirklichen Zeit: Der Abstand zwischen zwei Klängen ist für
+    // das Ohr, und das hört auch, während das Bild steht.
+    _klaenge.abholen(wirklich).forEach(klang.play);
 
     _popups.update(dt);
 
@@ -308,6 +353,22 @@ class ActionGame extends Game {
     }
   }
 
+  /// Was ein Treffer ausser der Zahl auslöst.
+  ///
+  /// **Ein Tick Dauerschaden löst nichts aus.** Er fällt mehrmals je
+  /// Sekunde; mit Klang und Beben wäre eine Pfütze des Sumpftrolls ein
+  /// Dauerton und ein Dauerwackeln.
+  void _trefferGefuehl(HitLanded event) {
+    if (event.overTime) return;
+    if (event.targetFaction == Faction.held) {
+      _klaenge.melde(SoundEffect.getroffen);
+      _beben.stoss(dauer: Beben.trefferDauer, staerke: Beben.trefferStaerke);
+      return;
+    }
+    _klaenge.melde(SoundEffect.treffer);
+    if (event.isCrit) _stopp.ausloesen();
+  }
+
   @override
   void render(Canvas canvas) {
     final held = sim.heroView;
@@ -315,15 +376,8 @@ class ActionGame extends Game {
 
     canvas.save();
     canvas.translate(kamera.x, kamera.y);
-    if (_beben > 0) {
-      // Abklingend, und aus der Zeit statt aus dem Zufall — derselbe
-      // Lauf bebt jedes Mal gleich.
-      final staerke = _bebenStaerke * _beben / _bebenDauer;
-      canvas.translate(
-        math.sin(_beben * 90) * staerke,
-        math.cos(_beben * 70) * staerke,
-      );
-    }
+    final beben = _beben.versatz;
+    canvas.translate(beben.dx, beben.dy);
 
     final bilder = _bilder;
     _drawFloor(canvas, kamera, bilder);
@@ -348,6 +402,38 @@ class ActionGame extends Game {
     _drawPopups(canvas);
 
     canvas.restore();
+    _drawLebensRand(canvas, held);
+  }
+
+  /// Der rote Rand bei wenig Leben — über dem Spielfeld, fest am Bild,
+  /// damit er nicht mitbebt.
+  ///
+  /// Rot ist in der Grube sonst dem Wächter vorbehalten. Das hier ist
+  /// keine Fläche in der Welt, der man ausweicht, sondern ein Rand am
+  /// Bild; verwechseln lässt er sich nicht.
+  void _drawLebensRand(Canvas canvas, EntityView held) {
+    final deckkraft = LebensRand.deckkraft(held.hpRatio, sim.elapsed);
+    if (deckkraft <= 0) return;
+    final farben = <Color>[
+      Palette.raumBlutig.withValues(alpha: 0.7 * deckkraft),
+      Palette.raumBlutig.withValues(alpha: 0),
+    ];
+    const b = LebensRand.breite;
+    final w = size.x;
+    final h = size.y;
+    // Je Kante ein Streifen, der nach innen ausläuft.
+    final kanten = <(Rect, Offset, Offset)>[
+      (Rect.fromLTWH(0, 0, w, b), Offset.zero, const Offset(0, b)),
+      (Rect.fromLTWH(0, h - b, w, b), Offset(0, h), Offset(0, h - b)),
+      (Rect.fromLTWH(0, 0, b, h), Offset.zero, const Offset(b, 0)),
+      (Rect.fromLTWH(w - b, 0, b, h), Offset(w, 0), Offset(w - b, 0)),
+    ];
+    for (final (flaeche, aussen, innen) in kanten) {
+      canvas.drawRect(
+        flaeche,
+        Paint()..shader = ui.Gradient.linear(aussen, innen, farben),
+      );
+    }
   }
 
   // --- Kamera ---

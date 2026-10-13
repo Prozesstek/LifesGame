@@ -128,6 +128,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
+| `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
@@ -187,6 +188,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
+| `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
@@ -246,7 +248,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 768 Tests
+flutter test             # 789 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

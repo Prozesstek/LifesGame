@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/action_game.dart';
+import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/action/minimap.dart';
 import 'package:lifes_game/action/pit_run_view.dart';
 
@@ -42,6 +43,7 @@ void main() {
   group('In der Grube', () {
     Future<ActionGame> zeige(WidgetTester tester) async {
       final game = ActionGame(
+        klang: const SilentSoundPlayer(),
         sim: ActionWorld(
           level: LevelCatalog.grube,
           heroStats: ActionStats.gereift,

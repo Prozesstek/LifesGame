@@ -102,6 +102,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
     return ActionGame(
       sim: welt,
+      klang: ref.read(soundPlayerProvider),
       // Bis die erste Stufe geschafft ist, erklärt sich die Grube
       // (ADR-0069). Ein neuer Stand je Lauf: Wer verliert und „Nochmal“
       // drückt, sieht die Zeichen wieder.

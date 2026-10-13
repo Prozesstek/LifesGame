@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 11.10.2026 · Frederik
+**Zuletzt aktualisiert:** 13.10.2026 · Frederik
 
 ---
 
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 768, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 789, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 305, progression 42, abilities 36, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -97,6 +97,9 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 - Kopieren und Einfügen des Spielstands im Handy-Browser — und damit
   auch das Teilen der Tagesgrube, das denselben Weg nimmt.
 - Ob der kontrastreichere Boden die dunkle Fledermaus schluckt.
+- **Die fünf Klänge der Grube hat niemand gehört** (13.10.): gerechnet,
+  nicht aufgenommen, und ob sie im Handy-Browser ohne Verzögerung
+  kommen, ist offen.
 - Drei Reihen „Inhalt folgt“ im Baum: Versprechen oder Baustelle?
 
 **Kleinere Lücken:**
@@ -108,12 +111,74 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
 - `world.dart` (1.845 Zeilen), `tracker.dart` (1.858) und
-  `action_game.dart` (1.136) liegen über der 800-Zeilen-Grenze.
+  `action_game.dart` (1.222) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 13.10.2026: Kampfgefühl — die Grube antwortet lauter
+
+Frederik schickte den Block als Auftrag: Die Welt meldet schon alles
+(`HitLanded`, `EntityDied`, `AbilityCast`), der Renderer antwortete nur
+zu leise. Gebaut ohne Fragerunde, die Vorgaben standen im Auftrag.
+
+| Was | Wie |
+|---|---|
+| **Klang** | fünf neue: der Held trifft, wird getroffen, ein Gegner fällt, eine Fähigkeit, eine Ankündigung |
+| **Trefferstopp** | fällt ein Gegner oder sitzt ein kritischer Treffer, stehen Welt und Bild 50 ms; danach 150 ms keiner |
+| **Beben** | kurz und klein (0,18 s, 3 Punkte), wenn der Held getroffen wird; die Landung des Wächters bleibt die stärkere |
+| **Roter Rand** | unter 25 % Leben, kräftiger mit jedem Verlust, mit ruhigem Puls aus der Zeit des Laufs |
+
+**Keine Zahl des Kampfes ändert sich.** Während des Stopps vergeht in
+der Welt keine Zeit, also zahlt ihn auch die Uhr des Laufs nicht.
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Klänge sind gerechnet, nicht aufgenommen**
+  (`tool/kampf_klaenge.py`: Rauschen, Sinus, Hüllkurve). Auf der Platte
+  lag nichts für den Kampf, und so gibt es keine Lizenz zu klären. Es
+  sind Platzhalter; tauschen ist eine Datei oder eine Zeile in
+  `SoundEffect`.
+- **Fünf Klänge statt vier**: „getroffen“ kam dazu, sonst klänge der
+  eigene Schlag wie der kassierte.
+- **Ein Tick Dauerschaden löst nichts aus**, weder Klang noch Beben —
+  sonst wäre die Pfütze des Sumpftrolls ein Dauerton.
+- **Jeder Klang höchstens einmal je Bild und nie dichter als 70 ms**;
+  ein Kill schluckt den Treffer, der ihn gebracht hat (`KampfKlang`).
+- **Die Ankündigung wird gezählt**, nicht gemeldet: Stehen mehr
+  Ankündigungen da als im Bild davor, holt jemand aus. Die Welt bekam
+  dafür kein neues Ereignis.
+- **`ActionGame` verlangt den Klang als Pflichtfeld.** Mit einem stillen
+  Standard bliebe ein Lauf stumm, sobald eine Stelle ihn vergisst
+  (`gotchas.md`, zweimal).
+- **Der Schrei des Kreischpilzes und der Tod des Helden** haben weiter
+  keinen Klang.
+
+Neu: `lib/action/kampfgefuehl.dart` (reine Rechnung),
+`tool/kampf_klaenge.py`, fünf Dateien unter `assets/Sound/`,
+`test/kampfgefuehl_test.dart`.
+
+App 789 (vorher 768). Der rote Rand gerendert in 390 × 844 und
+angesehen, mit Würfeln statt Figuren. **Kein Klang gehört, nicht
+gespielt, nicht am Handy.**
+
+### Offen
+
+- **Wie die Klänge klingen**, weiß niemand. Der Treffer fällt etwa jede
+  halbe Sekunde; ist er zu laut oder zu spitz, nervt er nach einer
+  Minute.
+- **Verzögerung im Browser**: Je Klang gibt es einen Player, und ein
+  neuer Start schneidet den alten ab. Ob das am Handy knackt oder
+  nachhängt, zeigt nur das Gerät.
+- Ob 50 ms Stopp bei jedem Kill gut sind oder im Gedränge stören.
+- Es gibt keinen Schalter „Ton aus“ — bisher klang die App nur bei
+  Häkchen und Feiern, jetzt klingt sie dauernd.
+- Rot war in der Grube dem Wächter vorbehalten. Der Rand ist keine
+  Fläche in der Welt, aber dieselbe Farbfamilie.
+- Die vier älteren Klänge (`Success.mp3`, `Win*.mp3`) haben weiter keine
+  Herkunft im Repo.
 
 ## 11.10.2026, danach: die Tagesgrube — eine Grube für alle, ein Versuch am Tag
 
