@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 13.10.2026 · Frederik
+**Zuletzt aktualisiert:** 14.10.2026 · Frederik
 
 ---
 
@@ -48,7 +48,15 @@ Saisons, Seilschaft — nach und nach, jede mit eigener Konzeptrunde. Die
 Fragen dafür stehen in der Vorlage
 [`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
 
+**Fähigkeiten** (14.10., [ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md)):
+Ultimate, Mana als Bremse, zehn neue Arten — entschieden, nicht gebaut.
+Die Fähigkeiten selbst entstehen in
+[`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md).
+
 **Braucht euch beide:**
+
+- **Zehn Fähigkeiten und zwei Ultimates von AktivesBrett** in die
+  Vorlage (ADR-0073).
 
 - ~~**Was der Testlauf misst.**~~ Entschieden am 27.09. (Frederik):
   **weiterbauen**. Der Testlauf ist damit ein Entwicklungsmonat; ob
@@ -117,6 +125,44 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 14.10.2026: Fähigkeiten — Ultimate, Mana als Bremse, zehn neue Arten
+
+Frederik: „Guck dir Fähigkeiten an“ — Issue #114. In einer Fragerunde
+entschieden, **nichts gebaut**:
+[ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md).
+
+| Was | Wie |
+|---|---|
+| **Ultimate** | eigener Platz ab Level 15; kein Mana, lädt durch Kills und Treffer am Wächter; jeder Lauf beginnt leer |
+| **Im Kampf** | groß in der Ecke, die drei anderen kleiner im Bogen darum; vor Level 15 bleibt die Reihe |
+| **Bild** | goldener Doppelrand, keine Seltenheit — Gold allein hieße Legendär |
+| **Quelle** | Baum, Kette, Errungenschaft; eine auf Level 15 im Baum erreichbar; nie aus der Grube |
+| **Mana** | wird die Bremse, die Abklingzeit verhindert nur Dauerfeuer; **zuerst messen** |
+| **Neue Arten** | Dash, Blink, Stun, Self-Buff, Stacking/Rage, Passiv, Hook, Unsichtbarkeit, Begleiter, Terrain — **jede in jeder Fähigkeit** |
+
+Sechsmal wie empfohlen. **Einmal dagegen:** Claude wollte Begleiter und
+Terrain den Ultimates vorbehalten; Frederik will alle Arten für alles.
+Dafür haben beide Grenzen bekommen (einer zugleich, Wände auf Zeit).
+
+Neu: die Vorlage [`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md) —
+je Entwickler zehn Fähigkeiten und zwei Ultimates, mit allen Bausteinen
+und Regeln. **Frederiks Ideen gehen wir Stück für Stück durch**, dann
+wird in drei Blöcken gebaut: Messung und Ultimate-Platz, die zehn Arten,
+die Fähigkeiten.
+
+**Der Fähigkeiten-Bildschirm ist frei** (Frederik): AktivesBrett baut
+dort nicht mehr.
+
+### Offen
+
+- Frederiks zehn Fähigkeiten und zwei Ultimates.
+- AktivesBrett hat ADR-0073 und die Vorlage nicht gesehen; seine zehn
+  und zwei fehlen.
+- Ob die Tagesgrube eine Ultimate bekommt.
+- Alle Zahlen der Ultimate (ein Achtel je Kill, 76 und 50 Punkte) sind
+  geschätzt.
+- Issue #115 „Neue Items“ ist nicht angesehen.
 
 ## 13.10.2026: Kampfgefühl — die Grube antwortet lauter
 
