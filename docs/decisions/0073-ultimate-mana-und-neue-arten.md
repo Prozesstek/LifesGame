@@ -60,14 +60,28 @@ in jede Fähigkeit**, auch in eine Ultimate:
 |---|---|
 | Dash | stoppt an der Wand wie jede Bewegung |
 | Blink | **nie durch eine Wand oder das Tor** |
-| Stun | der Wächter ist immun, er wird höchstens gebremst |
+| Stun | der Wächter hat eine **Stun-Leiste**: drei Kerben, erst jeder dritte Stun wirkt, halb so lang; er bricht seine laufende Ankündigung ab. Einfrieren zählt als Stun |
 | Self-Buff | ein Faktor auf Zeit; auf den Grundangriff nur leicht (ADR-0009) |
 | Stacking, Rage | gezählt wird, was passiert, nicht der Schaden; immer mit Obergrenze |
 | Passiv | liegt auf einem Platz, hat **keinen Knopf**, wirkt dauernd |
 | Hook | zieht einen Gegner heran, nicht den Wächter, nicht durch Wände |
 | Unsichtbarkeit | kurz, **endet beim ersten Angriff** |
-| Begleiter | **höchstens einer zugleich**, lebt auf Zeit; seine Kills zahlen nichts und laden die Ultimate nicht |
+| Begleiter | **höchstens einer zugleich**, lebt auf Zeit, wird nicht angegriffen und greift nur an, was der Held sieht; seine Kills **zahlen normal** (der Topf ist fest, ADR-0041), **laden die Ultimate aber nicht** |
 | Terrain | gesetzte Wände **verschwinden nach Sekunden** und nie in den Gang zum Tor |
+
+**Fünf Bausteine kamen beim Durchgehen von Frederiks Ideen dazu**:
+
+| Art | Regel |
+|---|---|
+| Bumerang | fliegt hin und zurück, trifft jeden je Weg höchstens einmal; an der Wand kehrt er um |
+| Falle | liegt am Boden, löst beim ersten Gegner aus; höchstens zwei zugleich |
+| Wegschleudern | stößt Gegner weg, die Wand hält auf; nicht den Wächter |
+| Zerspringen | ein gefrorener Gegner nimmt den nächsten Treffer sicher kritisch und taut auf |
+| Zufall | würfelt mit dem Würfel des Laufs, damit die Tagesgrube für alle gleich bleibt |
+
+**Gebaut wird, was eine Fähigkeit braucht.** Stacking und Rage, Passiv
+und Unsichtbarkeit nutzt keine von Frederiks zwölf; sie kommen, sobald
+eine Fähigkeit von AktivesBrett sie braucht.
 
 **Die neuen Fähigkeiten entstehen in einer Vorlage**:
 [`docs/vorlagen/faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md). Jeder
@@ -119,11 +133,16 @@ halten, was der Vorbehalt halten sollte.
 
 **Die Regeln der Tabelle** schützen je eine Zusage, die schon steht:
 Blink durch Wände überspränge Räume und den Auftritt des Wächters
-(`gate_test.dart`); ein betäubbarer Wächter machte seine Ankündigungen
-sinnlos (`boss_test.dart`); lange Unsichtbarkeit liesse sich bis zum
+(`gate_test.dart`); ein Wächter im Dauerstun machte seine Ankündigungen
+sinnlos (`boss_test.dart`) — deshalb wirkt nur jeder dritte Stun
+(Frederik: „Stun-Leiste“), und der bricht einen Angriff ab, statt ihn
+nur zu verzögern; lange Unsichtbarkeit liesse sich bis zum
 Wächter schleichen, und der zahlt den ganzen Topf (dieselbe Sorge wie
-bei der Besetzung, ADR-0063); Kills von Begleitern, die zahlen, ließen
-den Begleiter das Spiel spielen.
+bei der Besetzung, ADR-0063); Kills von Begleitern, die die Ultimate
+laden, ließen den Begleiter das Spiel spielen. **Beute zahlen sie
+trotzdem**: Der Ertrag einer Stufe ist ein fester Topf (ADR-0041), mehr
+als er zählt nie — verweigerte Beute ginge nur verloren, farmen lässt
+sich damit nichts (beim Durchgehen des Falken geändert).
 
 ## Verworfene Alternativen
 
