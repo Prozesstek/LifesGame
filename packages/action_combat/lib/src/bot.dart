@@ -32,9 +32,15 @@ abstract final class PitBot {
   /// die Messung in `tool/pit_sim.dart`. Ohne sie spielt er genauso.
   static void play(ActionWorld world, {PitManaLog? mana}) {
     while (!world.isOver && world.elapsed < timeLimit) {
-      _abilities(world, mana);
-      world.step(_input(world));
+      playStep(world, mana: mana);
     }
+  }
+
+  /// Ein Schritt: Plätze drücken, laufen. Für Tests, die zwischen zwei
+  /// Schritten hineinsehen wollen.
+  static void playStep(ActionWorld world, {PitManaLog? mana}) {
+    _abilities(world, mana);
+    world.step(_input(world));
   }
 
   static void _abilities(ActionWorld welt, PitManaLog? mana) {

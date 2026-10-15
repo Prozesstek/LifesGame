@@ -270,5 +270,26 @@ void main() {
       PitBot.play(welt);
       expect(welt.isOver, isTrue, reason: ability.id);
     }
+    // Die Ultimates (ADR-0073): Der Bot wirkt sie, sobald sie voll sind.
+    for (final ult in PitAbilities.ultimates) {
+      final welt = ActionWorld(
+        level: LevelBuilder.build(stage: PitStage(2), seed: 6),
+        heroStats: ActionStats.gereift,
+        stage: PitStage(2),
+        ultimateId: ult.id,
+        seed: 6,
+      );
+      var gewirkt = 0;
+      while (!welt.isOver && welt.elapsed < PitBot.timeLimit) {
+        PitBot.playStep(welt);
+        gewirkt += welt
+            .drainEvents()
+            .whereType<AbilityCast>()
+            .where((e) => e.id == ult.id)
+            .length;
+      }
+      expect(welt.isOver, isTrue, reason: ult.id);
+      expect(gewirkt, greaterThan(0), reason: '${ult.id} kam nie dran.');
+    }
   });
 }

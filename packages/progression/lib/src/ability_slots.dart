@@ -41,6 +41,17 @@ abstract final class AbilitySlots {
     return unlockLevels[slot - 1];
   }
 
+  /// Ab welchem Level der Platz der **Ultimate** offen ist (ADR-0073).
+  ///
+  /// **Ein eigener Platz, kein fünfter in [unlockLevels]**: Auf ihm liegt
+  /// nur eine Ultimate, und eine Ultimate liegt nur auf ihm. Level 15 setzt
+  /// die Reihe 1, 3, 6, 10 fort; ein fleissiger Spieler steht dort nach
+  /// etwa drei Wochen.
+  static const int ultimateLevel = 15;
+
+  /// Ob der Platz der Ultimate auf [level] offen ist.
+  static bool ultimateOpenAt(int level) => level >= ultimateLevel;
+
   /// Die nächste Stufe, die einen weiteren Slot bringt.
   /// Null, wenn bereits alle offen sind.
   static int? nextUnlockAfter(int level) {

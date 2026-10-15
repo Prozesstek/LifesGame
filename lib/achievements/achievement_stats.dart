@@ -77,6 +77,7 @@ AchievementStats buildAchievementStats({
     comebackStreak: habits.comebackStreakAfterPause(
       AchievementThresholds.pauseDays,
     ),
+    openedChests: habits.openedChests.length,
 
     // --- Theorie ---
     //

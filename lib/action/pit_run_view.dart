@@ -58,17 +58,23 @@ class _PitRunViewState extends State<PitRunView> {
   }
 
   /// Die Plätze auf 1, 2, 3 — in der Reihenfolge, in der sie auf dem
-  /// Charakter liegen. Oben auf der Tastatur oder im Nummernblock.
+  /// Charakter liegen — und die Ultimate auf 4 (ADR-0073). Oben auf der
+  /// Tastatur oder im Nummernblock.
   static final List<LogicalKeyboardKey> _slotKeys = <LogicalKeyboardKey>[
     LogicalKeyboardKey.digit1,
     LogicalKeyboardKey.digit2,
     LogicalKeyboardKey.digit3,
+    LogicalKeyboardKey.digit4,
   ];
   static final List<LogicalKeyboardKey> _slotKeysNumpad = <LogicalKeyboardKey>[
     LogicalKeyboardKey.numpad1,
     LogicalKeyboardKey.numpad2,
     LogicalKeyboardKey.numpad3,
+    LogicalKeyboardKey.numpad4,
   ];
+
+  /// Welche Taste die Ultimate trägt — die letzte der Reihe.
+  static const int _ultimatePlatz = 3;
 
   /// Welcher Platz zu [key] gehört, oder -1.
   static int _platzFuer(LogicalKeyboardKey key) {
@@ -84,8 +90,10 @@ class _PitRunViewState extends State<PitRunView> {
     final platz = _platzFuer(event.logicalKey);
     final slots = game.sim.slots;
     if (platz >= 0) {
-      if (platz >= slots.length) return KeyEventResult.handled;
-      final ability = slots[platz];
+      final ability = platz == _ultimatePlatz
+          ? game.sim.ultimate
+          : (platz < slots.length ? slots[platz] : null);
+      if (ability == null) return KeyEventResult.handled;
       // **Taste halten, mit der Maus zielen, loslassen wirkt** — wie der
       // Daumen am Knopf. Was nichts zu zielen hat, wirkt beim Drücken.
       if (event is KeyDownEvent) {

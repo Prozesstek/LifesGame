@@ -79,13 +79,14 @@ void main() {
   });
 
   group('Fähigkeiten am Baum', () {
-    test('elf Knoten bringen eine Fähigkeit mit', () {
+    test('neunzehn Knoten bringen eine Fähigkeit mit', () {
       // Seit ADR-0022 hängen elf der fünfzehn wählbaren Fähigkeiten am
-      // Baum; die vier stärksten kommen über Streak-Marken. Die Zahl
-      // steht hier, damit ein versehentlich entfernter Eintrag auffällt.
+      // Baum; seit ADR-0073 sieben aus Frederiks zehn dazu und die
+      // Wassergrube, eine Ultimate. Die Zahl steht hier, damit ein
+      // versehentlich entfernter Eintrag auffällt.
       final mitFaehigkeit = nodes.where((n) => n.unlocksAbility != null);
 
-      expect(mitFaehigkeit.length, 11);
+      expect(mitFaehigkeit.length, 19);
     });
 
     test('keine Wurzel bringt eine Fähigkeit mit', () {
@@ -117,15 +118,23 @@ void main() {
       }
     });
 
-    test('und keines mehr als drei', () {
+    test('und keines mehr als zwei Fünftel', () {
       // Die Gegenrichtung. Ohne sie wäre die Regel oben erfüllt, sobald
       // jedes Gebiet zwei hat — auch wenn eines zehn trägt.
+      //
+      // Bis ADR-0073 hiess sie „keines mehr als drei“. Frederiks zehn
+      // hängen an Ausdauer, Kraft, Psychologie, Philosophie und
+      // Gewohnheiten, also an Körper und Geist; die beiden tragen seitdem
+      // je sieben von neunzehn. Die Grenze hält jetzt, dass keines allein
+      // den Baum zum Fähigkeitenladen macht.
+      final alle = nodes.where((n) => n.unlocksAbility != null).length;
       for (final rootId in theoryRootIds) {
         final imGebiet = theoryGraph
             .descendantsOf(rootId)
             .where((n) => n.unlocksAbility != null);
 
-        expect(imGebiet.length, lessThanOrEqualTo(3), reason: rootId);
+        final anteil = imGebiet.length * 5;
+        expect(anteil, lessThanOrEqualTo(alle * 2), reason: rootId);
       }
     });
 

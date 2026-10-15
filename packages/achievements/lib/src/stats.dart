@@ -25,6 +25,7 @@ class AchievementStats {
     this.longestRunWithThreeChecks = 0,
     this.checksOnHardCustomHabits = 0,
     this.comebackStreak = 0,
+    this.openedChests = 0,
     this.passedLessons = 0,
     this.perfectLessons = 0,
     this.completedAreas = 0,
@@ -124,4 +125,8 @@ class AchievementStats {
 
   /// Wie oft verkauft wurde.
   final int soldCount;
+
+  /// Wie viele Tagestruhen je geöffnet wurden (ADR-0044). Eine Historie
+  /// von Tagen, sie wächst nur.
+  final int openedChests;
 }

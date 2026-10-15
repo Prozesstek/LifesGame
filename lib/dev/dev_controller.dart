@@ -58,9 +58,10 @@ class DevController extends Notifier<DebugGrants> {
   }
 
   void grantAllAbilities() {
-    state = state.withUnlockedAbilities(
-      AbilityCatalog.choosable.map((ability) => ability.moveId),
-    );
+    state = state.withUnlockedAbilities(<String>[
+      for (final ability in AbilityCatalog.choosable) ability.moveId,
+      for (final ability in AbilityCatalog.ultimates) ability.moveId,
+    ]);
   }
 
   /// Setzt nur die Zuschläge zurück, nicht den Spielstand.

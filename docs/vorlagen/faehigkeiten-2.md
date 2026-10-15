@@ -175,6 +175,48 @@ alle gleich.
   die Ultimate nicht. Sie zählt als Begleiter: kommt sie, geht der
   Falke.
 
+### Beim Bau entschieden (15.10.)
+
+Gebaut auf `feat/ultimate-und-mana`. Was die Vorlage offen ließ und
+ohne Rückfrage festgelegt wurde:
+
+- **Die Knoten der Baum-Quellen:** Glutspur an „Intervalltraining“,
+  Rückenwind an „Locker und lang“ (beide Ausdauer), Steinschlag an „Wie
+  nah ans Versagen“ (Kraft), Fanghaken an „Die Macht der Mehrheit“
+  (Asch), Wiederkehr an „Freiheit und Sinn“, Rankenpeitsche an „Was in
+  deiner Macht steht“, Schnappfalle an „Mach es offensichtlich“, die
+  **Wassergrube an „Erholung ist Teil der Arbeit“** — drei Punkte vom
+  Start, auf Level 15 sicher bezahlbar.
+- **Glückstrank:** eine neue Errungenschaft **„Zehn Truhen“** (zehn
+  Tagestruhen geöffnet, Stufe mittel: 75 Erfahrung, 25 Gold, 10 Ruhm).
+  Rückwirkend: Wer zehn Truhen hat, hat sie sofort.
+- **Fanghaken ohne eigenen Blink.** Hin zum Gegner und mit ihm zurück
+  endet genau dort, wo ein Haken endet; der Faden zeigt den Weg. Einen
+  Blink braucht damit keine Fähigkeit, und er ist nicht gebaut.
+- **Zwei Regeln weichen den Quellen:** Körper und Geist tragen jetzt je
+  sieben Fähigkeiten statt höchstens drei (Grenze jetzt: keines mehr als
+  zwei Fünftel), und die Gewohnheiten vergeben zwei Fähigkeiten über
+  Errungenschaften statt einer.
+- **Reichweiten, die fehlten:** Der Falke greift bis 7 Felder an, die
+  Pflanze bis 2; die Ranke schleudert nach rechts; ein Fels liegt nie im
+  Tor oder auf einem Feld daneben.
+- **Bilder** aus dem Raven-Paket (`assets/RAVEN.md`), als Platzhalter
+  gewählt — die Pflanze ist eine rote Blüte, der Falke ein geflügeltes
+  Wesen; ein echter Vogel war nicht dabei.
+
+**Gemessen** (`pit_sim`, Bot, 24 Läufe, Tag 30 ohne Ausrüstung):
+
+- **Mana:** Drei Angriffe im Takt hängen an Tag 0 und Tag 30 in 62 bis
+  67 % der Zeit am Mana, an Tag 60 mit bester Ausrüstung nur noch in
+  18 %. Die Bremse greift früh, spät kaum — **nicht nachgestellt**.
+- **Die Ultimate** ist nach etwa 16 Sekunden zum ersten Mal voll und
+  kommt rund dreimal je Lauf. Auf Stufe 13 hebt sie die Siegquote des
+  Bots um 20 bis 37 Punkte, auf Stufe 11 ändert sie fast nichts.
+- **Frederiks Sätze** liegen auf Stufe 13 zwischen 8 % (Fanghaken,
+  Steinschlag, Rückenwind) und 46 % (Wiederkehr, Schnappfalle, Ranke);
+  die drei alten (Funkenstoß, Steinhaut, Blütentau) bei 42 %. Der Bot
+  benutzt Haken, Fels und Wind schlecht — eine untere Schranke.
+
 ## AktivesBrett
 
 ### Fähigkeiten

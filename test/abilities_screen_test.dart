@@ -35,7 +35,9 @@ void main() {
   /// Freischalten.
   TheoryProgress mitKnoten() {
     var progress = const TheoryProgress.empty();
-    for (final ability in AbilityCatalog.choosable) {
+    // Nur die neunzehn von vor ADR-0073: Mit allen Knoten brächten die
+    // bestandenen Seiten allein mehr Erfahrung als Level 3.
+    for (final ability in AbilityCatalog.choosable.take(19)) {
       if (ability.source case FromTheory(:final nodeId)) {
         final lesson = theoryGraph.nodeById(nodeId)!.lesson;
         progress = progress.submit(lesson, <int?>[

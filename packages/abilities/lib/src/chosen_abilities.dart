@@ -24,12 +24,20 @@ import 'ability_catalog.dart';
 /// (ADR-0024). Sie ist keine Wahl, die zurückkommen kann — sie ist ein
 /// Rest aus einer früheren Fassung des Spiels.
 class ChosenAbilities {
-  ChosenAbilities({List<String> moveIds = const <String>[]})
+  ChosenAbilities({List<String> moveIds = const <String>[], this.ultimate})
       : _moveIds = List<String>.unmodifiable(moveIds);
 
-  const ChosenAbilities.empty() : _moveIds = const <String>[];
+  const ChosenAbilities.empty()
+      : _moveIds = const <String>[],
+        ultimate = null;
 
   final List<String> _moveIds;
+
+  /// Was auf dem Platz der **Ultimate** liegt, oder null (ADR-0073).
+  ///
+  /// Ein eigenes Feld, weil der Platz ein eigener ist: Eine Ultimate liegt
+  /// nie auf einem der drei anderen, und keine gewöhnliche Fähigkeit hier.
+  final String? ultimate;
 
   /// Die gewählten Move-Ids, in der Reihenfolge der freien Slots.
   List<String> get moveIds => _moveIds;
@@ -65,8 +73,16 @@ class ChosenAbilities {
     }
     next[index] = moveId;
 
-    return ChosenAbilities(moveIds: _compact(next));
+    return ChosenAbilities(moveIds: _compact(next), ultimate: ultimate);
   }
+
+  /// Legt [moveId] auf den Platz der Ultimate.
+  ChosenAbilities withUltimate(String moveId) {
+    return ChosenAbilities(moveIds: _moveIds, ultimate: moveId);
+  }
+
+  /// Räumt den Platz der Ultimate.
+  ChosenAbilities withoutUltimate() => ChosenAbilities(moveIds: _moveIds);
 
   /// Räumt den freien Slot [index].
   ChosenAbilities clearedAt(int index) {
@@ -75,7 +91,7 @@ class ChosenAbilities {
     final next = <String?>[..._moveIds];
     next[index] = null;
 
-    return ChosenAbilities(moveIds: _compact(next));
+    return ChosenAbilities(moveIds: _compact(next), ultimate: ultimate);
   }
 
   /// Streicht alles, was [isAllowed] nicht durchlässt.
@@ -83,11 +99,13 @@ class ChosenAbilities {
   /// Für den Weg in den Kampf: Was nicht mehr verdient ist, kommt nicht
   /// mit. Der Spielstand bleibt davon unberührt.
   ChosenAbilities whereAllowed(bool Function(String moveId) isAllowed) {
+    final ult = ultimate;
     return ChosenAbilities(
       moveIds: <String>[
         for (final id in _moveIds)
           if (isAllowed(id)) id,
       ],
+      ultimate: ult != null && isAllowed(ult) ? ult : null,
     );
   }
 
@@ -102,7 +120,11 @@ class ChosenAbilities {
   }
 
   Map<String, Object?> toJson() {
-    return <String, Object?>{'moves': _moveIds};
+    final ult = ultimate;
+    return <String, Object?>{
+      'moves': _moveIds,
+      if (ult != null) 'ultimate': ult,
+    };
   }
 
   /// Liest die Wahl. Was nicht lesbar ist, fehlt einfach — dieselbe
@@ -129,7 +151,14 @@ class ChosenAbilities {
   /// den Kampf.
   factory ChosenAbilities.fromJson(Map<String, Object?> json) {
     final raw = json['moves'];
-    if (raw is! List) return const ChosenAbilities.empty();
+    // Die Ultimate fällt beim Laden heraus wie jede andere unbekannte Id —
+    // und auch, wenn dort eine gewöhnliche Fähigkeit stünde.
+    final rohUlt = json['ultimate'];
+    final ult =
+        rohUlt is String && AbilityCatalog.ultimateByMoveId(rohUlt) != null
+            ? rohUlt
+            : null;
+    if (raw is! List) return ChosenAbilities(ultimate: ult);
 
     final seen = <String>{};
     return ChosenAbilities(
@@ -141,6 +170,7 @@ class ChosenAbilities {
               seen.add(entry))
             entry,
       ],
+      ultimate: ult,
     );
   }
 }

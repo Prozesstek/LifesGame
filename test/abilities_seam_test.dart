@@ -172,9 +172,11 @@ void main() {
       // und `FromTheory` an der Fähigkeit müssen dasselbe Paar bilden.
       for (final node in theoryGraph.nodes) {
         if (node.unlocksAbility case final String moveId) {
-          final passend = AbilityCatalog.choosable.where(
-            (a) => a.source is FromTheory && a.moveId == moveId,
-          );
+          // Auch eine Ultimate darf an einem Knoten hängen (ADR-0073).
+          final passend = <Ability>[
+            ...AbilityCatalog.choosable,
+            ...AbilityCatalog.ultimates,
+          ].where((a) => a.source is FromTheory && a.moveId == moveId);
 
           expect(
             passend.length,
@@ -219,6 +221,44 @@ void main() {
             'Auf Level $level gibt es $punkte Theoriepunkte, aber keinen '
             'erreichbaren Knoten mit Fähigkeit. Der zweite Platz ginge '
             'auf ein leeres Versprechen auf.',
+      );
+    });
+
+    test('wenn der Platz der Ultimate aufgeht, ist eine erreichbar', () {
+      // ADR-0073: **Mindestens eine Ultimate auf Level 15 über einen
+      // Knoten im Baum** — sonst ginge ihr Platz auf und bliebe leer.
+      // Dieselbe Rechnung wie für den zweiten Platz, nur dass hier alle
+      // Punkte bis Level 15 zählen und die Grundlagen schon bezahlt sind.
+      const level = AbilitySlots.ultimateLevel;
+      final punkte = TheoryPoints.earnedAt(level) - TheoryPoints.atStart;
+
+      final erreichbar = AbilityCatalog.ultimates.where((ability) {
+        if (ability.source case FromTheory(:final nodeId)) {
+          final kosten = _billigsterWeg(nodeId);
+          return kosten != null && kosten <= punkte;
+        }
+        return false;
+      });
+
+      expect(erreichbar, isNotEmpty);
+    });
+
+    test('jede Ultimate kommt aus Baum, Kette oder Errungenschaft', () {
+      for (final ability in AbilityCatalog.ultimates) {
+        expect(
+          ability.source,
+          isNot(isA<FromWeapon>()),
+          reason: ability.moveId,
+        );
+        expect(
+          PitAbilities.ultimateById(ability.moveId),
+          isNotNull,
+          reason: '${ability.moveId} tut in der Grube nichts.',
+        );
+      }
+      expect(
+        AbilityCatalog.ultimates.map((a) => a.moveId).toSet(),
+        PitAbilities.ultimates.map((a) => a.id).toSet(),
       );
     });
   });

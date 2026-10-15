@@ -67,7 +67,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel(RegExp('0 Ruhm')), findsWidgets);
-      expect(find.text('0 / 27'), findsOneWidget);
+      expect(find.text('0 / 28'), findsOneWidget);
     });
   });
 
@@ -140,8 +140,9 @@ void main() {
         expect(find.text(area.label), findsOneWidget);
       }
 
-      // Gewohnheiten: zwei von elf bei drei Tagen Kette.
-      expect(find.text('2/11'), findsOneWidget);
+      // Gewohnheiten: zwei von zwölf bei drei Tagen Kette (seit ADR-0073
+      // mit „Zehn Truhen“).
+      expect(find.text('2/12'), findsOneWidget);
 
       await tester.tap(find.text('Kampf'));
       await tester.pumpAndSettle();
@@ -163,7 +164,7 @@ void main() {
         find.bySemanticsLabel(RegExp('Errungenschaften:')),
         findsOneWidget,
       );
-      expect(find.textContaining(' / 27'), findsOneWidget);
+      expect(find.textContaining(' / 28'), findsOneWidget);
 
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();

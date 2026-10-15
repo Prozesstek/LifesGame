@@ -169,4 +169,48 @@ void main() {
       expect(gelesen.moveIds, alle);
     });
   });
+
+  group('Der Platz der Ultimate (ADR-0073)', () {
+    test('liegt neben den freien Plätzen und bleibt beim Umstellen', () {
+      final wahl = ChosenAbilities(moveIds: <String>['funkenstoss'])
+          .withUltimate('wassergrube')
+          .withAt(1, 'steinhaut')
+          .clearedAt(0);
+
+      expect(wahl.ultimate, 'wassergrube');
+      expect(wahl.moveIds, <String>['steinhaut']);
+      expect(wahl.withoutUltimate().ultimate, isNull);
+    });
+
+    test('überlebt Speichern und Laden', () {
+      final wahl = ChosenAbilities(moveIds: <String>['funkenstoss'])
+          .withUltimate('fleischfressende_pflanze');
+
+      final gelesen = ChosenAbilities.fromJson(wahl.toJson());
+
+      expect(gelesen.ultimate, 'fleischfressende_pflanze');
+      expect(gelesen.moveIds, <String>['funkenstoss']);
+    });
+
+    test('was keine Ultimate ist, fällt beim Laden heraus', () {
+      const fremd = 'gibt-es-nicht-und-soll-es-nie-geben';
+      expect(AbilityCatalog.ultimateByMoveId(fremd), isNull);
+
+      for (final falsch in <String>[fremd, 'funkenstoss']) {
+        final gelesen = ChosenAbilities.fromJson(<String, Object?>{
+          'moves': <Object?>[],
+          'ultimate': falsch,
+        });
+        expect(gelesen.ultimate, isNull, reason: falsch);
+      }
+    });
+
+    test('und keine Ultimate liegt auf einem der freien Plätze', () {
+      final gelesen = ChosenAbilities.fromJson(<String, Object?>{
+        'moves': <Object?>['wassergrube', 'funkenstoss'],
+      });
+
+      expect(gelesen.moveIds, <String>['funkenstoss']);
+    });
+  });
 }

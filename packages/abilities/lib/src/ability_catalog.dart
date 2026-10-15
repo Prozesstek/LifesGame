@@ -234,6 +234,97 @@ abstract final class AbilityCatalog {
       requirement: 'Errungenschaft „Zehn Sprossen"',
       rarity: Rarity.rare,
     ),
+
+    // --- Frederiks zehn (ADR-0073, `docs/vorlagen/faehigkeiten-2.md`) ---
+    //
+    // Die Quellen stehen so in der Vorlage. Körper und Geist tragen damit
+    // je sieben Fähigkeiten, Wissenschaft und Gesellschaft zwei und drei —
+    // die Grenze „keines mehr als drei“ aus Issue #21 gilt seitdem nicht
+    // mehr (`graph_content_test.dart`).
+    Ability(
+      moveId: 'glutspur',
+      source: FromTheory('ausdauer-intervalle'),
+      requirement: 'Ausdauer: „Intervalltraining" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'fanghaken',
+      source: FromTheory('psychologie-konformitaet'),
+      requirement: 'Psychologie: „Die Macht der Mehrheit" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'glueckstrank',
+      source: FromAchievement('zehn-truhen'),
+      requirement: 'Errungenschaft „Zehn Truhen"',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'wiederkehr',
+      source: FromTheory('philosophie-existenzialismus'),
+      requirement: 'Philosophie: „Freiheit und Sinn" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'schnappfalle',
+      source: FromTheory('gewohnheiten-offensichtlich'),
+      requirement: 'Gewohnheiten: „Mach es offensichtlich" bestehen',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'falke',
+      source: FromStreak(14),
+      requirement: '14 Tage Kette',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'steinschlag',
+      source: FromTheory('kraft-intensitaet'),
+      requirement: 'Kraft: „Wie nah ans Versagen" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'rankenpeitsche',
+      source: FromTheory('philosophie-stoizismus'),
+      requirement: 'Philosophie: „Was in deiner Macht steht" bestehen',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'rueckenwind',
+      source: FromTheory('ausdauer-grundlage'),
+      requirement: 'Ausdauer: „Locker und lang" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'eisball',
+      source: FromStreak(30),
+      requirement: '30 Tage Kette',
+      rarity: Rarity.rare,
+    ),
+  ];
+
+  /// Die **Ultimates** (ADR-0073): je eine Bedingung aus den bestehenden
+  /// Quellen, nie aus der Grube.
+  ///
+  /// **Sie stehen nicht in [choosable]** — eine Ultimate liegt nur auf
+  /// ihrem eigenen Platz, und [byMoveId] findet sie deshalb nicht. Ihre
+  /// [Ability.rarity] wird nicht gezeigt: Ultimates haben keine
+  /// Seltenheit, sie tragen einen goldenen Doppelrand.
+  ///
+  /// **Mindestens eine ist auf Level 15 über den Baum erreichbar** — sonst
+  /// ginge ihr Platz auf und bliebe leer. Das ist die Wassergrube;
+  /// `test/abilities_seam_test.dart` hält es fest.
+  static const List<Ability> ultimates = <Ability>[
+    Ability(
+      moveId: 'wassergrube',
+      source: FromTheory('koerper-erholung'),
+      requirement: 'Körper: „Erholung ist Teil der Arbeit" bestehen',
+    ),
+    Ability(
+      moveId: 'fleischfressende_pflanze',
+      source: FromStreak(30),
+      requirement: '30 Tage Kette',
+    ),
   ];
 
   /// Welcher Move in Slot 1 liegt.
@@ -255,6 +346,21 @@ abstract final class AbilityCatalog {
       if (ability.moveId == moveId) return ability;
     }
     return null;
+  }
+
+  /// Die Ultimate mit [moveId], oder null — auch für jede gewöhnliche.
+  static Ability? ultimateByMoveId(String moveId) {
+    for (final ability in ultimates) {
+      if (ability.moveId == moveId) return ability;
+    }
+    return null;
+  }
+
+  /// Alle Ultimates, die zu diesem Stand offen sind.
+  static List<Ability> unlockedUltimatesBy(AbilityProgress progress) {
+    return List<Ability>.unmodifiable(
+      ultimates.where((ability) => ability.isUnlockedBy(progress)),
+    );
   }
 
   /// Ob dieser Move gewählt werden darf.

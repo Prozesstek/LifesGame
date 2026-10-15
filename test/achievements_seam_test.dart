@@ -101,7 +101,8 @@ void main() {
       for (final ability in AbilityCatalog.choosable) {
         expect(ids.add(ability.moveId), isTrue, reason: ability.moveId);
       }
-      expect(AbilityCatalog.choosable, hasLength(19));
+      // Neunzehn bis ADR-0073, seitdem Frederiks zehn dazu.
+      expect(AbilityCatalog.choosable, hasLength(29));
     });
   });
 
@@ -240,8 +241,9 @@ void main() {
     // Vergleich gibt die Reihe 2775 und 1110 (ADR-0032). Die
     // Errungenschaften sollen daneben stehen, nicht darüber.
     test('er ist gedeckelt und kleiner als die Reihe', () {
-      expect(AchievementCatalog.lifetimeXp, 1680);
-      expect(AchievementCatalog.lifetimeGold, 560);
+      // Seit ADR-0073 mit „Zehn Truhen“: 75 und 25 mehr.
+      expect(AchievementCatalog.lifetimeXp, 1755);
+      expect(AchievementCatalog.lifetimeGold, 585);
       expect(AchievementCatalog.lifetimeXp, lessThan(LadderRewards.lifetimeXp));
       expect(
         AchievementCatalog.lifetimeGold,

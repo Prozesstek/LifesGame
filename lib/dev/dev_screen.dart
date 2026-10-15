@@ -549,7 +549,10 @@ class _AbilityPicker extends StatelessWidget {
         spacing: 6,
         runSpacing: 6,
         children: <Widget>[
-          for (final ability in AbilityCatalog.choosable)
+          for (final ability in <Ability>[
+            ...AbilityCatalog.choosable,
+            ...AbilityCatalog.ultimates,
+          ])
             Druck(
               child: ActionChip(
                 label: Text(
