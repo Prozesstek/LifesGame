@@ -50,7 +50,7 @@ Fragen dafür stehen in der Vorlage
 
 **Fähigkeiten** (14.10., [ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md)):
 Ultimate, neue Arten und Frederiks zehn und zwei **gebaut am 15.10.**
-(Branch `feat/ultimate-und-mana`, noch kein PR). Offen: **Mana als
+(PR #117, noch nicht gemergt). Offen: **Mana als
 Bremse ist gemessen, nicht gestellt**, und AktivesBrett fehlt in
 [`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md).
 
