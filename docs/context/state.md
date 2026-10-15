@@ -50,7 +50,7 @@ Fragen dafür stehen in der Vorlage
 
 **Fähigkeiten** (14.10., [ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md)):
 Ultimate, neue Arten und Frederiks zehn und zwei **gebaut am 15.10.**
-(PR #117, noch nicht gemergt). Offen: **Mana als
+(PR #117, gemergt am 15.10.). Offen: **Mana als
 Bremse ist gemessen, nicht gestellt**, und AktivesBrett fehlt in
 [`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md).
 
@@ -144,6 +144,8 @@ Der Glanz läuft in der Zeit des Laufs (`ActionWorld.elapsed`), er hält
 also mit dem Trefferstopp an. Die Restzeit kommt aus der Welt
 (`slotCooldownLeft`), die Anzeige rechnet nur (`AbklingAnzeige`). Der
 alte Satz „Im Kampf liest niemand Ziffern“ ist damit überholt.
+
+Gemergt am 15.10. als PR #117, zusammen mit den Fähigkeiten.
 
 App 797 (vorher 791), action_combat 331 (vorher 330). Die Knöpfe in
 allen vier Zuständen gerendert und angesehen. Dabei gefunden: Die Zahl
