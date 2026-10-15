@@ -64,7 +64,9 @@ class Level {
     required this.rooms,
     required Set<int> gates,
     required this.gatesClosed,
-  }) : _gates = gates;
+    Set<int> rocks = const <int>{},
+  })  : _gates = gates,
+        _rocks = rocks;
 
   /// Liest eine Karte aus Zeilen.
   ///
@@ -232,6 +234,40 @@ class Level {
       rooms: rooms,
       gates: _gates,
       gatesClosed: closed,
+      rocks: _rocks,
+    );
+  }
+
+  /// Die Felder, auf denen gerade ein Fels liegt (ADR-0073, Steinschlag).
+  final Set<int> _rocks;
+
+  /// Ob auf [x], [y] ein Fels liegt.
+  bool isRockAt(int x, int y) => _rocks.contains(_key(x, y));
+
+  /// Die Felder mit Fels, als (x, y) — für die Darstellung.
+  List<(int, int)> get rocks => <(int, int)>[
+        for (final key in _rocks) (key % 10000, key ~/ 10000),
+      ];
+
+  /// Dieselbe Halle mit einem Fels mehr oder weniger auf [x], [y]. Wie
+  /// bei den Toren ändert sich die Karte selbst nie.
+  Level withRock(int x, int y, {required bool present}) {
+    final key = _key(x, y);
+    if (_rocks.contains(key) == present) return this;
+    return Level._(
+      name: name,
+      tiles: tiles,
+      heroStart: heroStart,
+      spawns: spawns,
+      boss: boss,
+      rooms: rooms,
+      gates: _gates,
+      gatesClosed: gatesClosed,
+      rocks: Set<int>.unmodifiable(<int>{
+        for (final k in _rocks)
+          if (k != key) k,
+        if (present) key,
+      }),
     );
   }
 
@@ -274,6 +310,7 @@ class Level {
 
   bool isWallAt(int x, int y) {
     if (gatesClosed && isGateAt(x, y)) return true;
+    if (_rocks.isNotEmpty && isRockAt(x, y)) return true;
     return tileAt(x, y) == Tile.wand;
   }
 

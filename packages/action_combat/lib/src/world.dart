@@ -16,7 +16,9 @@ import 'vec2.dart';
 
 part 'aim.dart';
 part 'boss.dart';
+part 'effects.dart';
 part 'enemies.dart';
+part 'summons.dart';
 
 /// Ein Lauf durch eine Halle.
 ///
@@ -36,6 +38,7 @@ class ActionWorld {
     required this.heroStats,
     this.stage,
     List<String> abilityIds = const <String>[],
+    String? ultimateId,
     String? weaponMoveId,
     List<PitModifier> modifiers = const <PitModifier>[],
     this.rewardPot = const (xp: 0, gold: 0),
@@ -52,7 +55,8 @@ class ActionWorld {
               .whereType<PitAbility>()
               .take(ActionBalance.maxAbilitySlots)
               .map((a) => PitModifiers.apply(a, modifiers)),
-        ) {
+        ),
+        ultimate = _ultimateFor(ultimateId, modifiers) {
     _hero = ActionEntity(
       id: _nextId++,
       faction: Faction.held,
@@ -88,6 +92,12 @@ class ActionWorld {
       boss.untouchable = true;
     }
     _rebuildPath();
+  }
+
+  static PitAbility? _ultimateFor(String? id, List<PitModifier> modifiers) {
+    if (id == null) return null;
+    final ultimate = PitAbilities.ultimateById(id);
+    return ultimate == null ? null : PitModifiers.apply(ultimate, modifiers);
   }
 
   // --- Wo es weh tat (ADR-0072) ---
@@ -171,6 +181,33 @@ class ActionWorld {
   /// Was den Grundangriff bestimmt. Ohne bekannte Waffe die Faust.
   final PitWeapon weapon;
 
+  // --- Seit ADR-0073 ---
+
+  /// Die Ultimate auf ihrem eigenen Platz, oder null — vor Level 15, in
+  /// der Tagesgrube und bei einer Id, die die Grube nicht kennt.
+  final PitAbility? ultimate;
+
+  /// Wie voll die Ultimate ist, 0 bis 1. **Jeder Lauf beginnt leer**;
+  /// zwischen den Räumen bleibt sie.
+  double _ultimateCharge = 0;
+
+  /// Self-Buffs: Faktor und wie lange noch, je Wert.
+  double _buffAttack = 1;
+  double _buffAttackLeft = 0;
+  double _buffHaste = 1;
+  double _buffHasteLeft = 0;
+  double _buffSpeed = 1;
+  double _buffSpeedLeft = 0;
+
+  /// Der Sturm nach vorn, solange er läuft.
+  Vec2 _dashVelocity = Vec2.zero;
+  double _dashLeft = 0;
+  _DashTrail? _trail;
+
+  final List<_Trap> _traps = <_Trap>[];
+  _Companion? _companion;
+  final List<_RockLeft> _rocks = <_RockLeft>[];
+
   /// Wie lange die Prisma-Barriere noch hält, und wie viel sie zurückwirft.
   double _reflectLeft = 0;
   double _reflectShare = 0;
@@ -253,6 +290,8 @@ class ActionWorld {
       isAlive: view.isAlive,
       isSlowed: view.isSlowed,
       isBurning: view.isBurning,
+      isStunned: view.isStunned,
+      isFrozen: view.isFrozen,
     );
   }
 
@@ -301,6 +340,39 @@ class ActionWorld {
     ];
   }
 
+  // --- Was der Held gesetzt hat (ADR-0073) ---
+
+  List<TrapView> get traps => <TrapView>[
+        for (final falle in _traps)
+          TrapView(center: falle.center, radius: ActionBalance.trapRadius),
+      ];
+
+  /// Der Begleiter, solange er da ist.
+  CompanionView? get companion {
+    final begleiter = _companion;
+    if (begleiter == null) return null;
+    return CompanionView(
+      position: begleiter.position,
+      tint: begleiter.tint,
+      stationary: begleiter.effect.stationary,
+      remaining:
+          (begleiter.secondsLeft / begleiter.effect.seconds).clamp(0.0, 1.0),
+    );
+  }
+
+  /// Wie voll die Ultimate ist, 0 bis 1 — für den Ladering.
+  double get ultimateCharge => _ultimateCharge;
+
+  /// Ob der Held gerade einen Self-Buff trägt — für die Darstellung.
+  bool get isBuffed =>
+      _buffAttackLeft > 0 || _buffHasteLeft > 0 || _buffSpeedLeft > 0;
+
+  /// Ob der Held gerade stürmt.
+  bool get isDashing => _dashLeft > 0;
+
+  /// Wie viele Kerben der Stun-Leiste des Wächters gefüllt sind.
+  int get bossStunNotches => _boss?.stunNotches ?? 0;
+
   // --- Mana und Plätze (ADR-0039) ---
 
   int get mana => _mana.floor();
@@ -314,10 +386,19 @@ class ActionWorld {
 
   /// Abklingzeit einer Platz-Fähigkeit als Anteil, 0 heisst bereit.
   double slotCooldownRatio(String id) {
+    if (ultimate?.id == id) return 0;
     final rest = _slotCooldowns[id] ?? 0;
     final ability = _slotFor(id);
     if (rest <= 0 || ability == null || ability.cooldown <= 0) return 0;
     return (rest / ability.cooldown).clamp(0.0, 1.0);
+  }
+
+  /// Wie viele Sekunden [id] noch abklingt, 0 heisst bereit — für die
+  /// Zahl auf dem Knopf. Die Ultimate klingt nie ab.
+  double slotCooldownLeft(String id) {
+    if (ultimate?.id == id) return 0;
+    final rest = _slotCooldowns[id] ?? 0;
+    return rest > 0 ? rest : 0;
   }
 
   /// Ob [id] jetzt gewirkt werden kann: auf einem Platz, abgeklungen,
@@ -326,6 +407,9 @@ class ActionWorld {
     if (_over) return false;
     final ability = _slotFor(id);
     if (ability == null) return false;
+    // Die Ultimate kostet kein Mana und klingt nicht ab — sie muss voll
+    // sein (ADR-0073).
+    if (ability.isUltimate) return _ultimateCharge >= 1;
     if ((_slotCooldowns[id] ?? 0) > 0) return false;
     return _mana >= ability.manaCost;
   }
@@ -334,8 +418,38 @@ class ActionWorld {
     for (final ability in slots) {
       if (ability.id == id) return ability;
     }
+    final ult = ultimate;
+    if (ult != null && ult.id == id) return ult;
     return null;
   }
+
+  /// Lädt die Ultimate um [anteil], nie über voll.
+  void _chargeUltimate(double anteil) {
+    if (ultimate == null) return;
+    _ultimateCharge = math.min(1, _ultimateCharge + anteil);
+  }
+
+  // --- Nur für Tests: Zustände herstellen, die ein Lauf erst spät hat ---
+
+  /// Lädt die Ultimate, als wären Gegner gefallen.
+  void debugChargeUltimate(double anteil) => _chargeUltimate(anteil);
+
+  /// Lässt die Figur [id] stillstehen — beim Wächter über die Leiste.
+  void debugStun(int id, double sekunden) {
+    for (final figur in _entities) {
+      if (figur.id == id) _stun(figur, sekunden);
+    }
+  }
+
+  /// Setzt das Leben der Figur [id] auf [anteil] ihres vollen Lebens.
+  void debugWound(int id, double anteil) {
+    for (final figur in _entities) {
+      if (figur.id == id) figur.hp = (figur.maxHp * anteil).round();
+    }
+  }
+
+  /// Lässt jede Abklingzeit sofort enden.
+  void debugResetCooldowns() => _slotCooldowns.clear();
 
   /// Wirkt eine Fähigkeit von einem Platz — **kurz getippt**: Sie zielt
   /// selbst, auf den nächsten Gegner, den der Held sieht. Gibt false
@@ -371,8 +485,12 @@ class ActionWorld {
     final plan = _plan(ability, zielpunkt);
     if (plan == null) return false;
 
-    _mana -= ability.manaCost;
-    _slotCooldowns[id] = ability.cooldown;
+    if (ability.isUltimate) {
+      _ultimateCharge = 0;
+    } else {
+      _mana -= ability.manaCost;
+      _slotCooldowns[id] = ability.cooldown;
+    }
     _events.add(AbilityCast(id: id, at: plan.center));
 
     final flaechen = <double, _Zone>{};
@@ -386,72 +504,6 @@ class ActionWorld {
     }
     _zones.addAll(flaechen.values);
     return true;
-  }
-
-  /// Die eine Stelle, die jede Art von [PitEffect] ausführt — dorthin,
-  /// wohin [plan] zeigt.
-  void _apply(
-    PitEffect effect,
-    PitAbility ability,
-    _CastPlan plan,
-    Map<double, _Zone> flaechen,
-  ) {
-    switch (effect) {
-      case BoltAtNearest(:final power, :final range, :final leech):
-        final richtung = plan.direction;
-        if (richtung != null) {
-          _shootAlong(richtung, power: power, weite: range, leech: leech);
-          return;
-        }
-        final ziel = _nearestEnemyWithin(range, needsSight: true);
-        if (ziel == null) return;
-        _shoot(ziel, power: power, leech: leech);
-      case StrikeNearest(:final power, :final range):
-        final richtung = plan.direction;
-        final ziel = richtung != null
-            ? _nearestInCone(richtung, range)
-            : _nearestEnemyWithin(range);
-        if (richtung != null) _hero.facing = richtung;
-        if (ziel == null) return;
-        _hero.facing = (ziel.position - _hero.position).normalized;
-        _hit(_hero, ziel, powerFactor: power);
-      case StrikeAround(:final power, :final radius):
-        for (final ziel in _enemiesAround(plan.center, radius)) {
-          _hit(_hero, ziel, powerFactor: power);
-        }
-      case HealSelf(:final share):
-        _healHero((_hero.maxHp * share).round());
-      case GainMana(:final amount):
-        _mana = math.min(heroStats.maxMana.toDouble(), _mana + amount);
-      case ReduceIncoming(:final factor, :final seconds):
-        _wardFactor = _wardLeft > 0 ? math.min(_wardFactor, factor) : factor;
-        _wardLeft = seconds;
-      case ReflectIncoming(:final share, :final seconds):
-        _reflectShare =
-            _reflectLeft > 0 ? math.max(_reflectShare, share) : share;
-        _reflectLeft = seconds;
-      case SlowAround(:final radius, :final factor, :final seconds):
-        if (plan.placed) {
-          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
-          zone.slowFactor = math.min(zone.slowFactor, factor);
-          return;
-        }
-        for (final ziel in _enemiesWithin(radius)) {
-          ziel.slowFactor =
-              ziel.slowLeft > 0 ? math.min(ziel.slowFactor, factor) : factor;
-          ziel.slowLeft = math.max(ziel.slowLeft, seconds);
-        }
-      case DamageOverTime(:final radius, :final perSecond, :final seconds):
-        final jeSekunde = _hero.attack * _hero.damageMultiplier * perSecond;
-        if (plan.placed) {
-          final zone = _zoneFor(flaechen, plan, ability, radius, seconds);
-          zone.dotPerSecond = math.max(zone.dotPerSecond, jeSekunde);
-          return;
-        }
-        for (final ziel in _enemiesWithin(radius)) {
-          _applyDot(ziel, jeSekunde, seconds);
-        }
-    }
   }
 
   /// Ein Geschoss des Helden auf [ziel].
@@ -692,12 +744,17 @@ class ActionWorld {
     }
 
     _tickMana(dt);
+    _tickBuffs(dt);
     _moveHero(moveInput, dt);
     _heroAttack(dt);
     _tickZones(dt);
+    _tickTraps(dt);
+    _tickCompanion(dt);
+    _tickShoves(dt);
     _enemiesAct(dt);
     _tickStatus(dt);
     _moveProjectiles(dt);
+    _tickRocks(dt);
     _separate();
     _moveOrbs(dt);
     _collectDead();
@@ -710,13 +767,18 @@ class ActionWorld {
   // --- Held ---
 
   void _moveHero(Vec2 input, double dt) {
+    // Wer stürmt, lenkt nicht (ADR-0073).
+    if (_isDashing) {
+      _tickDash(dt);
+      return;
+    }
     final richtung = input.clampLength(1);
     if (richtung.isZero) return;
 
     _hero.facing = richtung.normalized;
     _hero.position = _slide(
       _hero.position,
-      richtung * (_hero.speed * dt),
+      richtung * (_hero.speed * _speedBuff * dt),
       _hero.radius,
     );
   }
@@ -743,6 +805,10 @@ class ActionWorld {
       if (!ziel.isAlive || ziel.isHero) continue;
       if (ziel.ghostLeft > 0) ziel.ghostLeft -= dt;
       if (ziel.slowLeft > 0) ziel.slowLeft -= dt;
+      if (ziel.stunLeft > 0) {
+        ziel.stunLeft -= dt;
+        if (ziel.stunLeft <= 0) ziel.frozen = false;
+      }
       if (ziel.dotLeft <= 0) continue;
 
       ziel.dotLeft -= dt;
@@ -775,7 +841,7 @@ class ActionWorld {
         : _nearestEnemyInRange(_hero);
     if (ziel == null) return;
 
-    _hero.cooldownLeft = _hero.attackCooldown;
+    _hero.cooldownLeft = _hero.attackCooldown / _hasteBuff;
     _hero.facing = (ziel.position - _hero.position).normalized;
     _events.add(
       AttackSwung(
@@ -817,7 +883,7 @@ class ActionWorld {
     if (weapon.burnPerSecond > 0 && ziel.isAlive) {
       _applyDot(
         ziel,
-        _hero.attack * _hero.damageMultiplier * weapon.burnPerSecond,
+        _heroPower * weapon.burnPerSecond,
         ActionBalance.weaponBurnSeconds,
       );
     }
@@ -846,6 +912,8 @@ class ActionWorld {
   void _enemiesAct(double dt) {
     for (final gegner in _entities) {
       if (!gegner.isAlive || gegner.isHero || gegner.untouchable) continue;
+      // Wer steht oder gerade gezogen wird, handelt nicht (ADR-0073).
+      if (gegner.isStunned || gegner.shoveLeft > 0) continue;
 
       final abstand = gegner.position.distanceTo(_hero.position);
       // **Wer weiter schiesst, als er sieht, wäre blind.** Der
@@ -1059,6 +1127,11 @@ class ActionWorld {
         continue;
       }
 
+      if (geschoss.boomerang) {
+        if (!_moveBoomerang(geschoss, dt)) geschoss.spent = true;
+        continue;
+      }
+
       geschoss.position = geschoss.position + geschoss.velocity * dt;
 
       if (_hitsWall(geschoss.position, geschoss.radius)) {
@@ -1087,6 +1160,11 @@ class ActionWorld {
               powerFactor: heldenKraft,
               leech: geschoss.heroLeech,
             );
+            // Erst nach dem Treffer frieren — sonst zerspränge das Eis
+            // am eigenen Einschlag.
+            if (geschoss.freezeSeconds > 0) {
+              _stun(ziel, geschoss.freezeSeconds, frozen: true);
+            }
           }
           break;
         }
@@ -1167,11 +1245,18 @@ class ActionWorld {
     ActionEntity target, {
     double powerFactor = 1,
     double leech = 0,
+    bool byCompanion = false,
   }) {
-    final kritisch =
+    // Zerspringen (ADR-0073): Ein Gefrorener nimmt den nächsten Treffer
+    // des Helden sicher kritisch. Der Würfel wird trotzdem geworfen, damit
+    // ein Eisball die übrigen Würfe des Laufs nicht verschiebt.
+    final wurf =
         attacker.critChance > 0 && _rng.nextDouble() < attacker.critChance;
+    final zerspringt = attacker.isHero && !byCompanion && _shatter(target);
+    final kritisch = wurf || zerspringt;
 
     var roh = attacker.attack * attacker.damageMultiplier * powerFactor;
+    if (attacker.isHero) roh *= _attackBuff;
     if (kritisch) roh *= attacker.critFactor;
 
     final breite = attacker.isHero
@@ -1183,6 +1268,14 @@ class ActionWorld {
     final schaden = math.max(ActionBalance.minDamage, roh.round());
     final wirklich = target.takeDamage(_mitigate(target, schaden));
     _knockBack(attacker, target);
+    if (attacker.isHero) {
+      target.lastHitByCompanion = byCompanion;
+      // Treffer am Wächter laden die Ultimate — sonst stünde sie im
+      // Wächterraum still, wo es keine Kills mehr gibt.
+      if (target == _boss && !byCompanion && wirklich > 0) {
+        _chargeUltimate(ActionBalance.ultimatePerBossHit);
+      }
+    }
 
     _events.add(
       HitLanded(
@@ -1353,6 +1446,8 @@ class ActionWorld {
       for (var j = i + 1; j < _entities.length; j++) {
         final b = _entities[j];
         if (!b.isAlive || b.untouchable) continue;
+        // Wer stürmt, geht durch Gegner hindurch (ADR-0073).
+        if (_isDashing && (a.isHero || b.isHero)) continue;
         // Wer sich aus einem Stau löst, geht durch Verbündete hindurch.
         if (!a.isHero && !b.isHero && (a.ghostLeft > 0 || b.ghostLeft > 0)) {
           continue;
@@ -1393,6 +1488,10 @@ class ActionWorld {
       if (_gemeldet.contains(entity.id)) continue;
       _gemeldet.add(entity.id);
       _kills++;
+      // Was im Lauf entsteht und was ein Begleiter tötet, lädt nicht.
+      if (!entity.lootless && !entity.lastHitByCompanion) {
+        _chargeUltimate(ActionBalance.ultimatePerKill);
+      }
       _maybeDropOrb(entity);
       _maybeDropTime(entity);
       _dropLoot(entity);

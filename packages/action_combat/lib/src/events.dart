@@ -216,3 +216,64 @@ class LootDropped extends ActionEvent {
   final int xp;
   final int gold;
 }
+
+// --- Seit ADR-0073 ---
+
+/// Ein Haken flog von [from] nach [to] — für den Faden im Bild.
+class HookThrown extends ActionEvent {
+  const HookThrown({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+}
+
+/// Ein Zufall ist gefallen (Glückstrank): [outcome] ist die Stelle in der
+/// Liste der Ausgänge, damit der Trank in der Farbe seines Wurfs leuchtet.
+class LuckRolled extends ActionEvent {
+  const LuckRolled({required this.at, required this.outcome});
+
+  final Vec2 at;
+  final int outcome;
+}
+
+/// Eine Falle ist zugeschnappt.
+class TrapSprung extends ActionEvent {
+  const TrapSprung({required this.at});
+
+  final Vec2 at;
+}
+
+/// Ein Fels ist gefallen oder wieder verschwunden.
+class RockChanged extends ActionEvent {
+  const RockChanged({required this.at, required this.present});
+
+  final Vec2 at;
+  final bool present;
+}
+
+/// Der Begleiter hat zugeschlagen — oder, mit [devoured], gefressen.
+class CompanionStruck extends ActionEvent {
+  const CompanionStruck({
+    required this.from,
+    required this.at,
+    required this.devoured,
+  });
+
+  final Vec2 from;
+  final Vec2 at;
+  final bool devoured;
+}
+
+/// Die Stun-Leiste des Wächters hat eine Kerbe mehr — oder ist voll, und
+/// er steht ([stunned]).
+class BossStunNotched extends ActionEvent {
+  const BossStunNotched({
+    required this.at,
+    required this.notches,
+    required this.stunned,
+  });
+
+  final Vec2 at;
+  final int notches;
+  final bool stunned;
+}

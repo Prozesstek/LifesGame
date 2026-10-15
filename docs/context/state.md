@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 13.10.2026 · Frederik
+**Zuletzt aktualisiert:** 15.10.2026 · Frederik
 
 ---
 
@@ -30,13 +30,13 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
-| **Fähigkeiten** | 19 Fähigkeiten und 8 Waffenzüge in der Grube, eigener Bereich mit allen Werten | ADR-0022, -0049 |
-| **Errungenschaften** | 19 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033 |
+| **Fähigkeiten** | 29 Fähigkeiten und 8 Waffenzüge in der Grube, **zwei Ultimates auf eigenem Platz ab Level 15**, zwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073 |
+| **Errungenschaften** | 20 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 789, dazu die acht Packages (theory 193, habits 324, gear
-118, action_combat 305, progression 42, abilities 36, identity 25,
+**Tests:** App 797, dazu die acht Packages (theory 193, habits 324, gear
+118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -48,7 +48,16 @@ Saisons, Seilschaft — nach und nach, jede mit eigener Konzeptrunde. Die
 Fragen dafür stehen in der Vorlage
 [`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
 
+**Fähigkeiten** (14.10., [ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md)):
+Ultimate, neue Arten und Frederiks zehn und zwei **gebaut am 15.10.**
+(PR #117, noch nicht gemergt). Offen: **Mana als
+Bremse ist gemessen, nicht gestellt**, und AktivesBrett fehlt in
+[`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md).
+
 **Braucht euch beide:**
+
+- **Zehn Fähigkeiten und zwei Ultimates von AktivesBrett** in die
+  Vorlage (ADR-0073).
 
 - ~~**Was der Testlauf misst.**~~ Entschieden am 27.09. (Frederik):
   **weiterbauen**. Der Testlauf ist damit ein Entwicklungsmonat; ob
@@ -110,13 +119,142 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
 - Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
-- `world.dart` (1.845 Zeilen), `tracker.dart` (1.858) und
+- `world.dart` (1.936 Zeilen), `tracker.dart` (1.858) und
   `action_game.dart` (1.222) liegen über der 800-Zeilen-Grenze.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 15.10.2026, danach: die Knöpfe zeigen, was abklingt
+
+Frederik: „Wenn Fähigkeiten auf Cooldown sind mach ein sweep, dim the
+icon und zeig einen cooldown und indicate the return.“ Gebaut ohne
+Fragerunde, auf demselben Branch (PR #117).
+
+| Was | Wie |
+|---|---|
+| **Sweep** | das dunkle Tortenstück gab es schon; dazu eine helle Kante wie ein Uhrzeiger |
+| **Ausgegraut** | das Bild in Graustufen und blasser, solange es abklingt |
+| **Zahl** | die Sekunden in der Mitte, aufgerundet; unter einer Sekunde mit einer Stelle („0,6“) |
+| **Zurück** | der Knopf leuchtet golden auf, ein Ring springt nach aussen, 0,45 s |
+
+Der Glanz läuft in der Zeit des Laufs (`ActionWorld.elapsed`), er hält
+also mit dem Trefferstopp an. Die Restzeit kommt aus der Welt
+(`slotCooldownLeft`), die Anzeige rechnet nur (`AbklingAnzeige`). Der
+alte Satz „Im Kampf liest niemand Ziffern“ ist damit überholt.
+
+App 797 (vorher 791), action_combat 331 (vorher 330). Die Knöpfe in
+allen vier Zuständen gerendert und angesehen. Dabei gefunden: Die Zahl
+lag zuerst unter dem Tortenstück und war mit abgedunkelt. **Nicht
+gespielt, nicht am Handy.**
+
+### Offen
+
+- Ob die Zahl auf den kleinen Knöpfen im Bogen (50 Punkte) am Handy
+  lesbar ist.
+- Die Ultimate hat keinen Glanz, wenn sie voll ist; sie zeigt es nur
+  über den Ring.
+
+## 15.10.2026: die Fähigkeiten sind gebaut — zwölf neue, zwei davon Ultimates
+
+Nach einem Absturz von Frederiks Rechner. Die Datei von ADR-0073 lag
+danach nur noch als Nullbytes auf der Platte und ist aus dem letzten
+Commit wiederhergestellt; was nach 19:39 am 14.10. daran geändert
+wurde, ist verloren. Dann Frederik: „Lass die Fähigkeiten bauen.“
+Gebaut ohne Fragerunde, die Vorgaben standen in ADR-0073 und in der
+Vorlage.
+
+| Was | Wie |
+|---|---|
+| **Elf neue Arten** | Sturm mit Spur, Haken, Strudel, Self-Buff, Zufall, Bumerang, Falle, Begleiter, Fels, Ranke, Eisball mit Zerspringen — in `effects.dart` und `summons.dart`, nicht in `world.dart` |
+| **Stillstand** | Gegner stehen und holen nicht aus; der Wächter hat eine Stun-Leiste aus drei Kerben |
+| **Die Ultimate** | eigener Platz ab Level 15, lädt ein Achtel je Kill und ein Achtzigstel je Treffer am Wächter; im Kampf gross in der Ecke mit Ladering, die drei anderen im Bogen; Taste 4 |
+| **Fähigkeiten-Bildschirm** | ein Platz mit goldenem Doppelrand unter den vier, die zwei Ultimates als eigene Gruppe; gezogen oder übers Blatt |
+| **Frederiks zwölf** | alle im Katalog, mit Quelle, Bild und Blatt |
+| **Glückstrank** | über eine neue Errungenschaft „Zehn Truhen“ |
+| **Mana** | `dart run tool/pit_sim.dart mana` misst, wie oft ein Platz am Mana hängt |
+
+**Ohne Rückfrage entschieden** (die ganze Liste steht in der Vorlage):
+
+- **Die Knoten der Baum-Quellen**, darunter die Wassergrube an
+  „Erholung ist Teil der Arbeit“ — drei Punkte, auf Level 15 sicher
+  erreichbar; ein Test hält das fest.
+- **Fanghaken ist ein Haken ohne Blink**: Das Ende ist dasselbe.
+- **Zwei Regeln weichen Frederiks Quellen**: Körper und Geist tragen je
+  sieben Fähigkeiten (bisher höchstens drei je Gebiet), und die
+  Gewohnheiten vergeben zwei über Errungenschaften (bisher eine je
+  Bereich).
+- **Die Tagesgrube bleibt ohne Ultimate**, und ihre sieben Sätze bleiben
+  die alten neunzehn — neue Sätze bräuchten eine neue Messung.
+
+**Gemessen** (Bot, Tag 30 ohne Ausrüstung):
+
+- **Mana bremst früh, spät kaum**: drei Angriffe im Takt hängen an
+  Tag 0 und 30 in 62–67 % der Zeit am Mana, an Tag 60 mit Ausrüstung in
+  18 %. **Nicht nachgestellt** — das ändert jede Siegquote und die
+  Tagesgrube.
+- **Die Ultimate** ist nach etwa 16 s voll und kommt rund dreimal je
+  Lauf. Auf Stufe 13 hebt sie die Siegquote um 20 bis 37 Punkte.
+
+Neu: `effects.dart`, `summons.dart`, `neue_arten_bild.dart`,
+`ultimate_platz.dart`, `neue_arten_test.dart`, zwölf Bilder aus Raven.
+App 791 (vorher 789), action_combat 330 (vorher 305). Bildschirm und
+Grube in 390 × 844 gerendert und angesehen, **die Grube mit Würfeln
+statt Figuren. Nicht gespielt, nicht am Handy.**
+
+### Offen
+
+- **Mana als Bremse stellen** — oder lassen. ADR-0073 sagt „zuerst
+  messen“; das ist geschehen, die Entscheidung nicht.
+- **Dreimal je Lauf** ist für einen „Moment“ vielleicht zu oft. Ein
+  Achtel je Kill ist geschätzt.
+- Die Bilder sind Platzhalter aus Raven; ein Falke war nicht dabei.
+- Die neuen Wirkungen haben keine eigenen Klänge und keine Animation,
+  nur Ringe, Fäden und Punkte.
+- `world.dart` ist auf 1.936 Zeilen gewachsen, obwohl die Wirkungen
+  ausgezogen sind.
+- AktivesBrett hat weder ADR-0073 noch die Vorlage gesehen; seine zehn
+  und zwei fehlen.
+
+## 14.10.2026: Fähigkeiten — Ultimate, Mana als Bremse, zehn neue Arten
+
+Frederik: „Guck dir Fähigkeiten an“ — Issue #114. In einer Fragerunde
+entschieden, **nichts gebaut**:
+[ADR-0073](../decisions/0073-ultimate-mana-und-neue-arten.md).
+
+| Was | Wie |
+|---|---|
+| **Ultimate** | eigener Platz ab Level 15; kein Mana, lädt durch Kills und Treffer am Wächter; jeder Lauf beginnt leer |
+| **Im Kampf** | groß in der Ecke, die drei anderen kleiner im Bogen darum; vor Level 15 bleibt die Reihe |
+| **Bild** | goldener Doppelrand, keine Seltenheit — Gold allein hieße Legendär |
+| **Quelle** | Baum, Kette, Errungenschaft; eine auf Level 15 im Baum erreichbar; nie aus der Grube |
+| **Mana** | wird die Bremse, die Abklingzeit verhindert nur Dauerfeuer; **zuerst messen** |
+| **Neue Arten** | Dash, Blink, Stun, Self-Buff, Stacking/Rage, Passiv, Hook, Unsichtbarkeit, Begleiter, Terrain — **jede in jeder Fähigkeit** |
+
+Sechsmal wie empfohlen. **Einmal dagegen:** Claude wollte Begleiter und
+Terrain den Ultimates vorbehalten; Frederik will alle Arten für alles.
+Dafür haben beide Grenzen bekommen (einer zugleich, Wände auf Zeit).
+
+Neu: die Vorlage [`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md) —
+je Entwickler zehn Fähigkeiten und zwei Ultimates, mit allen Bausteinen
+und Regeln. **Frederiks Ideen gehen wir Stück für Stück durch**, dann
+wird in drei Blöcken gebaut: Messung und Ultimate-Platz, die zehn Arten,
+die Fähigkeiten.
+
+**Der Fähigkeiten-Bildschirm ist frei** (Frederik): AktivesBrett baut
+dort nicht mehr.
+
+### Offen
+
+- Frederiks zehn Fähigkeiten und zwei Ultimates.
+- AktivesBrett hat ADR-0073 und die Vorlage nicht gesehen; seine zehn
+  und zwei fehlen.
+- Ob die Tagesgrube eine Ultimate bekommt.
+- Alle Zahlen der Ultimate (ein Achtel je Kill, 76 und 50 Punkte) sind
+  geschätzt.
+- Issue #115 „Neue Items“ ist nicht angesehen.
 
 ## 13.10.2026: Kampfgefühl — die Grube antwortet lauter
 

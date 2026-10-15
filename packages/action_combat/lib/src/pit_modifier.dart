@@ -149,11 +149,59 @@ abstract final class PitModifiers {
           perSecond: perSecond * dauer,
           seconds: seconds,
         ),
+      FreezeBolt(:final power, :final range, :final stunSeconds) => FreezeBolt(
+          power: power * direkt,
+          range: range,
+          stunSeconds: stunSeconds,
+        ),
+      HookNearest(:final range, :final power, :final stunSeconds) =>
+        HookNearest(
+          range: range,
+          power: power * direkt,
+          stunSeconds: stunSeconds,
+        ),
+      Boomerang(:final power, :final range) =>
+        Boomerang(power: power * direkt, range: range),
+      Trap(:final power, :final stunSeconds, :final seconds) => Trap(
+          power: power * direkt,
+          stunSeconds: stunSeconds,
+          seconds: seconds,
+        ),
+      SweepCone(:final power, :final range, :final fling) =>
+        SweepCone(power: power * direkt, range: range, fling: fling),
+      Companion() => Companion(
+          power: e.power * direkt,
+          interval: e.interval,
+          seconds: e.seconds,
+          reach: e.reach,
+          stationary: e.stationary,
+          devourBelow: e.devourBelow,
+        ),
+      Dash() => Dash(
+          distance: e.distance,
+          trailPerSecond: e.trailPerSecond * dauer,
+          trailSeconds: e.trailSeconds,
+          trailRadius: e.trailRadius,
+        ),
+      RandomOf(:final outcomes) => RandomOf(
+          outcomes: <PitOutcome>[
+            for (final o in outcomes)
+              PitOutcome(
+                weight: o.weight,
+                effects: <PitEffect>[
+                  for (final w in o.effects) _schaden(w, direkt, dauer),
+                ],
+              ),
+          ],
+        ),
       HealSelf() ||
       GainMana() ||
       ReduceIncoming() ||
       ReflectIncoming() ||
-      SlowAround() =>
+      SlowAround() ||
+      PullToCenter() ||
+      SelfBuff() ||
+      Rock() =>
         e,
     };
   }
@@ -165,12 +213,38 @@ abstract final class PitModifiers {
         ReduceIncoming(factor: minderung, seconds: seconds * factor),
       ReflectIncoming(:final share, :final seconds) =>
         ReflectIncoming(share: share, seconds: seconds * factor),
+      SelfBuff() => SelfBuff(
+          seconds: e.seconds * factor,
+          attack: e.attack,
+          haste: e.haste,
+          moveSpeed: e.moveSpeed,
+        ),
+      RandomOf(:final outcomes) => RandomOf(
+          outcomes: <PitOutcome>[
+            for (final o in outcomes)
+              PitOutcome(
+                weight: o.weight,
+                effects: <PitEffect>[
+                  for (final w in o.effects) _schutz(w, factor),
+                ],
+              ),
+          ],
+        ),
       BoltAtNearest() ||
       StrikeNearest() ||
       StrikeAround() ||
       GainMana() ||
       SlowAround() ||
-      DamageOverTime() =>
+      DamageOverTime() ||
+      Dash() ||
+      HookNearest() ||
+      PullToCenter() ||
+      Boomerang() ||
+      Trap() ||
+      Companion() ||
+      Rock() ||
+      SweepCone() ||
+      FreezeBolt() =>
         e,
     };
   }
@@ -192,6 +266,7 @@ abstract final class PitModifiers {
       aim: a.aim,
       castRange: a.castRange,
       tint: a.tint,
+      isUltimate: a.isUltimate,
     );
   }
 }

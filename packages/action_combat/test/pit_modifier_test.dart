@@ -192,6 +192,17 @@ bool _gleich(PitAbility a, PitAbility b) {
           's$radius/$factor/$seconds',
         DamageOverTime(:final radius, :final perSecond, :final seconds) =>
           'd$radius/$perSecond/$seconds',
+        Dash() => 'D${e.distance}/${e.trailPerSecond}/${e.trailSeconds}',
+        HookNearest() => 'H${e.range}/${e.power}/${e.stunSeconds}',
+        PullToCenter() => 'P${e.radius}/${e.stunSeconds}',
+        SelfBuff() => 'S${e.seconds}/${e.attack}/${e.haste}/${e.moveSpeed}',
+        RandomOf() => 'Z${e.outcomes.length}',
+        Boomerang() => 'B${e.power}/${e.range}',
+        Trap() => 'T${e.power}/${e.stunSeconds}/${e.seconds}',
+        Companion() => 'C${e.power}/${e.interval}/${e.seconds}/${e.reach}',
+        Rock() => 'R${e.seconds}',
+        SweepCone() => 'W${e.power}/${e.range}/${e.fling}',
+        FreezeBolt() => 'F${e.power}/${e.range}/${e.stunSeconds}',
       };
   return a.effects.map(zahlen).join() == b.effects.map(zahlen).join();
 }

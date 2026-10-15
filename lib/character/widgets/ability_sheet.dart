@@ -13,6 +13,7 @@ library;
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
+import 'package:progression/progression.dart';
 
 import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
@@ -43,6 +44,11 @@ final class RaeumePlatz extends AbilityPick {
   const RaeumePlatz();
 }
 
+/// Auf den Platz der Ultimate (ADR-0073).
+final class LegeUltimate extends AbilityPick {
+  const LegeUltimate();
+}
+
 /// Alles, was das Blatt über eine Fähigkeit wissen muss.
 ///
 /// **Ein Wert statt zehn Parametern.** Die Angaben hängen zusammen —
@@ -63,7 +69,30 @@ class AbilityCard {
        rarityStufe = ability.rarity.index,
        rarityLabel = ability.rarity.label,
        requirement = ability.requirement,
-       fromWeapon = false;
+       fromWeapon = false,
+       isUltimate = false,
+       ultimateOpen = false,
+       onUltimateSlot = false;
+
+  /// Eine Ultimate (ADR-0073): **ohne Seltenheit**, und statt der Plätze
+  /// steht im Blatt nur ihr eigener.
+  AbilityCard.ultimate({
+    required Ability ability,
+    required PitAbility pit,
+    required this.unlocked,
+    required this.ultimateOpen,
+    required this.onUltimateSlot,
+    int? attack,
+  }) : moveId = ability.moveId,
+       name = pit.name,
+       description = pit.description,
+       stats = pitAbilityStats(pit, attack: attack),
+       rarityStufe = null,
+       rarityLabel = null,
+       requirement = ability.requirement,
+       currentFreeIndex = null,
+       fromWeapon = false,
+       isUltimate = true;
 
   /// Der Waffenzug auf Platz 1. Er wird nicht gewählt, sondern getragen
   /// (ADR-0013) — deshalb ohne Seltenheit und ohne Bedingung.
@@ -79,7 +108,10 @@ class AbilityCard {
       requirement = null,
       unlocked = true,
       currentFreeIndex = null,
-      fromWeapon = true;
+      fromWeapon = true,
+      isUltimate = false,
+      ultimateOpen = false,
+      onUltimateSlot = false;
 
   final String moveId;
   final String name;
@@ -95,6 +127,12 @@ class AbilityCard {
 
   final bool unlocked;
   final bool fromWeapon;
+
+  /// Ob sie eine Ultimate ist, ob ihr Platz offen ist (Level 15), und ob
+  /// sie gerade darauf liegt.
+  final bool isUltimate;
+  final bool ultimateOpen;
+  final bool onUltimateSlot;
 
   /// Auf welchem **freien** Platz sie gerade liegt (0 = Platz 2), oder
   /// null.
@@ -212,6 +250,8 @@ class _Blatt extends StatelessWidget {
       ];
     }
 
+    if (karte.isUltimate) return _ultimateHandlungen(context);
+
     if (freiePlaetze.isEmpty) {
       return const <Widget>[
         Text(
@@ -260,6 +300,42 @@ class _Blatt extends StatelessWidget {
           ),
         ),
       ],
+    ];
+  }
+
+  /// Eine Ultimate hat nur einen Platz, ihren eigenen.
+  List<Widget> _ultimateHandlungen(BuildContext context) {
+    if (!karte.ultimateOpen) {
+      return <Widget>[
+        Text(
+          'Der Platz der Ultimate geht auf Level '
+          '${AbilitySlots.ultimateLevel} auf.',
+          style: const TextStyle(fontSize: 12, color: Palette.textDim),
+        ),
+      ];
+    }
+    if (karte.onUltimateSlot) {
+      return <Widget>[
+        Druck(
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(const RaeumePlatz()),
+            icon: const Icon(Icons.close, size: 18),
+            label: const Text('Platz räumen'),
+          ),
+        ),
+      ];
+    }
+    return <Widget>[
+      Druck(
+        child: OutlinedButton.icon(
+          key: const Key('lege-ultimate'),
+          onPressed: karte.unlocked
+              ? () => Navigator.of(context).pop(const LegeUltimate())
+              : null,
+          icon: const Icon(Icons.auto_awesome, size: 18),
+          label: const Text('Auf den Platz der Ultimate'),
+        ),
+      ),
     ];
   }
 }

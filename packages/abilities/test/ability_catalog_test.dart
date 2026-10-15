@@ -261,4 +261,33 @@ void main() {
       );
     });
   });
+
+  group('Die Ultimates (ADR-0073)', () {
+    test('keine steht unter den wählbaren', () {
+      for (final u in AbilityCatalog.ultimates) {
+        expect(AbilityCatalog.byMoveId(u.moveId), isNull, reason: u.moveId);
+        expect(u.isChoosable, isTrue, reason: u.moveId);
+      }
+    });
+
+    test('keine kommt von der Waffe', () {
+      for (final u in AbilityCatalog.ultimates) {
+        expect(u.source, isNot(isA<FromWeapon>()), reason: u.moveId);
+      }
+    });
+
+    test('was offen ist, folgt der Bedingung', () {
+      expect(
+        AbilityCatalog.unlockedUltimatesBy(const AbilityProgress.empty()),
+        isEmpty,
+      );
+      final lang = AbilityCatalog.unlockedUltimatesBy(
+        const AbilityProgress(longestStreak: 30),
+      );
+      expect(
+        lang.map((a) => a.moveId),
+        contains('fleischfressende_pflanze'),
+      );
+    });
+  });
 }

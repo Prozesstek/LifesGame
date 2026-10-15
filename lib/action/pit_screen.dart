@@ -95,6 +95,8 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       heroStats: werte,
       stage: widget.stage,
       abilityIds: plaetze,
+      // Die Ultimate, ab Level 15 auf ihrem eigenen Platz (ADR-0073).
+      ultimateId: ref.read(activeUltimateProvider),
       weaponMoveId: waffe,
       modifiers: veraenderungen,
       seed: seed,

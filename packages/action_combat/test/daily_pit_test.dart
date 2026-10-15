@@ -132,12 +132,15 @@ void main() {
       expect(waffen, hasLength(7));
     });
 
-    test('über die Woche kommt jede Fähigkeit einmal dran', () {
+    test('über die Woche kommt jede Fähigkeit von vor ADR-0073 dran', () {
+      // Die sieben Sätze sind gemessen (ADR-0072); die zehn aus ADR-0073
+      // kommen erst mit einer neuen Messung dazu. Bis dahin hält der Test
+      // fest, dass keine der neunzehn aus der Woche fällt.
       final gezeigt = <String>{
         for (final satz in DailyPit.loadouts) ...satz.abilityIds,
       };
 
-      expect(gezeigt, PitAbilities.all.map((a) => a.id).toSet());
+      expect(gezeigt, PitAbilities.all.take(19).map((a) => a.id).toSet());
     });
 
     test('der Einheitsheld kann jede seiner Fähigkeiten bezahlen', () {

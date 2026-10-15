@@ -25,10 +25,12 @@ void main() {
       }
     });
 
-    test('19 Meilensteine und 8 Entdeckungen', () {
-      expect(AchievementCatalog.milestoneCount, 19);
+    test('20 Meilensteine und 8 Entdeckungen', () {
+      // Der zwanzigste ist „Zehn Truhen“ (ADR-0073), die Quelle des
+      // Glückstranks.
+      expect(AchievementCatalog.milestoneCount, 20);
       expect(AchievementCatalog.discoveryCount, 8);
-      expect(AchievementCatalog.all, hasLength(27));
+      expect(AchievementCatalog.all, hasLength(28));
     });
 
     test('jeder Bereich ist besetzt', () {
@@ -105,14 +107,15 @@ void main() {
     // Die drei Zahlen aus ADR-0033. Sie stehen dort im Text und hier im
     // Code -- wer eine Stufe verschiebt oder einen Eintrag ergänzt, sieht
     // hier, dass der ADR nachzuziehen ist.
-    test('über ein Spielerleben: 1680 Erfahrung, 560 Gold, 385 Ruhm', () {
-      expect(AchievementCatalog.lifetimeXp, 1680);
-      expect(AchievementCatalog.lifetimeGold, 560);
-      expect(AchievementCatalog.lifetimeFame, 385);
+    // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr.
+    test('über ein Spielerleben: 1755 Erfahrung, 585 Gold, 395 Ruhm', () {
+      expect(AchievementCatalog.lifetimeXp, 1755);
+      expect(AchievementCatalog.lifetimeGold, 585);
+      expect(AchievementCatalog.lifetimeFame, 395);
     });
 
     test(
-        'der Ruhm teilt sich in 265 aus Meilensteinen und 120 aus Entdeckungen',
+        'der Ruhm teilt sich in 275 aus Meilensteinen und 120 aus Entdeckungen',
         () {
       var meilensteine = 0;
       var entdeckungen = 0;
@@ -123,7 +126,7 @@ void main() {
           entdeckungen += a.tier.fame;
         }
       }
-      expect(meilensteine, 265);
+      expect(meilensteine, 275);
       expect(entdeckungen, 120);
     });
 
@@ -166,24 +169,29 @@ void main() {
     });
 
     // Die vier aus ADR-0017, zurückgeholt über ADR-0033 -- einer je
-    // Bereich. Dass die Ids drüben in `package:combat` ankommen, prüft
+    // Bereich. Dazu seit ADR-0073 der Glückstrank, ein zweiter bei den
+    // Gewohnheiten. Dass die Ids drüben in der Grube ankommen, prüft
     // `test/abilities_seam_test.dart` in der App; hier ist es ein Wort.
-    test('vier Fähigkeiten, eine je Bereich', () {
+    test('fünf Fähigkeiten, jeder Bereich mindestens eine', () {
       final jeBereich = <AchievementArea, int>{};
       for (final a in AchievementCatalog.all) {
         if (a.moveId == null) continue;
         jeBereich[a.area] = (jeBereich[a.area] ?? 0) + 1;
       }
       expect(jeBereich, hasLength(AchievementArea.values.length));
-      for (final anzahl in jeBereich.values) {
-        expect(anzahl, 1);
-      }
+      expect(jeBereich[AchievementArea.gewohnheiten], 2);
       expect(
         <String>{
           for (final a in AchievementCatalog.all)
             if (a.moveId != null) a.moveId!,
         },
-        <String>{'breath', 'poison_strike', 'heavy_attack', 'mend'},
+        <String>{
+          'breath',
+          'poison_strike',
+          'heavy_attack',
+          'mend',
+          'glueckstrank',
+        },
       );
     });
   });

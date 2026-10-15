@@ -13,6 +13,7 @@ int _longestRunWithThreeChecks(AchievementStats s) =>
     s.longestRunWithThreeChecks;
 int _checksOnHardCustomHabits(AchievementStats s) => s.checksOnHardCustomHabits;
 int _comebackStreak(AchievementStats s) => s.comebackStreak;
+int _openedChests(AchievementStats s) => s.openedChests;
 int _passedLessons(AchievementStats s) => s.passedLessons;
 int _perfectLessons(AchievementStats s) => s.perfectLessons;
 int _completedAreas(AchievementStats s) => s.completedAreas;
@@ -27,7 +28,8 @@ int _soldCount(AchievementStats s) => s.soldCount;
 
 /// Alle Errungenschaften des Spiels an einem Ort.
 ///
-/// **19 Meilensteine und 8 Entdeckungen** — der erste Satz aus ADR-0033.
+/// **20 Meilensteine und 8 Entdeckungen** — der erste Satz aus ADR-0033,
+/// dazu „Zehn Truhen“ aus ADR-0073.
 /// Gleiche Regel wie bei Preisen, Belohnungen und Titeln: Steht eine
 /// dieser Bedingungen irgendwo anders im Code, ist das ein Bug.
 ///
@@ -99,6 +101,19 @@ abstract final class AchievementCatalog {
       measure: _daysWithThreeChecks,
       target: 14,
       moveId: 'breath',
+    ),
+    // Der Glückstrank ist die Fähigkeit der Truhe: Wer zehnmal alles
+    // erledigt hat, hat zehnmal gewürfelt (ADR-0073, Vorlage).
+    Achievement(
+      id: 'zehn-truhen',
+      name: 'Zehn Truhen',
+      area: AchievementArea.gewohnheiten,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: '10 Tagestruhen geöffnet',
+      measure: _openedChests,
+      target: 10,
+      moveId: 'glueckstrank',
     ),
     Achievement(
       id: 'bestaendig',

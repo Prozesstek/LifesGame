@@ -12,6 +12,7 @@ import 'action_sprites.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
 import 'kampfgefuehl.dart';
+import 'neue_arten_bild.dart';
 import 'lauf_zeichen.dart';
 import 'minimap.dart';
 import 'pit_tints.dart';
@@ -198,6 +199,9 @@ class ActionGame extends Game {
   /// Wie viele Angriffe beim letzten Bild angekündigt waren. Die Welt
   /// meldet eine Ankündigung nicht als Ereignis; eine mehr als eben heisst,
   /// dass jemand ausholt.
+  /// Was die Arten aus ADR-0073 ins Bild bringen.
+  final NeueArtenBild _neueArten = NeueArtenBild();
+
   int _angekuendigt = 0;
 
   /// Nur für Tests: ob das Bild gerade steht, und wie stark es bebt.
@@ -301,6 +305,13 @@ class ActionGame extends Game {
           );
         case RunEnded():
           _endeGemeldet = true;
+        case HookThrown() ||
+            LuckRolled() ||
+            TrapSprung() ||
+            RockChanged() ||
+            CompanionStruck() ||
+            BossStunNotched():
+          _neueArten.melde(event);
       }
     }
 
@@ -314,6 +325,7 @@ class ActionGame extends Game {
     _klaenge.abholen(wirklich).forEach(klang.play);
 
     _popups.update(dt);
+    _neueArten.update(dt);
 
     for (final swing in _swings) {
       swing.update(dt);
@@ -382,6 +394,7 @@ class ActionGame extends Game {
     final bilder = _bilder;
     _drawFloor(canvas, kamera, bilder);
     _drawZones(canvas);
+    _neueArten.drawBoden(canvas, sim);
     _drawOrbs(canvas);
     if (bilder == null) {
       _drawEntities(canvas);
@@ -390,6 +403,7 @@ class ActionGame extends Game {
       _drawFigures(canvas, bilder);
     }
     _drawStatus(canvas);
+    _neueArten.drawOben(canvas, sim);
     _drawProjectiles(canvas, bilder);
     _drawWard(canvas, held);
     _drawTelegraphs(canvas);

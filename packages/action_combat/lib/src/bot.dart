@@ -27,14 +27,23 @@ abstract final class PitBot {
   static const double timeLimit = 300;
 
   /// Spielt [world] bis zum Ende oder bis [timeLimit].
-  static void play(ActionWorld world) {
+  ///
+  /// [mana] zählt mit, wie oft ein Platz am Mana hing (ADR-0073) — für
+  /// die Messung in `tool/pit_sim.dart`. Ohne sie spielt er genauso.
+  static void play(ActionWorld world, {PitManaLog? mana}) {
     while (!world.isOver && world.elapsed < timeLimit) {
-      _abilities(world);
-      world.step(_input(world));
+      playStep(world, mana: mana);
     }
   }
 
-  static void _abilities(ActionWorld welt) {
+  /// Ein Schritt: Plätze drücken, laufen. Für Tests, die zwischen zwei
+  /// Schritten hineinsehen wollen.
+  static void playStep(ActionWorld world, {PitManaLog? mana}) {
+    _abilities(world, mana);
+    world.step(_input(world));
+  }
+
+  static void _abilities(ActionWorld welt, PitManaLog? mana) {
     final held = welt.heroView;
 
     var nah = 0;
@@ -47,29 +56,51 @@ abstract final class PitBot {
       }
     }
 
-    _slots(welt, nah);
+    _slots(welt, nah, mana);
   }
 
   /// Die Plätze, nach der Art ihrer Wirkung — nicht nach Namen, damit
   /// eine neue Fähigkeit ohne Änderung hier mitgespielt wird.
-  static void _slots(ActionWorld welt, int nah) {
+  static void _slots(ActionWorld welt, int nah, PitManaLog? mana) {
+    mana?._schritte++;
+    var hingAmMana = false;
     for (final ability in welt.slots) {
-      if (!welt.canCast(ability.id)) continue;
-      final lohnt = ability.effects.any(
-        (effect) => switch (effect) {
-          BoltAtNearest() => true,
-          StrikeNearest() => nah >= 1,
-          StrikeAround() => nah >= 2,
-          HealSelf() => welt.heroHpRatio < 0.5,
-          GainMana() => welt.manaRatio < 0.3,
-          ReduceIncoming() => nah >= 3 || welt.heroHpRatio < 0.4,
-          ReflectIncoming() => nah >= 3,
-          SlowAround() => nah >= 2,
-          DamageOverTime() => nah >= 2,
-        },
-      );
-      if (lohnt) welt.cast(ability.id);
+      if (welt.isOver || welt.slotCooldownRatio(ability.id) > 0) continue;
+      final lohnt = ability.effects.any((e) => _lohnt(e, welt, nah));
+      if (!lohnt) continue;
+      if (welt.mana < ability.manaCost) {
+        hingAmMana = true;
+        continue;
+      }
+      if (welt.cast(ability.id)) mana?._wuerfe++;
     }
+    if (hingAmMana) mana?._amMana++;
+
+    // Die Ultimate, sobald sie voll ist und es sich lohnt: bei einer
+    // Traube oder vor dem Wächter (ADR-0073).
+    final ult = welt.ultimate;
+    if (ult != null &&
+        welt.canCast(ult.id) &&
+        (nah >= 2 || welt.bossView != null)) {
+      welt.cast(ult.id);
+    }
+  }
+
+  /// Ob eine Wirkung sich gerade lohnt — nach ihrer Art, nicht nach dem
+  /// Namen der Fähigkeit.
+  static bool _lohnt(PitEffect effect, ActionWorld welt, int nah) {
+    return switch (effect) {
+      BoltAtNearest() || FreezeBolt() || Boomerang() => true,
+      StrikeNearest() || SweepCone() || HookNearest() => nah >= 1,
+      StrikeAround() || PullToCenter() || Rock() => nah >= 2,
+      HealSelf() => welt.heroHpRatio < 0.5,
+      GainMana() => welt.manaRatio < 0.3,
+      ReduceIncoming() => nah >= 3 || welt.heroHpRatio < 0.4,
+      ReflectIncoming() => nah >= 3,
+      SlowAround() || DamageOverTime() || Dash() => nah >= 2,
+      SelfBuff() || Companion() || Trap() => nah >= 1,
+      RandomOf() => nah >= 1 || welt.heroHpRatio < 0.5,
+    };
   }
 
   /// Die Richtung aus einem Kreis um [mitte] mit [radius] hinaus.
@@ -192,4 +223,30 @@ abstract final class PitBot {
     }
     return welt.fieldTo(ziel).directionFrom(held.position);
   }
+}
+
+/// Was der Bot über das Mana mitzählt (ADR-0073): wie oft er gewirkt hat,
+/// und in wie vielen Schritten er etwas wirken wollte, das bereit war,
+/// aber zu teuer.
+///
+/// **Gezählt wird der Wunsch, nicht der Knopf.** Ein Platz, der bereit
+/// ist und sich lohnt, aber am Mana scheitert, ist genau der Moment, in
+/// dem Mana bremst — Abklingzeit und „lohnt nicht“ zählen nicht mit.
+class PitManaLog {
+  int _schritte = 0;
+  int _amMana = 0;
+  int _wuerfe = 0;
+  double _sekunden = 0;
+
+  /// Wie viele Fähigkeiten gewirkt wurden.
+  int get casts => _wuerfe;
+
+  /// Anteil der Zeit, in der ein gewollter Platz am Mana hing, 0 bis 1.
+  double get starvedShare => _schritte == 0 ? 0 : _amMana / _schritte;
+
+  /// Würfe je Minute über alle gezählten Läufe.
+  double get castsPerMinute => _sekunden == 0 ? 0 : _wuerfe / _sekunden * 60;
+
+  /// Legt die Dauer eines gespielten Laufs dazu.
+  void addRun(ActionWorld welt) => _sekunden += welt.elapsed;
 }

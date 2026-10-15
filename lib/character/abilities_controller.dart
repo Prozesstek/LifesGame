@@ -35,6 +35,15 @@ class AbilitiesController extends Notifier<ChosenAbilities> {
   void clear(int index) {
     state = state.clearedAt(index);
   }
+
+  /// Legt [moveId] auf den Platz der Ultimate (ADR-0073).
+  void chooseUltimate(String moveId) {
+    state = state.withUltimate(moveId);
+  }
+
+  void clearUltimate() {
+    state = state.withoutUltimate();
+  }
 }
 
 final chosenAbilitiesProvider =
@@ -95,6 +104,41 @@ final unlockedAbilitiesProvider = Provider<List<Ability>>((ref) {
       if (geschenkt.contains(ability.moveId) && !ids.contains(ability.moveId))
         ability,
   ]);
+});
+
+/// Alle Ultimates, die der Spieler freigeschaltet hat (ADR-0073) — mit
+/// den Zuschlägen des Entwicklermodus, wie bei den übrigen Fähigkeiten.
+final unlockedUltimatesProvider = Provider<List<Ability>>((ref) {
+  final verdient = AbilityCatalog.unlockedUltimatesBy(
+    ref.watch(abilityProgressProvider),
+  );
+  final geschenkt = ref.watch(grantedAbilityIdsProvider);
+  if (geschenkt.isEmpty) return verdient;
+
+  final ids = <String>{for (final a in verdient) a.moveId};
+  return List<Ability>.unmodifiable(<Ability>[
+    ...verdient,
+    for (final ability in AbilityCatalog.ultimates)
+      if (geschenkt.contains(ability.moveId) && !ids.contains(ability.moveId))
+        ability,
+  ]);
+});
+
+/// Die Ultimate, mit der in die Grube gegangen wird — oder null.
+///
+/// **Hier gilt ihre Bedingung, und nur hier** — dieselbe Regel wie bei
+/// [activeMovesProvider]: Der Platz muss offen sein (Level 15), die
+/// Ultimate verdient, und die Grube muss sie kennen.
+final activeUltimateProvider = Provider<String?>((ref) {
+  final gewaehlt = ref.watch(chosenAbilitiesProvider).ultimate;
+  if (gewaehlt == null) return null;
+  final level = ref.watch(playerLevelProvider).level;
+  if (!AbilitySlots.ultimateOpenAt(level)) return null;
+  final offen = ref
+      .watch(unlockedUltimatesProvider)
+      .any((ability) => ability.moveId == gewaehlt);
+  if (!offen) return null;
+  return PitAbilities.ultimateById(gewaehlt) == null ? null : gewaehlt;
 });
 
 /// Was in Slot 1 liegt — die Fähigkeit der getragenen Waffe.

@@ -109,4 +109,19 @@ void main() {
       expect(xp / xpProTag, lessThan(30));
     });
   });
+
+  group('Der Platz der Ultimate (ADR-0073)', () {
+    test('geht auf Level 15 auf, nicht vorher', () {
+      expect(AbilitySlots.ultimateOpenAt(14), isFalse);
+      expect(AbilitySlots.ultimateOpenAt(AbilitySlots.ultimateLevel), isTrue);
+      expect(AbilitySlots.ultimateLevel, 15);
+    });
+
+    test('liegt nach dem letzten gewöhnlichen Platz', () {
+      expect(
+        AbilitySlots.ultimateLevel,
+        greaterThan(AbilitySlots.unlockLevels.last),
+      );
+    });
+  });
 }

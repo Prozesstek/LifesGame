@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 789 Tests
+flutter test                       # 797 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
@@ -43,7 +43,7 @@ dart run tool/tagesgrube_sim.dart  # die sieben Sätze der Tagesgrube
 # Die Packages laufen einzeln, ohne Flutter — dafuer reicht das Dart-SDK:
 #   winget install --id Google.DartSDK --exact
 cd packages/action_combat
-dart test                          # 305 Tests
+dart test                          # 331 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
@@ -82,16 +82,16 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/action_combat` | die Grube: 30 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 19 Fähigkeiten, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 305 |
+| `packages/action_combat` | die Grube: 30 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
 | `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 193 |
-| `packages/progression` | Levelkurve, Fähigkeitsslots, Theoriepunkte, Machtkurve | 42 |
+| `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve | 44 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 324 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute | 118 |
-| `packages/abilities` | woher eine Fähigkeit kommt und wann sie offen ist | 36 |
+| `packages/abilities` | woher eine Fähigkeit oder Ultimate kommt und wann sie offen ist | 43 |
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |
-| `packages/achievements` | 19 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
+| `packages/achievements` | 20 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 789 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 797 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

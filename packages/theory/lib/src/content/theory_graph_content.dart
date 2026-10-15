@@ -95,6 +95,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: intensitaetPage,
       iconId: 'gauge',
       parentIds: <String>['kraft-muskulatur'],
+      unlocksAbility: 'steinschlag',
     ),
     const TheoryNode(
       id: 'kraft-trainingsplanung',
@@ -137,12 +138,14 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: grundlagePage,
       iconId: 'jog',
       parentIds: <String>['ausdauer-fitness'],
+      unlocksAbility: 'rueckenwind',
     ),
     const TheoryNode(
       id: 'ausdauer-intervalle',
       lesson: intervallPage,
       iconId: 'intervals',
       parentIds: <String>['ausdauer-fitness'],
+      unlocksAbility: 'glutspur',
     ),
     const TheoryNode(
       id: 'ausdauer-energie',
@@ -181,6 +184,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: erholungPage,
       iconId: 'pause',
       parentIds: <String>['schlaf-regeneration'],
+      unlocksAbility: 'wassergrube',
     ),
     const TheoryNode(
       id: 'koerper-stress',
@@ -217,6 +221,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: aschPage,
       iconId: 'crowd',
       parentIds: <String>['geist-psychologie'],
+      unlocksAbility: 'fanghaken',
     ),
     const TheoryNode(
       id: 'psychologie-gehorsam',
@@ -304,6 +309,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: offensichtlichPage,
       iconId: 'eye',
       parentIds: <String>['gewohnheiten-vier-regeln'],
+      unlocksAbility: 'schnappfalle',
     ),
     const TheoryNode(
       id: 'gewohnheiten-attraktiv',
@@ -340,6 +346,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: stoizismusPage,
       iconId: 'stoic',
       parentIds: <String>['philosophie'],
+      unlocksAbility: 'rankenpeitsche',
     ),
     const TheoryNode(
       id: 'philosophie-ethik',
@@ -364,6 +371,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: existenzialismusPage,
       iconId: 'boulder',
       parentIds: <String>['philosophie'],
+      unlocksAbility: 'wiederkehr',
     ),
 
     // ----------------------------------------------------------------

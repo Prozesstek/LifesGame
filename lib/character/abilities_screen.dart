@@ -16,6 +16,7 @@ import '../ui/palette.dart';
 import 'abilities_controller.dart';
 import 'widgets/ability_sheet.dart';
 import 'widgets/ability_slots_row.dart';
+import 'widgets/ultimate_platz.dart';
 
 /// Der Fähigkeiten-Bildschirm: vier Plätze oben, der ganze Katalog
 /// darunter (ADR-0049).
@@ -68,6 +69,13 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       for (final ability in ref.watch(unlockedAbilitiesProvider))
         ability.moveId,
     };
+    final offeneUltimates = <String>{
+      for (final ability in ref.watch(unlockedUltimatesProvider))
+        ability.moveId,
+    };
+    final gezogen = _gezogen;
+    final zieheUltimate =
+        gezogen != null && AbilityCatalog.ultimateByMoveId(gezogen) != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +103,9 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                     gezogen: _gezogen,
                     // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
                     // die belegten plus der nächste leere.
+                    // Eine Ultimate liegt nie auf einem der drei Plätze.
                     nimmtAn: (slot) =>
+                        !zieheUltimate &&
                         slot >= 2 &&
                         slot - 2 < _belegung(chosen, level.level).length,
                     onAblegen: _lege,
@@ -106,6 +116,23 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                       weaponMove: weaponMove,
                       attack: attack,
                       offen: offen,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  UltimatePlatz(
+                    level: level.level,
+                    ultimate: chosen.ultimate,
+                    zieht: _gezogen != null,
+                    nimmtAn:
+                        zieheUltimate &&
+                        AbilitySlots.ultimateOpenAt(level.level),
+                    einladen: offeneUltimates.isNotEmpty,
+                    onAblegen: _legeUltimate,
+                    onTap: () => _tippeUltimatePlatz(
+                      context,
+                      ref,
+                      offen: offeneUltimates,
+                      attack: attack,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -141,6 +168,13 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                       chosen: chosen,
                       attack: attack,
                     ),
+                  ..._ultimates(
+                    context,
+                    ref,
+                    offen: offeneUltimates,
+                    chosen: chosen,
+                    attack: attack,
+                  ),
                 ],
               ),
             ),
@@ -232,6 +266,155 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       ),
       const SizedBox(height: 16),
     ];
+  }
+
+  /// Die Ultimates — eine eigene Gruppe mit goldenem Doppelrand statt
+  /// einer Seltenheit (ADR-0073).
+  List<Widget> _ultimates(
+    BuildContext context,
+    WidgetRef ref, {
+    required Set<String> offen,
+    required ChosenAbilities chosen,
+    required int attack,
+  }) {
+    return <Widget>[
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: <Widget>[
+            const Icon(Icons.auto_awesome, size: 16, color: Palette.goldOnDark),
+            const SizedBox(width: 6),
+            Text(
+              '${offen.length} / ${AbilityCatalog.ultimates.length}',
+              semanticsLabel:
+                  'Ultimates: ${offen.length} von '
+                  '${AbilityCatalog.ultimates.length} freigeschaltet',
+              style: const TextStyle(
+                fontSize: 11,
+                color: Palette.textOnDarkDim,
+              ),
+            ),
+          ],
+        ),
+      ),
+      GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: _columns,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.78,
+        children: <Widget>[
+          for (final ability in AbilityCatalog.ultimates)
+            HaltenUndZiehen<String>(
+              data: ability.moveId,
+              aktiv: offen.contains(ability.moveId),
+              bild: MoveBild(
+                moveId: ability.moveId,
+                side: HaltenUndZiehen.schwebeSeite - 12,
+                fallback: const Icon(Icons.auto_awesome, color: Palette.gold),
+              ),
+              rahmenFarbe: Palette.rahmenGoldHell,
+              onStart: () => _beginneZiehen(ability.moveId),
+              onEnde: _beendeZiehen,
+              child: UltimateRand(
+                hell: offen.contains(ability.moveId),
+                child: _Kachel(
+                  ability: ability,
+                  unlocked: offen.contains(ability.moveId),
+                  imEinsatz: chosen.ultimate == ability.moveId,
+                  ausgeblendet: _gezogen == ability.moveId,
+                  ohneRand: true,
+                  onTap: () => _zeigeUltimate(
+                    context,
+                    ref,
+                    ability: ability,
+                    unlocked: offen.contains(ability.moveId),
+                    attack: attack,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      const SizedBox(height: 16),
+    ];
+  }
+
+  void _legeUltimate(String moveId) {
+    _beendeZiehen();
+    ref.read(chosenAbilitiesProvider.notifier).chooseUltimate(moveId);
+    HapticFeedback.selectionClick();
+  }
+
+  /// Der Platz der Ultimate angetippt: belegt zeigt er ihr Blatt, leer
+  /// sagt er, wo sie herkommt.
+  Future<void> _tippeUltimatePlatz(
+    BuildContext context,
+    WidgetRef ref, {
+    required Set<String> offen,
+    required int attack,
+  }) async {
+    final id = ref.read(chosenAbilitiesProvider).ultimate;
+    final ability = id == null ? null : AbilityCatalog.ultimateByMoveId(id);
+    if (ability == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              offen.isEmpty
+                  ? 'Noch keine Ultimate freigeschaltet. Was es dafür '
+                        'braucht, steht bei den goldenen.'
+                  : 'Halte unten eine Ultimate gedrückt und zieh sie '
+                        'hierher.',
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      return;
+    }
+    await _zeigeUltimate(
+      context,
+      ref,
+      ability: ability,
+      unlocked: offen.contains(ability.moveId),
+      attack: attack,
+    );
+  }
+
+  Future<void> _zeigeUltimate(
+    BuildContext context,
+    WidgetRef ref, {
+    required Ability ability,
+    required bool unlocked,
+    required int attack,
+  }) async {
+    final pit = PitAbilities.ultimateById(ability.moveId);
+    if (pit == null) return;
+    final level = ref.read(playerLevelProvider).level;
+    final pick = await showAbilitySheet(
+      context,
+      karte: AbilityCard.ultimate(
+        ability: ability,
+        pit: pit,
+        unlocked: unlocked,
+        ultimateOpen: AbilitySlots.ultimateOpenAt(level),
+        onUltimateSlot:
+            ref.read(chosenAbilitiesProvider).ultimate == ability.moveId,
+        attack: attack,
+      ),
+      freiePlaetze: const <String?>[],
+    );
+    final steuer = ref.read(chosenAbilitiesProvider.notifier);
+    switch (pick) {
+      case null || LegeAuf():
+        return;
+      case LegeUltimate():
+        steuer.chooseUltimate(ability.moveId);
+      case RaeumePlatz():
+        steuer.clearUltimate();
+    }
   }
 
   void _beginneZiehen(String moveId) {
@@ -346,7 +529,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     );
 
     switch (pick) {
-      case null:
+      case null || LegeUltimate():
         return;
       case LegeAuf(:final freeIndex):
         ref
@@ -402,7 +585,11 @@ class _Kachel extends StatelessWidget {
     required this.imEinsatz,
     required this.onTap,
     this.ausgeblendet = false,
+    this.ohneRand = false,
   });
+
+  /// Ohne eigenen Rand — wenn ihn schon der Doppelrand der Ultimate trägt.
+  final bool ohneRand;
 
   final Ability ability;
   final bool unlocked;
@@ -452,12 +639,14 @@ class _Kachel extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: imEinsatz
-                        ? Palette.accent
-                        : farbe.withValues(alpha: unlocked ? 0.7 : 0.25),
-                    width: imEinsatz ? 2 : 1,
-                  ),
+                  border: ohneRand && !imEinsatz
+                      ? null
+                      : Border.all(
+                          color: imEinsatz
+                              ? Palette.accent
+                              : farbe.withValues(alpha: unlocked ? 0.7 : 0.25),
+                          width: imEinsatz ? 2 : 1,
+                        ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

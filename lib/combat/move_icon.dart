@@ -55,6 +55,21 @@ abstract final class MoveIcons {
     'mend': 'assets/Faehigkeiten/Sammeln.png',
     'breath': 'assets/Faehigkeiten/Atemzug.png',
 
+    // Frederiks zehn und zwei Ultimates (ADR-0073)
+    'glutspur': 'assets/Faehigkeiten/Glutspur.png',
+    'fanghaken': 'assets/Faehigkeiten/Fanghaken.png',
+    'glueckstrank': 'assets/Faehigkeiten/Glueckstrank.png',
+    'wiederkehr': 'assets/Faehigkeiten/Wiederkehr.png',
+    'schnappfalle': 'assets/Faehigkeiten/Schnappfalle.png',
+    'falke': 'assets/Faehigkeiten/Falke.png',
+    'steinschlag': 'assets/Faehigkeiten/Steinschlag.png',
+    'rankenpeitsche': 'assets/Faehigkeiten/Rankenpeitsche.png',
+    'rueckenwind': 'assets/Faehigkeiten/Rueckenwind.png',
+    'eisball': 'assets/Faehigkeiten/Eisball.png',
+    'wassergrube': 'assets/Faehigkeiten/Wassergrube.png',
+    'fleischfressende_pflanze':
+        'assets/Faehigkeiten/FleischfressendePflanze.png',
+
     // Waffenzüge
     'basic_attack': 'assets/Faehigkeiten/Bogenschuss.png',
     'sword_strike': 'assets/Faehigkeiten/Hieb.png',

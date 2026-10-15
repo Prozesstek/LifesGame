@@ -166,7 +166,8 @@ extension _Aim on ActionWorld {
   /// sieht und der in Reichweite liegt. Bei einem Schlag genügt die
   /// Reichweite, er geht nicht durch Wände.
   Vec2? _autoTarget(PitAbility ability) {
-    final braucheSicht = ability.effects.any((e) => e is! StrikeNearest);
+    final braucheSicht =
+        ability.effects.any((e) => e is! StrikeNearest && e is! SweepCone);
     // Ein Bereich darf auch einen Gegner erfassen, der knapp hinter der
     // Wurfweite steht — sein Rand reicht noch hin.
     final weite = ability.aim == PitAim.bereich
@@ -193,6 +194,7 @@ extension _Aim on ActionWorld {
     required double power,
     required double weite,
     double leech = 0,
+    double freeze = 0,
   }) {
     _hero.facing = richtung;
     _projectiles.add(
@@ -206,6 +208,7 @@ extension _Aim on ActionWorld {
         heroPower: power,
         heroLeech: leech,
         maxAge: weite / ActionBalance.heroBoltSpeed,
+        freezeSeconds: freeze,
       ),
     );
   }
@@ -358,13 +361,25 @@ extension _Aim on ActionWorld {
       case PitAim.richtung:
         final richtung =
             _plan(ability, zielpunkt)?.direction ?? _hero.facing.normalized;
-        final istGeschoss = ability.effects.any((e) => e is BoltAtNearest);
-        if (istGeschoss) {
+        // Was fliegt oder zieht, zeigt eine Bahn; ein Sturm die Breite
+        // des Helden.
+        final istBahn = ability.effects.any(
+          (e) =>
+              e is BoltAtNearest ||
+              e is FreezeBolt ||
+              e is Boomerang ||
+              e is HookNearest ||
+              e is Dash,
+        );
+        if (istBahn) {
+          final sturm = ability.effects.any((e) => e is Dash);
           return AimLine(
             tint: ability.tint,
             from: held,
             to: held + richtung * ability.reach,
-            width: ActionBalance.heroBoltRadius * 2,
+            width: sturm
+                ? ActionBalance.heroRadius * 2
+                : ActionBalance.heroBoltRadius * 2,
           );
         }
         return AimCone(

@@ -66,9 +66,9 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 42 Tests | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 44 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
-| `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht | nur Dart-SDK |
+| `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **neun zum Start** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)) | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 324 Tests | nur Dart-SDK |
@@ -98,18 +98,20 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
 | `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; zwei Spalten: Schriftton (`colorOf`, Marke und Name) und Rahmenton (`rahmenOf`, der Rand um ein Stück) | Flutter |
-| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 36 Tests | nur Dart-SDK |
-| `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen | nur Dart-SDK |
+| `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 43 Tests | nur Dart-SDK |
+| `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen — und die **Ultimates** (`ultimates`), die nie unter den wählbaren stehen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die **dreizehn** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
 | `packages/achievements/` | Errungenschaften, reines Dart, 24 Tests | nur Dart-SDK |
-| `packages/achievements/lib/src/catalog.dart` | die **19 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **20 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 305 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 331 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
-| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten | nur Dart-SDK |
+| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die zwei **Ultimates** |
+| `packages/action_combat/lib/src/effects.dart` | **die eine Stelle, die jede Wirkung ausführt** — Sturm, Haken, Strudel, Stillstand samt Stun-Leiste, Self-Buff, Zufall, Bumerang ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
+| `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter, der Fels | nur Dart-SDK | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
@@ -131,6 +133,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
+| `lib/action/neue_arten_bild.dart` | wie Falle, Begleiter, Haken-Faden, Eis, Stillstand und die Kerben des Wächters im Bild stehen — **nur Darstellung** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
 | `lib/action/pit_text.dart` | Name, Beschreibung **und alle Werte** einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart und je Wächter (`forBoss`), **eine Tabelle** | Flutter |
@@ -178,6 +181,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter der ganze Katalog; **auch hier per Ziehen** | Flutter |
 | `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — auch bei gesperrten | Flutter |
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze — zeigt nur, wählt nicht | Flutter |
+| `lib/character/widgets/ultimate_platz.dart` | der Platz der Ultimate und ihr **goldener Doppelrand** (`UltimateRand`) — eine Stelle für Platz, Kachel und Blatt | Flutter |
 | `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/ability_unlock.dart` | was neu ist und wohin es passt — reine Rechnung | Flutter |
@@ -248,17 +252,18 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 789 Tests
+flutter test             # 797 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
+dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 305 Tests
+dart test                              # 331 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -268,9 +273,9 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 193 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 42 Tests
+cd packages/progression ; dart test    # 44 Tests
 cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
-cd packages/abilities   ; dart test    # 36 Tests
+cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
@@ -324,10 +329,28 @@ wirken die Sets.
 
 Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
 Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine
-Stelle in `world.dart`, die sie ausführt. Das ist die Naht, an der Sets
-und Legendäre später eine Fähigkeit verändern. Alle neunzehn Fähigkeiten
-sind aus neun Arten gebaut; `test/pit_test.dart` hält fest, dass jede
+Stelle in `effects.dart`, die sie ausführt. Das ist die Naht, an der Sets
+und Legendäre später eine Fähigkeit verändern. Seit [ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)
+sind es neunundzwanzig Fähigkeiten und zwei Ultimates aus zwanzig Arten; `test/pit_test.dart` hält fest, dass jede
 lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
+
+**Ab Level 15 gibt es die Ultimate**
+([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)):
+ein eigener Platz, kein Mana, keine Abklingzeit. Sie lädt an
+Ereignissen, nie am Schaden — sonst wäre sie spät dauernd voll.
+
+| Frage | Antwortet |
+|---|---|
+| Ist der Platz offen? | `AbilitySlots.ultimateOpenAt` — Level 15 |
+| Welche geht mit in die Grube? | `activeUltimateProvider` — gewählt, verdient, Platz offen; die einzige Stelle |
+| Woran lädt sie? | `ActionBalance.ultimatePerKill` (ein Achtel) und `ultimatePerBossHit`; nicht, was im Lauf entsteht oder ein Begleiter tötet |
+| Wie sieht sie aus? | `UltimateRand` — goldener **Doppel**rand, keine Seltenheit; im Kampf gross in der Ecke, Taste 4 |
+
+**Eine Ultimate liegt nie auf einem der drei Plätze**: `PitAbilities.byId`
+und `AbilityCatalog.byMoveId` finden sie nicht, nur `ultimateById`.
+Stillstand trifft den Wächter über eine **Stun-Leiste** (drei Kerben,
+erst der dritte wirkt, halb so lang, und bricht seine Ankündigung ab);
+`neue_arten_test.dart` hält die Regeln der neuen Arten fest.
 
 **Elf Gegnerarten** (`EnemyKind`), jede mit einem Grund, der an ihrem
 Eintrag steht: Fussvolk `e`, Schütze `s`, Kobold `k` (schneller als der
@@ -675,7 +698,7 @@ die Sprossen in der Reihe existieren, prüft
 `flutter test test/gear_gates_seam_test.dart`.
 
 **Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Welt.**
-Alle neunzehn stehen in `packages/action_combat/lib/src/pit_ability.dart`,
+Alle neunundzwanzig und die zwei Ultimates stehen in `packages/action_combat/lib/src/pit_ability.dart`,
 ihre Bedingungen in `packages/abilities` ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md), ADR-0039).
 Schaden ist immer `Angriff × power` — sonst hängt die Fähigkeit nicht mehr
 am Angriffswert und damit nicht mehr an den Gewohnheiten. Dauerschaden ist
@@ -820,7 +843,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und vier
 Fähigkeiten vergeben.
 
-Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **fünfzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -831,6 +854,7 @@ Es gibt genau **vierzehn** Stellen, an denen etwas zusammenläuft:
 | `earnedTitleIdsProvider` | welche Titel verdient sind (ADR-0033) |
 | `abilityProgressProvider` | Waffe, Streak, Theorie **und Errungenschaft** für die Freischaltung |
 | `activeMovesProvider` | die Ids, mit denen in die Grube gegangen wird — Waffenzug zuerst |
+| `activeUltimateProvider` | die Ultimate dazu — Level, Freischaltung und Wahl (ADR-0073) |
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten — **der Graph ist die ganze Wahrheit** (ADR-0070) |
 | `ersterStartProvider` | welche Bereiche die Startseite zeigt (ADR-0068) |
