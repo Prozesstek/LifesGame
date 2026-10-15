@@ -393,6 +393,14 @@ class ActionWorld {
     return (rest / ability.cooldown).clamp(0.0, 1.0);
   }
 
+  /// Wie viele Sekunden [id] noch abklingt, 0 heisst bereit — für die
+  /// Zahl auf dem Knopf. Die Ultimate klingt nie ab.
+  double slotCooldownLeft(String id) {
+    if (ultimate?.id == id) return 0;
+    final rest = _slotCooldowns[id] ?? 0;
+    return rest > 0 ? rest : 0;
+  }
+
   /// Ob [id] jetzt gewirkt werden kann: auf einem Platz, abgeklungen,
   /// genug Mana.
   bool canCast(String id) {

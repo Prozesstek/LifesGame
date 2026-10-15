@@ -123,6 +123,25 @@ void main() {
       expect(welt.cast('steinhaut'), isFalse);
       expect(welt.slotCooldownRatio('steinhaut'), greaterThan(0.9));
     });
+
+    test('die Restzeit läuft in Sekunden herunter und bleibt bei null', () {
+      final welt = _welt();
+      const steinhaut = PitAbilities.steinhaut;
+      expect(welt.slotCooldownLeft('steinhaut'), 0);
+      expect(welt.cast('steinhaut'), isTrue);
+      final voll = welt.slotCooldownLeft('steinhaut');
+      expect(voll, closeTo(steinhaut.cooldown, 0.01));
+
+      final vorher = welt.slotCooldownLeft('steinhaut');
+      welt.step(Vec2.zero);
+      expect(welt.slotCooldownLeft('steinhaut'), lessThan(vorher));
+
+      for (var i = 0; i < 60 * (steinhaut.cooldown + 1); i++) {
+        welt.step(Vec2.zero);
+      }
+      expect(welt.slotCooldownLeft('steinhaut'), 0);
+      expect(welt.slotCooldownRatio('steinhaut'), 0);
+    });
   });
 
   group('Wirkungen', () {

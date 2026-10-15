@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 791, dazu die acht Packages (theory 193, habits 324, gear
-118, action_combat 330, progression 44, abilities 43, identity 25,
+**Tests:** App 797, dazu die acht Packages (theory 193, habits 324, gear
+118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -126,6 +126,36 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 15.10.2026, danach: die Knöpfe zeigen, was abklingt
+
+Frederik: „Wenn Fähigkeiten auf Cooldown sind mach ein sweep, dim the
+icon und zeig einen cooldown und indicate the return.“ Gebaut ohne
+Fragerunde, auf demselben Branch (PR #117).
+
+| Was | Wie |
+|---|---|
+| **Sweep** | das dunkle Tortenstück gab es schon; dazu eine helle Kante wie ein Uhrzeiger |
+| **Ausgegraut** | das Bild in Graustufen und blasser, solange es abklingt |
+| **Zahl** | die Sekunden in der Mitte, aufgerundet; unter einer Sekunde mit einer Stelle („0,6“) |
+| **Zurück** | der Knopf leuchtet golden auf, ein Ring springt nach aussen, 0,45 s |
+
+Der Glanz läuft in der Zeit des Laufs (`ActionWorld.elapsed`), er hält
+also mit dem Trefferstopp an. Die Restzeit kommt aus der Welt
+(`slotCooldownLeft`), die Anzeige rechnet nur (`AbklingAnzeige`). Der
+alte Satz „Im Kampf liest niemand Ziffern“ ist damit überholt.
+
+App 797 (vorher 791), action_combat 331 (vorher 330). Die Knöpfe in
+allen vier Zuständen gerendert und angesehen. Dabei gefunden: Die Zahl
+lag zuerst unter dem Tortenstück und war mit abgedunkelt. **Nicht
+gespielt, nicht am Handy.**
+
+### Offen
+
+- Ob die Zahl auf den kleinen Knöpfen im Bogen (50 Punkte) am Handy
+  lesbar ist.
+- Die Ultimate hat keinen Glanz, wenn sie voll ist; sie zeigt es nur
+  über den Ring.
 
 ## 15.10.2026: die Fähigkeiten sind gebaut — zwölf neue, zwei davon Ultimates
 
