@@ -53,7 +53,14 @@ void main() {
     test('jede Fähigkeit zielt so, wie sie wirkt', () {
       for (final a in PitAbilities.all) {
         final geschossOderSchlag = a.effects.any(
-          (e) => e is BoltAtNearest || e is StrikeNearest,
+          (e) =>
+              e is BoltAtNearest ||
+              e is StrikeNearest ||
+              e is FreezeBolt ||
+              e is Boomerang ||
+              e is HookNearest ||
+              e is SweepCone ||
+              e is Dash,
         );
         switch (a.aim) {
           case PitAim.richtung:

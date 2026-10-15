@@ -223,6 +223,30 @@ class ActionEntity {
   /// Zeit seit dem letzten Dauerschaden-Tick.
   double dotTick = 0;
 
+  // --- Seit ADR-0073 ---
+
+  /// Solange das läuft, steht die Figur still: kein Schritt, kein Schlag,
+  /// keine Ankündigung.
+  double stunLeft = 0;
+
+  /// Ob der Stillstand Eis ist — dann nimmt der nächste Treffer des
+  /// Helden sicher kritisch und taut auf (Zerspringen).
+  bool frozen = false;
+
+  /// Die Stun-Leiste des Wächters: wie viele Kerben schon gefüllt sind.
+  int stunNotches = 0;
+
+  /// Wohin die Figur gerade gezogen oder geschleudert wird, und wie lange
+  /// das noch dauert. Solange es läuft, handelt sie nicht.
+  Vec2 shoveVelocity = Vec2.zero;
+  double shoveLeft = 0;
+
+  /// Ob zuletzt ein Begleiter sie getroffen hat — dann lädt ihr Tod die
+  /// Ultimate nicht (ADR-0073).
+  bool lastHitByCompanion = false;
+
+  bool get isStunned => stunLeft > 0;
+
   /// Mit welchem Anteil seines Tempos diese Figur gerade handelt.
   double get tempo => slowLeft > 0 ? slowFactor : 1;
 
@@ -263,6 +287,8 @@ class EntityView {
     required this.isAlive,
     this.isSlowed = false,
     this.isBurning = false,
+    this.isStunned = false,
+    this.isFrozen = false,
   });
 
   factory EntityView.of(ActionEntity entity) {
@@ -277,6 +303,8 @@ class EntityView {
       isAlive: entity.isAlive,
       isSlowed: entity.isSlowed,
       isBurning: entity.isBurning,
+      isStunned: entity.isStunned,
+      isFrozen: entity.frozen && entity.isStunned,
     );
   }
 
@@ -292,4 +320,10 @@ class EntityView {
   /// Verlangsamt oder unter Dauerschaden — für eine Tönung im Renderer.
   final bool isSlowed;
   final bool isBurning;
+
+  /// Steht still — betäubt oder eingefroren (ADR-0073).
+  final bool isStunned;
+
+  /// Eingefroren: blau, und der nächste Treffer zerspringt.
+  final bool isFrozen;
 }

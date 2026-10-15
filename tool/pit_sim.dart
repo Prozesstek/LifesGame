@@ -10,6 +10,7 @@
 //
 //     dart run tool/pit_sim.dart          # 12 Läufe je Feld
 //     dart run tool/pit_sim.dart 40
+//     dart run tool/pit_sim.dart mana     # nur: bremst Mana?
 
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
@@ -19,6 +20,11 @@ import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 
 void main(List<String> args) {
+  // `mana` als erstes Argument rechnet nur die Mana-Tabelle (ADR-0073).
+  if (args.isNotEmpty && args.first == 'mana') {
+    _mana(args.length > 1 ? int.parse(args[1]) : 12);
+    return;
+  }
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
 
   // „+F" heisst: drei Fähigkeiten auf den Plätzen — Funkenstoß,
@@ -77,6 +83,80 @@ void main(List<String> args) {
 
   _jeWaechter(spalten, laeufe);
   _jeBesetzung(spalten, laeufe);
+  _mana(laeufe);
+}
+
+/// **Bremst Mana?** (ADR-0073) Je Tag und Satz: wie oft der Bot gewirkt
+/// hat, und in welchem Anteil der Zeit ein Platz bereit war, sich gelohnt
+/// hätte — und am Mana hing.
+///
+/// Zwei Sätze: die drei aus „+F“ (Schaden, Schutz, Heilung) und drei
+/// Angriffe, die man im Takt drückt (Funkenstoß, Klingenwirbel,
+/// Donnerkeil). Der zweite ist der, an dem sich zeigt, ob Mana bremst —
+/// der erste wirkt zwei seiner drei nur in Not.
+///
+/// Gesucht ist, was ADR-0073 verlangt: Wer alle drei im Takt drückt, ist
+/// nach 10 bis 15 Sekunden leer. „Am Mana“ also deutlich über null,
+/// auch an Tag 60.
+void _mana(int laeufe) {
+  const drei = <String>['funkenstoss', 'steinhaut', 'bluetentau'];
+  const angriff = <String>['funkenstoss', 'klingenwirbel', 'donnerkeil'];
+  final tage = <(String, ActionStats, String, int)>[
+    ('Tag 0', _statsNach(0), 'basic_attack', 1),
+    ('Tag 30', _statsNach(30), 'basic_attack', 11),
+    (
+      'Tag 60+G',
+      _statsNach(60, bonus: _bestesGear(), mitSeltenheit: true),
+      _besteWaffe(),
+      25,
+    ),
+  ];
+
+  print('Mana — wie oft ein Platz am Mana hängt (ADR-0073)\n');
+  print(
+    '  ${''.padRight(10)}${'Mana'.padLeft(6)}${'/s'.padLeft(6)}'
+    '${'Stufe'.padLeft(7)}'
+    '${'+F am Mana'.padLeft(12)}${'Würfe/min'.padLeft(11)}'
+    '${'Angr. am Mana'.padLeft(15)}${'Würfe/min'.padLeft(11)}',
+  );
+  for (final (name, stats, waffe, stufe) in tage) {
+    final a = _manaLauf(stats, waffe, stufe, drei, laeufe);
+    final b = _manaLauf(stats, waffe, stufe, angriff, laeufe);
+    print(
+      '  ${name.padRight(10)}${'${stats.maxMana}'.padLeft(6)}'
+      '${stats.manaRegen.toStringAsFixed(1).padLeft(6)}'
+      '${'$stufe'.padLeft(7)}'
+      '${'${(a.starvedShare * 100).round()} %'.padLeft(12)}'
+      '${a.castsPerMinute.toStringAsFixed(0).padLeft(11)}'
+      '${'${(b.starvedShare * 100).round()} %'.padLeft(15)}'
+      '${b.castsPerMinute.toStringAsFixed(0).padLeft(11)}',
+    );
+  }
+  print('');
+}
+
+PitManaLog _manaLauf(
+  ActionStats stats,
+  String waffe,
+  int stufe,
+  List<String> faehigkeiten,
+  int laeufe,
+) {
+  final log = PitManaLog();
+  for (var seed = 0; seed < laeufe; seed++) {
+    final stage = PitStage(stufe);
+    final welt = ActionWorld(
+      level: LevelBuilder.build(stage: stage, seed: seed),
+      heroStats: stats,
+      stage: stage,
+      abilityIds: faehigkeiten,
+      weaponMoveId: waffe,
+      seed: seed,
+    );
+    PitBot.play(welt, mana: log);
+    log.addRun(welt);
+  }
+  return log;
 }
 
 /// Dieselbe Rechnung mit **einer festen Rolle** der Besetzung (ADR-0062):

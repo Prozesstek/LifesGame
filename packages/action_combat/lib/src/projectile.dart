@@ -20,6 +20,8 @@ class Projectile {
     this.fromWeapon = false,
     this.isBoulder = false,
     this.maxAge = ActionBalance.projectileLifetime,
+    this.freezeSeconds = 0,
+    this.boomerang = false,
   });
 
   final int id;
@@ -29,7 +31,8 @@ class Projectile {
   /// von selbst auf.
   final Faction faction;
 
-  final Vec2 velocity;
+  /// Veränderlich nur für den Bumerang, der umkehrt und dem Helden folgt.
+  Vec2 velocity;
   final int damage;
   final double radius;
 
@@ -52,9 +55,24 @@ class Projectile {
   /// kürzere Bahn, als der Funke dann fliegt.
   final double maxAge;
 
+  /// Über null: Der Getroffene erstarrt so lange (Eisball, ADR-0073).
+  final double freezeSeconds;
+
+  /// Ob es ein Bumerang ist: Er fliegt durch Gegner und kehrt um
+  /// (Wiederkehr, ADR-0073).
+  final bool boomerang;
+
   Vec2 position;
   double age = 0;
   bool spent = false;
+
+  /// Nur beim Bumerang: ob er schon auf dem Rückweg ist, und wen er auf
+  /// dem laufenden Weg schon getroffen hat.
+  bool returning = false;
+
+  /// Nach so vielen Sekunden kehrt ein Bumerang um.
+  double returnAfter = 0;
+  final Set<int> hitIds = <int>{};
 }
 
 /// Ein Geschoss, wie der Renderer es sieht.
@@ -66,6 +84,8 @@ class ProjectileView {
     required this.direction,
     required this.radius,
     this.isBoulder = false,
+    this.isBoomerang = false,
+    this.isFreezing = false,
   });
 
   factory ProjectileView.of(Projectile p) {
@@ -76,6 +96,8 @@ class ProjectileView {
       direction: p.velocity.normalized,
       radius: p.radius,
       isBoulder: p.isBoulder,
+      isBoomerang: p.boomerang,
+      isFreezing: p.freezeSeconds > 0,
     );
   }
 
@@ -85,4 +107,10 @@ class ProjectileView {
   final Vec2 direction;
   final double radius;
   final bool isBoulder;
+
+  /// Die Kugel der Wiederkehr, die zurückkommt.
+  final bool isBoomerang;
+
+  /// Der Eisball.
+  final bool isFreezing;
 }

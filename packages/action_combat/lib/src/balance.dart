@@ -626,4 +626,47 @@ abstract final class ActionBalance {
   /// Wie hart sich zwei Figuren auseinanderschieben, die sich
   /// überschneiden. 1 heisst sofort, kleiner heisst weicher.
   static const double separationStrength = 0.5;
+
+  // --- Die Ultimate (ADR-0073) ---
+  //
+  // **Sie lädt an Ereignissen, nicht am Schaden**: Schaden wächst mit
+  // Level und Seltenheit um ein Vielfaches (ADR-0042), eine Zählung ist
+  // auf jeder Stufe gleich viel wert.
+
+  /// Wie viel ein besiegter Gegner lädt — acht Kills, und sie ist voll.
+  /// Was im Lauf entsteht (die Schleimlinge) und was ein Begleiter tötet,
+  /// lädt nichts.
+  static const double ultimatePerKill = 1 / 8;
+
+  /// Wie viel ein Treffer am Wächter lädt — jeder zehnte ein Achtel.
+  /// Sonst stünde sie im Wächterraum, wo es keine Kills mehr gibt, still.
+  static const double ultimatePerBossHit = 1 / 80;
+
+  // Ab welchem Level ihr Platz offen ist, steht in
+  // `package:progression` (`AbilitySlots.ultimateLevel`).
+
+  // --- Die neuen Arten (ADR-0073) ---
+
+  /// So lange dauert ein Sturm nach vorn (`Dash`) — etwa eine
+  /// Fünftelsekunde, wie in der Vorlage. Schutz gibt es dabei keinen.
+  static const double dashSeconds = 0.2;
+
+  /// So lange dauert es, bis ein Gezogener oder Geschleuderter ankommt —
+  /// Haken, Strudel, Ranke. Er wird nicht versetzt, sondern bewegt, damit
+  /// man sieht, woher er kam, und eine Wand ihn aufhält.
+  static const double shoveSeconds = 0.3;
+
+  /// Wie viele Kerben die Stun-Leiste des Wächters hat: Erst jeder
+  /// dritte Stillstand wirkt (ADR-0073, Frederik: „Stun-Leiste“).
+  static const int bossStunNotches = 3;
+
+  /// Mit welchem Anteil seiner Dauer ein Stillstand den Wächter trifft,
+  /// wenn die Leiste voll ist.
+  static const double bossStunShare = 0.5;
+
+  /// Wie viele Fallen höchstens zugleich liegen.
+  static const int maxTraps = 2;
+
+  /// Wie gross eine Falle ist — wer sie berührt, löst sie aus.
+  static const double trapRadius = 12;
 }
