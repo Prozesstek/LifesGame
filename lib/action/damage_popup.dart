@@ -25,29 +25,6 @@ class DamagePopup {
     this.mergeKey,
   });
 
-  /// Was ein gefallener Gegner einbringt (ADR-0041): golden, etwas höher
-  /// als die Schadenszahl, damit beide lesbar bleiben.
-  static DamagePopup? forLoot(LootDropped loot) {
-    final text = lootText(loot.xp, loot.gold);
-    if (text.isEmpty) return null;
-    return DamagePopup(
-      text: text,
-      color: Palette.goldOnDark,
-      origin: Vec2(loot.at.x, loot.at.y - 18),
-      scale: 0.85,
-    );
-  }
-
-  /// „+7 EP  +3 G" — aber nur, was wirklich gefallen ist.
-  ///
-  /// Der Goldtopf einer Stufe ist klein und wird abgerundet verteilt, also
-  /// bringt mancher Gegner kein ganzes Goldstück. „+0 G" liest sich wie
-  /// ein Fehler; dann steht dort nur die Erfahrung. Dieselbe Regel wie bei
-  /// den Schadenszahlen: keine Null über dem Kopf.
-  static String lootText(int xp, int gold) {
-    return <String>[if (xp > 0) '+$xp EP', if (gold > 0) '+$gold G'].join('  ');
-  }
-
   /// Aus einem Treffer wird eine Zahl — oder nichts.
   ///
   /// Ein Schlag, der nichts anrichtet, bekommt keine Null über den Kopf:
@@ -405,6 +382,18 @@ class Burst {
       maxRadius: radius,
       lifetime: 0.28,
       strokeWidth: 4,
+    );
+  }
+
+  /// Ein Level mitten im Lauf: ein breiter goldener Ring um den Helden,
+  /// langsamer als jeder Treffer — er soll stehen bleiben, nicht zucken.
+  factory Burst.aufstieg(Vec2 at) {
+    return Burst(
+      at: at,
+      color: Palette.goldOnDark,
+      maxRadius: 120,
+      lifetime: 0.9,
+      strokeWidth: 7,
     );
   }
 

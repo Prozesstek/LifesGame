@@ -53,7 +53,19 @@ enum SoundEffect {
   faehigkeit('Sound/Faehigkeit.wav'),
 
   /// Der Wächter oder ein Wächterauge kündigt einen Angriff an.
-  ankuendigung('Sound/Ankuendigung.wav');
+  ankuendigung('Sound/Ankuendigung.wav'),
+
+  // Seit dem Goldregen: was beim Helden ankommt (`BeuteRegen`).
+
+  /// Eine Münze kommt beim Helden an. Im Brunnen des Wächters dutzendfach
+  /// — `KampfKlang` hält sie auseinander, so wird es ein Rasseln.
+  muenze('Sound/Muenze.wav'),
+
+  /// Ein Funke Erfahrung kommt an. Leiser als die Münze.
+  funke('Sound/Funke.wav'),
+
+  /// Ein Level mitten im Lauf.
+  aufstieg('Sound/Aufstieg.wav');
 
   const SoundEffect(this.asset);
 

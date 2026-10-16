@@ -56,6 +56,7 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
       _fertig = false;
       _game = ActionGame(
         klang: ref.read(soundPlayerProvider),
+        startXp: null,
         sim: sim,
         onRunEnded: () {
           if (mounted) setState(() => _fertig = true);

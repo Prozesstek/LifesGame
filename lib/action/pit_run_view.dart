@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import '../ui/palette.dart';
 import 'ability_buttons.dart';
 import 'action_game.dart';
+import 'beute_anzeige.dart';
 import 'boss_text.dart';
 import 'minimap.dart';
-import 'damage_popup.dart';
 import 'action_joystick.dart';
 import 'lauf_zeichen_view.dart';
 
@@ -161,6 +161,28 @@ class _PitRunViewState extends State<PitRunView> {
             Positioned.fill(
               child: IgnorePointer(child: _BossTitle(game: game)),
             ),
+            // Unten der Balken, in der Mitte der Aufstieg — beide ohne
+            // Tipp, der Daumen gehört dem Steuerkreuz darunter.
+            Positioned(
+              left: 8,
+              right: 8,
+              bottom: 2,
+              child: IgnorePointer(
+                child: ValueListenableBuilder<int>(
+                  valueListenable: game.frame,
+                  builder: (context, _, _) =>
+                      ErfahrungsLeiste(regen: game.beute),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ValueListenableBuilder<int>(
+                  valueListenable: game.frame,
+                  builder: (context, _, _) => AufstiegsBild(game: game),
+                ),
+              ),
+            ),
             Positioned(
               right: 16,
               bottom: 24,
@@ -230,7 +252,6 @@ class _Hud extends StatelessWidget {
             Flexible(
               child: Text(
                 '${sim.kills} / ${sim.totalEnemies} erledigt'
-                '${sim.runXp > 0 || sim.runGold > 0 ? ' · ${DamagePopup.lootText(sim.runXp, sim.runGold)}' : ''}'
                 '${sim.orbsCollected > 0 ? ' · ${sim.orbsCollected} Kugeln' : ''}',
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -240,6 +261,12 @@ class _Hud extends StatelessWidget {
                 ),
               ),
             ),
+            // Die Kasse erst, wenn etwas gefallen ist: Eine Null dort
+            // liest sich wie ein Versprechen, das nicht kommt.
+            if (game.beute.hatGold) ...<Widget>[
+              const SizedBox(width: 8),
+              LaufKasse(regen: game.beute),
+            ],
             const SizedBox(width: 8),
             Flexible(child: _Clock(sim: sim)),
           ],

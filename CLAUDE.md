@@ -130,6 +130,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
+| `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
+| `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
+| `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
 | `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
@@ -253,7 +256,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 799 Tests
+flutter test             # 809 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
