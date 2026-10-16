@@ -48,6 +48,7 @@ void main() {
       final stufe = PitStage(1);
       final game = ActionGame(
         klang: const SilentSoundPlayer(),
+        startXp: null,
         sim: ActionWorld(
           level: LevelBuilder.build(stage: stufe, seed: 1),
           heroStats: ActionStats.gereift,

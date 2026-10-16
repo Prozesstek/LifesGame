@@ -14,6 +14,7 @@ void main() {
   ActionGame lauf() {
     return ActionGame(
       klang: const SilentSoundPlayer(),
+      startXp: null,
       sim: ActionWorld(
         level: LevelCatalog.grube,
         heroStats: ActionStats.gereift,

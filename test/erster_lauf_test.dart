@@ -135,6 +135,7 @@ void main() {
     ActionGame lauf({LaufZeichen? zeichen}) {
       return ActionGame(
         klang: const SilentSoundPlayer(),
+        startXp: null,
         sim: ActionWorld(
           level: LevelCatalog.grube,
           heroStats: ActionStats.gereift,

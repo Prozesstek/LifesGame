@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 15.10.2026 · Frederik
+**Zuletzt aktualisiert:** 16.10.2026 · Frederik
 
 ---
 
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 797, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 807, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -126,6 +126,53 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 16.10.2026: der Goldregen — Beute fliegt zum Helden
+
+Frederik: Man rennt durch die Grube, sie soll mehr Dopamin bringen; der
+Kampf zeigt, wie weit man gekommen ist, und muss sich belohnend
+anfühlen. „Lass als erstes anfangen mit dem Goldregen und XP muss sich
+auch geil anfühlen.“ Gebaut ohne Fragerunde als Prototyp.
+
+| Was | Wie |
+|---|---|
+| **Münzen** | ein Gegner wirft drei bis vierzehn, der Wächter einen Brunnen aus sechzehn bis achtundvierzig; sie springen, drehen sich, rollen aus und fliegen nach einer halben Sekunde zum Helden |
+| **Funken** | Erfahrung als glühende Punkte in der Farbe des Balkens auf der Startseite, mit Spur |
+| **Kasse** | oben neben der Zeit, zählt, was **angekommen** ist, und springt bei jeder Münze auf |
+| **Balken** | unten am Rand: Level und Erfahrung bis zum nächsten, mit allem aus dem Lauf |
+| **Aufstieg** | steigt das Level mitten im Lauf, springt das Abzeichen gross in die Mitte, ein goldener Ring geht um den Helden |
+| **Klang** | drei neue, gerechnet: Münze, Funke, Aufstieg |
+| **Ende** | das Ergebnis wartet, bis der Brunnen eingesammelt ist, höchstens 1,6 s |
+
+**Keine Zahl ändert sich.** Was fliegt, hat die Welt schon gezahlt
+(`LootDropped`, ADR-0041); ein Stück, das nie ankommt, kostet nichts.
+Die Zahl „+7 EP +3 G“ über dem Gegner und in der Kopfzeile ist dafür
+weg. Tagesgrube und Prototyp zeigen den Regen ohne Balken.
+
+**Beim Nachsehen im Code gefunden, nicht geändert:** Der Wächter füllt
+den Topf auf (`world.dart`, ADR-0041). Wer an allem vorbeirennt, bekommt
+mit ihm denselben Betrag. **Das ist der Grund fürs Durchrennen**, nicht
+die fehlende Beute. Und eine geschaffte Stufe zahlt nichts mehr, dort
+regnet es also nicht.
+
+**Die Beträge sind klein**: Stufe 1 zahlt 20 EP und 8 Gold im ganzen
+Lauf. Der Regen macht daraus mehr Münzen, aber nicht mehr Gold.
+
+Neu: `beute_regen.dart`, `beute_bild.dart`, `beute_anzeige.dart`,
+`test/beute_regen_test.dart`, drei Klänge. App 807 (vorher 797). Regen,
+Flug und Aufstieg in 390 × 844 gerendert und angesehen, mit Würfeln
+statt Figuren. Dabei gefunden: Die Kasse war auf heller Wand nicht zu
+lesen und steht jetzt auf einem dunklen Schild; der Brunnen streute zu
+weit. **Nicht gespielt, nicht gehört, nicht am Handy.**
+
+### Offen
+
+- **Der Wächter füllt nicht mehr auf** — der nächste Schritt; ändert die
+  Verteilung, nicht die Summe.
+- **Was ein Lauf auf einer geschafften Stufe bringt**: Sterne je Stufe
+  (Claudes Empfehlung) oder ein Tagesbeutel. Nicht entschieden.
+- Ob das Rasseln der Münzen im Brunnen nervt.
+- Der Balken unten liegt dicht unter den Fähigkeitsknöpfen.
 
 ## 15.10.2026, danach: die Knöpfe zeigen, was abklingt
 
