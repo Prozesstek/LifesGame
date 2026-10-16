@@ -127,6 +127,38 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 
 ---
 
+## 16.10.2026, abends: hundert Ebenen im selben Schritt
+
+Frederik: „Grubelevel bis 100“, und auf Claudes Vorschlag, Stufe 100 so
+hart zu machen wie bisher 30: „Ne baue das einfach mit den gleichen
+Abständen, ich hab zurzeit ne 27 Tage Streak und schaff Level 30
+immer.“ [ADR-0075](../decisions/0075-hundert-ebenen.md).
+
+| Was | Wie |
+|---|---|
+| **Stufe 1–30** | Zahl für Zahl wie vorher; kein Stand wird umgerechnet |
+| **Stufe 31–100** | derselbe Schritt weiter: Gegner je Stufe rund ein Achtel stärker, alle vier Stufen ein Raum mehr, die Belohnung wächst weiter um 5 EP und 2 Gold |
+| **`pit_sim`** | eine Spalte für Level 50; eine Spalte hört auf, sobald sie zweimal bei null steht |
+
+**Gemessen** (`pit_sim`, 8 Läufe je Feld): **Ab Stufe 42 gewinnt der
+Bot nie, auch mit Level 50**, bester Ausrüstung und drei Fähigkeiten;
+sicher bis 37, mit Tag-60-Werten bis 29. Der Bot ist eine untere
+Schranke, aber Stufe 100 ist rund tausendmal so stark wie Stufe 41.
+
+App 795, action_combat 331, beide unverändert in der Zahl: drei Tests
+nahmen 30 als Ende an und prüfen jetzt die Bezugsstufe.
+
+### Offen
+
+- **Soll Stufe 100 erreichbar sein?** Dann braucht es einen flacheren
+  Schritt über 30 — eine Zahl, gemessen mit `pit_sim`.
+- Die Summe der Belohnung ist zehnmal so gross; erreichbar ist bis zur
+  Wand etwa das Doppelte von vorher.
+- Ab Stufe 31 sind die Gruben länger als alles bisher (Stufe 100: zehn
+  Räume, knapp fünf Minuten). Nicht gespielt.
+
+---
+
 ## 16.10.2026, danach: der Eingang zeigt nur noch die nächste Ebene
 
 Frederik: „Kampf Anzeige mit welches Level kann raus (Fahrstuhlmodus)

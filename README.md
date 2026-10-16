@@ -36,7 +36,7 @@ flutter run -d chrome              # oder einfach start-app.bat doppelklicken
 flutter test                       # 795 Tests
 flutter analyze                    # muss sauber sein
 
-# Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
+# Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
 dart run tool/pit_sim.dart
 dart run tool/tagesgrube_sim.dart  # die sieben Sätze der Tagesgrube
 
@@ -82,7 +82,7 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/action_combat` | die Grube: 30 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
+| `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
 | `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 193 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve | 44 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 324 |

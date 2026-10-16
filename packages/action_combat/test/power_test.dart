@@ -109,7 +109,7 @@ void main() {
     test('die Stufen wachsen mit: ×1 auf Stufe 1, der Deckel auf 30', () {
       expect(PitStage(1).powerFactor, 1);
       expect(
-        PitStage(PitStage.count).powerFactor,
+        PitStage(PitStage.referenceStage).powerFactor,
         closeTo(ActionBalance.stagePowerLast, 0.0001),
       );
       for (var s = 2; s <= PitStage.count; s++) {
