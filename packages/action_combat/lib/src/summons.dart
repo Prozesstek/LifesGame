@@ -52,10 +52,15 @@ class CompanionView {
     required this.tint,
     required this.stationary,
     required this.remaining,
+    this.mirror = false,
   });
 
   final Vec2 position;
   final PitTint tint;
+
+  /// Ein Abbild des Helden (Spiegelbild, ADR-0074) — der Renderer
+  /// zeichnet dann den Helden, durchscheinend.
+  final bool mirror;
 
   /// Steht still (die Pflanze) oder fliegt mit (der Falke).
   final bool stationary;
@@ -121,9 +126,19 @@ extension _Summons on ActionWorld {
   void _summon(Companion c, Vec2 wo, PitTint tint) {
     _companion = _Companion(
       effect: c,
-      position: c.stationary ? wo : _hero.position,
+      position: c.stationary ? wo : _mirrorSpot(c),
       tint: tint,
     );
+  }
+
+  /// Wo ein mitfliegender Begleiter steht: beim Falken auf dem Helden,
+  /// das Spiegelbild neben ihm, links von seinem Blick.
+  Vec2 _mirrorSpot(Companion c) {
+    if (!c.mirror) return _hero.position;
+    var blick = _hero.facing.normalized;
+    if (blick.isZero) blick = const Vec2(1, 0);
+    final links = Vec2(blick.y, -blick.x);
+    return _hero.position + links * ActionBalance.mirrorOffset;
   }
 
   /// Ein Schritt des Begleiters.
@@ -140,13 +155,15 @@ extension _Summons on ActionWorld {
       return;
     }
     final c = begleiter.effect;
-    if (!c.stationary) begleiter.position = _hero.position;
+    if (!c.stationary) begleiter.position = _mirrorSpot(c);
     begleiter.cooldownLeft -= dt;
     if (begleiter.cooldownLeft > 0) return;
 
     final ziel = _companionTarget(begleiter);
     if (ziel == null) return;
-    begleiter.cooldownLeft = c.interval;
+    // Das Spiegelbild schlägt im Takt der Waffe (ADR-0074).
+    begleiter.cooldownLeft =
+        c.mirror ? _hero.attackCooldown / _hasteBuff : c.interval;
 
     final fressen =
         c.devourBelow > 0 && ziel != _boss && ziel.hpRatio < c.devourBelow;
@@ -172,18 +189,23 @@ extension _Summons on ActionWorld {
       );
       return;
     }
-    _hit(_hero, ziel, powerFactor: c.power, byCompanion: true);
+    final wucht = c.mirror ? c.power * weapon.power : c.power;
+    _hit(_hero, ziel, powerFactor: wucht, byCompanion: true);
   }
 
   /// Wen der Begleiter angreift: den nächsten, den der Held sieht —
   /// bei der Pflanze in ihrer Reichweite, beim Falken in seiner.
   ActionEntity? _companionTarget(_Companion begleiter) {
     final c = begleiter.effect;
+    // Das Spiegelbild steht neben dem Helden; es reicht so weit wie seine
+    // Waffe, gemessen von dort, wo er steht.
+    final reichweite =
+        c.mirror ? weapon.range + ActionBalance.mirrorOffset : c.reach;
     ActionEntity? bester;
     var besteDistanz = double.infinity;
     for (final ziel in _entities) {
       if (!ziel.isAlive || ziel.isHero || ziel.untouchable) continue;
-      final r = c.reach + ziel.radius;
+      final r = reichweite + ziel.radius;
       final d = begleiter.position.distanceSquaredTo(ziel.position);
       if (d > r * r || d >= besteDistanz) continue;
       if (!_canSee(_hero.position, ziel.position)) continue;

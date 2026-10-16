@@ -59,19 +59,7 @@ class AbilityButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         for (final ability in world.slots) ...<Widget>[
-          _AimGesture(
-            game: game,
-            ability: ability,
-            child: _RoundButton(
-              size: slotSize,
-              label: ability.name,
-              ratio: world.slotCooldownRatio(ability.id),
-              left: world.slotCooldownLeft(ability.id),
-              elapsed: world.elapsed,
-              ready: world.canCast(ability.id),
-              child: _SlotIcon(ability: ability),
-            ),
-          ),
+          _platz(ability, slotSize),
           if (ability != world.slots.last) const SizedBox(width: 10),
         ],
       ],
@@ -80,6 +68,27 @@ class AbilityButtons extends StatelessWidget {
 }
 
 extension on AbilityButtons {
+  /// Ein Platz im Kampf. **Ein Passiv hat keinen Knopf** (ADR-0073): Sein
+  /// Bild steht da, damit man sieht, was wirkt, nimmt aber keinen Tipp
+  /// an und hat nichts zu zielen.
+  Widget _platz(PitAbility ability, double size, {double? side}) {
+    final knopf = _RoundButton(
+      size: size,
+      label: ability.isPassive ? '${ability.name}, passiv' : ability.name,
+      ratio: world.slotCooldownRatio(ability.id),
+      left: world.slotCooldownLeft(ability.id),
+      elapsed: world.elapsed,
+      ready: ability.isPassive || world.canCast(ability.id),
+      child: side == null
+          ? _SlotIcon(ability: ability)
+          : _SlotIcon(ability: ability, side: side),
+    );
+    if (ability.isPassive) {
+      return IgnorePointer(child: Opacity(opacity: 0.75, child: knopf));
+    }
+    return _AimGesture(game: game, ability: ability, child: knopf);
+  }
+
   /// Die Ultimate unten rechts, die drei anderen links und oben im
   /// Viertelkreis darum — links zuerst, wo der Daumen hinkommt.
   Widget _mitUltimate(PitAbility ult) {
@@ -102,21 +111,10 @@ extension on AbilityButtons {
                   mitte +
                   math.sin(winkel[i]) * AbilityButtons._bogen -
                   AbilityButtons.arcSlotSize / 2,
-              child: _AimGesture(
-                game: game,
-                ability: world.slots[i],
-                child: _RoundButton(
-                  size: AbilityButtons.arcSlotSize,
-                  label: world.slots[i].name,
-                  ratio: world.slotCooldownRatio(world.slots[i].id),
-                  left: world.slotCooldownLeft(world.slots[i].id),
-                  elapsed: world.elapsed,
-                  ready: world.canCast(world.slots[i].id),
-                  child: _SlotIcon(
-                    ability: world.slots[i],
-                    side: AbilityButtons.arcSlotSize - 14,
-                  ),
-                ),
+              child: _platz(
+                world.slots[i],
+                AbilityButtons.arcSlotSize,
+                side: AbilityButtons.arcSlotSize - 14,
               ),
             ),
           Positioned(

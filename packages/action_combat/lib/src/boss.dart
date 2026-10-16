@@ -431,6 +431,7 @@ extension _BossBrain on ActionWorld {
         damage: (boss.attack * power).round(),
         radius: ActionBalance.bossBoulderRadius,
         isBoulder: true,
+        ownerId: boss.id,
       ),
     );
   }
@@ -455,6 +456,7 @@ extension _BossBrain on ActionWorld {
         velocity: richtung * ActionBalance.slaadSpitSpeed,
         damage: (boss.attack * ActionBalance.slaadSpitPower).round(),
         radius: ActionBalance.slaadSpitRadius,
+        ownerId: boss.id,
       ),
     );
   }

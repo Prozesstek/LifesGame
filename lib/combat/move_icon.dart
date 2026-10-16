@@ -70,6 +70,21 @@ abstract final class MoveIcons {
     'fleischfressende_pflanze':
         'assets/Faehigkeiten/FleischfressendePflanze.png',
 
+    // AktivesBretts zehn und zwei Ultimates (ADR-0074) — gezeichnet von
+    // `tool/faehigkeit_icons.py`, nicht aus dem Raven-Paket.
+    'zinseszins': 'assets/Faehigkeiten/Zinseszins.png',
+    'schattenschritt': 'assets/Faehigkeiten/Schattenschritt.png',
+    'kampfrausch': 'assets/Faehigkeiten/Kampfrausch.png',
+    'kriegsschrei': 'assets/Faehigkeiten/Kriegsschrei.png',
+    'spiegelbild': 'assets/Faehigkeiten/Spiegelbild.png',
+    'parade': 'assets/Faehigkeiten/Parade.png',
+    'ruhepuls': 'assets/Faehigkeiten/Ruhepuls.png',
+    'kettenblitz': 'assets/Faehigkeiten/Kettenblitz.png',
+    'rammbock': 'assets/Faehigkeiten/Rammbock.png',
+    'zweiter_atem': 'assets/Faehigkeiten/ZweiterAtem.png',
+    'bestform': 'assets/Faehigkeiten/Bestform.png',
+    'rueckspulen': 'assets/Faehigkeiten/Rueckspulen.png',
+
     // Waffenzüge
     'basic_attack': 'assets/Faehigkeiten/Bogenschuss.png',
     'sword_strike': 'assets/Faehigkeiten/Hieb.png',

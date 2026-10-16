@@ -203,6 +203,15 @@ bool _gleich(PitAbility a, PitAbility b) {
         Rock() => 'R${e.seconds}',
         SweepCone() => 'W${e.power}/${e.range}/${e.fling}',
         FreezeBolt() => 'F${e.power}/${e.range}/${e.stunSeconds}',
+        Blink() => 'K${e.distance}',
+        Vanish() => 'V${e.seconds}/${e.ambush}',
+        StunAround() => 'U${e.radius}/${e.seconds}',
+        Parry() => 'Q${e.seconds}/${e.stunSeconds}',
+        Stacking() => 'A${e.step}/${e.window}/${e.maxStacks}',
+        ChainBolt() => 'L${e.power}/${e.range}/${e.jumps}/${e.falloff}',
+        Overdrive() => 'O${e.seconds}/${e.abilityPower}/${e.attackPower}',
+        Rewind() => 'Y${e.seconds}/${e.invulnerableSeconds}',
+        PitPassive() => 'p${e.runtimeType}',
       };
   return a.effects.map(zahlen).join() == b.effects.map(zahlen).join();
 }

@@ -60,7 +60,9 @@ void main() {
               e is Boomerang ||
               e is HookNearest ||
               e is SweepCone ||
-              e is Dash,
+              e is Dash ||
+              e is ChainBolt ||
+              e is Blink,
         );
         switch (a.aim) {
           case PitAim.richtung:

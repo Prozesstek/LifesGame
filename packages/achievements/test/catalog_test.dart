@@ -28,9 +28,9 @@ void main() {
     test('20 Meilensteine und 8 Entdeckungen', () {
       // Der zwanzigste ist „Zehn Truhen“ (ADR-0073), die Quelle des
       // Glückstranks.
-      expect(AchievementCatalog.milestoneCount, 20);
+      expect(AchievementCatalog.milestoneCount, 21);
       expect(AchievementCatalog.discoveryCount, 8);
-      expect(AchievementCatalog.all, hasLength(28));
+      expect(AchievementCatalog.all, hasLength(29));
     });
 
     test('jeder Bereich ist besetzt', () {
@@ -107,15 +107,16 @@ void main() {
     // Die drei Zahlen aus ADR-0033. Sie stehen dort im Text und hier im
     // Code -- wer eine Stufe verschiebt oder einen Eintrag ergänzt, sieht
     // hier, dass der ADR nachzuziehen ist.
-    // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr.
-    test('über ein Spielerleben: 1755 Erfahrung, 585 Gold, 395 Ruhm', () {
-      expect(AchievementCatalog.lifetimeXp, 1755);
-      expect(AchievementCatalog.lifetimeGold, 585);
-      expect(AchievementCatalog.lifetimeFame, 395);
+    // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr; seit
+    // ADR-0074 mit „Sieben Tage in Form“ (mittel) noch einmal so viel.
+    test('über ein Spielerleben: 1830 Erfahrung, 610 Gold, 405 Ruhm', () {
+      expect(AchievementCatalog.lifetimeXp, 1830);
+      expect(AchievementCatalog.lifetimeGold, 610);
+      expect(AchievementCatalog.lifetimeFame, 405);
     });
 
     test(
-        'der Ruhm teilt sich in 275 aus Meilensteinen und 120 aus Entdeckungen',
+        'der Ruhm teilt sich in 285 aus Meilensteinen und 120 aus Entdeckungen',
         () {
       var meilensteine = 0;
       var entdeckungen = 0;
@@ -126,7 +127,7 @@ void main() {
           entdeckungen += a.tier.fame;
         }
       }
-      expect(meilensteine, 275);
+      expect(meilensteine, 285);
       expect(entdeckungen, 120);
     });
 
@@ -170,16 +171,17 @@ void main() {
 
     // Die vier aus ADR-0017, zurückgeholt über ADR-0033 -- einer je
     // Bereich. Dazu seit ADR-0073 der Glückstrank, ein zweiter bei den
-    // Gewohnheiten. Dass die Ids drüben in der Grube ankommen, prüft
+    // Gewohnheiten. Seit ADR-0074 die Bestform, eine Ultimate, ein
+    // dritter. Dass die Ids drüben in der Grube ankommen, prüft
     // `test/abilities_seam_test.dart` in der App; hier ist es ein Wort.
-    test('fünf Fähigkeiten, jeder Bereich mindestens eine', () {
+    test('sechs Fähigkeiten, jeder Bereich mindestens eine', () {
       final jeBereich = <AchievementArea, int>{};
       for (final a in AchievementCatalog.all) {
         if (a.moveId == null) continue;
         jeBereich[a.area] = (jeBereich[a.area] ?? 0) + 1;
       }
       expect(jeBereich, hasLength(AchievementArea.values.length));
-      expect(jeBereich[AchievementArea.gewohnheiten], 2);
+      expect(jeBereich[AchievementArea.gewohnheiten], 3);
       expect(
         <String>{
           for (final a in AchievementCatalog.all)
@@ -191,6 +193,7 @@ void main() {
           'heavy_attack',
           'mend',
           'glueckstrank',
+          'bestform',
         },
       );
     });

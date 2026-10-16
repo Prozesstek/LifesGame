@@ -18,6 +18,7 @@ part 'aim.dart';
 part 'boss.dart';
 part 'effects.dart';
 part 'enemies.dart';
+part 'hero_states.dart';
 part 'summons.dart';
 
 /// Ein Lauf durch eine Halle.
@@ -77,6 +78,13 @@ class ActionWorld {
     );
     _entities.add(_hero);
     _hpZuvor = _hero.hp;
+    // Passive Wirkungen liegen auf einem Platz und gelten den ganzen
+    // Lauf; gesammelt wird einmal (ADR-0074).
+    _passives = List<PitPassive>.unmodifiable(<PitPassive>[
+      for (final ability in slots)
+        for (final effect in ability.effects)
+          if (effect is PitPassive) effect,
+    ]);
     _damageByRoom = List<int>.filled(level.rooms.length, 0);
 
     for (final spawn in level.spawns) {
@@ -207,6 +215,49 @@ class ActionWorld {
   final List<_Trap> _traps = <_Trap>[];
   _Companion? _companion;
   final List<_RockLeft> _rocks = <_RockLeft>[];
+
+  // --- Seit ADR-0074 ---
+
+  /// Die passiven Wirkungen auf den Plätzen.
+  late final List<PitPassive> _passives;
+
+  /// Rage: wie viele Treffer gezählt sind, und wie lange sie noch halten.
+  int _rageStacks = 0;
+  double _rageLeft = 0;
+
+  /// Sekunden seit dem letzten eigenen Treffer des Helden — für Ruhepuls.
+  double _sinceHeroStruck = 0;
+
+  /// Ob der zweite Atem in diesem Lauf schon gegriffen hat.
+  bool _lastStandUsed = false;
+
+  /// Unsichtbarkeit: wie lange noch, und wie hart der erste Treffer.
+  double _vanishLeft = 0;
+  double _ambush = 1;
+
+  /// Parade: wie lange sie noch offen ist, und wie lange sie stillstellt.
+  double _parryLeft = 0;
+  double _parryStun = 0;
+
+  /// Bestform: wie lange noch, und mit welchen Zahlen.
+  double _overdriveLeft = 0;
+  Overdrive? _overdrive;
+
+  /// Unverwundbar nach dem Rückspulen.
+  double _invulnLeft = 0;
+
+  /// Stacking je Fähigkeit: gezählte Wiederholungen und wie lange das
+  /// Fenster noch offen ist.
+  final Map<String, ({int stacks, double left})> _stacking =
+      <String, ({int stacks, double left})>{};
+
+  /// Wo der Held in den letzten Sekunden stand — für das Rückspulen.
+  final List<_Snapshot> _history = <_Snapshot>[];
+  double _sinceSnapshot = 0;
+
+  /// Der Rammbock: womit dieser Sturm rammt, und wen er schon traf.
+  Dash? _ram;
+  final Set<int> _rammed = <int>{};
 
   /// Wie lange die Prisma-Barriere noch hält, und wie viel sie zurückwirft.
   double _reflectLeft = 0;
@@ -355,6 +406,7 @@ class ActionWorld {
       position: begleiter.position,
       tint: begleiter.tint,
       stationary: begleiter.effect.stationary,
+      mirror: begleiter.effect.mirror,
       remaining:
           (begleiter.secondsLeft / begleiter.effect.seconds).clamp(0.0, 1.0),
     );
@@ -369,6 +421,27 @@ class ActionWorld {
 
   /// Ob der Held gerade stürmt.
   bool get isDashing => _dashLeft > 0;
+
+  /// Ob der Held gerade unsichtbar ist — für die Darstellung.
+  bool get isVanished => _vanishLeft > 0;
+
+  /// Ob gerade eine Parade offen ist.
+  bool get isParrying => _parryLeft > 0;
+
+  /// Ob der Held nach dem Rückspulen unverwundbar ist.
+  bool get isInvulnerable => _invulnLeft > 0;
+
+  /// Ob Bestform gerade wirkt.
+  bool get isOverdriven => _overdriveLeft > 0;
+
+  /// Wie viele Treffer der Kampfrausch gerade zählt.
+  int get rageStacks => _rageStacks;
+
+  /// Wie oft [id] gerade gestapelt ist (Zinseszins) — 0 ohne Stapel.
+  int stacksOf(String id) {
+    final stand = _stacking[id];
+    return stand == null || stand.left <= 0 ? 0 : stand.stacks;
+  }
 
   /// Wie viele Kerben der Stun-Leiste des Wächters gefüllt sind.
   int get bossStunNotches => _boss?.stunNotches ?? 0;
@@ -410,7 +483,11 @@ class ActionWorld {
     // Die Ultimate kostet kein Mana und klingt nicht ab — sie muss voll
     // sein (ADR-0073).
     if (ability.isUltimate) return _ultimateCharge >= 1;
+    // Passiv heisst: kein Knopf (ADR-0073).
+    if (ability.isPassive) return false;
     if ((_slotCooldowns[id] ?? 0) > 0) return false;
+    // In Bestform kostet keine Fähigkeit Mana (ADR-0074).
+    if (_overdriveLeft > 0) return true;
     return _mana >= ability.manaCost;
   }
 
@@ -451,6 +528,11 @@ class ActionWorld {
   /// Lässt jede Abklingzeit sofort enden.
   void debugResetCooldowns() => _slotCooldowns.clear();
 
+  /// Womit ein Schlag des Helden gerade malgenommen wird — mit
+  /// [fromWeapon] für den Grundangriff, der eine Grenze hat (ADR-0074).
+  double debugHeroFactor({required bool fromWeapon}) =>
+      _heroFactor(fromWeapon: fromWeapon);
+
   /// Wirkt eine Fähigkeit von einem Platz — **kurz getippt**: Sie zielt
   /// selbst, auf den nächsten Gegner, den der Held sieht. Gibt false
   /// zurück, wenn sie nicht geht — nicht auf einem Platz, nicht
@@ -488,14 +570,17 @@ class ActionWorld {
     if (ability.isUltimate) {
       _ultimateCharge = 0;
     } else {
-      _mana -= ability.manaCost;
+      if (_overdriveLeft <= 0) _mana -= ability.manaCost;
       _slotCooldowns[id] = ability.cooldown;
     }
     _events.add(AbilityCast(id: id, at: plan.center));
 
+    // Stacking und Bestform verändern die Wucht dieses einen Wirkens —
+    // als Daten, wie ein Set (ADR-0074).
+    final gewirkt = _boosted(ability);
     final flaechen = <double, _Zone>{};
-    for (final effect in ability.effects) {
-      _apply(effect, ability, plan, flaechen);
+    for (final effect in gewirkt.effects) {
+      _apply(effect, gewirkt, plan, flaechen);
     }
     // Eine Fläche greift schon beim Aufschlagen, nicht erst im nächsten
     // Schritt.
@@ -597,7 +682,10 @@ class ActionWorld {
 
   /// Schaden am Helden nach seiner Schadensminderung.
   int _mitigate(ActionEntity target, int schaden) {
-    if (!target.isHero || _wardLeft <= 0) return schaden;
+    if (!target.isHero) return schaden;
+    // Nach dem Rückspulen trifft nichts (ADR-0074).
+    if (_invulnLeft > 0) return 0;
+    if (_wardLeft <= 0) return schaden;
     return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
   }
 
@@ -761,6 +849,8 @@ class ActionWorld {
     _updateGate();
     _tickEntrance(dt);
     _trackRoom();
+    _checkLastStand();
+    _recordHistory(dt);
     _checkEnd();
   }
 
@@ -786,13 +876,16 @@ class ActionWorld {
   void _tickMana(double dt) {
     _mana = math.min(
       heroStats.maxMana.toDouble(),
-      _mana + heroStats.manaRegen * dt,
+      _mana + heroStats.manaRegen * _restFactor * dt,
     );
+    // In Bestform läuft die Abklingzeit schneller (ADR-0074).
+    final takt = _overdriveLeft > 0 ? dt * (_overdrive?.cooldownRate ?? 1) : dt;
     for (final id in _slotCooldowns.keys.toList()) {
-      _slotCooldowns[id] = (_slotCooldowns[id] ?? 0) - dt;
+      _slotCooldowns[id] = (_slotCooldowns[id] ?? 0) - takt;
     }
     if (_wardLeft > 0) _wardLeft -= dt;
     if (_reflectLeft > 0) _reflectLeft -= dt;
+    _tickHeroStates(dt);
   }
 
   /// Verlangsamung und Dauerschaden der Gegner.
@@ -873,7 +966,7 @@ class ActionWorld {
 
   /// Ein Treffer der Waffe, samt dem, was sie mitbringt.
   void _weaponLanded(ActionEntity ziel, {double? power}) {
-    _hit(_hero, ziel, powerFactor: power ?? weapon.power);
+    _hit(_hero, ziel, powerFactor: power ?? weapon.power, fromWeapon: true);
     if (weapon.manaOnHit > 0) {
       _mana = math.min(
         heroStats.maxMana.toDouble(),
@@ -914,6 +1007,9 @@ class ActionWorld {
       if (!gegner.isAlive || gegner.isHero || gegner.untouchable) continue;
       // Wer steht oder gerade gezogen wird, handelt nicht (ADR-0073).
       if (gegner.isStunned || gegner.shoveLeft > 0) continue;
+      // Wen man nicht sieht, den greift man nicht an (ADR-0074). Der
+      // Wächter ist allein in seinem Raum — an ihm vorbei gibt es nichts.
+      if (_vanishLeft > 0 && gegner != _boss) continue;
 
       final abstand = gegner.position.distanceTo(_hero.position);
       // **Wer weiter schiesst, als er sieht, wäre blind.** Der
@@ -1111,6 +1207,7 @@ class ActionWorld {
         velocity: schuetze.facing * ActionBalance.projectileSpeed,
         damage: schuetze.attack,
         radius: ActionBalance.projectileRadius,
+        ownerId: schuetze.id,
       ),
     );
   }
@@ -1118,7 +1215,9 @@ class ActionWorld {
   // --- Geschosse ---
 
   void _moveProjectiles(double dt) {
-    for (final geschoss in _projectiles) {
+    // Über eine Kopie: Ein Kettenblitz legt beim Einschlag ein neues
+    // Geschoss nach (ADR-0074).
+    for (final geschoss in _projectiles.toList()) {
       if (geschoss.spent) continue;
 
       geschoss.age += dt;
@@ -1142,6 +1241,8 @@ class ActionWorld {
       for (final ziel in _entities) {
         if (!ziel.isAlive || ziel.faction == geschoss.faction) continue;
         if (ziel.untouchable) continue;
+        // Ein Kettenblitz trifft keinen zweimal.
+        if (geschoss.hitIds.contains(ziel.id)) continue;
         final reichweite = geschoss.radius + ziel.radius;
         if (geschoss.position.distanceSquaredTo(ziel.position) >
             reichweite * reichweite) {
@@ -1165,9 +1266,11 @@ class ActionWorld {
             if (geschoss.freezeSeconds > 0) {
               _stun(ziel, geschoss.freezeSeconds, frozen: true);
             }
+            if (geschoss.chainJumps > 0) _chainFrom(ziel, geschoss);
           }
           break;
         }
+        if (ziel.isHero && _parriedShot(geschoss)) break;
         final wirklich = ziel.takeDamage(
           _mitigate(ziel, math.max(ActionBalance.minDamage, geschoss.damage)),
         );
@@ -1181,6 +1284,7 @@ class ActionWorld {
             overTime: false,
           ),
         );
+        if (ziel.isHero && wirklich > 0) _heroStruck();
         break;
       }
     }
@@ -1246,7 +1350,11 @@ class ActionWorld {
     double powerFactor = 1,
     double leech = 0,
     bool byCompanion = false,
+    bool fromWeapon = false,
   }) {
+    // Eine Parade fängt ab, bevor gewürfelt wird (ADR-0074).
+    if (target.isHero && !attacker.isHero && _parried(attacker)) return 0;
+
     // Zerspringen (ADR-0073): Ein Gefrorener nimmt den nächsten Treffer
     // des Helden sicher kritisch. Der Würfel wird trotzdem geworfen, damit
     // ein Eisball die übrigen Würfe des Laufs nicht verschiebt.
@@ -1256,7 +1364,13 @@ class ActionWorld {
     final kritisch = wurf || zerspringt;
 
     var roh = attacker.attack * attacker.damageMultiplier * powerFactor;
-    if (attacker.isHero) roh *= _attackBuff;
+    if (attacker.isHero) {
+      roh *= _heroFactor(fromWeapon: fromWeapon && !byCompanion);
+      if (!byCompanion) {
+        roh *= _ambushOnce();
+        _sinceHeroStruck = 0;
+      }
+    }
     if (kritisch) roh *= attacker.critFactor;
 
     final breite = attacker.isHero
@@ -1267,6 +1381,7 @@ class ActionWorld {
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
     final wirklich = target.takeDamage(_mitigate(target, schaden));
+    if (target.isHero && wirklich > 0) _heroStruck();
     _knockBack(attacker, target);
     if (attacker.isHero) {
       target.lastHitByCompanion = byCompanion;

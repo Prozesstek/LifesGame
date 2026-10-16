@@ -277,3 +277,41 @@ class BossStunNotched extends ActionEvent {
   final int notches;
   final bool stunned;
 }
+
+// --- Seit ADR-0074 ---
+
+/// Der Held war eben bei [from] und ist jetzt bei [to] — ein Blink oder
+/// ein Rückspulen ([rewind]). Für das Bild: ein Schatten am alten Ort.
+class HeroBlinked extends ActionEvent {
+  const HeroBlinked({
+    required this.from,
+    required this.to,
+    this.rewind = false,
+  });
+
+  final Vec2 from;
+  final Vec2 to;
+  final bool rewind;
+}
+
+/// Eine Parade hat einen Treffer abgefangen; wer ihn führte, steht.
+class AttackParried extends ActionEvent {
+  const AttackParried({required this.at});
+
+  final Vec2 at;
+}
+
+/// Ein Kettenblitz springt von [from] nach [to].
+class ChainJumped extends ActionEvent {
+  const ChainJumped({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+}
+
+/// Der zweite Atem hat gegriffen — einmal je Lauf.
+class LastStandTriggered extends ActionEvent {
+  const LastStandTriggered({required this.at});
+
+  final Vec2 at;
+}

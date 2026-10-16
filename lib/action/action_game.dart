@@ -310,7 +310,11 @@ class ActionGame extends Game {
             TrapSprung() ||
             RockChanged() ||
             CompanionStruck() ||
-            BossStunNotched():
+            BossStunNotched() ||
+            HeroBlinked() ||
+            AttackParried() ||
+            ChainJumped() ||
+            LastStandTriggered():
           _neueArten.melde(event);
       }
     }
@@ -639,6 +643,8 @@ class ActionGame extends Game {
       );
 
       final blitz = _flashes[view.id] ?? 0;
+      // Unsichtbar heisst im Bild: kaum noch da (ADR-0074).
+      final unsichtbar = view.faction == Faction.held && sim.isVanished;
       bilder.draw(
         canvas,
         figure: figur,
@@ -648,6 +654,7 @@ class ActionGame extends Game {
         faceLeft: zustand.facesLeft,
         loop: !zustand.pose.playsOnce,
         flash: blitz > 0 ? (blitz / Burst.flashTime) * 0.8 : 0,
+        opacity: unsichtbar ? 0.3 : 1,
       );
 
       if (view.faction == Faction.gegner && view.hpRatio < 1) {
@@ -657,6 +664,28 @@ class ActionGame extends Game {
         _drawHeroBar(canvas, view, fuss.dy - figur.visibleHeight - 10);
       }
     }
+    _drawSpiegelbild(canvas, bilder);
+  }
+
+  /// Das Spiegelbild (ADR-0074): der Held noch einmal, durchscheinend,
+  /// in derselben Haltung — dort, wo die Welt das Abbild führt.
+  void _drawSpiegelbild(Canvas canvas, GrubeBilder bilder) {
+    final abbild = sim.companion;
+    if (abbild == null || !abbild.mirror) return;
+    final held = sim.heroView;
+    final zustand = _figuren[held.id];
+    if (zustand == null) return;
+    final ausblenden = abbild.remaining < 0.1 ? abbild.remaining * 10 : 1.0;
+    bilder.draw(
+      canvas,
+      figure: _figurFuer(held.kind),
+      pose: zustand.pose,
+      time: zustand.poseTime,
+      foot: _fussVon(abbild.position, held.radius),
+      faceLeft: zustand.facesLeft,
+      loop: !zustand.pose.playsOnce,
+      opacity: 0.45 * ausblenden,
+    );
   }
 
   void _drawCorpses(Canvas canvas, GrubeBilder bilder) {
@@ -1052,8 +1081,9 @@ class ActionGame extends Game {
       }
       // Die eigenen Funken golden, die fremden Pfeile rot: Wer ausweichen
       // will, muss auf einen Blick sehen, was ihm gilt.
+      // Ein Kettenblitz trägt die Farbe des Blitzes (ADR-0074).
       final farbe = shot.faction == Faction.held
-          ? Palette.goldOnDark
+          ? (shot.isChain ? Palette.tintBlitz : Palette.goldOnDark)
           : Palette.enemyOnDark;
       final mitte = Offset(shot.position.x, shot.position.y);
       final schweif = Offset(

@@ -176,12 +176,23 @@ abstract final class PitModifiers {
           reach: e.reach,
           stationary: e.stationary,
           devourBelow: e.devourBelow,
+          mirror: e.mirror,
         ),
       Dash() => Dash(
           distance: e.distance,
           trailPerSecond: e.trailPerSecond * dauer,
           trailSeconds: e.trailSeconds,
           trailRadius: e.trailRadius,
+          impactPower: e.impactPower * direkt,
+          impactFling: e.impactFling,
+          impactStun: e.impactStun,
+        ),
+      ChainBolt() => ChainBolt(
+          power: e.power * direkt,
+          range: e.range,
+          jumps: e.jumps,
+          jumpRange: e.jumpRange,
+          falloff: e.falloff,
         ),
       RandomOf(:final outcomes) => RandomOf(
           outcomes: <PitOutcome>[
@@ -201,7 +212,15 @@ abstract final class PitModifiers {
       SlowAround() ||
       PullToCenter() ||
       SelfBuff() ||
-      Rock() =>
+      Rock() ||
+      Blink() ||
+      Vanish() ||
+      StunAround() ||
+      Parry() ||
+      Stacking() ||
+      Overdrive() ||
+      Rewind() ||
+      PitPassive() =>
         e,
     };
   }
@@ -244,7 +263,16 @@ abstract final class PitModifiers {
       Companion() ||
       Rock() ||
       SweepCone() ||
-      FreezeBolt() =>
+      FreezeBolt() ||
+      Blink() ||
+      Vanish() ||
+      StunAround() ||
+      Parry() ||
+      Stacking() ||
+      ChainBolt() ||
+      Overdrive() ||
+      Rewind() ||
+      PitPassive() =>
         e,
     };
   }

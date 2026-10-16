@@ -106,12 +106,13 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **20 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 331 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 355 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
-| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die zwei **Ultimates** |
+| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die vier **Ultimates** und die drei **Passive** |
 | `packages/action_combat/lib/src/effects.dart` | **die eine Stelle, die jede Wirkung ausführt** — Sturm, Haken, Strudel, Stillstand samt Stun-Leiste, Self-Buff, Zufall, Bumerang ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
-| `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter, der Fels | nur Dart-SDK | nur Dart-SDK |
+| `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter (auch das **Spiegelbild**), der Fels | nur Dart-SDK |
+| `packages/action_combat/lib/src/hero_states.dart` | **was am Helden abläuft** ([ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)): Rage, Ruhepuls, zweiter Atem, Unsichtbarkeit, Parade, Bestform, Stacking, Kettenblitz, Blink, Rückspulen — und **die Grenze des Grundangriffs** (`_heroFactor`) | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
@@ -192,6 +193,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
+| `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
@@ -252,18 +254,19 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 797 Tests
+flutter test             # 802 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
 dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
+dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 331 Tests
+dart test                              # 355 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -331,8 +334,21 @@ Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
 Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine
 Stelle in `effects.dart`, die sie ausführt. Das ist die Naht, an der Sets
 und Legendäre später eine Fähigkeit verändern. Seit [ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)
-sind es neunundzwanzig Fähigkeiten und zwei Ultimates aus zwanzig Arten; `test/pit_test.dart` hält fest, dass jede
-lernbare Fähigkeit und jede Waffe im Laden in der Grube etwas tut.
+und [ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)
+sind es neununddreißig Fähigkeiten und vier Ultimates aus neunundzwanzig
+Arten; `test/pit_test.dart` hält fest, dass jede lernbare Fähigkeit und
+jede Waffe im Laden in der Grube etwas tut.
+
+**Ein Passiv hat keinen Knopf** (`PitAbility.isPassive`: alle Wirkungen
+sind `PitPassive`). Es liegt auf einem Platz, kostet nichts, klingt nicht
+ab und wirkt den ganzen Lauf; im Kampf steht sein Bild blasser und nimmt
+keinen Tipp an.
+
+**Der Grundangriff hat eine Grenze**: Alle Stärkungen zusammen —
+Self-Buff, Kampfrausch, Bestform — machen ihn höchstens
+`ActionBalance.weaponBuffCap` (1,25) härter. Fähigkeiten trifft sie
+nicht. Ein Faktor auf das, was jede halbe Sekunde fällt, entschiede
+sonst den Kampf allein (ADR-0009). `aktivesbrett_arten_test.dart`.
 
 **Ab Level 15 gibt es die Ultimate**
 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)):
@@ -698,7 +714,7 @@ die Sprossen in der Reihe existieren, prüft
 `flutter test test/gear_gates_seam_test.dart`.
 
 **Fähigkeiten ändern heißt: den Katalog anfassen, nicht die Welt.**
-Alle neunundzwanzig und die zwei Ultimates stehen in `packages/action_combat/lib/src/pit_ability.dart`,
+Alle neununddreißig und die vier Ultimates stehen in `packages/action_combat/lib/src/pit_ability.dart`,
 ihre Bedingungen in `packages/abilities` ([ADR-0022](docs/decisions/0022-faehigkeiten-set-aus-der-vorlage.md), ADR-0039).
 Schaden ist immer `Angriff × power` — sonst hängt die Fähigkeit nicht mehr
 am Angriffswert und damit nicht mehr an den Gewohnheiten. Dauerschaden ist

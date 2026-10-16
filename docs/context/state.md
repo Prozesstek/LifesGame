@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 15.10.2026 · Frederik
+**Zuletzt aktualisiert:** 16.10.2026 · AktivesBrett
 
 ---
 
@@ -30,13 +30,13 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
-| **Fähigkeiten** | 29 Fähigkeiten und 8 Waffenzüge in der Grube, **zwei Ultimates auf eigenem Platz ab Level 15**, zwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073 |
-| **Errungenschaften** | 20 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073 |
+| **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
+| **Errungenschaften** | 21 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073, -0074 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 797, dazu die acht Packages (theory 193, habits 324, gear
-118, action_combat 331, progression 44, abilities 43, identity 25,
+**Tests:** App 802, dazu die acht Packages (theory 193, habits 324, gear
+118, action_combat 355, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -126,6 +126,93 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 16.10.2026: AktivesBretts zehn Fähigkeiten und zwei Ultimates
+
+Die zweite Hälfte von Issue #114. Claude hat zehn Fähigkeiten und zwei
+Ultimates vorgeschlagen, die die Bausteine aus ADR-0073 nutzen, die
+Frederiks zwölf liegen liessen; AktivesBrett hat sie übernommen,
+**Spiegelbild auf Episch** gesetzt und **Bestform** und **Rückspulen**
+als Ultimates gewählt.
+[ADR-0074](../decisions/0074-aktivesbretts-faehigkeiten.md), die Liste
+in der Vorlage [`faehigkeiten-2.md`](../vorlagen/faehigkeiten-2.md).
+
+| Fähigkeit | was sie tut |
+|---|---|
+| Zinseszins | Schlag, jede Wiederholung binnen 4 s ein Fünftel härter, bis 5-mal |
+| Schattenschritt | Sprung, 2 s unsichtbar, der erste Treffer daraus ×1,5 |
+| Kampfrausch | **passiv**: je eingesteckten Treffer +4 %, bis 10-mal |
+| Kriegsschrei | wer nah steht, steht still; 6 s +20 % |
+| Spiegelbild | 10 s ein Abbild mit dem eigenen Grundangriff, halber Schaden |
+| Parade | 0,6 s offen, fängt einen Treffer ganz ab, der Angreifer steht |
+| Ruhepuls | **passiv**: ohne eigenen Treffer kommt Mana 40 % schneller |
+| Kettenblitz | springt auf bis zu drei weitere, je ein Viertel schwächer |
+| Rammbock | Sturm, der trifft, zur Seite wirft und festhält |
+| Zweiter Atem | **passiv**, einmal je Lauf: unter 20 % Leben heilt er 25 % |
+| *Bestform* | Ultimate, 8 s: Fähigkeiten +40 % ohne Mana, Abklingzeit doppelt so schnell |
+| *Rückspulen* | Ultimate: zurück an Ort und Leben von vor 4 s, kurz unverwundbar |
+
+**Drei Fragen vor dem Bau**, alle wie empfohlen beantwortet: Die Bilder
+zeichnet Claude (das Raven-Paket liegt nur bei Frederik); Bestform trifft
+mit Fähigkeiten +40 %, mit dem Grundangriff nur +25 %; ihre Quelle ist
+die neue Errungenschaft **„Sieben Tage in Form“** (sieben Tagestruhen).
+
+**Beim Bauen gefunden:**
+
+- **Die Grenze des Grundangriffs stand nur im Kommentar.** Am
+  `SelfBuff` hiess es, ein Test halte 1,25 fest — es gab keinen. Jetzt
+  ist sie eine Zahl (`ActionBalance.weaponBuffCap`) für alle Stärkungen
+  zusammen, mit Test.
+- **Ein Kettenblitz brach den Lauf ab**: Er legt beim Einschlag ein
+  neues Geschoss nach, mitten im Durchlaufen der Liste. Die Schleife
+  geht jetzt über eine Kopie.
+- **Python schreibt unter Windows CRLF.** Die Patch-Skripte hatten
+  vierzehn Dateien umgestellt; zurückgesetzt, bevor etwas eingecheckt
+  war.
+
+| Was | Wo |
+|---|---|
+| Zehn Fähigkeiten, zwei Ultimates, neun neue Arten | `pit_ability.dart` |
+| Was am Helden abläuft, und die Grenze des Grundangriffs | `hero_states.dart` (neu) |
+| Ausführung, Rammbock, Kettenblitz | `effects.dart`, `world.dart` |
+| Ein Passiv ohne Knopf im Kampf | `ability_buttons.dart` |
+| Schatten, Abbild, Parade, Bestform, Glut im Bild | `action_game.dart`, `neue_arten_bild.dart` |
+| Bedingungen und Knoten | `ability_catalog.dart`, `theory_graph_content.dart` |
+| Die zwölf Bilder | `tool/faehigkeit_icons.py` → `assets/Faehigkeiten/` |
+| Je Fähigkeit messen | `dart run tool/pit_sim.dart faehigkeiten` |
+
+**Gemessen** (`pit_sim faehigkeiten`, Tag 30, 12 Läufe je Feld, statt
+Funkenstoß neben Steinhaut und Blütentau): Auf Stufe 11 gewinnt der Bot
+mit jeder der zehn zu 83 bis 100 %, wie mit allen anderen. Auf Stufe 13
+liegen sie zwischen 8 % (Schattenschritt, Kriegsschrei, Spiegelbild,
+Rammbock) und **50 % (Kampfrausch)**, Funkenstoß bei 25 % — im Feld der
+übrigen 29. Der Bot springt, pariert und zielt nicht; wer das kann,
+liegt darüber.
+
+**Bestform ist der Ausreisser**: Zu Funkenstoß, Steinhaut und Blütentau
+dazu gewinnt der Bot Stufe 13 zu **100 %**, ohne Ultimate zu 25 %,
+mit Rückspulen zu 42 %, mit Frederiks Wassergrube zu 17 % und der
+Pflanze zu 33 %. Acht Sekunden ohne Mana bei doppelt so schneller
+Abklingzeit sind für den Bot ein Dauerfeuer. **Nicht nachgestellt** —
+eine Entscheidung für euch beide.
+
+App 802 (vorher 797), action_combat 355 (vorher 331). **Nicht gespielt,
+nicht am Handy, nicht im Browser angesehen** — die Bilder nur als Datei.
+
+### Offen
+
+- **Bestform ist zu stark** (Stufe 13: 100 % statt 25 %). Die Hebel:
+  kürzer als acht Sekunden, Abklingzeit nicht doppelt so schnell, oder
+  Mana nur zum halben Preis statt umsonst.
+- **Ob die Parade mit 0,6 s zu knapp ist**, und ob man sie im Gedränge
+  überhaupt gezielt drückt.
+- **Drei Passive kosten drei Plätze.** Wer alle drei trägt, hat keinen
+  Knopf mehr ausser der Ultimate.
+- **„Sieben Tage in Form“ kommt vor „Zehn Truhen“**: die Ultimate früher
+  als der Glückstrank. Der Platz geht ohnehin erst auf Level 15 auf.
+- **Die Bilder sind gezeichnet** und sehen neben den Raven-Bildern
+  anders aus. Wer eins tauschen will, legt ein Bild an dieselbe Stelle.
+- **Frederik hat ADR-0074 nicht gesehen.**
 
 ## 15.10.2026, danach: die Knöpfe zeigen, was abklingt
 
