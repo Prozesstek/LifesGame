@@ -10,6 +10,7 @@ import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'ladder_controller.dart';
+import 'widgets/eingangs_glut.dart';
 import 'widgets/tagesform_kreis.dart';
 import 'widgets/tagesgrube_karte.dart';
 
@@ -54,8 +55,10 @@ class LadderScreen extends ConsumerWidget {
                 children: <Widget>[
                   const TagesgrubeKarte(),
                   const Spacer(),
-                  _Ebene(stufe: stufe),
-                  const SizedBox(height: 10),
+                  EingangsGlut(
+                    ebene: stufe,
+                    child: _Ebene(stufe: stufe),
+                  ),
                   _Belohnung(stand: stand, stufe: stufe),
                   const Spacer(),
                   // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
@@ -111,8 +114,11 @@ class _Ebene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Die Zahl leuchtet in der Farbe des Schlunds darunter.
+    final glut = GlutStufe.fuer(stufe).farbe;
     return Column(
       key: LadderScreen.ebeneKey,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         const Text(
           'Ebene',
@@ -123,15 +129,18 @@ class _Ebene extends StatelessWidget {
             color: Palette.textOnDarkDim,
           ),
         ),
-        // Die Zahl steht auf dem Leder, nicht auf einer Fläche.
         Text(
           '$stufe',
           semanticsLabel: 'Ebene $stufe',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 64,
             height: 1.1,
             fontWeight: FontWeight.bold,
             color: Palette.textOnDark,
+            shadows: <Shadow>[
+              Shadow(color: glut, blurRadius: 18),
+              Shadow(color: glut.withValues(alpha: 0.6), blurRadius: 36),
+            ],
           ),
         ),
       ],

@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 795, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 799, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -124,6 +124,66 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 
 **Bewusst zurückgestellt** (Frederik, 27.09.): die tägliche Erinnerung
 (APK oder Web-Push) und die Identität im Wochenrückblick.
+
+---
+
+## 16.10.2026, spät: der Schlund glüht
+
+Frederik: „Was hälst du davon wenn wir Glow machen beim Eingang also
+dass das mythisch aussieht.“ Gebaut ohne Fragerunde.
+
+In der leeren Mitte des Eingangs liegt jetzt ein Schlund: ein dunkles
+Loch mit glühendem Rand, ein Schein, der atmet (2,4 s), Glut, die
+aufsteigt, und die Zahl der Ebene davor, in derselben Farbe
+nachleuchtend.
+
+| Ebene | Farbe | warum |
+|---|---|---|
+| 1–9 | Feuer | — |
+| 10–19 | violett | ab hier fällt Episches (`GearGates.epicRung`) |
+| 20–30 | golden | ab hier Legendäres |
+| 31–100 | blutrot, mehr Glut, ein zweiter Hitzering | jenseits des alten Endes (ADR-0075) |
+
+Violett und Gold sind die Ränder der Seltenheiten
+(`RarityBadge.rahmenOf`), keine neuen Farben. **In Tests atmet er
+nicht** (`test/flutter_test_config.dart`): Eine Animation ohne Ende
+liesse `pumpAndSettle` nie zur Ruhe kommen. Wer Bewegung im System
+abgeschaltet hat, sieht ihn ebenfalls still.
+
+App 799 (vorher 795). Alle vier Tiefen in 390 × 844 gerendert und
+nebeneinander angesehen; die Zahl sass zu dicht am Rand und steht jetzt
+höher. **Nicht am Handy** — ob die Weichzeichnung dort ruckelt, ist
+offen.
+
+## 16.10.2026, abends: hundert Ebenen im selben Schritt
+
+Frederik: „Grubelevel bis 100“, und auf Claudes Vorschlag, Stufe 100 so
+hart zu machen wie bisher 30: „Ne baue das einfach mit den gleichen
+Abständen, ich hab zurzeit ne 27 Tage Streak und schaff Level 30
+immer.“ [ADR-0075](../decisions/0075-hundert-ebenen.md).
+
+| Was | Wie |
+|---|---|
+| **Stufe 1–30** | Zahl für Zahl wie vorher; kein Stand wird umgerechnet |
+| **Stufe 31–100** | derselbe Schritt weiter: Gegner je Stufe rund ein Achtel stärker, alle vier Stufen ein Raum mehr, die Belohnung wächst weiter um 5 EP und 2 Gold |
+| **`pit_sim`** | eine Spalte für Level 50; eine Spalte hört auf, sobald sie zweimal bei null steht |
+
+**Gemessen** (`pit_sim`, 8 Läufe je Feld): **Ab Stufe 42 gewinnt der
+Bot nie, auch mit Level 50**, bester Ausrüstung und drei Fähigkeiten;
+sicher bis 37, mit Tag-60-Werten bis 29. Der Bot ist eine untere
+Schranke, aber Stufe 100 ist rund tausendmal so stark wie Stufe 41.
+
+App 795, action_combat 331, beide unverändert in der Zahl: drei Tests
+nahmen 30 als Ende an und prüfen jetzt die Bezugsstufe.
+
+### Offen
+
+- **Soll Stufe 100 erreichbar sein?** Dann braucht es einen flacheren
+  Schritt über 30 — eine Zahl, gemessen mit `pit_sim`.
+- Die Summe der Belohnung ist zehnmal so gross; erreichbar ist bis zur
+  Wand etwa das Doppelte von vorher.
+- Ab Stufe 31 sind die Gruben länger als alles bisher (Stufe 100: zehn
+  Räume, knapp fünf Minuten). Nicht gespielt.
 
 ---
 
