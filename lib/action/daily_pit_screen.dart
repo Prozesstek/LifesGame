@@ -60,6 +60,8 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
         inForm: widget.condition == DailyCondition.inForm,
       ),
       klang: ref.read(soundPlayerProvider),
+      // Die Tagesgrube zahlt nur Ruhm (ADR-0072), also kein Balken.
+      startXp: null,
       // Dieselbe Regel wie in der Grube (ADR-0069): Bis die erste Stufe
       // geschafft ist, erklärt sich der Lauf.
       zeichen: ref.read(ersterStartProvider).grubeErklaertSich

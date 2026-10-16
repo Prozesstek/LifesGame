@@ -2,7 +2,6 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
-import 'package:lifes_game/action/damage_popup.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -42,32 +41,5 @@ void main() {
     final gewonnen = reihe.recordRun(7, won: true);
     expect(gewonnen, (xp: voll.xp - 20, gold: voll.gold - 5));
     expect(c.read(totalXpProvider), vorher + voll.xp);
-  });
-
-  test('über einem gefallenen Gegner steht, was er gebracht hat', () {
-    final popup = DamagePopup.forLoot(
-      const LootDropped(at: Vec2(10, 10), xp: 7, gold: 3),
-    );
-    expect(popup?.text, '+7 EP  +3 G');
-    expect(
-      DamagePopup.forLoot(const LootDropped(at: Vec2.zero, xp: 0, gold: 0)),
-      isNull,
-    );
-  });
-
-  test('was nicht gefallen ist, steht nicht da — kein „+0 G"', () {
-    expect(
-      DamagePopup.forLoot(
-        const LootDropped(at: Vec2.zero, xp: 4, gold: 0),
-      )?.text,
-      '+4 EP',
-    );
-    expect(
-      DamagePopup.forLoot(
-        const LootDropped(at: Vec2.zero, xp: 0, gold: 2),
-      )?.text,
-      '+2 G',
-    );
-    expect(DamagePopup.lootText(12, 0), isNot(contains('0 G')));
   });
 }

@@ -1,4 +1,4 @@
-"""Erzeugt die fünf Klänge der Grube nach `assets/Sound/`.
+"""Erzeugt die acht Klänge der Grube nach `assets/Sound/`.
 
 **Platzhalter.** Die Klänge sind gerechnet, nicht aufgenommen: Rauschen,
 ein paar Sinus- und Rechteckwellen, eine Hüllkurve. Damit gehören sie
@@ -152,12 +152,66 @@ def ankuendigung():
     return _klang(dauer, stimme, 0.45)
 
 
+def muenze():
+    """Eine Münze kommt an: das klassische Pling, zwei helle Töne kurz
+    hintereinander, der zweite eine Quarte höher. Fällt im Brunnen des
+    Wächters dutzendfach — deshalb kurz und nicht zu laut."""
+    dauer = 0.13
+    ton = _Ton()
+
+    def stimme(t, anteil):
+        zweiter = t >= 0.045
+        lokal = t - 0.045 if zweiter else t
+        h = _huelle(lokal, dauer, anstieg=0.002, schaerfe=5)
+        hertz = 1319 if zweiter else 988
+        welle = ton.sinus(hertz)
+        # Ein Hauch Rechteck macht es metallisch statt flötig.
+        return h * (welle + 0.25 * (1.0 if welle >= 0 else -1.0))
+
+    return _klang(dauer, stimme, 0.3)
+
+
+def funke():
+    """Ein Funke Erfahrung kommt an: ein weicher Zug nach oben, leiser
+    als die Münze, damit beide zusammen nicht scheppern."""
+    dauer = 0.07
+    ton = _Ton()
+
+    def stimme(t, anteil):
+        h = _huelle(t, dauer, anstieg=0.004, schaerfe=4)
+        return h * ton.sinus(_gleiten(1100, 1760, anteil))
+
+    return _klang(dauer, stimme, 0.22)
+
+
+def aufstieg():
+    """Ein Level mitten im Lauf: vier Töne aufwärts, C-Dur, der letzte
+    klingt nach. Der seltenste Klang der Grube, deshalb der längste."""
+    schritt = 0.075
+    noten = (523, 659, 784, 1047)
+    dauer = schritt * (len(noten) - 1) + 0.4
+    ton, quinte = _Ton(), _Ton()
+
+    def stimme(t, anteil):
+        index = min(int(t / schritt), len(noten) - 1)
+        lokal = t - index * schritt
+        letzte = index == len(noten) - 1
+        h = _huelle(lokal, 0.4 if letzte else schritt * 2, schaerfe=3.5)
+        hertz = noten[index]
+        return h * (ton.sinus(hertz) + 0.35 * quinte.sinus(hertz * 1.5))
+
+    return _klang(dauer, stimme, 0.5)
+
+
 KLAENGE = {
     "Treffer": treffer,
     "Getroffen": getroffen,
     "Gefallen": gefallen,
     "Faehigkeit": faehigkeit,
     "Ankuendigung": ankuendigung,
+    "Muenze": muenze,
+    "Funke": funke,
+    "Aufstieg": aufstieg,
 }
 
 
