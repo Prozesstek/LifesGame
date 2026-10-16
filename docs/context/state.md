@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 15.10.2026 · Frederik
+**Zuletzt aktualisiert:** 16.10.2026 · Frederik
 
 ---
 
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 797, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 795, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -126,6 +126,38 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 16.10.2026, danach: der Eingang zeigt nur noch die nächste Ebene
+
+Frederik: „Kampf Anzeige mit welches Level kann raus (Fahrstuhlmodus)
+Aktuelles wird angezeigt, 2/30 weg (Ebene 2 dafür) und der Balken kann
+auch darunter weg.“
+
+| Vorher | Jetzt |
+|---|---|
+| „2 / 30“ mit Balken | **„Ebene 3“**, gross in der Mitte — die Ebene, in die „Hinab“ führt |
+| der Fahrstuhl: alle Stufen zum Wählen, mit Bestzeit | weg |
+
+**Ohne Rückfrage entschieden:** Angezeigt wird die **nächste** Ebene,
+nicht die zuletzt geschaffte — der eine Knopf darunter führt dorthin.
+In der Grube und im Ergebnis heisst es weiter „Stufe“.
+
+**Was damit wegfällt:** Eine geschaffte Ebene lässt sich nicht mehr
+wählen. Damit lassen sich **Schlüssel nicht mehr einsetzen** — sie
+öffneten die Beute nur bei einem weiteren Sieg auf einer geschafften
+Stufe (ADR-0048), und jeder Lauf ist jetzt ein erster. Bestzeiten werden
+weiter gespeichert, aber nirgends mehr gezeigt.
+
+App 795 (vorher 797): die drei Tests des Schachts sind weg, einer kam
+dazu. Den Eingang in 390 × 844 gerendert und angesehen. **Nicht am
+Handy.**
+
+### Offen
+
+- **Wofür Schlüssel jetzt da sind.**
+- **„Grubelevel bis 100“** — nicht gebaut, braucht Entscheidungen zu
+  Belohnung, Sperren im Laden, Errungenschaften, Tagesgrube und alten
+  Ständen.
 
 ## 15.10.2026, danach: die Knöpfe zeigen, was abklingt
 
