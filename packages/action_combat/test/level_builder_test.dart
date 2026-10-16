@@ -103,7 +103,7 @@ void main() {
   group('Die Stufen', () {
     test('Stufen ausserhalb werden auf den Rand gezogen', () {
       expect(PitStage(0).number, 1);
-      expect(PitStage(99).number, PitStage.count);
+      expect(PitStage(PitStage.count + 1).number, PitStage.count);
     });
 
     test('kein Wert fällt von einer Stufe zur nächsten', () {

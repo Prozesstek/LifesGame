@@ -33,10 +33,10 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 797 Tests
+flutter test                       # 799 Tests
 flutter analyze                    # muss sauber sein
 
-# Balance der Grube nachrechnen (30 Stufen gegen echten Werte-Pfad):
+# Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
 dart run tool/pit_sim.dart
 dart run tool/tagesgrube_sim.dart  # die sieben Sätze der Tagesgrube
 
@@ -82,7 +82,7 @@ Danach `flutter doctor` bis alles grün ist.
 
 | Pfad | Inhalt | Tests |
 |---|---|---|
-| `packages/action_combat` | die Grube: 30 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
+| `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
 | `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 193 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve | 44 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 324 |
@@ -91,7 +91,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |
 | `packages/achievements` | 20 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 797 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 799 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

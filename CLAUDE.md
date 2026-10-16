@@ -117,7 +117,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
-| `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
+| `packages/action_combat/lib/src/stage.dart` | die **hundert Stufen** — wie aus einer Stufe ein Faktor wird; die Zahlen gelten für 1 und 30, darüber im selben Schritt weiter ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
 | `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen, würfelt Wächter und Besetzung | nur Dart-SDK |
 | `packages/action_combat/lib/src/cast.dart` | die **Besetzung** einer Grube: welche Arten in diesem Lauf die Rollen spielen ([ADR-0063](docs/decisions/0063-besetzung-in-rollen.md)) | nur Dart-SDK |
@@ -139,7 +139,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart und je Wächter (`forBoss`), **eine Tabelle** | Flutter |
 | `lib/action/boss_text.dart` | wie die vier Wächter heißen, und die Zeile unter dem Namen beim Auftritt | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
-| `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
+| `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
@@ -211,7 +211,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter „17 / 30", der **Fahrstuhl** (alle 30 Stufen, Bestzeit), Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter **„Ebene 18“** — nur die nächste, kein Fahrstuhl mehr —, Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/widgets/eingangs_glut.dart` | **der Schlund im Eingang**: glüht in der Farbe dessen, was unten fällt — Feuer, ab 10 episch, ab 20 legendär, über 30 blutrot (`GlutStufe`); atmet in Tests nicht (`test/flutter_test_config.dart`) | Flutter |
 | `lib/combat/daily_pit_controller.dart` | Riverpod-Brücke Tagesgrube ↔ UI, **enthält keine Regeln**; `dailyConditionProvider` sagt, in welcher Verfassung es heute hinabginge | Flutter |
 | `lib/combat/widgets/tagesgrube_karte.dart` | die Tagesgrube im Eingang: Satz des Tages, Verfassung, „Hinab“ — **trägt den Versuch ein, bevor der Lauf beginnt**; danach Ergebnis und Teilen | Flutter |
 | `lib/combat/widgets/tagesgrube_ergebnis.dart` | das Blatt am Ende der Tagesgrube: Raumzeile, Zeit, Verfassung, Tageskette, Ruhm, Teilen | Flutter |
@@ -252,11 +253,11 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 797 Tests
+flutter test             # 799 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
-dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
+dart run tool/pit_sim.dart             # Stufe für Stufe, bis zur Wand
 dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
@@ -281,7 +282,7 @@ cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
 
 **Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
-die Grube.** Echtzeit, dreissig Stufen, jede Karte neu gesteckt. Der
+die Grube.** Echtzeit, hundert Stufen ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)), jede Karte neu gesteckt. Der
 Rundenkampf ist gelöscht. Die Regeln der Grube stehen an je einer
 Stelle:
 
@@ -783,7 +784,7 @@ genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 ein — aber genau einmal je Stufe.** Bis dahin gab er ausdrücklich
 nichts: `konzept.md` Abschnitt 2 macht ihn zur Auszahlung des
 Fortschritts, nicht zu seiner Quelle. Der Einwand galt jedoch nur
-*wiederholbarer* Belohnung. Die Grube hat dreißig Stufen, jede zahlt
+*wiederholbarer* Belohnung. Die Grube hat hundert Stufen, jede zahlt
 einmal, und der Gesamtbetrag steht deshalb als Zahl fest
 (`LadderRewards.lifetimeXp`). Wer daran dreht, lässt
 `flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
