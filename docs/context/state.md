@@ -155,6 +155,8 @@ nebeneinander angesehen; die Zahl sass zu dicht am Rand und steht jetzt
 höher. **Nicht am Handy** — ob die Weichzeichnung dort ruckelt, ist
 offen.
 
+Gemergt am 16.10. als PR #121.
+
 ## 16.10.2026, abends: hundert Ebenen im selben Schritt
 
 Frederik: „Grubelevel bis 100“, und auf Claudes Vorschlag, Stufe 100 so
@@ -175,6 +177,8 @@ Schranke, aber Stufe 100 ist rund tausendmal so stark wie Stufe 41.
 
 App 795, action_combat 331, beide unverändert in der Zahl: drei Tests
 nahmen 30 als Ende an und prüfen jetzt die Bezugsstufe.
+
+Gemergt am 16.10. als PR #120.
 
 ### Offen
 
@@ -211,6 +215,8 @@ weiter gespeichert, aber nirgends mehr gezeigt.
 App 795 (vorher 797): die drei Tests des Schachts sind weg, einer kam
 dazu. Den Eingang in 390 × 844 gerendert und angesehen. **Nicht am
 Handy.**
+
+Gemergt am 16.10. als PR #119.
 
 ### Offen
 
@@ -256,6 +262,9 @@ Flug und Aufstieg in 390 × 844 gerendert und angesehen, mit Würfeln
 statt Figuren. Dabei gefunden: Die Kasse war auf heller Wand nicht zu
 lesen und steht jetzt auf einem dunklen Schild; der Brunnen streute zu
 weit. **Nicht gespielt, nicht gehört, nicht am Handy.**
+
+Gemergt am 16.10. als PR #118, nach #119 bis #121; alle vier zusammen:
+App 809, action_combat 331.
 
 ### Offen
 
