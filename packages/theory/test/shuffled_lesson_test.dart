@@ -130,4 +130,31 @@ void main() {
 
     expect(reihenfolgen.length, greaterThan(1));
   });
+
+  group('Ein Rätsel allein mischen', () {
+    const raetsel = Question(
+      prompt: 'Was schätzt du?',
+      options: <String>['a', 'b', 'c'],
+      correctIndex: 2,
+      explanation: 'weil',
+    );
+
+    test('die richtige Antwort bleibt dieselbe, nur an neuer Stelle', () {
+      for (var saat = 0; saat < 20; saat++) {
+        final gemischt = shuffleOptions(raetsel, Random(saat));
+        expect(gemischt.options.toSet(), raetsel.options.toSet());
+        expect(gemischt.options[gemischt.correctIndex], 'c');
+        expect(gemischt.prompt, raetsel.prompt);
+        expect(gemischt.explanation, raetsel.explanation);
+      }
+    });
+
+    test('es wird wirklich gemischt', () {
+      final stellen = <int>{
+        for (var saat = 0; saat < 20; saat++)
+          shuffleOptions(raetsel, Random(saat)).correctIndex,
+      };
+      expect(stellen.length, greaterThan(1));
+    });
+  });
 }

@@ -24,11 +24,15 @@ import '../gear/gear_controller.dart';
 
 /// Was der Bildschirm gerade zeigt.
 ///
-/// [repeat] ist die zweite Runde (ADR-0055): Was im ersten Durchgang
-/// falsch war, kommt am Ende noch einmal — bis es sitzt.
-enum _Stage { reading, quiz, repeat, result }
+/// [raten] ist das Rätsel vor dem Lesen (`Lesson.teaser`), nur wenn die
+/// Seite eins hat. [repeat] ist die zweite Runde (ADR-0055): Was im
+/// ersten Durchgang falsch war, kommt am Ende noch einmal — bis es sitzt.
+enum _Stage { raten, reading, quiz, repeat, result }
 
 /// Eine Lektion: erst lesen, dann Fragen, dann Ergebnis.
+///
+/// **Hat die Seite ein Rätsel**, kommt es zuerst: geschätzt, nicht
+/// gewertet (`Lesson.teaser`).
 ///
 /// **Seit dem 18.10. eine Spielrunde wie bei Duolingo**: Der Text kommt
 /// in Häppchen (`LeseHaeppchen`), jede Antwort klingt — richtig eine
@@ -48,7 +52,7 @@ class LessonScreen extends ConsumerStatefulWidget {
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   static const double _maxWidth = 560;
 
-  _Stage _stage = _Stage.reading;
+  late _Stage _stage;
   int _index = 0;
   List<int?> _answers = const <int?>[];
   LessonResult? _result;
@@ -96,9 +100,39 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   /// Bildschirm: Die Seite ist eine eigene Route über dem Baum.
   final GlobalKey<AufstiegHostState> _host = GlobalKey<AufstiegHostState>();
 
+  /// Das Rätsel vor dem Lesen, Antworten gemischt — oder null.
+  Question? _raetsel;
+
+  /// Was geschätzt wurde. Wird nirgends gespeichert und zählt nicht.
+  int? _geschaetzt;
+
   Lesson get _lesson => widget.lesson;
 
   Question get _question => _questionAt(_index);
+
+  @override
+  void initState() {
+    super.initState();
+    final teaser = _lesson.teaser;
+    _raetsel = teaser == null ? null : shuffleOptions(teaser, Random());
+    _stage = teaser == null ? _Stage.reading : _Stage.raten;
+  }
+
+  /// Eine Schätzung. Gut geschätzt klingt der erste Ton der Leiter; daneben
+  /// klingt nichts — es war kein Fehler, nur eine Vermutung.
+  void _schaetze(int option) {
+    final raetsel = _raetsel;
+    if (raetsel == null) return;
+    setState(() => _geschaetzt = option);
+    if (raetsel.isCorrect(option)) {
+      ref.read(soundPlayerProvider).play(SoundEffect.ton1);
+      unawaited(HapticFeedback.mediumImpact());
+    } else {
+      unawaited(HapticFeedback.selectionClick());
+    }
+  }
+
+  void _zumText() => setState(() => _stage = _Stage.reading);
 
   bool get _isAnswered => _answers[_index] != null;
 
@@ -320,6 +354,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _maxWidth),
               child: switch (_stage) {
+                _Stage.raten => _buildRaetsel(),
                 _Stage.reading => LeseHaeppchen(
                   lesson: _lesson,
                   onStart: _startQuiz,
@@ -345,6 +380,36 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
           gesamt: _lesson.questionCount,
         ),
       ),
+    );
+  }
+
+  Widget _buildRaetsel() {
+    final raetsel = _raetsel;
+    if (raetsel == null) return const SizedBox.shrink();
+    return _Frage(
+      gestellt: _gestellt,
+      kopf: const Row(
+        children: <Widget>[
+          Icon(Icons.lightbulb_outline, size: 16, color: Palette.accent),
+          SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Was schätzt du?',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Palette.accent,
+              ),
+            ),
+          ),
+        ],
+      ),
+      frage: raetsel,
+      gewaehlt: _geschaetzt,
+      onSelect: _schaetze,
+      knopf: 'Weiter',
+      onWeiter: _geschaetzt != null ? _zumText : null,
+      geraten: true,
     );
   }
 
@@ -452,7 +517,11 @@ class _Frage extends StatelessWidget {
     required this.onSelect,
     required this.knopf,
     required this.onWeiter,
+    this.geraten = false,
   });
+
+  /// Ob es das Rätsel ist — dann zählt nichts, und daneben ist nicht rot.
+  final bool geraten;
 
   /// Die wievielte gestellte Frage — wechselt sie, wird geschoben.
   final int gestellt;
@@ -513,6 +582,7 @@ class _Frage extends StatelessWidget {
                     question: frage,
                     selected: gewaehlt,
                     onSelect: onSelect,
+                    geraten: geraten,
                   ),
                 ],
               ),
@@ -524,6 +594,12 @@ class _Frage extends StatelessWidget {
           erklaerung: frage.explanation,
           knopf: knopf,
           onWeiter: weiter ?? () {},
+          richtigWort: geraten ? 'Gut geschätzt' : 'Richtig',
+          falschWort: geraten ? 'Überraschend, oder?' : 'Nicht ganz',
+          falschFarbe: geraten ? Palette.accent : Palette.enemy,
+          falschZeichen: geraten
+              ? Icons.lightbulb_rounded
+              : Icons.close_rounded,
         ),
       ],
     );

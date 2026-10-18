@@ -41,7 +41,16 @@ Future<void> schonErledigt(WidgetTester tester) async {
 ///
 /// Seit dem 18.10. kommt der Text in Häppchen (`LeseHaeppchen`): Der Knopf
 /// zu den Fragen steht erst auf dem letzten Abschnitt, davor „Weiter“.
+/// Hat die Seite ein Rätsel, wird es zuerst geraten — irgendwie, es
+/// zählt nicht.
 Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
+  final teaser = lesson.teaser;
+  if (teaser != null) {
+    await tester.tap(find.text(teaser.options.first));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+  }
   final start = find.text('${lesson.questionCount} Fragen beantworten');
   for (var i = 0; i < lesson.sections.length && start.evaluate().isEmpty; i++) {
     await tester.tap(find.text('Weiter'));

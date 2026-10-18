@@ -20,8 +20,23 @@ class AntwortLeiste extends StatefulWidget {
     required this.erklaerung,
     required this.knopf,
     required this.onWeiter,
+    this.richtigWort = 'Richtig',
+    this.falschWort = 'Nicht ganz',
+    this.falschFarbe = Palette.enemy,
+    this.falschZeichen = Icons.close_rounded,
     super.key,
   });
+
+  /// Was über der Erklärung steht. Beim Rätsel heißt es anders: Eine
+  /// Schätzung ist gut oder überraschend, nicht richtig oder falsch.
+  final String richtigWort;
+  final String falschWort;
+
+  /// Rot bei einer Frage, braun bei einem Rätsel.
+  final Color falschFarbe;
+
+  /// Das Kreuz bei einer Frage, eine Glühbirne bei einem Rätsel.
+  final IconData falschZeichen;
 
   /// Null, solange nicht geantwortet ist.
   final bool? richtig;
@@ -74,7 +89,7 @@ class _AntwortLeisteState extends State<AntwortLeiste>
   @override
   Widget build(BuildContext context) {
     final richtig = widget.richtig;
-    final farbe = richtig == false ? Palette.enemy : Palette.success;
+    final farbe = richtig == false ? widget.falschFarbe : Palette.success;
     final grund = Color.alphaBlend(
       farbe.withValues(alpha: 0.16),
       Palette.surface,
@@ -120,6 +135,10 @@ class _AntwortLeisteState extends State<AntwortLeiste>
                   alignment: Alignment.topCenter,
                   child: _Urteil(
                     richtig: richtig,
+                    wort: richtig ? widget.richtigWort : widget.falschWort,
+                    zeichen: richtig
+                        ? Icons.check_rounded
+                        : widget.falschZeichen,
                     farbe: farbe,
                     erklaerung: widget.erklaerung,
                     sprung: _auf,
@@ -141,12 +160,16 @@ class _AntwortLeisteState extends State<AntwortLeiste>
 class _Urteil extends StatelessWidget {
   const _Urteil({
     required this.richtig,
+    required this.wort,
+    required this.zeichen,
     required this.farbe,
     required this.erklaerung,
     required this.sprung,
   });
 
   final bool richtig;
+  final String wort;
+  final IconData zeichen;
   final Color farbe;
   final String erklaerung;
   final Animation<double> sprung;
@@ -173,17 +196,13 @@ class _Urteil extends StatelessWidget {
                     color: farbe,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    richtig ? Icons.check_rounded : Icons.close_rounded,
-                    size: 20,
-                    color: Palette.surface,
-                  ),
+                  child: Icon(zeichen, size: 20, color: Palette.surface),
                 ),
               ),
               const SizedBox(width: 10),
               Flexible(
                 child: Text(
-                  richtig ? 'Richtig' : 'Nicht ganz',
+                  wort,
                   style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w900,

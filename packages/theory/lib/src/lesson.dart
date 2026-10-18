@@ -35,6 +35,7 @@ class Lesson {
     required this.sections,
     required this.questions,
     this.unlocksHabit,
+    this.teaser,
   });
 
   final String id;
@@ -52,6 +53,17 @@ class Lesson {
   /// dieses Feld später aus; das Konzept verlangt, dass Theorie und Habits
   /// verknüpft sind und nicht nebeneinanderstehen.
   final String? unlocksHabit;
+
+  /// **Das Rätsel vor der Seite** (18.10.): eine Schätzfrage, die vor dem
+  /// Lesen gestellt und **nicht gewertet** wird. Wer geraten hat, liest
+  /// nach einer Antwort statt vor sich hin — und behält mehr, auch wenn
+  /// er falsch lag. Die Auflösung steht in [Question.explanation], das
+  /// Warum im Text darunter.
+  ///
+  /// Null, solange die Seite keins hat; bisher hat es nur Kraft &
+  /// Muskulatur, als Probe. Es zählt nicht zu [questions] und kommt nie
+  /// in der Rückfrage des Tages.
+  final Question? teaser;
 
   int get questionCount => questions.length;
 }

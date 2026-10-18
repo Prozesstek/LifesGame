@@ -205,6 +205,43 @@ void main() {
       }
     });
 
+    test('jedes Rätsel ist eine gültige Frage', () {
+      // Es wird nicht gewertet — aber eine Auflösung, die auf keine
+      // Antwort zeigt, wäre trotzdem ein Rätsel ohne Lösung.
+      for (final node in nodes) {
+        final raetsel = node.lesson.teaser;
+        if (raetsel == null) continue;
+        expect(raetsel.prompt.trim(), isNotEmpty, reason: node.id);
+        expect(raetsel.options.length, inInclusiveRange(2, 4));
+        expect(
+          raetsel.options.toSet().length,
+          raetsel.options.length,
+          reason: node.id,
+        );
+        expect(raetsel.correctIndex, greaterThanOrEqualTo(0));
+        expect(raetsel.correctIndex, lessThan(raetsel.options.length));
+        expect(raetsel.explanation.trim(), isNotEmpty, reason: node.id);
+        for (final option in raetsel.options) {
+          expect(option.contains('('), isFalse, reason: '${node.id}: $option');
+        }
+      }
+    });
+
+    test('die Probe: jede Seite unter Kraft & Muskulatur hat ein Rätsel', () {
+      // 18.10.: Kraft ist das Gebiet, an dem Rätsel und Fälle erprobt
+      // werden. Fällt hier eins weg, ist die Probe nicht mehr vollständig.
+      const kraft = <Lesson>[
+        hypertrophiePage,
+        intensitaetPage,
+        trainingsplanungPage,
+        technikPage,
+        muskelkaterPage,
+      ];
+      for (final seite in kraft) {
+        expect(seite.teaser, isNotNull, reason: seite.id);
+      }
+    });
+
     test('die richtige Antwort liegt nicht immer an derselben Stelle', () {
       final stellen = <int>[
         for (final node in nodes)
