@@ -1,5 +1,5 @@
 /// Was ein Häkchen auslöst — Klang, Stoß, Feiern, aufsteigende Zahlen,
-/// die Leiste unten.
+/// fliegende Münzen, die Leiste unten.
 ///
 /// **Eine Stelle für jeden Ort, an dem abgehakt wird.** Bis zur Startseite
 /// mit „Heute" gab es nur den Gewohnheiten-Bildschirm, und alles stand
@@ -25,8 +25,10 @@ import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
 import '../progression/show_level_up.dart';
 import '../ui/aufstieg.dart';
+import '../ui/beute_flug.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
+import 'haekchen_moment.dart';
 import 'habits_controller.dart';
 import 'widgets/daily_chest_card.dart';
 import 'widgets/habit_timer_sheet.dart';
@@ -107,6 +109,7 @@ void _mitFeier(
   final werteVorher = ref.read(characterStatsProvider);
   final formVorher = ref.read(dailyFormProvider);
   final schluesselVorher = ref.read(availableKeysProvider);
+  final trackerVorher = ref.read(habitTrackerProvider);
 
   final result = tat(ref.read(habitTrackerProvider.notifier));
   if (result == null) return;
@@ -115,11 +118,32 @@ void _mitFeier(
     return;
   }
 
-  // Ein Häkchen soll sich anfühlen wie eins. Auf einem Handy ist das
-  // ein kurzer Stoß; im Browser und im Test passiert nichts.
-  unawaited(HapticFeedback.mediumImpact());
-  ref.read(soundPlayerProvider).play(_klang(ref, habit, werteVorher));
-  _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
+  final moment = HaekchenMoment.aus(
+    vorher: trackerVorher,
+    nachher: ref.read(habitTrackerProvider),
+    heute: ref.read(todayProvider),
+    punkt: _punkt(ref, habit, werteVorher) > 0,
+  );
+
+  // Ein Häkchen soll sich anfühlen wie eins: ein kurzer Stoß, auf dem
+  // Handy wie im Browser eines Android-Handys (`navigator.vibrate`) —
+  // der geschaffte Tag ein kräftiger. Im Test passiert nichts.
+  unawaited(
+    moment.tagGeschafft
+        ? HapticFeedback.heavyImpact()
+        : HapticFeedback.mediumImpact(),
+  );
+  final klang = ref.read(soundPlayerProvider)..play(moment.klang);
+  // Die Flamme der Tageskette zündet (`TodayCard`) — ein Fauchen über
+  // dem Ton, nicht statt seiner.
+  if (moment.ersterDesTages) klang.play(SoundEffect.kette);
+  // **Erst landet, was fliegt, dann wird gefeiert** — wie in der Grube,
+  // wo das Ergebnis wartet, bis der Brunnen eingesammelt ist. Sonst
+  // deckte der Aufstieg den Balken zu, der ihn gerade füllt.
+  final feiern = _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
+  if (!_fliegen(context, result, klang, danach: feiern)) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => feiern());
+  }
   sayHabitFeedback(
     context,
     _feedback(result, _gains(ref, habit, werteVorher, formVorher)),
@@ -134,6 +158,32 @@ void _mitFeier(
     formVorher,
     schluesselVorher,
   );
+  if (moment.tagGeschafft) AufstiegHost.maybeOf(context)?.konfetti();
+}
+
+/// **Erfahrung und Gold fliegen zur Leiste oben** — als Funken und
+/// Münzen, und die Zahlen dort steigen, wenn sie ankommen. Nur, wo es
+/// eine Leiste gibt (die Startseite); sonst steigen nur die Zahlen auf.
+///
+/// Der Klang ist schon geholt: Bis das letzte Stück ankommt, ist ein
+/// `ref` womöglich nicht mehr zu lesen. [danach] kommt, wenn alles
+/// gelandet ist. Gibt zurück, ob etwas fliegt.
+bool _fliegen(
+  BuildContext context,
+  CheckResult result,
+  SoundPlayer klang, {
+  required VoidCallback danach,
+}) {
+  return AufstiegHost.maybeOf(context)?.fliege(
+        gold: result.goldGained,
+        xp: result.xpGained,
+        beiAnkunft: (ziel) => klang.play(switch (ziel) {
+          FlugZiel.gold => SoundEffect.muenze,
+          FlugZiel.erfahrung => SoundEffect.funke,
+        }),
+        wennGelandet: danach,
+      ) ??
+      false;
 }
 
 /// Holt eine erledigte Tagesaufgabe ab (ADR-0055): Klang, Stoß, und
@@ -203,14 +253,18 @@ void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
 /// Errungenschaft kann eine Faehigkeit mitbringen (ADR-0033, Punkt 7);
 /// andersherum stuende die Faehigkeit da, bevor gesagt waere, woher sie
 /// kommt.
-void _celebrate(
+///
+/// Gibt die Feier zurück, statt sie zu starten: Wann sie kommt, sagt der
+/// Aufrufer — sobald die Münzen gelandet sind, sonst einen Bildaufbau
+/// später.
+VoidCallback _celebrate(
   BuildContext context,
   WidgetRef ref,
   List<Ability> vorher,
   Set<String> vorherErrungen,
   int vorherLevel,
 ) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
+  return () {
     if (!context.mounted) return;
     unawaited(() async {
       await showAchievementUnlocks(context, ref, before: vorherErrungen);
@@ -219,7 +273,7 @@ void _celebrate(
       if (!context.mounted) return;
       await showAbilityUnlocks(context, ref, before: vorher);
     }());
-  });
+  };
 }
 
 /// Was es nach [habit] gibt — die Belohnung, die sich jemand selbst
@@ -297,20 +351,17 @@ void sayHabitFeedback(
 /// jedes fünfte Mal sichtbar aus. Der Balken in der Kopfzeile bewegt
 /// sich jedes Mal; wenn der Punkt fällt, soll es außerdem jemand sagen.
 String _statGain(WidgetRef ref, Habit habit, CharacterStats vorher) {
-  final nachher = ref.read(characterStatsProvider);
-  final zuwachs = nachher.valueFor(habit.stat) - vorher.valueFor(habit.stat);
+  final zuwachs = _punkt(ref, habit, vorher);
   if (zuwachs <= 0) return '';
   return ' · +$zuwachs ${habit.stat.label}';
 }
 
-/// Welcher Klang zu diesem Häkchen gehört: der seltenere, wenn dabei ein
-/// Punkt gefallen ist. Fünf Häkchen sind ein Punkt Stärke — der fünfte
-/// soll anders klingen als die vier davor.
-SoundEffect _klang(WidgetRef ref, Habit habit, CharacterStats werteVorher) {
+/// Wie viele Punkte dieses Häkchen auf seinem Charakterwert gebracht hat.
+/// Fünf Häkchen sind ein Punkt Stärke — der fünfte soll anders klingen
+/// als die vier davor (`HaekchenMoment.klang`).
+int _punkt(WidgetRef ref, Habit habit, CharacterStats werteVorher) {
   final nachher = ref.read(characterStatsProvider).valueFor(habit.stat);
-  return nachher > werteVorher.valueFor(habit.stat)
-      ? SoundEffect.statPunkt
-      : SoundEffect.haekchen;
+  return nachher - werteVorher.valueFor(habit.stat);
 }
 
 /// **Die Zahlen steigen dort auf, wo getippt wurde** — Erfahrung, Gold,
@@ -325,8 +376,7 @@ void _steigen(
   DailyForm formVorher,
   int schluesselVorher,
 ) {
-  final nachher = ref.read(characterStatsProvider);
-  final punkt = nachher.valueFor(habit.stat) - werteVorher.valueFor(habit.stat);
+  final punkt = _punkt(ref, habit, werteVorher);
   final form = DailyFormText.gainAfterCheck(
     stat: habit.stat,
     vorher: formVorher,

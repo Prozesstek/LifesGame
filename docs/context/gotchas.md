@@ -3,6 +3,31 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Zeitgeber ist kein Bild: `pumpAndSettle` wartet nicht auf ihn
+
+Die Feier eines Häkchens (Errungenschaft, Aufstieg) soll warten, bis die
+Münzen an der Leiste gelandet sind. Der erste Entwurf nahm dafür
+
+```dart
+unawaited(Future<void>.delayed(landung, feiern));
+```
+
+— gleich lang wie der Flug. Im Widget-Test lief das in ein Rennen:
+`pumpAndSettle` hört auf, sobald kein Bild mehr ansteht, und die letzte
+Animation endete wenige Millisekunden **vor** dem Zeitgeber. Die Feier
+kam dann mitten im nächsten Schritt des Tests: Der nächste Tipp traf den
+Schleier des Dialogs statt der Gewohnheit, und das Bild zeigte einen
+Aufstieg, der zum Häkchen davor gehörte. Kein Fehler, keine Meldung,
+nur ein Test, der etwas anderes prüft, als er sagt.
+
+**Abhilfe:** an den Takt hängen, nicht an die Uhr. `AufstiegHost.fliege`
+nimmt `wennGelandet` und ruft es, sobald sein Ticker das letzte Stück
+ankommen sieht. Solange er läuft, steht ein Bild an, und
+`pumpAndSettle` wartet mit.
+
+**Regel:** Was nach einer Animation geschehen soll, hängt an ihrem Ende,
+nicht an einer gleich langen Wartezeit daneben.
+
 ## Ein `DecoratedBox` malt sein Kind über den eigenen Rand
 
 Der hängende Holzrahmen (`HolzRahmen`) legt sein Kind auf Pergament mit

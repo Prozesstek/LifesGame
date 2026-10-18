@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
+import 'beute_flug.dart';
+import 'konfetti.dart';
 import 'palette.dart';
 import 'pixel_art.dart';
 
@@ -22,6 +26,12 @@ class AufstiegZeile {
 /// selben Moment nach unten (`dailyListOn`) — die Zahlen stehen trotzdem
 /// dort, wo man hinsieht.
 ///
+/// **Und was ein Häkchen sonst noch auswirft** (18.10.): Münzen und
+/// Funken, die zur Leiste oben fliegen ([fliege]), und das Konfetti,
+/// wenn der Tag geschafft ist ([konfetti]). Beides liegt hier, weil
+/// beides vom Finger ausgeht — und weil ein Host das Bild über allem
+/// anderen hat.
+///
 /// Jede Animation endet von selbst; ein Test mit `pumpAndSettle` wartet
 /// sie einfach ab.
 class AufstiegHost extends StatefulWidget {
@@ -34,6 +44,10 @@ class AufstiegHost extends StatefulWidget {
   /// Wie weit die Zeilen steigen.
   static const double hoehe = 56;
 
+  /// Wie dicht Ankunftsklänge aufeinander folgen dürfen, in Sekunden. Acht
+  /// Münzen in vierhundert Millisekunden sind ein Rasseln, kein Brei.
+  static const double klangAbstand = 0.07;
+
   /// Der Host über [context] — oder null, wenn es keinen gibt. Dann steigt
   /// eben nichts auf; das Häkchen gilt trotzdem.
   static AufstiegHostState? maybeOf(BuildContext context) =>
@@ -43,10 +57,169 @@ class AufstiegHost extends StatefulWidget {
   State<AufstiegHost> createState() => AufstiegHostState();
 }
 
-class AufstiegHostState extends State<AufstiegHost> {
+class AufstiegHostState extends State<AufstiegHost>
+    with SingleTickerProviderStateMixin {
   Offset? _letzterFinger;
   final List<_Stoss> _stoesse = <_Stoss>[];
   int _naechste = 0;
+
+  // --- Was fliegt ---
+
+  final BeuteFlug _flug = BeuteFlug();
+  final List<Konfetti> _konfetti = <Konfetti>[];
+  final Map<FlugZiel, GlobalKey> _ziele = <FlugZiel, GlobalKey>{};
+  final Map<FlugZiel, ValueNotifier<int>> _unterwegs =
+      <FlugZiel, ValueNotifier<int>>{
+        for (final ziel in FlugZiel.values) ziel: ValueNotifier<int>(0),
+      };
+  final Map<FlugZiel, double> _letzterKlang = <FlugZiel, double>{};
+  void Function(FlugZiel ziel)? _beiAnkunft;
+
+  /// Was geschehen soll, wenn ein Wurf gelandet ist, und wann — in der
+  /// Zeit des Hosts ([_zeit]), nicht der Uhr: Läuft der Host nicht,
+  /// landet auch nichts.
+  final List<(double, VoidCallback)> _landungen = <(double, VoidCallback)>[];
+
+  /// Meldet jedem Bild, dass neu gemalt wird — ohne den Baum neu zu bauen.
+  final ValueNotifier<int> _bild = ValueNotifier<int>(0);
+  Ticker? _uhrOderNichts;
+  Ticker get _uhr => _uhrOderNichts ??= createTicker(_tick);
+  Duration _zuletzt = Duration.zero;
+  double _zeit = 0;
+
+  /// Ein Ziel meldet sich an ([FlugZielMarke]).
+  void meldeZiel(FlugZiel ziel, GlobalKey ort) => _ziele[ziel] = ort;
+
+  /// Und ab — aber nur, wenn es noch dasselbe ist.
+  void vergissZiel(FlugZiel ziel, GlobalKey ort) {
+    if (identical(_ziele[ziel], ort)) _ziele.remove(ziel);
+  }
+
+  /// Wie viel zu [ziel] noch unterwegs ist. Die Leiste zieht es ab.
+  ValueListenable<int> unterwegs(FlugZiel ziel) => _unterwegs[ziel]!;
+
+  /// Wie viele Würfe Konfetti gerade in der Luft sind.
+  @visibleForTesting
+  int get konfettiInDerLuft => _konfetti.length;
+
+  /// Lässt [gold] als Münzen und [xp] als Funken vom letzten Finger zu
+  /// ihren Zielen fliegen. **Ohne Ziel fliegt nichts** — auf dem
+  /// Gewohnheiten-Bildschirm gibt es keine Leiste, dort steigen nur die
+  /// Zahlen auf.
+  ///
+  /// [beiAnkunft] klingt, wenn etwas ankommt, höchstens alle
+  /// [AufstiegHost.klangAbstand] Sekunden je Ziel. [wennGelandet] kommt,
+  /// sobald das letzte Stück dieses Wurfs angekommen ist — im Takt des
+  /// Hosts, damit ein Test, der auf Ruhe wartet, auch darauf wartet.
+  ///
+  /// Gibt zurück, ob etwas fliegt. Wenn nicht, kommt [wennGelandet] nie.
+  bool fliege({
+    required int gold,
+    required int xp,
+    void Function(FlugZiel ziel)? beiAnkunft,
+    VoidCallback? wennGelandet,
+  }) {
+    final finger = _letzterFinger;
+    final box = context.findRenderObject();
+    if (finger == null || box is! RenderBox) return false;
+    final von = box.globalToLocal(finger);
+    var landung = 0.0;
+    for (final (ziel, betrag) in <(FlugZiel, int)>[
+      (FlugZiel.gold, gold),
+      (FlugZiel.erfahrung, xp),
+    ]) {
+      final nach = _mitteVon(ziel, box);
+      if (nach == null || betrag <= 0) continue;
+      final dauer = _flug.wirf(
+        von: von,
+        ziel: ziel,
+        nach: nach,
+        betrag: betrag,
+      );
+      if (dauer > landung) landung = dauer;
+    }
+    if (landung <= 0) return false;
+    _beiAnkunft = beiAnkunft;
+    if (wennGelandet != null) _landungen.add((_zeit + landung, wennGelandet));
+    _meldeUnterwegs();
+    _laufe();
+    return true;
+  }
+
+  /// Konfetti vom letzten Finger aus.
+  void konfetti() {
+    final finger = _letzterFinger;
+    final box = context.findRenderObject();
+    if (finger == null || box is! RenderBox) return;
+    _konfetti.add(Konfetti(von: box.globalToLocal(finger), seed: _naechste++));
+    _laufe();
+  }
+
+  Offset? _mitteVon(FlugZiel ziel, RenderBox host) {
+    final ort = _ziele[ziel]?.currentContext?.findRenderObject();
+    if (ort is! RenderBox || !ort.attached || !ort.hasSize) return null;
+    return host.globalToLocal(ort.localToGlobal(ort.size.center(Offset.zero)));
+  }
+
+  void _meldeUnterwegs() {
+    for (final ziel in FlugZiel.values) {
+      _unterwegs[ziel]!.value = _flug.unterwegs(ziel);
+    }
+  }
+
+  void _laufe() {
+    if (_uhr.isActive) return;
+    _zuletzt = Duration.zero;
+    _uhr.start();
+  }
+
+  void _tick(Duration seitStart) {
+    final dt = (seitStart - _zuletzt).inMicroseconds / 1e6;
+    _zuletzt = seitStart;
+    _zeit += dt;
+
+    final angekommen = _flug.update(dt);
+    if (angekommen.isNotEmpty) _meldeUnterwegs();
+    for (final ziel in angekommen) {
+      if (_zeit - (_letzterKlang[ziel] ?? -1) < AufstiegHost.klangAbstand) {
+        continue;
+      }
+      _letzterKlang[ziel] = _zeit;
+      _beiAnkunft?.call(ziel);
+    }
+
+    for (final wurf in _konfetti) {
+      wurf.update(dt);
+    }
+    _konfetti.removeWhere((wurf) => wurf.vorbei);
+
+    _bild.value++;
+    _landen();
+    if (_flug.leer && _konfetti.isEmpty && _landungen.isEmpty) _uhr.stop();
+  }
+
+  /// Ruft, was gelandet ist. Ist nichts mehr in der Luft, ist alles
+  /// gelandet — auf einen Bruchteil einer Sekunde kommt es nicht an.
+  void _landen() {
+    final faellig = _landungen
+        .where((l) => _flug.leer || l.$1 <= _zeit)
+        .toList(growable: false);
+    if (faellig.isEmpty) return;
+    _landungen.removeWhere(faellig.contains);
+    for (final (_, danach) in faellig) {
+      danach();
+    }
+  }
+
+  @override
+  void dispose() {
+    _uhrOderNichts?.dispose();
+    _bild.dispose();
+    for (final notifier in _unterwegs.values) {
+      notifier.dispose();
+    }
+    super.dispose();
+  }
 
   /// Lässt [zeilen] an der Stelle des letzten Fingers aufsteigen.
   void zeige(List<AufstiegZeile> zeilen) {
@@ -73,6 +246,14 @@ class AufstiegHostState extends State<AufstiegHost> {
       child: Stack(
         children: <Widget>[
           widget.child,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: KonfettiMaler(_konfetti, repaint: _bild),
+                foregroundPainter: BeuteFlugMaler(_flug, repaint: _bild),
+              ),
+            ),
+          ),
           for (final stoss in _stoesse)
             Positioned(
               key: ValueKey<int>(stoss.id),
