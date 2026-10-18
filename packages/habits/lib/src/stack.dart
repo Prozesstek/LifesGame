@@ -58,10 +58,16 @@ abstract final class HabitStacks {
   ///
   /// Ein Anker, der nicht in [habits] steht (gestoppt, heute nicht
   /// fällig), zählt nicht: Die Gewohnheit ist dann selbst eine Wurzel.
+  ///
+  /// [zuerst] ist der Vorsatz vom Lagerfeuer (ADR-0076): **sein Stapel**
+  /// steht vor allen anderen offenen — als Ganzes, denn ein Glied allein
+  /// nach oben zu ziehen risse es von seinem Anker. Ist er erledigt,
+  /// wandert er nach unten wie jeder andere.
   static List<StackedHabit> order(
     List<Habit> habits,
     Map<String, String> anchors, {
     required bool Function(Habit habit) isDone,
+    String? zuerst,
   }) {
     final aufListe = <String, Habit>{for (final h in habits) h.id: h};
     final kinder = <String, List<Habit>>{};
@@ -86,13 +92,25 @@ abstract final class HabitStacks {
       ];
     }
 
+    final vorn = <StackedHabit>[];
     final offen = <StackedHabit>[];
     final fertig = <StackedHabit>[];
     for (final wurzel in wurzeln) {
       final glieder = stapel(wurzel, 0, cued: false);
       final alleErledigt = glieder.every((g) => isDone(g.habit));
-      (alleErledigt ? fertig : offen).addAll(glieder);
+      final vorgenommen = glieder.any((g) => g.habit.id == zuerst);
+      if (alleErledigt) {
+        fertig.addAll(glieder);
+      } else if (vorgenommen) {
+        vorn.addAll(glieder);
+      } else {
+        offen.addAll(glieder);
+      }
     }
-    return List<StackedHabit>.unmodifiable(<StackedHabit>[...offen, ...fertig]);
+    return List<StackedHabit>.unmodifiable(<StackedHabit>[
+      ...vorn,
+      ...offen,
+      ...fertig,
+    ]);
   }
 }

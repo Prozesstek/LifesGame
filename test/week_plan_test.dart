@@ -9,6 +9,7 @@ import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
 import 'package:lifes_game/habits/widgets/weekday_picker.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
+import 'package:lifes_game/lagerfeuer/lagerfeuer_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -219,12 +220,14 @@ void main() {
     testWidgets('die Truhe verlangt nur, was heute fällig ist', (tester) async {
       final c = container(gemischt());
       await zeige(tester, c, const HabitsScreen());
-      expect(find.byType(DailyChestCard), findsNothing);
+      expect(c.read(habitTrackerProvider).canOpenChest(mittwoch), isFalse);
 
       await tester.tap(find.text(zweite.name));
       await tester.pumpAndSettle();
 
       expect(c.read(habitTrackerProvider).canOpenChest(mittwoch), isTrue);
+      // Sie wartet am Lagerfeuer (ADR-0076).
+      await zeige(tester, c, const LagerfeuerScreen());
       expect(find.byType(DailyChestCard), findsOneWidget);
     });
 

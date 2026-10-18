@@ -71,7 +71,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **neun zum Start** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 324 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 333 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -151,7 +151,13 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
 | `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme** | Flutter |
+| `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
+| `lib/lagerfeuer/am_feuer.dart` | **was am Feuer wartet** und ob es brennt (ab 18 Uhr oder Tag geschafft) — reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/lagerfeuer/am_feuer_provider.dart` | trägt das zusammen, **rechnet nichts** | Flutter |
+| `lib/lagerfeuer/widgets/feuer_bild.dart` | Himmel, Scheite, Flammen, Funken; brennt oder glimmt; **flackert in Tests nicht** (`test/flutter_test_config.dart`) | Flutter |
+| `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
+| `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
@@ -169,7 +175,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
-| `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben mit Stand und Knopf „Abholen“ — **auf der Startseite** unter „Heute“ | Flutter |
+| `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben mit Stand und Knopf „Abholen“ — **am Lagerfeuer** (ADR-0076) | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
@@ -268,7 +274,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 834 Tests
+flutter test             # 843 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -284,7 +290,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 324 Tests
+dart test                              # 333 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -586,6 +592,7 @@ stehen und dort bleiben müssen:
 | In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **Stapel** mit Offenem oben, ganz erledigte unten, je nach Priorität |
 | Woran hängt eine Gewohnheit? | `HabitTracker.anchorFor` — höchstens ein Anker, nie im Kreis (`canAnchor`); **Satz oder Anker**, `setAnchor` und `setCue` ersetzen einander ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) |
 | Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
+| Was kommt heute zuerst? | `HabitTracker.firstUpOn` — am Abend davor am Lagerfeuer gewählt; sein **Stapel** steht vor allen offenen, erzeugt keine Zahl ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)) |
 | Wann kommt eine Gewohnheit dran? | `HabitTracker.cueFor` — eine Zeile Text, für Vorlagen **und** eigene, erzeugt keine Zahl ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) |
 | Was gibt es danach? | `HabitTracker.treatFor` — eine Zeile Text neben Satz **oder** Anker, erzeugt keine Zahl; beim Abhaken sagt `sayHabitFeedback` „Jetzt: …“ ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) |
 | Wie läuft ein Zeitziel? | `HabitTracker.startTimer`, `pauseTimer`, `settleTimer` — aus der Startzeit, höchstens einer, Minuten bleiben stehen ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) |
@@ -859,7 +866,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und vier
 Fähigkeiten vergeben.
 
-Es gibt genau **fünfzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **sechzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -874,6 +881,7 @@ Es gibt genau **fünfzehn** Stellen, an denen etwas zusammenläuft:
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten — **der Graph ist die ganze Wahrheit** (ADR-0070) |
 | `ersterStartProvider` | welche Bereiche die Startseite zeigt (ADR-0068) |
+| `amFeuerProvider` | was am Lagerfeuer wartet — Rückfrage, Truhe, Aufgaben — und ob es brennt (ADR-0076) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |

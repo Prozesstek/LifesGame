@@ -12,7 +12,6 @@ import 'habits_controller.dart';
 import 'stat_icon.dart';
 import 'widgets/cue_dialog.dart';
 import 'widgets/custom_habit_sheet.dart';
-import 'widgets/daily_chest_card.dart';
 import 'widgets/habit_check_tile.dart';
 import 'widgets/habit_template_tile.dart';
 import 'widgets/streak_freeze_card.dart';
@@ -129,17 +128,8 @@ class HabitsScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                       ],
                     ],
-                    if (tracker.canOpenChest(today) ||
-                        tracker.hasOpenedChest(today)) ...<Widget>[
-                      const SizedBox(height: 4),
-                      DailyChestCard(
-                        canOpen: tracker.canOpenChest(today),
-                        opened: tracker.hasOpenedChest(today)
-                            ? DailyChest.forDay(today)
-                            : null,
-                        onOpen: () => openDailyChest(context, ref),
-                      ),
-                    ],
+                    // Die Truhe stand bis zum 18.10. hier; sie wartet jetzt
+                    // am Lagerfeuer (ADR-0076).
                     const SizedBox(height: 18),
                     // **Über den Reitern, nicht in einem**: Anlegen soll
                     // man immer sehen, auch wenn „Vorerstellte“ offen ist.

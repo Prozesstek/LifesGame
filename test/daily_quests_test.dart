@@ -10,6 +10,8 @@ import 'package:lifes_game/habits/widgets/daily_quests_card.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/lagerfeuer/lagerfeuer_screen.dart';
+import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -74,22 +76,25 @@ void main() {
     expect(c.read(claimableQuestsProvider), contains(zumAbhaken));
   });
 
-  testWidgets(
-    'die Karte steht auf der Startseite, nicht bei den Gewohnheiten',
-    (tester) async {
-      // Seit dem 28.09. (Issue #88): abgeholt wird, wo man abhakt.
-      await zeige(tester, container(beideErledigt()), const HomeScreen());
-      expect(find.byType(DailyQuestsCard), findsOneWidget);
-      expect(find.bySemanticsLabel('Tagesaufgaben'), findsOneWidget);
+  testWidgets('die Karte steht am Lagerfeuer, nicht auf der Startseite '
+      'und nicht bei den Gewohnheiten', (tester) async {
+    // Seit dem 18.10. (ADR-0076): Abgeholt wird am Feuer. Auf der
+    // Startseite sagt das Feuer, dass etwas wartet.
+    await zeige(tester, container(beideErledigt()), const LagerfeuerScreen());
+    expect(find.byType(DailyQuestsCard), findsOneWidget);
+    expect(find.bySemanticsLabel('Tagesaufgaben'), findsOneWidget);
 
-      await zeige(tester, container(beideErledigt()), const HabitsScreen());
-      expect(find.byType(DailyQuestsCard), findsNothing);
-    },
-  );
+    await zeige(tester, container(beideErledigt()), const HomeScreen());
+    expect(find.byType(DailyQuestsCard), findsNothing);
+    expect(find.byType(LagerfeuerKarte), findsOneWidget);
+
+    await zeige(tester, container(beideErledigt()), const HabitsScreen());
+    expect(find.byType(DailyQuestsCard), findsNothing);
+  });
 
   testWidgets('Abholen bringt einen Schlüssel, und nur einmal', (tester) async {
     final c = container(beideErledigt());
-    await zeige(tester, c, const HomeScreen());
+    await zeige(tester, c, const LagerfeuerScreen());
     final vorher = c.read(earnedKeysProvider);
     final abholbar = c.read(claimableQuestsProvider).length;
     final erste = c.read(claimableQuestsProvider).first;
@@ -130,7 +135,7 @@ void main() {
     // tun ist, kam erst auf Tipp.
     final offen = const HabitTracker.empty().activate(a.id).activate(b.id);
     final c = container(offen);
-    await zeige(tester, c, const HomeScreen());
+    await zeige(tester, c, const LagerfeuerScreen());
 
     final aufgaben = c.read(dailyQuestsProvider);
     expect(aufgaben.where((q) => !q.isDone), isNotEmpty);
@@ -148,7 +153,7 @@ void main() {
 
   testWidgets('eine erledigte, nicht abgeholte bleibt lesbar', (tester) async {
     final c = container(beideErledigt());
-    await zeige(tester, c, const HomeScreen());
+    await zeige(tester, c, const LagerfeuerScreen());
 
     for (final aufgabe in c.read(claimableQuestsProvider)) {
       expect(
@@ -164,7 +169,7 @@ void main() {
 
   testWidgets('eine offene Aufgabe hat keinen Knopf', (tester) async {
     final offen = const HabitTracker.empty().activate(a.id).activate(b.id);
-    await zeige(tester, container(offen), const HomeScreen());
+    await zeige(tester, container(offen), const LagerfeuerScreen());
 
     expect(
       find.descendant(

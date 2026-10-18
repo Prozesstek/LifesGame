@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:habits/habits.dart';
 
 import '../character/abilities_screen.dart';
 import '../gear/equipment_screen.dart';
@@ -22,10 +21,9 @@ import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
 import '../ui/druck.dart';
-import '../habits/daily_quests_provider.dart';
-import '../habits/habit_check_flow.dart';
-import '../habits/widgets/daily_chest_card.dart';
-import '../habits/widgets/daily_quests_card.dart';
+import '../lagerfeuer/am_feuer_provider.dart';
+import '../lagerfeuer/lagerfeuer_screen.dart';
+import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
@@ -150,9 +148,8 @@ class HomeScreen extends ConsumerWidget {
                     // zum 28.09. stand hier die Figur und gab an vollen
                     // Tagen Platz ab; sie ist jetzt in der Ausrüstung.
                     // Eine lange Liste rollt, statt überzulaufen.
-                    // Darunter die **Tagesaufgaben** (Issue #88): Sie hängen
-                    // an denselben Häkchen, und abgeholt wird, wo man
-                    // abhakt.
+                    // Darunter das **Lagerfeuer** (ADR-0076) mit Truhe,
+                    // Tagesaufgaben und Rückfrage.
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -164,30 +161,16 @@ class HomeScreen extends ConsumerWidget {
                               const ErsteGewohnheitKarte()
                             else
                               const TodayCard(),
-                            // Die **Tagestruhe** direkt darunter: Sie ist
-                            // der Lohn für genau diese Liste.
-                            if (tracker.canOpenChest(today) ||
-                                tracker.hasOpenedChest(today)) ...<Widget>[
+                            // **Das Lagerfeuer** (ADR-0076) direkt darunter:
+                            // Truhe und Tagesaufgaben standen hier bis zum
+                            // 18.10. als zwei Karten, jetzt warten sie dort,
+                            // zusammen mit der Rückfrage.
+                            if (start.zeigtTagesaufgaben) ...<Widget>[
                               const SizedBox(height: 10),
-                              DailyChestCard(
-                                canOpen: tracker.canOpenChest(today),
-                                opened: tracker.hasOpenedChest(today)
-                                    ? DailyChest.forDay(today)
-                                    : null,
-                                onOpen: () => openDailyChest(context, ref),
-                              ),
-                            ],
-                            if (ref.watch(dailyQuestsProvider)
-                                case final aufgaben
-                                when start.zeigtTagesaufgaben &&
-                                    aufgaben.isNotEmpty) ...<Widget>[
-                              const SizedBox(height: 10),
-                              DailyQuestsCard(
-                                quests: aufgaben,
-                                isClaimed: (q) =>
-                                    tracker.isQuestClaimed(today, q.id),
-                                onClaim: (q) =>
-                                    claimDailyQuest(context, ref, q),
+                              LagerfeuerKarte(
+                                amFeuer: ref.watch(amFeuerProvider),
+                                onOpen: () =>
+                                    _open(context, const LagerfeuerScreen()),
                               ),
                             ],
                           ],
