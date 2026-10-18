@@ -149,7 +149,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint und welcher leuchtet — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)) | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
-| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp | Flutter |
+| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
@@ -161,7 +161,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | **„Heute“ oben**, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
-| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen; **eine Stelle** für Startseite und Gewohnheiten | Flutter |
+| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
+| `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/habits/widgets/haekchen_kreis.dart` | der Kreis, der beim Abhaken **aufspringt** — Blitz, Ring, acht Striche; nur beim Setzen; **eine Stelle** für Kachel und „Heute“ | Flutter |
 | `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
 | `lib/habits/widgets/habit_timer_sheet.dart` | das Blatt mit dem Ring: Start, Pause, „schon erledigt“ — meldet nur, **hakt nicht ab** | Flutter |
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
@@ -196,12 +198,17 @@ durch die Grube ersetzt und gelöscht.
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
+| `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
-| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger | Flutter |
+| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`) | Flutter |
+| `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
+| `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
+| `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
+| `lib/ui/sprung.dart` | **wie etwas aufspringt** — eine gedämpfte Feder für Häkchen und Flamme | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
@@ -256,7 +263,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 809 Tests
+flutter test             # 825 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

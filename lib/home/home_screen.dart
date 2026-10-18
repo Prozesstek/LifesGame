@@ -71,7 +71,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final level = ref.watch(playerLevelProvider);
+    final xp = ref.watch(effectiveXpProvider);
     final gold = ref.watch(goldProvider);
 
     final tracker = ref.watch(habitTrackerProvider);
@@ -143,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
 
                     const SizedBox(height: 12),
-                    StatusLeiste(level: level, gold: gold),
+                    StatusLeiste(xp: xp, gold: gold),
                     const SizedBox(height: 12),
 
                     // **Heute** (ADR-0053) bekommt, was übrig bleibt. Bis
