@@ -41,6 +41,12 @@ enum SoundEffect {
   /// Klang jedes Häkchens**; der hat jetzt seine Leiter.
   richtig('Sound/Success.mp3'),
 
+  /// Eine Antwort war falsch — auf einer Seite oder in der Rückfrage.
+  /// Zwei weiche Schläge abwärts, die nicht strafen
+  /// (`tool/lern_klaenge.py`). Eine richtige Antwort auf einer Seite
+  /// klettert stattdessen die [tonleiter] hinauf (`AntwortKlang`).
+  falsch('Sound/Falsch.wav'),
+
   /// Eine Lektion ist bestanden.
   lektion('Sound/Win.mp3'),
 

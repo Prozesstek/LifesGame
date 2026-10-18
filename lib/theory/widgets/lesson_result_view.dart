@@ -1,13 +1,22 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/sprung.dart';
 import '../../gear/gear_icon.dart';
 import 'tree_overview.dart';
 
 /// Was nach der letzten Frage steht: Ergebnis, Ertrag, nächster Schritt.
+///
+/// **Es baut sich auf** (18.10.): Das Zeichen springt, Erfahrung und
+/// Gold zählen von null hoch, und erst danach kommen die Knöpfe. Ist
+/// nichts zu zählen, stehen sie sofort da. [onGezaehlt] meldet das Ende
+/// des Zählens — die Feiern warten darauf, sonst deckte ein Aufstieg die
+/// Zahl zu, die ihn gebracht hat.
 class LessonResultView extends StatelessWidget {
   const LessonResultView({
     required this.lesson,
@@ -17,8 +26,12 @@ class LessonResultView extends StatelessWidget {
     this.keyGained = false,
     this.next,
     this.onNext,
+    this.onGezaehlt,
     super.key,
   });
+
+  /// Wie lange Erfahrung und Gold hochzählen.
+  static const Duration zaehlen = Duration(milliseconds: 900);
 
   final Lesson lesson;
   final LessonResult result;
@@ -37,6 +50,12 @@ class LessonResultView extends StatelessWidget {
   /// Ob die Seite einen Schlüssel gebracht hat (ADR-0048).
   final bool keyGained;
 
+  /// Erfahrung und Gold sind fertig gezählt. Kommt nur, wenn es etwas zu
+  /// zählen gibt.
+  final VoidCallback? onGezaehlt;
+
+  bool get _zaehlt => result.xpGained > 0 || result.goldGained > 0;
+
   @override
   Widget build(BuildContext context) {
     final passed = result.isPassed;
@@ -46,10 +65,12 @@ class LessonResultView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: <Widget>[
-        Icon(
-          passed ? Icons.verified_outlined : Icons.replay_circle_filled,
-          size: 52,
-          color: color,
+        _Aufspringen(
+          child: Icon(
+            passed ? Icons.verified_outlined : Icons.replay_circle_filled,
+            size: 52,
+            color: color,
+          ),
         ),
         const SizedBox(height: 14),
         Center(
@@ -70,8 +91,12 @@ class LessonResultView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        if (result.xpGained > 0 || result.goldGained > 0)
-          _Earnings(xp: result.xpGained, gold: result.goldGained),
+        if (_zaehlt)
+          _Earnings(
+            xp: result.xpGained,
+            gold: result.goldGained,
+            onGezaehlt: onGezaehlt,
+          ),
         if (keyGained) ...<Widget>[
           const SizedBox(height: 10),
           const _Schluessel(),
@@ -88,27 +113,85 @@ class LessonResultView extends StatelessWidget {
           _HabitUnlock(habit: lesson.unlocksHabit ?? ''),
         ],
         const SizedBox(height: 28),
-        if (weiter != null) ...<Widget>[
-          _NaechsteSeite(schritt: weiter, onTap: onNext),
-          const SizedBox(height: 8),
-          TextButton(
-            key: doneKey,
-            onPressed: onDone,
-            child: const Text('Fertig'),
+        _NachDemZaehlen(
+          wartet: _zaehlt,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (weiter != null) ...<Widget>[
+                _NaechsteSeite(schritt: weiter, onTap: onNext),
+                const SizedBox(height: 8),
+                TextButton(
+                  key: doneKey,
+                  onPressed: onDone,
+                  child: const Text('Fertig'),
+                ),
+              ] else
+                FilledButton(
+                  key: doneKey,
+                  onPressed: onDone,
+                  child: const Text('Weiter'),
+                ),
+              const SizedBox(height: 8),
+              if (!result.isPerfect)
+                TextButton(
+                  onPressed: onRetry,
+                  child: Text(passed ? 'Nochmal für alle Punkte' : 'Nochmal'),
+                ),
+            ],
           ),
-        ] else
-          FilledButton(
-            key: doneKey,
-            onPressed: onDone,
-            child: const Text('Weiter'),
-          ),
-        const SizedBox(height: 8),
-        if (!result.isPerfect)
-          TextButton(
-            onPressed: onRetry,
-            child: Text(passed ? 'Nochmal für alle Punkte' : 'Nochmal'),
-          ),
+        ),
       ],
+    );
+  }
+}
+
+/// Das Zeichen oben springt einmal auf, wenn das Ergebnis kommt.
+class _Aufspringen extends StatelessWidget {
+  const _Aufspringen({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 700),
+      builder: (context, t, child) =>
+          Transform.scale(scale: Sprung.feder(t, von: 0.1), child: child),
+      child: child,
+    );
+  }
+}
+
+/// Die Knöpfe kommen, wenn gezählt ist — und lassen sich vorher nicht
+/// tippen. Ohne etwas zu zählen sind sie sofort da.
+class _NachDemZaehlen extends StatelessWidget {
+  const _NachDemZaehlen({required this.wartet, required this.child});
+
+  final bool wartet;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!wartet) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: LessonResultView.zaehlen + const Duration(milliseconds: 250),
+      builder: (context, t, child) {
+        final sichtbar = Sprung.abschnitt(t, 0.75, 1);
+        return IgnorePointer(
+          ignoring: t < 1,
+          child: Opacity(
+            opacity: sichtbar,
+            child: Transform.translate(
+              offset: Offset(0, 12 * (1 - sichtbar)),
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -162,31 +245,48 @@ class _NaechsteSeite extends StatelessWidget {
   }
 }
 
+/// Erfahrung und Gold, von null hochgezählt. **Nur Darstellung**: Gezählt
+/// hat der Fortschritt längst, hier steigt dieselbe Zahl.
 class _Earnings extends StatelessWidget {
-  const _Earnings({required this.xp, required this.gold});
+  const _Earnings({required this.xp, required this.gold, this.onGezaehlt});
 
   final int xp;
   final int gold;
+  final VoidCallback? onGezaehlt;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        if (xp > 0)
-          _Chip(
-            icon: Icons.auto_graph,
-            label: '+$xp Erfahrung',
-            color: Palette.accent,
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: LessonResultView.zaehlen,
+      curve: Curves.easeOutCubic,
+      onEnd: onGezaehlt,
+      builder: (context, t, _) {
+        // Ein Hauch Wachsen, solange gezählt wird — am Ende steht die
+        // Zahl wieder still in ihrer Grösse.
+        final gross = t >= 1 ? 1.0 : 1 + 0.08 * math.sin(math.pi * t);
+        return Transform.scale(
+          scale: gross,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (xp > 0)
+                _Chip(
+                  icon: Icons.auto_graph,
+                  label: '+${(xp * t).round()} Erfahrung',
+                  color: Palette.accent,
+                ),
+              if (xp > 0 && gold > 0) const SizedBox(width: 10),
+              if (gold > 0)
+                _Chip(
+                  icon: Icons.savings_outlined,
+                  label: '+${(gold * t).round()} Gold',
+                  color: Palette.gold,
+                ),
+            ],
           ),
-        if (xp > 0 && gold > 0) const SizedBox(width: 10),
-        if (gold > 0)
-          _Chip(
-            icon: Icons.savings_outlined,
-            label: '+$gold Gold',
-            color: Palette.gold,
-          ),
-      ],
+        );
+      },
     );
   }
 }

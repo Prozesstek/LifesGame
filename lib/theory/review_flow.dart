@@ -48,7 +48,9 @@ void answerReview(
       ?keyGainLine(ref, schluesselVorher),
     ]);
   } else {
-    unawaited(HapticFeedback.selectionClick());
+    unawaited(HapticFeedback.heavyImpact());
+    // Derselbe Klang wie eine falsche Antwort auf einer Seite.
+    ref.read(soundPlayerProvider).play(SoundEffect.falsch);
   }
 
   WidgetsBinding.instance.addPostFrameCallback((_) {

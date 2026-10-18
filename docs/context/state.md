@@ -26,7 +26,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 |---|---|---|
 | **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
+| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 825, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 830, dazu die acht Packages (theory 193, habits 324, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -126,6 +126,63 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 18.10.2026, danach: eine Seite als Spielrunde
+
+Frederik: „Ist sehr cool. Wie könnten wir das Lernen noch spannender
+machen?“ Claude schlug vier Ideen vor — die Seite als Spielrunde, Seiten
+werden golden, erst erinnern und dann wählen, ein Schrein in der Grube —
+und empfahl die erste. Frederik: „Ja“. Gebaut als Prototyp, ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Häppchen** | ein Abschnitt je Bildschirm, Striche oben, „Weiter“; der Knopf zu den Fragen steht erst auf dem letzten |
+| **Jede Antwort klingt** | richtig klettert die Tonleiter des Häkchens, eine Stufe je Antwort in Folge; falsch zwei weiche Schläge abwärts, und die Leiter beginnt von vorn. Dazu Vibration |
+| **Die Antwort bewegt sich** | die richtige springt auf, die falsche schüttelt den Kopf |
+| **Das Urteil von unten** | grün oder rot, „Richtig“ oder „Nicht ganz“, die Erklärung und der Knopf — bis dahin ein Kasten unter den Antworten |
+| **Der Balken oben** | springt mit jeder Antwort vor, die sitzt; eine falsche lässt ihn stehen, die zweite Runde füllt ihn |
+| **Die Fragen schieben sich** | die neue von rechts herein, die alte nach links hinaus |
+| **Das Ergebnis baut sich auf** | das Zeichen springt, Erfahrung und Gold zählen hoch, danach kommen die Knöpfe |
+| **Drei von drei** | der Akkord löst die Leiter auf, Konfetti steigt aus der Mitte |
+
+**Keine Zahl ändert sich.** Bestehen, Erfahrung, Gold und die zweite
+Runde rechnen wie vorher.
+
+**Ohne Rückfrage entschieden:**
+
+- **Erst gezählt, dann gefeiert**: Errungenschaft, Aufstieg und neue
+  Fähigkeit kommen, wenn Erfahrung und Gold fertig gezählt sind — wie
+  beim Häkchen. Bis dahin geht es nicht zurück; wer es versucht, bekommt
+  die Feier sofort. Sonst ginge ein Aufstieg verloren, dessen „vorher“
+  nur auf dieser Seite steht.
+- **Drei von drei klingen wie ein geschaffter Tag** (`TagGeschafft.wav`),
+  zwei von drei wie bisher (`Win.mp3`).
+- **Eine falsche Rückfrage klingt jetzt auch**, mit demselben Klang.
+- **Nicht verschränkt**: Abschnitt und Frage stehen weiter getrennt
+  (`lernen.md`, Punkt 4) — das wäre Schreibarbeit an jeder Seite.
+- **„Richtig“ bleibt ein Wort**, kein wechselndes Lob (ADR-0060).
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Beim Schieben
+standen alte und neue Frage in der Mitte halb übereinander; die alte
+geht jetzt schneller und blendet aus. Und das Konfetti kam vom Knopf
+ganz unten kaum über die untere Hälfte, es steigt jetzt aus der Mitte
+(`AufstiegHost.konfetti(von:)`).
+
+Neu: `antwort_klang.dart`, `lese_haeppchen.dart`, `antwort_leiste.dart`,
+`runden_balken.dart`, `tool/lern_klaenge.py`, `Falsch.wav`. App 830
+(vorher 825). **Nicht gehört, nicht gespielt, nicht am Handy.**
+
+### Offen
+
+- Ob der dumpfe Klang bei falsch freundlich klingt oder nach Strafe.
+- Kurze Abschnitte stehen allein auf einem Bildschirm mit viel Leere
+  darunter.
+- Wer eine Seite nur nachschlagen will, blättert jetzt statt zu rollen.
+- **Die anderen drei Ideen**: Seiten werden golden (die Stufen der
+  Rückfrage sichtbar am Knoten), erst erinnern und dann wählen, ein
+  Schrein in der Grube. Der Schrein braucht eine Konzeptrunde und einen
+  ADR — er berührt die Balance der Grube und die Tagesgrube.
 
 ## 18.10.2026: der Häkchen-Moment — abhaken wie bei Duolingo
 

@@ -9,6 +9,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
+import 'package:lifes_game/theory/widgets/lesson_result_view.dart';
 import 'package:lifes_game/action/pit_text.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -82,10 +83,12 @@ void main() {
   });
 
   group('Der Screen erscheint, wenn eine Seite sitzt', () {
+    /// Ohne [abwarten] endet es einen Bildaufbau nach „Auswerten“.
     Future<void> bestehen(
       WidgetTester tester,
-      ProviderContainer container,
-    ) async {
+      ProviderContainer container, {
+      bool abwarten = true,
+    }) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -94,10 +97,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(
-        find.text('${knoten.lesson.questionCount} Fragen beantworten'),
-      );
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, knoten.lesson);
 
       for (var i = 0; i < knoten.lesson.questionCount; i++) {
         final frage = knoten.lesson.questions.firstWhere(
@@ -106,14 +106,32 @@ void main() {
 
         await tester.tap(find.text(frage.options[frage.correctIndex]));
         await tester.pumpAndSettle();
-        await tester.tap(
-          find.text(
-            i == knoten.lesson.questionCount - 1 ? 'Auswerten' : 'Weiter',
-          ),
-        );
-        await tester.pumpAndSettle();
+        final letzte = i == knoten.lesson.questionCount - 1;
+        await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
+        if (letzte && !abwarten) {
+          await tester.pump();
+        } else {
+          await tester.pumpAndSettle();
+        }
       }
     }
+
+    testWidgets('die Feier wartet, bis Erfahrung und Gold gezählt sind', (
+      tester,
+    ) async {
+      // Sonst deckte sie die Zahl zu, die sie gebracht hat — derselbe
+      // Grund wie beim Häkchen, dessen Feier auf die Münzen wartet.
+      useTallView(tester);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await bestehen(tester, container, abwarten: false);
+      await tester.pump(LessonResultView.zaehlen ~/ 2);
+      expect(find.byType(AbilityUnlockSheet), findsNothing);
+
+      await tester.pumpAndSettle();
+      expect(find.byType(AbilityUnlockSheet), findsOneWidget);
+    });
 
     testWidgets('bestanden feiert die Fähigkeit', (tester) async {
       useTallView(tester);
