@@ -100,6 +100,15 @@ abstract final class PitBot {
       SlowAround() || DamageOverTime() || Dash() => nah >= 2,
       SelfBuff() || Companion() || Trap() => nah >= 1,
       RandomOf() => nah >= 1 || welt.heroHpRatio < 0.5,
+      // ADR-0074. Der Bot springt nicht und pariert nicht gezielt; er
+      // drückt, sobald jemand nah ist — eine untere Schranke wie immer.
+      ChainBolt() || Stacking() => true,
+      StunAround() => nah >= 2,
+      Blink() || Vanish() => nah >= 3 && welt.heroHpRatio < 0.5,
+      Parry() => nah >= 1,
+      Overdrive() => nah >= 1,
+      Rewind() => welt.heroHpRatio < 0.35,
+      PitPassive() => false,
     };
   }
 

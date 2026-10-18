@@ -219,24 +219,52 @@ ohne Rückfrage festgelegt wurde:
 
 ## AktivesBrett
 
+Am 16.10. mit Claude zusammengestellt und gebaut
+([ADR-0074](../decisions/0074-aktivesbretts-faehigkeiten.md)). Die Liste
+war Claudes Vorschlag; AktivesBrett hat sie übernommen, Spiegelbild auf
+Episch gesetzt und Bestform und Rückspulen als Ultimates gewählt.
+
 ### Fähigkeiten
 
 | # | Name | Bausteine | Ziel | Mana | Abklingzeit | Seltenheit | Quelle | Farbe | Icon / Animation |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | | | |
-| 2 | | | | | | | | | |
-| 3 | | | | | | | | | |
-| 4 | | | | | | | | | |
-| 5 | | | | | | | | | |
-| 6 | | | | | | | | | |
-| 7 | | | | | | | | | |
-| 8 | | | | | | | | | |
-| 9 | | | | | | | | | |
-| 10 | | | | | | | | | |
+| 1 | Zinseszins | **Stacking** + Schlag 0,8 × Angriff: jede Wiederholung binnen 4 s trifft 20 % härter, bis 5-mal | Richtung | 10 | 2 s | Gewöhnlich | „Zwei Minuten reichen“ | klinge | Klinge vor drei wachsenden Säulen |
+| 2 | Schattenschritt | **Blink** bis 4 Felder + **Unsichtbarkeit** 2 s; der erste Treffer daraus ×1,5 | Richtung | 18 | 9 s | Ungewöhnlich | „Warum keiner hilft“ | seele | eine Gestalt mit Streifen dahinter; der Held wird durchscheinend |
+| 3 | Kampfrausch | **Passiv**, **Rage**: je eingesteckten Treffer +4 %, bis 10-mal, fällt nach 4 s ohne Treffer ab | — | — | — | Selten | „Gefühle regulieren“ | lava | drei Klauenhiebe; Glutpunkte um den Helden, einer je Treffer |
+| 4 | Kriegsschrei | **Stun** um den Helden (2 Felder) 0,8 s + Self-Buff Angriff +20 %, 6 s | um den Helden | 24 | 15 s | Selten | „Wie ein Muskel wächst“ | blitz | ein Horn, aus dem drei Bögen schallen |
+| 5 | Spiegelbild | **Begleiter** als Abbild: bleibt 10 s stehen, wo man es ruft, und schlägt mit dem Grundangriff zu halbem Schaden | selbst | 28 | 22 s | **Episch** | „Sich selbst testen“ | seele | zwei Gestalten am Spiegel; im Kampf der Held noch einmal, durchscheinend |
+| 6 | Parade | **Parade**: 0,6 s offen, fängt einen Treffer ganz ab, der Angreifer steht 1,5 s | selbst | 12 | 6 s | Ungewöhnlich | „Eine Überschrift ist keine Studie“ | schutz | ein Schild, an dem eine Klinge abprallt; ein Bogen vor dem Helden |
+| 7 | Ruhepuls | **Passiv**: 1 s ohne eigenen Treffer, und Mana kommt 40 % schneller | — | — | — | Gewöhnlich | „Schlaf & Regeneration“ | zeit | ein Herz mit Pulslinie |
+| 8 | Kettenblitz | Geschoss 1,0 × Angriff, **springt** auf bis zu 3 weitere, je ×0,75 | Richtung | 22 | 6 s | Selten | „Medien & Information“ | blitz | ein Blitz und zwei kleine; im Kampf ein Faden je Sprung |
+| 9 | Rammbock | **Dash** 3 Felder **mit Aufprall**: 1,2 × Angriff, 1,5 Felder zur Seite, 0,5 s Stillstand | Richtung | 20 | 9 s | Ungewöhnlich | „Technik vor Gewicht“ | sand | ein Balken mit Eisenkopf und Fahrtstreifen |
+| 10 | Zweiter Atem | **Passiv**, einmal je Lauf: unter 20 % Leben heilt 25 % und 2 s halber Schaden | — | — | — | Episch | 7 Tage Kette | natur | ein grüner Kreis mit Plus; ein grüner Ring, wenn er greift |
 
 ### Ultimates
 
 | # | Name | Bausteine | Ziel | Quelle | Icon / Animation |
 |---|---|---|---|---|---|
-| U1 | | | | | |
-| U2 | | | | | |
+| U1 | Bestform | 8 s: Fähigkeiten +40 %, kein Mana, Abklingzeit ×2 so schnell, Grundangriff +25 % (die Grenze), 40 % weniger Schaden | selbst | Errungenschaft „Sieben Tage in Form“ (sieben Tagestruhen) | ein goldener Stern; ein pulsierender goldener Doppelring |
+| U2 | Rückspulen | zurück an Ort und Leben von vor 4 s, nie mit weniger Leben; 1,5 s unverwundbar | selbst | „Erinnerung ist kein Video“ | eine Uhr mit Pfeil gegen den Uhrzeigersinn; ein Zeitring |
+
+### Festgelegt beim Bau
+
+- **Die Grenze des Grundangriffs** ist jetzt `ActionBalance.weaponBuffCap`
+  (1,25), für alles zusammen. Bestform und Kampfrausch treffen mit
+  Fähigkeiten voll, mit dem Grundangriff höchstens bis dahin.
+- **Blink** landet vor jeder Wand und vor dem Tor. Ohne Gegner in Sicht
+  springt er dorthin, wohin der Held schaut — ein Ausweg ist kein
+  verfehlter Wurf.
+- **Unsichtbar** handeln Gegner nicht; **der Wächter schon**.
+- **Parade** fängt auch Pfeile, dann steht der Schütze. Gegen Flächen
+  hilft sie nicht.
+- **Kettenblitz** springt nur auf Gegner, die vom Einschlag aus zu sehen
+  sind, und keinen zweimal.
+- **Rückspulen** geht nie über ein Tor zurück, das seitdem zugefallen
+  ist, und nie in einen Fels; dann gibt es nur das Leben zurück.
+- **Das Spiegelbild** erscheint links neben dem Helden und **bleibt
+  dort stehen** (AktivesBrett am 18.10.: „soll da stehen bleiben, wo
+  man die Fähigkeit gedrückt hat“); es schlägt im Takt seiner Waffe von
+  seinem Platz aus, und seine Kills laden die Ultimate nicht, wie beim
+  Falken.
+- **Die Bilder** sind gezeichnet (`tool/faehigkeit_icons.py`), nicht
+  aus dem Raven-Paket.

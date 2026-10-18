@@ -70,10 +70,16 @@ void main() {
     });
 
     test('jede Move-Id existiert in package:combat', () {
+      // Auch eine Ultimate (seit ADR-0074 die Bestform), die `byId` nicht
+      // findet, weil sie auf keinem der drei Plätze liegt.
       for (final achievement in AchievementCatalog.all) {
         final id = achievement.moveId;
         if (id == null) continue;
-        expect(PitAbilities.byId(id), isNotNull, reason: achievement.id);
+        expect(
+          PitAbilities.byId(id) ?? PitAbilities.ultimateById(id),
+          isNotNull,
+          reason: achievement.id,
+        );
       }
     });
 
@@ -101,8 +107,9 @@ void main() {
       for (final ability in AbilityCatalog.choosable) {
         expect(ids.add(ability.moveId), isTrue, reason: ability.moveId);
       }
-      // Neunzehn bis ADR-0073, seitdem Frederiks zehn dazu.
-      expect(AbilityCatalog.choosable, hasLength(29));
+      // Neunzehn bis ADR-0073, seitdem Frederiks zehn dazu, seit ADR-0074
+      // AktivesBretts zehn.
+      expect(AbilityCatalog.choosable, hasLength(39));
     });
   });
 
@@ -241,9 +248,10 @@ void main() {
     // Vergleich gibt die Reihe 2775 und 1110 (ADR-0032). Die
     // Errungenschaften sollen daneben stehen, nicht darüber.
     test('er ist gedeckelt und kleiner als die Reihe', () {
-      // Seit ADR-0073 mit „Zehn Truhen“: 75 und 25 mehr.
-      expect(AchievementCatalog.lifetimeXp, 1755);
-      expect(AchievementCatalog.lifetimeGold, 585);
+      // Seit ADR-0073 mit „Zehn Truhen“: 75 und 25 mehr; seit ADR-0074
+      // mit „Sieben Tage in Form“ noch einmal so viel.
+      expect(AchievementCatalog.lifetimeXp, 1830);
+      expect(AchievementCatalog.lifetimeGold, 610);
       expect(AchievementCatalog.lifetimeXp, lessThan(LadderRewards.lifetimeXp));
       expect(
         AchievementCatalog.lifetimeGold,

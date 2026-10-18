@@ -38,6 +38,17 @@ class NeueArtenBild {
         );
       case BossStunNotched(:final at, :final stunned):
         if (stunned) _blitze.add(_Blitz.ring(at, Palette.tintStern, 50));
+      // --- ADR-0074 ---
+      case HeroBlinked(:final from, :final to, :final rewind):
+        final farbe = rewind ? Palette.tintZeit : Palette.tintSeele;
+        _blitze.add(_Blitz.ring(from, farbe, 18));
+        _blitze.add(_Blitz.faden(from, to, farbe: farbe));
+      case AttackParried(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSchutz, 26));
+      case ChainJumped(:final from, :final to):
+        _blitze.add(_Blitz.faden(from, to, farbe: Palette.tintBlitz));
+      case LastStandTriggered(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintNatur, 44));
       default:
         return false;
     }
@@ -113,6 +124,7 @@ class NeueArtenBild {
   void drawOben(Canvas canvas, ActionWorld welt) {
     _status(canvas, welt);
     _begleiter(canvas, welt);
+    _heldenZustand(canvas, welt);
     if (welt.isBuffed) {
       final held = welt.heroView;
       canvas.drawCircle(
@@ -174,10 +186,67 @@ class NeueArtenBild {
     }
   }
 
-  /// Der Falke kreist über dem Helden, die Pflanze steht und atmet.
+  /// Was AktivesBretts Fähigkeiten am Helden zeigen (ADR-0074): eine
+  /// offene Parade als Schild davor, Bestform als goldener Doppelring,
+  /// unverwundbar als Zeitring, Kampfrausch als Glut je Treffer.
+  void _heldenZustand(Canvas canvas, ActionWorld welt) {
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+    Paint ring(Color farbe, double breite) => Paint()
+      ..color = farbe
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = breite;
+
+    if (welt.isParrying) {
+      final blick = held.facing;
+      final winkel = math.atan2(blick.y, blick.x);
+      canvas.drawArc(
+        Rect.fromCircle(center: mitte, radius: held.radius + 9),
+        winkel - 0.9,
+        1.8,
+        false,
+        ring(Palette.tintSchutz, 3),
+      );
+    }
+    if (welt.isOverdriven) {
+      final puls = 1 + 0.08 * math.sin(welt.elapsed * 8);
+      canvas.drawCircle(
+        mitte,
+        (held.radius + 10) * puls,
+        ring(Palette.rahmenGoldHell, 2),
+      );
+      canvas.drawCircle(
+        mitte,
+        (held.radius + 14) * puls,
+        ring(Palette.rahmenGoldHell.withValues(alpha: 0.6), 1.5),
+      );
+    }
+    if (welt.isInvulnerable) {
+      canvas.drawCircle(
+        mitte,
+        held.radius + 12,
+        ring(Palette.tintZeit.withValues(alpha: 0.8), 2.5),
+      );
+    }
+    final rausch = welt.rageStacks;
+    for (var i = 0; i < rausch; i++) {
+      final winkel = welt.elapsed * 2 + i * 2 * math.pi / 10;
+      canvas.drawCircle(
+        Offset(
+          mitte.dx + math.cos(winkel) * (held.radius + 5),
+          mitte.dy + math.sin(winkel) * (held.radius + 5),
+        ),
+        1.6,
+        Paint()..color = Palette.tintLava,
+      );
+    }
+  }
+
+  /// Der Falke kreist über dem Helden, die Pflanze steht und atmet. Das
+  /// Spiegelbild zeichnet `ActionGame` als Figur.
   void _begleiter(Canvas canvas, ActionWorld welt) {
     final begleiter = welt.companion;
-    if (begleiter == null) return;
+    if (begleiter == null || begleiter.mirror) return;
     final farbe = tintColor(begleiter.tint);
     final deckkraft = begleiter.remaining < 0.1
         ? begleiter.remaining * 10

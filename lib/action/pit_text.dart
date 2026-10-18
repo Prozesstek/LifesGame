@@ -35,6 +35,7 @@ String? pitSummaryOf(String id) {
 /// „12 Mana · 1,5 s — Ein Funke fliegt geradeaus."
 String pitAbilitySummary(PitAbility ability) {
   if (ability.isUltimate) return 'Ultimate — ${ability.description}';
+  if (ability.isPassive) return ability.description;
   final kosten = ability.manaCost == 0
       ? 'kein Mana'
       : '${ability.manaCost} Mana';
@@ -76,8 +77,17 @@ typedef PitStat = ({String label, String value});
 /// alten `move_help.dart`: Was sich ausrechnen lässt, wird ausgerechnet.
 List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
   final stats = <PitStat>[
-    (label: 'Art', value: ability.isUltimate ? 'Ultimate' : ability.kind.label),
-    if (ability.isUltimate)
+    (
+      label: 'Art',
+      value: ability.isUltimate
+          ? 'Ultimate'
+          : ability.isPassive
+          ? 'Passiv — wirkt dauernd, ohne Knopf'
+          : ability.kind.label,
+    ),
+    if (ability.isPassive)
+      ...<PitStat>[]
+    else if (ability.isUltimate)
       (
         label: 'Lädt sich',
         value:
@@ -91,7 +101,7 @@ List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
       ),
       (label: 'Abklingzeit', value: '${pitNumber(ability.cooldown)} s'),
     ],
-    (label: 'Zielen', value: _zielen(ability.aim)),
+    if (!ability.isPassive) (label: 'Zielen', value: _zielen(ability.aim)),
   ];
 
   // **Reichweite und Umkreis stehen einmal oben**, nicht an jeder
@@ -221,11 +231,24 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
             '${_schaden(perSecond, attack)} je Sekunde, '
             '${pitNumber(seconds)} s',
       ));
-    case Dash(:final distance, :final trailPerSecond, :final trailSeconds):
+    case Dash(
+      :final distance,
+      :final trailPerSecond,
+      :final trailSeconds,
+      :final impactPower,
+      :final impactStun,
+    ):
       stats.add((
         label: 'Sturm',
         value: '${distance.round()} weit, durch Gegner',
       ));
+      if (impactPower > 0) {
+        stats.add((label: 'Rammt', value: _schaden(impactPower, attack)));
+        stats.add((
+          label: 'Stillstand',
+          value: '${pitNumber(impactStun)} s, zur Seite geworfen',
+        ));
+      }
       if (trailPerSecond > 0) {
         stats.add((
           label: 'Spur',
@@ -281,6 +304,14 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
         label: 'Liegt',
         value: '${pitNumber(seconds)} s, höchstens ${ActionBalance.maxTraps}',
       ));
+    case Companion(:final power, :final seconds, mirror: true):
+      stats.add((
+        label: 'Abbild',
+        value:
+            'bleibt stehen, wo du es rufst, und schlägt mit deinem '
+            'Grundangriff zu ${(power * 100).round()} %, '
+            '${pitNumber(seconds)} s lang',
+      ));
     case Companion(
       :final power,
       :final interval,
@@ -314,6 +345,112 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
       stats.add((
         label: 'Gefroren',
         value: '${pitNumber(stunSeconds)} s; der nächste Treffer ist kritisch',
+      ));
+    // --- ADR-0074 ---
+    case Blink(:final distance):
+      stats.add((
+        label: 'Sprung',
+        value: 'bis ${distance.round()}, nie durch Wand oder Tor',
+      ));
+    case Vanish(:final seconds, :final ambush):
+      stats.add((
+        label: 'Unsichtbar',
+        value: '${pitNumber(seconds)} s, bis zum ersten eigenen Treffer',
+      ));
+      if (ambush > 1) {
+        stats.add((
+          label: 'Erster Treffer',
+          value: '×${pitNumber(ambush)} Schaden',
+        ));
+      }
+    case StunAround(:final seconds):
+      stats.add((
+        label: 'Stillstand',
+        value: '${pitNumber(seconds)} s für alle im Umkreis',
+      ));
+    case Parry(:final seconds, :final stunSeconds):
+      stats.add((
+        label: 'Parade',
+        value: '${pitNumber(seconds)} s offen, fängt einen Treffer ganz ab',
+      ));
+      stats.add((
+        label: 'Stillstand',
+        value: '${pitNumber(stunSeconds)} s für den Angreifer',
+      ));
+    case Stacking(:final step, :final window, :final maxStacks):
+      stats.add((
+        label: 'Zinseszins',
+        value:
+            '+${(step * 100).round()} % je Wiederholung binnen '
+            '${pitNumber(window)} s, bis $maxStacks×',
+      ));
+    case ChainBolt(:final power, :final jumps, :final falloff):
+      stats.add((label: 'Schaden', value: _schaden(power, attack)));
+      stats.add((
+        label: 'Springt',
+        value:
+            'auf bis zu $jumps weitere, je ${(falloff * 100).round()} % '
+            'der Wucht davor',
+      ));
+    case Overdrive(
+      :final seconds,
+      :final abilityPower,
+      :final attackPower,
+      :final cooldownRate,
+    ):
+      stats.add((
+        label: 'Bestform',
+        value:
+            '${pitNumber(seconds)} s: Fähigkeiten '
+            '+${((abilityPower - 1) * 100).round()} %, ohne Mana, '
+            'Abklingzeit ×${pitNumber(cooldownRate)} so schnell',
+      ));
+      stats.add((
+        label: 'Grundangriff',
+        value: '+${((attackPower - 1) * 100).round()} %',
+      ));
+    case Rewind(:final seconds, :final invulnerableSeconds):
+      stats.add((
+        label: 'Zurück',
+        value: 'an Ort und Leben von vor ${pitNumber(seconds)} s',
+      ));
+      stats.add((
+        label: 'Unverwundbar',
+        value: '${pitNumber(invulnerableSeconds)} s',
+      ));
+    case RageOnHit(:final perHit, :final maxStacks, :final decaySeconds):
+      stats.add((
+        label: 'Kampfrausch',
+        value:
+            '+${(perHit * 100).round()} % je eingesteckten Treffer, bis '
+            '$maxStacks×; fällt nach ${pitNumber(decaySeconds)} s ab',
+      ));
+    case RestMana(:final factor, :final idleSeconds):
+      stats.add((
+        label: 'Ruhepuls',
+        value:
+            'Mana ${((factor - 1) * 100).round()} % schneller nach '
+            '${pitNumber(idleSeconds)} s ohne eigenen Treffer',
+      ));
+    case LastStand(
+      :final threshold,
+      :final heal,
+      :final wardFactor,
+      :final wardSeconds,
+    ):
+      stats.add((
+        label: 'Zweiter Atem',
+        value: 'einmal je Lauf unter ${(threshold * 100).round()} % Leben',
+      ));
+      stats.add((
+        label: 'Heilung',
+        value: '${(heal * 100).round()} % der vollen Gesundheit',
+      ));
+      stats.add((
+        label: 'Schutz',
+        value:
+            '${((1 - wardFactor) * 100).round()} % weniger Schaden, '
+            '${pitNumber(wardSeconds)} s',
       ));
   }
 }

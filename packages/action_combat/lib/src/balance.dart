@@ -669,4 +669,24 @@ abstract final class ActionBalance {
 
   /// Wie gross eine Falle ist — wer sie berührt, löst sie aus.
   static const double trapRadius = 12;
+
+  // --- AktivesBretts Arten (ADR-0074) ---
+
+  /// **Die Grenze für den Grundangriff**: Alle Stärkungen zusammen —
+  /// Self-Buff, Rage, Bestform — machen ihn höchstens so viel härter.
+  /// Ein Faktor auf das, was jede halbe Sekunde fällt, entschiede sonst
+  /// den Kampf allein (ADR-0009, ADR-0073). Fähigkeiten trifft sie nicht.
+  static const double weaponBuffCap = 1.25;
+
+  /// Wie weit ein Blink vor einem Gegner, auf den er zielt, stehen
+  /// bleibt — er landet daneben, nicht in ihm.
+  static const double blinkGap = 6;
+
+  /// Wie weit neben dem Helden das Spiegelbild erscheint — dort bleibt
+  /// es dann stehen.
+  static const double mirrorOffset = 26;
+
+  /// Wie oft Rückspulen sich merkt, wo der Held stand: alle so viele
+  /// Sekunden ein Bild.
+  static const double rewindSampleSeconds = 0.1;
 }

@@ -11,6 +11,7 @@
 //     dart run tool/pit_sim.dart          # 12 Läufe je Feld
 //     dart run tool/pit_sim.dart 40
 //     dart run tool/pit_sim.dart mana     # nur: bremst Mana?
+//     dart run tool/pit_sim.dart faehigkeiten   # nur: je Fähigkeit
 
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
@@ -23,6 +24,11 @@ void main(List<String> args) {
   // `mana` als erstes Argument rechnet nur die Mana-Tabelle (ADR-0073).
   if (args.isNotEmpty && args.first == 'mana') {
     _mana(args.length > 1 ? int.parse(args[1]) : 12);
+    return;
+  }
+  // `faehigkeiten` rechnet nur die Tabelle je Fähigkeit (ADR-0074).
+  if (args.isNotEmpty && args.first == 'faehigkeiten') {
+    _jeFaehigkeit(args.length > 1 ? int.parse(args[1]) : 12);
     return;
   }
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
@@ -185,6 +191,92 @@ PitManaLog _manaLauf(
     log.addRun(welt);
   }
   return log;
+}
+
+/// **Je Fähigkeit** (ADR-0074): Was trägt eine einzelne? Sie ersetzt den
+/// Funkenstoß im Satz „+F“ — Steinhaut und Blütentau bleiben —, an Tag 30
+/// auf Stufe 11 und 13. Darunter jede Ultimate, zusätzlich zu „+F“.
+///
+/// **Der Bot ist dumm**: Er springt nicht gezielt, pariert nicht im
+/// richtigen Augenblick und spult nicht zurück, wenn es sich lohnt. Wer
+/// zielt, liegt darüber; die Zahlen sind eine untere Schranke, und ein
+/// Abstand zwischen zwei Zeilen sagt mehr als die Zeile selbst.
+void _jeFaehigkeit(int laeufe) {
+  final stats = _statsNach(30);
+  const bogen = 'basic_attack';
+  const rest = <String>['steinhaut', 'bluetentau'];
+  const stufen = <int>[11, 13];
+
+  print(
+    'Je Fähigkeit — Tag 30, statt Funkenstoß neben Steinhaut und '
+    'Blütentau, $laeufe Läufe je Feld\n',
+  );
+  final kopf = StringBuffer('  ${''.padRight(26)}');
+  for (final stufe in stufen) {
+    kopf.write('Stufe $stufe'.padLeft(10));
+  }
+  print(kopf);
+
+  for (final ability in PitAbilities.all) {
+    if (rest.contains(ability.id)) continue;
+    final zeile = StringBuffer('  ${ability.name.padRight(26)}');
+    for (final stufe in stufen) {
+      final quote = _siegquote(
+        stufe,
+        stats,
+        bogen,
+        <String>[ability.id, ...rest],
+        null,
+        laeufe,
+      );
+      zeile.write('$quote %'.padLeft(10));
+    }
+    print(zeile);
+  }
+
+  print('\n  Ultimate, zusätzlich zu Funkenstoß, Steinhaut, Blütentau');
+  for (final ult in <PitAbility?>[null, ...PitAbilities.ultimates]) {
+    final zeile = StringBuffer('  ${(ult?.name ?? 'ohne').padRight(26)}');
+    for (final stufe in stufen) {
+      final quote = _siegquote(
+        stufe,
+        stats,
+        bogen,
+        const <String>['funkenstoss', ...rest],
+        ult?.id,
+        laeufe,
+      );
+      zeile.write('$quote %'.padLeft(10));
+    }
+    print(zeile);
+  }
+  print('');
+}
+
+int _siegquote(
+  int stufe,
+  ActionStats stats,
+  String waffe,
+  List<String> faehigkeiten,
+  String? ultimate,
+  int laeufe,
+) {
+  var siege = 0;
+  for (var seed = 0; seed < laeufe; seed++) {
+    final stage = PitStage(stufe);
+    final welt = ActionWorld(
+      level: LevelBuilder.build(stage: stage, seed: seed),
+      heroStats: stats,
+      stage: stage,
+      abilityIds: faehigkeiten,
+      ultimateId: ultimate,
+      weaponMoveId: waffe,
+      seed: seed,
+    );
+    PitBot.play(welt);
+    if (welt.isWon) siege++;
+  }
+  return (siege * 100 / laeufe).round();
 }
 
 /// Dieselbe Rechnung mit **einer festen Rolle** der Besetzung (ADR-0062):

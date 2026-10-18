@@ -89,6 +89,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: hypertrophiePage,
       iconId: 'muscle',
       parentIds: <String>['kraft-muskulatur'],
+      unlocksAbility: 'kriegsschrei',
     ),
     const TheoryNode(
       id: 'kraft-intensitaet',
@@ -108,6 +109,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: technikPage,
       iconId: 'technique',
       parentIds: <String>['kraft-muskulatur'],
+      unlocksAbility: 'rammbock',
     ),
     const TheoryNode(
       id: 'kraft-muskelkater',
@@ -171,6 +173,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: schlafRegenerationPage,
       iconId: 'moon',
       parentIds: <String>['koerper'],
+      unlocksAbility: 'ruhepuls',
     ),
     TheoryNode(
       id: 'koerper-schlaf',
@@ -234,18 +237,21 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: bystanderPage,
       iconId: 'bystander',
       parentIds: <String>['geist-psychologie'],
+      unlocksAbility: 'schattenschritt',
     ),
     const TheoryNode(
       id: 'psychologie-gedaechtnis',
       lesson: gedaechtnisPage,
       iconId: 'memory',
       parentIds: <String>['geist-psychologie'],
+      unlocksAbility: 'rueckspulen',
     ),
     const TheoryNode(
       id: 'psychologie-emotionen',
       lesson: emotionenPage,
       iconId: 'emotion',
       parentIds: <String>['geist-psychologie'],
+      unlocksAbility: 'kampfrausch',
     ),
     const TheoryNode(
       id: 'selbstentwicklung',
@@ -322,6 +328,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: habitsBranch.lessons[2],
       iconId: 'intervals',
       parentIds: const <String>['gewohnheiten-vier-regeln'],
+      unlocksAbility: 'zinseszins',
     ),
     TheoryNode(
       id: 'gewohnheiten-nie-zweimal',
@@ -402,6 +409,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: wissenschaftBranch.lessons[2],
       iconId: 'flask',
       parentIds: const <String>['wissenschaftliches-denken'],
+      unlocksAbility: 'spiegelbild',
     ),
     const TheoryNode(
       id: 'wissenschaft-stichprobe',
@@ -414,6 +422,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: studieLesenPage,
       iconId: 'news',
       parentIds: <String>['wissenschaftliches-denken'],
+      unlocksAbility: 'parade',
     ),
 
     // ----------------------------------------------------------------
@@ -457,6 +466,7 @@ final TheoryGraph theoryGraph = TheoryGraph(
       lesson: medienPage,
       iconId: 'media',
       parentIds: <String>['gesellschaft'],
+      unlocksAbility: 'kettenblitz',
     ),
     const TheoryNode(
       id: 'gesellschaft-vergleich',

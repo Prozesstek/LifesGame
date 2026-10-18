@@ -58,6 +58,13 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Faehigkeiten/Eisball.png` | fc1009 |
 | `Faehigkeiten/Wassergrube.png` | fc786 |
 | `Faehigkeiten/FleischfressendePflanze.png` | fc263 |
+
+**Nicht aus dem Paket** sind die zwölf Bilder zu AktivesBretts
+Fähigkeiten (ADR-0074): Zinseszins, Schattenschritt, Kampfrausch,
+Kriegsschrei, Spiegelbild, Parade, Ruhepuls, Kettenblitz, Rammbock,
+ZweiterAtem, Bestform, Rueckspulen. Sie sind gezeichnet von
+`tool/faehigkeit_icons.py` und gehören dem Projekt; wer ein Raven-Bild
+lieber hat, legt es an dieselbe Stelle.
 | `Waffen/Boegen/Kurzbogen.png` | fc1781 |
 | `Waffen/Schwerter/Uebungsklinge.png` | fc1777 |
 | `Waffen/Kolben/Streitkolben.png` | fc1702 |
