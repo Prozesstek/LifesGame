@@ -806,6 +806,132 @@ void main() {
           .state<AufstiegHostState>(find.byType(AufstiegHost))
           .konfettiInDerLuft;
 
+      group('Das Rätsel vor der Seite', () {
+        const seite = hypertrophiePage;
+        final raetsel = seite.teaser!;
+
+        Future<void> pumpeSeite(
+          WidgetTester tester,
+          ProviderContainer container,
+        ) async {
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: const MaterialApp(home: LessonScreen(lesson: seite)),
+            ),
+          );
+          await tester.pump();
+        }
+
+        testWidgets('kommt vor dem Text, und weiter geht es erst nach '
+            'einer Schätzung', (tester) async {
+          useTallView(tester);
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
+          await pumpeSeite(tester, container);
+
+          expect(find.text('Was schätzt du?'), findsOneWidget);
+          expect(find.text(raetsel.prompt), findsOneWidget);
+          expect(find.text(seite.sections.first.heading), findsNothing);
+          final knopf = tester.widget<FilledButton>(
+            find.ancestor(
+              of: find.text('Weiter'),
+              matching: find.byType(FilledButton),
+            ),
+          );
+          expect(knopf.onPressed, isNull);
+        });
+
+        testWidgets('daneben ist überraschend, nicht falsch — und zählt '
+            'nicht', (tester) async {
+          useTallView(tester);
+          final mitschrift = _Mitschrift();
+          final container = ProviderContainer(
+            overrides: [soundPlayerProvider.overrideWithValue(mitschrift)],
+          );
+          addTearDown(container.dispose);
+          await pumpeSeite(tester, container);
+
+          final daneben = raetsel.options.firstWhere(
+            (o) => o != raetsel.options[raetsel.correctIndex],
+          );
+          await tester.tap(find.text(daneben));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Überraschend, oder?'), findsOneWidget);
+          expect(find.text(raetsel.explanation), findsOneWidget);
+          expect(find.text('Nicht ganz'), findsNothing);
+          expect(find.byIcon(Icons.close), findsNothing);
+          expect(mitschrift.gespielt, isEmpty);
+          expect(
+            container.read(theoryProgressProvider).recordFor(seite.id),
+            isNull,
+          );
+
+          await tester.tap(find.text('Weiter'));
+          await tester.pumpAndSettle();
+          expect(find.text(seite.sections.first.heading), findsOneWidget);
+        });
+
+        testWidgets('gut geschätzt klingt den ersten Ton', (tester) async {
+          useTallView(tester);
+          final mitschrift = _Mitschrift();
+          final container = ProviderContainer(
+            overrides: [soundPlayerProvider.overrideWithValue(mitschrift)],
+          );
+          addTearDown(container.dispose);
+          await pumpeSeite(tester, container);
+
+          await tester.tap(find.text(raetsel.options[raetsel.correctIndex]));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Gut geschätzt'), findsOneWidget);
+          expect(mitschrift.gespielt, <SoundEffect>[SoundEffect.ton1]);
+        });
+
+        testWidgets('„Nochmal“ fängt bei den Fragen an, nicht beim Rätsel', (
+          tester,
+        ) async {
+          useTallView(tester);
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
+          await pumpeSeite(tester, container);
+          await zuDenFragen(tester, seite);
+
+          for (var i = 0; i < seite.questionCount; i++) {
+            final frage = seite.questions.firstWhere(
+              (q) => find.text(q.prompt).evaluate().isNotEmpty,
+            );
+            await tester.tap(
+              find.text(
+                frage.options[(frage.correctIndex + 1) % frage.options.length],
+              ),
+            );
+            await tester.pumpAndSettle();
+            final letzte = i == seite.questionCount - 1;
+            await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
+            await tester.pumpAndSettle();
+          }
+          while (find.textContaining('Noch einmal').evaluate().isNotEmpty) {
+            final frage = seite.questions.firstWhere(
+              (q) => find.text(q.prompt).evaluate().isNotEmpty,
+            );
+            await tester.tap(find.text(frage.options[frage.correctIndex]));
+            await tester.pumpAndSettle();
+            await tester.tap(find.text('Weiter'));
+            await tester.pumpAndSettle();
+          }
+          await tester.tap(find.text('Nochmal'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Was schätzt du?'), findsNothing);
+          expect(
+            find.text('Frage 1 von ${seite.questionCount}'),
+            findsOneWidget,
+          );
+        });
+      });
+
       testWidgets('der Text kommt in Häppchen', (tester) async {
         expect(
           _first.sections.length,

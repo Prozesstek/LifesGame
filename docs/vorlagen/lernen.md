@@ -99,6 +99,13 @@ daraus **gerechnet**, nicht gespeichert (ADR-0008, ADR-0011).
 
 ## 2. Die Fragen prüfen Wiedererkennen, nicht Erinnern
 
+> **„Frage vor dem Text“ gebaut am 18.10.2026, als Probe an Kraft &
+> Muskulatur** (`state.md`): ein **Rätsel** vor jeder Seite, geschätzt
+> und nicht gewertet (`Lesson.teaser`). Es ist keine der drei Fragen der
+> Seite, sondern eine eigene, die neugierig machen soll. Dazu ist dort
+> die zweite Frage ein **Fall** — eine Situation, in der das Gelesene
+> angewendet wird.
+
 Vier sichtbare Optionen sind der schwächste Abruf, den es gibt. Drei
 Änderungen, alle an der Oberfläche, **keine am Inhalt**:
 

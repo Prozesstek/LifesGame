@@ -51,14 +51,7 @@ class ShuffledLesson {
 
       fragen.add(
         ShuffledQuestion(
-          question: Question(
-            prompt: frage.prompt,
-            options: <String>[
-              for (final k in reihenfolge) frage.options[k],
-            ],
-            correctIndex: reihenfolge.indexOf(frage.correctIndex),
-            explanation: frage.explanation,
-          ),
+          question: _neuGeordnet(frage, reihenfolge),
           lessonIndex: i,
           optionOrder: reihenfolge,
         ),
@@ -95,4 +88,24 @@ class ShuffledLesson {
 
     return zurueck;
   }
+}
+
+/// Mischt nur die Antworten von [frage] — für das Rätsel vor einer Seite
+/// (`Lesson.teaser`). Es zählt zu keiner Lektion und braucht deshalb
+/// keine Rückübersetzung.
+Question shuffleOptions(Question frage, Random random) {
+  final reihenfolge = List<int>.generate(frage.options.length, (k) => k)
+    ..shuffle(random);
+  return _neuGeordnet(frage, reihenfolge);
+}
+
+/// [frage] mit ihren Antworten in [reihenfolge]; die richtige zeigt auf
+/// dieselbe Antwort an ihrer neuen Stelle.
+Question _neuGeordnet(Question frage, List<int> reihenfolge) {
+  return Question(
+    prompt: frage.prompt,
+    options: <String>[for (final k in reihenfolge) frage.options[k]],
+    correctIndex: reihenfolge.indexOf(frage.correctIndex),
+    explanation: frage.explanation,
+  );
 }

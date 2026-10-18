@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 830 Tests
+flutter test                       # 834 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
@@ -54,7 +54,7 @@ cd packages/gear
 dart test                          # 118 Tests, prüft Preise, Sets, Würfel, Laden und Beute
 
 cd packages/theory
-dart test                          # 193 Tests, prüft auch den Inhalt
+dart test                          # 197 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 25 Tests, nur noch der Wortlaut
@@ -83,7 +83,7 @@ Danach `flutter doctor` bis alles grün ist.
 | Pfad | Inhalt | Tests |
 |---|---|---|
 | `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
-| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 193 |
+| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 197 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve | 44 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 324 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute | 118 |
@@ -91,7 +91,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/identity` | 13 Titel — nur ihr Wortlaut, Name | 25 |
 | `packages/achievements` | 20 Meilensteine, 8 Entdeckungen, Ruhm | 24 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 830 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Grube, Laden, Charakter, Errungenschaften | 834 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

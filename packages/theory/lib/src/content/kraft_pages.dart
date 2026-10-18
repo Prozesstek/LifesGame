@@ -6,6 +6,13 @@
 /// dem, was Übersichtsarbeiten recht einhellig zeigen, und sind bewusst
 /// als Größenordnung formuliert — „etwa", „meist" —, nicht als Rezept.
 ///
+/// **Die Probe für Rätsel und Fälle** (18.10.): Jede Seite hier öffnet
+/// mit einem Rätsel (`Lesson.teaser`), das vor dem Lesen geraten und
+/// nicht gewertet wird, und ihre **zweite Frage ist ein Fall** — eine
+/// Situation, in der das Gelesene angewendet wird, statt einen Satz
+/// daraus wiederzuerkennen. Trägt die Probe, bekommen alle Seiten diese
+/// Form.
+///
 /// **Entwürfe von Claude, gegengelesen von Frederik** (ADR-0050, Punkt 3).
 library;
 
@@ -15,6 +22,22 @@ const Lesson hypertrophiePage = Lesson(
   id: 'kraft-01-hypertrophie',
   title: 'Wie ein Muskel wächst',
   summary: 'Spannung, Menge und Baustoff — mehr braucht es nicht.',
+  teaser: Question(
+    prompt: 'Zwei Gruppen trainieren wochenlang dieselben Übungen. Die eine '
+        'schwer, mit etwa acht Wiederholungen je Satz, die andere leicht, '
+        'mit etwa dreißig. Beide gehen bis kurz vor die Grenze. Wer baut '
+        'mehr Muskeln auf?',
+    options: <String>[
+      'Die Gruppe mit dem schweren Gewicht',
+      'Die Gruppe mit den dreißig Wiederholungen',
+      'Beide etwa gleich viel',
+    ],
+    correctIndex: 2,
+    explanation:
+        'Beide etwa gleich viel — so kam es in Studien mit genau diesem '
+        'Aufbau heraus. Das Signal ist die Spannung am Ende des Satzes, '
+        'nicht die Zahl auf der Hantel.',
+  ),
   sections: <LessonSection>[
     LessonSection(
       heading: 'Spannung ist das Signal',
@@ -56,16 +79,18 @@ const Lesson hypertrophiePage = Lesson(
           'Zahl ist, dass der Satz nah an die Grenze geht.',
     ),
     Question(
-      prompt: 'Worauf kommt es bei der Trainingsmenge vor allem an?',
+      prompt: 'Jana trainiert die Beine einmal pro Woche mit drei lockeren '
+          'Sätzen und wundert sich, dass nichts wächst. Was bringt am '
+          'meisten?',
       options: <String>[
-        'Auf die harten Sätze je Muskel und Woche',
-        'Auf die Minuten, die man im Studio verbringt',
-        'Auf die Zahl der Übungen in einer Einheit',
+        'Mehr harte Sätze für die Beine pro Woche',
+        'Ein Eiweißshake direkt nach dem Training',
+        'Die Übungen jede Woche komplett tauschen',
       ],
       correctIndex: 0,
       explanation:
-          'Gezählt werden fordernde Sätze für einen Muskel über die Woche. '
-          'Zeit im Studio und Übungsvielfalt sagen darüber wenig.',
+          'Drei lockere Sätze sind zu wenig Reiz. Gezählt werden harte '
+          'Sätze je Muskel über die Woche — mehr davon bringt am meisten.',
     ),
     Question(
       prompt: 'Wie viel Eiweiß ist für Krafttraining ein guter Richtwert?',
@@ -86,6 +111,20 @@ const Lesson intensitaetPage = Lesson(
   id: 'kraft-02-intensitaet',
   title: 'Wie nah ans Versagen',
   summary: 'Ein harter Satz endet kurz vor der Grenze, nicht an ihr.',
+  teaser: Question(
+    prompt: 'Jemand hebt zum ersten Mal Gewichte und hört auf, sobald es '
+        'unangenehm wird. Wie viele saubere Wiederholungen wären meist '
+        'noch gegangen?',
+    options: <String>[
+      'Keine einzige mehr',
+      'Gerade noch eine',
+      'Oft noch mehrere',
+    ],
+    correctIndex: 2,
+    explanation:
+        'Oft noch mehrere. Unangenehm heißt nicht am Ende — wer anfängt, '
+        'schätzt seine Reserve fast immer zu niedrig ein.',
+  ),
   sections: <LessonSection>[
     LessonSection(
       heading: 'Wiederholungen in Reserve',
@@ -105,8 +144,8 @@ const Lesson intensitaetPage = Lesson(
     ),
     LessonSection(
       heading: 'Sich selbst einschätzen lernen',
-      body: 'Am Anfang schätzt man die Reserve fast immer zu hoch ein: Man '
-          'hört auf, wenn es unangenehm wird, nicht wenn es nicht mehr '
+      body: 'Am Anfang schätzt man die Reserve fast immer zu niedrig ein: '
+          'Man hört auf, wenn es unangenehm wird, nicht wenn es nicht mehr '
           'geht. Hin und wieder einen Satz bei einer sicheren Übung bis '
           'zur Grenze zu gehen, eicht das eigene Gefühl.',
     ),
@@ -125,22 +164,25 @@ const Lesson intensitaetPage = Lesson(
           'wäre Aufwärmen.',
     ),
     Question(
-      prompt: 'Warum muss nicht jeder Satz bis zum Versagen gehen?',
+      prompt: 'Max geht in jedem Satz bis zum völligen Versagen, auch bei '
+          'schweren Kniebeugen, und ist ständig erschöpft. Was ändert er '
+          'zuerst?',
       options: <String>[
-        'Weil Versagen den Muskel dauerhaft schädigt',
-        'Weil es kaum mehr bringt, aber viel mehr ermüdet',
-        'Weil Muskeln nur mit leichten Sätzen wachsen',
+        'Jeden Satz zusätzlich mit Schwung beenden',
+        'Ein bis zwei Wiederholungen vorher aufhören',
+        'Noch mehr Sätze bis zum Versagen machen',
       ],
       correctIndex: 1,
-      explanation: 'Die letzten Wiederholungen bis zum Versagen bringen wenig '
-          'zusätzlich und kosten viel Erholung — und oft saubere Technik.',
+      explanation: 'Ein Rest in Reserve kostet kaum Wachstum, spart aber viel '
+          'Erholung — und hält die Technik sauber, gerade bei schweren '
+          'Grundübungen.',
     ),
     Question(
       prompt: 'Wie schätzen Anfänger ihre Reserve meist ein?',
       options: <String>[
         'Genau richtig, das Gefühl täuscht selten',
-        'Zu niedrig, sie gehen ständig zu weit',
-        'Zu hoch, sie hören zu früh schon auf',
+        'Zu hoch, sie gehen ständig zu weit',
+        'Zu niedrig, sie hören zu früh schon auf',
       ],
       correctIndex: 2,
       explanation:
@@ -154,6 +196,16 @@ const Lesson trainingsplanungPage = Lesson(
   id: 'kraft-03-trainingsplanung',
   title: 'Den Plan bauen',
   summary: 'Ganzkörper oder Split — und warum das zweitrangig ist.',
+  teaser: Question(
+    prompt: 'Plan A ist auf dem Papier der beste, braucht aber fünf Abende pro '
+        'Woche. Plan B ist nur gut, passt aber in deine drei freien Abende. '
+        'Was bringt dir nach einem Jahr mehr?',
+    options: <String>['Plan A', 'Plan B', 'Beide gleich viel'],
+    correctIndex: 1,
+    explanation:
+        'Meist Plan B. Zwischen vernünftigen Plänen sind die Unterschiede '
+        'klein — zwischen durchgehalten und abgebrochen sind sie riesig.',
+  ),
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ganzkörper oder Split',
@@ -193,16 +245,17 @@ const Lesson trainingsplanungPage = Lesson(
           'passt sich den verfügbaren Tagen an.',
     ),
     Question(
-      prompt: 'Wie oft sollte ein Muskel pro Woche meist drankommen?',
+      prompt: 'Lea hat nur montags und donnerstags Zeit fürs Training. Welcher '
+          'Plan passt am besten zu ihr?',
       options: <String>[
-        'Mindestens zweimal',
-        'Genau einmal allein',
-        'Nur alle zwei Wochen',
+        'Ganzkörper: an beiden Tagen alle Muskeln',
+        'Ein Split: an jedem Tag andere Muskeln',
+        'Nur ein langer Tag, der zweite fällt weg',
       ],
       correctIndex: 0,
       explanation:
-          'Bei gleicher Gesamtmenge ist zweimal meist etwas besser: Die '
-          'Sätze verteilen sich, jede Einheit bleibt frischer.',
+          'Im Ganzkörperplan kommt jeder Muskel zweimal pro Woche dran — '
+          'meist etwas besser als einmal. Im Split wäre es nur einmal.',
     ),
     Question(
       prompt: 'Was entscheidet am meisten über den Erfolg eines Plans?',
@@ -222,6 +275,20 @@ const Lesson technikPage = Lesson(
   id: 'kraft-04-technik',
   title: 'Technik vor Gewicht',
   summary: 'Saubere Wiederholungen trainieren, was sie sollen.',
+  teaser: Question(
+    prompt: 'Bizepscurls im Vergleich: Anna nimmt weniger Gewicht und bewegt '
+        'den ganzen Weg. Ben nimmt mehr Gewicht, bewegt aber nur die obere '
+        'Hälfte. Wessen Bizeps wächst eher?',
+    options: <String>[
+      'Annas, mit dem ganzen Weg',
+      'Bens, mit mehr Gewicht',
+      'Beide genau gleich',
+    ],
+    correctIndex: 0,
+    explanation: 'Meist Annas. Gerade die gedehnte Phase unten, mit fast '
+        'gestrecktem Arm, scheint für das Wachstum wertvoll — und genau die '
+        'lässt Ben aus.',
+  ),
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der ganze Weg zählt',
@@ -260,16 +327,18 @@ const Lesson technikPage = Lesson(
           'meist mehr als ein halber mit größerer Zahl auf der Hantel.',
     ),
     Question(
-      prompt: 'Was macht Schwung bei einer Wiederholung?',
+      prompt: 'Tom schafft beim Rudern mehr Gewicht, seit er mit dem ganzen '
+          'Oberkörper Schwung holt. Was passiert dabei?',
       options: <String>[
-        'Er lässt den Muskel deutlich stärker arbeiten',
-        'Er nimmt dem Muskel Arbeit ab und belastet Gelenke',
-        'Er hat auf die Wirkung überhaupt keinen Einfluss',
+        'Der Rücken wächst jetzt deutlich schneller',
+        'Der Schwung nimmt dem Rücken Arbeit ab',
+        'Die Gelenke werden davon sogar entlastet',
       ],
       correctIndex: 1,
       explanation:
-          'Was der Schwung erledigt, muss der Muskel nicht leisten — die '
-          'Last landet stattdessen auf Sehnen und Gelenken.',
+          'Was der Schwung erledigt, muss der Rücken nicht leisten. Die '
+          'größere Zahl täuscht — und die Last landet auf Sehnen und '
+          'Gelenken.',
     ),
     Question(
       prompt: 'Wie lernt man eine neue Übung am besten?',
@@ -290,6 +359,18 @@ const Lesson muskelkaterPage = Lesson(
   id: 'kraft-05-muskelkater',
   title: 'Muskelkater und Pausen',
   summary: 'Was Muskelkater bedeutet — und was nicht.',
+  teaser: Question(
+    prompt: 'Nach den ersten Trainings hast du jedes Mal tagelang Muskelkater. '
+        'Nach zwei Monaten kaum noch. Was bedeutet das?',
+    options: <String>[
+      'Das Training wirkt nicht mehr',
+      'Der Körper hat sich daran gewöhnt',
+      'Du isst zu wenig Eiweiß',
+    ],
+    correctIndex: 1,
+    explanation: 'Der Körper hat sich gewöhnt — und wächst trotzdem weiter. '
+        'Muskelkater zeigt, dass etwas neu war, nicht, dass es gut war.',
+  ),
   sections: <LessonSection>[
     LessonSection(
       heading: 'Muskelkater ist kein Zeugnis',
@@ -329,16 +410,18 @@ const Lesson muskelkaterPage = Lesson(
           'nicht — wer regelmäßig trainiert, hat ihn seltener.',
     ),
     Question(
-      prompt: 'Wie lange braucht ein Muskel nach einer harten Einheit meist?',
+      prompt: 'Nina hat gestern Beine trainiert und spürt heute noch die '
+          'Oberschenkel. Was ist heute sinnvoll?',
       options: <String>[
-        'Nur wenige Stunden',
-        'Etwa ein bis zwei Tage',
-        'Mindestens zwei Wochen',
+        'Dieselben Beinübungen noch härter machen',
+        'Oberkörper trainieren, Beine ruhen lassen',
+        'Eine Woche lang gar nichts mehr machen',
       ],
       correctIndex: 1,
       explanation:
-          'Ein bis zwei Tage sind üblich. In der Zeit lassen sich andere '
-          'Muskeln trainieren.',
+          'Ein Muskel braucht meist ein bis zwei Tage. Andere Muskeln kann '
+          'man in der Zeit trainieren — eine ganze Woche Pause braucht es '
+          'nicht.',
     ),
     Question(
       prompt: 'Was steckt häufig hinter wochenlangem Stillstand?',

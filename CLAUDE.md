@@ -52,12 +52,12 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 193 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 197 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
 | `packages/theory/lib/src/content/area_pages.dart` | die Einführungsseiten der **Zwischenebenen** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)) | nur Dart-SDK |
-| `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet | nur Dart-SDK |
+| `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet, und **die Probe für Rätsel und Fall** (18.10.): jede Seite öffnet mit einem Rätsel (`Lesson.teaser`), ihre zweite Frage ist eine Situation | nur Dart-SDK |
 | `packages/theory/lib/src/content/ausdauer_pages.dart` | **Ausdauer & Fitness**: Einführung und fünf Themen | nur Dart-SDK |
 | `packages/theory/lib/src/content/philosophie_pages.dart` | **Philosophie**: Einführung, Stoizismus, Ethik, Fehlschlüsse, Sokrates, Existenzialismus | nur Dart-SDK |
 | `packages/theory/lib/src/content/gewohnheiten_pages.dart` | **Gewohnheiten** unter Selbstentwicklung: Überkapitel → vier Regeln → je Regel eine Seite (bisher: offensichtlich, attraktiv), **aus dem Gelesenen** ([ADR-0061](docs/decisions/0061-der-baum-waechst-aus-dem-gelesenen.md)) | nur Dart-SDK |
@@ -268,7 +268,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 830 Tests
+flutter test             # 834 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -288,7 +288,7 @@ dart test                              # 324 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 193 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 197 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
 cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests

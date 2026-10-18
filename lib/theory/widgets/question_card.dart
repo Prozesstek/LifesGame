@@ -13,13 +13,20 @@ import '../../ui/sprung.dart';
 /// gewählte **springt** auf, wenn sie stimmt, und **wackelt**, wenn
 /// nicht; die richtige steht dann grün daneben. Die Erklärung kommt von
 /// unten (`AntwortLeiste`), seit dem 18.10. nicht mehr hier.
+///
+/// **Ein Rätsel** ([geraten]) wird nicht gewertet: Eine falsche Schätzung
+/// steht braun statt rot da und schüttelt nicht den Kopf.
 class QuestionCard extends StatelessWidget {
   const QuestionCard({
     required this.question,
     required this.selected,
     required this.onSelect,
+    this.geraten = false,
     super.key,
   });
+
+  /// Ob nur geschätzt wird — das Rätsel vor einer Seite.
+  final bool geraten;
 
   final Question question;
 
@@ -54,6 +61,7 @@ class QuestionCard extends StatelessWidget {
               label: question.options[i],
               state: _stateOf(i),
               gewaehlt: selected == i,
+              geraten: geraten,
               onTap: _isAnswered ? null : () => onSelect(i),
             ),
           ),
@@ -76,11 +84,15 @@ class _Option extends StatefulWidget {
     required this.label,
     required this.state,
     required this.gewaehlt,
+    required this.geraten,
     this.onTap,
   });
 
   final String label;
   final _OptionState state;
+
+  /// Beim Rätsel ist eine falsche Wahl keine Strafe: braun, ohne Kreuz.
+  final bool geraten;
 
   /// Ob diese getippt wurde — nur sie springt oder wackelt. Die richtige
   /// neben einer falschen wird grün, bewegt sich aber nicht.
@@ -126,10 +138,11 @@ class _OptionWidgetState extends State<_Option>
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+    final falsch = widget.geraten ? Palette.accent : Palette.enemy;
     final border = switch (state) {
       _OptionState.open => Palette.surfaceRaised,
       _OptionState.correct => Palette.success,
-      _OptionState.wrong => Palette.enemy,
+      _OptionState.wrong => falsch,
       _OptionState.dimmed => Palette.surface,
     };
     final grund = switch (state) {
@@ -138,7 +151,7 @@ class _OptionWidgetState extends State<_Option>
         Palette.surface,
       ),
       _OptionState.wrong => Color.alphaBlend(
-        Palette.enemy.withValues(alpha: 0.1),
+        falsch.withValues(alpha: 0.1),
         Palette.surface,
       ),
       _ => Palette.surface,
@@ -177,7 +190,7 @@ class _OptionWidgetState extends State<_Option>
                 ),
                 if (state == _OptionState.correct)
                   const Icon(Icons.check, size: 18, color: Palette.success),
-                if (state == _OptionState.wrong)
+                if (state == _OptionState.wrong && !widget.geraten)
                   const Icon(Icons.close, size: 18, color: Palette.enemy),
               ],
             ),
@@ -197,7 +210,10 @@ class _OptionWidgetState extends State<_Option>
             scale: Sprung.stoss(t, hoehe: 0.09),
             child: child,
           ),
-          // Dreimal hin und her, schnell leiser — ein Kopfschütteln.
+          // Dreimal hin und her, schnell leiser — ein Kopfschütteln. Nicht
+          // beim Rätsel: Dort war es eine Schätzung, kein Fehler.
+          _OptionState.wrong when widget.geraten =>
+            child ?? const SizedBox.shrink(),
           _OptionState.wrong => Transform.translate(
             offset: Offset(7 * math.sin(t * math.pi * 6) * (1 - t), 0),
             child: child,

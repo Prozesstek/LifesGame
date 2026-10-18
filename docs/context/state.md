@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 830, dazu die acht Packages (theory 193, habits 324, gear
+**Tests:** App 834, dazu die acht Packages (theory 197, habits 324, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -84,6 +84,8 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 
 - Gegenlesen: neun Einführungen und zwanzig Themen im Wissensbaum
   (Kraft, Ausdauer, Psychologie, Philosophie) — mit Gesundheitsaussagen.
+  **Dass es nötig ist, zeigte der 18.10.**: Auf „Wie nah ans Versagen“
+  stand das Gegenteil des Richtigen (Eintrag vom 18.10.).
   Dazu die Einführung „Gewohnheiten“, am 07.10. umgeschrieben.
 - **Der erste Lauf ist härter als gedacht**: Stufe 1 auf Level 1 steht
   für den Bot bei 67 %, nicht bei 93 % (Eintrag vom 07.10.).
@@ -126,6 +128,59 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 18.10.2026, abends: Rätsel und Fälle — die Probe an Kraft
+
+Frederik: „Wie könnten wir den Inhalt von Theorie noch interessanter
+machen?“ Der Befund: Fast jede der 63 Seiten hat dieselbe Form, drei
+sachliche Absätze, dann drei Fragen, die einen Satz aus dem Text
+abfragen. Lebendig sind die Seiten, die von etwas ausgehen — die
+Experimente der Psychologie, Frederiks Beispiele bei den Gewohnheiten.
+Claude schlug vier Ideen vor und empfahl zwei davon zusammen, als Probe
+an einem Gebiet. Frederik: „Ja gerne“.
+
+| Was | Wie |
+|---|---|
+| **Das Rätsel vor der Seite** | eine Szene mit Schätzfrage, bevor man liest („Zwei Gruppen trainieren … wer baut mehr Muskeln auf?“); daneben ist braun mit Glühbirne und „Überraschend, oder?“, nicht rot; gut geschätzt klingt den ersten Ton der Leiter |
+| **Es zählt nicht** | nicht für Bestehen, Erfahrung oder Rückfrage; gespeichert wird nichts; „Nochmal“ fängt bei den Fragen an |
+| **Die zweite Frage ist ein Fall** | Jana, Max, Lea, Tom und Nina haben ein Problem, und die Frage ist, was sie tun — statt einen Satz wiederzuerkennen |
+| **Wo** | alle fünf Themen unter Kraft & Muskulatur, die Einführung nicht |
+
+Neu ist ein Feld: `Lesson.teaser`, eine `Question`, die vor dem Lesen
+steht. Ein Test hält fest, dass jede Kraft-Seite eins hat, und prüft
+jedes Rätsel wie eine Frage.
+
+**Beim Schreiben gefunden — ein Fehler im Inhalt:** Auf „Wie nah ans
+Versagen“ stand, Anfänger schätzten ihre Reserve „zu hoch“ ein, und die
+richtige Antwort lautete „Zu hoch, sie hören zu früh schon auf“. Das
+widerspricht sich: Wer zu früh aufhört, schätzt seine Reserve zu
+**niedrig** ein, und so zeigen es auch die Studien dazu. Text und Frage
+sind korrigiert. Die Seite stand so seit dem 26.09. im Spiel.
+
+**Ohne Rückfrage entschieden:**
+
+- **Kraft als Probe**, weil es das trockenste Gebiet ist: Dort sieht man
+  den Unterschied am deutlichsten.
+- **Die zweite Frage wird der Fall**, auf jeder Seite dieselbe Stelle,
+  und ihre richtige Antwort bleibt an derselben Stelle wie vorher — die
+  Verteilung aus ADR-0027 bleibt, wie sie war.
+- **Die Fälle haben Namen**, keine Du-Form: eine kleine Geschichte statt
+  einer Prüfungsfrage.
+- **Ein Rätsel darf ein Fakt der Seite vorwegnehmen**, den eine Frage
+  danach noch einmal abfragt — das Wiederholen ist gewollt.
+
+Fünf Rätsel und zwei Seiten gerendert in 390 × 844 und angesehen.
+theory 197 (vorher 193), App 834 (vorher 830). **Nicht gespielt, nicht
+am Handy, nicht gegengelesen.**
+
+### Offen
+
+- **Ob die Probe trägt**: Frederik liest die fünf Seiten. Wenn ja,
+  bekommen alle 63 Rätsel und Fall — Schreibarbeit, Seite für Seite.
+- Die Rätsel stützen sich auf Studien („so kam es in Studien mit genau
+  diesem Aufbau heraus“), nennen aber keine. Ob eine Quelle dazugehört.
+- Die übrigen Ideen: „Heute ausprobieren“ am Ende jeder Seite, und
+  Frederiks Bücher und Videos als Quelle für die grauen Gebiete.
 
 ## 18.10.2026, danach: eine Seite als Spielrunde
 
