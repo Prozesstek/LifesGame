@@ -126,19 +126,20 @@ extension _Summons on ActionWorld {
   void _summon(Companion c, Vec2 wo, PitTint tint) {
     _companion = _Companion(
       effect: c,
-      position: c.stationary ? wo : _mirrorSpot(c),
+      position: c.mirror ? _mirrorSpot() : (c.stationary ? wo : _hero.position),
       tint: tint,
     );
   }
 
-  /// Wo ein mitfliegender Begleiter steht: beim Falken auf dem Helden,
-  /// das Spiegelbild neben ihm, links von seinem Blick.
-  Vec2 _mirrorSpot(Companion c) {
-    if (!c.mirror) return _hero.position;
+  /// Wo das Spiegelbild erscheint: neben dem Helden, links von seinem
+  /// Blick — und dort **bleibt es** (ADR-0074). Steht dort eine Wand,
+  /// erscheint es auf ihm.
+  Vec2 _mirrorSpot() {
     var blick = _hero.facing.normalized;
     if (blick.isZero) blick = const Vec2(1, 0);
     final links = Vec2(blick.y, -blick.x);
-    return _hero.position + links * ActionBalance.mirrorOffset;
+    final daneben = _hero.position + links * ActionBalance.mirrorOffset;
+    return _hitsWall(daneben, _hero.radius) ? _hero.position : daneben;
   }
 
   /// Ein Schritt des Begleiters.
@@ -155,7 +156,7 @@ extension _Summons on ActionWorld {
       return;
     }
     final c = begleiter.effect;
-    if (!c.stationary) begleiter.position = _mirrorSpot(c);
+    if (!c.stationary) begleiter.position = _hero.position;
     begleiter.cooldownLeft -= dt;
     if (begleiter.cooldownLeft > 0) return;
 
@@ -197,10 +198,9 @@ extension _Summons on ActionWorld {
   /// bei der Pflanze in ihrer Reichweite, beim Falken in seiner.
   ActionEntity? _companionTarget(_Companion begleiter) {
     final c = begleiter.effect;
-    // Das Spiegelbild steht neben dem Helden; es reicht so weit wie seine
-    // Waffe, gemessen von dort, wo er steht.
-    final reichweite =
-        c.mirror ? weapon.range + ActionBalance.mirrorOffset : c.reach;
+    // Das Spiegelbild reicht so weit wie die Waffe des Helden, gemessen
+    // von dort, wo es steht.
+    final reichweite = c.mirror ? weapon.range : c.reach;
     ActionEntity? bester;
     var besteDistanz = double.infinity;
     for (final ziel in _entities) {

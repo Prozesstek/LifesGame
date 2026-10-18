@@ -308,8 +308,9 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
       stats.add((
         label: 'Abbild',
         value:
-            'schlägt mit deinem Grundangriff zu '
-            '${(power * 100).round()} %, ${pitNumber(seconds)} s lang',
+            'bleibt stehen, wo du es rufst, und schlägt mit deinem '
+            'Grundangriff zu ${(power * 100).round()} %, '
+            '${pitNumber(seconds)} s lang',
       ));
     case Companion(
       :final power,

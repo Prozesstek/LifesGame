@@ -343,12 +343,41 @@ void main() {
       expect(ereignisse.whereType<CompanionStruck>(), isNotEmpty);
     });
 
-    test('es steht neben dem Helden, nicht auf ihm', () {
+    test('es erscheint neben dem Helden, nicht auf ihm', () {
       final welt = _welt(const <String>['spiegelbild']);
       welt.cast('spiegelbild');
       final abstand =
           welt.companion!.position.distanceTo(welt.heroView.position);
       expect(abstand, closeTo(ActionBalance.mirrorOffset, 1));
+    });
+
+    test('es bleibt stehen, wo es gerufen wurde', () {
+      // AktivesBrett nach dem ersten Spielen: Es lief dem Helden nach.
+      final welt = _welt(const <String>['spiegelbild']);
+      welt.cast('spiegelbild');
+      final dort = welt.companion!.position;
+      _laufe(welt, _schritte(2), const Vec2(1, 0));
+      expect(welt.heroView.position.distanceTo(dort), greaterThan(2 * _feld));
+      expect(welt.companion!.position, dort);
+      expect(welt.companion!.stationary, isTrue);
+    });
+
+    test('es schlägt von seinem Platz aus, nicht vom Helden', () {
+      // Der Gegner steht neben dem Abbild; der Held ist weggegangen,
+      // sieht ihn aber noch.
+      final welt = _welt(
+        const <String>['spiegelbild'],
+        level: _dicht,
+        stats: _sanft,
+      );
+      welt.cast('spiegelbild');
+      final dort = welt.companion!.position;
+      final ereignisse = _laufe(welt, _schritte(3));
+      final schlaege = ereignisse.whereType<CompanionStruck>();
+      expect(schlaege, isNotEmpty);
+      for (final schlag in schlaege) {
+        expect(schlag.from, dort);
+      }
     });
   });
 

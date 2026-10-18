@@ -232,7 +232,7 @@ Episch gesetzt und Bestform und Rückspulen als Ultimates gewählt.
 | 2 | Schattenschritt | **Blink** bis 4 Felder + **Unsichtbarkeit** 2 s; der erste Treffer daraus ×1,5 | Richtung | 18 | 9 s | Ungewöhnlich | „Warum keiner hilft“ | seele | eine Gestalt mit Streifen dahinter; der Held wird durchscheinend |
 | 3 | Kampfrausch | **Passiv**, **Rage**: je eingesteckten Treffer +4 %, bis 10-mal, fällt nach 4 s ohne Treffer ab | — | — | — | Selten | „Gefühle regulieren“ | lava | drei Klauenhiebe; Glutpunkte um den Helden, einer je Treffer |
 | 4 | Kriegsschrei | **Stun** um den Helden (2 Felder) 0,8 s + Self-Buff Angriff +20 %, 6 s | um den Helden | 24 | 15 s | Selten | „Wie ein Muskel wächst“ | blitz | ein Horn, aus dem drei Bögen schallen |
-| 5 | Spiegelbild | **Begleiter** als Abbild: schlägt 10 s mit dem Grundangriff zu halbem Schaden | selbst | 28 | 22 s | **Episch** | „Sich selbst testen“ | seele | zwei Gestalten am Spiegel; im Kampf der Held noch einmal, durchscheinend |
+| 5 | Spiegelbild | **Begleiter** als Abbild: bleibt 10 s stehen, wo man es ruft, und schlägt mit dem Grundangriff zu halbem Schaden | selbst | 28 | 22 s | **Episch** | „Sich selbst testen“ | seele | zwei Gestalten am Spiegel; im Kampf der Held noch einmal, durchscheinend |
 | 6 | Parade | **Parade**: 0,6 s offen, fängt einen Treffer ganz ab, der Angreifer steht 1,5 s | selbst | 12 | 6 s | Ungewöhnlich | „Eine Überschrift ist keine Studie“ | schutz | ein Schild, an dem eine Klinge abprallt; ein Bogen vor dem Helden |
 | 7 | Ruhepuls | **Passiv**: 1 s ohne eigenen Treffer, und Mana kommt 40 % schneller | — | — | — | Gewöhnlich | „Schlaf & Regeneration“ | zeit | ein Herz mit Pulslinie |
 | 8 | Kettenblitz | Geschoss 1,0 × Angriff, **springt** auf bis zu 3 weitere, je ×0,75 | Richtung | 22 | 6 s | Selten | „Medien & Information“ | blitz | ein Blitz und zwei kleine; im Kampf ein Faden je Sprung |
@@ -261,7 +261,10 @@ Episch gesetzt und Bestform und Rückspulen als Ultimates gewählt.
   sind, und keinen zweimal.
 - **Rückspulen** geht nie über ein Tor zurück, das seitdem zugefallen
   ist, und nie in einen Fels; dann gibt es nur das Leben zurück.
-- **Das Spiegelbild** steht links neben dem Helden und schlägt im Takt
-  seiner Waffe; seine Kills laden die Ultimate nicht, wie beim Falken.
+- **Das Spiegelbild** erscheint links neben dem Helden und **bleibt
+  dort stehen** (AktivesBrett am 18.10.: „soll da stehen bleiben, wo
+  man die Fähigkeit gedrückt hat“); es schlägt im Takt seiner Waffe von
+  seinem Platz aus, und seine Kills laden die Ultimate nicht, wie beim
+  Falken.
 - **Die Bilder** sind gezeichnet (`tool/faehigkeit_icons.py`), nicht
   aus dem Raven-Paket.

@@ -31,7 +31,7 @@ mit **Spiegelbild als Episch** und den Ultimates **Bestform** und
 | Schattenschritt | Blink + Unsichtbarkeit | 18 · 9 s | Ungewöhnlich | „Warum keiner hilft“ |
 | Kampfrausch | **Passiv**, Rage | – | Selten | „Gefühle regulieren“ |
 | Kriegsschrei | Stun im Umkreis + Self-Buff | 24 · 15 s | Selten | „Wie ein Muskel wächst“ |
-| Spiegelbild | Begleiter als Abbild | 28 · 22 s | **Episch** | „Sich selbst testen“ |
+| Spiegelbild | Begleiter als Abbild, **bleibt stehen** | 28 · 22 s | **Episch** | „Sich selbst testen“ |
 | Parade | Parade | 12 · 6 s | Ungewöhnlich | „Eine Überschrift ist keine Studie“ |
 | Ruhepuls | **Passiv**, Mana | – | Gewöhnlich | „Schlaf & Regeneration“ |
 | Kettenblitz | Kettenblitz | 22 · 6 s | Selten | „Medien & Information“ |

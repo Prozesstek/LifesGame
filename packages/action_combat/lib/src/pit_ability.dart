@@ -286,9 +286,11 @@ final class Trap extends PitEffect {
 /// heisst: Ein Gegner unter diesem Anteil seines Lebens wird **gefressen**
 /// — nie der Wächter.
 ///
-/// Mit [mirror] ist er ein **Abbild des Helden** (Spiegelbild): Er schlägt
-/// mit dessen Grundangriff — Reichweite und Takt der Waffe, Wucht
-/// `Waffe × power` —, und [interval] und [reach] gelten nicht.
+/// Mit [mirror] ist er ein **Abbild des Helden** (Spiegelbild): Es
+/// erscheint neben ihm, **bleibt stehen, wo es gerufen wurde**, und
+/// schlägt von dort mit dessen Grundangriff — Reichweite und Takt der
+/// Waffe, Wucht `Waffe × power`. [interval] und [reach] gelten dann
+/// nicht.
 final class Companion extends PitEffect {
   const Companion({
     required this.power,
@@ -1299,11 +1301,12 @@ abstract final class PitAbilities {
         interval: 0,
         seconds: 10,
         reach: 0,
+        stationary: true,
         mirror: true,
       ),
     ],
-    description: 'Zehn Sekunden lang kämpft ein Abbild neben dir — mit '
-        'deinem Grundangriff, zu halbem Schaden.',
+    description: 'Ein Abbild bleibt zehn Sekunden stehen, wo du es rufst, '
+        'und kämpft von dort mit deinem Grundangriff, zu halbem Schaden.',
     aim: PitAim.selbst,
     castRange: 0,
     tint: PitTint.seele,

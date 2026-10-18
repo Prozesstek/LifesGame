@@ -101,6 +101,12 @@ class ActionGame extends Game {
   /// Was jede Figur gerade tut, je Id. Anzeige, nicht Simulation.
   final Map<int, FigureState> _figuren = <int, FigureState>{};
 
+  /// Das Spiegelbild hat eine eigene Haltung (ADR-0074): Es steht, wo es
+  /// gerufen wurde, und schlägt aus, wenn es trifft — es macht nicht
+  /// nach, was der Held tut.
+  FigureState? _abbild;
+  Vec2 _abbildBlick = const Vec2(1, 0);
+
   /// Wer gefallen ist und gerade umkippt.
   final List<FallenFigure> _leichen = <FallenFigure>[];
 
@@ -330,6 +336,7 @@ class ActionGame extends Game {
             AttackParried() ||
             ChainJumped() ||
             LastStandTriggered():
+          if (event is CompanionStruck) _abbildSchlaegt(event);
           _neueArten.melde(event);
       }
     }
@@ -370,6 +377,7 @@ class ActionGame extends Game {
     _strahlen.removeWhere((s) => !s.isAlive);
 
     _updateFiguren(dt);
+    _updateAbbild(dt);
     for (final leiche in _leichen) {
       leiche.age += dt;
     }
@@ -702,13 +710,50 @@ class ActionGame extends Game {
     _drawSpiegelbild(canvas, bilder);
   }
 
+  /// Das Spiegelbild schlägt: Es dreht sich zum Ziel und holt aus.
+  void _abbildSchlaegt(CompanionStruck schlag) {
+    final zustand = _abbild;
+    if (zustand == null || !(sim.companion?.mirror ?? false)) return;
+    final richtung = schlag.at - schlag.from;
+    if (!richtung.isZero) _abbildBlick = richtung.normalized;
+    zustand.swing(Pose.attack);
+  }
+
+  /// Hält die Haltung des Spiegelbilds — angelegt, wenn es erscheint,
+  /// verworfen, wenn es geht.
+  void _updateAbbild(double dt) {
+    final abbild = sim.companion;
+    if (abbild == null || !abbild.mirror) {
+      _abbild = null;
+      return;
+    }
+    final held = sim.heroView;
+    final zustand = _abbild ??= FigureState(
+      abbild.position,
+      figure: _figurFuer(held.kind),
+    );
+    zustand.update(
+      EntityView(
+        id: -1,
+        faction: Faction.held,
+        kind: held.kind,
+        position: abbild.position,
+        radius: held.radius,
+        hpRatio: 1,
+        facing: _abbildBlick,
+        isAlive: true,
+      ),
+      dt,
+    );
+  }
+
   /// Das Spiegelbild (ADR-0074): der Held noch einmal, durchscheinend,
-  /// in derselben Haltung — dort, wo die Welt das Abbild führt.
+  /// dort, wo es gerufen wurde — mit eigener Haltung.
   void _drawSpiegelbild(Canvas canvas, GrubeBilder bilder) {
     final abbild = sim.companion;
     if (abbild == null || !abbild.mirror) return;
     final held = sim.heroView;
-    final zustand = _figuren[held.id];
+    final zustand = _abbild;
     if (zustand == null) return;
     final ausblenden = abbild.remaining < 0.1 ? abbild.remaining * 10 : 1.0;
     bilder.draw(

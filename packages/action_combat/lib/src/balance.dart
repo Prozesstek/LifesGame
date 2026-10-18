@@ -682,7 +682,8 @@ abstract final class ActionBalance {
   /// bleibt — er landet daneben, nicht in ihm.
   static const double blinkGap = 6;
 
-  /// Wie weit das Spiegelbild neben dem Helden steht.
+  /// Wie weit neben dem Helden das Spiegelbild erscheint — dort bleibt
+  /// es dann stehen.
   static const double mirrorOffset = 26;
 
   /// Wie oft Rückspulen sich merkt, wo der Held stand: alle so viele

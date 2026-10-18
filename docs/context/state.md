@@ -35,8 +35,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 843, dazu die acht Packages (theory 197, habits 333, gear
-118, action_combat 331, progression 44, abilities 43, identity 25,
+**Tests:** App 848, dazu die acht Packages (theory 197, habits 333, gear
+118, action_combat 357, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -129,6 +129,33 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 18.10.2026, zuletzt: das Spiegelbild bleibt stehen
+
+AktivesBrett nach dem ersten Spielen seiner Fähigkeiten (ADR-0074): „Der
+Klon ist mit an dir dran, das soll so nicht. Er soll da stehen bleiben,
+wo man die Fähigkeit gedrückt hat, und mit angreifen.“
+
+| | vorher | jetzt |
+|---|---|---|
+| Wo es steht | lief neben dem Helden mit | erscheint neben ihm und **bleibt dort** (`Companion.stationary`) |
+| Wovon es schlägt | Reichweite der Waffe plus Abstand, vom Helden aus gedacht | Reichweite der Waffe, **von seinem Platz aus** |
+| Im Bild | machte die Haltung des Helden nach, lief also im Stand | **eigene Haltung**: steht, dreht sich zum Ziel, holt aus, wenn es trifft |
+
+Es greift weiter nur an, was der Held sieht (ADR-0073, wie Falke und
+Pflanze) — wer weit wegläuft, lässt es untätig stehen. Steht neben dem
+Helden eine Wand, erscheint es auf ihm.
+
+Vorher `main` hereingeholt (Lagerfeuer, Lernen als Runde, hundert
+Ebenen); Konflikte nur in `CLAUDE.md` und `state.md`. App 848,
+action_combat 357. **Nicht im Browser angesehen, nicht am Handy.**
+
+### Offen
+
+- Ob das Abbild untätig stehen soll, wenn der Held den Raum verlässt,
+  oder auch ohne seinen Blick angreifen darf.
+- Die übrigen neun Fähigkeiten und die Ultimates sind nicht gespielt;
+  Bestform ist weiter zu stark (Eintrag vom 16.10.).
 
 ## 18.10.2026, spät: das Lagerfeuer — der Tag endet an einer Stelle
 
