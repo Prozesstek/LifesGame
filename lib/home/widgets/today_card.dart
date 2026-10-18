@@ -41,6 +41,10 @@ import '../../ui/sprung.dart';
 class TodayCard extends ConsumerWidget {
   const TodayCard({super.key});
 
+  /// Woran Tests die Flamme des Vorsatzes vom Lagerfeuer finden
+  /// (ADR-0076).
+  static const Key flammeKey = ValueKey<String>('heute-zuerst');
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tracker = ref.watch(habitTrackerProvider);
@@ -87,6 +91,7 @@ class TodayCard extends ConsumerWidget {
                 depth: eintrag.depth,
                 cued: eintrag.isCued,
                 timed: tracker.hasTimer(eintrag.habit.id),
+                zuerst: tracker.firstUpOn(today) == eintrag.habit.id,
                 onTap: () => tapHabit(context, ref, eintrag.habit),
                 onTimerDone: () =>
                     finishHabitTimer(context, ref, eintrag.habit),
@@ -352,6 +357,7 @@ class _Zeile extends StatelessWidget {
     this.depth = 0,
     this.cued = false,
     this.timed = false,
+    this.zuerst = false,
     this.onTimerDone,
     super.key,
   });
@@ -377,6 +383,10 @@ class _Zeile extends StatelessWidget {
   /// Ob sie ein Zeitziel hat — dann steht rechts die Restzeit.
   final bool timed;
 
+  /// Ob sie am Abend davor am Feuer als Erstes gewählt wurde (ADR-0076)
+  /// — dann trägt sie eine kleine Flamme.
+  final bool zuerst;
+
   /// Der laufende Timer ist bei null angekommen.
   final VoidCallback? onTimerDone;
 
@@ -401,7 +411,8 @@ class _Zeile extends StatelessWidget {
       label: done
           ? '${habit.name} erledigt'
           : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
-                '${cued ? ', jetzt dran' : ''}',
+                '${cued ? ', jetzt dran' : ''}'
+                '${zuerst ? ', heute zuerst' : ''}',
       child: Druck(
         child: InkWell(
           onTap: onTap,
@@ -421,17 +432,34 @@ class _Zeile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(
-                        habit.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: done ? Palette.textDim : Palette.text,
-                          decoration: done ? TextDecoration.lineThrough : null,
-                          decorationColor: Palette.textDim,
-                        ),
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              habit.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: done ? Palette.textDim : Palette.text,
+                                decoration: done
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                decorationColor: Palette.textDim,
+                              ),
+                            ),
+                          ),
+                          if (zuerst) ...<Widget>[
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.local_fire_department,
+                              key: TodayCard.flammeKey,
+                              size: 15,
+                              color: Palette.tintLava,
+                            ),
+                          ],
+                        ],
                       ),
                       if (text != null)
                         Text(

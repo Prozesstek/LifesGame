@@ -9,6 +9,7 @@ import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
+import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -100,7 +101,7 @@ void main() {
     );
   });
 
-  testWidgets('alles erledigt: alle stehen noch da, die Truhe darunter', (
+  testWidgets('alles erledigt: alle stehen noch da, darunter das Feuer', (
     tester,
   ) async {
     final tracker = const HabitTracker.empty()
@@ -116,7 +117,12 @@ void main() {
     expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
     expect(inDerKarte(find.byIcon(Icons.check_circle)), findsNWidgets(2));
     expect(inDerKarte(find.text('2 / 2')), findsOneWidget);
-    expect(find.byKey(DailyChestCard.oeffnenKey), findsOneWidget);
+    // Die Truhe wartet am Lagerfeuer (ADR-0076), das Feuer sagt es.
+    expect(find.byKey(DailyChestCard.oeffnenKey), findsNothing);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Lagerfeuer, \d+ wart')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('auch nach der Truhe bleibt die Liste stehen', (tester) async {
@@ -131,15 +137,17 @@ void main() {
     expect(inDerKarte(find.byIcon(Icons.check_circle)), findsOneWidget);
   });
 
-  testWidgets('die Truhe steht auf der Startseite und geht dort auf', (
+  testWidgets('die Truhe wartet am Lagerfeuer und geht dort auf', (
     tester,
   ) async {
     final offen = const HabitTracker.empty().activate(starter.id);
     await startseite(tester, offen);
-    expect(find.byType(DailyChestCard), findsNothing);
+    expect(find.byType(LagerfeuerKarte), findsNothing);
 
     final erledigt = offen.check(starter.id, heute).tracker;
     final container = await startseite(tester, erledigt);
+    await tester.tap(find.byKey(LagerfeuerKarte.oeffnenKey));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(DailyChestCard.oeffnenKey));
     await tester.pumpAndSettle();
 

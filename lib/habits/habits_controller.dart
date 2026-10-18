@@ -85,6 +85,12 @@ class HabitsController extends Notifier<HabitTracker> {
     state = state.setAnchor(habitId, anchorId);
   }
 
+  /// Was an [day] zuerst drankommt, am Feuer gewählt; null nimmt es
+  /// zurück (ADR-0076).
+  void setFirstUp(Day day, String? habitId) {
+    state = state.setFirstUp(day, habitId);
+  }
+
   /// Hakt ab oder nimmt das Häkchen zurück.
   ///
   /// Gibt das Ergebnis zurück, wenn dabei etwas verdient wurde — sonst

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
-import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/daily_chest_card.dart';
+import 'package:lifes_game/lagerfeuer/lagerfeuer_screen.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
@@ -12,7 +12,8 @@ import 'package:theory/theory.dart';
 import 'test_view.dart';
 
 /// Die Tagestruhe auf dem ganzen Weg (ADR-0044): alles erledigt → Karte
-/// → Öffnen → Enthüllung → Gold im Goldstand.
+/// → Öffnen → Enthüllung → Gold im Goldstand. Seit dem 18.10. wartet sie
+/// am Lagerfeuer (ADR-0076).
 const Day _heute = Day(2026, 9, 23);
 
 ProviderContainer _container() {
@@ -37,7 +38,7 @@ Future<void> _pump(WidgetTester tester, ProviderContainer c) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: c,
-      child: const MaterialApp(home: HabitsScreen()),
+      child: const MaterialApp(home: LagerfeuerScreen()),
     ),
   );
   await tester.pump();

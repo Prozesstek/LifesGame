@@ -14,6 +14,7 @@ import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/erste_gewohnheit.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
+import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -411,7 +412,8 @@ void main() {
       expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Kampf']);
       expect(leuchtet(tester), 'Kampf');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
-      expect(find.byType(DailyQuestsCard), findsOneWidget);
+      // Die Tagesaufgaben warten am Lagerfeuer (ADR-0076).
+      expect(find.byType(LagerfeuerKarte), findsOneWidget);
 
       // Keine Seite gelesen, keine Fähigkeit: nur der Waffenzug.
       expect(c.read(activeMovesProvider), hasLength(1));

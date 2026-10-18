@@ -24,8 +24,8 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
-| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
+| **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
+| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
@@ -35,7 +35,7 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 834, dazu die acht Packages (theory 197, habits 324, gear
+**Tests:** App 843, dazu die acht Packages (theory 197, habits 333, gear
 118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -43,7 +43,8 @@ der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 ## Offen, gesammelt
 
 **Die Richtung** (09.10., [ADR-0071](../decisions/0071-das-naechste-level.md)):
-~~Tagesgrube~~ (gebaut am 11.10., ADR-0072), Lagerfeuer, Schatten,
+~~Tagesgrube~~ (gebaut am 11.10., ADR-0072), ~~Lagerfeuer~~ (gebaut am
+18.10., ADR-0076), Schatten,
 Saisons, Seilschaft — nach und nach, jede mit eigener Konzeptrunde. Die
 Fragen dafür stehen in der Vorlage
 [`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
@@ -128,6 +129,67 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 18.10.2026, spät: das Lagerfeuer — der Tag endet an einer Stelle
+
+Frederik: „Mir gefällt der aktuelle Stand richtig gut. Was fällt dir
+allgemein noch so ein?“ Aus sechs Vorschlägen: „Lagerfeuer find ich
+cool“ — die zweite Idee aus ADR-0071. In zwei Fragerunden entschieden,
+alle sieben Fragen wie empfohlen:
+[ADR-0076](../decisions/0076-das-lagerfeuer.md).
+
+| Was | Wie |
+|---|---|
+| **Ein Ort bei Nacht** | eigener Bildschirm: Himmel, Sterne, ein gezeichnetes Feuer, das flackert, Funken |
+| **Immer offen** | ab 18 Uhr oder sobald alles erledigt ist, brennt es; vorher glimmt es nur |
+| **Was dort liegt** | die Rückfrage, die Truhe, die Tagesaufgaben, sonntags und montags der Wochenrückblick |
+| **Nur dort** | Truhe und Aufgaben stehen nicht mehr auf der Startseite und nicht im Gewohnheiten-Bildschirm; die Rückfrage bleibt zusätzlich in der Theorie |
+| **Auf der Startseite** | unter „Heute“ eine Karte: ein kleines Feuer und, was wartet, als Zeichen mit Zahl |
+| **Morgen zuerst** | die morgen fälligen Gewohnheiten als Knöpfe; die gewählte steht morgen oben in „Heute“, mit einer Flamme — ein Vorsatz, keine Zahl |
+| **Zum Schluss** | „Genug für heute. Leg das Handy weg.“ |
+
+**Keine Zahl ändert sich**, und alles verfällt weiter um Mitternacht.
+Neu im Spielstand ist nur der Vorsatz (`firstUp`, je Tag eine
+Gewohnheit, eine Historie wie die Truhen).
+
+**Ohne Rückfrage entschieden:**
+
+- **Der Vorsatz zieht seinen ganzen Stapel nach vorn**, wenn er an einer
+  anderen Gewohnheit hängt — ein Glied allein risse von seinem Anker.
+  Erledigt wandert er nach unten wie jede andere.
+- **Die Knöpfe stehen in der Reihenfolge ohne Vorsatz**, sonst spränge
+  der gewählte beim Tippen nach vorn.
+- **Gezählt wird, was verfällt**: Rückfrage, Truhe, Aufgaben. Wochenrückblick
+  und Vorsatz zählen nicht, sonst stünde die Zahl den ganzen Abend da.
+- **Die Karte erscheint mit dem ersten Häkchen**, wie vorher die
+  Tagesaufgaben (ADR-0068).
+- **Die Flamme steht nur in „Heute“ auf der Startseite**, nicht auf den
+  Kacheln des Gewohnheiten-Bildschirms; die Reihenfolge gilt in beiden.
+- **Ob es brennt, wird beim Neubau gelesen**, ohne eigenen Takt: Steht
+  die App um 18 Uhr offen da, brennt es erst beim nächsten Tipp.
+
+**Beim Bauen gefunden:** Am Feuer verschmolzen die Beschriftungen für
+den Vorleser zu einem Satz — Feuer, Truhe und Aufgaben in einem Knoten,
+weil die Liste nur einen Eintrag hat. Jeder Teil hat jetzt seinen
+eigenen. **Beim Ansehen gefunden** (gerendert in 390 × 844): Auf der
+Startseite stand „Lagerf…“, weil sich das Wort den Platz mit einem
+`Spacer` teilte.
+
+Neu: `lib/lagerfeuer/` mit sechs Dateien, `HabitTracker.firstUpOn` und
+`setFirstUp`, `WeekCard.istGross`, `test/lagerfeuer_test.dart`,
+`first_up_test.dart`. habits 333 (vorher 324), App 843 (vorher 834).
+Startseite abends und morgens, das Feuer brennend und glimmend
+gerendert und angesehen. **Nicht am Handy, nicht im Browser gespielt.**
+
+### Offen
+
+- **Ob es am Abend wirklich eine Minute ist** oder ob man trotzdem
+  tagsüber an drei Stellen sucht.
+- Das Feuer hat keinen Klang; ein Knistern beim Öffnen läge nahe.
+- Eine Erinnerung am Abend gibt es erst mit einer App (ADR-0071).
+- Der Begleiter kommt mit dem Haus — das braucht AktivesBrett.
+- AktivesBrett hat ADR-0076 nicht gesehen: Truhe und Aufgaben sind von
+  der Startseite verschwunden.
 
 ## 18.10.2026, abends: Rätsel und Fälle — die Probe an Kraft
 

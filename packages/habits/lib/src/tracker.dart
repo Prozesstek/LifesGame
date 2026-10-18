@@ -88,6 +88,7 @@ class HabitTracker {
     Map<String, HabitPlan> plans = const <String, HabitPlan>{},
     Map<String, String> anchors = const <String, String>{},
     Map<String, String> treats = const <String, String>{},
+    Map<Day, String> firstUp = const <Day, String>{},
     HabitTimer? timer,
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
@@ -106,6 +107,7 @@ class HabitTracker {
         }),
         _anchors = Map<String, String>.unmodifiable(anchors),
         _treats = Map<String, String>.unmodifiable(treats),
+        _firstUp = Map<Day, String>.unmodifiable(firstUp),
         _timer = timer;
 
   const HabitTracker.empty()
@@ -120,6 +122,7 @@ class HabitTracker {
         _plans = const <String, HabitPlan>{},
         _anchors = const <String, String>{},
         _treats = const <String, String>{},
+        _firstUp = const <Day, String>{},
         _timer = null;
 
   /// Liest einen gespeicherten Stand.
@@ -322,6 +325,22 @@ class HabitTracker {
       ]);
     }
 
+    // Was am Feuer für morgen gewählt wurde (ADR-0076). Eine Gewohnheit,
+    // die es nicht mehr gibt, fällt heraus.
+    final vorsaetze = <Day, String>{};
+    final rawFirstUp = json['firstUp'];
+    if (rawFirstUp is Map) {
+      for (final entry in rawFirstUp.entries) {
+        final key = entry.key;
+        final habitId = entry.value;
+        if (key is! String || habitId is! String || !bekannt(habitId)) {
+          continue;
+        }
+        final day = Day.tryParse(key);
+        if (day != null) vorsaetze[day] = habitId;
+      }
+    }
+
     final uhr = HabitTimer.fromJson(json['timer']);
 
     return HabitTracker(
@@ -336,6 +355,7 @@ class HabitTracker {
       plans: plaene,
       anchors: anker,
       treats: belohnungen,
+      firstUp: vorsaetze,
       timer: uhr != null && bekannt(uhr.habitId) ? uhr : null,
     );
   }
@@ -402,6 +422,12 @@ class HabitTracker {
   /// der Auslöser, und wie er ohne jede Zahl.
   final Map<String, String> _treats;
 
+  /// Je Tag, was an ihm **zuerst** drankommt (ADR-0076): am Abend davor
+  /// am Lagerfeuer gewählt. Ein Umsetzungsvorsatz, keine Zahl — er ordnet
+  /// nur die Tagesliste. Eine Historie, damit ein Vorsatz von gestern
+  /// nicht den von heute überschreibt.
+  final Map<Day, String> _firstUp;
+
   /// Der eine Timer, der läuft oder angehalten ist (ADR-0067) — oder
   /// keiner. Ganze Minuten stehen in [_progress], hier nur der Rest.
   final HabitTimer? _timer;
@@ -449,6 +475,11 @@ class HabitTracker {
         },
       if (_anchors.isNotEmpty) 'anchors': <String, Object?>{..._anchors},
       if (_treats.isNotEmpty) 'treats': <String, Object?>{..._treats},
+      if (_firstUp.isNotEmpty)
+        'firstUp': <String, Object?>{
+          for (final day in _firstUp.keys.toList()..sort())
+            day.toString(): _firstUp[day],
+        },
       if (_timer case final uhr?) 'timer': uhr.toJson(),
       if (_plans.isNotEmpty)
         'plans': <String, Object?>{
@@ -593,7 +624,26 @@ class HabitTracker {
       faellig,
       _anchors,
       isDone: (habit) => isChecked(habit.id, day),
+      zuerst: _firstUp[day],
     );
+  }
+
+  // --- Das Lagerfeuer (ADR-0076) ---
+
+  /// Was an [day] zuerst drankommt — am Abend davor am Feuer gewählt —
+  /// oder null. Erzeugt keine Zahl.
+  String? firstUpOn(Day day) => _firstUp[day];
+
+  /// Setzt, was an [day] zuerst drankommt. Ein zweiter Tipp am selben
+  /// Abend ersetzt den ersten, null nimmt ihn zurück. Eine unbekannte
+  /// Gewohnheit ändert nichts.
+  HabitTracker setFirstUp(Day day, String? habitId) {
+    if (habitId == null) {
+      if (!_firstUp.containsKey(day)) return this;
+      return _copyWith(firstUp: <Day, String>{..._firstUp}..remove(day));
+    }
+    if (definitionFor(habitId) == null) return this;
+    return _copyWith(firstUp: <Day, String>{..._firstUp, day: habitId});
   }
 
   // --- Koppeln (ADR-0065) ---
@@ -1236,6 +1286,7 @@ class HabitTracker {
     Map<String, HabitPlan>? plans,
     Map<String, String>? anchors,
     Map<String, String>? treats,
+    Map<Day, String>? firstUp,
     HabitTimer? timer,
     bool clearTimer = false,
   }) {
@@ -1251,6 +1302,7 @@ class HabitTracker {
       plans: plans ?? _plans,
       anchors: anchors ?? _anchors,
       treats: treats ?? _treats,
+      firstUp: firstUp ?? _firstUp,
       timer: clearTimer ? null : (timer ?? _timer),
     );
   }

@@ -404,7 +404,8 @@ Die Logik gibt nur Events aus, Flame spielt sie ab.
 12. **Die fünf Ideen aus ADR-0071** — jede braucht vor dem Bau ihre
     Konzeptrunde; die Fragen stehen in
     [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md).
-    Die Tagesgrube hat ihre gehabt (ADR-0072), vier stehen aus.
+    Die Tagesgrube (ADR-0072) und das Lagerfeuer (ADR-0076) haben ihre
+    gehabt, drei stehen aus.
 
 ---
 
@@ -432,8 +433,9 @@ Ausbau.
 
 **Entschieden am 09.10.2026**
 ([ADR-0071](docs/decisions/0071-das-naechste-level.md)). Fünf Ideen,
-nach und nach, jede mit eigener Konzeptrunde. **Gebaut ist seit dem
-11.10.2026 die Tagesgrube, die anderen vier nicht.** Der Grundsatz: weniger
+nach und nach, jede mit eigener Konzeptrunde. **Gebaut sind die
+Tagesgrube (11.10.2026) und das Lagerfeuer (18.10.2026), die anderen drei
+nicht.** Der Grundsatz: weniger
 Systeme, die enger zusammenhängen. Einzelheiten und offene Fragen:
 [`docs/vorlagen/das-naechste-level.md`](docs/vorlagen/das-naechste-level.md).
 
@@ -444,7 +446,11 @@ Systeme, die enger zusammenhängen. Einzelheiten und offene Fragen:
   +25 % auf alle vier Werte, und sie bringt nur Ruhm. Die vier Stufen
   des Tages (ADR-0040) sind dafür gestrichen.
 - **Lagerfeuer** — abends eine Minute für Rückfrage, Truhe, Aufgaben und
-  Wochenrückblick; zum Schluss, was morgen zuerst drankommt.
+  Wochenrückblick; zum Schluss, was morgen zuerst drankommt. **Gebaut am
+  18.10.2026** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): immer
+  offen, ab 18 Uhr brennt es; Truhe und Aufgaben gibt es nur noch dort,
+  alles verfällt weiter um Mitternacht, und der gewählte Vorsatz steht
+  am nächsten Morgen mit einer Flamme oben in „Heute“.
 - **Schatten** — ganz unten wartet man selbst, wie man vor 30 Tagen war;
   die Wächter werden innere Gegner.
 - **Saisons** — sechs Wochen, ein Thema aus einem gelesenen Buch.
