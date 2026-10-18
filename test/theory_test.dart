@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/audio/sound_effects.dart';
+import 'package:lifes_game/theory/antwort_klang.dart';
 import 'package:lifes_game/theory/widgets/review_section.dart';
+import 'package:lifes_game/theory/widgets/runden_balken.dart';
+import 'package:lifes_game/ui/aufstieg.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
@@ -19,6 +23,14 @@ import 'package:theory/theory.dart';
 import 'test_view.dart';
 
 final Lesson _first = habitsBranch.lessons.first;
+
+/// Merkt sich, was gespielt werden sollte, statt es zu spielen.
+class _Mitschrift implements SoundPlayer {
+  final List<SoundEffect> gespielt = <SoundEffect>[];
+
+  @override
+  void play(SoundEffect effect) => gespielt.add(effect);
+}
 
 /// Ein Container, in dem der Spieler auf [level] steht.
 ///
@@ -684,6 +696,15 @@ void main() {
     });
   });
 
+  group('AntwortKlang', () {
+    test('richtig klettert, falsch klingt dumpf, über fünf bleibt es oben', () {
+      expect(AntwortKlang.fuer(richtig: true, inFolge: 1), SoundEffect.ton1);
+      expect(AntwortKlang.fuer(richtig: true, inFolge: 3), SoundEffect.ton3);
+      expect(AntwortKlang.fuer(richtig: true, inFolge: 9), SoundEffect.ton5);
+      expect(AntwortKlang.fuer(richtig: false, inFolge: 4), SoundEffect.falsch);
+    });
+  });
+
   group('LessonScreen', () {
     Future<void> pump(WidgetTester tester, ProviderContainer container) async {
       await tester.pumpWidget(
@@ -752,8 +773,7 @@ void main() {
       expect(find.text(_first.sections.first.heading), findsOneWidget);
       expect(find.text('Frage 1 von ${_first.questionCount}'), findsNothing);
 
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
 
       expect(find.text('Frage 1 von ${_first.questionCount}'), findsOneWidget);
 
@@ -765,14 +785,133 @@ void main() {
       expect(sichtbar, hasLength(1));
     });
 
+    group('Eine Seite als Spielrunde (18.10.)', () {
+      /// Beantwortet die stehende Frage — [richtig] oder daneben.
+      Future<void> antworte(
+        WidgetTester tester, {
+        required bool richtig,
+      }) async {
+        final frage = shownQuestion();
+        final wahl = richtig
+            ? frage.correctIndex
+            : (frage.correctIndex + 1) % frage.options.length;
+        await tester.tap(find.text(frage.options[wahl]));
+        await tester.pumpAndSettle();
+      }
+
+      int balken(WidgetTester tester) =>
+          tester.widget<RundenBalken>(find.byType(RundenBalken)).geloest;
+
+      int konfetti(WidgetTester tester) => tester
+          .state<AufstiegHostState>(find.byType(AufstiegHost))
+          .konfettiInDerLuft;
+
+      testWidgets('der Text kommt in Häppchen', (tester) async {
+        expect(
+          _first.sections.length,
+          greaterThan(1),
+          reason: 'sonst prüft der Test nichts',
+        );
+        useTallView(tester);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        await pump(tester, container);
+
+        expect(find.text(_first.sections.first.heading), findsOneWidget);
+        expect(find.text(_first.sections[1].heading), findsNothing);
+        expect(
+          find.text('${_first.questionCount} Fragen beantworten'),
+          findsNothing,
+        );
+
+        await tester.tap(find.text('Weiter'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(_first.sections[1].heading), findsOneWidget);
+      });
+
+      testWidgets('richtig klettert die Leiter, drei von drei lösen den '
+          'Akkord auf und werfen Konfetti', (tester) async {
+        useTallView(tester);
+        final mitschrift = _Mitschrift();
+        final container = ProviderContainer(
+          overrides: [soundPlayerProvider.overrideWithValue(mitschrift)],
+        );
+        addTearDown(container.dispose);
+        await pump(tester, container);
+        await zuDenFragen(tester, _first);
+
+        for (var i = 0; i < _first.questionCount; i++) {
+          await antworte(tester, richtig: true);
+          expect(balken(tester), i + 1);
+          final letzte = i == _first.questionCount - 1;
+          await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
+          if (!letzte) await tester.pumpAndSettle();
+        }
+        await tester.pump();
+        expect(konfetti(tester), 1);
+        await tester.pumpAndSettle();
+
+        // Danach darf eine Errungenschaft klingen — gefragt ist der Anfang.
+        expect(
+          mitschrift.gespielt.take(_first.questionCount + 1),
+          <SoundEffect>[
+            ...SoundEffect.tonleiter.take(_first.questionCount),
+            SoundEffect.tagGeschafft,
+          ],
+        );
+      });
+
+      testWidgets('falsch klingt dumpf, fängt die Leiter von vorn an und '
+          'lässt den Balken stehen', (tester) async {
+        useTallView(tester);
+        final mitschrift = _Mitschrift();
+        final container = ProviderContainer(
+          overrides: [soundPlayerProvider.overrideWithValue(mitschrift)],
+        );
+        addTearDown(container.dispose);
+        await pump(tester, container);
+        await zuDenFragen(tester, _first);
+
+        await antworte(tester, richtig: false);
+        expect(balken(tester), 0);
+        expect(find.text('Nicht ganz'), findsOneWidget);
+        for (var i = 1; i < _first.questionCount; i++) {
+          await tester.tap(find.text('Weiter'));
+          await tester.pumpAndSettle();
+          await antworte(tester, richtig: true);
+        }
+        await tester.tap(find.text('Auswerten'));
+        await tester.pumpAndSettle();
+
+        // Die zweite Runde holt die falsche nach — und füllt den Balken.
+        expect(find.text('Noch einmal — die letzte'), findsOneWidget);
+        await antworte(tester, richtig: true);
+        expect(balken(tester), _first.questionCount);
+        await tester.tap(find.text('Weiter'));
+        await tester.pump();
+        expect(konfetti(tester), 0);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bestanden'), findsOneWidget);
+        expect(
+          mitschrift.gespielt.take(_first.questionCount + 2),
+          <SoundEffect>[
+            SoundEffect.falsch,
+            ...SoundEffect.tonleiter.take(_first.questionCount),
+            SoundEffect.lektion,
+          ],
+        );
+      });
+    });
+
     testWidgets('vor der Antwort geht es nicht weiter', (tester) async {
       useTallView(tester);
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       await pump(tester, container);
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
 
       final button = tester.widget<FilledButton>(
         find.ancestor(
@@ -788,10 +927,7 @@ void main() {
         WidgetTester tester, {
         required int falsch,
       }) async {
-        await tester.tap(
-          find.text('${_first.questionCount} Fragen beantworten'),
-        );
-        await tester.pumpAndSettle();
+        await zuDenFragen(tester, _first);
         for (var i = 0; i < _first.questionCount; i++) {
           final question = shownQuestion();
           final option = i < falsch
@@ -888,8 +1024,7 @@ void main() {
       addTearDown(container.dispose);
 
       await pump(tester, container);
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
 
       final question = shownQuestion();
       expect(find.text(question.explanation), findsNothing);
@@ -909,8 +1044,7 @@ void main() {
       addTearDown(container.dispose);
 
       await pump(tester, container);
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
       await answerAll(tester, correctly: true);
 
       expect(find.text('Bestanden'), findsOneWidget);
@@ -938,8 +1072,7 @@ void main() {
       addTearDown(container.dispose);
 
       await pump(tester, container);
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
       await answerAll(tester, correctly: false);
 
       expect(find.text('Noch nicht bestanden'), findsOneWidget);
@@ -956,8 +1089,7 @@ void main() {
       addTearDown(container.dispose);
 
       await pump(tester, container);
-      await tester.tap(find.text('${_first.questionCount} Fragen beantworten'));
-      await tester.pumpAndSettle();
+      await zuDenFragen(tester, _first);
       await answerAll(tester, correctly: false);
 
       await tester.tap(find.text('Nochmal'));
@@ -970,10 +1102,7 @@ void main() {
       final schleife = theoryGraph.nodeById('gewohnheiten-schleife')!;
 
       Future<void> bestehe(WidgetTester tester) async {
-        await tester.tap(
-          find.text('${_first.questionCount} Fragen beantworten'),
-        );
-        await tester.pumpAndSettle();
+        await zuDenFragen(tester, _first);
         await answerAll(tester, correctly: true);
       }
 
@@ -1087,10 +1216,7 @@ void main() {
         addTearDown(container.dispose);
 
         await pump(tester, container);
-        await tester.tap(
-          find.text('${_first.questionCount} Fragen beantworten'),
-        );
-        await tester.pumpAndSettle();
+        await zuDenFragen(tester, _first);
         await answerAll(tester, correctly: false);
 
         expect(find.text('Noch nicht bestanden'), findsOneWidget);

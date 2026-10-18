@@ -149,6 +149,12 @@ es ist die am besten belegte einzelne Verhaltenstechnik.
 
 ## 4. Der Lesebildschirm
 
+> **Teilweise gebaut am 18.10.2026**, als Teil der Seite als Spielrunde
+> (`state.md`): **ein Abschnitt je Bildschirm** mit Strichen oben statt
+> „2 von 3“. Abschnitt und Frage sind **nicht** verschränkt — dafür
+> bräuchte es die Schreibarbeit an jeder Seite —, Nachlesen nach einer
+> falschen Antwort und der Kernsatz fehlen weiter.
+
 | Heute | Besser | Warum |
 |---|---|---|
 | Drei Absätze am Stück, dann drei Fragen | Abschnitt → Frage → Abschnitt → Frage | Kurzer Abruf direkt nach dem Lesen, und auf dem Handy drei kleine Blöcke statt einer Wand |

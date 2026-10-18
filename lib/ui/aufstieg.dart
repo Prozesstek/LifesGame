@@ -146,12 +146,16 @@ class AufstiegHostState extends State<AufstiegHost>
     return true;
   }
 
-  /// Konfetti vom letzten Finger aus.
-  void konfetti() {
+  /// Konfetti vom letzten Finger aus — oder von [von], in Punkten des
+  /// Hosts. Eine Seite im Wissensbaum endet mit dem Knopf ganz unten; von
+  /// dort käme es kaum über die untere Hälfte.
+  void konfetti({Offset? von}) {
     final finger = _letzterFinger;
     final box = context.findRenderObject();
-    if (finger == null || box is! RenderBox) return;
-    _konfetti.add(Konfetti(von: box.globalToLocal(finger), seed: _naechste++));
+    if (box is! RenderBox) return;
+    final start = von ?? (finger == null ? null : box.globalToLocal(finger));
+    if (start == null) return;
+    _konfetti.add(Konfetti(von: start, seed: _naechste++));
     _laufe();
   }
 
