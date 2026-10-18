@@ -256,14 +256,20 @@ class FlugZielMarke extends StatefulWidget {
 class _FlugZielMarkeState extends State<FlugZielMarke>
     with SingleTickerProviderStateMixin {
   final GlobalKey _ort = GlobalKey();
-  late final AnimationController _puls = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 180),
-    value: 1,
-  );
+  late final AnimationController _puls;
   AufstiegHostState? _host;
   ValueListenable<int>? _unterwegs;
   int _zuletzt = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _puls = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      value: 1,
+    );
+  }
 
   @override
   void didChangeDependencies() {

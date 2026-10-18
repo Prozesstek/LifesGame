@@ -44,11 +44,17 @@ class HaekchenKreis extends StatefulWidget {
 
 class _HaekchenKreisState extends State<HaekchenKreis>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _sprung = AnimationController(
-    vsync: this,
-    duration: HaekchenKreis.dauer,
-    value: 1,
-  );
+  late final AnimationController _sprung;
+
+  @override
+  void initState() {
+    super.initState();
+    _sprung = AnimationController(
+      vsync: this,
+      duration: HaekchenKreis.dauer,
+      value: 1,
+    );
+  }
 
   @override
   void didUpdateWidget(HaekchenKreis alt) {

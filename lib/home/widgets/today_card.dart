@@ -187,11 +187,19 @@ class _Flamme extends StatefulWidget {
 }
 
 class _FlammeState extends State<_Flamme> with SingleTickerProviderStateMixin {
-  late final AnimationController _zuenden = AnimationController(
-    vsync: this,
-    duration: _Flamme.zuenden,
-    value: 1,
-  );
+  // In `initState`, nicht faul: Ohne Kette baut die Flamme nichts, und
+  // ein fauler Controller entstünde erst in `dispose` (`gotchas.md`).
+  late final AnimationController _zuenden;
+
+  @override
+  void initState() {
+    super.initState();
+    _zuenden = AnimationController(
+      vsync: this,
+      duration: _Flamme.zuenden,
+      value: 1,
+    );
+  }
 
   @override
   void didUpdateWidget(_Flamme alt) {

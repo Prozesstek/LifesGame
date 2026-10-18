@@ -3,6 +3,37 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein fauler Controller entsteht im `dispose` — und die CI hat ein anderes Flutter
+
+PR #122 lief hier mit allen 825 Tests grün und fiel nach dem Merge in
+der CI mit 37 roten Tests. Die Web-Fassung wurde nicht ausgeliefert.
+Die Ursache war eine Zeile in der Flamme von „Heute“:
+
+```dart
+late final AnimationController _zuenden = AnimationController(vsync: this, ...);
+```
+
+Ein `late final` mit Startwert entsteht erst beim ersten Zugriff. Ohne
+Tageskette baut die Flamme aber nichts und fasst ihn nie an. Der erste
+Zugriff war deshalb `_zuenden.dispose()`, und der Controller entstand
+mitten im Abbau. Flutter 3.44.9 fragt dabei den `TickerMode` eines
+Vorfahren ab, der schon abgebaut wird: „Looking up a deactivated
+widget's ancestor is unsafe.“ Ab dann blieb der Abbau stecken, und alles
+dahinter fiel mit um: ein Tooltip, der am Zeiger hing, ein Zeitgeber des
+`DayWatcher`. 22 Tests trafen die Flamme, die anderen 15 ihre Reste.
+
+**Warum es hier grün war:** Hier läuft Flutter 3.47.0, die CI
+nimmt 3.44.9 (`.github/workflows/pages.yml`). In 3.47 schweigt
+`createTicker` an dieser Stelle.
+
+**Abhilfe:** Controller in `initState` anlegen, nicht faul.
+
+**Regeln:** Ein `late final` mit Startwert gehört nur dorthin, wo er in
+`initState` oder in jedem `build` berührt wird, sonst ist `dispose` der
+erste Zugriff. Und **grün auf diesem Rechner heißt nicht grün in der
+CI**, solange die Versionen auseinanderliegen; nach einem Merge den Lauf
+ansehen (`gh run list --branch main`).
+
 ## Ein Zeitgeber ist kein Bild: `pumpAndSettle` wartet nicht auf ihn
 
 Die Feier eines Häkchens (Errungenschaft, Aufstieg) soll warten, bis die

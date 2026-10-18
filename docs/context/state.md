@@ -178,7 +178,10 @@ Neu: `haekchen_moment.dart`, `haekchen_kreis.dart`, `beute_flug.dart`,
 `tool/haekchen_klaenge.py`, sieben Klänge, `test/haekchen_moment_test.dart`.
 App 825 (vorher 809). **Nicht gehört, nicht gespielt, nicht am Handy.**
 
-Gemergt am 18.10. als PR #122.
+Gemergt am 18.10. als PR #122. **Die erste Auslieferung fiel in der CI
+um**, 37 rote Tests, hier alle grün: Die Flamme legte ihren Controller
+erst im `dispose` an, und die CI läuft auf einem älteren Flutter
+(`gotchas.md`). Behoben direkt auf `main`.
 
 ### Offen
 
