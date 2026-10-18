@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
 import 'action_sprites.dart';
+import 'beute_bild.dart';
+import 'beute_regen.dart';
 import 'damage_popup.dart';
 import 'figure_state.dart';
 import 'kampfgefuehl.dart';
@@ -31,11 +33,22 @@ class ActionGame extends Game {
   ActionGame({
     required this.sim,
     required this.klang,
+    required this.startXp,
     this.onRunEnded,
     this.zeichen,
   });
 
   final ActionWorld sim;
+
+  /// Die Erfahrung des Spielers vor dem Lauf — für den Balken unten, der
+  /// mit jedem Funken voller wird. **Pflicht, aber nullbar**: Die
+  /// Tagesgrube und der Prototyp zahlen keine Erfahrung und geben null;
+  /// die Grube soll ihn nicht vergessen können wie früher den Klang.
+  final int? startXp;
+
+  /// Münzen und Funken, die zum Helden fliegen — nur Darstellung dessen,
+  /// was die Welt schon gezahlt hat (`beute_regen.dart`).
+  late final BeuteRegen beute = BeuteRegen(startXp: startXp);
 
   /// Womit die Grube klingt. **Pflicht, ohne Standardwert**: Mit einem
   /// stillen Standard bliebe ein Lauf stumm, sobald eine Stelle vergisst,
@@ -295,7 +308,9 @@ class ActionGame extends Game {
           // Staub, wo das Gitter fällt.
           _bursts.add(Burst.slam(event.at, ActionBalance.tileSize * 1.5));
         case LootDropped():
-          _popups.add(DamagePopup.forLoot(event));
+          // Der Wächter wirft einen Brunnen. Er ist es, wenn die Welt im
+          // selben Bild gewonnen hat — die Meldung selbst sagt es nicht.
+          beute.wirf(event, gross: sim.isWon);
         case BossLanded():
           // Er schlägt auf: ein grosser Ring und ein Beben.
           _bursts.add(Burst.slam(event.at, 110));
@@ -317,6 +332,14 @@ class ActionGame extends Game {
             LastStandTriggered():
           _neueArten.melde(event);
       }
+    }
+
+    final ankunft = beute.update(dt, sim.heroView.position);
+    if (ankunft.gold) _klaenge.melde(SoundEffect.muenze);
+    if (ankunft.xp) _klaenge.melde(SoundEffect.funke);
+    if (ankunft.aufstieg) {
+      _klaenge.melde(SoundEffect.aufstieg);
+      _bursts.add(Burst.aufstieg(sim.heroView.position));
     }
 
     final angekuendigt = sim.telegraphs.length;
@@ -364,10 +387,21 @@ class ActionGame extends Game {
     // geändert.
     if (dt > 0) frame.value++;
     if (_endeGemeldet) {
-      _endeGemeldet = false;
-      onRunEnded?.call();
+      // **Erst wenn eingesammelt ist.** Der Brunnen des Wächters ist der
+      // Höhepunkt des Laufs; stünde das Ergebnis sofort darüber, sähe ihn
+      // niemand. Gezählt mit der wirklichen Zeit und gedeckelt, damit ein
+      // hängendes Stück das Ende nie aufhält.
+      _endeWartet += wirklich;
+      if (beute.leer || _endeWartet >= endeWartetHoechstens) {
+        _endeGemeldet = false;
+        onRunEnded?.call();
+      }
     }
   }
+
+  /// So lange wartet das Ergebnis höchstens auf die Beute in der Luft.
+  static const double endeWartetHoechstens = 1.6;
+  double _endeWartet = 0;
 
   /// Was ein Treffer ausser der Zahl auslöst.
   ///
@@ -417,6 +451,7 @@ class ActionGame extends Game {
     // Mit Bildern zeigt der Schlag sich selbst; der Ring war der Ersatz.
     if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
+    BeuteBild.zeichne(canvas, beute);
     _drawPopups(canvas);
 
     canvas.restore();

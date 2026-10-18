@@ -68,6 +68,7 @@ void main() {
   ) async {
     final game = ActionGame(
       klang: const SilentSoundPlayer(),
+      startXp: null,
       sim: ActionWorld(
         level: LevelCatalog.grube,
         heroStats: ActionStats.gereift,

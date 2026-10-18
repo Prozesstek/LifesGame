@@ -192,6 +192,7 @@ void main() {
       final mitschrift = _Mitschrift();
       final game = ActionGame(
         klang: mitschrift,
+        startXp: null,
         sim: ActionWorld(
           level: level ?? gedraenge,
           heroStats: werte,

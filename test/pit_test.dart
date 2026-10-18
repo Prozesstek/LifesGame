@@ -61,81 +61,46 @@ void main() {
   });
 
   group('Der Eingang', () {
-    testWidgets('zeigt Fortschritt, Stufe und Belohnung', (tester) async {
+    testWidgets('zeigt die Ebene und ihre Belohnung', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(child: MaterialApp(home: LadderScreen())),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('0 / ${PitStage.count}'), findsOneWidget);
-      expect(find.byKey(LadderScreen.etageKey(1)), findsOneWidget);
+      expect(find.byKey(LadderScreen.ebeneKey), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
       // Seit dem 28.09. als Zeichen und Zahl, ohne Satz (Issue #88).
       expect(find.text('+${LadderRewards.xpFor(1)}'), findsOneWidget);
-      expect(find.byIcon(Icons.explore_outlined), findsOneWidget);
+      // Seit dem 16.10. ohne „0 / 30“ und ohne Fahrstuhl.
+      expect(find.text('0 / ${PitStage.count}'), findsNothing);
+      expect(find.byIcon(Icons.lock), findsNothing);
     });
 
-    /// Ein Stand mit drei geschafften Stufen und einer Bestzeit auf 2.
-    ///
-    /// **Im Handyformat ansehen** (`usePhoneView`): Wer einmal unten war,
-    /// sieht über dem Schacht die Tagesgrube (ADR-0072). Im Testfenster
-    /// von 600 Punkten Höhe bleiben dem Schacht dann drei Zeilen, und die
-    /// geschafften Stufen rollen aus dem Bild.
-    Widget mitDreiStufen() {
+    testWidgets('nach drei geschafften Ebenen geht es auf die vierte', (
+      tester,
+    ) async {
+      usePhoneView(tester);
       const stand = LadderProgress(
         highestDefeated: 3,
         bestTimes: <int, double>{2: 42.3},
       );
-      return ProviderScope(
-        overrides: [
-          savedGameProvider.overrideWithValue(const SaveData(ladder: stand)),
-        ],
-        child: const MaterialApp(home: LadderScreen()),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(const SaveData(ladder: stand)),
+          ],
+          child: const MaterialApp(home: LadderScreen()),
+        ),
       );
-    }
-
-    testWidgets('der Schacht zeigt Bestzeit, neue Stufe und Sperre', (
-      tester,
-    ) async {
-      usePhoneView(tester);
-      await tester.pumpWidget(mitDreiStufen());
       await tester.pumpAndSettle();
 
-      expect(find.text('42,3 s'), findsOneWidget);
-      // Stufe 4 ist die nächste neue, darüber ist zu.
-      expect(find.byIcon(Icons.explore_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.lock), findsWidgets);
-    });
-
-    testWidgets('eine geschaffte Stufe wählen, „Hinab“ fährt dorthin', (
-      tester,
-    ) async {
-      usePhoneView(tester);
-      await tester.pumpWidget(mitDreiStufen());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(LadderScreen.etageKey(2)));
-      await tester.pump();
+      expect(find.text('4'), findsOneWidget);
       await tester.tap(find.byKey(LadderScreen.hinabKey));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
-      expect(grube.stage.number, 2);
-    });
-
-    testWidgets('eine gesperrte Stufe lässt sich nicht wählen', (tester) async {
-      usePhoneView(tester);
-      await tester.pumpWidget(mitDreiStufen());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(LadderScreen.etageKey(5)));
-      await tester.pump();
-      await tester.tap(find.byKey(LadderScreen.hinabKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      final grube = tester.widget<PitScreen>(find.byType(PitScreen));
-      expect(grube.stage.number, 4, reason: 'die nächste neue');
+      expect(grube.stage.number, 4);
     });
 
     testWidgets('„Hinab" führt in die Grube der nächsten Stufe', (

@@ -8,14 +8,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// `MoveIcons` für die Bilder: Welche Datei zu welchem Anlass gehört,
 /// steht in [SoundEffect.asset] und sonst nirgends.
 enum SoundEffect {
-  /// Ein Häkchen ist gesetzt — der häufigste Moment des Spiels, deshalb
-  /// der kürzeste Klang.
-  haekchen('Sound/Success.mp3'),
+  // --- Das Häkchen ---
+  //
+  // **Die Tonleiter des Tages** (`tool/haekchen_klaenge.py`): Jedes
+  // Häkchen eines Tages klingt eine Stufe höher als das davor, das letzte
+  // Fällige löst den Akkord auf. Welche Stufe dran ist, sagt
+  // `HaekchenMoment.klang`. Gerechnet, nicht aufgenommen — Platzhalter.
+
+  /// Das erste Häkchen des Tages.
+  ton1('Sound/Ton1.wav'),
+  ton2('Sound/Ton2.wav'),
+  ton3('Sound/Ton3.wav'),
+  ton4('Sound/Ton4.wav'),
+
+  /// Das fünfte — mehr Gewohnheiten laufen nicht
+  /// (`HabitRewards.maxActiveHabits`).
+  ton5('Sound/Ton5.wav'),
+
+  /// Das letzte Fällige des Tages ist abgehakt.
+  tagGeschafft('Sound/TagGeschafft.wav'),
+
+  /// Das erste Häkchen des Tages zündet die Flamme der Tageskette. Liegt
+  /// über dem Ton des Häkchens, deshalb ein Fauchen und kein Ton.
+  kette('Sound/Kette.wav'),
 
   /// Ein Häkchen hat einen ganzen Charakterpunkt gebracht. Seltener als
   /// ein Häkchen, deshalb ein grösserer Klang. **Vorerst dieselbe Datei
   /// wie die Lektion** — es gibt keine weitere; tauschen ist diese Zeile.
   statPunkt('Sound/Win.mp3'),
+
+  /// Eine Rückfrage ist richtig beantwortet. **Bis zum 18.10. auch der
+  /// Klang jedes Häkchens**; der hat jetzt seine Leiter.
+  richtig('Sound/Success.mp3'),
+
+  /// Eine Antwort war falsch — auf einer Seite oder in der Rückfrage.
+  /// Zwei weiche Schläge abwärts, die nicht strafen
+  /// (`tool/lern_klaenge.py`). Eine richtige Antwort auf einer Seite
+  /// klettert stattdessen die [tonleiter] hinauf (`AntwortKlang`).
+  falsch('Sound/Falsch.wav'),
 
   /// Eine Lektion ist bestanden.
   lektion('Sound/Win.mp3'),
@@ -53,9 +83,30 @@ enum SoundEffect {
   faehigkeit('Sound/Faehigkeit.wav'),
 
   /// Der Wächter oder ein Wächterauge kündigt einen Angriff an.
-  ankuendigung('Sound/Ankuendigung.wav');
+  ankuendigung('Sound/Ankuendigung.wav'),
+
+  // Seit dem Goldregen: was beim Helden ankommt (`BeuteRegen`).
+
+  /// Eine Münze kommt beim Helden an. Im Brunnen des Wächters dutzendfach
+  /// — `KampfKlang` hält sie auseinander, so wird es ein Rasseln.
+  muenze('Sound/Muenze.wav'),
+
+  /// Ein Funke Erfahrung kommt an. Leiser als die Münze.
+  funke('Sound/Funke.wav'),
+
+  /// Ein Level mitten im Lauf.
+  aufstieg('Sound/Aufstieg.wav');
 
   const SoundEffect(this.asset);
+
+  /// Die Leiter von unten nach oben.
+  static const List<SoundEffect> tonleiter = <SoundEffect>[
+    ton1,
+    ton2,
+    ton3,
+    ton4,
+    ton5,
+  ];
 
   /// Pfad unter `assets/`, so wie `AssetSource` ihn erwartet.
   final String asset;

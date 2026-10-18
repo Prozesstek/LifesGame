@@ -116,6 +116,11 @@ statt vier eigener, weniger Pflicht. Das braucht einen eigenen ADR
 
 ## 2. Das Lagerfeuer — der Tag endet an einer Stelle
 
+> **Gebaut am 18.10.2026.** Die sechs Fragen unten und die Frage nach dem
+> Bild sind in [ADR-0076](../decisions/0076-das-lagerfeuer.md)
+> entschieden, alle wie empfohlen; der Begleiter kommt später mit dem
+> Haus. Was hier steht, ist der Entwurf davor und bleibt, wie er war.
+
 **Gegen:** die tägliche Pflicht.
 
 Abends gibt es **eine Minute für alles**, statt fünf Dingen, die um

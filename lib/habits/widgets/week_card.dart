@@ -25,12 +25,18 @@ class WeekCard extends StatelessWidget {
   final WeekSummary thisWeek;
   final WeekSummary lastWeek;
 
+  /// Ob der Rückblick heute **gross** steht: sonntags, und montags, wenn
+  /// die letzte Woche etwas hatte. Eine Stelle für den Charakter und das
+  /// Lagerfeuer (ADR-0076), das ihn nur an diesen Tagen zeigt.
+  static bool istGross(Day today, WeekSummary lastWeek) =>
+      today.weekday == DateTime.sunday ||
+      (today.weekday == DateTime.monday && lastWeek.activeDays > 0);
+
   @override
   Widget build(BuildContext context) {
-    final sonntag = today.weekday == DateTime.sunday;
     final montag = today.weekday == DateTime.monday && lastWeek.activeDays > 0;
 
-    if (sonntag || montag) {
+    if (istGross(today, lastWeek)) {
       final woche = montag ? lastWeek : thisWeek;
       return _Gross(
         titel: montag ? 'Deine letzte Woche' : 'Deine Woche',

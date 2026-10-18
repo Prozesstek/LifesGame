@@ -61,6 +61,20 @@ void main(List<String> args) {
       drei,
       _legendaereKraefte(),
     ),
+    // Der stärkste denkbare Held: Level 50, sonst wie „T60+G+F“. Seit es
+    // hundert Stufen gibt, zeigt diese Spalte, wo die Grube aufhört,
+    // schaffbar zu sein.
+    'L50+G+F': _Spalte(
+      _statsNach(
+        60,
+        bonus: _bestesGear(),
+        mitSeltenheit: true,
+        level: LevelCurve.maxLevel,
+      ),
+      gut,
+      drei,
+      _legendaereKraefte(),
+    ),
   };
 
   print('Die Grube — $laeufe Läufe je Feld, jede Karte neu gebaut\n');
@@ -79,12 +93,26 @@ void main(List<String> args) {
     '${spalten.keys.map((k) => k.padLeft(10)).join()}',
   );
 
+  // **Wer zweimal hintereinander bei null steht, rechnet nicht weiter**
+  // („—“): Bei hundert Stufen liefe die Tabelle sonst eine Stunde lang
+  // Läufe, die niemand gewinnt. Steht jede Spalte so, endet sie.
+  final nullen = <String, int>{for (final k in spalten.keys) k: 0};
   for (var stufe = 1; stufe <= PitStage.count; stufe++) {
     final zeile = StringBuffer('  ${stufe.toString().padRight(7)}');
-    for (final spalte in spalten.values) {
-      zeile.write('${_quote(stufe, spalte, laeufe)} %'.padLeft(10));
+    for (final e in spalten.entries) {
+      if (nullen[e.key]! >= 2) {
+        zeile.write('—'.padLeft(10));
+        continue;
+      }
+      final quote = _quote(stufe, e.value, laeufe);
+      nullen[e.key] = quote == 0 ? nullen[e.key]! + 1 : 0;
+      zeile.write('$quote %'.padLeft(10));
     }
     print(zeile);
+    if (nullen.values.every((n) => n >= 2)) {
+      print('  … ab hier gewinnt keine Spalte mehr.');
+      break;
+    }
   }
 
   _jeWaechter(spalten, laeufe);
@@ -441,6 +469,7 @@ ActionStats _statsNach(
   int tage, {
   GearBonus bonus = const GearBonus(),
   bool mitSeltenheit = false,
+  int? level,
 }) {
   final gewaehlt = HabitCatalog.all
       .take(HabitRewards.maxActiveHabits)
@@ -461,7 +490,7 @@ ActionStats _statsNach(
   }
 
   final gelesen = tage == 0 ? 0 : _grundlagenXp;
-  final level = LevelCurve.levelFor(tracker.totalXp + gelesen).level;
+  final stufe = level ?? LevelCurve.levelFor(tracker.totalXp + gelesen).level;
   final waffe = _bestesIn(GearSlot.waffe).rarity.powerFactor;
   final ruestung = _bestesIn(GearSlot.ruestung).rarity.powerFactor;
 
@@ -471,7 +500,7 @@ ActionStats _statsNach(
     maxHp: s.maxHp + bonus.maxHp,
     defense: s.defense + bonus.defense,
     energy: s.maxEnergy + bonus.maxEnergy,
-    levelFactor: PowerCurve.factorFor(level),
+    levelFactor: PowerCurve.factorFor(stufe),
     weaponFactor: mitSeltenheit ? waffe : 1,
     armorFactor: mitSeltenheit ? ruestung : 1,
   );

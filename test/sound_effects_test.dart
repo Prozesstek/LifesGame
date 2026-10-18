@@ -77,7 +77,11 @@ void main() {
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
       await schonErledigt(tester);
-      expect(mitschrift.gespielt.first, SoundEffect.haekchen);
+      // Die einzige Gewohnheit: Das erste Häkchen des Tages schafft ihn
+      // zugleich — der Akkord statt der ersten Stufe, und die Flamme
+      // zündet darüber.
+      expect(mitschrift.gespielt.first, SoundEffect.tagGeschafft);
+      expect(mitschrift.gespielt, contains(SoundEffect.kette));
 
       // Das erste Häkchen überhaupt ist „Erster Schritt" — die Feier
       // kommt einen Bildaufbau später und bringt ihren eigenen Klang.

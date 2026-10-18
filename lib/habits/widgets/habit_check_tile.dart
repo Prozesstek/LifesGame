@@ -5,6 +5,7 @@ import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 import '../../ui/druck.dart';
+import 'haekchen_kreis.dart';
 import 'habit_countdown.dart';
 
 /// Eine laufende Gewohnheit: abhaken, Streak sehen, ein Tagesziel füllen.
@@ -53,12 +54,6 @@ class HabitCheckTile extends StatelessWidget {
     this.onEditCue,
     super.key,
   });
-
-  /// Wie lange der Wechsel von „offen" auf „erledigt" dauert.
-  ///
-  /// Kurz genug, dass niemand wartet, lang genug, dass man es sieht — ein
-  /// Häkchen, das ohne Regung erscheint, fühlt sich nach Formular an.
-  static const Duration checkDuration = Duration(milliseconds: 220);
 
   final Habit habit;
   final bool isChecked;
@@ -387,11 +382,11 @@ class TreatLine extends StatelessWidget {
   }
 }
 
-/// Der Kreis links, der beim Abhaken aufpoppt.
+/// Der Kreis links, der beim Abhaken aufspringt.
 ///
-/// Der Sprung kommt aus einem [AnimatedSwitcher] statt aus einem eigenen
-/// Zustand: Die Kachel bleibt damit zustandslos, und die Animation läuft
-/// auch dann, wenn der Tracker von woanders geändert wird.
+/// Der Sprung steckt im [HaekchenKreis], nicht in der Kachel: Die Kachel
+/// bleibt damit zustandslos, und der Sprung läuft auch dann, wenn der
+/// Tracker von woanders geändert wird — vom Timer etwa.
 class _CheckMark extends StatelessWidget {
   const _CheckMark({
     required this.isChecked,
@@ -408,20 +403,10 @@ class _CheckMark extends StatelessWidget {
     return Semantics(
       checked: isChecked,
       label: cued ? '$label, jetzt dran' : label,
-      child: AnimatedSwitcher(
-        duration: HabitCheckTile.checkDuration,
-        transitionBuilder: (child, animation) => ScaleTransition(
-          scale: Tween<double>(begin: 0.6, end: 1).animate(animation),
-          child: FadeTransition(opacity: animation, child: child),
-        ),
-        child: Icon(
-          isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
-          key: ValueKey<bool>(isChecked),
-          size: 26,
-          color: isChecked
-              ? Palette.success
-              : (cued ? Palette.accent : Palette.muted),
-        ),
+      child: HaekchenKreis(
+        isChecked: isChecked,
+        size: 26,
+        offenFarbe: cued ? Palette.accent : Palette.muted,
       ),
     );
   }

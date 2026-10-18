@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 16.10.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 18.10.2026 · Frederik
 
 ---
 
@@ -24,9 +24,9 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
-| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068 |
-| **Wissensbaum** | vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
+| **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
+| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076 |
+| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
@@ -35,15 +35,16 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 802, dazu die acht Packages (theory 193, habits 324, gear
-118, action_combat 355, progression 44, abilities 43, identity 25,
+**Tests:** App 843, dazu die acht Packages (theory 197, habits 333, gear
+118, action_combat 331, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
 ## Offen, gesammelt
 
 **Die Richtung** (09.10., [ADR-0071](../decisions/0071-das-naechste-level.md)):
-~~Tagesgrube~~ (gebaut am 11.10., ADR-0072), Lagerfeuer, Schatten,
+~~Tagesgrube~~ (gebaut am 11.10., ADR-0072), ~~Lagerfeuer~~ (gebaut am
+18.10., ADR-0076), Schatten,
 Saisons, Seilschaft — nach und nach, jede mit eigener Konzeptrunde. Die
 Fragen dafür stehen in der Vorlage
 [`das-naechste-level.md`](../vorlagen/das-naechste-level.md).
@@ -84,6 +85,8 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 
 - Gegenlesen: neun Einführungen und zwanzig Themen im Wissensbaum
   (Kraft, Ausdauer, Psychologie, Philosophie) — mit Gesundheitsaussagen.
+  **Dass es nötig ist, zeigte der 18.10.**: Auf „Wie nah ans Versagen“
+  stand das Gegenteil des Richtigen (Eintrag vom 18.10.).
   Dazu die Einführung „Gewohnheiten“, am 07.10. umgeschrieben.
 - **Der erste Lauf ist härter als gedacht**: Stufe 1 auf Level 1 steht
   für den Bot bei 67 %, nicht bei 93 % (Eintrag vom 07.10.).
@@ -126,6 +129,401 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 18.10.2026, spät: das Lagerfeuer — der Tag endet an einer Stelle
+
+Frederik: „Mir gefällt der aktuelle Stand richtig gut. Was fällt dir
+allgemein noch so ein?“ Aus sechs Vorschlägen: „Lagerfeuer find ich
+cool“ — die zweite Idee aus ADR-0071. In zwei Fragerunden entschieden,
+alle sieben Fragen wie empfohlen:
+[ADR-0076](../decisions/0076-das-lagerfeuer.md).
+
+| Was | Wie |
+|---|---|
+| **Ein Ort bei Nacht** | eigener Bildschirm: Himmel, Sterne, ein gezeichnetes Feuer, das flackert, Funken |
+| **Immer offen** | ab 18 Uhr oder sobald alles erledigt ist, brennt es; vorher glimmt es nur |
+| **Was dort liegt** | die Rückfrage, die Truhe, die Tagesaufgaben, sonntags und montags der Wochenrückblick |
+| **Nur dort** | Truhe und Aufgaben stehen nicht mehr auf der Startseite und nicht im Gewohnheiten-Bildschirm; die Rückfrage bleibt zusätzlich in der Theorie |
+| **Auf der Startseite** | unter „Heute“ eine Karte: ein kleines Feuer und, was wartet, als Zeichen mit Zahl |
+| **Morgen zuerst** | die morgen fälligen Gewohnheiten als Knöpfe; die gewählte steht morgen oben in „Heute“, mit einer Flamme — ein Vorsatz, keine Zahl |
+| **Zum Schluss** | „Genug für heute. Leg das Handy weg.“ |
+
+**Keine Zahl ändert sich**, und alles verfällt weiter um Mitternacht.
+Neu im Spielstand ist nur der Vorsatz (`firstUp`, je Tag eine
+Gewohnheit, eine Historie wie die Truhen).
+
+**Ohne Rückfrage entschieden:**
+
+- **Der Vorsatz zieht seinen ganzen Stapel nach vorn**, wenn er an einer
+  anderen Gewohnheit hängt — ein Glied allein risse von seinem Anker.
+  Erledigt wandert er nach unten wie jede andere.
+- **Die Knöpfe stehen in der Reihenfolge ohne Vorsatz**, sonst spränge
+  der gewählte beim Tippen nach vorn.
+- **Gezählt wird, was verfällt**: Rückfrage, Truhe, Aufgaben. Wochenrückblick
+  und Vorsatz zählen nicht, sonst stünde die Zahl den ganzen Abend da.
+- **Die Karte erscheint mit dem ersten Häkchen**, wie vorher die
+  Tagesaufgaben (ADR-0068).
+- **Die Flamme steht nur in „Heute“ auf der Startseite**, nicht auf den
+  Kacheln des Gewohnheiten-Bildschirms; die Reihenfolge gilt in beiden.
+- **Ob es brennt, wird beim Neubau gelesen**, ohne eigenen Takt: Steht
+  die App um 18 Uhr offen da, brennt es erst beim nächsten Tipp.
+
+**Beim Bauen gefunden:** Am Feuer verschmolzen die Beschriftungen für
+den Vorleser zu einem Satz — Feuer, Truhe und Aufgaben in einem Knoten,
+weil die Liste nur einen Eintrag hat. Jeder Teil hat jetzt seinen
+eigenen. **Beim Ansehen gefunden** (gerendert in 390 × 844): Auf der
+Startseite stand „Lagerf…“, weil sich das Wort den Platz mit einem
+`Spacer` teilte.
+
+Neu: `lib/lagerfeuer/` mit sechs Dateien, `HabitTracker.firstUpOn` und
+`setFirstUp`, `WeekCard.istGross`, `test/lagerfeuer_test.dart`,
+`first_up_test.dart`. habits 333 (vorher 324), App 843 (vorher 834).
+Startseite abends und morgens, das Feuer brennend und glimmend
+gerendert und angesehen. **Nicht am Handy, nicht im Browser gespielt.**
+
+### Offen
+
+- **Ob es am Abend wirklich eine Minute ist** oder ob man trotzdem
+  tagsüber an drei Stellen sucht.
+- Das Feuer hat keinen Klang; ein Knistern beim Öffnen läge nahe.
+- Eine Erinnerung am Abend gibt es erst mit einer App (ADR-0071).
+- Der Begleiter kommt mit dem Haus — das braucht AktivesBrett.
+- AktivesBrett hat ADR-0076 nicht gesehen: Truhe und Aufgaben sind von
+  der Startseite verschwunden.
+
+## 18.10.2026, abends: Rätsel und Fälle — die Probe an Kraft
+
+Frederik: „Wie könnten wir den Inhalt von Theorie noch interessanter
+machen?“ Der Befund: Fast jede der 63 Seiten hat dieselbe Form, drei
+sachliche Absätze, dann drei Fragen, die einen Satz aus dem Text
+abfragen. Lebendig sind die Seiten, die von etwas ausgehen — die
+Experimente der Psychologie, Frederiks Beispiele bei den Gewohnheiten.
+Claude schlug vier Ideen vor und empfahl zwei davon zusammen, als Probe
+an einem Gebiet. Frederik: „Ja gerne“.
+
+| Was | Wie |
+|---|---|
+| **Das Rätsel vor der Seite** | eine Szene mit Schätzfrage, bevor man liest („Zwei Gruppen trainieren … wer baut mehr Muskeln auf?“); daneben ist braun mit Glühbirne und „Überraschend, oder?“, nicht rot; gut geschätzt klingt den ersten Ton der Leiter |
+| **Es zählt nicht** | nicht für Bestehen, Erfahrung oder Rückfrage; gespeichert wird nichts; „Nochmal“ fängt bei den Fragen an |
+| **Die zweite Frage ist ein Fall** | Jana, Max, Lea, Tom und Nina haben ein Problem, und die Frage ist, was sie tun — statt einen Satz wiederzuerkennen |
+| **Wo** | alle fünf Themen unter Kraft & Muskulatur, die Einführung nicht |
+
+Neu ist ein Feld: `Lesson.teaser`, eine `Question`, die vor dem Lesen
+steht. Ein Test hält fest, dass jede Kraft-Seite eins hat, und prüft
+jedes Rätsel wie eine Frage.
+
+**Beim Schreiben gefunden — ein Fehler im Inhalt:** Auf „Wie nah ans
+Versagen“ stand, Anfänger schätzten ihre Reserve „zu hoch“ ein, und die
+richtige Antwort lautete „Zu hoch, sie hören zu früh schon auf“. Das
+widerspricht sich: Wer zu früh aufhört, schätzt seine Reserve zu
+**niedrig** ein, und so zeigen es auch die Studien dazu. Text und Frage
+sind korrigiert. Die Seite stand so seit dem 26.09. im Spiel.
+
+**Ohne Rückfrage entschieden:**
+
+- **Kraft als Probe**, weil es das trockenste Gebiet ist: Dort sieht man
+  den Unterschied am deutlichsten.
+- **Die zweite Frage wird der Fall**, auf jeder Seite dieselbe Stelle,
+  und ihre richtige Antwort bleibt an derselben Stelle wie vorher — die
+  Verteilung aus ADR-0027 bleibt, wie sie war.
+- **Die Fälle haben Namen**, keine Du-Form: eine kleine Geschichte statt
+  einer Prüfungsfrage.
+- **Ein Rätsel darf ein Fakt der Seite vorwegnehmen**, den eine Frage
+  danach noch einmal abfragt — das Wiederholen ist gewollt.
+
+Fünf Rätsel und zwei Seiten gerendert in 390 × 844 und angesehen.
+theory 197 (vorher 193), App 834 (vorher 830). **Nicht gespielt, nicht
+am Handy, nicht gegengelesen.**
+
+Gemergt am 18.10. als PR #125. Er hieß zuerst #124 und zeigte auf den
+Branch von #123; der Merge von #123 löschte diesen Branch, und GitHub
+schloss #124, statt ihn auf `main` umzustellen.
+
+### Offen
+
+- **Ob die Probe trägt**: Frederik liest die fünf Seiten. Wenn ja,
+  bekommen alle 63 Rätsel und Fall — Schreibarbeit, Seite für Seite.
+- Die Rätsel stützen sich auf Studien („so kam es in Studien mit genau
+  diesem Aufbau heraus“), nennen aber keine. Ob eine Quelle dazugehört.
+- Die übrigen Ideen: „Heute ausprobieren“ am Ende jeder Seite, und
+  Frederiks Bücher und Videos als Quelle für die grauen Gebiete.
+
+## 18.10.2026, danach: eine Seite als Spielrunde
+
+Frederik: „Ist sehr cool. Wie könnten wir das Lernen noch spannender
+machen?“ Claude schlug vier Ideen vor — die Seite als Spielrunde, Seiten
+werden golden, erst erinnern und dann wählen, ein Schrein in der Grube —
+und empfahl die erste. Frederik: „Ja“. Gebaut als Prototyp, ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Häppchen** | ein Abschnitt je Bildschirm, Striche oben, „Weiter“; der Knopf zu den Fragen steht erst auf dem letzten |
+| **Jede Antwort klingt** | richtig klettert die Tonleiter des Häkchens, eine Stufe je Antwort in Folge; falsch zwei weiche Schläge abwärts, und die Leiter beginnt von vorn. Dazu Vibration |
+| **Die Antwort bewegt sich** | die richtige springt auf, die falsche schüttelt den Kopf |
+| **Das Urteil von unten** | grün oder rot, „Richtig“ oder „Nicht ganz“, die Erklärung und der Knopf — bis dahin ein Kasten unter den Antworten |
+| **Der Balken oben** | springt mit jeder Antwort vor, die sitzt; eine falsche lässt ihn stehen, die zweite Runde füllt ihn |
+| **Die Fragen schieben sich** | die neue von rechts herein, die alte nach links hinaus |
+| **Das Ergebnis baut sich auf** | das Zeichen springt, Erfahrung und Gold zählen hoch, danach kommen die Knöpfe |
+| **Drei von drei** | der Akkord löst die Leiter auf, Konfetti steigt aus der Mitte |
+
+**Keine Zahl ändert sich.** Bestehen, Erfahrung, Gold und die zweite
+Runde rechnen wie vorher.
+
+**Ohne Rückfrage entschieden:**
+
+- **Erst gezählt, dann gefeiert**: Errungenschaft, Aufstieg und neue
+  Fähigkeit kommen, wenn Erfahrung und Gold fertig gezählt sind — wie
+  beim Häkchen. Bis dahin geht es nicht zurück; wer es versucht, bekommt
+  die Feier sofort. Sonst ginge ein Aufstieg verloren, dessen „vorher“
+  nur auf dieser Seite steht.
+- **Drei von drei klingen wie ein geschaffter Tag** (`TagGeschafft.wav`),
+  zwei von drei wie bisher (`Win.mp3`).
+- **Eine falsche Rückfrage klingt jetzt auch**, mit demselben Klang.
+- **Nicht verschränkt**: Abschnitt und Frage stehen weiter getrennt
+  (`lernen.md`, Punkt 4) — das wäre Schreibarbeit an jeder Seite.
+- **„Richtig“ bleibt ein Wort**, kein wechselndes Lob (ADR-0060).
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Beim Schieben
+standen alte und neue Frage in der Mitte halb übereinander; die alte
+geht jetzt schneller und blendet aus. Und das Konfetti kam vom Knopf
+ganz unten kaum über die untere Hälfte, es steigt jetzt aus der Mitte
+(`AufstiegHost.konfetti(von:)`).
+
+Neu: `antwort_klang.dart`, `lese_haeppchen.dart`, `antwort_leiste.dart`,
+`runden_balken.dart`, `tool/lern_klaenge.py`, `Falsch.wav`. App 830
+(vorher 825). **Nicht gehört, nicht gespielt, nicht am Handy.**
+
+Gemergt am 18.10. als PR #123; die CI lief diesmal im ersten Anlauf
+durch.
+
+### Offen
+
+- Ob der dumpfe Klang bei falsch freundlich klingt oder nach Strafe.
+- Kurze Abschnitte stehen allein auf einem Bildschirm mit viel Leere
+  darunter.
+- Wer eine Seite nur nachschlagen will, blättert jetzt statt zu rollen.
+- **Die anderen drei Ideen**: Seiten werden golden (die Stufen der
+  Rückfrage sichtbar am Knoten), erst erinnern und dann wählen, ein
+  Schrein in der Grube. Der Schrein braucht eine Konzeptrunde und einen
+  ADR — er berührt die Balance der Grube und die Tagesgrube.
+
+## 18.10.2026: der Häkchen-Moment — abhaken wie bei Duolingo
+
+Frederik: „Können wir das abhaken von Gewohnheiten noch befriedigender
+machen wie bei DioLingo?“ Gebaut ohne Fragerunde als Prototyp.
+
+| Was | Wie |
+|---|---|
+| **Der Kreis springt** | grün über seine Grösse hinaus und zurück, dahinter ein Blitz, ein Ring nach aussen, acht Striche; nur beim Setzen, nicht beim Zurücknehmen (`HaekchenKreis`, Kachel und „Heute“) |
+| **Die Tonleiter des Tages** | jedes Häkchen klingt eine Stufe höher als das davor, fünf Stufen pentatonisch; das letzte Fällige löst den Akkord auf. Ein Punkt Stärke klingt wie bisher anders |
+| **Die Flamme zündet** | mit dem ersten Häkchen des Tages: sie schiesst hoch, glüht, Funken steigen, die Zahl der Tageskette rollt eins weiter, dazu ein Fauchen |
+| **Münzen fliegen** | auf der Startseite platzen Münzen und Funken am Finger auf und fliegen zur Goldzahl und zum Balken; die Zahl steigt mit jeder, die ankommt, und das Ziel springt kurz auf |
+| **Konfetti** | wenn der Tag geschafft ist, vom Finger aus über den ganzen Bildschirm, dazu ein kräftigerer Stoss |
+| **Erst landen, dann feiern** | Errungenschaft, Aufstieg und neue Fähigkeit kommen, wenn die letzte Münze gelandet ist — vorher deckte der Aufstieg den Balken zu, der ihn gerade füllt |
+
+**Keine Zahl ändert sich.** Was fliegt, hat der Tracker schon gezählt;
+die Leiste zieht nur ab, was noch unterwegs ist (`BeuteFlug`, wie der
+Goldregen der Grube). Münze und Funke stehen jetzt an einer Stelle für
+beide (`MuenzBild`).
+
+**Ohne Rückfrage entschieden:**
+
+- **`Success.mp3` klingt nicht mehr beim Häkchen**, nur noch bei der
+  richtigen Rückfrage. Die Leiter ist gerechnet
+  (`tool/haekchen_klaenge.py`), Platzhalter wie die Klänge der Grube.
+- **Fünf Stufen**, weil höchstens fünf Gewohnheiten laufen; darüber
+  bleibt es die oberste.
+- **Ein Punkt Stärke hat den Vorrang** vor dem Akkord, wenn beides auf
+  einmal fällt.
+- **Auf dem Gewohnheiten-Bildschirm fliegt nichts**: Dort gibt es keine
+  Leiste oben, nur die Zahlen steigen auf. Kreis, Ton und Konfetti gibt
+  es dort auch.
+- **Die Leiste unten bleibt**, obwohl sie jetzt dreimal sagt, was
+  aufsteigt und fliegt — Tests halten sie fest, und sie trägt „Jetzt:
+  Kaffee“ (ADR-0066).
+
+**Beim Nachsehen gefunden:** Der Kommentar „im Browser passiert nichts“
+stimmte nicht. Flutter macht im Browser aus `HapticFeedback` ein
+`navigator.vibrate` — auf einem Android-Handy vibriert das Häkchen also
+schon immer, auf dem iPhone nicht.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Die Münzen hingen zu
+lange hinter den aufsteigenden Zahlen, sie heben jetzt schneller ab; und
+der Aufstieg deckte Münzen und Konfetti sofort zu. Eine Feier mit festem
+Zeitgeber lief dabei in ein Rennen mit `pumpAndSettle` (`gotchas.md`);
+sie hängt jetzt am Takt des Hosts.
+
+Neu: `haekchen_moment.dart`, `haekchen_kreis.dart`, `beute_flug.dart`,
+`konfetti.dart`, `muenz_bild.dart`, `sprung.dart`,
+`tool/haekchen_klaenge.py`, sieben Klänge, `test/haekchen_moment_test.dart`.
+App 825 (vorher 809). **Nicht gehört, nicht gespielt, nicht am Handy.**
+
+Gemergt am 18.10. als PR #122. **Die erste Auslieferung fiel in der CI
+um**, 37 rote Tests, hier alle grün: Die Flamme legte ihren Controller
+erst im `dispose` an, und die CI läuft auf einem älteren Flutter
+(`gotchas.md`). Behoben direkt auf `main`.
+
+### Offen
+
+- **Wie die Leiter klingt**, weiß niemand — und ob fünf Glocken am Morgen
+  nach einer Woche nerven.
+- Die Leiste unten: raus für ein gewöhnliches Häkchen?
+- Steigt das Level mitten im Flug, wartet das Abzeichen auf die Funken,
+  der Aufstieg aber erscheint erst danach — ob das als ein Moment oder
+  als zwei gelesen wird.
+- Wer direkt nach dem Abhaken einen Bereich öffnet, sieht die Feier erst
+  beim Zurückkommen: Der Host läuft dahinter nicht weiter.
+- Der Gewohnheiten-Bildschirm hat keine Leiste, zu der etwas fliegen
+  könnte.
+
+## 16.10.2026, spät: der Schlund glüht
+
+Frederik: „Was hälst du davon wenn wir Glow machen beim Eingang also
+dass das mythisch aussieht.“ Gebaut ohne Fragerunde.
+
+In der leeren Mitte des Eingangs liegt jetzt ein Schlund: ein dunkles
+Loch mit glühendem Rand, ein Schein, der atmet (2,4 s), Glut, die
+aufsteigt, und die Zahl der Ebene davor, in derselben Farbe
+nachleuchtend.
+
+| Ebene | Farbe | warum |
+|---|---|---|
+| 1–9 | Feuer | — |
+| 10–19 | violett | ab hier fällt Episches (`GearGates.epicRung`) |
+| 20–30 | golden | ab hier Legendäres |
+| 31–100 | blutrot, mehr Glut, ein zweiter Hitzering | jenseits des alten Endes (ADR-0075) |
+
+Violett und Gold sind die Ränder der Seltenheiten
+(`RarityBadge.rahmenOf`), keine neuen Farben. **In Tests atmet er
+nicht** (`test/flutter_test_config.dart`): Eine Animation ohne Ende
+liesse `pumpAndSettle` nie zur Ruhe kommen. Wer Bewegung im System
+abgeschaltet hat, sieht ihn ebenfalls still.
+
+App 799 (vorher 795). Alle vier Tiefen in 390 × 844 gerendert und
+nebeneinander angesehen; die Zahl sass zu dicht am Rand und steht jetzt
+höher. **Nicht am Handy** — ob die Weichzeichnung dort ruckelt, ist
+offen.
+
+Gemergt am 16.10. als PR #121.
+
+## 16.10.2026, abends: hundert Ebenen im selben Schritt
+
+Frederik: „Grubelevel bis 100“, und auf Claudes Vorschlag, Stufe 100 so
+hart zu machen wie bisher 30: „Ne baue das einfach mit den gleichen
+Abständen, ich hab zurzeit ne 27 Tage Streak und schaff Level 30
+immer.“ [ADR-0075](../decisions/0075-hundert-ebenen.md).
+
+| Was | Wie |
+|---|---|
+| **Stufe 1–30** | Zahl für Zahl wie vorher; kein Stand wird umgerechnet |
+| **Stufe 31–100** | derselbe Schritt weiter: Gegner je Stufe rund ein Achtel stärker, alle vier Stufen ein Raum mehr, die Belohnung wächst weiter um 5 EP und 2 Gold |
+| **`pit_sim`** | eine Spalte für Level 50; eine Spalte hört auf, sobald sie zweimal bei null steht |
+
+**Gemessen** (`pit_sim`, 8 Läufe je Feld): **Ab Stufe 42 gewinnt der
+Bot nie, auch mit Level 50**, bester Ausrüstung und drei Fähigkeiten;
+sicher bis 37, mit Tag-60-Werten bis 29. Der Bot ist eine untere
+Schranke, aber Stufe 100 ist rund tausendmal so stark wie Stufe 41.
+
+App 795, action_combat 331, beide unverändert in der Zahl: drei Tests
+nahmen 30 als Ende an und prüfen jetzt die Bezugsstufe.
+
+Gemergt am 16.10. als PR #120.
+
+### Offen
+
+- **Soll Stufe 100 erreichbar sein?** Dann braucht es einen flacheren
+  Schritt über 30 — eine Zahl, gemessen mit `pit_sim`.
+- Die Summe der Belohnung ist zehnmal so gross; erreichbar ist bis zur
+  Wand etwa das Doppelte von vorher.
+- Ab Stufe 31 sind die Gruben länger als alles bisher (Stufe 100: zehn
+  Räume, knapp fünf Minuten). Nicht gespielt.
+
+---
+
+## 16.10.2026, danach: der Eingang zeigt nur noch die nächste Ebene
+
+Frederik: „Kampf Anzeige mit welches Level kann raus (Fahrstuhlmodus)
+Aktuelles wird angezeigt, 2/30 weg (Ebene 2 dafür) und der Balken kann
+auch darunter weg.“
+
+| Vorher | Jetzt |
+|---|---|
+| „2 / 30“ mit Balken | **„Ebene 3“**, gross in der Mitte — die Ebene, in die „Hinab“ führt |
+| der Fahrstuhl: alle Stufen zum Wählen, mit Bestzeit | weg |
+
+**Ohne Rückfrage entschieden:** Angezeigt wird die **nächste** Ebene,
+nicht die zuletzt geschaffte — der eine Knopf darunter führt dorthin.
+In der Grube und im Ergebnis heisst es weiter „Stufe“.
+
+**Was damit wegfällt:** Eine geschaffte Ebene lässt sich nicht mehr
+wählen. Damit lassen sich **Schlüssel nicht mehr einsetzen** — sie
+öffneten die Beute nur bei einem weiteren Sieg auf einer geschafften
+Stufe (ADR-0048), und jeder Lauf ist jetzt ein erster. Bestzeiten werden
+weiter gespeichert, aber nirgends mehr gezeigt.
+
+App 795 (vorher 797): die drei Tests des Schachts sind weg, einer kam
+dazu. Den Eingang in 390 × 844 gerendert und angesehen. **Nicht am
+Handy.**
+
+Gemergt am 16.10. als PR #119.
+
+### Offen
+
+- **Wofür Schlüssel jetzt da sind.**
+- **„Grubelevel bis 100“** — nicht gebaut, braucht Entscheidungen zu
+  Belohnung, Sperren im Laden, Errungenschaften, Tagesgrube und alten
+  Ständen.
+
+## 16.10.2026: der Goldregen — Beute fliegt zum Helden
+
+Frederik: Man rennt durch die Grube, sie soll mehr Dopamin bringen; der
+Kampf zeigt, wie weit man gekommen ist, und muss sich belohnend
+anfühlen. „Lass als erstes anfangen mit dem Goldregen und XP muss sich
+auch geil anfühlen.“ Gebaut ohne Fragerunde als Prototyp.
+
+| Was | Wie |
+|---|---|
+| **Münzen** | ein Gegner wirft drei bis vierzehn, der Wächter einen Brunnen aus sechzehn bis achtundvierzig; sie springen, drehen sich, rollen aus und fliegen nach einer halben Sekunde zum Helden |
+| **Funken** | Erfahrung als glühende Punkte in der Farbe des Balkens auf der Startseite, mit Spur |
+| **Kasse** | oben neben der Zeit, zählt, was **angekommen** ist, und springt bei jeder Münze auf |
+| **Balken** | unten am Rand: Level und Erfahrung bis zum nächsten, mit allem aus dem Lauf |
+| **Aufstieg** | steigt das Level mitten im Lauf, springt das Abzeichen gross in die Mitte, ein goldener Ring geht um den Helden |
+| **Klang** | drei neue, gerechnet: Münze, Funke, Aufstieg |
+| **Ende** | das Ergebnis wartet, bis der Brunnen eingesammelt ist, höchstens 1,6 s |
+
+**Keine Zahl ändert sich.** Was fliegt, hat die Welt schon gezahlt
+(`LootDropped`, ADR-0041); ein Stück, das nie ankommt, kostet nichts.
+Die Zahl „+7 EP +3 G“ über dem Gegner und in der Kopfzeile ist dafür
+weg. Tagesgrube und Prototyp zeigen den Regen ohne Balken.
+
+**Beim Nachsehen im Code gefunden, nicht geändert:** Der Wächter füllt
+den Topf auf (`world.dart`, ADR-0041). Wer an allem vorbeirennt, bekommt
+mit ihm denselben Betrag. **Das ist der Grund fürs Durchrennen**, nicht
+die fehlende Beute. Und eine geschaffte Stufe zahlt nichts mehr, dort
+regnet es also nicht.
+
+**Die Beträge sind klein**: Stufe 1 zahlt 20 EP und 8 Gold im ganzen
+Lauf. Der Regen macht daraus mehr Münzen, aber nicht mehr Gold.
+
+Neu: `beute_regen.dart`, `beute_bild.dart`, `beute_anzeige.dart`,
+`test/beute_regen_test.dart`, drei Klänge. App 807 (vorher 797). Regen,
+Flug und Aufstieg in 390 × 844 gerendert und angesehen, mit Würfeln
+statt Figuren. Dabei gefunden: Die Kasse war auf heller Wand nicht zu
+lesen und steht jetzt auf einem dunklen Schild; der Brunnen streute zu
+weit. **Nicht gespielt, nicht gehört, nicht am Handy.**
+
+Gemergt am 16.10. als PR #118, nach #119 bis #121; alle vier zusammen:
+App 809, action_combat 331.
+
+### Offen
+
+- **Der Wächter füllt nicht mehr auf** — der nächste Schritt; ändert die
+  Verteilung, nicht die Summe.
+- **Was ein Lauf auf einer geschafften Stufe bringt**: Sterne je Stufe
+  (Claudes Empfehlung) oder ein Tagesbeutel. Nicht entschieden.
+- Ob das Rasseln der Münzen im Brunnen nervt.
+- Der Balken unten liegt dicht unter den Fähigkeitsknöpfen.
 
 ## 16.10.2026: AktivesBretts zehn Fähigkeiten und zwei Ultimates
 

@@ -4,12 +4,18 @@ import 'balance.dart';
 
 /// Wie hart eine Stufe der Grube ist (ADR-0039).
 ///
-/// **Dreissig Stufen, eine Grube.** Die Karte wird bei jedem Lauf neu
+/// **Hundert Stufen, eine Grube.** Die Karte wird bei jedem Lauf neu
 /// zusammengesteckt (`LevelBuilder`), die Stufe entscheidet nur, wie stark
-/// die Gegner sind und wie viele Räume vor dem Wächter liegen. So bleibt
-/// die Zahl „17 / 30" erhalten, an der die Sperren im Laden (ADR-0034),
-/// die Errungenschaften (ADR-0033) und die einmalige Belohnung
-/// (ADR-0032) hängen — sie heisst nur nicht mehr Sprosse, sondern Stufe.
+/// die Gegner sind und wie viele Räume vor dem Wächter liegen. An ihr
+/// hängen die Sperren im Laden (ADR-0034), die Errungenschaften
+/// (ADR-0033) und die einmalige Belohnung (ADR-0032).
+///
+/// **Seit dem 16.10. hundert statt dreissig** (Frederik: „mit den
+/// gleichen Abständen“). Die Zahlen in [ActionBalance] gelten weiter für
+/// Stufe 1 und Stufe [referenceStage]; dahinter wird mit **demselben
+/// Schritt** weitergerechnet — geometrisch, was geometrisch wuchs,
+/// linear, was linear wuchs. Stufe 1 bis 30 sind damit Zahl für Zahl,
+/// was sie vorher waren, und kein Spielstand muss umgerechnet werden.
 ///
 /// Die Zahlen selbst stehen in [ActionBalance]; hier steht, wie aus einer
 /// Stufe ein Faktor wird.
@@ -23,14 +29,19 @@ class PitStage {
     return PitStage._(number.clamp(1, count));
   }
 
-  /// Wie viele Stufen es gibt. Dieselbe Zahl wie die Sprossen der alten
-  /// Reihe — mit Absicht, siehe oben.
-  static const int count = 30;
+  /// Wie viele Stufen es gibt.
+  static const int count = 100;
+
+  /// Die Stufe, für die die „…Last“-Zahlen in [ActionBalance] stehen —
+  /// das frühere Ende der Grube. Darüber geht es im selben Schritt weiter.
+  static const int referenceStage = 30;
 
   final int number;
 
-  /// Wo die Stufe zwischen der ersten und der letzten liegt, 0 bis 1.
-  double get progress => (number - 1) / (count - 1);
+  /// Wo die Stufe zwischen der ersten und [referenceStage] liegt: 0 auf
+  /// Stufe 1, 1 auf Stufe 30 — und **darüber mehr als 1**, auf Stufe 100
+  /// etwa 3,4. So wächst jede Grösse über 30 hinaus im selben Schritt.
+  double get progress => (number - 1) / (referenceStage - 1);
 
   /// Faktor auf die Lebenspunkte aller Gegner — mit [powerFactor].
   double get hpFactor =>
@@ -49,7 +60,8 @@ class PitStage {
       powerFactor;
 
   /// Was die Gegner zusätzlich vervielfacht, weil der Held vervielfacht
-  /// (ADR-0042): ×1 auf Stufe 1, [ActionBalance.stagePowerLast] auf 30.
+  /// (ADR-0042): ×1 auf Stufe 1, [ActionBalance.stagePowerLast] auf 30,
+  /// darüber im selben Verhältnis je Stufe weiter.
   /// Wirkt auf Leben, Angriff **und** Verteidigung.
   double get powerFactor => _geometric(1, ActionBalance.stagePowerLast);
 

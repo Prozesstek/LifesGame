@@ -26,6 +26,7 @@ void main() {
   Future<ActionGame> zeige(WidgetTester tester, List<String> plaetze) async {
     final game = ActionGame(
       klang: const SilentSoundPlayer(),
+      startXp: null,
       sim: ActionWorld(
         level: saal,
         heroStats: ActionStats.gereift,

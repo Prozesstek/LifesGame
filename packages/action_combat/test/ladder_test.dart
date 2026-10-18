@@ -86,8 +86,12 @@ void main() {
       // **Der Deckel ist der Grund, warum es Belohnung geben darf.** Er
       // steht hier als Zahl, damit ein Griff an `LadderRewards` sofort
       // sichtbar macht, wie viel das Spiel insgesamt verschenkt.
-      expect(LadderRewards.lifetimeXp, 2775);
-      expect(LadderRewards.lifetimeGold, 1110);
+      //
+      // Seit dem 16.10. hundert Stufen im selben Schritt: zehnmal so viel
+      // wie bei dreissig. Erreichbar ist davon nur, was der Held schafft —
+      // die Stufen über 30 wachsen schneller als er (`pit_sim`).
+      expect(LadderRewards.lifetimeXp, 26750);
+      expect(LadderRewards.lifetimeGold, 10700);
     });
   });
 

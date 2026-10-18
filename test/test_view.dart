@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/habits/widgets/habit_timer_sheet.dart';
+import 'package:theory/theory.dart';
 
 /// Gibt dem Test ein hohes Fenster.
 ///
@@ -33,5 +34,28 @@ void usePhoneView(WidgetTester tester) {
 Future<void> schonErledigt(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(find.byKey(HabitTimerSheet.doneKey));
+  await tester.pumpAndSettle();
+}
+
+/// Blättert eine Seite bis zu ihren Fragen und beginnt sie.
+///
+/// Seit dem 18.10. kommt der Text in Häppchen (`LeseHaeppchen`): Der Knopf
+/// zu den Fragen steht erst auf dem letzten Abschnitt, davor „Weiter“.
+/// Hat die Seite ein Rätsel, wird es zuerst geraten — irgendwie, es
+/// zählt nicht.
+Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
+  final teaser = lesson.teaser;
+  if (teaser != null) {
+    await tester.tap(find.text(teaser.options.first));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+  }
+  final start = find.text('${lesson.questionCount} Fragen beantworten');
+  for (var i = 0; i < lesson.sections.length && start.evaluate().isEmpty; i++) {
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+  }
+  await tester.tap(start);
   await tester.pumpAndSettle();
 }

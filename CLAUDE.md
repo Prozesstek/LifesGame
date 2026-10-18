@@ -52,12 +52,12 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 193 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 197 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
 | `packages/theory/lib/src/content/area_pages.dart` | die Einführungsseiten der **Zwischenebenen** ([ADR-0050](docs/decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)) | nur Dart-SDK |
-| `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet | nur Dart-SDK |
+| `packages/theory/lib/src/content/kraft_pages.dart` | die Themen unter **Kraft & Muskulatur** — das erste befüllte Gebiet, und **die Probe für Rätsel und Fall** (18.10.): jede Seite öffnet mit einem Rätsel (`Lesson.teaser`), ihre zweite Frage ist eine Situation | nur Dart-SDK |
 | `packages/theory/lib/src/content/ausdauer_pages.dart` | **Ausdauer & Fitness**: Einführung und fünf Themen | nur Dart-SDK |
 | `packages/theory/lib/src/content/philosophie_pages.dart` | **Philosophie**: Einführung, Stoizismus, Ethik, Fehlschlüsse, Sokrates, Existenzialismus | nur Dart-SDK |
 | `packages/theory/lib/src/content/gewohnheiten_pages.dart` | **Gewohnheiten** unter Selbstentwicklung: Überkapitel → vier Regeln → je Regel eine Seite (bisher: offensichtlich, attraktiv), **aus dem Gelesenen** ([ADR-0061](docs/decisions/0061-der-baum-waechst-aus-dem-gelesenen.md)) | nur Dart-SDK |
@@ -71,7 +71,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **neun zum Start** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 324 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 333 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -118,7 +118,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
-| `packages/action_combat/lib/src/stage.dart` | die **dreissig Stufen** — wie aus einer Stufe ein Faktor wird | nur Dart-SDK |
+| `packages/action_combat/lib/src/stage.dart` | die **hundert Stufen** — wie aus einer Stufe ein Faktor wird; die Zahlen gelten für 1 und 30, darüber im selben Schritt weiter ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
 | `packages/action_combat/lib/src/level_builder.dart` | steckt die Räume gesät zu einer Grube zusammen, würfelt Wächter und Besetzung | nur Dart-SDK |
 | `packages/action_combat/lib/src/cast.dart` | die **Besetzung** einer Grube: welche Arten in diesem Lauf die Rollen spielen ([ADR-0063](docs/decisions/0063-besetzung-in-rollen.md)) | nur Dart-SDK |
@@ -131,6 +131,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
+| `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
+| `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
+| `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
 | `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
 | `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
@@ -140,16 +143,22 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart und je Wächter (`forBoss`), **eine Tabelle** | Flutter |
 | `lib/action/boss_text.dart` | wie die vier Wächter heißen, und die Zeile unter dem Namen beim Auftritt | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
-| `tool/pit_sim.dart` | prüft die **Grube**: alle dreissig Stufen gegen den echten Werte-Pfad | nur Dart-SDK |
+| `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint und welcher leuchtet — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)) | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
-| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp | Flutter |
+| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)) | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme** | Flutter |
+| `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
+| `lib/lagerfeuer/am_feuer.dart` | **was am Feuer wartet** und ob es brennt (ab 18 Uhr oder Tag geschafft) — reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/lagerfeuer/am_feuer_provider.dart` | trägt das zusammen, **rechnet nichts** | Flutter |
+| `lib/lagerfeuer/widgets/feuer_bild.dart` | Himmel, Scheite, Flammen, Funken; brennt oder glimmt; **flackert in Tests nicht** (`test/flutter_test_config.dart`) | Flutter |
+| `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
+| `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
@@ -159,13 +168,15 @@ durch die Grube ersetzt und gelöscht.
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/habits/habits_screen.dart` | **„Heute“ oben**, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
-| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen; **eine Stelle** für Startseite und Gewohnheiten | Flutter |
+| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
+| `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/habits/widgets/haekchen_kreis.dart` | der Kreis, der beim Abhaken **aufspringt** — Blitz, Ring, acht Striche; nur beim Setzen; **eine Stelle** für Kachel und „Heute“ | Flutter |
 | `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
 | `lib/habits/widgets/habit_timer_sheet.dart` | das Blatt mit dem Ring: Start, Pause, „schon erledigt“ — meldet nur, **hakt nicht ab** | Flutter |
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
-| `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben mit Stand und Knopf „Abholen“ — **auf der Startseite** unter „Heute“ | Flutter |
+| `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben mit Stand und Knopf „Abholen“ — **am Lagerfeuer** (ADR-0076) | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
@@ -195,12 +206,18 @@ durch die Grube ersetzt und gelöscht.
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
+| `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
+| `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
-| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger | Flutter |
+| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`) | Flutter |
+| `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
+| `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
+| `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
+| `lib/ui/sprung.dart` | **wie etwas aufspringt** — eine gedämpfte Feder für Häkchen und Flamme | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
@@ -213,7 +230,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter „17 / 30", der **Fahrstuhl** (alle 30 Stufen, Bestzeit), Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter **„Ebene 18“** — nur die nächste, kein Fahrstuhl mehr —, Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/widgets/eingangs_glut.dart` | **der Schlund im Eingang**: glüht in der Farbe dessen, was unten fällt — Feuer, ab 10 episch, ab 20 legendär, über 30 blutrot (`GlutStufe`); atmet in Tests nicht (`test/flutter_test_config.dart`) | Flutter |
 | `lib/combat/daily_pit_controller.dart` | Riverpod-Brücke Tagesgrube ↔ UI, **enthält keine Regeln**; `dailyConditionProvider` sagt, in welcher Verfassung es heute hinabginge | Flutter |
 | `lib/combat/widgets/tagesgrube_karte.dart` | die Tagesgrube im Eingang: Satz des Tages, Verfassung, „Hinab“ — **trägt den Versuch ein, bevor der Lauf beginnt**; danach Ergebnis und Teilen | Flutter |
 | `lib/combat/widgets/tagesgrube_ergebnis.dart` | das Blatt am Ende der Tagesgrube: Raumzeile, Zeit, Verfassung, Tageskette, Ruhm, Teilen | Flutter |
@@ -232,7 +250,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_action_panel.dart` | der Knopf **über** dem Startknoten | Flutter |
 | `lib/theory/widgets/tree_overview.dart` | **der Überblick**: vier Gebiete mit Stand, „Weiterlesen“, Legende ([ADR-0056](docs/decisions/0056-ueberblick-im-wissensbaum.md)) | Flutter |
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
-| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite** | Flutter |
+| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
+| `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
+| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Bildschirm, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
+| `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
 | `lib/theory/review_flow.dart` | was eine Antwort auf die Rückfrage auslöst | Flutter |
 
@@ -254,11 +276,11 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 802 Tests
+flutter test             # 843 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
-dart run tool/pit_sim.dart             # 30 Stufen gegen echten Werte-Pfad
+dart run tool/pit_sim.dart             # Stufe für Stufe, bis zur Wand
 dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
@@ -271,11 +293,11 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 324 Tests
+dart test                              # 333 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 193 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 197 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
 cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
@@ -284,7 +306,7 @@ cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
 ```
 
 **Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
-die Grube.** Echtzeit, dreissig Stufen, jede Karte neu gesteckt. Der
+die Grube.** Echtzeit, hundert Stufen ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)), jede Karte neu gesteckt. Der
 Rundenkampf ist gelöscht. Die Regeln der Grube stehen an je einer
 Stelle:
 
@@ -586,6 +608,7 @@ stehen und dort bleiben müssen:
 | In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **Stapel** mit Offenem oben, ganz erledigte unten, je nach Priorität |
 | Woran hängt eine Gewohnheit? | `HabitTracker.anchorFor` — höchstens ein Anker, nie im Kreis (`canAnchor`); **Satz oder Anker**, `setAnchor` und `setCue` ersetzen einander ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) |
 | Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
+| Was kommt heute zuerst? | `HabitTracker.firstUpOn` — am Abend davor am Lagerfeuer gewählt; sein **Stapel** steht vor allen offenen, erzeugt keine Zahl ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)) |
 | Wann kommt eine Gewohnheit dran? | `HabitTracker.cueFor` — eine Zeile Text, für Vorlagen **und** eigene, erzeugt keine Zahl ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) |
 | Was gibt es danach? | `HabitTracker.treatFor` — eine Zeile Text neben Satz **oder** Anker, erzeugt keine Zahl; beim Abhaken sagt `sayHabitFeedback` „Jetzt: …“ ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) |
 | Wie läuft ein Zeitziel? | `HabitTracker.startTimer`, `pauseTimer`, `settleTimer` — aus der Startzeit, höchstens einer, Minuten bleiben stehen ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) |
@@ -799,7 +822,7 @@ genau das. Wer eine dieser Zahlen ändert, lässt diesen Test laufen.
 ein — aber genau einmal je Stufe.** Bis dahin gab er ausdrücklich
 nichts: `konzept.md` Abschnitt 2 macht ihn zur Auszahlung des
 Fortschritts, nicht zu seiner Quelle. Der Einwand galt jedoch nur
-*wiederholbarer* Belohnung. Die Grube hat dreißig Stufen, jede zahlt
+*wiederholbarer* Belohnung. Die Grube hat hundert Stufen, jede zahlt
 einmal, und der Gesamtbetrag steht deshalb als Zahl fest
 (`LadderRewards.lifetimeXp`). Wer daran dreht, lässt
 `flutter test test/progression_test.dart` laufen — der Kampf hängt jetzt
@@ -859,7 +882,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und vier
 Fähigkeiten vergeben.
 
-Es gibt genau **fünfzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **sechzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -874,6 +897,7 @@ Es gibt genau **fünfzehn** Stellen, an denen etwas zusammenläuft:
 | `availableTheoryPointsProvider` | Level und Baum — freie Theoriepunkte |
 | `passedPagesProvider` | bestandene Seiten — **der Graph ist die ganze Wahrheit** (ADR-0070) |
 | `ersterStartProvider` | welche Bereiche die Startseite zeigt (ADR-0068) |
+| `amFeuerProvider` | was am Lagerfeuer wartet — Rückfrage, Truhe, Aufgaben — und ob es brennt (ADR-0076) |
 | `activeSetsProvider` | welche Ausrüstungs-Sets wirken (ADR-0030) |
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |

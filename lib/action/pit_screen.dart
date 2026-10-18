@@ -4,6 +4,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../progression/level_provider.dart';
 import '../progression/show_level_up.dart';
 
 import '../achievements/show_achievement_unlock.dart';
@@ -105,6 +106,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     return ActionGame(
       sim: welt,
       klang: ref.read(soundPlayerProvider),
+      // Wo der Balken unten beginnt — dieselbe Erfahrung, aus der die
+      // Startseite das Level rechnet.
+      startXp: ref.read(effectiveXpProvider),
       // Bis die erste Stufe geschafft ist, erklärt sich die Grube
       // (ADR-0069). Ein neuer Stand je Lauf: Wer verliert und „Nochmal“
       // drückt, sieht die Zeichen wieder.

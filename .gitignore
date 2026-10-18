@@ -55,3 +55,6 @@ Thumbs.db
 !.env.example
 *.keystore
 *.jks
+
+# Python legt beim Import von tool/kampf_klaenge.py einen Zwischenspeicher an.
+__pycache__/
