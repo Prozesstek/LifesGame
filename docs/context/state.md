@@ -173,6 +173,10 @@ Fünf Rätsel und zwei Seiten gerendert in 390 × 844 und angesehen.
 theory 197 (vorher 193), App 834 (vorher 830). **Nicht gespielt, nicht
 am Handy, nicht gegengelesen.**
 
+Gemergt am 18.10. als PR #125. Er hieß zuerst #124 und zeigte auf den
+Branch von #123; der Merge von #123 löschte diesen Branch, und GitHub
+schloss #124, statt ihn auf `main` umzustellen.
+
 ### Offen
 
 - **Ob die Probe trägt**: Frederik liest die fünf Seiten. Wenn ja,
@@ -227,6 +231,9 @@ ganz unten kaum über die untere Hälfte, es steigt jetzt aus der Mitte
 Neu: `antwort_klang.dart`, `lese_haeppchen.dart`, `antwort_leiste.dart`,
 `runden_balken.dart`, `tool/lern_klaenge.py`, `Falsch.wav`. App 830
 (vorher 825). **Nicht gehört, nicht gespielt, nicht am Handy.**
+
+Gemergt am 18.10. als PR #123; die CI lief diesmal im ersten Anlauf
+durch.
 
 ### Offen
 
