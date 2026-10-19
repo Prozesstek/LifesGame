@@ -12,6 +12,7 @@
 //     dart run tool/pit_sim.dart 40
 //     dart run tool/pit_sim.dart mana     # nur: bremst Mana?
 //     dart run tool/pit_sim.dart faehigkeiten   # nur: je Fähigkeit
+//     dart run tool/pit_sim.dart ausruestung    # nur: je Kraft (ADR-0077)
 
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
@@ -29,6 +30,11 @@ void main(List<String> args) {
   // `faehigkeiten` rechnet nur die Tabelle je Fähigkeit (ADR-0074).
   if (args.isNotEmpty && args.first == 'faehigkeiten') {
     _jeFaehigkeit(args.length > 1 ? int.parse(args[1]) : 12);
+    return;
+  }
+  // `ausruestung` rechnet nur die Tabelle je Kraft (ADR-0077).
+  if (args.isNotEmpty && args.first == 'ausruestung') {
+    _jeKraft(args.length > 1 ? int.parse(args[1]) : 12);
     return;
   }
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
@@ -259,8 +265,9 @@ int _siegquote(
   String waffe,
   List<String> faehigkeiten,
   String? ultimate,
-  int laeufe,
-) {
+  int laeufe, {
+  List<PitModifier> modifiers = const <PitModifier>[],
+}) {
   var siege = 0;
   for (var seed = 0; seed < laeufe; seed++) {
     final stage = PitStage(stufe);
@@ -271,12 +278,86 @@ int _siegquote(
       abilityIds: faehigkeiten,
       ultimateId: ultimate,
       weaponMoveId: waffe,
+      modifiers: modifiers,
       seed: seed,
     );
     PitBot.play(welt);
     if (welt.isWon) siege++;
   }
   return (siege * 100 / laeufe).round();
+}
+
+/// **Was jede Kraft der neuen Ausrüstung trägt** (ADR-0077): Tag 30,
+/// Bogen, Funkenstoß, Steinhaut und Blütentau — und dazu genau eine
+/// Kraft, ohne die Werte ihres Stücks. Darunter die zwei neuen Waffen
+/// und das Vampirset mit seiner Sichel.
+///
+/// Der Bot geht nicht gezielt in den Frost und lässt die Irrlichter
+/// nicht vorausfliegen; die Zahlen sind wie überall eine untere Schranke.
+void _jeKraft(int laeufe) {
+  final stats = _statsNach(30);
+  const bogen = 'basic_attack';
+  const plaetze = <String>['funkenstoss', 'steinhaut', 'bluetentau'];
+  const stufen = <int>[11, 13];
+
+  print(
+    'Je Kraft — Tag 30, Bogen, Funkenstoß, Steinhaut, Blütentau, '
+    '$laeufe Läufe je Feld\n',
+  );
+  final kopf = StringBuffer('  ${''.padRight(28)}');
+  for (final stufe in stufen) {
+    kopf.write('Stufe $stufe'.padLeft(10));
+  }
+  print(kopf);
+
+  void zeile(String name, String waffe, List<PitModifier> kraefte) {
+    final text = StringBuffer('  ${name.padRight(28)}');
+    for (final stufe in stufen) {
+      final quote = _siegquote(
+        stufe,
+        stats,
+        waffe,
+        plaetze,
+        null,
+        laeufe,
+        modifiers: kraefte,
+      );
+      text.write('$quote %'.padLeft(10));
+    }
+    print(text);
+  }
+
+  zeile('ohne', bogen, const <PitModifier>[]);
+  for (final kraft in <PitGearPower>[
+    PitGearPowers.frostreif,
+    PitGearPowers.irrlichter,
+    PitGearPowers.flickwerk,
+    PitGearPowers.falkenblick,
+    PitGearPowers.hasenlauf,
+    PitGearPowers.seelenernte,
+    PitGearPowers.echo,
+  ]) {
+    zeile(kraft.name, bogen, kraft.modifiers);
+  }
+
+  print('\n  Die zwei neuen Waffen, ohne Kraft');
+  zeile('Speerstich', 'spear_thrust', const <PitModifier>[]);
+  zeile('Sichelhieb', 'sickle_reap', const <PitModifier>[]);
+
+  // Nach Platz, nicht nach Preis: Das erste Teil ist die Sichel.
+  final vampir = <GearItem>[...GearCatalog.piecesOf(GearSets.vampir.id)]
+    ..sort((a, b) => a.slot.index.compareTo(b.slot.index));
+  List<PitModifier> teile(int n) => <PitModifier>[
+    for (final item in vampir.take(n))
+      ...?PitGearPowers.byId(item.power)?.modifiers,
+    for (final id in GearSets.vampir.perkFor(n)?.powers ?? <String>[])
+      ...?PitGearPowers.byId(id)?.modifiers,
+  ];
+  print('\n  Das Vampirset, mit der Sichel');
+  zeile('ein Teil (die Sichel)', 'sickle_reap', teile(1));
+  zeile('zwei Teile', 'sickle_reap', teile(2));
+  zeile('vier Teile: Blutpakt', 'sickle_reap', teile(4));
+  print('');
 }
 
 /// Dieselbe Rechnung mit **einer festen Rolle** der Besetzung (ADR-0062):
@@ -540,12 +621,13 @@ GearBonus _bestesGear() {
   return summe;
 }
 
-/// Die legendären Kräfte der besten Stücke. Sets rechnet die Simulation
-/// nicht: Die besten Stücke je Platz sind kein Set.
+/// Die Kräfte der besten Stücke — seit ADR-0077 an jeder Seltenheit.
+/// Sets rechnet die Simulation nicht: Die besten Stücke je Platz sind
+/// kein Set.
 List<PitModifier> _legendaereKraefte() {
   return <PitModifier>[
     for (final item in _besteStuecke())
-      ...?PitLegendaries.byId(item.legendaryPower)?.modifiers,
+      ...?PitGearPowers.byId(item.power)?.modifiers,
   ];
 }
 

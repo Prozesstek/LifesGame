@@ -94,6 +94,9 @@ abstract final class MoveIcons {
     'greatsword_cleave': 'assets/Faehigkeiten/Spalter.png',
     'longbow_volley': 'assets/Faehigkeiten/Doppelschuss.png',
     'sunblade_flare': 'assets/Faehigkeiten/Sonnenhieb.png',
+    // Seit ADR-0077, gezeichnet mit `tool/item_icons.py`.
+    'spear_thrust': 'assets/Faehigkeiten/Speerstich.png',
+    'sickle_reap': 'assets/Faehigkeiten/Sichelhieb.png',
   };
 
   /// Der Pfad zum Bild, oder `null` wenn es für diesen Zug keins gibt.

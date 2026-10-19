@@ -9,11 +9,13 @@ import '../ui/pixel_art.dart';
 /// hier steht nur, wie es aussieht — dieselbe Trennung wie bei
 /// [MoveIcons] für die Züge.
 ///
-/// **Jedes der achtundvierzig Stücke hat eins** — seit dem 21.09. alle
-/// aus dem Raven-Fantasy-Paket (64 × 64, Frederiks Download), damit Laden,
-/// Charakter und Fähigkeiten einen Stil haben. Davor waren es vier gemalte
-/// Waffen und achtzehn erzeugte Stücke; das Werkzeug dafür ist entfallen,
-/// es hätte die Raven-Bilder beim nächsten Lauf überschrieben.
+/// **Jedes der sechzig Stücke hat eins** — seit dem 21.09. die ersten
+/// achtundvierzig aus dem Raven-Fantasy-Paket (64 × 64, Frederiks
+/// Download), damit Laden, Charakter und Fähigkeiten einen Stil haben.
+/// Davor waren es vier gemalte Waffen und achtzehn erzeugte Stücke; das
+/// Werkzeug dafür ist entfallen, es hätte die Raven-Bilder beim nächsten
+/// Lauf überschrieben. Die zwölf aus ADR-0077 sind gezeichnet
+/// (`tool/item_icons.py`), weil das Paket nur bei Frederik liegt.
 ///
 /// **Ein Bild kommt in zwei Schritten dazu:**
 ///
@@ -92,6 +94,19 @@ abstract final class GearIcons {
     'gear-phoenixfeder': 'assets/Talismane/Phoenixfeder.png',
     'gear-drachenzahn': 'assets/Talismane/Drachenzahn.png',
     'gear-herz-des-titanen': 'assets/Talismane/HerzDesTitanen.png',
+    // Seit ADR-0077 — gezeichnet mit `tool/item_icons.py`, nicht Raven.
+    'gear-langspeer': 'assets/Waffen/Speere/Langspeer.png',
+    'gear-blutsichel': 'assets/Waffen/Sicheln/Blutsichel.png',
+    'gear-flickenmantel': 'assets/Ruestung/Flickenmantel.png',
+    'gear-nachtmantel': 'assets/Ruestung/Nachtmantel.png',
+    'gear-falkenhaube': 'assets/Helme/Falkenhaube.png',
+    'gear-fledermaushaube': 'assets/Helme/Fledermaushaube.png',
+    'gear-hasenlaeufer': 'assets/Schuhe/Hasenlaeufer.png',
+    'gear-schattenstiefel': 'assets/Schuhe/Schattenstiefel.png',
+    'gear-seelenring': 'assets/Ringe/Seelenring.png',
+    'gear-frostreif': 'assets/Ringe/Frostreif.png',
+    'gear-echostein': 'assets/Talismane/Echostein.png',
+    'gear-irrlichtamulett': 'assets/Talismane/Irrlichtamulett.png',
   };
 
   /// Der Pfad zum Bild, oder `null` wenn es für dieses Stück keins gibt.

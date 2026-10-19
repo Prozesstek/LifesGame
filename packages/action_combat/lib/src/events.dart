@@ -315,3 +315,37 @@ class LastStandTriggered extends ActionEvent {
 
   final Vec2 at;
 }
+
+// --- Seit ADR-0077 ---
+
+/// Der Blutpakt hat eine Heilung zum Schaden gemacht: von [from] zu dem
+/// Gegner bei [to].
+class BloodLashed extends ActionEvent {
+  const BloodLashed({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+}
+
+/// Ein Irrlicht ist bei [at] zerplatzt.
+class WispBurst extends ActionEvent {
+  const WispBurst({required this.at, required this.radius});
+
+  final Vec2 at;
+  final double radius;
+}
+
+/// Das Flickwerk hat einen Schild um den Helden gelegt.
+class ShieldRaised extends ActionEvent {
+  const ShieldRaised({required this.at});
+
+  final Vec2 at;
+}
+
+/// Das Echo hat die Fähigkeit [id] noch einmal treffen lassen.
+class AbilityEchoed extends ActionEvent {
+  const AbilityEchoed({required this.id, required this.at});
+
+  final String id;
+  final Vec2 at;
+}

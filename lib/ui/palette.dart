@@ -148,6 +148,14 @@ abstract final class Palette {
   static const Color tintStern = Color(0xFFF5E9A8);
   static const Color tintSchutz = Color(0xFFE0B65B);
 
+  /// Der Blutpakt des Vampirsets (ADR-0077) — ein Weinrot, das ins
+  /// Violette geht, damit es neben dem Rot des Wächters nicht als
+  /// Ankündigung gelesen wird.
+  static const Color tintBlut = Color(0xFFC8508F);
+
+  /// Die Irrlichter (ADR-0077): ein blasses Grün, heller als die Natur.
+  static const Color tintIrrlicht = Color(0xFFC6F2B4);
+
   // ---------------------------------------------------------------
   // Die Rahmen des Level-Abzeichens, je zehn Level einer
   // ---------------------------------------------------------------

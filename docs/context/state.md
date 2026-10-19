@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 18.10.2026 · Frederik
+**Zuletzt aktualisiert:** 19.10.2026 · AktivesBrett
 
 ---
 
@@ -29,14 +29,14 @@ sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
-| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 48 Stücken**, **Rahmen und Name in der Farbe der Seltenheit** | ADR-0029–0031, -0034, -0047, -0048, -0057 |
+| **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
 | **Errungenschaften** | 21 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073, -0074 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 848, dazu die acht Packages (theory 197, habits 333, gear
-118, action_combat 357, progression 44, abilities 43, identity 25,
+**Tests:** App 850, dazu die acht Packages (theory 197, habits 333, gear
+120, action_combat 381, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -129,6 +129,94 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 19.10.2026: zwölf Stücke mit Kräften und das Vampirset
+
+AktivesBrett: zehn neue Items, zwei je Kategorie, erst als Ideen. Dazu
+eigene Vorgaben: ein Ring mit Eisaura, ein Amulett mit Kugeln, die
+Gegner suchen, und ein Vampirset aus vier Teilen. Nach dem Durchsehen:
+„Dann mach jetzt.“ [ADR-0077](../decisions/0077-ausruestung-mit-kraeften.md).
+
+| Stück | Platz | Seltenheit | Kraft |
+|---|---|---|---|
+| Langspeer | Waffe | Ungewöhnlich | Speerstich: alle in einer Linie |
+| Blutsichel | Waffe | Episch, Vampir | Sichelhieb: alle im Bogen; Lebensraub 4 % |
+| Flickenmantel | Rüstung | Selten | Schild nach 3 s ohne Treffer |
+| Nachtmantel | Rüstung | Episch, Vampir | Lebensraub 3 % |
+| Falkenhaube | Helm | Ungewöhnlich | +5 % kritisch, je kritischem +3 Mana |
+| Fledermaushaube | Helm | Episch, Vampir | Lebensraub 2 % |
+| Hasenläufer | Schuhe | Gewöhnlich | nach jedem Kill kurz schneller |
+| Schattenstiefel | Schuhe | Episch, Vampir | Lebensraub 3 % |
+| Seelenring | Ring | Selten | Mana je Kill |
+| **Frostreif** | Ring | Legendär | Eiskreis, bremst und friert |
+| Echostein | Talisman | Selten | jede vierte Fähigkeit noch einmal, halb |
+| **Amulett der Irrlichter** | Talisman | Legendär | alle 5 s ein Irrlicht, bis 3, sucht Gegner |
+
+**Das Vampirset**: zwei Teile heilen je Kill; mit allen vier blutet man
+jede Sekunde 2 % — **immer**, auch ohne Gegner —, der Lebensraub zählt
+doppelt, ein Fünftel davon trifft zusätzlich, und **keine andere
+Heilung heilt**: Heilfähigkeiten, Heilkugeln, Kill-Heilung, zweiter
+Atem und Rückspulen treffen stattdessen den nächsten Gegner.
+
+**Kräfte gibt es jetzt auf jeder Seltenheit**, nicht nur auf Legendär.
+Eine Kraft am Helden ist ein Passiv wie Kampfrausch und kommt als
+`GrantPassive` in die Welt; `PitLegendaries` heißt jetzt
+`PitGearPowers`, `GearItem.legendaryPower` jetzt `power`.
+
+**Fragen vor dem Bau**, sieben Antworten: Blutpakt **immer**, nicht nur
+im Kampf (gegen Claudes Empfehlung — „ich probiere es mal aus und sage,
+ob es zu schwer ist“); der Raub-Schaden erst mit allen vier (gegen die
+Empfehlung); Kill-Heilung und Heilkugeln werden zu Schaden; Kräfte auf
+jeder Seltenheit; die Bilder zeichnet Claude.
+
+**Ohne Rückfrage entschieden** (die ganze Liste steht im ADR): zwölf
+statt zehn, weil sechs Plätze mal zwei zwölf sind; das Vampirset episch
+und damit das **erste verdiente Set**; Frostreif und Irrlichter
+legendär; Lebensraub nur mit eigener Hand; das Echo wiederholt nur
+Treffer.
+
+**Gemessen** (`dart run tool/pit_sim.dart ausruestung 40`, Tag 30,
+Bogen, Funkenstoß, Steinhaut, Blütentau; Stufe 13, ohne Kraft 18 %):
+Frostreif 30 %, Irrlichter 38 %, Flickwerk 40 %, Falkenblick 40 %,
+Hasenlauf 15 %, Seelenernte 25 %, Echo 25 %. Speerstich und Sichelhieb
+ohne Kraft schlagen wie der Bogen (je 18 %). Das Vampirset mit der
+Sichel: ein Teil 43 %, zwei Teile 63 %, **alle vier 28 %** — der Bot
+heilt nicht gezielt und läuft nie zur nächsten Kugel. Auf Stufe 11 kommt er mit vollem Set in
+neun von zehn Läufen durch. **Zwei Teile sind der stärkste Sprung**
+(63 %) — Lebensraub und Kill-Heilung ohne Preis.
+
+**Nachgestellt nach der ersten Messung:** Falkenblick hatte 6 % und
+5 Mana und hob Stufe 13 auf 58 %, mehr als jede andere Kraft, auf einer
+ungewöhnlichen Haube; jetzt 5 % und 3 Mana. Der Sichelhieb hatte ×0,75
+und kam auf 3 %; jetzt ×0,9.
+
+**Beim Bauen gefunden:** In `assets/RAVEN.md` stand der Absatz zu
+AktivesBretts Fähigkeitsbildern (ADR-0074) mitten in der Tabelle und
+zerriss sie. Er steht jetzt darunter.
+
+Neu: `gear_powers.dart`, `ausruestung_kraefte_test.dart` (24 Tests),
+`tool/item_icons.py`, zwanzig Bilder (zwölf im Laden, zwei
+Grundangriffe, sechs auf der Figur). App 850 (vorher 848), action_combat
+381 (vorher 357), gear 120 (vorher 118). Die Bilder als Kontaktbogen und
+auf der Figur angesehen. **Nicht gespielt, nicht am Handy, nicht im
+Browser.**
+
+### Offen
+
+- **Ob der Blutpakt zu hart ist** — AktivesBrett spielt ihn und sagt es.
+  Die Hebel: der Abzug (2 %), der Faktor auf den Lebensraub (×2), der
+  Anteil als Schaden (ein Fünftel), oder der Abzug nur im Kampf.
+- Das Amulett der Irrlichter ist nach Zahlen der beste Talisman und
+  steht damit in der Spalte „beste Ausrüstung“ der großen
+  `pit_sim`-Tabelle; die ist nicht neu gemessen.
+- **Seelenraub trifft mit dem Blutpakt praktisch doppelt**: Seine
+  Heilung (der ganze Schaden) wird zu Schaden am nächsten Gegner. Das
+  folgt der Regel, ist aber vielleicht nicht gewollt.
+- Die neuen Kräfte haben keinen eigenen Klang.
+- Issue #115 will auch zwei Ring- und zwei Amulettplätze und Werte, die
+  mit dem Level wachsen — nicht gebaut.
+- **Frederik hat ADR-0077 nicht gesehen**, auch nicht, dass Kräfte jetzt
+  auf jeder Seltenheit sitzen.
 
 ## 18.10.2026, zuletzt: das Spiegelbild bleibt stehen
 

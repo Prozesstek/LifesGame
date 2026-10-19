@@ -533,6 +533,126 @@ final class LastStand extends PitPassive {
   final double wardSeconds;
 }
 
+// --- Kräfte der Ausrüstung (ADR-0077) ---
+//
+// Dieselbe Bauform wie die Passive auf den Plätzen: Sie gelten den
+// ganzen Lauf. Ein Stück bringt sie über `GrantPassive` mit
+// (`pit_modifier.dart`), ausgeführt werden sie in `gear_powers.dart`.
+
+/// **Lebensraub**: [share] des Schadens, den der Held mit eigener Hand
+/// anrichtet, heilt ihn. Mehrere Stücke zählen zusammen.
+final class LifeSteal extends PitPassive {
+  const LifeSteal({required this.share});
+
+  final double share;
+}
+
+/// **Der Blutpakt** — das volle Vampirset: jede Sekunde [drainShare] des
+/// vollen Lebens weg, **immer**, auch ohne Gegner. Der Lebensraub zählt
+/// [stealFactor]-mal, und [stealDamageShare] dessen, was er heilen
+/// könnte, trifft den Gegner zusätzlich — auch bei vollem Leben.
+///
+/// **Sonst heilt nichts**: Heilfähigkeiten, Heilkugeln und jede andere
+/// Heilung treffen stattdessen den nächsten Gegner in Sicht mit genau
+/// dem Betrag.
+final class BloodPact extends PitPassive {
+  const BloodPact({
+    required this.drainShare,
+    required this.stealFactor,
+    required this.stealDamageShare,
+  });
+
+  final double drainShare;
+  final double stealFactor;
+  final double stealDamageShare;
+}
+
+/// Jeder Gegner, den der Held fällt, heilt ihn um [share] seines vollen
+/// Lebens.
+final class HealOnKill extends PitPassive {
+  const HealOnKill({required this.share});
+
+  final double share;
+}
+
+/// **Frostreif**: Ein Kreis aus Eis mit [radius] wandert mit dem Helden.
+/// Wer darin steht, läuft mit [slowFactor] seines Tempos und nimmt je
+/// Sekunde [perSecond] mal den Angriff. Der Wächter wird nur halb so
+/// stark gebremst.
+final class FrostAura extends PitPassive {
+  const FrostAura({
+    required this.radius,
+    required this.slowFactor,
+    required this.perSecond,
+  });
+
+  final double radius;
+  final double slowFactor;
+  final double perSecond;
+}
+
+/// **Irrlichter**: Alle [interval] Sekunden entsteht eines, höchstens
+/// [maxCount] zugleich. Ohne Gegner kreisen sie um den Helden; sieht er
+/// einen im Umkreis [seekRange], fliegt eins hin und zerplatzt bei der
+/// Berührung — [power] mal Angriff auf alle im Umkreis [blastRadius].
+final class Wisps extends PitPassive {
+  const Wisps({
+    required this.interval,
+    required this.maxCount,
+    required this.seekRange,
+    required this.power,
+    required this.blastRadius,
+  });
+
+  final double interval;
+  final int maxCount;
+  final double seekRange;
+  final double power;
+  final double blastRadius;
+}
+
+/// Nach jedem Kill läuft der Held [seconds] lang [speed]-mal so schnell.
+final class KillRush extends PitPassive {
+  const KillRush({required this.seconds, required this.speed});
+
+  final double seconds;
+  final double speed;
+}
+
+/// Jeder Kill bringt [amount] Mana.
+final class ManaOnKill extends PitPassive {
+  const ManaOnKill({required this.amount});
+
+  final int amount;
+}
+
+/// [chance] mehr kritische Treffer, und jeder bringt [manaOnCrit] Mana.
+final class CritEdge extends PitPassive {
+  const CritEdge({required this.chance, required this.manaOnCrit});
+
+  final double chance;
+  final int manaOnCrit;
+}
+
+/// Hat der Held [idleSeconds] lang nichts eingesteckt, baut sich ein
+/// Schild aus [share] seines vollen Lebens auf. Er fängt Schaden ab, bevor
+/// das Leben ihn trägt.
+final class IdleShield extends PitPassive {
+  const IdleShield({required this.idleSeconds, required this.share});
+
+  final double idleSeconds;
+  final double share;
+}
+
+/// **Echo**: Jede [every]-te Fähigkeit, die Schaden macht, wirkt ein
+/// zweites Mal — nur ihre Treffer, mit [power] der Wucht.
+final class Echo extends PitPassive {
+  const Echo({required this.every, required this.power});
+
+  final int every;
+  final double power;
+}
+
 /// Wie eine Fähigkeit gezielt wird.
 ///
 /// **Kurz tippen zielt von selbst, halten zielt von Hand** — bei allen

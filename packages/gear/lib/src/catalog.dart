@@ -3,7 +3,7 @@ import 'prices.dart';
 
 /// Alles, was der Shop führt.
 ///
-/// **Acht Stücke je Platz, fünf Seltenheiten.** Fünf davon sind von
+/// **Zehn Stücke je Platz, fünf Seltenheiten** (bis ADR-0077 acht). Fünf davon sind von
 /// Anfang an kaufbar — zwei gewöhnliche, zwei ungewöhnliche, ein seltenes
 /// (ADR-0029). Der Laden soll dreißig Tage lang etwas zu entscheiden geben;
 /// mit neun Stücken war nach zwei Wochen alles gesehen.
@@ -130,7 +130,7 @@ abstract final class GearCatalog {
       name: 'Sonnenklinge',
       slot: GearSlot.waffe,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-sonnenglut',
+      power: 'legendaer-sonnenglut',
       price: GearPrices.waffeLegendary,
       bonus: GearBonus(attack: 6, maxEnergy: 1),
       why: 'Der einzige Waffenzug mit einer Perfect-Wirkung: Ein perfekter '
@@ -224,7 +224,7 @@ abstract final class GearCatalog {
       name: 'Titanenpanzer',
       slot: GearSlot.ruestung,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-steinerne-haut',
+      power: 'legendaer-steinerne-haut',
       price: GearPrices.ruestungLegendary,
       bonus: GearBonus(maxHp: 64, defense: 5, maxEnergy: 1),
       why: 'Der Panzer für die letzten zehn Sprossen. Vierundsechzig '
@@ -318,7 +318,7 @@ abstract final class GearCatalog {
       name: 'Krone des Hochwächters',
       slot: GearSlot.helm,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-weitblick',
+      power: 'legendaer-weitblick',
       price: GearPrices.helmLegendary,
       bonus: GearBonus(maxHp: 36, defense: 3, maxEnergy: 1),
       why: 'Drei Punkte Verteidigung auf dem Kopf gab es bisher nirgends. '
@@ -411,7 +411,7 @@ abstract final class GearCatalog {
       name: 'Stiefel des Titanen',
       slot: GearSlot.schuhe,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-beben',
+      power: 'legendaer-beben',
       price: GearPrices.schuheLegendary,
       bonus: GearBonus(maxHp: 16, defense: 4, maxEnergy: 1),
       why: 'Verteidigung, Leben und Energie auf einem Platz, der mit hundert '
@@ -502,7 +502,7 @@ abstract final class GearCatalog {
       name: 'Ring des Erzdämons',
       slot: GearSlot.ring,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-erzhunger',
+      power: 'legendaer-erzhunger',
       price: GearPrices.ringLegendary,
       bonus: GearBonus(attack: 3, maxHp: 12, maxEnergy: 4),
       why: 'Das teuerste Stück des Ladens, und das einzige, das auf drei '
@@ -591,12 +591,161 @@ abstract final class GearCatalog {
       name: 'Herz des Titanen',
       slot: GearSlot.talisman,
       rarity: GearRarity.legendary,
-      legendaryPower: 'legendaer-lebensquell',
+      power: 'legendaer-lebensquell',
       price: GearPrices.talismanLegendary,
       bonus: GearBonus(attack: 4, maxHp: 16, maxEnergy: 3),
       why: 'Drei Punkte Energie außerhalb des Rings gab es bisher nicht. '
           'Wer Ring und Herz zusammen trägt, hat sieben — und damit jede '
           'Fähigkeit des Spiels jede zweite Runde. Verdient ab dem '
+          'Bergwächter.',
+    ),
+
+    // ---------------------------------------------------------------
+    // Seit ADR-0077: zwei je Platz, jedes mit einer Kraft
+    //
+    // **Kräfte gibt es jetzt auf jeder Seltenheit**, nicht nur auf
+    // Legendär. Vier davon sind das Vampirset, zwei kamen von
+    // AktivesBrett (Frostreif, Irrlichter), sechs hat Claude dazugelegt.
+    // ---------------------------------------------------------------
+    GearItem(
+      id: 'gear-langspeer',
+      name: 'Langspeer',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.uncommon,
+      price: GearPrices.langspeer,
+      bonus: GearBonus(attack: 4, maxHp: 6),
+      why: 'Reicht doppelt so weit wie eine Klinge, und wer hintereinander '
+          'steht, wird zusammen getroffen. Wer Gegner in Reihen kommen '
+          'lässt, trifft mit einem Stich zwei.',
+    ),
+    GearItem(
+      id: 'gear-blutsichel',
+      setId: 'set-vampir',
+      name: 'Blutsichel',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.epic,
+      power: 'kraft-lebensraub-sichel',
+      price: GearPrices.blutsichel,
+      bonus: GearBonus(attack: 5, maxHp: 14),
+      why: 'Schnelle Hiebe im Bogen, jeder schwach, aber jeder raubt Leben '
+          '— und wer viele auf einmal trifft, raubt viel. Teil des '
+          'Vampirsets, ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-flickenmantel',
+      name: 'Flickenmantel',
+      slot: GearSlot.ruestung,
+      rarity: GearRarity.rare,
+      power: 'kraft-flickwerk',
+      price: GearPrices.flickenmantel,
+      bonus: GearBonus(maxHp: 42, defense: 3),
+      why: 'Weniger Panzer als der Harnisch, dafür ein Schild, der sich '
+          'nach drei Sekunden ohne Treffer von selbst aufbaut. Belohnt '
+          'jeden, der aus den Ringen des Wächters läuft.',
+    ),
+    GearItem(
+      id: 'gear-nachtmantel',
+      setId: 'set-vampir',
+      name: 'Nachtmantel',
+      slot: GearSlot.ruestung,
+      rarity: GearRarity.epic,
+      power: 'kraft-lebensraub-mantel',
+      price: GearPrices.nachtmantel,
+      bonus: GearBonus(maxHp: 58, defense: 5),
+      why: 'Die schwerste epische Rüstung, und sie raubt Leben. Teil des '
+          'Vampirsets, ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-falkenhaube',
+      name: 'Falkenhaube',
+      slot: GearSlot.helm,
+      rarity: GearRarity.uncommon,
+      power: 'kraft-falkenblick',
+      price: GearPrices.falkenhaube,
+      bonus: GearBonus(maxHp: 26, defense: 1),
+      why: 'Mehr kritische Treffer, und jeder füllt Mana nach. Je öfter '
+          'man trifft, desto öfter kommt die nächste Fähigkeit.',
+    ),
+    GearItem(
+      id: 'gear-fledermaushaube',
+      setId: 'set-vampir',
+      name: 'Fledermaushaube',
+      slot: GearSlot.helm,
+      rarity: GearRarity.epic,
+      power: 'kraft-lebensraub-haube',
+      price: GearPrices.fledermaushaube,
+      bonus: GearBonus(attack: 1, maxHp: 30, defense: 2, maxEnergy: 1),
+      why: 'Ein wenig von allem, und ein wenig Lebensraub. Teil des '
+          'Vampirsets, ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-hasenlaeufer',
+      name: 'Hasenläufer',
+      slot: GearSlot.schuhe,
+      rarity: GearRarity.common,
+      power: 'kraft-hasenlauf',
+      price: GearPrices.hasenlaeufer,
+      bonus: GearBonus(maxHp: 8, defense: 1),
+      why: 'Nach jedem Kill kurz schneller — zum nächsten Gegner oder weg '
+          'von ihm. Die einzige gewöhnliche Ausrüstung mit einer Kraft.',
+    ),
+    GearItem(
+      id: 'gear-schattenstiefel',
+      setId: 'set-vampir',
+      name: 'Schattenstiefel',
+      slot: GearSlot.schuhe,
+      rarity: GearRarity.epic,
+      power: 'kraft-lebensraub-stiefel',
+      price: GearPrices.schattenstiefel,
+      bonus: GearBonus(maxHp: 16, defense: 4),
+      why: 'Die festesten epischen Schuhe, und sie rauben Leben. Teil des '
+          'Vampirsets, ab Sprosse zehn.',
+    ),
+    GearItem(
+      id: 'gear-seelenring',
+      name: 'Seelenring',
+      slot: GearSlot.ring,
+      rarity: GearRarity.rare,
+      power: 'kraft-seelenernte',
+      price: GearPrices.seelenring,
+      bonus: GearBonus(maxHp: 6, maxEnergy: 3),
+      why: 'Jeder Kill gibt Mana. In einem vollen Raum bezahlt er die '
+          'Fähigkeiten, die ihn leeren.',
+    ),
+    GearItem(
+      id: 'gear-frostreif',
+      name: 'Frostreif',
+      slot: GearSlot.ring,
+      rarity: GearRarity.legendary,
+      power: 'kraft-frostreif',
+      price: GearPrices.frostreif,
+      bonus: GearBonus(attack: 2, maxHp: 12, maxEnergy: 4),
+      why: 'Ein Kreis aus Eis geht mit dir: Wer hineinläuft, wird langsamer '
+          'und friert. Wer rückwärts schlägt, behält Abstand. Verdient ab '
+          'dem Bergwächter.',
+    ),
+    GearItem(
+      id: 'gear-echostein',
+      name: 'Echostein',
+      slot: GearSlot.talisman,
+      rarity: GearRarity.rare,
+      power: 'kraft-echo',
+      price: GearPrices.echostein,
+      bonus: GearBonus(attack: 2, maxHp: 8, maxEnergy: 2),
+      why: 'Jede vierte Fähigkeit mit Schaden trifft ein zweites Mal, halb '
+          'so hart. Lohnt sich für den, der seine Knöpfe oft drückt.',
+    ),
+    GearItem(
+      id: 'gear-irrlichtamulett',
+      name: 'Amulett der Irrlichter',
+      slot: GearSlot.talisman,
+      rarity: GearRarity.legendary,
+      power: 'kraft-irrlichter',
+      price: GearPrices.irrlichtamulett,
+      bonus: GearBonus(attack: 4, maxHp: 18, maxEnergy: 3),
+      why: 'Alle fünf Sekunden ein Irrlicht, bis zu drei. Sie kreisen, bis '
+          'ein Gegner auftaucht, und zerplatzen an ihm — wer einen Raum '
+          'betritt, hat schon drei Schüsse frei. Verdient ab dem '
           'Bergwächter.',
     ),
   ];

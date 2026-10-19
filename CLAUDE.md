@@ -84,10 +84,10 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 118 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 120 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
-| `packages/gear/lib/src/set_catalog.dart` | die **drei Sets** und ihre Wirkung | nur Dart-SDK |
+| `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
 | `packages/gear/lib/src/gates.dart` | ab welcher Sprosse Episch und Legendär kaufbar sind | nur Dart-SDK |
 | `packages/gear/lib/src/rolls.dart` | **wie gewürfelt wird**: Werte 85–115 %, Seltenheit je Stufe, der Tagesladen, die Beute ([ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)) | nur Dart-SDK |
 | `packages/gear/lib/src/copy.dart` | ein **Exemplar**: Katalogstück plus gespeicherte Werte | nur Dart-SDK |
@@ -106,16 +106,17 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **20 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 357 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 381 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
-| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die vier **Ultimates** und die drei **Passive** |
+| `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die vier **Ultimates**, die drei **Passive** und die Passive der **Ausrüstung** (ADR-0077) |
 | `packages/action_combat/lib/src/effects.dart` | **die eine Stelle, die jede Wirkung ausführt** — Sturm, Haken, Strudel, Stillstand samt Stun-Leiste, Self-Buff, Zufall, Bumerang ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter (auch das **Spiegelbild**), der Fels | nur Dart-SDK |
 | `packages/action_combat/lib/src/hero_states.dart` | **was am Helden abläuft** ([ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)): Rage, Ruhepuls, zweiter Atem, Unsichtbarkeit, Parade, Bestform, Stacking, Kettenblitz, Blink, Rückspulen — und **die Grenze des Grundangriffs** (`_heroFactor`) | nur Dart-SDK |
+| `packages/action_combat/lib/src/gear_powers.dart` | **was die Ausrüstung am Helden tut** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)): Lebensraub und Blutpakt, Frostreif, Irrlichter, Flickwerk, Falkenblick, Hasenlauf, Seelenernte, Echo — und die Grundangriffe Speer und Sichel | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
-| `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und legendäre Kräfte** Fähigkeiten verändern — und die sechs Kräfte selbst | nur Dart-SDK |
+| `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und Kräfte der Ausrüstung** Fähigkeiten verändern — und alle Kräfte selbst (`PitGearPowers`); eine Kraft am Helden kommt als `GrantPassive` (ADR-0077) | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **hundert Stufen** — wie aus einer Stufe ein Faktor wird; die Zahlen gelten für 1 und 30, darüber im selben Schritt weiter ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)) | nur Dart-SDK |
@@ -204,6 +205,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
+| `tool/item_icons.py` | **zeichnet** die zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre sechs Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek) | Python |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
@@ -276,19 +278,20 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 848 Tests
+flutter test             # 850 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
 dart run tool/pit_sim.dart             # Stufe für Stufe, bis zur Wand
 dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
+dart run tool/pit_sim.dart ausruestung   # nur: was jede Kraft der Ausrüstung trägt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 357 Tests
+dart test                              # 381 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -299,7 +302,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 197 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
-cd packages/gear        ; dart test    # 118 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
+cd packages/gear        ; dart test    # 120 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -320,8 +323,8 @@ Stelle:
 | Welche Plätze gehen mit? | `activeMovesProvider`, gefiltert in `ActionWorld` — was die Grube nicht kennt, fällt heraus |
 | Wie schlägt der Held? | `PitWeapons` — über den **Waffenzug** (`AbilityCatalog.weaponMoves`), nicht die Item-Id |
 | Was kann der Held im Kampf? | Grundangriff der Waffe (von selbst) und die drei Plätze — **keine** Grundfähigkeiten; auf der Tastatur 1–3 (`PitRunView`) |
-| Was ändern Sets und Legendäre? | `pitModifiersFor` in `lib/gear/set_effects.dart` — rechnet nichts, übersetzt nur |
-| Welche Kraft trägt ein legendäres Stück? | `GearItem.legendaryPower` (Id) → `PitLegendaries` (Wirkung) |
+| Was ändern Sets und Kräfte? | `pitModifiersFor` in `lib/gear/set_effects.dart` — rechnet nichts, übersetzt nur |
+| Welche Kraft trägt ein Stück? | `GearItem.power` (Id) → `PitGearPowers` (Wirkung) — seit ADR-0077 auf **jeder** Seltenheit; ein Set über `SetPerk.powers` |
 
 **Kurz tippen zielt selbst, halten zielt von Hand.** Jede Fähigkeit
 trägt ein `PitAim`: `selbst` (Heilung, Schutz, Mana — wirkt beim
@@ -351,6 +354,18 @@ hängen — es müssen null sein.
 `world.dart` sieht nur das Ergebnis. Die Art einer Fähigkeit
 (`PitKind`: Angriff, Umgebung, Schutz) steht am Eintrag — auf sie
 wirken die Sets.
+
+**Eine Kraft am Helden ist ein Passiv**
+([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)):
+Lebensraub, Frostreif, Irrlichter und die übrigen stehen als
+`PitPassive` neben Kampfrausch und Ruhepuls, und die Ausrüstung bringt
+sie als `GrantPassive` mit — derselbe Weg wie jede andere Veränderung,
+`apply` lässt die Fähigkeiten dabei, wie sie sind. `ActionWorld` sammelt
+die Passive der Plätze und der Ausrüstung an einer Stelle, ausgeführt
+wird in `gear_powers.dart`. **Jede Heilung ausser dem Lebensraub geht
+über `_healHero`**: Dort macht der Blutpakt des vollen Vampirsets sie zu
+Schaden am nächsten Gegner. Wer eine neue Heilung baut und `_hero.hp`
+selbst setzt, heilt am Blutpakt vorbei. `ausruestung_kraefte_test.dart`.
 
 Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
 Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine
@@ -672,7 +687,7 @@ stehen in `packages/gear/lib/src/prices.dart`. Das Package kennt `habits`
 nicht und muss den Zufluss deshalb annehmen (25 Gold am Tag); dass die
 Annahme stimmt, prüft `test/progression_test.dart` in der App. Neue Stücke
 kommen nach `catalog.dart` und werden von `catalog_test.dart` automatisch
-mitgeprüft — jedes Stück muss wirken, jeder Platz führt acht (fünf offene, drei verdiente), und teurer
+mitgeprüft — jedes Stück muss wirken, jeder Platz führt zehn (sechs offene, vier verdiente), und teurer
 muss **innerhalb einer Seltenheit** auch besser sein ([ADR-0029](docs/decisions/0029-seltenheit-statt-preisleiter.md)).
 
 **Seit [ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)
@@ -707,7 +722,7 @@ Stände (mit `ownedIds`) werden beim Laden übernommen: jedes Stück ein
 Exemplar mit 100 %, frühere Verkäufe zum alten Satz.
 
 **Sets ändern heißt: den Set-Katalog anfassen, nicht die Engine.** Alle
-drei stehen in `packages/gear/lib/src/set_catalog.dart`, welche Stücke
+vier stehen in `packages/gear/lib/src/set_catalog.dart`, welche Stücke
 dazugehören steht als `setId` **am Stück** ([ADR-0030](docs/decisions/0030-sets-wirken-auf-eine-art-von-faehigkeit.md)).
 Drei Regeln bleiben an je einer Stelle:
 
@@ -720,6 +735,14 @@ Drei Regeln bleiben an je einer Stelle:
 Ein Set wirkt nie auf den **Grundangriff**: Der ist keine Fähigkeit,
 sondern die Waffe. Ein Faktor auf das, was jede halbe Sekunde fällt,
 entschiede den Kampf allein (ADR-0009, einmal im Rundenkampf gemessen).
+**Lebensraub ist kein solcher Faktor** (ADR-0077): Er heilt, statt mehr
+Schaden zu machen, und gilt deshalb auch für den Grundangriff.
+
+**Das Vampirset ist das erste verdiente Set** (ADR-0077): Seine vier
+Teile sind episch, also erst ab Sprosse zehn zu haben. Ein Set ist ganz
+offen oder ganz verdient (`set_catalog_test.dart`), und die Preisregeln
+der Sets — gleich teuer, im ersten Monat erreichbar — gelten für die
+drei offenen (`GearSets.open`).
 
 **Die Waffe ist dabei der Sonderfall.** Sie ist der einzige Platz, dessen
 Stück den **Grundangriff** bestimmt (`PitWeapons`), und keine zwei

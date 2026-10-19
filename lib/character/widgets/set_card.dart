@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
+import '../../gear/weapon_ability_line.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 
@@ -107,7 +108,7 @@ class _SetRow extends StatelessWidget {
         const SizedBox(height: 3),
         if (perk case final SetPerk aktiv)
           Text(
-            '${aktiv.labels.join(' · ')} auf ${set.target.label}',
+            setPerkText(set, aktiv),
             style: const TextStyle(fontSize: 12, color: Palette.success),
           ),
         // Statt „Noch ein Teil bis zur nächsten Stufe“: ein Punkt je

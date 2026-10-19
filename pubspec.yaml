@@ -88,6 +88,9 @@ flutter:
     - assets/Waffen/Boegen/
     - assets/Waffen/Staebe/
     - assets/Waffen/Kolben/
+    # Gezeichnet mit `tool/item_icons.py` (ADR-0077).
+    - assets/Waffen/Speere/
+    - assets/Waffen/Sicheln/
 
     # Die uebrigen Plaetze. Alle Bilder stammen aus dem Raven-Paket
     # (`assets/RAVEN.md`).
