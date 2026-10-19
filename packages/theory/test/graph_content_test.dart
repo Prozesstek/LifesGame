@@ -186,6 +186,18 @@ void main() {
       }
     });
 
+    test('jede Seite hat genau einen Merksatz', () {
+      // Seit dem 19.10. trägt jede Seite den einen Satz, der hängen
+      // bleiben soll. Einer, nicht mehrere: Zwei Merksätze sind keiner.
+      for (final node in nodes) {
+        final merksaetze = <Absatz>[
+          for (final section in node.lesson.sections)
+            ...Lesetext.aus(section.body).whereType<Merksatz>(),
+        ];
+        expect(merksaetze, hasLength(1), reason: node.id);
+      }
+    });
+
     test('jeder correctIndex zeigt auf eine vorhandene Antwort', () {
       for (final node in nodes) {
         for (final question in node.lesson.questions) {

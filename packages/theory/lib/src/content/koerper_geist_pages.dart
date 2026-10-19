@@ -14,24 +14,29 @@ const Lesson erholungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Belastung allein macht nicht stärker',
-      body: 'Ein Muskel wächst nicht während des Trainings, sondern danach. '
+      body:
+          'Ein Muskel wächst nicht während des Trainings, sondern danach. '
           'Dasselbe gilt für fast alles, was man üben kann: Der Reiz setzt '
-          'etwas in Gang, die Anpassung passiert in der Ruhe. Wer nur Reize '
-          'setzt und nie erholt, sammelt Belastung ohne Ertrag.',
+          'etwas in Gang, die Anpassung passiert **in der Ruhe**. Wer nur '
+          'Reize setzt und nie erholt, sammelt Belastung ohne Ertrag.\n\n'
+          '==Der Reiz setzt etwas in Gang, die Anpassung passiert in der '
+          'Ruhe.==',
     ),
     LessonSection(
       heading: 'Erschöpfung sieht aus wie Faulheit',
-      body: 'Wer über Wochen zu wenig erholt, verliert zuerst die Lust, dann '
-          'die Konzentration, dann die Leistung. Von außen — und oft auch '
-          'von innen — sieht das nach mangelnder Disziplin aus. Die Antwort '
+      body:
+          'Wer über Wochen zu wenig erholt, verliert zuerst die Lust, dann '
+          'die Konzentration, dann die Leistung. Von außen — und oft auch von '
+          'innen — sieht das nach **mangelnder Disziplin** aus. Die Antwort '
           '„streng dich mehr an" macht es dann zuverlässig schlimmer.',
     ),
     LessonSection(
       heading: 'Pausen muss man planen',
-      body: 'Eine Pause, die erst kommt, wenn nichts mehr geht, ist keine '
+      body:
+          'Eine Pause, die erst kommt, wenn nichts mehr geht, ist keine '
           'Erholung, sondern ein Zusammenbruch. Nützlich sind Pausen, die '
-          'im Plan stehen, bevor sie nötig sind — ein freier Tag pro Woche, '
-          'eine leichtere Woche pro Monat.',
+          '**im Plan stehen**, bevor sie nötig sind — ein freier Tag pro '
+          'Woche, eine leichtere Woche pro Monat.',
     ),
   ],
   questions: <Question>[
@@ -81,24 +86,28 @@ const Lesson stressPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Wofür die Reaktion gebaut ist',
-      body: 'Die Stressreaktion stellt kurzfristig Energie bereit, schärft '
-          'die Aufmerksamkeit und stellt anderes hintan — Verdauung, '
-          'Reparatur, langfristiges Denken. Für eine Bedrohung, die in '
-          'Minuten vorbei ist, ist das eine ausgezeichnete Antwort.',
+      body:
+          'Die Stressreaktion stellt kurzfristig Energie bereit, schärft die '
+          'Aufmerksamkeit und stellt anderes hintan — Verdauung, Reparatur, '
+          'langfristiges Denken. Für eine Bedrohung, die **in Minuten '
+          'vorbei** ist, ist das eine ausgezeichnete Antwort.',
     ),
     LessonSection(
       heading: 'Das Problem ist die Dauer',
-      body: 'Moderne Belastungen hören selten nach Minuten auf. Läuft die '
-          'Reaktion über Wochen, bleiben genau die Dinge liegen, die sie '
+      body:
+          'Moderne Belastungen hören selten nach Minuten auf. Läuft die '
+          'Reaktion **über Wochen**, bleiben genau die Dinge liegen, die sie '
           'hintanstellt. Schlaf wird schlechter, die Geduld kürzer, die '
           'Anfälligkeit größer — und all das erzeugt neuen Stress.',
     ),
     LessonSection(
       heading: 'Was die Schleife unterbricht',
-      body: 'Wirksam ist alles, was dem Körper ein Ende signalisiert: '
+      body:
+          'Wirksam ist alles, was dem Körper **ein Ende signalisiert**: '
           'Bewegung, langsames Ausatmen, Schlaf, ein erledigter Punkt auf '
-          'einer Liste. Der gemeinsame Nenner ist nicht Entspannung, '
-          'sondern ein Abschluss.',
+          'einer Liste. Der gemeinsame Nenner ist nicht Entspannung, sondern '
+          'ein Abschluss.\n\n'
+          '==Gegen Stress hilft nicht Entspannung, sondern ein Abschluss.==',
     ),
   ],
   questions: <Question>[
@@ -148,24 +157,28 @@ const Lesson motivationPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die Reihenfolge ist meist andersherum',
-      body: 'Der verbreitete Glaube lautet: erst Motivation, dann Handlung. '
-          'In der Praxis kommt die Lust häufiger nach den ersten Minuten '
-          'als davor. Wer wartet, bis er Lust hat, wartet auf etwas, das '
-          'das Anfangen erst erzeugt.',
+      body:
+          'Der verbreitete Glaube lautet: erst Motivation, dann Handlung. In '
+          'der Praxis kommt die Lust häufiger **nach den ersten Minuten** als '
+          'davor. Wer wartet, bis er Lust hat, wartet auf etwas, das das '
+          'Anfangen erst erzeugt.\n\n'
+          '==Erst anfangen, dann kommt die Lust.==',
     ),
     LessonSection(
       heading: 'Gefühle schwanken, Systeme nicht',
-      body: 'Motivation hängt an Schlaf, Wetter, Nachrichten und Zufall. '
-          'Etwas, das an einer so schwankenden Größe hängt, taugt nicht als '
-          'Fundament. Ein fester Zeitpunkt, ein vorbereiteter Platz und '
-          'eine lächerlich kleine erste Handlung schwanken nicht.',
+      body:
+          'Motivation hängt an Schlaf, Wetter, Nachrichten und Zufall. Etwas, '
+          'das an einer so schwankenden Größe hängt, taugt nicht als '
+          'Fundament. Ein fester Zeitpunkt, ein vorbereiteter Platz und eine '
+          'lächerlich kleine erste Handlung **schwanken nicht**.',
     ),
     LessonSection(
       heading: 'Was trotzdem hilft',
-      body: 'Motivation ist nicht wertlos — sie ist nur kein Werkzeug für '
-          'schlechte Tage. Nutze sie an guten Tagen für das, was das System '
-          'stabiler macht: einkaufen, vorbereiten, aufräumen. So arbeitet '
-          'die gute Laune für den Tag, an dem keine da ist.',
+      body:
+          'Motivation ist nicht wertlos — sie ist nur kein Werkzeug für '
+          'schlechte Tage. Nutze sie **an guten Tagen** für das, was das '
+          'System stabiler macht: einkaufen, vorbereiten, aufräumen. So '
+          'arbeitet die gute Laune für den Tag, an dem keine da ist.',
     ),
   ],
   questions: <Question>[
@@ -214,24 +227,28 @@ const Lesson wiederholungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Lesen fühlt sich nach Lernen an',
-      body: 'Etwas zum dritten Mal zu lesen erzeugt ein starkes Gefühl von '
-          'Vertrautheit — und Vertrautheit wird zuverlässig mit Können '
-          'verwechselt. Beim Abrufen ohne Vorlage bricht dieses Gefühl '
+      body:
+          'Etwas zum dritten Mal zu lesen erzeugt ein starkes Gefühl von '
+          'Vertrautheit — und Vertrautheit wird zuverlässig **mit Können '
+          'verwechselt**. Beim Abrufen ohne Vorlage bricht dieses Gefühl '
           'regelmäßig zusammen.',
     ),
     LessonSection(
       heading: 'Abrufen ist der Vorgang',
-      body: 'Sich an etwas zu erinnern, ohne nachzusehen, ist anstrengender '
-          'als Lesen und dabei deutlich wirksamer. Die Anstrengung ist kein '
-          'Nebeneffekt, sondern der Lernvorgang selbst: Was mühsam '
-          'hervorgeholt wird, liegt danach näher an der Oberfläche.',
+      body:
+          'Sich an etwas zu erinnern, ohne nachzusehen, ist anstrengender als '
+          'Lesen und dabei deutlich wirksamer. Die Anstrengung ist kein '
+          'Nebeneffekt, sondern **der Lernvorgang selbst**: Was mühsam '
+          'hervorgeholt wird, liegt danach näher an der Oberfläche.\n\n'
+          '==Abrufen ist anstrengender als Lesen — und wirksamer.==',
     ),
     LessonSection(
       heading: 'Der beste Zeitpunkt ist kurz vor dem Vergessen',
-      body: 'Zu früh wiederholt ist verschwendete Mühe, zu spät ist neu '
-          'lernen. Am meisten bringt der Moment, in dem es gerade noch '
-          'geht — deshalb werden die Abstände mit jeder gelungenen '
-          'Wiederholung länger.',
+      body:
+          'Zu früh wiederholt ist verschwendete Mühe, zu spät ist neu lernen. '
+          'Am meisten bringt der Moment, in dem es **gerade noch geht** — '
+          'deshalb werden die Abstände mit jeder gelungenen Wiederholung '
+          'länger.',
     ),
   ],
   questions: <Question>[
@@ -284,25 +301,29 @@ const Lesson psychologiePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Erleben und Verhalten',
-      body: 'Psychologie ist die Wissenschaft vom Erleben und Verhalten des '
-          'Menschen. Erleben ist, was innen passiert — Gedanken, Gefühle, '
+      body:
+          'Psychologie ist die Wissenschaft vom **Erleben** und **Verhalten** '
+          'des Menschen. Erleben ist, was innen passiert — Gedanken, Gefühle, '
           'Wahrnehmung. Verhalten ist, was man von außen sehen kann. '
           'Interessant wird es dort, wo beides auseinanderfällt.',
     ),
     LessonSection(
       heading: 'Der eigene Eindruck ist kein Messgerät',
-      body: 'Menschen sind erstaunlich schlecht darin, die Ursachen ihres '
+      body:
+          'Menschen sind **erstaunlich schlecht** darin, die Ursachen ihres '
           'eigenen Verhaltens zu benennen. Hinterher findet sich fast immer '
           'eine Begründung, die plausibel klingt — auch wenn in Wahrheit '
           'etwas anderes gewirkt hat. Deshalb beobachtet und misst die '
-          'Psychologie, statt nur zu fragen.',
+          'Psychologie, statt nur zu fragen.\n\n'
+          '==Der eigene Eindruck ist kein Messgerät.==',
     ),
     LessonSection(
       heading: 'Anlage, Umfeld und Übung',
-      body: 'Warum jemand ist, wie er ist, hat selten nur eine Ursache. Die '
+      body:
+          'Warum jemand ist, wie er ist, hat selten nur eine Ursache. Die '
           'Veranlagung steckt einen Rahmen ab, Umfeld und Erfahrungen '
           'bestimmen, wo man darin landet. Am leichtesten ändern lässt sich '
-          'der Teil, den man täglich wiederholt — genau dort setzen '
+          'der Teil, **den man täglich wiederholt** — genau dort setzen '
           'Gewohnheiten an.',
     ),
   ],

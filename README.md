@@ -54,7 +54,7 @@ cd packages/gear
 dart test                          # 118 Tests, prüft Preise, Sets, Würfel, Laden und Beute
 
 cd packages/theory
-dart test                          # 203 Tests, prüft auch den Inhalt
+dart test                          # 204 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 25 Tests, nur noch der Wortlaut
@@ -83,7 +83,7 @@ Danach `flutter doctor` bis alles grün ist.
 | Pfad | Inhalt | Tests |
 |---|---|---|
 | `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube | 331 |
-| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 203 |
+| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 204 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve | 44 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte | 333 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute | 118 |

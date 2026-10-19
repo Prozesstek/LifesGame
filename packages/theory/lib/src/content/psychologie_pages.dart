@@ -18,26 +18,30 @@ const Lesson aschPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Drei Linien',
-      body: 'In den 1950er-Jahren ließ Solomon Asch Versuchspersonen eine '
-          'einfache Frage beantworten: Welche von drei Linien ist so lang '
-          'wie eine vierte? Die Antwort war offensichtlich. Die anderen im '
-          'Raum waren aber eingeweiht und nannten in manchen Runden '
-          'einstimmig eine falsche Linie.',
+      body:
+          'In den 1950er-Jahren ließ Solomon Asch Versuchspersonen eine '
+          'einfache Frage beantworten: Welche von drei Linien ist so lang wie '
+          'eine vierte? Die Antwort war offensichtlich. Die anderen im Raum '
+          'waren aber **eingeweiht** und nannten in manchen Runden einstimmig '
+          'eine falsche Linie.',
     ),
     LessonSection(
       heading: 'Was geschah',
-      body: 'In etwa einem Drittel dieser Runden schloss sich die '
-          'Versuchsperson der falschen Mehrheit an, und rund drei von vier '
-          'taten es mindestens einmal. Viele sagten hinterher, sie hätten '
-          'gezweifelt, aber nicht auffallen wollen. Der Druck einer Gruppe '
-          'wirkt auch dann, wenn niemand ihn ausspricht.',
+      body:
+          'In **etwa einem Drittel** dieser Runden schloss sich die '
+          'Versuchsperson der falschen Mehrheit an, und **rund drei von '
+          'vier** taten es mindestens einmal. Viele sagten hinterher, sie '
+          'hätten gezweifelt, aber nicht auffallen wollen. Der Druck einer '
+          'Gruppe wirkt auch dann, wenn niemand ihn ausspricht.',
     ),
     LessonSection(
       heading: 'Ein Verbündeter genügt',
-      body: 'Sobald eine einzige andere Person die richtige Antwort gab, '
+      body:
+          'Sobald **eine einzige andere Person** die richtige Antwort gab, '
           'brach die Anpassung stark ein. Für den Alltag heißt das: Wer in '
           'einer Runde als Erster widerspricht, macht es allen anderen '
-          'leichter. Und wer selbst zweifelt, ist selten der Einzige.',
+          'leichter. Und wer selbst zweifelt, ist selten der Einzige.\n\n'
+          '==Wer als Erster widerspricht, macht es allen anderen leichter.==',
     ),
   ],
   questions: <Question>[
@@ -88,26 +92,30 @@ const Lesson milgramPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der Versuch',
-      body: 'Stanley Milgram ließ Anfang der 1960er-Jahre Versuchspersonen '
+      body:
+          'Stanley Milgram ließ Anfang der 1960er-Jahre Versuchspersonen '
           'einem anderen Menschen scheinbar Stromstöße geben, die mit jeder '
           'falschen Antwort stärker wurden. Der „Schüler" war ein '
           'Schauspieler und bekam keinen Strom, aber er schrie und '
           'protestierte. Ein Versuchsleiter im Kittel sagte nur ruhig: '
-          '„Bitte fahren Sie fort."',
+          '„**Bitte fahren Sie fort**."',
     ),
     LessonSection(
       heading: 'Das Ergebnis',
-      body: 'In der bekanntesten Fassung gingen rund zwei Drittel bis zur '
+      body:
+          'In der bekanntesten Fassung gingen **rund zwei Drittel** bis zur '
           'höchsten Stufe. Die meisten waren dabei sichtlich gequält und '
           'protestierten — und machten trotzdem weiter. Böse Absicht war '
           'selten das Problem, sondern das Gefühl, die Verantwortung liege '
-          'bei jemand anderem.',
+          'bei jemand anderem.\n\n'
+          '==Nicht böse Absicht, sondern abgegebene Verantwortung.==',
     ),
     LessonSection(
       heading: 'Was die Varianten zeigen',
-      body: 'Milgram veränderte den Aufbau vielfach. Saß das Opfer im selben '
+      body:
+          'Milgram veränderte den Aufbau vielfach. Saß das Opfer im selben '
           'Raum, oder gab der Versuchsleiter Anweisungen nur per Telefon, '
-          'sank der Gehorsam deutlich. Weigerten sich andere Teilnehmer, '
+          '**sank der Gehorsam deutlich**. Weigerten sich andere Teilnehmer, '
           'weigerten sich viele mit. Heute gilt der Versuch als ethisch '
           'grenzwertig — die Frage, die er stellt, ist geblieben.',
     ),
@@ -158,26 +166,30 @@ const Lesson bystanderPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Verantwortung verteilt sich',
-      body: 'In Versuchen von Darley und Latané Ende der 1960er-Jahre halfen '
+      body:
+          'In Versuchen von Darley und Latané Ende der 1960er-Jahre halfen '
           'Menschen einem scheinbar Kranken seltener und später, je mehr '
           'andere mutmaßlich zuhörten. Die Erklärung: Mit jedem weiteren '
-          'Zeugen fühlt sich jeder Einzelne weniger zuständig. Man nennt '
-          'das Verantwortungsdiffusion.',
+          'Zeugen fühlt sich jeder Einzelne weniger zuständig. Man nennt das '
+          '**Verantwortungsdiffusion**.',
     ),
     LessonSection(
       heading: 'Eine Legende weniger',
-      body: 'Oft wird dazu der Fall von Kitty Genovese erzählt, bei dem 38 '
-          'Nachbarn tatenlos zugesehen haben sollen. Diese Zahl hat sich '
-          'als stark übertrieben erwiesen. Und Auswertungen echter '
-          'Aufnahmen von Konflikten auf der Straße zeigen: Meist greift '
-          'doch jemand ein, und in größeren Gruppen sogar eher.',
+      body:
+          'Oft wird dazu der Fall von Kitty Genovese erzählt, bei dem 38 '
+          'Nachbarn tatenlos zugesehen haben sollen. Diese Zahl hat sich als '
+          '**stark übertrieben** erwiesen. Und Auswertungen echter Aufnahmen '
+          'von Konflikten auf der Straße zeigen: Meist greift doch jemand '
+          'ein, und in größeren Gruppen sogar eher.',
     ),
     LessonSection(
       heading: 'Was hilft',
-      body: 'Wer Hilfe braucht, spricht am besten eine Person direkt an: „Sie '
-          'in der blauen Jacke, rufen Sie bitte den Notruf." Damit ist die '
-          'Zuständigkeit geklärt. Und wer zusieht, kann sich fragen, ob '
-          'wirklich schon jemand hilft, oder ob nur alle darauf warten.',
+      body:
+          'Wer Hilfe braucht, spricht am besten **eine Person direkt an**: '
+          '„Sie in der blauen Jacke, rufen Sie bitte den Notruf." Damit ist '
+          'die Zuständigkeit geklärt. Und wer zusieht, kann sich fragen, ob '
+          'wirklich schon jemand hilft, oder ob nur alle darauf warten.\n\n'
+          '==Wer Hilfe braucht, spricht eine Person direkt an.==',
     ),
   ],
   questions: <Question>[
@@ -226,25 +238,29 @@ const Lesson gedaechtnisPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ein Wort verändert den Unfall',
-      body: 'Elizabeth Loftus zeigte Versuchspersonen in den 1970er-Jahren '
+      body:
+          'Elizabeth Loftus zeigte Versuchspersonen in den 1970er-Jahren '
           'Filme von Autounfällen. Fragte man, wie schnell die Autos waren, '
           'als sie „ineinanderkrachten", schätzten die Leute höher als bei '
           '„zusammenstießen". Eine Woche später erinnerten sich mehr von '
-          'ihnen an zerbrochenes Glas — das es im Film nicht gab.',
+          'ihnen an **zerbrochenes Glas** — das es im Film nicht gab.',
     ),
     LessonSection(
       heading: 'Erinnern heißt neu bauen',
-      body: 'Das Gedächtnis speichert keine Aufnahme, die man später abspielt. '
-          'Es speichert Bruchstücke und setzt sie beim Erinnern neu '
-          'zusammen, ergänzt um das, was plausibel scheint. Jedes Erinnern '
-          'kann die Erinnerung dabei ein wenig verändern.',
+      body:
+          'Das Gedächtnis speichert **keine Aufnahme**, die man später '
+          'abspielt. Es speichert Bruchstücke und setzt sie beim Erinnern '
+          '**neu zusammen**, ergänzt um das, was plausibel scheint. Jedes '
+          'Erinnern kann die Erinnerung dabei ein wenig verändern.\n\n'
+          '==Erinnern heißt neu bauen, nicht abspielen.==',
     ),
     LessonSection(
       heading: 'Was daraus folgt',
-      body: 'Sich sicher zu fühlen, heißt nicht, recht zu haben. Das zeigt '
+      body:
+          'Sich sicher zu fühlen, **heißt nicht, recht zu haben**. Das zeigt '
           'sich vor Gericht, wo Zeugenaussagen falsch sein können, obwohl '
-          'niemand lügt, und im Streit darüber, wer was gesagt hat. Wer '
-          'etwas Wichtiges behalten will, schreibt es früh auf.',
+          'niemand lügt, und im Streit darüber, wer was gesagt hat. Wer etwas '
+          'Wichtiges behalten will, schreibt es früh auf.',
     ),
   ],
   questions: <Question>[
@@ -295,25 +311,30 @@ const Lesson emotionenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Gefühle sind Signale',
-      body: 'Angst, Wut oder Trauer sind keine Fehler, sondern Hinweise: Etwas '
-          'ist wichtig, bedrohlich oder verloren. Regulieren heißt nicht, '
-          'sie abzuschalten, sondern zu beeinflussen, wie stark sie werden '
-          'und was man daraufhin tut.',
+      body:
+          'Angst, Wut oder Trauer sind **keine Fehler, sondern Hinweise**: '
+          'Etwas ist wichtig, bedrohlich oder verloren. Regulieren heißt '
+          'nicht, sie abzuschalten, sondern zu beeinflussen, wie stark sie '
+          'werden und was man daraufhin tut.',
     ),
     LessonSection(
       heading: 'Umdeuten statt Unterdrücken',
-      body: 'Die Forschung von James Gross unterscheidet zwei Wege. Wer ein '
-          'Gefühl nur unterdrückt, zeigt es nach außen weniger, fühlt es '
+      body:
+          'Die Forschung von James Gross unterscheidet zwei Wege. Wer ein '
+          'Gefühl nur **unterdrückt**, zeigt es nach außen weniger, fühlt es '
           'aber kaum schwächer und ist hinterher oft erschöpfter. Wer die '
-          'Lage umdeutet — „die Prüfung ist eine Gelegenheit, nicht ein '
-          'Urteil" —, fühlt tatsächlich anders.',
+          'Lage **umdeutet** — „die Prüfung ist eine Gelegenheit, nicht ein '
+          'Urteil" —, fühlt tatsächlich anders.\n\n'
+          '==Umdeuten verändert das Gefühl, Unterdrücken nur seinen '
+          'Ausdruck.==',
     ),
     LessonSection(
       heading: 'Benennen hilft',
-      body: 'Schon das Gefühl in Worte zu fassen, „ich bin gerade wütend", '
-          'dämpft es messbar. Wer genauer benennen kann, als nur „schlecht", '
-          'hat mehr Möglichkeiten, damit umzugehen: Enttäuschung verlangt '
-          'etwas anderes als Erschöpfung.',
+      body:
+          'Schon das Gefühl in Worte zu fassen, „ich bin gerade wütend", '
+          '**dämpft es messbar**. Wer genauer benennen kann, als nur '
+          '„schlecht", hat mehr Möglichkeiten, damit umzugehen: Enttäuschung '
+          'verlangt etwas anderes als Erschöpfung.',
     ),
   ],
   questions: <Question>[

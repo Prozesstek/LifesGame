@@ -17,22 +17,26 @@ const Lesson ausdauerPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ausdauer ist Versorgung',
-      body: 'Ausdauer heißt, eine Belastung lange durchzuhalten. Dafür müssen '
-          'Herz, Lunge und Blutgefäße die Muskeln laufend mit Sauerstoff '
-          'versorgen, und die Muskeln müssen ihn verwerten können. Beides '
-          'lässt sich trainieren — erstaunlich schnell, und in jedem Alter.',
+      body:
+          'Ausdauer heißt, eine Belastung lange durchzuhalten. Dafür müssen '
+          'Herz, Lunge und Blutgefäße die Muskeln laufend **mit Sauerstoff '
+          'versorgen**, und die Muskeln müssen ihn verwerten können. Beides '
+          'lässt sich trainieren — erstaunlich schnell, und in jedem Alter.\n\n'
+          '==Ausdauer lässt sich trainieren — schnell, und in jedem Alter.==',
     ),
     LessonSection(
       heading: 'Mehr als Sport',
-      body: 'Gute Ausdauer zeigt sich nicht nur beim Laufen. Treppen, Tragen, '
+      body:
+          'Gute Ausdauer zeigt sich nicht nur beim Laufen. Treppen, Tragen, '
           'ein langer Tag auf den Beinen werden leichter. Und kaum eine '
-          'einzelne Größe hängt so deutlich mit einem langen, gesunden Leben '
-          'zusammen wie die Ausdauerfähigkeit.',
+          'einzelne Größe hängt so deutlich mit einem **langen, gesunden '
+          'Leben** zusammen wie die Ausdauerfähigkeit.',
     ),
     LessonSection(
       heading: 'Worum es hier geht',
-      body: 'In diesem Gebiet geht es darum, wie das Herz arbeitet, was die '
-          'Obergrenze der Ausdauer bestimmt, warum lockeres Training so '
+      body:
+          'In diesem Gebiet geht es darum, wie das Herz arbeitet, was die '
+          'Obergrenze der Ausdauer bestimmt, warum **lockeres Training** so '
           'wichtig ist, wofür harte Intervalle gut sind und woher der Körper '
           'seine Energie nimmt.',
     ),
@@ -83,23 +87,28 @@ const Lesson herzPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Was der Puls misst',
-      body: 'Der Puls zählt, wie oft das Herz in der Minute schlägt. Bei '
-          'Belastung steigt er, weil die Muskeln mehr Blut brauchen. Ein '
+      body:
+          'Der Puls zählt, wie oft das Herz in der Minute schlägt. Bei '
+          'Belastung steigt er, weil die Muskeln **mehr Blut** brauchen. Ein '
           'trainiertes Herz pumpt mit jedem Schlag mehr Blut und kommt '
           'deshalb für dieselbe Arbeit mit weniger Schlägen aus.',
     ),
     LessonSection(
       heading: 'Der Ruhepuls',
-      body: 'In Ruhe liegt der Puls bei Erwachsenen meist zwischen 60 und 100 '
-          'Schlägen. Ausdauertrainierte liegen oft darunter. Morgens nach '
+      body:
+          'In Ruhe liegt der Puls bei Erwachsenen meist **zwischen 60 und 100 '
+          'Schlägen**. Ausdauertrainierte liegen oft darunter. Morgens nach '
           'dem Aufwachen gemessen, ist er ein einfacher Hinweis auf den '
           'Trainingsstand — und ein ungewohnt hoher Wert manchmal ein '
-          'Zeichen, dass der Körper noch mit Erholung beschäftigt ist.',
+          'Zeichen, dass der Körper noch mit Erholung beschäftigt ist.\n\n'
+          '==Ein trainiertes Herz schafft dieselbe Arbeit mit weniger '
+          'Schlägen.==',
     ),
     LessonSection(
       heading: 'Der Maximalpuls',
-      body: 'Nach oben hat der Puls eine Grenze, die mit dem Alter sinkt. Die '
-          'Faustregel „220 minus Alter" ist nur eine grobe Schätzung; '
+      body:
+          'Nach oben hat der Puls eine Grenze, die mit dem Alter sinkt. Die '
+          'Faustregel „220 minus Alter" ist **nur eine grobe Schätzung**; '
           'einzelne Menschen liegen deutlich darüber oder darunter. Anders '
           'als der Ruhepuls lässt sich der Maximalpuls durch Training kaum '
           'verändern.',
@@ -153,26 +162,30 @@ const Lesson vo2maxPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Was die Zahl bedeutet',
-      body: 'VO₂max ist die größte Menge Sauerstoff, die der Körper bei voller '
+      body:
+          'VO₂max ist die größte Menge Sauerstoff, die der Körper bei voller '
           'Anstrengung pro Minute aufnehmen und verwerten kann, meist '
           'angegeben je Kilogramm Körpergewicht. Sie ist so etwas wie der '
-          'Hubraum der Ausdauer: Sie legt fest, wie viel Leistung aus dem '
+          '**Hubraum der Ausdauer**: Sie legt fest, wie viel Leistung aus dem '
           'Sauerstoff höchstens herauszuholen ist.',
     ),
     LessonSection(
       heading: 'Sie lässt sich trainieren',
-      body: 'Ein Teil der VO₂max ist angeboren. Untrainierte verbessern sie '
-          'durch regelmäßiges Ausdauertraining aber oft deutlich, vor allem '
-          'in den ersten Monaten. Mit dem Alter sinkt sie langsam — bei '
+      body:
+          'Ein Teil der VO₂max ist angeboren. Untrainierte verbessern sie '
+          'durch regelmäßiges Ausdauertraining aber **oft deutlich**, vor '
+          'allem in den ersten Monaten. Mit dem Alter sinkt sie langsam — bei '
           'Menschen, die trainieren, spürbar langsamer.',
     ),
     LessonSection(
       heading: 'Warum sie mehr als Sport ist',
-      body: 'Eine höhere VO₂max hängt in großen Studien eng mit einem '
-          'geringeren Sterberisiko zusammen, und zwar stärker als viele '
+      body:
+          'Eine höhere VO₂max hängt in großen Studien eng mit einem '
+          '**geringeren Sterberisiko** zusammen, und zwar stärker als viele '
           'bekannte Risikofaktoren. Der größte Gewinn liegt dabei nicht bei '
-          'Spitzensportlern, sondern bei denen, die von sehr wenig auf '
-          'etwas mehr kommen.',
+          'Spitzensportlern, sondern bei denen, die von sehr wenig auf etwas '
+          'mehr kommen.\n\n'
+          '==Am meisten gewinnt, wer von sehr wenig auf etwas mehr kommt.==',
     ),
   ],
   questions: <Question>[
@@ -223,23 +236,27 @@ const Lesson grundlagePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Das Fundament',
-      body: 'Grundlagenausdauer entsteht vor allem durch lange, ruhige '
-          'Einheiten. Dabei passen sich Herz, Gefäße und Muskeln an: mehr '
+      body:
+          'Grundlagenausdauer entsteht vor allem durch **lange, ruhige '
+          'Einheiten**. Dabei passen sich Herz, Gefäße und Muskeln an: mehr '
           'kleine Blutgefäße, mehr Kraftwerke in den Zellen, bessere '
           'Fettverbrennung. Das ist nicht spektakulär, aber es trägt alles '
           'andere.',
     ),
     LessonSection(
       heading: 'Woran man das Tempo erkennt',
-      body: 'Ein einfacher Test: Im lockeren Bereich kann man noch in ganzen '
-          'Sätzen sprechen, auch wenn man merkt, dass man sich bewegt. Wer '
+      body:
+          'Ein einfacher Test: Im lockeren Bereich kann man noch **in ganzen '
+          'Sätzen sprechen**, auch wenn man merkt, dass man sich bewegt. Wer '
           'nur noch einzelne Wörter herausbekommt, ist zu schnell. Viele '
-          'laufen ihre ruhigen Einheiten zu hart und ihre harten zu weich.',
+          'laufen ihre ruhigen Einheiten zu hart und ihre harten zu weich.\n\n'
+          '==Wer noch in ganzen Sätzen sprechen kann, ist locker genug.==',
     ),
     LessonSection(
       heading: 'Viel leicht, wenig hart',
-      body: 'Ausdauersportler verbringen meist den größten Teil ihrer '
-          'Trainingszeit, oft um die achtzig Prozent, in diesem lockeren '
+      body:
+          'Ausdauersportler verbringen meist den größten Teil ihrer '
+          'Trainingszeit, oft um die **achtzig Prozent**, in diesem lockeren '
           'Bereich. Das ist kein Zeichen von Bequemlichkeit: Nur so bleibt '
           'genug Erholung übrig, um die wenigen harten Einheiten wirklich '
           'hart zu machen.',
@@ -292,26 +309,31 @@ const Lesson intervallPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Hart, Pause, hart',
-      body: 'Beim Intervalltraining wechseln sich harte Abschnitte und Pausen '
-          'ab, etwa viermal vier Minuten zügig mit jeweils drei Minuten '
-          'lockerem Traben dazwischen. Die Pausen erlauben es, insgesamt '
-          'länger in einem hohen Bereich zu arbeiten, als man es am Stück '
-          'schaffen würde.',
+      body:
+          'Beim Intervalltraining wechseln sich **harte Abschnitte und '
+          'Pausen** ab, etwa viermal vier Minuten zügig mit jeweils drei '
+          'Minuten lockerem Traben dazwischen. Die Pausen erlauben es, '
+          'insgesamt länger in einem hohen Bereich zu arbeiten, als man es am '
+          'Stück schaffen würde.',
     ),
     LessonSection(
       heading: 'Wofür es gut ist',
-      body: 'Intervalle heben besonders wirksam die VO₂max, also die '
+      body:
+          'Intervalle heben besonders wirksam die **VO₂max**, also die '
           'Obergrenze der Ausdauer. Sie sind zeitsparend: Eine halbe Stunde '
           'mit Intervallen fordert den Körper stärker als eine Stunde '
           'gemütliches Laufen. Sie ersetzen die lockeren Einheiten aber '
-          'nicht, sie ergänzen sie.',
+          'nicht, sie ergänzen sie.\n\n'
+          '==Intervalle ergänzen die lockeren Einheiten, sie ersetzen sie '
+          'nicht.==',
     ),
     LessonSection(
       heading: 'Wie oft',
-      body: 'Harte Intervalle kosten viel Erholung. Ein bis zwei solcher '
+      body:
+          'Harte Intervalle kosten viel Erholung. **Ein bis zwei** solcher '
           'Einheiten pro Woche reichen den meisten; mehr führt schnell dazu, '
-          'dass alle Einheiten mittelmäßig werden. Wer neu anfängt, baut '
-          'erst ein paar Wochen Grundlage auf.',
+          'dass alle Einheiten mittelmäßig werden. Wer neu anfängt, baut erst '
+          'ein paar Wochen Grundlage auf.',
     ),
   ],
   questions: <Question>[
@@ -362,26 +384,30 @@ const Lesson energiePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die eine Währung',
-      body: 'Jede Muskelbewegung wird mit ATP bezahlt, einem Molekül, das '
-          'Energie kurzfristig speichert. Davon hat der Muskel nur für '
-          'wenige Sekunden Vorrat. Alles, was länger dauert, hängt daran, '
-          'wie schnell der Körper ATP nachproduzieren kann.',
+      body:
+          'Jede Muskelbewegung wird mit **ATP** bezahlt, einem Molekül, das '
+          'Energie kurzfristig speichert. Davon hat der Muskel nur für wenige '
+          'Sekunden Vorrat. Alles, was länger dauert, hängt daran, wie '
+          'schnell der Körper ATP nachproduzieren kann.',
     ),
     LessonSection(
       heading: 'Mit und ohne Sauerstoff',
-      body: 'Ohne Sauerstoff, anaerob, geht die Nachproduktion schnell, '
+      body:
+          '**Ohne Sauerstoff**, anaerob, geht die Nachproduktion schnell, '
           'reicht aber nur für kurze, harte Belastungen wie einen Sprint. '
-          'Mit Sauerstoff, aerob, ist sie langsamer, kann dafür aber '
+          '**Mit Sauerstoff**, aerob, ist sie langsamer, kann dafür aber '
           'stundenlang laufen, aus Kohlenhydraten und Fett. Die meisten '
           'Belastungen nutzen beide Wege, nur in anderem Verhältnis.',
     ),
     LessonSection(
       heading: 'Laktat ist nicht der Feind',
-      body: 'Bei harter Belastung entsteht vermehrt Laktat. Es ist kein '
-          'Abfall, sondern wird weiterverwertet, auch als Brennstoff, und '
+      body:
+          'Bei harter Belastung entsteht vermehrt Laktat. Es ist **kein '
+          'Abfall**, sondern wird weiterverwertet, auch als Brennstoff, und '
           'ist nach einer Belastung meist innerhalb von etwa einer Stunde '
           'wieder abgebaut. Mit dem Muskelkater der nächsten Tage hat es '
-          'deshalb nichts zu tun.',
+          'deshalb nichts zu tun.\n\n'
+          '==Laktat ist Brennstoff — mit Muskelkater hat es nichts zu tun.==',
     ),
   ],
   questions: <Question>[

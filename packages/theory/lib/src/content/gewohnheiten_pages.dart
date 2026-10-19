@@ -22,26 +22,31 @@ const Lesson gewohnheitenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der größte Teil läuft von allein',
-      body: 'Ein großer Teil dessen, was du an einem Tag tust, ist nicht '
-          'entschieden, sondern gewohnt: der Griff zum Handy nach dem '
+      body:
+          'Ein großer Teil dessen, was du an einem Tag tust, ist **nicht '
+          'entschieden, sondern gewohnt**: der Griff zum Handy nach dem '
           'Aufwachen, der Weg in die Küche, das Getränk zum Essen. '
-          'Gewohnheiten sind die Handlungen, die das Gehirn so oft '
-          'wiederholt hat, dass es nicht mehr nachdenken muss.',
+          'Gewohnheiten sind die Handlungen, die das Gehirn so oft wiederholt '
+          'hat, dass es nicht mehr nachdenken muss.',
     ),
     LessonSection(
       heading: 'Kleine Schritte summieren sich',
-      body: 'Eine einzelne Wiederholung ändert fast nichts. Ein Prozent '
-          'besser an einem Tag sieht man nicht. Über ein Jahr aber wird '
-          'aus vielen unsichtbaren Schritten ein sichtbarer Unterschied — '
-          'in beide Richtungen. Deshalb lohnt es sich, auf die kleinen, '
-          'täglichen Dinge zu achten statt auf den großen Vorsatz.',
+      body:
+          'Eine einzelne Wiederholung ändert fast nichts. **Ein Prozent '
+          'besser** an einem Tag sieht man nicht. Über ein Jahr aber wird aus '
+          'vielen unsichtbaren Schritten ein sichtbarer Unterschied — in '
+          'beide Richtungen. Deshalb lohnt es sich, auf die kleinen, '
+          'täglichen Dinge zu achten statt auf den großen Vorsatz.\n\n'
+          '==Aus vielen unsichtbaren Schritten wird ein sichtbarer '
+          'Unterschied.==',
     ),
     LessonSection(
       heading: 'Worum es hier geht',
-      body: 'Jede Gewohnheit läuft in einer Schleife: Auslöser, Routine, '
-          'Belohnung. Die Seiten unter diesem Kapitel zeigen sie und '
-          'fragen, an welchen Stellen der Schleife man eingreifen kann — '
-          'und wie das im eigenen Alltag aussieht, in der eigenen Wohnung.',
+      body:
+          'Jede Gewohnheit läuft in einer Schleife: **Auslöser, Routine, '
+          'Belohnung**. Die Seiten unter diesem Kapitel zeigen sie und '
+          'fragen, an welchen Stellen der Schleife man eingreifen kann — und '
+          'wie das im eigenen Alltag aussieht, in der eigenen Wohnung.',
     ),
   ],
   questions: <Question>[
@@ -95,26 +100,31 @@ const Lesson vierRegelnPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Vier Stellen, vier Hebel',
-      body: 'James Clear teilt die Schleife in vier Schritte: Auslöser, '
-          'Verlangen, Reaktion, Belohnung. Zu jedem gehört eine Regel. '
-          'Mach es offensichtlich — damit der Auslöser auffällt. Mach es '
-          'attraktiv — damit du es willst. Mach es einfach — damit das '
-          'Tun wenig kostet. Mach es befriedigend — damit du wiederkommst.',
+      body:
+          'James Clear teilt die Schleife in vier Schritte: Auslöser, '
+          'Verlangen, Reaktion, Belohnung. Zu jedem gehört eine Regel. **Mach '
+          'es offensichtlich** — damit der Auslöser auffällt. **Mach es '
+          'attraktiv** — damit du es willst. **Mach es einfach** — damit das '
+          'Tun wenig kostet. **Mach es befriedigend** — damit du '
+          'wiederkommst.',
     ),
     LessonSection(
       heading: 'Umgedreht gegen schlechte Gewohnheiten',
-      body: 'Dieselben Regeln funktionieren rückwärts. Was du loswerden '
-          'willst, machst du unsichtbar, unattraktiv, schwierig und '
-          'unbefriedigend. Wer weniger Süßes essen will, kauft es nicht '
-          'ein — dann steht es nicht im Schrank, und die Frage, ob man '
+      body:
+          'Dieselben Regeln funktionieren rückwärts. Was du loswerden willst, '
+          'machst du **unsichtbar, unattraktiv, schwierig und '
+          'unbefriedigend**. Wer weniger Süßes essen will, kauft es nicht ein '
+          '— dann steht es nicht im Schrank, und die Frage, ob man '
           'widersteht, stellt sich gar nicht erst.',
     ),
     LessonSection(
       heading: 'Nicht mehr Willenskraft, sondern bessere Umstände',
-      body: 'Keine der vier Regeln verlangt, dass du dich mehr '
-          'zusammenreißt. Sie alle verändern die Lage, in der du '
-          'entscheidest. Das ist der Kern: Wer seine Umstände gestaltet, '
-          'braucht im entscheidenden Moment weniger Disziplin.',
+      body:
+          'Keine der vier Regeln verlangt, dass du dich mehr zusammenreißt. '
+          'Sie alle **verändern die Lage**, in der du entscheidest. Das ist '
+          'der Kern: Wer seine Umstände gestaltet, braucht im entscheidenden '
+          'Moment weniger Disziplin.\n\n'
+          '==Wer seine Umstände gestaltet, braucht weniger Disziplin.==',
     ),
   ],
   questions: <Question>[
@@ -168,29 +178,34 @@ const Lesson offensichtlichPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Was du siehst, entscheidet mit',
-      body: 'In einer Krankenhauskantine in Boston stellte die Ärztin Anne '
+      body:
+          'In einer Krankenhauskantine in Boston stellte die Ärztin Anne '
           'Thorndike Wasserflaschen zusätzlich in Kühlschränke neben die '
-          'Kassen und in Körbe überall im Raum. Sonst änderte sich '
-          'nichts. In den Monaten danach wurde deutlich mehr Wasser '
-          'gekauft und weniger Limonade. Niemand hatte sich vorgenommen, '
-          'gesünder zu trinken — das Wasser stand einfach da.',
+          'Kassen und in Körbe überall im Raum. Sonst änderte sich nichts. In '
+          'den Monaten danach wurde deutlich mehr Wasser gekauft und weniger '
+          'Limonade. Niemand hatte sich vorgenommen, gesünder zu trinken — '
+          '**das Wasser stand einfach da**.',
     ),
     LessonSection(
       heading: 'Die Wohnung umstellen',
-      body: 'Dasselbe geht zu Hause. Eine volle Wasserflasche auf dem '
+      body:
+          'Dasselbe geht zu Hause. Eine volle Wasserflasche auf dem '
           'Schreibtisch wird öfter getrunken als eine im Schrank. Gemüse '
-          'vorne im Kühlschrank auf Augenhöhe wird eher gegessen als das '
-          'in der Schublade unten. Das Buch auf dem Kopfkissen wird eher '
-          'gelesen als das im Regal. Der Auslöser ist dann nicht ein '
-          'Vorsatz, sondern ein Gegenstand, an dem du vorbeikommst.',
+          'vorne im Kühlschrank auf Augenhöhe wird eher gegessen als das in '
+          'der Schublade unten. Das Buch auf dem Kopfkissen wird eher gelesen '
+          'als das im Regal. Der Auslöser ist dann nicht ein Vorsatz, sondern '
+          '**ein Gegenstand, an dem du vorbeikommst**.\n\n'
+          '==Der Auslöser ist kein Vorsatz, sondern ein Gegenstand, an dem du '
+          'vorbeikommst.==',
     ),
     LessonSection(
       heading: 'Ein Ort, eine Sache — und das Gegenteil verstecken',
-      body: 'Hilfreich ist, wenn ein Platz für eine Sache steht: der Stuhl '
-          'am Fenster zum Lesen, der Tisch zum Arbeiten. Und umgekehrt: '
-          'Was du seltener tun willst, räumst du aus dem Blick. Das Handy '
-          'in einem anderen Zimmer, die Süßigkeiten hinten im Schrank. '
-          'Kleine Umstellungen, die jeden Tag von selbst wirken.',
+      body:
+          'Hilfreich ist, wenn ein Platz für eine Sache steht: der Stuhl am '
+          'Fenster zum Lesen, der Tisch zum Arbeiten. Und umgekehrt: Was du '
+          'seltener tun willst, räumst du **aus dem Blick**. Das Handy in '
+          'einem anderen Zimmer, die Süßigkeiten hinten im Schrank. Kleine '
+          'Umstellungen, die jeden Tag von selbst wirken.',
     ),
   ],
   questions: <Question>[
@@ -245,41 +260,45 @@ const Lesson attraktivPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die Vorfreude zieht, nicht die Belohnung',
-      body: 'Dopamin gilt als Botenstoff des Glücks, treibt aber vor allem '
-          'das Wollen an. Es steigt nicht erst, wenn die Belohnung da ist, '
-          'sondern schon, wenn sie sich ankündigt: beim Geruch des '
-          'Kaffees, beim Ton der Nachricht. Diese Erwartung bringt dich '
-          'in Bewegung. Eine Gewohnheit, auf die du dich freust, beginnst '
-          'du deshalb leichter als eine, die du nur für richtig hältst.',
+      body:
+          'Dopamin gilt als Botenstoff des Glücks, treibt aber vor allem '
+          '**das Wollen** an. Es steigt nicht erst, wenn die Belohnung da '
+          'ist, sondern schon, wenn sie sich ankündigt: beim Geruch des '
+          'Kaffees, beim Ton der Nachricht. Diese Erwartung bringt dich in '
+          'Bewegung. Eine Gewohnheit, auf die du dich freust, beginnst du '
+          'deshalb leichter als eine, die du nur für richtig hältst.\n\n'
+          '==Dopamin treibt das Wollen an — schon, wenn sich die Belohnung '
+          'ankündigt.==',
     ),
     LessonSection(
       heading: 'Das Versuchungsbündel',
-      body: 'Daraus folgt ein einfacher Griff: Verbinde, was du tun musst, '
-          'mit etwas, das du ohnehin willst. Die Lieblingsserie nur auf '
-          'dem Heimtrainer. Der Podcast nur beim Aufräumen. Zusammen mit '
-          'der Kopplung ergibt das einen ganzen Satz: Nach dem Frühstück '
-          'lese ich zwei Minuten — und danach gibt es den Kaffee. Die '
-          'Belohnung muss klein sein und sofort kommen. Ein Ausflug am '
-          'Wochenende zieht am Montagmorgen niemanden vom Sofa.',
+      body:
+          'Daraus folgt ein einfacher Griff: **Verbinde, was du tun musst, '
+          'mit etwas, das du ohnehin willst**. Die Lieblingsserie nur auf dem '
+          'Heimtrainer. Der Podcast nur beim Aufräumen. Zusammen mit der '
+          'Kopplung ergibt das einen ganzen Satz: Nach dem Frühstück lese ich '
+          'zwei Minuten — und danach gibt es den Kaffee. Die Belohnung muss '
+          '**klein sein und sofort kommen**. Ein Ausflug am Wochenende zieht '
+          'am Montagmorgen niemanden vom Sofa.',
     ),
     LessonSection(
       heading: 'Die Menschen um dich herum',
-      body: 'Attraktiv ist auch, was die eigene Gruppe für normal hält. '
-          'Menschen übernehmen Gewohnheiten von denen, die ihnen nah '
-          'sind, von der Mehrheit und von denen, die sie bewundern. Wer '
-          'laufen will, hat es in einer Laufgruppe leichter als allein: '
-          'Dort ist Laufen nichts Besonderes, sondern das, was man eben '
-          'tut. Such dir Umgebungen, in denen dein Wunschverhalten der '
-          'Normalfall ist.',
+      body:
+          'Attraktiv ist auch, was die eigene Gruppe für normal hält. '
+          'Menschen übernehmen Gewohnheiten von denen, die ihnen nah sind, '
+          'von der Mehrheit und von denen, die sie bewundern. Wer laufen '
+          'will, hat es in einer Laufgruppe leichter als allein: Dort ist '
+          'Laufen nichts Besonderes, sondern das, was man eben tut. Such dir '
+          'Umgebungen, in denen dein Wunschverhalten **der Normalfall** ist.',
     ),
     LessonSection(
       heading: 'Umdeuten — und umdrehen',
-      body: 'Oft genügt ein anderes Wort. „Ich muss trainieren“ beschreibt '
+      body:
+          'Oft genügt **ein anderes Wort**. „Ich muss trainieren“ beschreibt '
           'eine Last, „ich darf trainieren“ eine Gelegenheit, und beides '
-          'meint dieselbe halbe Stunde. Gegen eine schlechte Gewohnheit '
-          'wirkt die Regel rückwärts: Mach sie unattraktiv. Führ dir vor '
-          'Augen, was sie dich kostet, statt was sie dir für den Moment '
-          'gibt.',
+          'meint dieselbe halbe Stunde. Gegen eine schlechte Gewohnheit wirkt '
+          'die Regel rückwärts: Mach sie unattraktiv. Führ dir vor Augen, was '
+          'sie dich kostet, statt was sie dir für den Moment gibt.',
     ),
   ],
   questions: <Question>[

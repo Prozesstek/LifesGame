@@ -17,24 +17,28 @@ const Lesson philosophiePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Fragen, die nicht verschwinden',
-      body: 'Was ist ein gutes Leben? Was darf ich tun? Woher weiß ich, dass '
+      body:
+          'Was ist ein gutes Leben? Was darf ich tun? Woher weiß ich, dass '
           'etwas wahr ist? Solche Fragen lassen sich nicht messen wie ein '
           'Puls. Philosophie ist der Versuch, sie trotzdem sorgfältig zu '
-          'beantworten — mit Gründen statt mit Bauchgefühl.',
+          'beantworten — **mit Gründen statt mit Bauchgefühl**.',
     ),
     LessonSection(
       heading: 'Werkzeug, kein Museum',
-      body: 'Vieles, was Denker vor über zweitausend Jahren schrieben, ist '
+      body:
+          'Vieles, was Denker vor über zweitausend Jahren schrieben, ist '
           'erstaunlich praktisch. Die Stoiker schrieben Anleitungen gegen '
           'Sorgen, Aristoteles über Gewohnheiten und Charakter. Wer sie '
-          'liest, bekommt keine fertigen Antworten, aber bessere Fragen.',
+          'liest, bekommt keine fertigen Antworten, aber **bessere Fragen**.\n\n'
+          '==Keine fertigen Antworten, aber bessere Fragen.==',
     ),
     LessonSection(
       heading: 'Worum es hier geht',
-      body: 'In diesem Gebiet geht es um den Stoizismus, um drei Arten, über '
-          'richtig und falsch nachzudenken, um typische Denkfehler in '
-          'Diskussionen, um Sokrates und seine Fragen und um die Frage '
-          'nach Freiheit und Sinn.',
+      body:
+          'In diesem Gebiet geht es um den **Stoizismus**, um drei Arten, '
+          'über richtig und falsch nachzudenken, um typische Denkfehler in '
+          'Diskussionen, um Sokrates und seine Fragen und um die Frage nach '
+          'Freiheit und Sinn.',
     ),
   ],
   questions: <Question>[
@@ -83,27 +87,32 @@ const Lesson stoizismusPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Die Unterscheidung',
-      body: 'Der Stoiker Epiktet, selbst einst ein Sklave, begann sein '
-          'Handbüchlein mit einem Gedanken: Manches liegt in unserer Macht, '
-          'anderes nicht. In unserer Macht sind unser Urteil, unsere '
+      body:
+          'Der Stoiker Epiktet, selbst einst ein Sklave, begann sein '
+          'Handbüchlein mit einem Gedanken: **Manches liegt in unserer Macht, '
+          'anderes nicht**. In unserer Macht sind unser Urteil, unsere '
           'Absichten, unser Handeln. Nicht in unserer Macht sind der Körper '
           'ganz, der Ruf, das Wetter, was andere tun.',
     ),
     LessonSection(
       heading: 'Warum das beruhigt',
-      body: 'Viel Ärger entsteht, weil wir uns an Dingen abarbeiten, die wir '
+      body:
+          'Viel Ärger entsteht, weil wir uns an Dingen abarbeiten, die wir '
           'nicht ändern können: am Stau, an einer Absage, an der Laune eines '
           'anderen. Die Stoiker empfehlen, die Kraft dorthin zu lenken, wo '
-          'sie etwas bewirkt — auf die eigene Reaktion. Das ist keine '
-          'Gleichgültigkeit, sondern Sparsamkeit mit Energie.',
+          'sie etwas bewirkt — **auf die eigene Reaktion**. Das ist keine '
+          'Gleichgültigkeit, sondern Sparsamkeit mit Energie.\n\n'
+          '==Lenk deine Kraft dorthin, wo sie etwas bewirkt: auf die eigene '
+          'Reaktion.==',
     ),
     LessonSection(
       heading: 'Ein Kaiser mit Notizbuch',
-      body: 'Mark Aurel, römischer Kaiser, schrieb im Feldlager Notizen an '
-          'sich selbst, die heute als „Selbstbetrachtungen" gelesen werden. Er '
+      body:
+          'Mark Aurel, römischer Kaiser, schrieb im Feldlager Notizen an sich '
+          'selbst, die heute als „Selbstbetrachtungen" gelesen werden. Er '
           'erinnerte sich darin immer wieder an dieselben Grundsätze. Auch '
           'für einen Kaiser war Gelassenheit also keine Eigenschaft, sondern '
-          'eine tägliche Übung.',
+          '**eine tägliche Übung**.',
     ),
   ],
   questions: <Question>[
@@ -153,25 +162,29 @@ const Lesson ethikPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Auf die Folgen schauen',
-      body: 'Der Utilitarismus, geprägt von Bentham und Mill, fragt: Welche '
+      body:
+          'Der **Utilitarismus**, geprägt von Bentham und Mill, fragt: Welche '
           'Handlung bringt insgesamt das meiste Wohl und das wenigste Leid? '
-          'Richtig ist, was die besten Folgen hat. Das ist klar und '
+          'Richtig ist, was **die besten Folgen** hat. Das ist klar und '
           'rechenbar — kann aber Einzelne opfern, wenn es der Summe dient.',
     ),
     LessonSection(
       heading: 'Auf die Pflicht schauen',
-      body: 'Immanuel Kant hielt dagegen: Manche Dinge darf man nicht tun, '
-          'egal was dabei herauskommt. Ein Grundsatz von ihm lautet sinngemäß: '
-          'Behandle Menschen nie bloß als Mittel, sondern immer auch als '
+      body:
+          'Immanuel Kant hielt dagegen: Manche Dinge darf man nicht tun, egal '
+          'was dabei herauskommt. Ein Grundsatz von ihm lautet sinngemäß: '
+          'Behandle Menschen **nie bloß als Mittel**, sondern immer auch als '
           'Zweck. Lügen ist dann falsch, selbst wenn es im Moment nützt.',
     ),
     LessonSection(
       heading: 'Auf den Menschen schauen',
-      body: 'Aristoteles fragt weniger „Was soll ich jetzt tun?" als „Was für '
-          'ein Mensch will ich werden?". Tugenden wie Mut entstehen durch '
+      body:
+          'Aristoteles fragt weniger „Was soll ich jetzt tun?" als „**Was für '
+          'ein Mensch will ich werden**?". Tugenden wie Mut entstehen durch '
           'Übung und liegen in der Mitte zwischen zwei Fehlern, beim Mut '
           'zwischen Feigheit und Tollkühnheit. Charakter ist bei ihm im '
-          'Grunde eine Sammlung von Gewohnheiten.',
+          'Grunde eine **Sammlung von Gewohnheiten**.\n\n'
+          '==Charakter ist eine Sammlung von Gewohnheiten.==',
     ),
   ],
   questions: <Question>[
@@ -221,8 +234,9 @@ const Lesson fehlschluessePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der Strohmann',
-      body: 'Statt das Argument des anderen anzugreifen, greift man eine '
-          'verzerrte, schwächere Fassung davon an. „Du willst weniger '
+      body:
+          'Statt das Argument des anderen anzugreifen, greift man eine '
+          '**verzerrte, schwächere Fassung** davon an. „Du willst weniger '
           'Fleisch essen? Also soll keiner mehr grillen dürfen." Der '
           'Strohmann fällt leicht um — nur hat ihn niemand aufgestellt. '
           'Gegenmittel: das Argument des anderen erst so gut wiedergeben, '
@@ -230,16 +244,20 @@ const Lesson fehlschluessePage = Lesson(
     ),
     LessonSection(
       heading: 'Der Angriff auf die Person',
-      body: 'Hier wird nicht die Aussage geprüft, sondern der, der sie macht: '
-          '„Du rauchst doch selbst, was weißt du schon über Gesundheit." '
-          'Ob jemand sich an seinen Rat hält, sagt nichts darüber, ob der '
-          'Rat stimmt. Ein Argument steht oder fällt mit seinen Gründen.',
+      body:
+          'Hier wird nicht die Aussage geprüft, sondern der, der sie macht: '
+          '„Du rauchst doch selbst, was weißt du schon über Gesundheit." Ob '
+          'jemand sich an seinen Rat hält, sagt nichts darüber, ob der Rat '
+          'stimmt. Ein Argument steht oder fällt **mit seinen Gründen**.\n\n'
+          '==Ein Argument steht oder fällt mit seinen Gründen, nicht mit der '
+          'Person.==',
     ),
     LessonSection(
       heading: 'Das falsche Dilemma',
-      body: 'Es werden nur zwei Möglichkeiten angeboten, obwohl es mehr gibt: '
+      body:
+          'Es werden nur zwei Möglichkeiten angeboten, obwohl es mehr gibt: '
           '„Entweder du trainierst jeden Tag, oder du kannst es gleich '
-          'lassen." Wer solche Sätze bemerkt, fragt nach dem Dritten. Oft '
+          'lassen." Wer solche Sätze bemerkt, fragt **nach dem Dritten**. Oft '
           'liegt die vernünftige Antwort genau dort.',
     ),
   ],
@@ -288,14 +306,16 @@ const Lesson sokratesPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ein Mann, der nichts aufschrieb',
-      body: 'Sokrates lebte im fünften Jahrhundert vor Christus in Athen und '
-          'hat selbst kein einziges Buch geschrieben. Was wir über ihn '
+      body:
+          'Sokrates lebte im fünften Jahrhundert vor Christus in Athen und '
+          'hat selbst **kein einziges Buch** geschrieben. Was wir über ihn '
           'wissen, stammt vor allem von seinem Schüler Platon. Sokrates '
           'redete lieber: auf dem Markt, mit jedem, der stehen blieb.',
     ),
     LessonSection(
       heading: 'Die Methode',
-      body: 'Statt zu belehren, stellte er Fragen. Was ist Mut? Was ist '
+      body:
+          'Statt zu belehren, **stellte er Fragen**. Was ist Mut? Was ist '
           'Gerechtigkeit? Mit jeder Antwort fragte er nach, bis sich '
           'Widersprüche zeigten. Am Ende wussten die Gesprächspartner oft '
           'weniger als vorher — aber sie wussten jetzt, dass sie es nicht '
@@ -303,11 +323,13 @@ const Lesson sokratesPage = Lesson(
     ),
     LessonSection(
       heading: 'Wissen um das Nichtwissen',
-      body: 'Sokrates hielt sich nur insofern für weise, als er seine eigene '
-          'Unwissenheit kannte. Für den Alltag ist das ein nützlicher '
+      body:
+          'Sokrates hielt sich nur insofern für weise, als er **seine eigene '
+          'Unwissenheit** kannte. Für den Alltag ist das ein nützlicher '
           'Grundsatz: Wer weiß, wo sein Wissen endet, fragt nach, statt zu '
-          'raten. Und wer einem anderen etwas klarmachen will, erreicht '
-          'mit guten Fragen oft mehr als mit Behauptungen.',
+          'raten. Und wer einem anderen etwas klarmachen will, erreicht mit '
+          'guten Fragen oft mehr als mit Behauptungen.\n\n'
+          '==Wer weiß, wo sein Wissen endet, fragt nach, statt zu raten.==',
     ),
   ],
   questions: <Question>[
@@ -357,25 +379,29 @@ const Lesson existenzialismusPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Erst da, dann bestimmt',
-      body: 'Jean-Paul Sartre fasste den Existenzialismus in einen Satz: Die '
-          'Existenz geht der Essenz voraus. Ein Messer wird für einen Zweck '
+      body:
+          'Jean-Paul Sartre fasste den Existenzialismus in einen Satz: **Die '
+          'Existenz geht der Essenz voraus**. Ein Messer wird für einen Zweck '
           'gemacht, ein Mensch nicht. Er ist zuerst da und bestimmt erst '
           'durch sein Handeln, wer er ist. Keine Natur und kein Plan nimmt '
           'ihm diese Entscheidung ab.',
     ),
     LessonSection(
       heading: 'Zur Freiheit verurteilt',
-      body: 'Das klingt nach Befreiung und ist auch eine Last. Wer frei ist, '
-          'ist verantwortlich — auch für das, was er aus Bequemlichkeit '
+      body:
+          'Das klingt nach Befreiung und ist auch eine Last. Wer frei ist, '
+          'ist **verantwortlich** — auch für das, was er aus Bequemlichkeit '
           'unterlässt. „Ich bin eben so" ist für Sartre eine Ausrede: Man '
-          'ist, was man immer wieder tut.',
+          'ist, was man immer wieder tut.\n\n'
+          '==Man ist, was man immer wieder tut.==',
     ),
     LessonSection(
       heading: 'Sisyphos',
-      body: 'Albert Camus erzählt von Sisyphos, der auf ewig einen Stein '
+      body:
+          'Albert Camus erzählt von Sisyphos, der auf ewig einen Stein '
           'bergauf rollen muss, der jedes Mal wieder hinabrollt. Das Leben '
           'hat keinen fertigen Sinn, sagt Camus, aber man kann sich dagegen '
-          'auflehnen, indem man es trotzdem voll lebt. Sein Schluss: Man '
+          'auflehnen, indem man es **trotzdem voll lebt**. Sein Schluss: Man '
           'muss sich Sisyphos als glücklichen Menschen vorstellen.',
     ),
   ],

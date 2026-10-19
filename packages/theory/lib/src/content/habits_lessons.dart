@@ -24,27 +24,32 @@ const Lesson _systemeSchlagenVorsaetze = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Wissen ist selten das Problem',
-      body: 'Fast jeder weiß, was er tun müsste: sich mehr bewegen, früher '
-          'ins Bett, weniger am Handy hängen. Trotzdem passiert es nicht. '
-          'Das liegt nicht an fehlender Einsicht, sondern daran, dass die '
+      body:
+          'Fast jeder weiß, was er tun müsste: sich mehr bewegen, früher ins '
+          'Bett, weniger am Handy hängen. Trotzdem passiert es nicht. Das '
+          'liegt nicht an fehlender Einsicht, sondern daran, dass die '
           'Einsicht an einem müden Dienstagabend nichts entscheidet. '
-          'Entschieden wird durch das, was in dem Moment am nächsten liegt.',
+          'Entschieden wird durch das, **was in dem Moment am nächsten '
+          'liegt**.',
     ),
     LessonSection(
       heading: 'Ein Ziel sagt nicht, was du heute tust',
-      body: '„Zehn Kilo abnehmen“ ist ein Ergebnis, keine Handlung. Es legt '
-          'nicht fest, wann du losgehst, wie lange, und was passiert, wenn '
-          'es regnet. Ein System beantwortet genau diese Fragen im Voraus, '
-          'damit du sie nicht jedes Mal neu verhandelst. Verhandeln kostet '
-          'Kraft, und die ist abends am knappsten.',
+      body:
+          '„Zehn Kilo abnehmen“ ist **ein Ergebnis, keine Handlung**. Es legt '
+          'nicht fest, wann du losgehst, wie lange, und was passiert, wenn es '
+          'regnet. Ein System beantwortet genau diese Fragen im Voraus, damit '
+          'du sie nicht jedes Mal neu verhandelst. Verhandeln kostet Kraft, '
+          'und die ist abends am knappsten.',
     ),
     LessonSection(
       heading: 'Der Maßstab verschiebt sich',
-      body: 'Wer in Zielen denkt, ist bis zum Ziel erfolglos und danach '
+      body:
+          'Wer in Zielen denkt, ist bis zum Ziel erfolglos und danach '
           'orientierungslos. Wer in Systemen denkt, hat heute Abend eine '
           'klare Antwort auf die Frage, ob der Tag gezählt hat: Habe ich '
-          'getan, was ich mir vorgenommen hatte? Genau das ist es, was '
-          'diese App abhakt — nicht das Ergebnis, sondern die Wiederholung.',
+          'getan, was ich mir vorgenommen hatte? Genau das ist es, was diese '
+          'App abhakt — **nicht das Ergebnis, sondern die Wiederholung**.\n\n'
+          '==Abgehakt wird nicht das Ergebnis, sondern die Wiederholung.==',
     ),
   ],
   questions: <Question>[
@@ -103,28 +108,32 @@ const Lesson _dieSchleife = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Drei Teile, immer dieselben',
-      body: 'Jede Gewohnheit läuft in derselben Schleife ab. Ein Auslöser '
+      body:
+          'Jede Gewohnheit läuft in derselben Schleife ab. Ein **Auslöser** '
           'startet sie: eine Uhrzeit, ein Ort, ein Gefühl, eine andere '
-          'Handlung. Dann folgt die Routine, das eigentliche Verhalten. '
-          'Am Ende steht eine Belohnung, die dem Gehirn sagt: Das war '
+          'Handlung. Dann folgt die **Routine**, das eigentliche Verhalten. '
+          'Am Ende steht eine **Belohnung**, die dem Gehirn sagt: Das war '
           'brauchbar, merk dir den Auslöser.',
     ),
     LessonSection(
       heading: 'Der Auslöser ist der Hebel',
-      body: 'An der Routine herumzuschrauben ist mühsam — sie kostet Kraft, '
-          'jedes Mal. Am Auslöser zu arbeiten ist billiger. Wer die '
-          'Laufschuhe abends neben die Tür stellt, hat den Auslöser '
-          'sichtbar gemacht. Wer das Handy aus dem Schlafzimmer verbannt, '
-          'hat einen entfernt. Beides wirkt, ohne dass man morgens '
-          'disziplinierter sein müsste.',
+      body:
+          'An der Routine herumzuschrauben ist mühsam — sie kostet Kraft, '
+          'jedes Mal. **Am Auslöser zu arbeiten ist billiger**. Wer die '
+          'Laufschuhe abends neben die Tür stellt, hat den Auslöser sichtbar '
+          'gemacht. Wer das Handy aus dem Schlafzimmer verbannt, hat einen '
+          'entfernt. Beides wirkt, ohne dass man morgens disziplinierter sein '
+          'müsste.\n\n'
+          '==Der Auslöser ist der Hebel, nicht die Routine.==',
     ),
     LessonSection(
       heading: 'Ankoppeln statt neu erfinden',
-      body: 'Der verlässlichste Auslöser ist etwas, das du ohnehin jeden Tag '
+      body:
+          'Der verlässlichste Auslöser ist etwas, das du ohnehin jeden Tag '
           'tust. „Nach dem Zähneputzen mache ich zehn Kniebeugen“ ist '
           'stabiler als „Ich mache morgens Sport“, weil das Zähneputzen '
-          'bereits fest sitzt. Die neue Gewohnheit erbt die Verlässlichkeit '
-          'der alten.',
+          'bereits fest sitzt. Die neue Gewohnheit **erbt die Verlässlichkeit '
+          'der alten**.',
     ),
   ],
   questions: <Question>[
@@ -183,26 +192,30 @@ const Lesson _zweiMinuten = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der teuerste Teil ist der Anfang',
-      body: 'Nicht das Training ist schwer, sondern das Anziehen der Schuhe. '
+      body:
+          'Nicht das Training ist schwer, sondern das Anziehen der Schuhe. '
           'Nicht das Lesen, sondern das Aufschlagen des Buchs. Wer schon '
-          'angefangen hat, macht meistens weiter — die Hürde liegt fast '
-          'immer am Anfang, nicht in der Mitte.',
+          'angefangen hat, macht meistens weiter — die Hürde liegt fast immer '
+          '**am Anfang**, nicht in der Mitte.\n\n'
+          '==Die Hürde liegt am Anfang, nicht in der Mitte.==',
     ),
     LessonSection(
       heading: 'Schrumpfen, bis es lächerlich wirkt',
-      body: 'Die Zwei-Minuten-Regel: Formuliere die Gewohnheit so klein, dass '
-          'sie in zwei Minuten erledigt ist. „Eine Seite lesen.“ „Die '
-          'Sportsachen anziehen.“ Das fühlt sich zu wenig an, und genau '
-          'das ist der Punkt — was zu klein zum Scheitern ist, überlebt '
-          'auch schlechte Tage.',
+      body:
+          'Die Zwei-Minuten-Regel: Formuliere die Gewohnheit so klein, dass '
+          'sie **in zwei Minuten erledigt** ist. „Eine Seite lesen.“ „Die '
+          'Sportsachen anziehen.“ Das fühlt sich zu wenig an, und genau das '
+          'ist der Punkt — was zu klein zum Scheitern ist, überlebt auch '
+          'schlechte Tage.',
     ),
     LessonSection(
       heading: 'Erst die Wiederholung, dann der Umfang',
-      body: 'Zwei Minuten trainieren keine Ausdauer, aber sie etablieren die '
-          'Handlung. Wer sechs Wochen lang jeden Tag zwei Minuten liest, '
-          'hat etwas, das man ausbauen kann. Wer sechs Wochen lang '
-          'vorhatte, eine Stunde zu lesen, hat nichts. Der Umfang lässt '
-          'sich später erhöhen, die verlorenen Wochen nicht.',
+      body:
+          'Zwei Minuten trainieren keine Ausdauer, aber sie **etablieren die '
+          'Handlung**. Wer sechs Wochen lang jeden Tag zwei Minuten liest, '
+          'hat etwas, das man ausbauen kann. Wer sechs Wochen lang vorhatte, '
+          'eine Stunde zu lesen, hat nichts. Der Umfang lässt sich später '
+          'erhöhen, die verlorenen Wochen nicht.',
     ),
   ],
   questions: <Question>[
@@ -260,23 +273,27 @@ const Lesson _nieZweimal = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der erste Ausfall ist ein Unfall',
-      body: 'Jeder verpasst Tage. Krankheit, Reise, ein Tag, an dem alles '
+      body:
+          'Jeder verpasst Tage. Krankheit, Reise, ein Tag, an dem alles '
           'schiefgeht. Ein einzelner ausgelassener Tag verändert an einer '
-          'Gewohnheit fast nichts — die Wirkung entsteht über Wochen, nicht '
-          'über einen Dienstag.',
+          'Gewohnheit **fast nichts** — die Wirkung entsteht über Wochen, '
+          'nicht über einen Dienstag.',
     ),
     LessonSection(
       heading: 'Der zweite ist der Anfang vom Ende',
-      body: 'Gefährlich wird der Tag danach. Zweimal ausgelassen ist keine '
-          'Ausnahme mehr, sondern das neue Muster. Deshalb die Regel: nie '
-          'zweimal hintereinander. Nicht „nie auslassen“ — das hält '
-          'niemand ein und macht den ersten Ausfall zur Niederlage.',
+      body:
+          'Gefährlich wird der Tag danach. Zweimal ausgelassen ist keine '
+          'Ausnahme mehr, sondern das neue Muster. Deshalb die Regel: **nie '
+          'zweimal hintereinander**. Nicht „nie auslassen“ — das hält niemand '
+          'ein und macht den ersten Ausfall zur Niederlage.\n\n'
+          '==Einmal auslassen ist ein Unfall. Zweimal ist ein neues Muster.==',
     ),
     LessonSection(
       heading: 'Alles-oder-nichts kostet mehr als der Ausfall',
-      body: 'Wer eine Kette von 60 Tagen reißen sieht und daraufhin ganz '
+      body:
+          'Wer eine Kette von 60 Tagen reißen sieht und daraufhin ganz '
           'aufhört, hat sich für den einen verlorenen Tag mit sechzig '
-          'bestraft. Der Wiedereinstieg am nächsten Tag ist deshalb '
+          'bestraft. **Der Wiedereinstieg am nächsten Tag** ist deshalb '
           'wichtiger als die perfekte Serie. In dieser App wird ein '
           'verpasster Tag nicht bestraft — der Bonus fehlt einfach.',
     ),
@@ -338,26 +355,30 @@ const Lesson _identitaet = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Zwei Arten, dasselbe zu wollen',
-      body: '„Ich versuche, mit dem Rauchen aufzuhören“ und „Ich bin kein '
-          'Raucher“ beschreiben dieselbe Absicht, aber nicht dieselbe '
-          'Person. Im ersten Satz kämpft jemand gegen sich selbst. Im '
+      body:
+          '„Ich versuche, mit dem Rauchen aufzuhören“ und „Ich bin kein '
+          'Raucher“ beschreiben dieselbe Absicht, aber **nicht dieselbe '
+          'Person**. Im ersten Satz kämpft jemand gegen sich selbst. Im '
           'zweiten stellt sich die Frage gar nicht mehr.',
     ),
     LessonSection(
       heading: 'Jede Wiederholung ist ein Beleg',
-      body: 'Man wird nicht durch eine Entscheidung zu jemandem, sondern '
-          'durch die Sammlung kleiner Belege. Jedes Mal Sport ist ein '
-          'Beleg dafür, sportlich zu sein. Kein einzelner davon überzeugt, '
-          'aber sie summieren sich zu etwas, das sich nicht mehr wie '
-          'Anstrengung anfühlt, sondern wie eine Tatsache.',
+      body:
+          'Man wird nicht durch eine Entscheidung zu jemandem, sondern durch '
+          'die **Sammlung kleiner Belege**. Jedes Mal Sport ist ein Beleg '
+          'dafür, sportlich zu sein. Kein einzelner davon überzeugt, aber sie '
+          'summieren sich zu etwas, das sich nicht mehr wie Anstrengung '
+          'anfühlt, sondern wie eine Tatsache.\n\n'
+          '==Jede Wiederholung ist ein Beleg dafür, wer du bist.==',
     ),
     LessonSection(
       heading: 'Rückwärts denken',
-      body: 'Statt zu fragen „Was will ich erreichen?“ frage: „Wer müsste '
-          'ich sein, damit das selbstverständlich ist?“ — und dann: „Was '
-          'tut diese Person heute?“ Diese Frage liefert direkt die '
-          'Gewohnheit. Sie ist auch der Grund, warum in dieser App der '
-          'Charakter mitwächst: Der Fortschritt gehört zu jemandem.',
+      body:
+          'Statt zu fragen „Was will ich erreichen?“ frage: „**Wer müsste ich '
+          'sein**, damit das selbstverständlich ist?“ — und dann: „Was tut '
+          'diese Person heute?“ Diese Frage liefert direkt die Gewohnheit. '
+          'Sie ist auch der Grund, warum in dieser App der Charakter '
+          'mitwächst: Der Fortschritt gehört zu jemandem.',
     ),
   ],
   questions: <Question>[

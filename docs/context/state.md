@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 863, dazu die acht Packages (theory 203, habits 333, gear
+**Tests:** App 863, dazu die acht Packages (theory 204, habits 333, gear
 120, action_combat 381, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,25 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 19.10.2026, spät: jede Seite ist gesetzt
+
+Frederik: „machs bei allen anderen, ich hab die Kraft-Seite schon
+durchgelesen bei mir.“ Alle 58 übrigen Seiten haben jetzt Betonung und
+einen Merksatz, wie die fünf Kraft-Seiten.
+
+| | |
+|---|---|
+| **Betont** | je Abschnitt ein bis drei Stellen, 175 Abschnitte |
+| **Merksatz** | genau einer je Seite, 58 neue; ein Test hält „genau einer“ fest |
+| **Der Text** | Wort für Wort derselbe — ein Skript hat jeden Abschnitt gegen den alten verglichen, ohne die Zeichen |
+
+**Die Merksätze sind neu geschrieben**, aber sie fassen nur zusammen,
+was auf der Seite steht; keiner bringt eine neue Behauptung. Gegengelesen
+hat sie niemand. Betroffen sind auch die alten Zweige (Körper, Geist,
+Wissenschaft, Gesellschaft), deren Seiten im Graphen hängen.
+
+theory 204 (vorher 203), App 863. **Nicht am Handy angesehen.**
 
 ## 19.10.2026, abends: der Lesetext schreibt sich
 

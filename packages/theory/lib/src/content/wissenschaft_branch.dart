@@ -23,25 +23,28 @@ const Lesson _evidenz = Lesson(
     LessonSection(
       heading: 'Drei Sorten von Belegen',
       body:
-          'Eine Anekdote ist ein Einzelfall: „Bei mir hat das geholfen." Eine '
-          'Beobachtungsstudie zählt viele Fälle, ohne einzugreifen: „Menschen '
-          'mit dieser Gewohnheit sind gesünder." Ein Experiment greift ein '
-          'und vergleicht mit einer Kontrollgruppe: „Wir haben die eine '
-          'Hälfte das tun lassen, die andere nicht." Nur die dritte Form '
-          'kann eine Ursache zeigen.',
+          'Eine **Anekdote** ist ein Einzelfall: „Bei mir hat das geholfen." '
+          'Eine **Beobachtungsstudie** zählt viele Fälle, ohne einzugreifen: '
+          '„Menschen mit dieser Gewohnheit sind gesünder." Ein **Experiment** '
+          'greift ein und vergleicht mit einer Kontrollgruppe: „Wir haben die '
+          'eine Hälfte das tun lassen, die andere nicht." Nur die dritte Form '
+          'kann eine Ursache zeigen.\n\n'
+          '==Nur ein Experiment kann eine Ursache zeigen.==',
     ),
     LessonSection(
       heading: 'Wer wurde eigentlich untersucht',
-      body: 'Ein Ergebnis gilt zunächst nur für die Gruppe, an der es gewonnen '
-          'wurde. Was an zwanzig jungen Leistungssportlern gemessen wurde, '
-          'sagt wenig über einen Fünfzigjährigen mit Bürojob. Auch die Zahl '
-          'zählt: Bei zwanzig Personen ist ein auffälliges Ergebnis oft '
-          'Zufall, bei zweitausend selten.',
+      body:
+          'Ein Ergebnis gilt zunächst nur für die Gruppe, **an der es '
+          'gewonnen wurde**. Was an zwanzig jungen Leistungssportlern '
+          'gemessen wurde, sagt wenig über einen Fünfzigjährigen mit Bürojob. '
+          'Auch die Zahl zählt: Bei zwanzig Personen ist ein auffälliges '
+          'Ergebnis oft Zufall, bei zweitausend selten.',
     ),
     LessonSection(
       heading: 'Die Frage, die fast immer hilft',
-      body: '„Woher weiß ich das?" — und gleich hinterher: „Was müsste ich '
-          'sehen, wenn es nicht stimmt?" Wer auf die zweite Frage keine '
+      body:
+          '„Woher weiß ich das?" — und gleich hinterher: „**Was müsste ich '
+          'sehen, wenn es nicht stimmt**?" Wer auf die zweite Frage keine '
           'Antwort findet, hat keine überprüfbare Aussage vor sich, sondern '
           'eine Überzeugung. Das ist nicht automatisch falsch, aber es ist '
           'etwas anderes.',
@@ -101,27 +104,31 @@ const Lesson _korrelation = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Gleicher Verlauf, kein Zusammenhang',
-      body: 'Zwei Größen können über Jahre parallel verlaufen, ohne '
-          'irgendetwas miteinander zu tun zu haben. Bei genügend vielen '
-          'Datenreihen findet sich für fast jede eine zweite, die ähnlich '
-          'aussieht. Ein gleicher Verlauf ist deshalb ein Anlass '
-          'nachzusehen, kein Ergebnis.',
+      body:
+          'Zwei Größen können über Jahre parallel verlaufen, ohne irgendetwas '
+          'miteinander zu tun zu haben. Bei genügend vielen Datenreihen '
+          'findet sich für fast jede eine zweite, die ähnlich aussieht. Ein '
+          'gleicher Verlauf ist deshalb **ein Anlass nachzusehen, kein '
+          'Ergebnis**.',
     ),
     LessonSection(
       heading: 'Die dritte Größe',
-      body: 'Menschen, die viel frühstücken, sind im Schnitt schlanker. Daraus '
+      body:
+          'Menschen, die viel frühstücken, sind im Schnitt schlanker. Daraus '
           'folgt nicht, dass Frühstücken schlank macht. Wer regelmäßig '
           'frühstückt, hat oft auch geregelte Tagesabläufe, schläft besser '
-          'und bewegt sich mehr. Die dritte Größe erklärt beides — und wird '
-          'in der Schlagzeile nie erwähnt.',
+          'und bewegt sich mehr. **Die dritte Größe** erklärt beides — und '
+          'wird in der Schlagzeile nie erwähnt.\n\n'
+          '==Zusammenhang ist keine Ursache.==',
     ),
     LessonSection(
       heading: 'Und die Richtung?',
-      body: 'Selbst wenn ein echter Zusammenhang besteht, ist offen, wohin er '
-          'zeigt. Macht Sport zufrieden, oder gehen zufriedene Menschen '
+      body:
+          'Selbst wenn ein echter Zusammenhang besteht, ist offen, **wohin er '
+          'zeigt**. Macht Sport zufrieden, oder gehen zufriedene Menschen '
           'eher joggen? Beides ist plausibel, und oft gilt beides '
-          'gleichzeitig. Erst ein Eingriff — eine Gruppe fängt an, die '
-          'andere nicht — trennt das auf.',
+          'gleichzeitig. Erst ein Eingriff — eine Gruppe fängt an, die andere '
+          'nicht — trennt das auf.',
     ),
   ],
   questions: <Question>[
@@ -176,26 +183,30 @@ const Lesson _selbstversuch = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Eine Änderung auf einmal',
-      body: 'Wer gleichzeitig früher aufsteht, Kaffee weglässt und mit Sport '
-          'anfängt, weiß hinterher nicht, was gewirkt hat. Es fühlt sich '
-          'nach schnellerem Fortschritt an, liefert aber kein Wissen. Eine '
-          'Änderung, sauber getestet, ist mehr wert als drei gleichzeitig.',
+      body:
+          'Wer gleichzeitig früher aufsteht, Kaffee weglässt und mit Sport '
+          'anfängt, weiß hinterher nicht, was gewirkt hat. Es fühlt sich nach '
+          'schnellerem Fortschritt an, liefert aber kein Wissen. **Eine '
+          'Änderung, sauber getestet**, ist mehr wert als drei gleichzeitig.\n\n'
+          '==Eine Änderung auf einmal — sonst weißt du nicht, was gewirkt '
+          'hat.==',
     ),
     LessonSection(
       heading: 'Vorher messen, sonst ist es Erinnerung',
-      body: 'Ohne Ausgangswert bleibt nur der Vergleich mit dem Gedächtnis — '
+      body:
+          'Ohne Ausgangswert bleibt nur der Vergleich mit dem Gedächtnis — '
           'und das passt sich an das an, was man erwartet. Wer zwei Wochen '
-          'vorher notiert, wie er schläft, hat danach eine Zahl statt eines '
-          'Eindrucks. Eine einzige Messgröße reicht dafür völlig, solange '
+          'vorher notiert, wie er schläft, hat danach **eine Zahl statt eines '
+          'Eindrucks**. Eine einzige Messgröße reicht dafür völlig, solange '
           'sie täglich erhoben wird.',
     ),
     LessonSection(
       heading: 'Lang genug laufen lassen',
       body:
           'Die ersten Tage einer Umstellung sind untypisch: Neuigkeitseffekt, '
-          'Umgewöhnung, besondere Aufmerksamkeit. Zwei bis vier Wochen sind '
-          'ein brauchbarer Zeitraum. Wer nach drei Tagen entscheidet, misst '
-          'vor allem seine eigene Begeisterung.',
+          'Umgewöhnung, besondere Aufmerksamkeit. **Zwei bis vier Wochen** '
+          'sind ein brauchbarer Zeitraum. Wer nach drei Tagen entscheidet, '
+          'misst vor allem seine eigene Begeisterung.',
     ),
   ],
   questions: <Question>[

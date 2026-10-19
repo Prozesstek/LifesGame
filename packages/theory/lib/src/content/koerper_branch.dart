@@ -24,27 +24,30 @@ const Lesson _schlaf = Lesson(
     LessonSection(
       heading: 'Nachts wird aufgeräumt',
       body:
-          'Schlaf ist kein Ausschalten, sondern Wartungsarbeit. Erlebtes wird '
-          'sortiert und ins Langzeitgedächtnis überführt, Hormone werden '
+          'Schlaf ist kein Ausschalten, sondern **Wartungsarbeit**. Erlebtes '
+          'wird sortiert und ins Langzeitgedächtnis überführt, Hormone werden '
           'zurückgesetzt, das Gehirn spült Abfallstoffe aus. Wer eine Nacht '
           'kürzt, spart keine Zeit — er verschiebt die Arbeit auf den '
           'nächsten Tag, wo sie als Konzentrationsloch wieder auftaucht.',
     ),
     LessonSection(
       heading: 'Regelmäßigkeit schlägt Dauer',
-      body: 'Sieben Stunden zur immer gleichen Zeit sind besser als acht '
+      body:
+          'Sieben Stunden zur immer gleichen Zeit sind besser als acht '
           'Stunden zu wechselnden. Der Körper stellt sich auf einen Rhythmus '
           'ein und bereitet Einschlafen und Aufwachen vor. Wer jeden Tag zu '
           'einer anderen Zeit ins Bett geht, zwingt ihn, ständig neu zu '
           'raten. Der verlässlichste Anker dafür ist nicht die Schlafenszeit, '
-          'sondern die Aufstehzeit — sie lässt sich willentlich einhalten, '
-          'Einschlafen nicht.',
+          'sondern die **Aufstehzeit** — sie lässt sich willentlich '
+          'einhalten, Einschlafen nicht.\n\n'
+          '==Regelmäßigkeit schlägt Dauer.==',
     ),
     LessonSection(
       heading: 'Licht stellt die innere Uhr',
-      body: 'Helligkeit am Morgen sagt dem Körper, wann der Tag beginnt, und '
-          'legt damit fest, wann abends Müdigkeit einsetzt. Zehn Minuten '
-          'Tageslicht kurz nach dem Aufstehen wirken stärker als jedes '
+      body:
+          'Helligkeit am Morgen sagt dem Körper, wann der Tag beginnt, und '
+          'legt damit fest, wann abends Müdigkeit einsetzt. **Zehn Minuten '
+          'Tageslicht** kurz nach dem Aufstehen wirken stärker als jedes '
           'Einschlafritual am Abend. Umgekehrt verschiebt helles Licht spät '
           'am Abend den Rhythmus nach hinten.',
     ),
@@ -103,25 +106,29 @@ const Lesson _bewegung = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der erste Schritt bringt am meisten',
-      body: 'Der Unterschied zwischen null und ein bisschen Bewegung ist '
+      body:
+          'Der Unterschied **zwischen null und ein bisschen Bewegung** ist '
           'größer als der zwischen viel und sehr viel. Wer von gar nichts auf '
           'zwanzig Minuten Gehen am Tag kommt, holt den Löwenanteil des '
           'gesundheitlichen Effekts. Wer von einer Stunde auf zwei erhöht, '
-          'gewinnt vergleichsweise wenig dazu.',
+          'gewinnt vergleichsweise wenig dazu.\n\n'
+          '==Der Schritt von null auf ein bisschen bringt am meisten.==',
     ),
     LessonSection(
       heading: 'Alltagsbewegung zählt mit',
-      body: 'Treppen, Wege, Stehen, Tragen — das summiert sich über einen Tag '
+      body:
+          'Treppen, Wege, Stehen, Tragen — das summiert sich über einen Tag '
           'auf mehr als die meisten Trainingseinheiten. Wer drei Mal die '
           'Woche trainiert und die übrigen sechzehn Stunden sitzt, hat ein '
-          'Bewegungsproblem, kein Trainingsproblem. Die Lösung liegt selten '
-          'im Fitnessstudio.',
+          '**Bewegungsproblem, kein Trainingsproblem**. Die Lösung liegt '
+          'selten im Fitnessstudio.',
     ),
     LessonSection(
       heading: 'Häufig schlägt hart',
-      body: 'Eine anstrengende Einheit pro Woche fühlt sich nach mehr an als '
-          'zehn Minuten täglich, bewirkt aber weniger. Häufigkeit hält den '
-          'Körper in Bereitschaft, Intensität überfordert ihn punktuell. '
+      body:
+          'Eine anstrengende Einheit pro Woche fühlt sich nach mehr an als '
+          'zehn Minuten täglich, bewirkt aber weniger. **Häufigkeit** hält '
+          'den Körper in Bereitschaft, Intensität überfordert ihn punktuell. '
           'Dazu kommt: Was täglich stattfindet, wird zur Gewohnheit. Was '
           'einmal pro Woche stattfindet, bleibt eine Entscheidung.',
     ),
@@ -181,7 +188,8 @@ const Lesson _umgebung = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Sichtweite schlägt Vorsatz',
-      body: 'Was in Reichweite steht, wird gegessen. Das ist keine '
+      body:
+          '**Was in Reichweite steht, wird gegessen**. Das ist keine '
           'Charakterschwäche, sondern gut belegtes Verhalten: Die Menge, die '
           'jemand isst, hängt stärker von Packungsgröße, Tellergröße und '
           'Sichtbarkeit ab als von seinem Hungergefühl. Wer sich abends gegen '
@@ -190,18 +198,21 @@ const Lesson _umgebung = Lesson(
     ),
     LessonSection(
       heading: 'Die Entscheidung fällt im Supermarkt',
-      body: 'Eine Entscheidung beim Einkauf ersetzt sieben abendliche. Was '
+      body:
+          '**Eine Entscheidung beim Einkauf ersetzt sieben abendliche**. Was '
           'nicht in der Wohnung ist, muss man nicht ablehnen. Das ist '
           'derselbe Hebel wie beim Auslöser einer Gewohnheit: die Umgebung '
-          'einmal ändern statt sich täglich zusammenzureißen.',
+          'einmal ändern statt sich täglich zusammenzureißen.\n\n'
+          '==Was nicht in der Wohnung ist, muss man nicht ablehnen.==',
     ),
     LessonSection(
       heading: 'Ersetzen, nicht verbieten',
-      body: 'Verbote erzeugen Verlangen und halten selten lange. Austausch '
+      body:
+          'Verbote erzeugen Verlangen und halten selten lange. **Austausch** '
           'funktioniert besser: dieselbe Handlung, anderes Ergebnis. Wasser '
-          'vor der Mahlzeit statt danach, Obst in Sichtweite statt Süßem, '
-          'der Teller einmal kleiner. Keine dieser Änderungen verlangt '
-          'Verzicht im Moment — sie verschieben nur, was am nächsten liegt.',
+          'vor der Mahlzeit statt danach, Obst in Sichtweite statt Süßem, der '
+          'Teller einmal kleiner. Keine dieser Änderungen verlangt Verzicht '
+          'im Moment — sie verschieben nur, was am nächsten liegt.',
     ),
   ],
   questions: <Question>[
