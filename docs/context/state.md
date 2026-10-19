@@ -169,6 +169,10 @@ zugleich die Feedbackrunde.
 - Schon in Ordnung: targetSdk 36, NDK 28, keine Internet-Berechtigung,
   kein Entwicklermodus im Release-Build.
 
+**Danach am selben Tag:** Das Studio heißt **FRENO Studios** — „Lifes
+Game Studio“ war zu nah an „Life Games Studio“. Das Konto ist
+angelegt; die Bestätigung der Identität läuft.
+
 **Aufgeräumt:** Die Einträge vom 04. bis 11.10. stehen jetzt wortgleich
 in [`verlauf.md`](verlauf.md).
 

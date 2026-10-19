@@ -50,9 +50,17 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       Sperrliste in `ziele.md`.
 - [ ] *(Mensch)* Wem gehört das Konto? Der andere wird in der Play
       Console als Nutzer eingeladen.
-- [ ] *(Mensch)* Konto anlegen, 25 $ zahlen, Identität bestätigen; dazu
-      gehört ein Android-Gerät mit der Play-Console-App. Dauert Tage, also
-      zuerst.
+- [x] **Entwicklername: FRENO Studios** (19.10.). Erst hieß es
+      „Lifes Game Studio“ — zu nah an „Life Games Studio“, das es schon
+      gibt. Eine Websuche fand keinen anderen Träger des Namens.
+- [ ] *(Mensch)* „Freno“ als Marke prüfen (DPMA, TMview, Klassen 9 und
+      41): Das Wort heißt italienisch und spanisch „Bremse“.
+- [ ] *(Mensch)* Schreibweise festlegen — „FRENO Studios“ oder „Freno
+      Studios“ — und überall gleich führen: Play Console,
+      Datenschutzseite, Impressum.
+- [x] *(Mensch)* Konto angelegt (19.10.).
+- [ ] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
+      ein Android-Gerät mit der Play-Console-App. Dauert Tage.
 - [ ] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
       Händler stehen Adresse und Telefon öffentlich im Store.
 - [ ] **Name und Paket-Id endgültig.** `dev.prozesstek.lifes_game` lässt
