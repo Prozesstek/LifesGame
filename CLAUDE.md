@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 197 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 203 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
@@ -63,6 +63,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/content/gewohnheiten_pages.dart` | **Gewohnheiten** unter Selbstentwicklung: Überkapitel → vier Regeln → je Regel eine Seite (bisher: offensichtlich, attraktiv), **aus dem Gelesenen** ([ADR-0061](docs/decisions/0061-der-baum-waechst-aus-dem-gelesenen.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/habits_lessons.dart` | die fünf Seiten des **früheren Handbuchs** — seit [ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md) Knoten unter Gewohnheiten, „Zwei Minuten reichen“ als Regel 3 | nur Dart-SDK |
 | `packages/theory/lib/src/content/psychologie_pages.dart` | **Psychologie**: fünf Themen an Experimenten — Asch, Milgram, Bystander, Loftus, Gefühle | nur Dart-SDK |
+| `packages/theory/lib/src/lesetext.dart` | **wie ein Abschnitt gesetzt wird**: `**betont**` und ein Absatz in `==…==` als Merksatz, mehr Zeichen gibt es nicht; jede Seite wird auf offene Zeichen geprüft | nur Dart-SDK |
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
@@ -256,6 +257,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
 | `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Bildschirm, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
@@ -279,7 +281,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 857 Tests
+flutter test             # 863 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -301,7 +303,7 @@ dart test                              # 333 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 197 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 203 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
 cd packages/gear        ; dart test    # 120 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests

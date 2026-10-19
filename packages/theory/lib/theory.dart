@@ -20,6 +20,7 @@ export 'src/content/root_pages.dart';
 export 'src/content/theory_graph_content.dart';
 export 'src/content/wissenschaft_gesellschaft_pages.dart';
 export 'src/content/wissenschaft_branch.dart';
+export 'src/lesetext.dart';
 export 'src/lesson.dart';
 export 'src/node.dart';
 export 'src/node_graph.dart';

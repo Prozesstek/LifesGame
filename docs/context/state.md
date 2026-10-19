@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 850, dazu die acht Packages (theory 197, habits 333, gear
+**Tests:** App 863, dazu die acht Packages (theory 203, habits 333, gear
 120, action_combat 381, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,45 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 19.10.2026, abends: der Lesetext schreibt sich
+
+Frederik: „ich hätte gerne, dass bei dem Theorie-Teil die Lerntexte
+nach und nach geschrieben werden … also mit Animation und mit
+verschiedenen Textgrößen und Formatierung noch mehr gespielt werden.“
+Gebaut ohne Fragerunde als Prototyp.
+
+| Was | Wie |
+|---|---|
+| **Die Überschrift fällt herein** | 22 Punkte, schiebt sich in 0,28 s von unten ins Bild |
+| **Wort für Wort** | rund 40 ms je Wort, jedes blendet über drei Wörter ein; ein Abschnitt steht nach zwei bis drei Sekunden |
+| **Ein Tipp zeigt alles** | auf den Text; zurückgeblättert schreibt sich nichts noch einmal |
+| **Drei Größen** | der erste Satz 18 und halbfett, der Rest 16, ein Merksatz 20 und fett auf eigener Fläche mit Balken, die aufspringt |
+| **Betont** | fett, in der Farbe der Seite |
+
+**Der Inhalt bekommt zwei Zeichen** (`Lesetext` in `packages/theory`):
+`**betont**` und ein ganzer Absatz in `==…==` als Merksatz. Ein Test
+prüft jede Seite auf offene Zeichen. **Gesetzt sind bisher nur die fünf
+Kraft-Seiten**, wie bei Rätsel und Fall: je zwei bis drei Betonungen
+und ein Merksatz. Die Merksätze sagen nichts Neues, sie stehen so oder
+fast so schon auf der Seite. Alle anderen Seiten schreiben sich auch,
+mit großem erstem Satz, aber ohne Betonung und Merksatz.
+
+**Ohne Rückfrage entschieden:** Wort für Wort statt Buchstabe für
+Buchstabe — schneller, als man liest, damit niemand wartet. Der Text
+steht von Anfang an im Layout, nur durchsichtig: Nichts springt, und
+der Vorleser bekommt ihn ganz. Kein Klang je Wort. Wer Bewegung im
+System abgeschaltet hat, bekommt alles sofort.
+
+theory 203 (vorher 197), App 863 (vorher 857). Die erste Kraft-Seite
+in 390 × 844 gerendert und angesehen, mitten im Schreiben und fertig.
+**Nicht am Handy, nicht gespielt.**
+
+### Offen
+
+- Ob 40 ms je Wort sich richtig anfühlen oder ungeduldig machen.
+- Ob die übrigen 58 Seiten Betonung und Merksatz bekommen — Schreibarbeit
+  wie bei Rätsel und Fall, am besten in einem Zug.
 
 ## 19.10.2026, danach: die App wird store-fähig
 
