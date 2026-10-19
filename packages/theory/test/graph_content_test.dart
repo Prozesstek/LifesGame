@@ -172,6 +172,20 @@ void main() {
       }
     });
 
+    test('jedes Zeichen im Text ist geschlossen', () {
+      // `**` und `==` setzen den Text (Lesetext). Ein offenes Zeichen
+      // betonte den Rest des Absatzes — oder stünde nackt im Bild.
+      for (final node in nodes) {
+        for (final section in node.lesson.sections) {
+          expect(
+            Lesetext.fehler(section.body),
+            isEmpty,
+            reason: '${node.id}: ${section.heading}',
+          );
+        }
+      }
+    });
+
     test('jeder correctIndex zeigt auf eine vorhandene Antwort', () {
       for (final node in nodes) {
         for (final question in node.lesson.questions) {

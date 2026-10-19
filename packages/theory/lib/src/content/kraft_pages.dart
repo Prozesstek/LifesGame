@@ -41,16 +41,19 @@ const Lesson hypertrophiePage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Spannung ist das Signal',
-      body: 'Ein Muskel wächst, wenn er unter hoher Spannung arbeiten muss. '
+      body:
+          'Ein Muskel wächst, wenn er **unter hoher Spannung** arbeiten muss. '
           'Ob diese Spannung von einem schweren Gewicht mit wenigen '
           'Wiederholungen kommt oder von einem leichteren mit vielen, ist '
           'zweitrangig — solange der Satz fordernd endet. Muskelaufbau '
           'klappt über eine erstaunlich breite Spanne von etwa sechs bis '
-          'dreißig Wiederholungen.',
+          'dreißig Wiederholungen.\n\n'
+          '==Das Signal ist die Spannung, nicht die Zahl auf der Hantel.==',
     ),
     LessonSection(
       heading: 'Die Menge zählt über die Woche',
-      body: 'Entscheidend ist, wie viele fordernde Sätze ein Muskel pro Woche '
+      body:
+          'Entscheidend ist, wie viele **fordernde Sätze** ein Muskel pro Woche '
           'bekommt. Grob gilt: etwa zehn und mehr harte Sätze je Muskel und '
           'Woche bringen mehr als wenige. Nach oben flacht der Nutzen ab, '
           'und irgendwann frisst die Erholung den Gewinn auf. Wer anfängt, '
@@ -58,7 +61,8 @@ const Lesson hypertrophiePage = Lesson(
     ),
     LessonSection(
       heading: 'Ohne Baustoff kein Bau',
-      body: 'Neues Muskelgewebe wird aus Eiweiß gebaut. Für Menschen, die mit '
+      body:
+          'Neues Muskelgewebe wird aus **Eiweiß** gebaut. Für Menschen, die mit '
           'Gewichten trainieren, liegt eine sinnvolle Menge bei etwa 1,6 '
           'Gramm Eiweiß je Kilogramm Körpergewicht am Tag, verteilt auf '
           'mehrere Mahlzeiten. Mehr schadet selten, bringt aber auch kaum '
@@ -130,9 +134,10 @@ const Lesson intensitaetPage = Lesson(
       heading: 'Wiederholungen in Reserve',
       body: 'Ein nützliches Maß für einen Satz ist die Frage: Wie viele '
           'saubere Wiederholungen wären noch gegangen? Das nennt man '
-          'Wiederholungen in Reserve. Ein harter Satz endet mit etwa null '
+          '**Wiederholungen in Reserve**. Ein harter Satz endet mit etwa null '
           'bis drei in Reserve. Ein Satz, bei dem noch zehn gegangen wären, '
-          'war Aufwärmen.',
+          'war Aufwärmen.\n\n'
+          '==Ein harter Satz endet mit null bis drei in Reserve.==',
     ),
     LessonSection(
       heading: 'Versagen ist kein Muss',
@@ -144,7 +149,7 @@ const Lesson intensitaetPage = Lesson(
     ),
     LessonSection(
       heading: 'Sich selbst einschätzen lernen',
-      body: 'Am Anfang schätzt man die Reserve fast immer zu niedrig ein: '
+      body: 'Am Anfang schätzt man die Reserve fast immer **zu niedrig** ein: '
           'Man hört auf, wenn es unangenehm wird, nicht wenn es nicht mehr '
           'geht. Hin und wieder einen Satz bei einer sicheren Übung bis '
           'zur Grenze zu gehen, eicht das eigene Gefühl.',
@@ -211,13 +216,14 @@ const Lesson trainingsplanungPage = Lesson(
       heading: 'Ganzkörper oder Split',
       body: 'Beim Ganzkörpertraining kommt in jeder Einheit jeder große '
           'Muskel dran. Beim Split teilt man auf, etwa in Ober- und '
-          'Unterkörper an verschiedenen Tagen. Beides funktioniert. Der '
+          'Unterkörper an verschiedenen Tagen. **Beides funktioniert.** Der '
           'Unterschied liegt vor allem darin, wie viele Tage man hat und '
           'wie lang eine Einheit sein darf.',
     ),
     LessonSection(
       heading: 'Zweimal ist meist besser als einmal',
-      body: 'Jeden Muskel mindestens zweimal pro Woche zu trainieren, ist bei '
+      body:
+          'Jeden Muskel mindestens **zweimal pro Woche** zu trainieren, ist bei '
           'gleicher Gesamtmenge meist etwas besser, als alles an einem Tag '
           'zu erledigen. Die Menge lässt sich so besser verteilen, und jede '
           'Einheit bleibt frischer. Wer nur zwei Tage hat, landet damit '
@@ -228,7 +234,8 @@ const Lesson trainingsplanungPage = Lesson(
       body: 'Die Unterschiede zwischen vernünftigen Plänen sind klein. Der '
           'Unterschied zwischen einem Plan, den man drei Monate '
           'durchzieht, und einem, den man nach drei Wochen abbricht, ist '
-          'riesig. Ein Plan passt zum Alltag oder er scheitert an ihm.',
+          'riesig.\n\n'
+          '==Ein Plan passt zum Alltag oder er scheitert an ihm.==',
     ),
   ],
   questions: <Question>[
@@ -292,16 +299,18 @@ const Lesson technikPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Der ganze Weg zählt',
-      body: 'Eine Wiederholung über den vollen Bewegungsumfang trainiert den '
+      body:
+          'Eine Wiederholung über den **vollen Bewegungsumfang** trainiert den '
           'Muskel meist besser als eine halbe mit mehr Gewicht. Gerade die '
           'Phase, in der der Muskel gedehnt unter Last steht, scheint für '
           'das Wachstum wertvoll zu sein. Wer das Gewicht erhöht und dafür '
-          'den Weg verkürzt, tauscht Wirkung gegen eine größere Zahl.',
+          'den Weg verkürzt, tauscht Wirkung gegen eine größere Zahl.\n\n'
+          '==Der volle Weg schlägt das größere Gewicht.==',
     ),
     LessonSection(
       heading: 'Kontrolle statt Schwung',
       body: 'Schwung nimmt dem Muskel Arbeit ab und legt sie auf Gelenke und '
-          'Sehnen. Ein kontrolliertes Absenken und ein entschlossenes, aber '
+          'Sehnen. Ein **kontrolliertes Absenken** und ein entschlossenes, aber '
           'sauberes Heben sind die Regel. Ruckartige Wiederholungen fühlen '
           'sich nach viel an und bringen oft wenig.',
     ),
@@ -377,7 +386,8 @@ const Lesson muskelkaterPage = Lesson(
       body: 'Muskelkater tritt meist ein bis drei Tage nach ungewohnter '
           'Belastung auf, besonders nach neuen Übungen. Er zeigt, dass etwas '
           'neu war — nicht, dass das Training gut war. Wer regelmäßig '
-          'trainiert, bekommt ihn seltener, und wächst trotzdem weiter.',
+          'trainiert, bekommt ihn seltener, und wächst trotzdem weiter.\n\n'
+          '==Muskelkater zeigt, dass etwas neu war — nicht, dass es gut war.==',
     ),
     LessonSection(
       heading: 'Pausen gehören zum Plan',
@@ -391,7 +401,7 @@ const Lesson muskelkaterPage = Lesson(
       heading: 'Übertraining ist selten, Unterversorgung nicht',
       body: 'Echtes Übertraining, das Wochen oder Monate der Erholung '
           'braucht, ist bei Freizeitsportlern selten. Häufiger ist zu '
-          'wenig Schlaf, zu wenig Essen und zu viel Stress neben dem '
+          '**wenig Schlaf, zu wenig Essen und zu viel Stress** neben dem '
           'Training. Stagniert die Leistung über Wochen, lohnt der Blick '
           'dorthin oft mehr als ein neuer Plan.',
     ),

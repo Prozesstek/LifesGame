@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
+import 'schreib_text.dart';
 
 /// **Die Seite in Häppchen** — ein Abschnitt je Bildschirm statt einer
 /// Wand aus drei.
@@ -28,6 +29,10 @@ class LeseHaeppchen extends StatefulWidget {
 class _LeseHaeppchenState extends State<LeseHaeppchen> {
   late final PageController _seiten;
   int _hier = 0;
+
+  /// Der weiteste Abschnitt, der schon zu sehen war. Was davor liegt, ist
+  /// gelesen und schreibt sich beim Zurückblättern nicht noch einmal.
+  int _weitester = 0;
 
   Lesson get _lesson => widget.lesson;
 
@@ -71,12 +76,17 @@ class _LeseHaeppchenState extends State<LeseHaeppchen> {
           child: PageView.builder(
             controller: _seiten,
             itemCount: _anzahl,
-            onPageChanged: (i) => setState(() => _hier = i),
+            onPageChanged: (i) => setState(() {
+              _hier = i;
+              if (i > _weitester) _weitester = i;
+            }),
             itemBuilder: (context, i) => _Abschnitt(
               zusammenfassung: i == 0 ? _lesson.summary : null,
               abschnitt: i < _lesson.sections.length
                   ? _lesson.sections[i]
                   : null,
+              aktiv: i == _hier,
+              gelesen: i < _weitester,
             ),
           ),
         ),
@@ -133,10 +143,17 @@ class _Striche extends StatelessWidget {
 }
 
 class _Abschnitt extends StatelessWidget {
-  const _Abschnitt({required this.zusammenfassung, required this.abschnitt});
+  const _Abschnitt({
+    required this.zusammenfassung,
+    required this.abschnitt,
+    required this.aktiv,
+    required this.gelesen,
+  });
 
   final String? zusammenfassung;
   final LessonSection? abschnitt;
+  final bool aktiv;
+  final bool gelesen;
 
   @override
   Widget build(BuildContext context) {
@@ -156,14 +173,13 @@ class _Abschnitt extends StatelessWidget {
           ),
           const SizedBox(height: 20),
         ],
-        if (teil != null) ...<Widget>[
-          Text(
-            teil.heading,
-            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+        if (teil != null)
+          SchreibText(
+            heading: teil.heading,
+            body: teil.body,
+            aktiv: aktiv,
+            sofort: gelesen,
           ),
-          const SizedBox(height: 10),
-          Text(teil.body, style: const TextStyle(fontSize: 16, height: 1.55)),
-        ],
       ],
     );
   }
