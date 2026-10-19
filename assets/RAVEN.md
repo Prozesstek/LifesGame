@@ -58,13 +58,6 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Faehigkeiten/Eisball.png` | fc1009 |
 | `Faehigkeiten/Wassergrube.png` | fc786 |
 | `Faehigkeiten/FleischfressendePflanze.png` | fc263 |
-
-**Nicht aus dem Paket** sind die zwölf Bilder zu AktivesBretts
-Fähigkeiten (ADR-0074): Zinseszins, Schattenschritt, Kampfrausch,
-Kriegsschrei, Spiegelbild, Parade, Ruhepuls, Kettenblitz, Rammbock,
-ZweiterAtem, Bestform, Rueckspulen. Sie sind gezeichnet von
-`tool/faehigkeit_icons.py` und gehören dem Projekt; wer ein Raven-Bild
-lieber hat, legt es an dieselbe Stelle.
 | `Waffen/Boegen/Kurzbogen.png` | fc1781 |
 | `Waffen/Schwerter/Uebungsklinge.png` | fc1777 |
 | `Waffen/Kolben/Streitkolben.png` | fc1702 |
@@ -115,3 +108,19 @@ lieber hat, legt es an dieselbe Stelle.
 | `Talismane/HerzDesTitanen.png` | fc2141 |
 | `Items/Truhe.png` (Tagestruhe, ADR-0044) | fc6 |
 | `Items/Schluessel.png` (Schlüssel zur Beute, ADR-0048) | fc77 |
+
+**Nicht aus dem Paket** sind die zwölf Bilder zu AktivesBretts
+Fähigkeiten (ADR-0074): Zinseszins, Schattenschritt, Kampfrausch,
+Kriegsschrei, Spiegelbild, Parade, Ruhepuls, Kettenblitz, Rammbock,
+ZweiterAtem, Bestform, Rueckspulen. Sie sind gezeichnet von
+`tool/faehigkeit_icons.py` und gehören dem Projekt; wer ein Raven-Bild
+lieber hat, legt es an dieselbe Stelle.
+
+**Ebenfalls nicht aus dem Paket** sind die zwölf Stücke aus ADR-0077 —
+Langspeer, Blutsichel, Flickenmantel, Nachtmantel, Falkenhaube,
+Fledermaushaube, Hasenlaeufer, Schattenstiefel, Seelenring, Frostreif,
+Echostein, Irrlichtamulett —, die Grundangriffe Speerstich und
+Sichelhieb und ihre sechs Bilder auf der Figur
+(`character/Charakter_<Name>.png`). Gezeichnet von `tool/item_icons.py`,
+die Rüstungen und Helme auf der Figur als umgefärbter Umriss von
+Lederwams und Lederkappe.

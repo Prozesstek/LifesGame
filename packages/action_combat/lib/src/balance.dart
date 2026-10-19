@@ -689,4 +689,30 @@ abstract final class ActionBalance {
   /// Wie oft Rückspulen sich merkt, wo der Held stand: alle so viele
   /// Sekunden ein Bild.
   static const double rewindSampleSeconds = 0.1;
+
+  // --- Die Kräfte der Ausrüstung (ADR-0077) ---
+
+  /// In welchem Takt der Blutpakt Leben abzieht. Die Menge steht am
+  /// Eintrag (`BloodPact.drainShare`), hier nur, wie oft sie fällt — in
+  /// halben Sekunden wie jeder Dauerschaden.
+  static const double bloodDrainTick = 0.5;
+
+  /// Wie weit eine Heilung reicht, die der Blutpakt zum Schaden macht.
+  /// Steht dort niemand, den der Held sieht, verpufft sie.
+  static const double bloodLashRange = 240;
+
+  /// In welchem Takt der Frostreif friert, und wie lange seine Bremse
+  /// nach dem Hinauslaufen hält.
+  static const double frostAuraTick = 0.5;
+  static const double frostAuraHold = 0.25;
+
+  /// Irrlichter: wie schnell sie fliegen, wie gross sie sind, wie weit
+  /// und wie schnell sie um den Helden kreisen.
+  static const double wispSpeed = 220;
+  static const double wispRadius = 5;
+  static const double wispOrbitRadius = 24;
+  static const double wispOrbitSpeed = 2.4;
+
+  /// Wie breit der Stich des Langspeers ist — von der Mitte zum Rand.
+  static const double spearHalfWidth = 9;
 }

@@ -138,7 +138,7 @@ void main() {
         level: LevelCatalog.grube,
         heroStats: ActionStats.frisch,
         abilityIds: const <String>['steinhaut'],
-        modifiers: PitLegendaries.weitblick.modifiers,
+        modifiers: PitGearPowers.weitblick.modifiers,
       );
       expect(
         welt.slots.single.cooldown,
@@ -147,12 +147,15 @@ void main() {
     });
   });
 
-  group('Die legendären Kräfte', () {
+  group('Die Kräfte der Ausrüstung', () {
     test('eindeutige Ids, und jede verändert etwas', () {
-      final ids = PitLegendaries.all.map((l) => l.id).toList();
+      final ids = PitGearPowers.all.map((l) => l.id).toList();
       expect(ids.toSet(), hasLength(ids.length));
 
-      for (final kraft in PitLegendaries.all) {
+      for (final kraft in PitGearPowers.all) {
+        // Eine Kraft am Helden (ADR-0077) lässt die Fähigkeiten, wie sie
+        // sind; sie wirkt, weil sie ein Passiv mitbringt.
+        if (kraft.modifiers.any((m) => m is GrantPassive)) continue;
         final veraendert = PitAbilities.all.any((a) {
           final b = PitModifiers.apply(a, kraft.modifiers);
           return b.manaCost != a.manaCost ||
@@ -164,7 +167,7 @@ void main() {
     });
 
     test('jede Fähigkeit, die eine Kraft nennt, gibt es', () {
-      for (final kraft in PitLegendaries.all) {
+      for (final kraft in PitGearPowers.all) {
         for (final mod in kraft.modifiers.whereType<AddEffects>()) {
           expect(
             PitAbilities.byId(mod.abilityId),

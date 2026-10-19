@@ -166,7 +166,7 @@ class GearItem {
     required this.bonus,
     required this.why,
     this.setId,
-    this.legendaryPower,
+    this.power,
   });
 
   /// Stabiler Bezeichner für Speicherstände und Tests.
@@ -210,12 +210,16 @@ class GearItem {
 
   bool get isSetPiece => setId != null;
 
-  /// Was dieses Stück an Fähigkeiten verändert — nur bei legendären
-  /// (ADR-0039).
+  /// Die Kraft des Stücks, oder null: was es in der Grube an Fähigkeiten
+  /// oder am Helden verändert.
+  ///
+  /// **Bis ADR-0077 nur bei legendären** (ADR-0039). Seitdem darf jede
+  /// Seltenheit eine tragen — der Frostreif, aber auch die gewöhnlichen
+  /// Hasenläufer. Die Seltenheit sagt, wie stark sie ist, nicht ob.
   ///
   /// **Hier steht nur die Id**, die Wirkung steht in
-  /// `package:action_combat` (`PitLegendaries`). Dieses Package kennt die
+  /// `package:action_combat` (`PitGearPowers`). Dieses Package kennt die
   /// Grube nicht, dieselbe Trennung wie bei den Waffenzügen. Dass jede Id
   /// dort ankommt, prüft `test/pit_test.dart` in der App.
-  final String? legendaryPower;
+  final String? power;
 }

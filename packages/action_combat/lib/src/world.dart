@@ -18,6 +18,7 @@ part 'aim.dart';
 part 'boss.dart';
 part 'effects.dart';
 part 'enemies.dart';
+part 'gear_powers.dart';
 part 'hero_states.dart';
 part 'summons.dart';
 
@@ -58,6 +59,17 @@ class ActionWorld {
               .map((a) => PitModifiers.apply(a, modifiers)),
         ),
         ultimate = _ultimateFor(ultimateId, modifiers) {
+    // Passive Wirkungen liegen auf einem Platz und gelten den ganzen
+    // Lauf; gesammelt wird einmal (ADR-0074). Seit ADR-0077 bringt auch
+    // die Ausrüstung welche mit — als [GrantPassive] unter den
+    // Veränderungen, die Sets und Kräfte liefern.
+    _passives = List<PitPassive>.unmodifiable(<PitPassive>[
+      for (final ability in slots)
+        for (final effect in ability.effects)
+          if (effect is PitPassive) effect,
+      for (final modifier in modifiers)
+        if (modifier is GrantPassive) modifier.passive,
+    ]);
     _hero = ActionEntity(
       id: _nextId++,
       faction: Faction.held,
@@ -73,18 +85,12 @@ class ActionWorld {
       speed: ActionBalance.heroSpeed,
       attackRange: weapon.range,
       attackCooldown: heroStats.attackCooldown * weapon.cooldownFactor,
-      critChance: heroStats.critChance + ActionBalance.heroBaseCritChance,
+      critChance:
+          heroStats.critChance + ActionBalance.heroBaseCritChance + _critBonus,
       critFactor: heroStats.critFactor,
     );
     _entities.add(_hero);
     _hpZuvor = _hero.hp;
-    // Passive Wirkungen liegen auf einem Platz und gelten den ganzen
-    // Lauf; gesammelt wird einmal (ADR-0074).
-    _passives = List<PitPassive>.unmodifiable(<PitPassive>[
-      for (final ability in slots)
-        for (final effect in ability.effects)
-          if (effect is PitPassive) effect,
-    ]);
     _damageByRoom = List<int>.filled(level.rooms.length, 0);
 
     for (final spawn in level.spawns) {
@@ -218,7 +224,8 @@ class ActionWorld {
 
   // --- Seit ADR-0074 ---
 
-  /// Die passiven Wirkungen auf den Plätzen.
+  /// Die passiven Wirkungen auf den Plätzen — und seit ADR-0077 die der
+  /// Ausrüstung.
   late final List<PitPassive> _passives;
 
   /// Rage: wie viele Treffer gezählt sind, und wie lange sie noch halten.
@@ -258,6 +265,29 @@ class ActionWorld {
   /// Der Rammbock: womit dieser Sturm rammt, und wen er schon traf.
   Dash? _ram;
   final Set<int> _rammed = <int>{};
+
+  // --- Seit ADR-0077: die Kräfte der Ausrüstung ---
+
+  /// Irrlichter: die fliegenden, bis zum nächsten, und wo der Kreis
+  /// gerade steht.
+  final List<_Wisp> _wisps = <_Wisp>[];
+  double _wispTimer = 0;
+  double _wispAngle = 0;
+
+  /// Frostreif und Blutpakt: der Takt ihres Schadens.
+  double _auraTick = 0;
+  double _drainTick = 0;
+
+  /// Flickwerk: was der Schild noch fängt, und wie lange der Held nichts
+  /// eingesteckt hat.
+  int _shield = 0;
+  double _sinceHeroHurt = 0;
+
+  /// Hasenlauf: wie lange noch schneller.
+  double _rushLeft = 0;
+
+  /// Echo: wie viele Fähigkeiten mit Schaden seit dem letzten Echo.
+  int _echoCount = 0;
 
   /// Wie lange die Prisma-Barriere noch hält, und wie viel sie zurückwirft.
   double _reflectLeft = 0;
@@ -414,6 +444,27 @@ class ActionWorld {
 
   /// Wie voll die Ultimate ist, 0 bis 1 — für den Ladering.
   double get ultimateCharge => _ultimateCharge;
+
+  // --- Was die Ausrüstung zeigt (ADR-0077) ---
+
+  /// Die Irrlichter, die gerade fliegen.
+  List<WispView> get wisps => <WispView>[
+        for (final w in _wisps)
+          WispView(position: w.position, seeking: w.targetId != null),
+      ];
+
+  /// Wie gross der Frostreif ist, oder null ohne ihn.
+  double? get frostAuraRadius => _gear<FrostAura>()?.radius;
+
+  /// Was der Schild aus dem Flickwerk noch fängt, 0 bis 1.
+  double get shieldRatio {
+    final flick = _gear<IdleShield>();
+    if (flick == null || _shield <= 0) return 0;
+    return (_shield / (_hero.maxHp * flick.share)).clamp(0.0, 1.0);
+  }
+
+  /// Ob das volle Vampirset getragen wird — der Held blutet.
+  bool get isBloodPact => _pact != null;
 
   /// Ob der Held gerade einen Self-Buff trägt — für die Darstellung.
   bool get isBuffed =>
@@ -588,6 +639,7 @@ class ActionWorld {
       _affect(zone);
     }
     _zones.addAll(flaechen.values);
+    _maybeEcho(gewirkt, plan);
     return true;
   }
 
@@ -617,7 +669,11 @@ class ActionWorld {
     );
   }
 
+  /// Heilt den Helden — **die eine Stelle für jede Heilung** ausser dem
+  /// Lebensraub. Mit dem Blutpakt trifft sie stattdessen einen Gegner
+  /// (ADR-0077).
   void _healHero(int menge) {
+    if (_bloodRedirect(menge)) return;
     final vorher = _hero.hp;
     _hero.hp = math.min(_hero.maxHp, _hero.hp + menge);
     _events.add(HeroHealed(at: _hero.position, amount: _hero.hp - vorher));
@@ -685,8 +741,11 @@ class ActionWorld {
     if (!target.isHero) return schaden;
     // Nach dem Rückspulen trifft nichts (ADR-0074).
     if (_invulnLeft > 0) return 0;
-    if (_wardLeft <= 0) return schaden;
-    return math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
+    final gemindert = _wardLeft <= 0
+        ? schaden
+        : math.max(ActionBalance.minDamage, (schaden * _wardFactor).round());
+    // Das Flickwerk fängt zuletzt, was durch alles andere kam (ADR-0077).
+    return _absorb(gemindert);
   }
 
   /// Was sich gerade ankündigt und dem Helden schaden wird — die Ringe
@@ -838,6 +897,7 @@ class ActionWorld {
     _tickZones(dt);
     _tickTraps(dt);
     _tickCompanion(dt);
+    _tickGearPowers(dt);
     _tickShoves(dt);
     _enemiesAct(dt);
     _tickStatus(dt);
@@ -955,9 +1015,7 @@ class ActionWorld {
       return;
     }
 
-    final ziele =
-        weapon.cleave ? _enemiesWithin(weapon.range) : <ActionEntity>[ziel];
-    for (final getroffen in ziele) {
+    for (final getroffen in _weaponTargets(ziel)) {
       for (var i = 0; i < weapon.hits && getroffen.isAlive; i++) {
         _weaponLanded(getroffen);
       }
@@ -1312,9 +1370,14 @@ class ActionWorld {
           _collectTime(orb);
           continue;
         }
+        _orbsCollected++;
+        // Mit dem Blutpakt heilt auch eine Kugel nicht (ADR-0077).
+        if (_bloodRedirect(orb.heal)) {
+          _events.add(OrbCollected(at: _hero.position, healed: 0));
+          continue;
+        }
         final vorher = _hero.hp;
         _hero.hp = math.min(_hero.maxHp, _hero.hp + orb.heal);
-        _orbsCollected++;
         _events.add(
           OrbCollected(at: _hero.position, healed: _hero.hp - vorher),
         );
@@ -1405,6 +1468,9 @@ class ActionWorld {
 
     if (leech > 0 && attacker.isHero && wirklich > 0) {
       _healHero((wirklich * leech).round());
+    }
+    if (attacker.isHero && !byCompanion) {
+      _afterHeroHit(target, wirklich, kritisch);
     }
     if (target.isHero && !attacker.isHero && _reflectLeft > 0) {
       final zurueck = attacker.takeDamage(
@@ -1610,6 +1676,7 @@ class ActionWorld {
       _maybeDropOrb(entity);
       _maybeDropTime(entity);
       _dropLoot(entity);
+      _onKill();
       _events.add(
         EntityDied(
           id: entity.id,

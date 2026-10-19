@@ -335,7 +335,11 @@ class ActionGame extends Game {
             HeroBlinked() ||
             AttackParried() ||
             ChainJumped() ||
-            LastStandTriggered():
+            LastStandTriggered() ||
+            BloodLashed() ||
+            WispBurst() ||
+            ShieldRaised() ||
+            AbilityEchoed():
           if (event is CompanionStruck) _abbildSchlaegt(event);
           _neueArten.melde(event);
       }

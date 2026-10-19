@@ -49,6 +49,16 @@ class NeueArtenBild {
         _blitze.add(_Blitz.faden(from, to, farbe: Palette.tintBlitz));
       case LastStandTriggered(:final at):
         _blitze.add(_Blitz.ring(at, Palette.tintNatur, 44));
+      // --- Die Kräfte der Ausrüstung (ADR-0077) ---
+      case BloodLashed(:final from, :final to):
+        _blitze.add(_Blitz.faden(from, to, farbe: Palette.tintBlut));
+        _blitze.add(_Blitz.ring(to, Palette.tintBlut, 16));
+      case WispBurst(:final at, :final radius):
+        _blitze.add(_Blitz.ring(at, Palette.tintIrrlicht, radius));
+      case ShieldRaised(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSchutz, 30));
+      case AbilityEchoed(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSeele, 34));
       default:
         return false;
     }
@@ -78,6 +88,7 @@ class NeueArtenBild {
 
   /// Was am Boden liegt — unter den Figuren.
   void drawBoden(Canvas canvas, ActionWorld welt) {
+    _frostreif(canvas, welt);
     for (final falle in welt.traps) {
       final mitte = Offset(falle.center.x, falle.center.y);
       canvas.drawCircle(
@@ -125,6 +136,7 @@ class NeueArtenBild {
     _status(canvas, welt);
     _begleiter(canvas, welt);
     _heldenZustand(canvas, welt);
+    _ausruestung(canvas, welt);
     if (welt.isBuffed) {
       final held = welt.heroView;
       canvas.drawCircle(
@@ -238,6 +250,75 @@ class NeueArtenBild {
         ),
         1.6,
         Paint()..color = Palette.tintLava,
+      );
+    }
+  }
+
+  /// Der Frostreif liegt als blasser Kreis unter dem Helden und atmet
+  /// leicht (ADR-0077).
+  void _frostreif(Canvas canvas, ActionWorld welt) {
+    final radius = welt.frostAuraRadius;
+    if (radius == null) return;
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+    final atem = radius * (1 + 0.04 * math.sin(welt.elapsed * 2));
+    canvas.drawCircle(
+      mitte,
+      atem,
+      Paint()..color = Palette.tintEis.withValues(alpha: 0.12),
+    );
+    canvas.drawCircle(
+      mitte,
+      atem,
+      Paint()
+        ..color = Palette.tintEis.withValues(alpha: 0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  /// Was die Ausrüstung am Helden zeigt (ADR-0077): Irrlichter als
+  /// leuchtende Punkte, das Flickwerk als Ring, der mit dem Schild
+  /// schwindet, und der Blutpakt als Puls in der Farbe des Bluts.
+  void _ausruestung(Canvas canvas, ActionWorld welt) {
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+
+    for (final licht in welt.wisps) {
+      final wo = Offset(licht.position.x, licht.position.y);
+      canvas.drawCircle(
+        wo,
+        ActionBalance.wispRadius + 3,
+        Paint()..color = Palette.tintIrrlicht.withValues(alpha: 0.3),
+      );
+      canvas.drawCircle(
+        wo,
+        ActionBalance.wispRadius,
+        Paint()..color = Palette.tintIrrlicht,
+      );
+    }
+
+    final schild = welt.shieldRatio;
+    if (schild > 0) {
+      canvas.drawCircle(
+        mitte,
+        held.radius + 6,
+        Paint()
+          ..color = Palette.tintSchutz.withValues(alpha: 0.3 + 0.5 * schild)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1 + 2 * schild,
+      );
+    }
+
+    if (welt.isBloodPact) {
+      final puls = 0.5 + 0.5 * math.sin(welt.elapsed * 4);
+      canvas.drawCircle(
+        mitte,
+        held.radius + 3,
+        Paint()
+          ..color = Palette.tintBlut.withValues(alpha: 0.25 + 0.35 * puls)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
       );
     }
   }

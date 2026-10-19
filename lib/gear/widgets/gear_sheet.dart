@@ -150,11 +150,11 @@ class GearSheet extends ConsumerWidget {
                 _Zeile(label: 'Set', wert: '„${set.name}"'),
                 _Zeile(
                   label: '${GearSet.smallSize} Teile',
-                  wert: set.twoPiece.labels.join(', '),
+                  wert: setPerkText(set, set.twoPiece),
                 ),
                 _Zeile(
                   label: '${GearSet.fullSize} Teile',
-                  wert: set.fourPiece.labels.join(', '),
+                  wert: setPerkText(set, set.fourPiece),
                 ),
                 _Zeile(
                   label: 'Getragen',

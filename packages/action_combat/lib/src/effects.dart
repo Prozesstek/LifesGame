@@ -420,7 +420,7 @@ extension _Effects on ActionWorld {
 
   double get _attackBuff => _buffAttackLeft > 0 ? _buffAttack : 1;
   double get _hasteBuff => _buffHasteLeft > 0 ? _buffHaste : 1;
-  double get _speedBuff => _buffSpeedLeft > 0 ? _buffSpeed : 1;
+  double get _speedBuff => (_buffSpeedLeft > 0 ? _buffSpeed : 1) * _rushFactor;
 
   void _tickBuffs(double dt) {
     if (_buffAttackLeft > 0) _buffAttackLeft -= dt;

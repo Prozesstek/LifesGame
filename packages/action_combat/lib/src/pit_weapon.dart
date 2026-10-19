@@ -25,6 +25,8 @@ class PitWeapon {
     this.cleave = false,
     this.manaOnHit = 0,
     this.burnPerSecond = 0,
+    this.pierce = false,
+    this.arcDegrees = 0,
   });
 
   final String moveId;
@@ -54,9 +56,17 @@ class PitWeapon {
 
   /// Brand je Sekunde auf dem Getroffenen, als Vielfaches des Angriffs.
   final double burnPerSecond;
+
+  /// Ob der Stoss **alle in einer Linie** trifft — der Langspeer
+  /// (ADR-0077). Breit ist sie `ActionBalance.spearHalfWidth`.
+  final bool pierce;
+
+  /// Ein Bogen vor dem Helden, so viele Grad weit: Alle darin werden
+  /// getroffen — die Blutsichel (ADR-0077). Null heisst: nur der eine.
+  final double arcDegrees;
 }
 
-/// Die acht Waffen und der leere Platz.
+/// Die zehn Waffen und der leere Platz.
 ///
 /// Hier wird geschrieben wie in `pit_ability.dart`. Wer eine ändert, lässt
 /// `dart run tool/pit_sim.dart` laufen.
@@ -142,6 +152,31 @@ abstract final class PitWeapons {
     burnPerSecond: 0.25,
   );
 
+  // --- Seit ADR-0077 ---
+
+  /// Weiter als jede Nahkampfwaffe, und wer hintereinander steht, wird
+  /// zusammen getroffen.
+  static const PitWeapon speerstich = PitWeapon(
+    moveId: 'spear_thrust',
+    name: 'Speerstich',
+    power: 1.1,
+    cooldownFactor: 1.15,
+    range: 68,
+    pierce: true,
+  );
+
+  /// Schnelle Hiebe im Bogen, jeder für sich schwach — die Waffe des
+  /// Vampirsets: Wer viele trifft, raubt viel.
+  static const PitWeapon sichelhieb = PitWeapon(
+    moveId: 'sickle_reap',
+    name: 'Sichelhieb',
+    // Erst 0,75: Stufe 13 nur zu 3 %, der Bogen zu 18 %.
+    power: 0.9,
+    cooldownFactor: 0.8,
+    range: 40,
+    arcDegrees: 120,
+  );
+
   static const List<PitWeapon> all = <PitWeapon>[
     kurzbogen,
     hieb,
@@ -151,6 +186,8 @@ abstract final class PitWeapons {
     spalter,
     doppelschuss,
     sonnenhieb,
+    speerstich,
+    sichelhieb,
   ];
 
   /// `null` für einen Zug, der keine Waffe ist.

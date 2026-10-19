@@ -258,13 +258,17 @@ void main() {
       expect(weaponAbilityLine(bogen), contains('schießt'));
     });
 
-    test('nur legendäre Stücke nennen eine legendäre Kraft', () {
+    test('jedes Stück mit einer Kraft nennt sie, jedes Legendäre hat eine', () {
+      // Seit ADR-0077 tragen Kräfte nicht mehr nur legendäre Stücke.
       for (final item in GearCatalog.all) {
-        final zeile = legendaryPowerLine(item);
-        if (item.rarity == GearRarity.legendary) {
-          expect(zeile, startsWith('Legendär: '), reason: item.name);
+        final zeile = gearPowerLine(item);
+        if (item.power != null) {
+          expect(zeile, startsWith('Kraft: '), reason: item.name);
         } else {
           expect(zeile, isNull, reason: item.name);
+        }
+        if (item.rarity == GearRarity.legendary) {
+          expect(zeile, isNotNull, reason: item.name);
         }
       }
     });

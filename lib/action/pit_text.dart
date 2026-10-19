@@ -51,6 +51,8 @@ String pitWeaponSummary(PitWeapon waffe) {
     else
       '×${pitNumber(waffe.power)} Schaden',
     if (waffe.cleave) 'trifft alle in Reichweite',
+    if (waffe.pierce) 'trifft alle in einer Linie',
+    if (waffe.arcDegrees > 0) 'trifft alle im Bogen',
     if (waffe.cooldownFactor > 1) 'langsam',
     if (waffe.cooldownFactor < 1) 'schnell',
     if (waffe.manaOnHit > 0) '+${waffe.manaOnHit} Mana je Treffer',
@@ -144,6 +146,12 @@ List<PitStat> pitWeaponStats(PitWeapon waffe, {int? attack}) {
             : '×${pitNumber(1 / waffe.cooldownFactor)} schneller',
       ),
     if (waffe.cleave) (label: 'Trifft', value: 'alle in Reichweite'),
+    if (waffe.pierce) (label: 'Trifft', value: 'alle in einer Linie'),
+    if (waffe.arcDegrees > 0)
+      (
+        label: 'Trifft',
+        value: 'alle im Bogen von ${waffe.arcDegrees.round()} Grad',
+      ),
     if (waffe.manaOnHit > 0)
       (label: 'Mana je Treffer', value: '+${waffe.manaOnHit}'),
     if (waffe.burnPerSecond > 0)
@@ -452,5 +460,83 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
             '${((1 - wardFactor) * 100).round()} % weniger Schaden, '
             '${pitNumber(wardSeconds)} s',
       ));
+    // --- Die Kräfte der Ausrüstung (ADR-0077) ---
+    case LifeSteal(:final share):
+      stats.add((
+        label: 'Lebensraub',
+        value: '${_prozent(share)} des Schadens',
+      ));
+    case BloodPact(
+      :final drainShare,
+      :final stealFactor,
+      :final stealDamageShare,
+    ):
+      stats.add((
+        label: 'Blutpakt',
+        value: '−${_prozent(drainShare)} Leben je Sekunde, immer',
+      ));
+      stats.add((
+        label: 'Lebensraub',
+        value:
+            '×${pitNumber(stealFactor)}, ${_prozent(stealDamageShare)} '
+            'davon trifft den Gegner',
+      ));
+      stats.add((
+        label: 'Heilung',
+        value: 'heilt nicht, trifft den nächsten Gegner',
+      ));
+    case HealOnKill(:final share):
+      stats.add((label: 'Je Kill', value: 'heilt ${_prozent(share)} Leben'));
+    case FrostAura(:final radius, :final slowFactor, :final perSecond):
+      stats.add((
+        label: 'Frostreif',
+        value: 'Umkreis ${radius.round()}, bremst auf ${_prozent(slowFactor)}',
+      ));
+      stats.add((
+        label: 'Kälte',
+        value: '${_schaden(perSecond, attack)} je Sekunde',
+      ));
+    case Wisps(
+      :final interval,
+      :final maxCount,
+      :final seekRange,
+      :final power,
+    ):
+      stats.add((
+        label: 'Irrlichter',
+        value:
+            'alle ${pitNumber(interval)} s eins, bis $maxCount; suchen bis '
+            '${seekRange.round()}',
+      ));
+      stats.add((label: 'Schaden', value: _schaden(power, attack)));
+    case KillRush(:final seconds, :final speed):
+      stats.add((
+        label: 'Je Kill',
+        value: '${pitNumber(seconds)} s ×${pitNumber(speed)} so schnell',
+      ));
+    case ManaOnKill(:final amount):
+      stats.add((label: 'Je Kill', value: '+$amount Mana'));
+    case CritEdge(:final chance, :final manaOnCrit):
+      stats.add((
+        label: 'Kritisch',
+        value: '+${_prozent(chance)}, je Treffer +$manaOnCrit Mana',
+      ));
+    case IdleShield(:final idleSeconds, :final share):
+      stats.add((
+        label: 'Schild',
+        value:
+            '${_prozent(share)} des Lebens nach ${pitNumber(idleSeconds)} s '
+            'ohne Treffer',
+      ));
+    case Echo(:final every, :final power):
+      stats.add((
+        label: 'Echo',
+        value:
+            'jede $every. Fähigkeit mit Schaden noch einmal, '
+            '×${pitNumber(power)}',
+      ));
   }
 }
+
+/// „4 %" aus 0,04.
+String _prozent(double anteil) => '${(anteil * 100).round()} %';

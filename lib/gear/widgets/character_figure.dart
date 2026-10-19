@@ -53,6 +53,9 @@ class CharacterFigure extends StatelessWidget {
     'gear-runenkrone': 'assets/character/Charakter_Runenkrone.png',
     'gear-krone-des-hochwaechters':
         'assets/character/Charakter_KroneDesHochwaechters.png',
+    // Seit ADR-0077 — umgefärbte Lederkappe, `tool/item_icons.py`
+    'gear-falkenhaube': 'assets/character/Charakter_Falkenhaube.png',
+    'gear-fledermaushaube': 'assets/character/Charakter_Fledermaushaube.png',
     // Rüstung — erzeugt
     'gear-lederwams': 'assets/character/Charakter_Lederwams.png',
     'gear-gestepptes-wams': 'assets/character/Charakter_GesteppteWams.png',
@@ -63,6 +66,9 @@ class CharacterFigure extends StatelessWidget {
         'assets/character/Charakter_Drachenschuppenpanzer.png',
     'gear-runenharnisch': 'assets/character/Charakter_Runenharnisch.png',
     'gear-titanenpanzer': 'assets/character/Charakter_Titanenpanzer.png',
+    // Seit ADR-0077 — umgefärbtes Lederwams, `tool/item_icons.py`
+    'gear-flickenmantel': 'assets/character/Charakter_Flickenmantel.png',
+    'gear-nachtmantel': 'assets/character/Charakter_Nachtmantel.png',
     // Waffe — erzeugt
     'gear-kurzbogen': 'assets/character/Charakter_Kurzbogen.png',
     'gear-uebungsklinge': 'assets/character/Charakter_Uebungsklinge.png',
@@ -73,6 +79,9 @@ class CharacterFigure extends StatelessWidget {
     'gear-zweihaender': 'assets/character/Charakter_Zweihaender.png',
     'gear-langbogen': 'assets/character/Charakter_Langbogen.png',
     'gear-sonnenklinge': 'assets/character/Charakter_Sonnenklinge.png',
+    // Seit ADR-0077 — gezeichnet, `tool/item_icons.py`
+    'gear-langspeer': 'assets/character/Charakter_Langspeer.png',
+    'gear-blutsichel': 'assets/character/Charakter_Blutsichel.png',
   };
 
   /// Die Zeichnungen, die über der Figur liegen, von unten nach oben.

@@ -163,21 +163,54 @@ void main() {
       );
       expect(legendaer, isNotEmpty);
       for (final item in legendaer) {
-        expect(
-          PitLegendaries.byId(item.legendaryPower),
-          isNotNull,
-          reason: item.name,
-        );
+        expect(PitGearPowers.byId(item.power), isNotNull, reason: item.name);
+      }
+    });
+
+    test('jede Kraft an einem Stück oder Set gibt es in der Grube', () {
+      // Seit ADR-0077 tragen auch andere Seltenheiten und Sets eine.
+      for (final item in GearCatalog.all) {
+        if (item.power == null) continue;
+        expect(PitGearPowers.byId(item.power), isNotNull, reason: item.name);
+      }
+      for (final set in GearSets.all) {
+        for (final id in <String>[
+          ...set.twoPiece.powers,
+          ...set.fourPiece.powers,
+        ]) {
+          expect(PitGearPowers.byId(id), isNotNull, reason: '${set.name}: $id');
+        }
       }
     });
 
     test('keine Kraft liegt auf zwei Stücken, keine auf keinem', () {
-      final vergeben = GearCatalog.all
-          .map((i) => i.legendaryPower)
-          .whereType<String>()
-          .toList();
+      // Eine Kraft hängt an genau einem Stück oder an einer Stufe eines
+      // Sets (ADR-0077), nie an zweien und nie an keinem.
+      final vergeben = <String>[
+        ...GearCatalog.all.map((i) => i.power).whereType<String>(),
+        for (final set in GearSets.all) ...<String>[
+          ...set.twoPiece.powers,
+          ...set.fourPiece.powers,
+        ],
+      ];
       expect(vergeben.toSet(), hasLength(vergeben.length));
-      expect(vergeben.toSet(), PitLegendaries.all.map((l) => l.id).toSet());
+      expect(vergeben.toSet(), PitGearPowers.all.map((l) => l.id).toSet());
+    });
+
+    test('ein volles Vampirset blutet in der Grube', () {
+      final teile = GearCatalog.piecesOf(GearSets.vampir.id);
+      final welt = ActionWorld(
+        level: LevelCatalog.grube,
+        heroStats: ActionStats.gereift,
+        modifiers: pitModifiersFor(<ActiveSet>[
+          ActiveSet(
+            set: GearSets.vampir,
+            pieces: teile.length,
+            perk: GearSets.vampir.fourPiece,
+          ),
+        ], teile),
+      );
+      expect(welt.isBloodPact, isTrue);
     });
 
     test('ein getragenes Set kommt als Veränderung in der Grube an', () {

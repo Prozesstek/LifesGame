@@ -1,6 +1,6 @@
 import 'gear_set.dart';
 
-/// Die drei Sets des Spiels.
+/// Die Sets des Spiels: drei offene, seit ADR-0077 ein verdientes.
 ///
 /// **Jedes wirkt auf genau eine Art von Fähigkeit.** Ein Set, das jede
 /// Fähigkeit gleich verstärkt, wäre nur ein größerer Bonus — man nimmt das
@@ -61,7 +61,33 @@ abstract final class GearSets {
         'breitere, langsamere Leiste macht Schutz verlässlich statt stark.',
   );
 
+  /// Der Held selbst: Lebensraub, und mit allen vier ein Pakt (ADR-0077).
+  ///
+  /// **Das erste verdiente Set**: Seine Teile sind episch, also erst ab
+  /// Sprosse zehn zu haben (`GearGates`). Die drei Sets oben sollen in
+  /// dreissig Tagen erreichbar sein; dieses verlangt, dass man schon
+  /// Heilfähigkeiten hat, die es zu Schaden machen kann.
+  static const GearSet vampir = GearSet(
+    id: 'set-vampir',
+    name: 'Vampir',
+    target: SetTarget.held,
+    twoPiece: SetPerk(powers: <String>['kraft-blutdurst']),
+    fourPiece: SetPerk(powers: <String>['kraft-blutpakt']),
+    why: 'Jedes Teil raubt Leben. Mit allen vieren blutet man dauernd, '
+        'raubt doppelt — und keine Heilung heilt mehr, sie trifft den '
+        'nächsten Gegner. Für alle, die nie aufhören zu schlagen.',
+  );
+
   static const List<GearSet> all = <GearSet>[
+    eisernerWille,
+    sturmruf,
+    ruhigerStand,
+    vampir,
+  ];
+
+  /// Die drei Sets, die von Anfang an zu haben sind — und deshalb gleich
+  /// viel kosten müssen (`set_catalog_test.dart`).
+  static const List<GearSet> open = <GearSet>[
     eisernerWille,
     sturmruf,
     ruhigerStand,

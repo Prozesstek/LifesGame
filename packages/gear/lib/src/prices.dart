@@ -27,12 +27,16 @@
 ///
 /// | Platz | Gewöhnlich | Ungewöhnlich | Selten | Episch | Legendär |
 /// |---|---|---|---|---|---|
-/// | Waffe | 90 · 160 | 410 · 510 | 650 | 770 · 900 | 1200 |
-/// | Rüstung | 110 · 190 | 450 · 560 | 690 | 830 · 970 | 1300 |
-/// | Helm | 70 · 130 | 280 · 370 | 510 | 630 · 730 | 1000 |
-/// | Schuhe | 70 · 130 | 270 · 350 | 480 | 600 · 700 | 970 |
-/// | Ring | 120 · 210 | 490 · 590 | 700 | 870 · 1000 | 1330 |
-/// | Talisman | 100 · 180 | 350 · 440 | 590 | 730 · 870 | 1170 |
+/// | Waffe | 90 · 160 | 410 · 510 · **580** | 650 | 770 · 900 · **960** | 1200 |
+/// | Rüstung | 110 · 190 | 450 · 560 | **640** · 690 | 830 · 970 · **1010** | 1300 |
+/// | Helm | 70 · 130 | 280 · 370 · **420** | 510 | 630 · 730 · **770** | 1000 |
+/// | Schuhe | 70 · 130 · **160** | 270 · 350 | 480 | 600 · 700 · **740** | 970 |
+/// | Ring | 120 · 210 | 490 · 590 | **650** · 700 | 870 · 1000 | **1250** · 1330 |
+/// | Talisman | 100 · 180 | 350 · 440 | 590 · **620** | 730 · 870 | 1170 · **1220** |
+///
+/// Fett die zwölf aus ADR-0077. Jedes reiht sich in seine Seltenheit
+/// ein, ohne die Grenzen darüber zu verschieben: Selten bleibt das
+/// teuerste Offene, Episch liegt über Selten, Legendär über Episch.
 ///
 /// **Episch und Legendär sind nicht über den Preis knapp, sondern über die
 /// Gegnerreihe** (`GearGates`, ADR-0034). Deshalb liegen sie nur mäßig
@@ -126,4 +130,19 @@ abstract final class GearPrices {
   static const int talismanEpic1 = 730;
   static const int talismanEpic2 = 870;
   static const int talismanLegendary = 1170;
+
+  // --- Seit ADR-0077: zwei je Platz ---
+
+  static const int langspeer = 580;
+  static const int blutsichel = 960;
+  static const int flickenmantel = 640;
+  static const int nachtmantel = 1010;
+  static const int falkenhaube = 420;
+  static const int fledermaushaube = 770;
+  static const int hasenlaeufer = 160;
+  static const int schattenstiefel = 740;
+  static const int seelenring = 650;
+  static const int frostreif = 1250;
+  static const int echostein = 620;
+  static const int irrlichtamulett = 1220;
 }

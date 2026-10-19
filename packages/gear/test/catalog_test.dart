@@ -56,50 +56,42 @@ void main() {
       }
     });
 
-    test('jeder Platz führt acht Stücke: fünf offene, drei verdiente', () {
+    test('jeder Platz führt zehn Stücke: sechs offene, vier verdiente', () {
       // Fünf von Anfang an (ADR-0029), drei hinter der Gegnerreihe
-      // (ADR-0034). Beide Zahlen einzeln, damit ein Platz nicht mit acht
-      // offenen und null verdienten durchrutscht.
+      // (ADR-0034), seit ADR-0077 je eins mehr. Beide Zahlen einzeln,
+      // damit ein Platz nicht mit zehn offenen und null verdienten
+      // durchrutscht.
       for (final slot in GearSlot.values) {
         final alle = GearCatalog.forSlot(slot);
         final offen = alle.where((item) => !item.rarity.isGated);
         final verdient = alle.where((item) => item.rarity.isGated);
 
-        expect(offen, hasLength(5), reason: slot.label);
-        expect(verdient, hasLength(3), reason: slot.label);
+        expect(offen, hasLength(6), reason: slot.label);
+        expect(verdient, hasLength(4), reason: slot.label);
       }
     });
 
-    test('jeder Platz hat zwei, zwei, eins — und zwei, eins', () {
-      // Zwei gewöhnliche, zwei ungewöhnliche, ein seltenes; dahinter zwei
-      // epische und ein legendäres. Die Form ist überall dieselbe, damit
-      // ein Platz nicht heimlich reicher wird als ein anderer.
+    test('jeder Platz hat jede Seltenheit, die alte Form darunter', () {
+      // Bis ADR-0077 war die Form überall dieselbe: zwei gewöhnliche, zwei
+      // ungewöhnliche, ein seltenes, dahinter zwei epische und ein
+      // legendäres. Die zwölf neuen Stücke legen sich darüber, je Platz
+      // eins offen und eins verdient — die alte Form bleibt die
+      // Untergrenze, damit kein Platz ärmer wird als vorher.
+      const mindestens = <GearRarity, int>{
+        GearRarity.common: 2,
+        GearRarity.uncommon: 2,
+        GearRarity.rare: 1,
+        GearRarity.epic: 2,
+        GearRarity.legendary: 1,
+      };
       for (final slot in GearSlot.values) {
-        expect(
-          GearCatalog.forSlotAndRarity(slot, GearRarity.epic),
-          hasLength(2),
-          reason: slot.label,
-        );
-        expect(
-          GearCatalog.forSlotAndRarity(slot, GearRarity.legendary),
-          hasLength(1),
-          reason: slot.label,
-        );
-        expect(
-          GearCatalog.forSlotAndRarity(slot, GearRarity.common),
-          hasLength(2),
-          reason: slot.label,
-        );
-        expect(
-          GearCatalog.forSlotAndRarity(slot, GearRarity.uncommon),
-          hasLength(2),
-          reason: slot.label,
-        );
-        expect(
-          GearCatalog.forSlotAndRarity(slot, GearRarity.rare),
-          hasLength(1),
-          reason: slot.label,
-        );
+        for (final MapEntry(key: rarity, value: n) in mindestens.entries) {
+          expect(
+            GearCatalog.forSlotAndRarity(slot, rarity).length,
+            greaterThanOrEqualTo(n),
+            reason: '${slot.label}, ${rarity.label}',
+          );
+        }
       }
     });
 
@@ -188,16 +180,16 @@ void main() {
 
         expect(
           episch.first.price,
-          greaterThan(selten.single.price),
+          greaterThan(selten.last.price),
           reason: slot.label,
         );
         expect(
-          legendaer.single.price,
+          legendaer.first.price,
           greaterThan(episch.last.price),
           reason: slot.label,
         );
         expect(
-          legendaer.single.price / goldProTag,
+          legendaer.last.price / goldProTag,
           lessThanOrEqualTo(80),
           reason: '${slot.label}: Legendär unerreichbar',
         );
@@ -261,7 +253,7 @@ void main() {
         if (selten.isEmpty) continue;
 
         expect(
-          selten.single.price,
+          selten.last.price,
           GearCatalog.forSlot(slot).where((i) => !i.rarity.isGated).last.price,
           reason: 'Auf ${slot.label} ist Selten nicht das teuerste Offene',
         );
