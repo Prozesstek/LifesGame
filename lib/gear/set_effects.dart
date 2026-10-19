@@ -1,14 +1,14 @@
 import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 
-/// Was getragene Sets und legendäre Stücke an den Fähigkeiten der Grube
-/// ändern (ADR-0039).
+/// Was getragene Sets und Stücke mit einer Kraft in der Grube ändern
+/// (ADR-0039, seit ADR-0077 an jeder Seltenheit und auch am Helden).
 ///
 /// **Die Naht zwischen zwei Packages, die einander nicht kennen.**
 /// `package:gear` weiß, welche Stücke ein Set sind und welche Kraft ein
 /// legendäres trägt; `package:action_combat` weiß, was eine Fähigkeit
 /// tut. Gerechnet wird hier nichts: Faktoren kommen aus `GearSets`, die
-/// legendären Kräfte aus `PitLegendaries`. Die eine Umrechnung — ein
+/// legendären Kräfte aus `PitGearPowers`. Die eine Umrechnung — ein
 /// Energiepunkt Rabatt ist so viel Mana wie ein Energiepunkt Vorrat —
 /// liest ihren Kurs aus `ActionBalance`, statt ihn zu wiederholen.
 List<PitModifier> pitModifiersFor(
@@ -17,8 +17,14 @@ List<PitModifier> pitModifiersFor(
 ) {
   return <PitModifier>[
     for (final entry in active) ..._setModifiers(entry),
-    for (final item in equipped)
-      ...?PitLegendaries.byId(item.legendaryPower)?.modifiers,
+    for (final item in equipped) ...?PitGearPowers.byId(item.power)?.modifiers,
+  ];
+}
+
+/// Die Kräfte, die eine Stufe eines Sets mitbringt (ADR-0077).
+List<PitModifier> _setPowers(SetPerk perk) {
+  return <PitModifier>[
+    for (final id in perk.powers) ...?PitGearPowers.byId(id)?.modifiers,
   ];
 }
 
@@ -26,6 +32,7 @@ List<PitModifier> _setModifiers(ActiveSet entry) {
   final art = pitKindFor(entry.set.target);
   final perk = entry.perk;
   return <PitModifier>[
+    ..._setPowers(perk),
     if (perk.damageFactor != 1.0)
       ScaleDamage(factor: perk.damageFactor, kind: art),
     if (perk.energyDiscount != 0)
@@ -38,15 +45,19 @@ List<PitModifier> _setModifiers(ActiveSet entry) {
   ];
 }
 
-/// Welche Art von Fähigkeit zu welchem Set-Ziel gehört.
+/// Welche Art von Fähigkeit zu welchem Set-Ziel gehört — `null` für ein
+/// Set, das auf den Helden wirkt statt auf eine Art (das Vampirset,
+/// ADR-0077). Seine Faktoren träfen dann jede Fähigkeit; es trägt aber
+/// keine, nur Kräfte.
 ///
 /// **Die einzige Stelle, an der die beiden Aufzählungen aufeinandertreffen.**
 /// Ein `switch` ohne Standardfall sorgt dafür, dass ein neuer Wert auf der
 /// einen Seite hier einen Fehler erzeugt statt still durchzurutschen.
-PitKind pitKindFor(SetTarget target) {
+PitKind? pitKindFor(SetTarget target) {
   return switch (target) {
     SetTarget.angriff => PitKind.angriff,
     SetTarget.umgebung => PitKind.umgebung,
     SetTarget.schutz => PitKind.schutz,
+    SetTarget.held => null,
   };
 }

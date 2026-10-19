@@ -138,7 +138,7 @@ void main() {
         level: LevelCatalog.grube,
         heroStats: ActionStats.frisch,
         abilityIds: const <String>['steinhaut'],
-        modifiers: PitLegendaries.weitblick.modifiers,
+        modifiers: PitGearPowers.weitblick.modifiers,
       );
       expect(
         welt.slots.single.cooldown,
@@ -147,12 +147,15 @@ void main() {
     });
   });
 
-  group('Die legendären Kräfte', () {
+  group('Die Kräfte der Ausrüstung', () {
     test('eindeutige Ids, und jede verändert etwas', () {
-      final ids = PitLegendaries.all.map((l) => l.id).toList();
+      final ids = PitGearPowers.all.map((l) => l.id).toList();
       expect(ids.toSet(), hasLength(ids.length));
 
-      for (final kraft in PitLegendaries.all) {
+      for (final kraft in PitGearPowers.all) {
+        // Eine Kraft am Helden (ADR-0077) lässt die Fähigkeiten, wie sie
+        // sind; sie wirkt, weil sie ein Passiv mitbringt.
+        if (kraft.modifiers.any((m) => m is GrantPassive)) continue;
         final veraendert = PitAbilities.all.any((a) {
           final b = PitModifiers.apply(a, kraft.modifiers);
           return b.manaCost != a.manaCost ||
@@ -164,7 +167,7 @@ void main() {
     });
 
     test('jede Fähigkeit, die eine Kraft nennt, gibt es', () {
-      for (final kraft in PitLegendaries.all) {
+      for (final kraft in PitGearPowers.all) {
         for (final mod in kraft.modifiers.whereType<AddEffects>()) {
           expect(
             PitAbilities.byId(mod.abilityId),
@@ -203,6 +206,15 @@ bool _gleich(PitAbility a, PitAbility b) {
         Rock() => 'R${e.seconds}',
         SweepCone() => 'W${e.power}/${e.range}/${e.fling}',
         FreezeBolt() => 'F${e.power}/${e.range}/${e.stunSeconds}',
+        Blink() => 'K${e.distance}',
+        Vanish() => 'V${e.seconds}/${e.ambush}',
+        StunAround() => 'U${e.radius}/${e.seconds}',
+        Parry() => 'Q${e.seconds}/${e.stunSeconds}',
+        Stacking() => 'A${e.step}/${e.window}/${e.maxStacks}',
+        ChainBolt() => 'L${e.power}/${e.range}/${e.jumps}/${e.falloff}',
+        Overdrive() => 'O${e.seconds}/${e.abilityPower}/${e.attackPower}',
+        Rewind() => 'Y${e.seconds}/${e.invulnerableSeconds}',
+        PitPassive() => 'p${e.runtimeType}',
       };
   return a.effects.map(zahlen).join() == b.effects.map(zahlen).join();
 }

@@ -23,18 +23,32 @@ String? weaponAbilityLine(GearItem item) {
   return 'Grundangriff: ${waffe.name} — ${pitWeaponSummary(waffe)}';
 }
 
-/// Die legendäre Kraft eines Stücks, als Zeile für den Laden.
+/// Die Kraft eines Stücks, als Zeile für den Laden — seit ADR-0077 an
+/// jeder Seltenheit, nicht nur an legendären.
 ///
 /// `null` für alles, was keine trägt — und für eine Id, die in der Grube
 /// nicht ankommt. Dass es die nicht gibt, prüft `test/pit_test.dart`.
-String? legendaryPowerLine(GearItem item) {
-  final kraft = PitLegendaries.byId(item.legendaryPower);
+String? gearPowerLine(GearItem item) {
+  final kraft = PitGearPowers.byId(item.power);
   if (kraft == null) return null;
-  return 'Legendär: ${kraft.name} — ${kraft.description}';
+  return 'Kraft: ${kraft.name} — ${kraft.description}';
+}
+
+/// Was eine Stufe eines Sets tut, in Worten: ihre Zahlen und ihre
+/// Kräfte (ADR-0077). Eine Stelle für das Blatt und die Set-Karte.
+String setPerkText(GearSet set, SetPerk perk) {
+  final teile = <String>[
+    if (perk.labels.isNotEmpty)
+      '${perk.labels.join(', ')} auf ${set.target.label}',
+    for (final id in perk.powers)
+      if (PitGearPowers.byId(id) case final kraft?)
+        '${kraft.name} — ${kraft.description}',
+  ];
+  return teile.join(' · ');
 }
 
 /// Alles, was ein Stück an Fähigkeiten verändert, in einer Fläche.
 String? itemAbilityText(GearItem item) {
-  final zeilen = <String>[?weaponAbilityLine(item), ?legendaryPowerLine(item)];
+  final zeilen = <String>[?weaponAbilityLine(item), ?gearPowerLine(item)];
   return zeilen.isEmpty ? null : zeilen.join('\n');
 }

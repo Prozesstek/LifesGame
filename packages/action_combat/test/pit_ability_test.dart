@@ -31,6 +31,13 @@ void main() {
       // Umsonst ist nur, was Mana zurückgibt — sonst wäre sie eine
       // Fähigkeit ohne Preis, und man drückte sie jede Abklingzeit blind.
       for (final ability in PitAbilities.all) {
+        // Ein Passiv hat keinen Knopf, also weder Preis noch Abklingzeit
+        // (ADR-0073); es kostet den Platz.
+        if (ability.isPassive) {
+          expect(ability.manaCost, 0, reason: ability.id);
+          expect(ability.cooldown, 0, reason: ability.id);
+          continue;
+        }
         final bringtMana = ability.effects.any((e) => e is GainMana);
         expect(
           ability.manaCost > 0 || bringtMana,

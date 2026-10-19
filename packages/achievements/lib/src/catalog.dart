@@ -115,6 +115,20 @@ abstract final class AchievementCatalog {
       target: 10,
       moveId: 'glueckstrank',
     ),
+    // Bestform ist die Tagesform als Ultimate: Wer an sieben Tagen alles
+    // Fällige erledigt hat, war siebenmal in Form — die Tagestruhe zählt
+    // genau diese Tage (ADR-0074).
+    Achievement(
+      id: 'sieben-tage-in-form',
+      name: 'Sieben Tage in Form',
+      area: AchievementArea.gewohnheiten,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: 'an 7 Tagen alles erledigt (Tagestruhe geöffnet)',
+      measure: _openedChests,
+      target: 7,
+      moveId: 'bestform',
+    ),
     Achievement(
       id: 'bestaendig',
       name: 'der Beständige',

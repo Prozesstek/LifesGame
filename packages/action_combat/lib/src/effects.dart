@@ -83,12 +83,50 @@ extension _Effects on ActionWorld {
         _dropRock(plan.center, seconds);
       case SweepCone(:final power, :final range, :final fling):
         _sweep(plan, power: power, range: range, fling: fling);
+      // --- ADR-0074 ---
+      case Blink(:final distance):
+        _blink(plan, distance);
+      case Vanish(:final seconds, :final ambush):
+        _vanishLeft = math.max(_vanishLeft, seconds);
+        _ambush = ambush;
+      case StunAround(:final radius, :final seconds):
+        for (final ziel in _enemiesAround(plan.center, radius)) {
+          _stun(ziel, seconds);
+        }
+      case Parry(:final seconds, :final stunSeconds):
+        _parryLeft = seconds;
+        _parryStun = stunSeconds;
+      case ChainBolt(
+          :final power,
+          :final range,
+          :final jumps,
+          :final jumpRange,
+          :final falloff,
+        ):
+        _boltFrom(
+          plan,
+          power: power,
+          range: range,
+          chainJumps: jumps,
+          chainRange: jumpRange,
+          chainFalloff: falloff,
+        );
+      case Overdrive(:final seconds):
+        _overdrive = effect;
+        _overdriveLeft = seconds;
+      case Rewind():
+        _rewind(effect);
+      // Stacking wirkt beim Wirken auf die anderen Wirkungen (`_boosted`),
+      // Passives dauernd — hier gibt es für beide nichts zu tun.
+      case Stacking() || PitPassive():
+        return;
     }
   }
 
   /// Was ein Schlag des Helden gerade wiegt: Angriff mal Faktor mal
   /// Self-Buff. Dauerschaden und Begleiter rechnen damit.
-  double get _heroPower => _hero.attack * _hero.damageMultiplier * _attackBuff;
+  double get _heroPower =>
+      _hero.attack * _hero.damageMultiplier * _heroFactor(fromWeapon: false);
 
   // --- Geschosse ---
 
@@ -100,6 +138,9 @@ extension _Effects on ActionWorld {
     required double range,
     double leech = 0,
     double freeze = 0,
+    int chainJumps = 0,
+    double chainRange = 0,
+    double chainFalloff = 1,
   }) {
     var richtung = plan.direction;
     if (richtung == null) {
@@ -113,6 +154,9 @@ extension _Effects on ActionWorld {
       weite: range,
       leech: leech,
       freeze: freeze,
+      chainJumps: chainJumps,
+      chainRange: chainRange,
+      chainFalloff: chainFalloff,
     );
   }
 
@@ -376,7 +420,7 @@ extension _Effects on ActionWorld {
 
   double get _attackBuff => _buffAttackLeft > 0 ? _buffAttack : 1;
   double get _hasteBuff => _buffHasteLeft > 0 ? _buffHaste : 1;
-  double get _speedBuff => _buffSpeedLeft > 0 ? _buffSpeed : 1;
+  double get _speedBuff => (_buffSpeedLeft > 0 ? _buffSpeed : 1) * _rushFactor;
 
   void _tickBuffs(double dt) {
     if (_buffAttackLeft > 0) _buffAttackLeft -= dt;
@@ -413,6 +457,8 @@ extension _Effects on ActionWorld {
     _hero.facing = richtung;
     _dashVelocity = richtung * (d.distance / ActionBalance.dashSeconds);
     _dashLeft = ActionBalance.dashSeconds;
+    _ram = d.impactPower > 0 ? d : null;
+    _rammed.clear();
     _trail = d.trailPerSecond <= 0
         ? null
         : _DashTrail(
@@ -437,7 +483,34 @@ extension _Effects on ActionWorld {
       _hero.radius,
     );
     _dropTrail();
-    if (_dashLeft <= 0) _trail = null;
+    _ramAlong();
+    if (_dashLeft <= 0) {
+      _trail = null;
+      _ram = null;
+    }
+  }
+
+  /// Der Rammbock (ADR-0074): Wen der Sturm streift, der wird getroffen,
+  /// zur Seite geworfen — weg von der Bahn — und steht kurz still.
+  /// Jeder höchstens einmal je Sturm.
+  void _ramAlong() {
+    final ramm = _ram;
+    if (ramm == null) return;
+    final richtung = _dashVelocity.normalized;
+    final rechts = Vec2(-richtung.y, richtung.x);
+    for (final ziel in _entities.toList()) {
+      if (!ziel.isAlive || ziel.isHero || ziel.untouchable) continue;
+      if (_rammed.contains(ziel.id)) continue;
+      final r = _hero.radius + ziel.radius + 2;
+      if (_hero.position.distanceSquaredTo(ziel.position) > r * r) continue;
+      _rammed.add(ziel.id);
+      _hit(_hero, ziel, powerFactor: ramm.impactPower);
+      final weg = ziel.position - _hero.position;
+      final seite =
+          weg.x * rechts.x + weg.y * rechts.y >= 0 ? rechts : rechts * -1;
+      _shove(ziel, ziel.position + seite * ramm.impactFling);
+      _stun(ziel, ramm.impactStun + ActionBalance.shoveSeconds);
+    }
   }
 
   /// Legt ein Glied der Spur, sobald der Held einen Radius weiter ist.

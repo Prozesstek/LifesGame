@@ -34,7 +34,7 @@ abstract final class AbilityCatalog {
 
   /// Welche Waffe welche Fähigkeit mitbringt.
   ///
-  /// **Acht Waffen, acht verschiedene Züge** — die Tabelle aus ADR-0017,
+  /// **Zehn Waffen, zehn verschiedene Züge** — die Tabelle aus ADR-0017,
   /// Punkt 2. Bis dahin gaben beide Klingen `sword_strike`; die Waffe
   /// bestimmte damit nichts, und der ganze Slot war Dekoration.
   ///
@@ -55,6 +55,12 @@ abstract final class AbilityCatalog {
   /// | Zweihänder | Spalter | 1,6 | +1 |
   /// | Langbogen | Doppelschuss | 0,45 × 2 | +4 |
   /// | Sonnenklinge | Sonnenhieb | 1,4 | +3, Perfect entzündet |
+  /// | Langspeer | Speerstich | 1,1 | trifft alle in einer Linie |
+  /// | Blutsichel | Sichelhieb | 0,9 | trifft alle im Bogen, raubt Leben |
+  ///
+  /// Die Zahlen der Tabelle stammen aus dem Rundenkampf; was in der
+  /// Grube gilt, steht in `PitWeapons`. Langspeer und Blutsichel kamen
+  /// mit ADR-0077 und haben nur dort Zahlen.
   ///
   /// **Die letzten drei hängen an der Gegnerreihe** (ADR-0034) und bringen
   /// je einen Rhythmus, den es unter den fünf ersten nicht gab: den
@@ -75,6 +81,8 @@ abstract final class AbilityCatalog {
     'gear-zweihaender': 'greatsword_cleave',
     'gear-langbogen': 'longbow_volley',
     'gear-sonnenklinge': 'sunblade_flare',
+    'gear-langspeer': 'spear_thrust',
+    'gear-blutsichel': 'sickle_reap',
   };
 
   /// Die fünfzehn Fähigkeiten, die der Spieler auf die freien Slots legen
@@ -301,6 +309,73 @@ abstract final class AbilityCatalog {
       requirement: '30 Tage Kette',
       rarity: Rarity.rare,
     ),
+
+    // --- AktivesBretts zehn (ADR-0074, `docs/vorlagen/faehigkeiten-2.md`) ---
+    //
+    // Sechs hängen an Körper und Geist, je zwei an Wissenschaft und
+    // Gesellschaft, damit keines mehr als zwei Fünftel trägt
+    // (`graph_content_test.dart`). Der zweite Atem kommt über die Kette.
+    Ability(
+      moveId: 'zinseszins',
+      source: FromTheory('gewohnheiten-zwei-minuten'),
+      requirement: 'Gewohnheiten: „Zwei Minuten reichen" bestehen',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'schattenschritt',
+      source: FromTheory('psychologie-bystander'),
+      requirement: 'Psychologie: „Warum keiner hilft" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'kampfrausch',
+      source: FromTheory('psychologie-emotionen'),
+      requirement: 'Psychologie: „Gefühle regulieren" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'kriegsschrei',
+      source: FromTheory('kraft-hypertrophie'),
+      requirement: 'Kraft: „Wie ein Muskel wächst" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'spiegelbild',
+      source: FromTheory('wissenschaft-selbsttest'),
+      requirement: 'Wissenschaft: „Sich selbst testen" bestehen',
+      rarity: Rarity.epic,
+    ),
+    Ability(
+      moveId: 'parade',
+      source: FromTheory('wissenschaft-studie'),
+      requirement: 'Wissenschaft: „Eine Überschrift ist keine Studie" '
+          'bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'ruhepuls',
+      source: FromTheory('schlaf-regeneration'),
+      requirement: 'Körper: „Schlaf & Regeneration" bestehen',
+      rarity: Rarity.common,
+    ),
+    Ability(
+      moveId: 'kettenblitz',
+      source: FromTheory('medien-information'),
+      requirement: 'Gesellschaft: „Medien & Information" bestehen',
+      rarity: Rarity.rare,
+    ),
+    Ability(
+      moveId: 'rammbock',
+      source: FromTheory('kraft-technik'),
+      requirement: 'Kraft: „Technik vor Gewicht" bestehen',
+      rarity: Rarity.uncommon,
+    ),
+    Ability(
+      moveId: 'zweiter_atem',
+      source: FromStreak(7),
+      requirement: '7 Tage Kette',
+      rarity: Rarity.epic,
+    ),
   ];
 
   /// Die **Ultimates** (ADR-0073): je eine Bedingung aus den bestehenden
@@ -324,6 +399,17 @@ abstract final class AbilityCatalog {
       moveId: 'fleischfressende_pflanze',
       source: FromStreak(30),
       requirement: '30 Tage Kette',
+    ),
+    // AktivesBretts zwei (ADR-0074).
+    Ability(
+      moveId: 'bestform',
+      source: FromAchievement('sieben-tage-in-form'),
+      requirement: 'Errungenschaft „Sieben Tage in Form"',
+    ),
+    Ability(
+      moveId: 'rueckspulen',
+      source: FromTheory('psychologie-gedaechtnis'),
+      requirement: 'Psychologie: „Erinnerung ist kein Video" bestehen',
     ),
   ];
 

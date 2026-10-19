@@ -22,6 +22,10 @@ class Projectile {
     this.maxAge = ActionBalance.projectileLifetime,
     this.freezeSeconds = 0,
     this.boomerang = false,
+    this.ownerId,
+    this.chainJumps = 0,
+    this.chainRange = 0,
+    this.chainFalloff = 1,
   });
 
   final int id;
@@ -62,6 +66,16 @@ class Projectile {
   /// (Wiederkehr, ADR-0073).
   final bool boomerang;
 
+  /// Wer es geschossen hat, bei Gegnern — damit eine Parade weiss, wen
+  /// sie stillstellt (ADR-0074). Null beim Helden.
+  final int? ownerId;
+
+  /// Kettenblitz (ADR-0074): wie oft er nach dem Einschlag noch springt,
+  /// wie weit, und mit welchem Anteil der Wucht.
+  final int chainJumps;
+  final double chainRange;
+  final double chainFalloff;
+
   Vec2 position;
   double age = 0;
   bool spent = false;
@@ -86,6 +100,7 @@ class ProjectileView {
     this.isBoulder = false,
     this.isBoomerang = false,
     this.isFreezing = false,
+    this.isChain = false,
   });
 
   factory ProjectileView.of(Projectile p) {
@@ -98,6 +113,7 @@ class ProjectileView {
       isBoulder: p.isBoulder,
       isBoomerang: p.boomerang,
       isFreezing: p.freezeSeconds > 0,
+      isChain: p.chainJumps > 0 || p.chainRange > 0,
     );
   }
 
@@ -113,4 +129,7 @@ class ProjectileView {
 
   /// Der Eisball.
   final bool isFreezing;
+
+  /// Ein Kettenblitz, auch auf seinem letzten Sprung.
+  final bool isChain;
 }

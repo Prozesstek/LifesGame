@@ -38,6 +38,27 @@ class NeueArtenBild {
         );
       case BossStunNotched(:final at, :final stunned):
         if (stunned) _blitze.add(_Blitz.ring(at, Palette.tintStern, 50));
+      // --- ADR-0074 ---
+      case HeroBlinked(:final from, :final to, :final rewind):
+        final farbe = rewind ? Palette.tintZeit : Palette.tintSeele;
+        _blitze.add(_Blitz.ring(from, farbe, 18));
+        _blitze.add(_Blitz.faden(from, to, farbe: farbe));
+      case AttackParried(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSchutz, 26));
+      case ChainJumped(:final from, :final to):
+        _blitze.add(_Blitz.faden(from, to, farbe: Palette.tintBlitz));
+      case LastStandTriggered(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintNatur, 44));
+      // --- Die Kräfte der Ausrüstung (ADR-0077) ---
+      case BloodLashed(:final from, :final to):
+        _blitze.add(_Blitz.faden(from, to, farbe: Palette.tintBlut));
+        _blitze.add(_Blitz.ring(to, Palette.tintBlut, 16));
+      case WispBurst(:final at, :final radius):
+        _blitze.add(_Blitz.ring(at, Palette.tintIrrlicht, radius));
+      case ShieldRaised(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSchutz, 30));
+      case AbilityEchoed(:final at):
+        _blitze.add(_Blitz.ring(at, Palette.tintSeele, 34));
       default:
         return false;
     }
@@ -67,6 +88,7 @@ class NeueArtenBild {
 
   /// Was am Boden liegt — unter den Figuren.
   void drawBoden(Canvas canvas, ActionWorld welt) {
+    _frostreif(canvas, welt);
     for (final falle in welt.traps) {
       final mitte = Offset(falle.center.x, falle.center.y);
       canvas.drawCircle(
@@ -113,6 +135,8 @@ class NeueArtenBild {
   void drawOben(Canvas canvas, ActionWorld welt) {
     _status(canvas, welt);
     _begleiter(canvas, welt);
+    _heldenZustand(canvas, welt);
+    _ausruestung(canvas, welt);
     if (welt.isBuffed) {
       final held = welt.heroView;
       canvas.drawCircle(
@@ -174,10 +198,136 @@ class NeueArtenBild {
     }
   }
 
-  /// Der Falke kreist über dem Helden, die Pflanze steht und atmet.
+  /// Was AktivesBretts Fähigkeiten am Helden zeigen (ADR-0074): eine
+  /// offene Parade als Schild davor, Bestform als goldener Doppelring,
+  /// unverwundbar als Zeitring, Kampfrausch als Glut je Treffer.
+  void _heldenZustand(Canvas canvas, ActionWorld welt) {
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+    Paint ring(Color farbe, double breite) => Paint()
+      ..color = farbe
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = breite;
+
+    if (welt.isParrying) {
+      final blick = held.facing;
+      final winkel = math.atan2(blick.y, blick.x);
+      canvas.drawArc(
+        Rect.fromCircle(center: mitte, radius: held.radius + 9),
+        winkel - 0.9,
+        1.8,
+        false,
+        ring(Palette.tintSchutz, 3),
+      );
+    }
+    if (welt.isOverdriven) {
+      final puls = 1 + 0.08 * math.sin(welt.elapsed * 8);
+      canvas.drawCircle(
+        mitte,
+        (held.radius + 10) * puls,
+        ring(Palette.rahmenGoldHell, 2),
+      );
+      canvas.drawCircle(
+        mitte,
+        (held.radius + 14) * puls,
+        ring(Palette.rahmenGoldHell.withValues(alpha: 0.6), 1.5),
+      );
+    }
+    if (welt.isInvulnerable) {
+      canvas.drawCircle(
+        mitte,
+        held.radius + 12,
+        ring(Palette.tintZeit.withValues(alpha: 0.8), 2.5),
+      );
+    }
+    final rausch = welt.rageStacks;
+    for (var i = 0; i < rausch; i++) {
+      final winkel = welt.elapsed * 2 + i * 2 * math.pi / 10;
+      canvas.drawCircle(
+        Offset(
+          mitte.dx + math.cos(winkel) * (held.radius + 5),
+          mitte.dy + math.sin(winkel) * (held.radius + 5),
+        ),
+        1.6,
+        Paint()..color = Palette.tintLava,
+      );
+    }
+  }
+
+  /// Der Frostreif liegt als blasser Kreis unter dem Helden und atmet
+  /// leicht (ADR-0077).
+  void _frostreif(Canvas canvas, ActionWorld welt) {
+    final radius = welt.frostAuraRadius;
+    if (radius == null) return;
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+    final atem = radius * (1 + 0.04 * math.sin(welt.elapsed * 2));
+    canvas.drawCircle(
+      mitte,
+      atem,
+      Paint()..color = Palette.tintEis.withValues(alpha: 0.12),
+    );
+    canvas.drawCircle(
+      mitte,
+      atem,
+      Paint()
+        ..color = Palette.tintEis.withValues(alpha: 0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  /// Was die Ausrüstung am Helden zeigt (ADR-0077): Irrlichter als
+  /// leuchtende Punkte, das Flickwerk als Ring, der mit dem Schild
+  /// schwindet, und der Blutpakt als Puls in der Farbe des Bluts.
+  void _ausruestung(Canvas canvas, ActionWorld welt) {
+    final held = welt.heroView;
+    final mitte = Offset(held.position.x, held.position.y);
+
+    for (final licht in welt.wisps) {
+      final wo = Offset(licht.position.x, licht.position.y);
+      canvas.drawCircle(
+        wo,
+        ActionBalance.wispRadius + 3,
+        Paint()..color = Palette.tintIrrlicht.withValues(alpha: 0.3),
+      );
+      canvas.drawCircle(
+        wo,
+        ActionBalance.wispRadius,
+        Paint()..color = Palette.tintIrrlicht,
+      );
+    }
+
+    final schild = welt.shieldRatio;
+    if (schild > 0) {
+      canvas.drawCircle(
+        mitte,
+        held.radius + 6,
+        Paint()
+          ..color = Palette.tintSchutz.withValues(alpha: 0.3 + 0.5 * schild)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1 + 2 * schild,
+      );
+    }
+
+    if (welt.isBloodPact) {
+      final puls = 0.5 + 0.5 * math.sin(welt.elapsed * 4);
+      canvas.drawCircle(
+        mitte,
+        held.radius + 3,
+        Paint()
+          ..color = Palette.tintBlut.withValues(alpha: 0.25 + 0.35 * puls)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+    }
+  }
+
+  /// Der Falke kreist über dem Helden, die Pflanze steht und atmet. Das
+  /// Spiegelbild zeichnet `ActionGame` als Figur.
   void _begleiter(Canvas canvas, ActionWorld welt) {
     final begleiter = welt.companion;
-    if (begleiter == null) return;
+    if (begleiter == null || begleiter.mirror) return;
     final farbe = tintColor(begleiter.tint);
     final deckkraft = begleiter.remaining < 0.1
         ? begleiter.remaining * 10

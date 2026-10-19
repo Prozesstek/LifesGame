@@ -8,7 +8,12 @@
 enum SetTarget {
   angriff('Angriffs-Fähigkeiten'),
   umgebung('Umgebungen'),
-  schutz('Schutz und Heilung');
+  schutz('Schutz und Heilung'),
+
+  /// **Keine Art von Fähigkeit, sondern der Held selbst** — das Vampirset
+  /// (ADR-0077). Seine Wirkung steht in Kräften ([SetPerk.powers]), nicht
+  /// in Faktoren auf Fähigkeiten.
+  held('den Helden');
 
   const SetTarget(this.label);
 
@@ -28,6 +33,7 @@ class SetPerk {
     this.timingSpeedFactor = 1.0,
     this.timingWindowFactor = 1.0,
     this.protectionFactor = 1.0,
+    this.powers = const <String>[],
   });
 
   /// Vielfaches auf den Schaden. 1.25 heißt 25 % mehr.
@@ -51,12 +57,19 @@ class SetPerk {
   /// bleiben, bis `package:combat` gelöscht ist.
   final double protectionFactor;
 
+  /// Kräfte, die diese Stufe mitbringt — Ids in `PitGearPowers` in
+  /// `package:action_combat`, wie `GearItem.power` (ADR-0077). Was sie
+  /// tun, sagt ihre Beschreibung dort; [labels] nennt nur die Zahlen
+  /// darüber.
+  final List<String> powers;
+
   bool get isEmpty =>
       damageFactor == 1.0 &&
       energyDiscount == 0 &&
       timingSpeedFactor == 1.0 &&
       timingWindowFactor == 1.0 &&
-      protectionFactor == 1.0;
+      protectionFactor == 1.0 &&
+      powers.isEmpty;
 
   /// Die Wirkung als kurze Liste, wie sie auf einer Kachel steht.
   ///

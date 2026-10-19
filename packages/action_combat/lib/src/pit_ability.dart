@@ -151,18 +151,30 @@ final class DamageOverTime extends PitEffect {
 /// Kette kleiner Flächen mit Umkreis [trailRadius], die [trailSeconds]
 /// liegen und brennen — `Angriff × trailPerSecond` je Sekunde, wie jeder
 /// Dauerschaden.
+///
+/// Mit [impactPower] über null **rammt** er (Rammbock): Wen er auf dem Weg
+/// streift, der nimmt `Angriff × impactPower`, fliegt [impactFling] weit
+/// zur Seite und steht [impactStun] still — jeder höchstens einmal je
+/// Sturm. Der Wächter wird nicht geschleudert; sein Stillstand geht über
+/// die Leiste.
 final class Dash extends PitEffect {
   const Dash({
     required this.distance,
     this.trailPerSecond = 0,
     this.trailSeconds = 0,
     this.trailRadius = 0,
+    this.impactPower = 0,
+    this.impactFling = 0,
+    this.impactStun = 0,
   });
 
   final double distance;
   final double trailPerSecond;
   final double trailSeconds;
   final double trailRadius;
+  final double impactPower;
+  final double impactFling;
+  final double impactStun;
 }
 
 /// Ein Haken: zieht **einen** Gegner bis [range] heran, vor die Füsse des
@@ -273,6 +285,12 @@ final class Trap extends PitEffect {
 /// [reach] an; sonst fliegt er mit dem Helden. [devourBelow] über null
 /// heisst: Ein Gegner unter diesem Anteil seines Lebens wird **gefressen**
 /// — nie der Wächter.
+///
+/// Mit [mirror] ist er ein **Abbild des Helden** (Spiegelbild): Es
+/// erscheint neben ihm, **bleibt stehen, wo es gerufen wurde**, und
+/// schlägt von dort mit dessen Grundangriff — Reichweite und Takt der
+/// Waffe, Wucht `Waffe × power`. [interval] und [reach] gelten dann
+/// nicht.
 final class Companion extends PitEffect {
   const Companion({
     required this.power,
@@ -281,6 +299,7 @@ final class Companion extends PitEffect {
     required this.reach,
     this.stationary = false,
     this.devourBelow = 0,
+    this.mirror = false,
   });
 
   final double power;
@@ -289,6 +308,7 @@ final class Companion extends PitEffect {
   final double reach;
   final bool stationary;
   final double devourBelow;
+  final bool mirror;
 }
 
 /// **Terrain**: Ein Fels von einem Feld fällt auf den abgesetzten Punkt
@@ -333,6 +353,304 @@ final class FreezeBolt extends PitEffect {
   final double power;
   final double range;
   final double stunSeconds;
+}
+
+// --- AktivesBretts zehn (ADR-0074) ---
+
+/// **Blink**: Der Held ist sofort bis [distance] weiter — in die gezielte
+/// Richtung, beim kurzen Tippen auf den nächsten Gegner zu, den er sieht.
+///
+/// **Nie durch eine Wand oder das Tor** (ADR-0073): Er landet vor dem
+/// ersten Hindernis. Sonst überspränge er Räume und den Auftritt des
+/// Wächters.
+final class Blink extends PitEffect {
+  const Blink({required this.distance});
+
+  final double distance;
+}
+
+/// **Unsichtbarkeit**: [seconds] lang sehen die Gegner den Helden nicht —
+/// sie bemerken ihn nicht und greifen nicht an. Der Wächter sieht ihn
+/// trotzdem: Er ist allein in seinem Raum, da gibt es nichts zu
+/// umgehen.
+///
+/// **Sie endet mit dem ersten eigenen Treffer**, und der trifft
+/// [ambush]-mal so hart — auch der Grundangriff, der von selbst fällt.
+final class Vanish extends PitEffect {
+  const Vanish({required this.seconds, this.ambush = 1});
+
+  final double seconds;
+  final double ambush;
+}
+
+/// **Stun im Umkreis** [radius] um den Helden: Alle stehen [seconds]
+/// still. Beim Wächter über die Stun-Leiste (ADR-0073).
+final class StunAround extends PitEffect {
+  const StunAround({required this.radius, required this.seconds});
+
+  final double radius;
+  final double seconds;
+}
+
+/// **Parade**: [seconds] lang wird der nächste Treffer ganz abgefangen,
+/// und wer ihn führte, steht [stunSeconds] still. Danach ist sie
+/// verbraucht; kommt in der Zeit nichts, war sie umsonst.
+///
+/// Auch ein Pfeil wird pariert — dann steht der Schütze still. Gegen eine
+/// Fläche hilft sie nicht, die hat niemanden, der zuschlägt.
+final class Parry extends PitEffect {
+  const Parry({required this.seconds, required this.stunSeconds});
+
+  final double seconds;
+  final double stunSeconds;
+}
+
+/// **Stacking**: Jedes Wirken dieser Fähigkeit binnen [window] Sekunden
+/// nach dem letzten trifft um [step] härter, höchstens [maxStacks]-mal.
+/// Gezählt wird das Wirken, nicht der Schaden (ADR-0073).
+///
+/// Steht als Erstes in der Liste und wirkt auf die Treffer der übrigen
+/// Wirkungen desselben Wirkens.
+final class Stacking extends PitEffect {
+  const Stacking({
+    required this.step,
+    required this.window,
+    required this.maxStacks,
+  });
+
+  final double step;
+  final double window;
+  final int maxStacks;
+}
+
+/// **Kettenblitz**: ein Geschoss wie [BoltAtNearest], das nach dem
+/// Einschlag auf den nächsten Gegner springt — höchstens [jumps]-mal, je
+/// bis [jumpRange] weit, jeder Sprung mit [falloff] der Wucht davor.
+/// **Nur auf Gegner, die vom Einschlag aus zu sehen sind**, und keinen
+/// zweimal.
+final class ChainBolt extends PitEffect {
+  const ChainBolt({
+    required this.power,
+    required this.range,
+    required this.jumps,
+    required this.jumpRange,
+    required this.falloff,
+  });
+
+  final double power;
+  final double range;
+  final int jumps;
+  final double jumpRange;
+  final double falloff;
+}
+
+/// **Bestform** (Ultimate): [seconds] lang treffen Fähigkeiten
+/// [abilityPower]-mal so hart, der Grundangriff [attackPower]-mal, die
+/// Fähigkeiten kosten kein Mana, und ihre Abklingzeiten laufen
+/// [cooldownRate]-mal so schnell.
+///
+/// **Der Grundangriff bleibt unter der Grenze** (ADR-0009, ADR-0073):
+/// höchstens [ActionBalance.weaponBuffCap], auch zusammen mit anderen
+/// Stärkungen.
+final class Overdrive extends PitEffect {
+  const Overdrive({
+    required this.seconds,
+    required this.abilityPower,
+    required this.attackPower,
+    required this.cooldownRate,
+  });
+
+  final double seconds;
+  final double abilityPower;
+  final double attackPower;
+  final double cooldownRate;
+}
+
+/// **Rückspulen** (Ultimate): Der Held steht wieder, wo er vor [seconds]
+/// Sekunden stand, mit dem Leben von damals — nie mit weniger als jetzt —,
+/// und ist danach [invulnerableSeconds] unverwundbar.
+///
+/// **Nie über ein Tor zurück**: Ist es seitdem zugefallen, oder steht an
+/// der alten Stelle jetzt ein Fels, bleibt er stehen und bekommt nur das
+/// Leben zurück.
+final class Rewind extends PitEffect {
+  const Rewind({required this.seconds, required this.invulnerableSeconds});
+
+  final double seconds;
+  final double invulnerableSeconds;
+}
+
+/// Eine Wirkung, die **dauernd** wirkt, solange ihre Fähigkeit auf einem
+/// Platz liegt — ohne Knopf, ohne Mana, ohne Abklingzeit (ADR-0073:
+/// Passiv). Sie kostet den Platz.
+///
+/// Eine Fähigkeit ist passiv, wenn alle ihre Wirkungen es sind
+/// ([PitAbility.isPassive]).
+sealed class PitPassive extends PitEffect {
+  const PitPassive();
+}
+
+/// **Rage**: Jeder Treffer, den der Held einsteckt, macht ihn um [perHit]
+/// stärker, höchstens [maxStacks]-mal. [decaySeconds] ohne Treffer, und
+/// alles fällt ab. Gezählt, nicht am Schaden gemessen (ADR-0073).
+///
+/// Auf den Grundangriff wirkt sie nur bis [ActionBalance.weaponBuffCap].
+final class RageOnHit extends PitPassive {
+  const RageOnHit({
+    required this.perHit,
+    required this.maxStacks,
+    required this.decaySeconds,
+  });
+
+  final double perHit;
+  final int maxStacks;
+  final double decaySeconds;
+}
+
+/// **Ruhepuls**: Hat der Held [idleSeconds] lang keinen Schaden
+/// ausgeteilt, kommt Mana [factor]-mal so schnell zurück.
+final class RestMana extends PitPassive {
+  const RestMana({required this.factor, required this.idleSeconds});
+
+  final double factor;
+  final double idleSeconds;
+}
+
+/// **Zweiter Atem**: einmal je Lauf. Fällt das Leben unter [threshold],
+/// heilt der Held [heal] der vollen Gesundheit und nimmt [wardSeconds]
+/// lang nur [wardFactor] des Schadens.
+final class LastStand extends PitPassive {
+  const LastStand({
+    required this.threshold,
+    required this.heal,
+    required this.wardFactor,
+    required this.wardSeconds,
+  });
+
+  final double threshold;
+  final double heal;
+  final double wardFactor;
+  final double wardSeconds;
+}
+
+// --- Kräfte der Ausrüstung (ADR-0077) ---
+//
+// Dieselbe Bauform wie die Passive auf den Plätzen: Sie gelten den
+// ganzen Lauf. Ein Stück bringt sie über `GrantPassive` mit
+// (`pit_modifier.dart`), ausgeführt werden sie in `gear_powers.dart`.
+
+/// **Lebensraub**: [share] des Schadens, den der Held mit eigener Hand
+/// anrichtet, heilt ihn. Mehrere Stücke zählen zusammen.
+final class LifeSteal extends PitPassive {
+  const LifeSteal({required this.share});
+
+  final double share;
+}
+
+/// **Der Blutpakt** — das volle Vampirset: jede Sekunde [drainShare] des
+/// vollen Lebens weg, **immer**, auch ohne Gegner. Der Lebensraub zählt
+/// [stealFactor]-mal, und [stealDamageShare] dessen, was er heilen
+/// könnte, trifft den Gegner zusätzlich — auch bei vollem Leben.
+///
+/// **Sonst heilt nichts**: Heilfähigkeiten, Heilkugeln und jede andere
+/// Heilung treffen stattdessen den nächsten Gegner in Sicht mit genau
+/// dem Betrag.
+final class BloodPact extends PitPassive {
+  const BloodPact({
+    required this.drainShare,
+    required this.stealFactor,
+    required this.stealDamageShare,
+  });
+
+  final double drainShare;
+  final double stealFactor;
+  final double stealDamageShare;
+}
+
+/// Jeder Gegner, den der Held fällt, heilt ihn um [share] seines vollen
+/// Lebens.
+final class HealOnKill extends PitPassive {
+  const HealOnKill({required this.share});
+
+  final double share;
+}
+
+/// **Frostreif**: Ein Kreis aus Eis mit [radius] wandert mit dem Helden.
+/// Wer darin steht, läuft mit [slowFactor] seines Tempos und nimmt je
+/// Sekunde [perSecond] mal den Angriff. Der Wächter wird nur halb so
+/// stark gebremst.
+final class FrostAura extends PitPassive {
+  const FrostAura({
+    required this.radius,
+    required this.slowFactor,
+    required this.perSecond,
+  });
+
+  final double radius;
+  final double slowFactor;
+  final double perSecond;
+}
+
+/// **Irrlichter**: Alle [interval] Sekunden entsteht eines, höchstens
+/// [maxCount] zugleich. Ohne Gegner kreisen sie um den Helden; sieht er
+/// einen im Umkreis [seekRange], fliegt eins hin und zerplatzt bei der
+/// Berührung — [power] mal Angriff auf alle im Umkreis [blastRadius].
+final class Wisps extends PitPassive {
+  const Wisps({
+    required this.interval,
+    required this.maxCount,
+    required this.seekRange,
+    required this.power,
+    required this.blastRadius,
+  });
+
+  final double interval;
+  final int maxCount;
+  final double seekRange;
+  final double power;
+  final double blastRadius;
+}
+
+/// Nach jedem Kill läuft der Held [seconds] lang [speed]-mal so schnell.
+final class KillRush extends PitPassive {
+  const KillRush({required this.seconds, required this.speed});
+
+  final double seconds;
+  final double speed;
+}
+
+/// Jeder Kill bringt [amount] Mana.
+final class ManaOnKill extends PitPassive {
+  const ManaOnKill({required this.amount});
+
+  final int amount;
+}
+
+/// [chance] mehr kritische Treffer, und jeder bringt [manaOnCrit] Mana.
+final class CritEdge extends PitPassive {
+  const CritEdge({required this.chance, required this.manaOnCrit});
+
+  final double chance;
+  final int manaOnCrit;
+}
+
+/// Hat der Held [idleSeconds] lang nichts eingesteckt, baut sich ein
+/// Schild aus [share] seines vollen Lebens auf. Er fängt Schaden ab, bevor
+/// das Leben ihn trägt.
+final class IdleShield extends PitPassive {
+  const IdleShield({required this.idleSeconds, required this.share});
+
+  final double idleSeconds;
+  final double share;
+}
+
+/// **Echo**: Jede [every]-te Fähigkeit, die Schaden macht, wirkt ein
+/// zweites Mal — nur ihre Treffer, mit [power] der Wucht.
+final class Echo extends PitPassive {
+  const Echo({required this.every, required this.power});
+
+  final int every;
+  final double power;
 }
 
 /// Wie eine Fähigkeit gezielt wird.
@@ -428,6 +746,11 @@ class PitAbility {
   /// Die Farbe ihrer Fläche.
   final PitTint tint;
 
+  /// Ob sie **passiv** ist (ADR-0073): Sie liegt auf einem Platz und wirkt
+  /// dauernd, hat aber keinen Knopf, kein Mana und keine Abklingzeit.
+  bool get isPassive =>
+      effects.isNotEmpty && effects.every((e) => e is PitPassive);
+
   /// Wie weit sie reicht: die Wurfweite eines Bereichs, sonst die
   /// grösste Reichweite ihrer Geschosse und Schläge.
   double get reach {
@@ -442,6 +765,8 @@ class PitAbility {
         HookNearest(:final range) => range,
         SweepCone(:final range) => range,
         Dash(:final distance) => distance,
+        Blink(:final distance) => distance,
+        ChainBolt(:final range) => range,
         _ => 0.0,
       };
       if (weite > weiteste) weiteste = weite;
@@ -461,6 +786,7 @@ class PitAbility {
         Trap() => ActionBalance.trapRadius,
         Rock() => ActionBalance.tileSize / 2,
         Companion(:final reach, :final stationary) => stationary ? reach : 0.0,
+        StunAround(:final radius) => radius,
         _ => 0.0,
       };
       if (r > groesste) groesste = r;
@@ -1006,6 +1332,198 @@ abstract final class PitAbilities {
     tint: PitTint.eis,
   );
 
+  // --- AktivesBretts zehn (ADR-0074, `docs/vorlagen/faehigkeiten-2.md`) ---
+
+  /// Ein Schlag, der mit jeder Wiederholung wächst — die 1%-Methode als
+  /// Klinge. Billig und schnell bereit: Bezahlt wird mit Mana, nicht mit
+  /// Warten (ADR-0073, Mana als Bremse).
+  static const PitAbility zinseszins = PitAbility(
+    id: 'zinseszins',
+    name: 'Zinseszins',
+    kind: PitKind.angriff,
+    manaCost: 10,
+    cooldown: 2,
+    effects: <PitEffect>[
+      Stacking(step: 0.2, window: 4, maxStacks: 5),
+      StrikeNearest(power: 0.8, range: 56),
+    ],
+    description: 'Ein Schlag. Jede Wiederholung binnen vier Sekunden trifft '
+        'ein Fünftel härter, bis zu fünfmal.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.klinge,
+  );
+
+  /// Ein Schritt ins Dunkle: weg, unsichtbar, und der erste Schlag daraus
+  /// sitzt.
+  static const PitAbility schattenschritt = PitAbility(
+    id: 'schattenschritt',
+    name: 'Schattenschritt',
+    kind: PitKind.schutz,
+    manaCost: 18,
+    cooldown: 9,
+    effects: <PitEffect>[
+      Blink(distance: 128),
+      Vanish(seconds: 2, ambush: 1.5),
+    ],
+    description: 'Ein Sprung bis vier Felder weit, dann zwei Sekunden '
+        'unsichtbar. Der erste Treffer daraus macht anderthalbfachen Schaden.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.seele,
+  );
+
+  /// Passiv: Wer einsteckt, schlägt härter zurück.
+  static const PitAbility kampfrausch = PitAbility(
+    id: 'kampfrausch',
+    name: 'Kampfrausch',
+    kind: PitKind.angriff,
+    manaCost: 0,
+    cooldown: 0,
+    effects: <PitEffect>[
+      RageOnHit(perHit: 0.04, maxStacks: 10, decaySeconds: 4),
+    ],
+    description: 'Passiv: Jeder Treffer, den du einsteckst, macht dich 4 % '
+        'stärker, bis zu zehnmal. Vier Sekunden ohne Treffer, und es fällt ab.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.lava,
+  );
+
+  /// Ein Schrei, der die Nahen erstarren lässt und Mut macht.
+  static const PitAbility kriegsschrei = PitAbility(
+    id: 'kriegsschrei',
+    name: 'Kriegsschrei',
+    kind: PitKind.angriff,
+    manaCost: 24,
+    cooldown: 15,
+    effects: <PitEffect>[
+      StunAround(radius: 64, seconds: 0.8),
+      SelfBuff(seconds: 6, attack: 1.2),
+    ],
+    description: 'Alles um dich steht kurz still, und sechs Sekunden lang '
+        'triffst du ein Fünftel härter.',
+    aim: PitAim.umDenHelden,
+    castRange: 0,
+    tint: PitTint.blitz,
+  );
+
+  /// Ein Abbild, das mit der eigenen Waffe zuschlägt.
+  static const PitAbility spiegelbild = PitAbility(
+    id: 'spiegelbild',
+    name: 'Spiegelbild',
+    kind: PitKind.angriff,
+    manaCost: 28,
+    cooldown: 22,
+    effects: <PitEffect>[
+      Companion(
+        power: 0.5,
+        interval: 0,
+        seconds: 10,
+        reach: 0,
+        stationary: true,
+        mirror: true,
+      ),
+    ],
+    description: 'Ein Abbild bleibt zehn Sekunden stehen, wo du es rufst, '
+        'und kämpft von dort mit deinem Grundangriff, zu halbem Schaden.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.seele,
+  );
+
+  /// Den Schlag kommen sehen und abfangen.
+  static const PitAbility parade = PitAbility(
+    id: 'parade',
+    name: 'Parade',
+    kind: PitKind.schutz,
+    manaCost: 12,
+    cooldown: 6,
+    effects: <PitEffect>[Parry(seconds: 0.6, stunSeconds: 1.5)],
+    description: 'Kommt in den nächsten 0,6 Sekunden ein Treffer, fängst du '
+        'ihn ganz ab, und wer ihn führte, steht still. Zu früh ist umsonst.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.schutz,
+  );
+
+  /// Passiv: Wer durchatmet, lädt nach.
+  static const PitAbility ruhepuls = PitAbility(
+    id: 'ruhepuls',
+    name: 'Ruhepuls',
+    kind: PitKind.schutz,
+    manaCost: 0,
+    cooldown: 0,
+    effects: <PitEffect>[RestMana(factor: 1.4, idleSeconds: 1)],
+    description: 'Passiv: Eine Sekunde ohne eigenen Treffer, und Mana kommt '
+        '40 % schneller zurück.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.zeit,
+  );
+
+  /// Ein Blitz, der weitererzählt wird.
+  static const PitAbility kettenblitz = PitAbility(
+    id: 'kettenblitz',
+    name: 'Kettenblitz',
+    kind: PitKind.angriff,
+    manaCost: 22,
+    cooldown: 6,
+    effects: <PitEffect>[
+      ChainBolt(
+        power: 1.0,
+        range: 256,
+        jumps: 3,
+        jumpRange: 128,
+        falloff: 0.75,
+      ),
+    ],
+    description: 'Ein Blitz springt vom Getroffenen auf bis zu drei weitere, '
+        'jeder Sprung ein Viertel schwächer.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.blitz,
+  );
+
+  /// Der Held stürmt los und räumt den Weg frei.
+  static const PitAbility rammbock = PitAbility(
+    id: 'rammbock',
+    name: 'Rammbock',
+    kind: PitKind.angriff,
+    manaCost: 20,
+    cooldown: 9,
+    effects: <PitEffect>[
+      Dash(
+        distance: 96,
+        impactPower: 1.2,
+        impactFling: 48,
+        impactStun: 0.5,
+      ),
+    ],
+    description: 'Ein Sturm nach vorn. Wer im Weg steht, wird getroffen, zur '
+        'Seite geworfen und steht kurz still.',
+    aim: PitAim.richtung,
+    castRange: 0,
+    tint: PitTint.sand,
+  );
+
+  /// Passiv: einmal je Lauf, wenn es eng wird.
+  static const PitAbility zweiterAtem = PitAbility(
+    id: 'zweiter_atem',
+    name: 'Zweiter Atem',
+    kind: PitKind.schutz,
+    manaCost: 0,
+    cooldown: 0,
+    effects: <PitEffect>[
+      LastStand(threshold: 0.2, heal: 0.25, wardFactor: 0.5, wardSeconds: 2),
+    ],
+    description: 'Passiv, einmal je Lauf: Fällt dein Leben unter ein Fünftel, '
+        'heilst du ein Viertel und nimmst zwei Sekunden lang halben Schaden.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.natur,
+  );
+
   // --- Frederiks Ultimates (ADR-0073) ---
 
   /// Der Boden bricht ein, Wasser strudelt, alles rutscht hinein. Die
@@ -1053,10 +1571,57 @@ abstract final class PitAbilities {
     isUltimate: true,
   );
 
+  // --- AktivesBretts Ultimates (ADR-0074) ---
+
+  /// Die Tagesform als Moment im Kampf: Wer in Form ist, ist es acht
+  /// Sekunden lang ganz.
+  static const PitAbility bestform = PitAbility(
+    id: 'bestform',
+    name: 'Bestform',
+    kind: PitKind.schutz,
+    manaCost: 0,
+    cooldown: 0,
+    effects: <PitEffect>[
+      Overdrive(
+        seconds: 8,
+        abilityPower: 1.4,
+        attackPower: 1.25,
+        cooldownRate: 2,
+      ),
+      ReduceIncoming(factor: 0.6, seconds: 8),
+    ],
+    description: 'Acht Sekunden lang: Fähigkeiten treffen 40 % härter und '
+        'kosten kein Mana, Abklingzeiten laufen doppelt so schnell, der '
+        'Grundangriff trifft ein Viertel härter, und du nimmst 40 % '
+        'weniger Schaden.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.stern,
+    isUltimate: true,
+  );
+
+  /// Die letzten Sekunden noch einmal — nur besser.
+  static const PitAbility rueckspulen = PitAbility(
+    id: 'rueckspulen',
+    name: 'Rückspulen',
+    kind: PitKind.schutz,
+    manaCost: 0,
+    cooldown: 0,
+    effects: <PitEffect>[Rewind(seconds: 4, invulnerableSeconds: 1.5)],
+    description: 'Du stehst wieder, wo du vor vier Sekunden standest, mit '
+        'dem Leben von damals, und bist anderthalb Sekunden unverwundbar.',
+    aim: PitAim.selbst,
+    castRange: 0,
+    tint: PitTint.zeit,
+    isUltimate: true,
+  );
+
   /// Die Ultimates — sie liegen nur auf ihrem eigenen Platz.
   static const List<PitAbility> ultimates = <PitAbility>[
     wassergrube,
     fleischfressendePflanze,
+    bestform,
+    rueckspulen,
   ];
 
   static const List<PitAbility> all = <PitAbility>[
@@ -1089,6 +1654,16 @@ abstract final class PitAbilities {
     rankenpeitsche,
     rueckenwind,
     eisball,
+    zinseszins,
+    schattenschritt,
+    kampfrausch,
+    kriegsschrei,
+    spiegelbild,
+    parade,
+    ruhepuls,
+    kettenblitz,
+    rammbock,
+    zweiterAtem,
   ];
 
   /// `null` für eine Id, die in der Grube nichts tut — und für eine

@@ -79,14 +79,15 @@ void main() {
   });
 
   group('Fähigkeiten am Baum', () {
-    test('neunzehn Knoten bringen eine Fähigkeit mit', () {
+    test('neunundzwanzig Knoten bringen eine Fähigkeit mit', () {
       // Seit ADR-0022 hängen elf der fünfzehn wählbaren Fähigkeiten am
       // Baum; seit ADR-0073 sieben aus Frederiks zehn dazu und die
-      // Wassergrube, eine Ultimate. Die Zahl steht hier, damit ein
+      // Wassergrube, eine Ultimate; seit ADR-0074 neun aus AktivesBretts
+      // zehn und das Rückspulen. Die Zahl steht hier, damit ein
       // versehentlich entfernter Eintrag auffällt.
       final mitFaehigkeit = nodes.where((n) => n.unlocksAbility != null);
 
-      expect(mitFaehigkeit.length, 19);
+      expect(mitFaehigkeit.length, 29);
     });
 
     test('keine Wurzel bringt eine Fähigkeit mit', () {

@@ -277,3 +277,75 @@ class BossStunNotched extends ActionEvent {
   final int notches;
   final bool stunned;
 }
+
+// --- Seit ADR-0074 ---
+
+/// Der Held war eben bei [from] und ist jetzt bei [to] — ein Blink oder
+/// ein Rückspulen ([rewind]). Für das Bild: ein Schatten am alten Ort.
+class HeroBlinked extends ActionEvent {
+  const HeroBlinked({
+    required this.from,
+    required this.to,
+    this.rewind = false,
+  });
+
+  final Vec2 from;
+  final Vec2 to;
+  final bool rewind;
+}
+
+/// Eine Parade hat einen Treffer abgefangen; wer ihn führte, steht.
+class AttackParried extends ActionEvent {
+  const AttackParried({required this.at});
+
+  final Vec2 at;
+}
+
+/// Ein Kettenblitz springt von [from] nach [to].
+class ChainJumped extends ActionEvent {
+  const ChainJumped({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+}
+
+/// Der zweite Atem hat gegriffen — einmal je Lauf.
+class LastStandTriggered extends ActionEvent {
+  const LastStandTriggered({required this.at});
+
+  final Vec2 at;
+}
+
+// --- Seit ADR-0077 ---
+
+/// Der Blutpakt hat eine Heilung zum Schaden gemacht: von [from] zu dem
+/// Gegner bei [to].
+class BloodLashed extends ActionEvent {
+  const BloodLashed({required this.from, required this.to});
+
+  final Vec2 from;
+  final Vec2 to;
+}
+
+/// Ein Irrlicht ist bei [at] zerplatzt.
+class WispBurst extends ActionEvent {
+  const WispBurst({required this.at, required this.radius});
+
+  final Vec2 at;
+  final double radius;
+}
+
+/// Das Flickwerk hat einen Schild um den Helden gelegt.
+class ShieldRaised extends ActionEvent {
+  const ShieldRaised({required this.at});
+
+  final Vec2 at;
+}
+
+/// Das Echo hat die Fähigkeit [id] noch einmal treffen lassen.
+class AbilityEchoed extends ActionEvent {
+  const AbilityEchoed({required this.id, required this.at});
+
+  final String id;
+  final Vec2 at;
+}

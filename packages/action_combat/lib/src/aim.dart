@@ -149,7 +149,15 @@ extension _Aim on ActionWorld {
           );
         }
         final ziel = _autoTarget(ability);
-        if (ziel == null) return null;
+        if (ziel == null) {
+          // Ein Blink ohne Gegner in Sicht ist ein Ausweg, kein
+          // verfehlter Wurf: Er springt dorthin, wohin der Held schaut
+          // (ADR-0074).
+          final blink = ability.effects.any((e) => e is Blink);
+          final blick = _hero.facing.normalized;
+          if (!blink || blick.isZero) return null;
+          return _CastPlan(center: held, direction: blick);
+        }
         return _CastPlan(center: held, direction: (ziel - held).normalized);
 
       case PitAim.bereich:
@@ -195,6 +203,9 @@ extension _Aim on ActionWorld {
     required double weite,
     double leech = 0,
     double freeze = 0,
+    int chainJumps = 0,
+    double chainRange = 0,
+    double chainFalloff = 1,
   }) {
     _hero.facing = richtung;
     _projectiles.add(
@@ -209,6 +220,9 @@ extension _Aim on ActionWorld {
         heroLeech: leech,
         maxAge: weite / ActionBalance.heroBoltSpeed,
         freezeSeconds: freeze,
+        chainJumps: chainJumps,
+        chainRange: chainRange,
+        chainFalloff: chainFalloff,
       ),
     );
   }
@@ -369,10 +383,12 @@ extension _Aim on ActionWorld {
               e is FreezeBolt ||
               e is Boomerang ||
               e is HookNearest ||
-              e is Dash,
+              e is Dash ||
+              e is ChainBolt ||
+              e is Blink,
         );
         if (istBahn) {
-          final sturm = ability.effects.any((e) => e is Dash);
+          final sturm = ability.effects.any((e) => e is Dash || e is Blink);
           return AimLine(
             tint: ability.tint,
             from: held,

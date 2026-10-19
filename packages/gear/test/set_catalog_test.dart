@@ -51,7 +51,7 @@ void main() {
     });
 
     test('jeder Set-Platz führt weiter zwei freie offene Stücke', () {
-      // Fünf offene Stücke je Platz, drei davon in Sets. Wer kein Set
+      // Sechs offene Stücke je Platz, drei davon in Sets. Wer kein Set
       // will, soll trotzdem etwas zu wählen haben.
       for (final slot in <GearSlot>[
         GearSlot.waffe,
@@ -63,19 +63,35 @@ void main() {
           slot,
         ).where((i) => !i.isSetPiece && !i.rarity.isGated);
 
-        expect(frei, hasLength(2), reason: slot.label);
+        expect(frei.length, greaterThanOrEqualTo(2), reason: slot.label);
       }
     });
 
-    test('Episches und Legendäres gehört zu keinem Set', () {
-      // **Ein Set soll in dreißig Tagen erreichbar bleiben.** Hinge ein
-      // Teil an Sprosse zwanzig, wäre das Set bis dahin unvollständig —
-      // und die 2er-Stufe, die den Anfang macht, das Einzige, was es je
-      // gibt (ADR-0034).
+    test('Legendäres gehört zu keinem Set', () {
       for (final item in GearCatalog.all) {
-        if (!item.rarity.isGated) continue;
+        if (item.rarity != GearRarity.legendary) continue;
 
         expect(item.setId, isNull, reason: item.name);
+      }
+    });
+
+    test('ein Set ist ganz offen oder ganz verdient', () {
+      // **Ein offenes Set soll in dreißig Tagen erreichbar bleiben.** Hinge
+      // ein Teil an Sprosse zehn, wäre das Set bis dahin unvollständig —
+      // und die 2er-Stufe, die den Anfang macht, das Einzige, was es je
+      // gibt (ADR-0034). Das Vampirset ist deshalb **ganz** episch
+      // (ADR-0077), nicht halb.
+      for (final set in GearSets.all) {
+        final verdient = GearCatalog.piecesOf(
+          set.id,
+        ).map((i) => i.rarity.isGated).toSet();
+
+        expect(verdient, hasLength(1), reason: set.name);
+        expect(
+          verdient.single,
+          !GearSets.open.contains(set),
+          reason: '${set.name}: offen heißt ohne Sperre',
+        );
       }
     });
 
@@ -151,9 +167,16 @@ void main() {
     });
 
     test('jede Stufe lässt sich in Worten sagen', () {
+      // In Zahlen oder über eine Kraft, die ihre Beschreibung mitbringt
+      // (ADR-0077).
       for (final set in GearSets.all) {
-        expect(set.twoPiece.labels, isNotEmpty, reason: set.name);
-        expect(set.fourPiece.labels, isNotEmpty, reason: set.name);
+        for (final stufe in <SetPerk>[set.twoPiece, set.fourPiece]) {
+          expect(
+            stufe.labels.isNotEmpty || stufe.powers.isNotEmpty,
+            isTrue,
+            reason: set.name,
+          );
+        }
       }
     });
   });
@@ -163,7 +186,7 @@ void main() {
       // **Die Wahl zwischen den Sets soll eine Frage des Spielstils sein,
       // nicht des Geldbeutels.** Wäre eines um die Hälfte billiger, nähme
       // man dieses und die Entscheidung wäre keine.
-      final preise = GearSets.all.map((s) => GearCatalog.fullSetPrice(s.id));
+      final preise = GearSets.open.map((s) => GearCatalog.fullSetPrice(s.id));
       final billigstes = preise.reduce((a, b) => a < b ? a : b);
       final teuerstes = preise.reduce((a, b) => a > b ? a : b);
 
@@ -172,7 +195,7 @@ void main() {
 
     test('die kleine Stufe ist im ersten Monat erreichbar', () {
       // Ein Bonus, den im 30-Tage-Lauf niemand sieht, ist keiner.
-      for (final set in GearSets.all) {
+      for (final set in GearSets.open) {
         final stuecke = GearCatalog.piecesOf(set.id);
         final zweiBilligste = stuecke.take(GearSet.smallSize);
         final tage =
@@ -185,11 +208,23 @@ void main() {
     test('die volle Stufe ist ein Fernziel, kein Monatskauf', () {
       // Das ist Absicht: Der Laden soll nach dreißig Tagen noch etwas zu
       // wollen übrig lassen. Zu weit darf es trotzdem nicht sein.
-      for (final set in GearSets.all) {
+      for (final set in GearSets.open) {
         final tage = GearCatalog.fullSetPrice(set.id) / goldProTag;
 
         expect(tage, greaterThan(45), reason: '${set.name}: zu schnell voll');
         expect(tage, lessThan(110), reason: '${set.name}: unerreichbar');
+      }
+    });
+
+    test('ein verdientes Set kostet mehr als jedes offene', () {
+      // Die Sperre ist die Hürde (ADR-0034), der Preis folgt ihr: Wäre
+      // das Vampirset billiger als ein offenes, kaufte man es zuerst.
+      final offen = GearSets.open
+          .map((s) => GearCatalog.fullSetPrice(s.id))
+          .reduce((a, b) => a > b ? a : b);
+      for (final set in GearSets.all) {
+        if (GearSets.open.contains(set)) continue;
+        expect(GearCatalog.fullSetPrice(set.id), greaterThan(offen));
       }
     });
   });

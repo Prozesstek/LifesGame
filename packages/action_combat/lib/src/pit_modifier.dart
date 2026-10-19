@@ -84,6 +84,17 @@ final class AddEffects extends PitModifier {
   final List<PitEffect> effects;
 }
 
+/// **Kein Umbau einer Fähigkeit, sondern eine Wirkung am Helden** — die
+/// Kräfte der Ausrüstung seit ADR-0077 (Lebensraub, Frostreif,
+/// Irrlichter …). [PitModifiers.apply] lässt jede Fähigkeit dabei, wie
+/// sie ist; `ActionWorld` sammelt das [passive] zu den Passiven der
+/// Plätze.
+final class GrantPassive extends PitModifier {
+  const GrantPassive(this.passive);
+
+  final PitPassive passive;
+}
+
 /// Wendet Veränderungen an.
 abstract final class PitModifiers {
   /// [ability] mit allen [modifiers], in Reihenfolge.
@@ -120,6 +131,8 @@ abstract final class PitModifiers {
       case AddEffects(:final abilityId, :final effects):
         if (a.id != abilityId) return a;
         return _kopie(a, effects: <PitEffect>[...a.effects, ...effects]);
+      case GrantPassive():
+        return a;
     }
   }
 
@@ -176,12 +189,23 @@ abstract final class PitModifiers {
           reach: e.reach,
           stationary: e.stationary,
           devourBelow: e.devourBelow,
+          mirror: e.mirror,
         ),
       Dash() => Dash(
           distance: e.distance,
           trailPerSecond: e.trailPerSecond * dauer,
           trailSeconds: e.trailSeconds,
           trailRadius: e.trailRadius,
+          impactPower: e.impactPower * direkt,
+          impactFling: e.impactFling,
+          impactStun: e.impactStun,
+        ),
+      ChainBolt() => ChainBolt(
+          power: e.power * direkt,
+          range: e.range,
+          jumps: e.jumps,
+          jumpRange: e.jumpRange,
+          falloff: e.falloff,
         ),
       RandomOf(:final outcomes) => RandomOf(
           outcomes: <PitOutcome>[
@@ -201,7 +225,15 @@ abstract final class PitModifiers {
       SlowAround() ||
       PullToCenter() ||
       SelfBuff() ||
-      Rock() =>
+      Rock() ||
+      Blink() ||
+      Vanish() ||
+      StunAround() ||
+      Parry() ||
+      Stacking() ||
+      Overdrive() ||
+      Rewind() ||
+      PitPassive() =>
         e,
     };
   }
@@ -244,7 +276,16 @@ abstract final class PitModifiers {
       Companion() ||
       Rock() ||
       SweepCone() ||
-      FreezeBolt() =>
+      FreezeBolt() ||
+      Blink() ||
+      Vanish() ||
+      StunAround() ||
+      Parry() ||
+      Stacking() ||
+      ChainBolt() ||
+      Overdrive() ||
+      Rewind() ||
+      PitPassive() =>
         e,
     };
   }
@@ -271,14 +312,18 @@ abstract final class PitModifiers {
   }
 }
 
-/// Eine legendäre Kraft: was ein legendäres Stück an Fähigkeiten ändert.
+/// Eine Kraft der Ausrüstung: was ein Stück oder ein Set in der Grube
+/// ändert — an den Fähigkeiten oder, über [GrantPassive], am Helden.
 ///
-/// **Die Id steht am Stück in `package:gear`** (`GearItem.legendaryPower`),
+/// **Bis ADR-0077 trugen nur legendäre Stücke eine**; seitdem kann jedes
+/// Stück eine haben, und ein Set auch (`SetPerk.powers`).
+///
+/// **Die Id steht am Stück in `package:gear`** (`GearItem.power`),
 /// die Wirkung hier. Dieselbe Naht wie bei den Fähigkeiten: Ids, die
 /// über eine Package-Grenze zeigen, und ein Test in der App, der prüft,
 /// dass keine ins Leere zeigt.
-class PitLegendary {
-  const PitLegendary({
+class PitGearPower {
+  const PitGearPower({
     required this.id,
     required this.name,
     required this.description,
@@ -291,20 +336,21 @@ class PitLegendary {
   final List<PitModifier> modifiers;
 }
 
-/// Die sechs legendären Kräfte — eine je legendärem Stück.
+/// Die Kräfte der Ausrüstung: die sechs legendären, dazu seit ADR-0077
+/// die der neuen Stücke und des Vampirsets.
 ///
 /// **Jede verändert, statt nur zu verstärken.** Ein legendäres Stück, das
 /// nur „+15 % Schaden" gibt, ist ein teures episches. Diese hier ändern,
 /// was eine Fähigkeit *tut* oder wie oft man sie drückt.
-abstract final class PitLegendaries {
-  static const PitLegendary sonnenglut = PitLegendary(
+abstract final class PitGearPowers {
+  static const PitGearPower sonnenglut = PitGearPower(
     id: 'legendaer-sonnenglut',
     name: 'Sonnenglut',
     description: 'Jeder Dauerschaden brennt anderthalbmal so heiss.',
     modifiers: <PitModifier>[ScaleOverTime(factor: 1.5)],
   );
 
-  static const PitLegendary steinerneHaut = PitLegendary(
+  static const PitGearPower steinerneHaut = PitGearPower(
     id: 'legendaer-steinerne-haut',
     name: 'Steinerne Haut',
     description: 'Steinhaut und Sammeln werfen zusätzlich ein Drittel des '
@@ -321,14 +367,14 @@ abstract final class PitLegendaries {
     ],
   );
 
-  static const PitLegendary weitblick = PitLegendary(
+  static const PitGearPower weitblick = PitGearPower(
     id: 'legendaer-weitblick',
     name: 'Weitblick',
     description: 'Jede Fähigkeit ist ein Fünftel schneller wieder bereit.',
     modifiers: <PitModifier>[ScaleCooldown(factor: 0.8)],
   );
 
-  static const PitLegendary beben = PitLegendary(
+  static const PitGearPower beben = PitGearPower(
     id: 'legendaer-beben',
     name: 'Beben',
     description: 'Kraftschlag und Wurzelgriff lassen den Boden beben: Alles '
@@ -348,30 +394,175 @@ abstract final class PitLegendaries {
     ],
   );
 
-  static const PitLegendary erzhunger = PitLegendary(
+  static const PitGearPower erzhunger = PitGearPower(
     id: 'legendaer-erzhunger',
     name: 'Erzhunger',
     description: 'Jede Fähigkeit kostet ein Drittel weniger Mana.',
     modifiers: <PitModifier>[ReduceManaCost(factor: 0.67)],
   );
 
-  static const PitLegendary lebensquell = PitLegendary(
+  static const PitGearPower lebensquell = PitGearPower(
     id: 'legendaer-lebensquell',
     name: 'Lebensquell',
     description: 'Heilung und Schutz wirken anderthalbmal so stark.',
     modifiers: <PitModifier>[ScaleProtection(factor: 1.5)],
   );
 
-  static const List<PitLegendary> all = <PitLegendary>[
+  // --- Seit ADR-0077 ---
+
+  static const PitGearPower frostreif = PitGearPower(
+    id: 'kraft-frostreif',
+    name: 'Frostreif',
+    description: 'Ein Kreis aus Eis geht mit dir. Wer darin steht, läuft '
+        'langsamer und friert.',
+    modifiers: <PitModifier>[
+      GrantPassive(FrostAura(radius: 60, slowFactor: 0.7, perSecond: 0.1)),
+    ],
+  );
+
+  static const PitGearPower irrlichter = PitGearPower(
+    id: 'kraft-irrlichter',
+    name: 'Irrlichter',
+    description: 'Alle fünf Sekunden ein Irrlicht, höchstens drei. Sie '
+        'kreisen um dich, suchen Gegner in der Nähe und zerplatzen an '
+        'ihnen.',
+    modifiers: <PitModifier>[
+      GrantPassive(
+        Wisps(
+          interval: 5,
+          maxCount: 3,
+          seekRange: 160,
+          power: 1.2,
+          blastRadius: 40,
+        ),
+      ),
+    ],
+  );
+
+  static const PitGearPower flickwerk = PitGearPower(
+    id: 'kraft-flickwerk',
+    name: 'Flickwerk',
+    description: 'Drei Sekunden ohne Treffer, und ein Schild aus einem '
+        'Zehntel deines Lebens legt sich um dich.',
+    modifiers: <PitModifier>[
+      GrantPassive(IdleShield(idleSeconds: 3, share: 0.1)),
+    ],
+  );
+
+  static const PitGearPower falkenblick = PitGearPower(
+    id: 'kraft-falkenblick',
+    name: 'Falkenblick',
+    description: 'Fünf Prozent mehr kritische Treffer, und jeder bringt '
+        'drei Mana.',
+    // Erst 6 % und 5 Mana: Stufe 13 stieg von 18 auf 58 % — mehr als
+    // jede andere Kraft, auf einer ungewöhnlichen Haube.
+    modifiers: <PitModifier>[
+      GrantPassive(CritEdge(chance: 0.05, manaOnCrit: 3)),
+    ],
+  );
+
+  static const PitGearPower hasenlauf = PitGearPower(
+    id: 'kraft-hasenlauf',
+    name: 'Hasenlauf',
+    description: 'Nach jedem Kill zwei Sekunden lang ein Drittel schneller.',
+    modifiers: <PitModifier>[
+      GrantPassive(KillRush(seconds: 2, speed: 1.3)),
+    ],
+  );
+
+  static const PitGearPower seelenernte = PitGearPower(
+    id: 'kraft-seelenernte',
+    name: 'Seelenernte',
+    description: 'Jeder Kill bringt acht Mana.',
+    modifiers: <PitModifier>[GrantPassive(ManaOnKill(amount: 8))],
+  );
+
+  static const PitGearPower echo = PitGearPower(
+    id: 'kraft-echo',
+    name: 'Echo',
+    description: 'Jede vierte Fähigkeit, die Schaden macht, trifft ein '
+        'zweites Mal mit halber Wucht.',
+    modifiers: <PitModifier>[GrantPassive(Echo(every: 4, power: 0.5))],
+  );
+
+  // Das Vampirset: vier Teile mit Lebensraub, zwei Stufen am Set.
+
+  static const PitGearPower blutsichel = PitGearPower(
+    id: 'kraft-lebensraub-sichel',
+    name: 'Lebensraub',
+    description: 'Vier Prozent deines Schadens heilen dich.',
+    modifiers: <PitModifier>[GrantPassive(LifeSteal(share: 0.04))],
+  );
+
+  static const PitGearPower nachtmantel = PitGearPower(
+    id: 'kraft-lebensraub-mantel',
+    name: 'Lebensraub',
+    description: 'Drei Prozent deines Schadens heilen dich.',
+    modifiers: <PitModifier>[GrantPassive(LifeSteal(share: 0.03))],
+  );
+
+  static const PitGearPower fledermaushaube = PitGearPower(
+    id: 'kraft-lebensraub-haube',
+    name: 'Lebensraub',
+    description: 'Zwei Prozent deines Schadens heilen dich.',
+    modifiers: <PitModifier>[GrantPassive(LifeSteal(share: 0.02))],
+  );
+
+  static const PitGearPower schattenstiefel = PitGearPower(
+    id: 'kraft-lebensraub-stiefel',
+    name: 'Lebensraub',
+    description: 'Drei Prozent deines Schadens heilen dich.',
+    modifiers: <PitModifier>[GrantPassive(LifeSteal(share: 0.03))],
+  );
+
+  /// Zwei Teile des Vampirsets.
+  static const PitGearPower blutdurst = PitGearPower(
+    id: 'kraft-blutdurst',
+    name: 'Blutdurst',
+    description: 'Jeder Kill heilt drei Prozent deines Lebens.',
+    modifiers: <PitModifier>[GrantPassive(HealOnKill(share: 0.03))],
+  );
+
+  /// Alle vier Teile: ersetzt [blutdurst], wie die volle Stufe jedes Sets
+  /// die kleine ersetzt — deshalb steht die Kill-Heilung hier noch einmal.
+  static const PitGearPower blutpakt = PitGearPower(
+    id: 'kraft-blutpakt',
+    name: 'Blutpakt',
+    description: 'Jede Sekunde verlierst du zwei Prozent deines Lebens. '
+        'Der Lebensraub zählt doppelt, und ein Fünftel dessen, was er '
+        'heilen könnte, trifft den Gegner. Sonst heilt dich nichts: Jede '
+        'andere Heilung trifft stattdessen den nächsten Gegner.',
+    modifiers: <PitModifier>[
+      GrantPassive(HealOnKill(share: 0.03)),
+      GrantPassive(
+        BloodPact(drainShare: 0.02, stealFactor: 2, stealDamageShare: 0.2),
+      ),
+    ],
+  );
+
+  static const List<PitGearPower> all = <PitGearPower>[
     sonnenglut,
     steinerneHaut,
     weitblick,
     beben,
     erzhunger,
     lebensquell,
+    frostreif,
+    irrlichter,
+    flickwerk,
+    falkenblick,
+    hasenlauf,
+    seelenernte,
+    echo,
+    blutsichel,
+    nachtmantel,
+    fledermaushaube,
+    schattenstiefel,
+    blutdurst,
+    blutpakt,
   ];
 
-  static PitLegendary? byId(String? id) {
+  static PitGearPower? byId(String? id) {
     if (id == null) return null;
     for (final kraft in all) {
       if (kraft.id == id) return kraft;
