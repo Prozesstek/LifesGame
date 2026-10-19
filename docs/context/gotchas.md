@@ -3,6 +3,26 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Auf einem Tablet gilt das Hochformat aus dem Manifest nicht mehr
+
+`android:screenOrientation="portrait"` steht im Manifest, und
+`main.dart` sperrt das Hochformat zusätzlich. **Mit targetSdk 36
+ignoriert Android beides auf Bildschirmen ab 600 dp kürzester Seite** —
+Tablets, aufgeklappte Faltbare. Die App dreht sich mit und wird auf
+1280 × 800 gestreckt. Kein Test meldet das, und im Browser sieht man es
+nie.
+
+targetSdk 36 kommt von Flutter selbst (`flutter.targetSdkVersion`) und
+ist seit dem 31.08.2026 Pflicht im Play Store. Zurückdrehen geht also
+nicht.
+
+**Abhilfe:** `PhoneFrame` zeigt die App dort im Rahmen, verkleinert,
+wenn sie quer nicht passt (`PhoneFrame.tabletShortestSide`).
+
+**Regel:** Eine Sperre im Manifest ist auf großen Bildschirmen eine
+Bitte. Was nur im Hochformat trägt, braucht eine eigene Antwort auf
+breite Fenster.
+
 ## Ein fauler Controller entsteht im `dispose` — und die CI hat ein anderes Flutter
 
 PR #122 lief hier mit allen 825 Tests grün und fiel nach dem Merge in

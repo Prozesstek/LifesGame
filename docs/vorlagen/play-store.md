@@ -93,21 +93,23 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 
 ### Code
 
-- [ ] Upload-Schlüssel erzeugen, `android/key.properties`, eine
-      Release-`signingConfig` in `android/app/build.gradle.kts`. Bisher
-      signiert der Release-Build mit dem Debug-Schlüssel.
+- [x] Release-`signingConfig` in `android/app/build.gradle.kts` (19.10.):
+      liest `android/key.properties`, ohne die Datei weiter der
+      Debug-Schlüssel.
+- [ ] *(Mensch)* Upload-Schlüssel erzeugen und `android/key.properties`
+      ausfüllen — Befehl und Felder in `android/key.properties.example`.
 - [ ] *(Mensch)* Schlüssel und Passwort an zwei Orten sichern. `*.jks` und
       `key.properties` sind gitignored, das bleibt so.
 - [ ] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
       allen Dichten, dazu 512 × 512 für den Store.
-- [ ] Startbild in der Lederfarbe. Bisher steht dort der helle
+- [x] Startbild in der Lederfarbe (19.10.). Bisher steht dort der helle
       Standardhintergrund (`launch_background.xml`), beim Start blitzt
       Weiß auf.
-- [ ] **Zurück-Geste in der Grube.** Das Steuerkreuz nimmt den ganzen
+- [x] **Zurück-Geste in der Grube** (19.10., `lauf_verlassen.dart`). Das Steuerkreuz nimmt den ganzen
       Bildschirm ein, und `PitScreen` hat kein `PopScope`: Ein Wisch vom
       linken Rand beendet den Lauf. Er soll nachfragen wie die
       Tagesgrube.
-- [ ] **Große Bildschirme.** Mit targetSdk 36 hält Android auf Tablets
+- [x] **Große Bildschirme** (19.10.: der Rahmen). Mit targetSdk 36 hält Android auf Tablets
       und aufgeklappten Faltbaren das Hochformat nicht mehr ein.
       `PhoneFrame` dort einschalten oder Tablets in der Play Console
       ausschließen.
@@ -115,7 +117,10 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       erreichbar machen, ohne Satz auf dem Bildschirm (ADR-0060).
 - [ ] Mit jedem Upload die Zahl nach dem `+` in `pubspec.yaml` erhöhen
       (`version: 0.1.0+1`).
-- [ ] `flutter build appbundle --release` — Play nimmt nur `.aab`.
+- [ ] `flutter build appbundle --release` — Play nimmt nur `.aab`. Am
+      19.10. zum ersten Mal gebaut (57 MB), aber mit „failed to strip
+      debug symbols“: Dafür braucht Flutter die cmdline-tools. Nach deren
+      Installation und mit dem Upload-Schlüssel neu bauen.
 
 ### Recht und Inhalt
 

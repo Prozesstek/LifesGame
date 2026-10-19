@@ -128,6 +128,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/example/headless_run.dart` | spielt eine Halle ohne Bildschirm durch, mit drei Machtstufen | nur Dart-SDK |
 | `lib/action/` | die Darstellung dazu — Figuren, Steuerkreuz, Kopfzeile | Flutter |
 | `lib/action/pit_screen.dart` | ein Lauf durch eine Stufe — **die einzige Stelle**, die ein Ergebnis in die Reihe trägt | Flutter |
+| `lib/action/lauf_verlassen.dart` | **die Rückfrage, bevor ein Lauf verlassen wird** — Grube und Tagesgrube; auf Android ist „Zurück“ eine Geste vom Rand, und das Steuerkreuz nimmt den ganzen Bildschirm | Flutter |
 | `lib/action/daily_pit_screen.dart` | der **eine Lauf des Tages** durch die Tagesgrube — trägt ein, wie er ausging; „Zurück“ fragt nach und hält den Lauf an | Flutter |
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
@@ -230,7 +231,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
-| `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße | Flutter |
+| `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße — **und auf Tablets**, wo Android das Hochformat seit targetSdk 36 nicht mehr einhält | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter **„Ebene 18“** — nur die nächste, kein Fahrstuhl mehr —, Belohnung als Zeichen, „Hinab" | Flutter |
 | `lib/combat/widgets/eingangs_glut.dart` | **der Schlund im Eingang**: glüht in der Farbe dessen, was unten fällt — Feuer, ab 10 episch, ab 20 legendär, über 30 blutrot (`GlutStufe`); atmet in Tests nicht (`test/flutter_test_config.dart`) | Flutter |
@@ -278,7 +279,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 850 Tests
+flutter test             # 857 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

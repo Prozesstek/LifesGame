@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Das Leder der App (`Palette.background`). Steht hier ein zweites
+         Mal, weil Android das Startbild malt, bevor Flutter läuft — sonst
+         blitzt beim Start Weiß auf. Wer die Palette ändert, zieht diese
+         Zahl nach. -->
+    <color name="leder">#FF17110A</color>
+</resources>
