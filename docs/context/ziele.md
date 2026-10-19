@@ -8,7 +8,7 @@
 > Ziele sind **SMART**: spezifisch, messbar, erreichbar, relevant, terminiert.
 > Ein Ziel ohne Prüfbefehl ist hier keins.
 
-**Zuletzt aktualisiert:** 11.10.2026 · Frederik
+**Zuletzt aktualisiert:** 19.10.2026 · Frederik
 
 ---
 
@@ -27,6 +27,9 @@ Instanz, die zählt.
 
 **Termin: MVP steht am Sonntag, 20.09.2026. Testlauf 21.09.–20.10.2026.**
 
+**Danach, seit dem 19.10.: am Freitag, 20.11.2026, im Play Store**
+(Ziel 9) — der erste Schritt zu Fremden.
+
 ## Die Ziele auf einen Blick
 
 | # | Ziel | Quelle | Termin |
@@ -39,6 +42,7 @@ Instanz, die zählt.
 | 6 | Die Gegnerreihe schließt den MVP-Schnitt ✓ | Issue #36 | ~~20.09.~~ **08.09.** |
 | 7 | Der Nachweis | diese Datei | 20.10. |
 | 8 | Errungenschaften vor dem Teststart ✓ | Issue #41 | ~~20.09.~~ **12.09.** |
+| 9 | Lifes Game steht im Play Store | diese Datei | **20.11.** |
 
 ## Was **nicht** im MVP ist — und warum
 
@@ -51,7 +55,7 @@ Ohne diese Abgrenzung wandert jeder gute Einfall in den kritischen Pfad.
 | **Lebensbalken an der Zeitachse** | Kosmetisch. Die Zahlen stimmen, nur die Reihenfolge nicht. |
 | **Kampfsystem-Umbau** (Initiative, Kontern) | Nicht entschieden, kein Dokument im Repo. Ein unentschiedener Umbau gehört nicht in einen terminierten Plan. |
 | ~~**Android**~~ → **jetzt dazugehörend** (26.08.) | Zurückgenommen von AktivesBrett: „Im Browser ist ja nur zum Testen, aber es soll auf dem Handy laufen." Das trägt: Ziel 7 verlangt **30 Tage tägliches** Spielen, und ein Browser-Tab wird seltener angetippt als ein Symbol auf dem Startbildschirm. Die Einrichtung steht in `state.md`. |
-| **Store, Icons der App** | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. |
+| ~~**Store, Icons der App**~~ → **Ziel 9** (19.10.) | Ein sideloadetes APK reicht für zwei Leute. Das Startsymbol bleibt vorerst das Flutter-Logo. **Aufgehoben von Frederik:** „Wir wollen am 20.11 in den Store.“ Für zwei Leute reichte das APK, Feedback von Fremden braucht den Store. |
 | ~~**Verkauf im Laden**~~ → **gebaut am 08.09.** | Das Signal war eingetreten ([ADR-0031](../decisions/0031-verkauf-als-versenkte-kosten.md)): Mit 27 Stücken, fünf Sidegrade-Waffen und drei Sets kostet ein Fehlgriff bis zu 42 Tage und war nicht zu korrigieren. Wer fünf Rhythmen anbietet, muss das Ausprobieren bezahlbar machen — sonst probiert niemand. **Entprellen der Persistenz** bleibt zurückgestellt. |
 | **Dungeon** (Lauf aus 5 Kämpfen, Tränke, Wiederbelebung) | Neu auf dieser Liste am 08.09. ([ADR-0032](../decisions/0032-gegnerreihe-statt-dungeon.md)): Issue #36 hat Ziel 6 auf die Gegnerreihe umgeschrieben. Der Dungeon braucht drei Systeme mehr **und** eine Entscheidung, die `konzept.md` selbst offen lässt. Nach dem Teststart. |
 | ~~**Baum über 24 Knoten hinaus**~~ → **begonnen am 26.09.** | Frederik hat die Sperre aufgehoben ([ADR-0050](../decisions/0050-zwischenebenen-und-angekuendigte-gebiete.md)): Zwischenebenen und alle Überschriften aus Issue #54 stehen im Baum, der Inhalt kommt schrittweise. Der Grund: `runway_sim` zeigte den Baum an Tag 33 leer gelesen. |
@@ -491,6 +495,73 @@ vergleichen können. Beides ist hier der Zweck.
 
 ---
 
+## Ziel 9 — Lifes Game steht im Play Store
+
+**Termin: Freitag, 20.11.2026 · Liste zum Abhaken: [`docs/vorlagen/play-store.md`](../vorlagen/play-store.md)**
+
+> **Neu am 19.10.2026.** Frederik: „Wir wollen am 20.11 in den Store,
+> halt das fest.“ Der Store stand bis dahin auf der Sperrliste, zuletzt
+> bestätigt am 02.10. („erst später“). **Gelesen als: öffentlich.** Das
+> ist Claudes Lesart; ist der Start der Feedbackrunde gemeint, rückt
+> jeder Termin unten um gut drei Wochen nach hinten. AktivesBrett hat
+> noch nicht zugestimmt.
+
+### Spezifisch
+
+Android, deutsch, für Deutschland, Österreich und die Schweiz. Der Weg
+führt über einen **geschlossenen Test mit Fremden**: Für ein neues
+privates Play-Konto ist er Pflicht, und er ist zugleich die
+Feedbackrunde, um die es geht. iOS gehört nicht dazu.
+
+### Messbar
+
+| Kriterium | Ist (19.10.) | Soll |
+|---|---|---|
+| Play-Konto | **keins** | angelegt und bestätigt, Mi 21.10. |
+| Release-Build | **nie gebaut**, signiert mit dem Debug-Schlüssel | eigener Upload-Schlüssel, `.aab` |
+| Startsymbol | **Flutter-Logo** | eigenes |
+| Geschlossener Test | **—** | **≥ 12 Tester eingeschrieben ab Mo 26.10.** |
+| Vierzehn Tage am Stück | — | 26.10.–09.11. |
+| Produktionszugang | — | beantragt Mo 09.11. |
+| Öffentlich | — | **Fr 20.11.** |
+
+```bash
+flutter doctor                       # Android toolchain ohne ✗
+flutter build appbundle --release    # build/app/outputs/bundle/release/app-release.aab
+flutter test
+```
+
+Alles danach steht in der Play Console, nicht im Repo.
+
+### Erreichbar
+
+Knapp. Der Code ist das Kleinste: Signieren, Startsymbol, Startbild,
+eine Rückfrage beim Verlassen der Grube. Teuer sind drei Fristen, die
+sich nicht abkürzen lassen — vierzehn Tage Test, Googles Prüfung des
+Produktionszugangs (nach eigener Angabe meist bis zu sieben Tage) und
+die Prüfung der ersten öffentlichen Fassung. **Deshalb ist der 26.10.
+die eigentliche Frist**: Bis dahin müssen zwölf Tester eingeschrieben
+sein, und jeder Tag später geht vom Puffer für die Prüfungen ab.
+
+Dazu kommt, was nur Menschen können: das Konto, die Bestätigung der
+Identität, zwölf Leute, die mitmachen, die Lizenzen der Asset-Pakete.
+
+**Schneidbar**, wenn es knapp wird: Erinnerung und große Schrift — sie
+können als Update während des Tests kommen. **Nicht schneidbar**: die
+Lizenzen, die Datenschutzerklärung und zwölf Tester. Ohne sie gibt es
+keinen Store.
+
+### Relevant
+
+Bisher spielen nur die beiden Erbauer (Ziel 7). Die Durchsicht vom
+02.10. kam zu dem Schluss: „ein gutes Spiel für zwei Erbauer, noch kein
+Produkt für Fremde“ (`verlauf.md`). Ob das stimmt, zeigt nur ein
+Fremder. Die Messlatte aus ADR-0071 — zehn Fremde, nach zwei Wochen
+teilen noch drei — wäre mit dem Test zum ersten Mal prüfbar; als Ziel
+ist sie weiter nicht bestätigt.
+
+---
+
 ## Wie der Fortschritt geprüft wird
 
 **Freitags, in fünf Minuten.** Für jedes laufende Ziel die Ist-Spalte
@@ -507,6 +578,13 @@ Meilensteine nicht (siehe dort).
 
 ## Verlauf
 
+- **19.10.2026** — **Ziel 9 neu: der Play Store am 20.11.**
+  (Frederik). „Store, Icons der App“ fällt von der Sperrliste, die
+  übrigen Punkte bleiben. Gelesen als: öffentlich; der Weg führt über
+  den Pflichttest mit zwölf Testern ab dem 26.10. Die Liste zum Abhaken
+  steht in [`docs/vorlagen/play-store.md`](../vorlagen/play-store.md).
+  **Noch ohne ADR**: Konto, Erinnerung und Absturzberichte sind nicht
+  entschieden, der ADR kommt mit ihnen.
 - **11.10.2026** — **Die Tagesgrube steht**
   ([ADR-0072](../decisions/0072-die-tagesgrube.md)), die erste der fünf
   Ideen aus ADR-0071: dieselbe Grube für alle, ein Versuch am Tag, danach

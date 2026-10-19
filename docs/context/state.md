@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 18.10.2026 · Frederik
+**Zuletzt aktualisiert:** 19.10.2026 · Frederik
 
 ---
 
@@ -20,7 +20,8 @@
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
 sind erreicht; seit Teststart wurde trotzdem stark weitergebaut (siehe
-„Offen“).
+„Offen“). **Als Nächstes: Ziel 9, der Play Store am 20.11.** — die Frist,
+die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
@@ -75,11 +76,13 @@ Bremse ist gemessen, nicht gestellt**, und AktivesBrett fehlt in
 
 **Vor einer Veröffentlichung** (Durchsicht vom 02.10.). **Entschieden
 am 02.10. (Frederik): Ziel ist eine Android- und iOS-App, aber erst
-später — zuerst wird das Konzept weiter ausgebaut.** Store bleibt auf
-der Sperrliste in `ziele.md`. Offen bis dahin: Datenverlust, Erinnerung und Android-App, ~~der lange Weg
+später — zuerst wird das Konzept weiter ausgebaut.** ~~Store bleibt auf
+der Sperrliste in `ziele.md`.~~ **Seit dem 19.10. Ziel 9: am 20.11. im
+Play Store** ([`play-store.md`](../vorlagen/play-store.md)). Offen bis dahin: Datenverlust, Erinnerung und Android-App, ~~der lange Weg
 zum ersten Kampf~~ (gebaut, ADR-0068), ~~nur tägliche Gewohnheiten~~ (gebaut, ADR-0064),
 Lizenzen der Assets, Fremde als Tester (mit der Tagesgrube ohne Store
-möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
+möglich, ADR-0071). Die ganze Liste steht in `verlauf.md`, Eintrag
+vom 02.10.
 
 **Inhalt und Balance:**
 
@@ -129,6 +132,56 @@ möglich, ADR-0071). Die ganze Liste steht im Eintrag vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 19.10.2026: der Play Store am 20.11.
+
+Frederik: „Wir wollen bald die App in den Android Store kriegen um
+Feedback zu sammeln. Was müssen wir dafür noch machen?“ Claude hat das
+Repo durchgesehen und eine Liste geschrieben, danach Frederik: „Wir
+wollen am 20.11 in den Store, halt das fest.“ **Nichts gebaut.**
+
+Neu ist **Ziel 9** in `ziele.md`; „Store, Icons der App“ ist von der
+Sperrliste. Die Liste zum Abhaken, mit Terminen:
+[`docs/vorlagen/play-store.md`](../vorlagen/play-store.md).
+
+**Der Befund:** Ein neues privates Play-Konto darf erst öffentlich, wenn
+ein geschlossener Test mit mindestens zwölf Testern vierzehn Tage am
+Stück gelaufen ist; danach prüft Google den Produktionszugang, nach
+eigener Angabe meist in bis zu sieben Tagen. Für den 20.11. heißt das:
+**Bis Mo 26.10. müssen zwölf Tester eingeschrieben sein.** Der Test ist
+zugleich die Feedbackrunde.
+
+**Beim Nachsehen gefunden:**
+
+- Auf diesem Rechner wurde noch nie ein Android-Build gebaut;
+  `flutter doctor` meldet fehlende cmdline-tools und nicht akzeptierte
+  Lizenzen.
+- Der Release-Build signiert mit dem Debug-Schlüssel, das Startsymbol
+  ist das Flutter-Logo, das Startbild hell.
+- **Ein Wisch vom linken Rand beendet einen Lauf in der Grube**: Das
+  Steuerkreuz nimmt den ganzen Bildschirm ein, und `PitScreen` hat kein
+  `PopScope`. Im Browser fällt das nicht auf.
+- Mit targetSdk 36 hält Android das Hochformat auf Tablets nicht mehr
+  ein.
+- Die Vorschauen in 390 × 844 taugen nicht als Screenshots für den
+  Store: Die lange Seite darf höchstens doppelt so lang sein wie die
+  kurze.
+- Schon in Ordnung: targetSdk 36, NDK 28, keine Internet-Berechtigung,
+  kein Entwicklermodus im Release-Build.
+
+**Aufgeräumt:** Die Einträge vom 04. bis 11.10. stehen jetzt wortgleich
+in [`verlauf.md`](verlauf.md).
+
+### Offen
+
+- **„In den Store“ ist als öffentlich gelesen**, nicht bestätigt. Ist
+  der Start der Feedbackrunde gemeint, rückt alles um gut drei Wochen.
+- AktivesBrett hat nicht zugestimmt — der Store stand auf der
+  Sperrliste, die beide bindet.
+- Zu entscheiden bis Mi 21.10.: wem das Konto gehört, der endgültige
+  Name (die Paket-Id ist nach dem ersten Upload fest), Spiel oder App,
+  Erinnerung, Absturzberichte, große Schrift.
+- Ein ADR fehlt mit Absicht, bis diese Fragen entschieden sind.
 
 ## 18.10.2026, spät: das Lagerfeuer — der Tag endet an einer Stelle
 
@@ -717,406 +770,6 @@ gespielt, nicht am Handy.**
   Fläche in der Welt, aber dieselbe Farbfamilie.
 - Die vier älteren Klänge (`Success.mp3`, `Win*.mp3`) haben weiter keine
   Herkunft im Repo.
-
-## 11.10.2026, danach: die Tagesgrube — eine Grube für alle, ein Versuch am Tag
-
-Frederik: „Tagesgrube lets go.“ Die erste der fünf Ideen aus ADR-0071,
-in zwei Fragerunden entschieden und gebaut:
-[ADR-0072](../decisions/0072-die-tagesgrube.md).
-
-| Was | Wie |
-|---|---|
-| **Dieselbe Grube für alle** | der Startwert kommt aus dem Datum, daraus Karte, Wächter und Besetzung |
-| **Ein Held für alle** | die Werte eines fleißigen Spielers an Tag 30; je Wochentag ein fester Satz aus Waffe und drei Fähigkeiten |
-| **In Form** | alles Fällige erledigt: +25 % auf alle vier Werte, ja oder nein; ein Ruhetag geht ohne Aufschlag |
-| **Ein Versuch** | zählt mit dem Start; wer mittendrin schließt, hat abgebrochen; „Zurück“ fragt nach und hält den Lauf an |
-| **Nur Ruhm** | antreten 1, Sieg 3, Sieg in Form 5 — weder Erfahrung noch Gold, keine Beute |
-| **Der Text** | Raumzeile, Zeit, Form, Tageskette und die Adresse, in die Zwischenablage |
-| **Wo** | im Eingang der Grube ganz oben, sobald jemand einmal unten war |
-| **Die Dailies** | gestrichen (ADR-0040 abgelöst); was sie gezahlt haben, zählt weiter |
-
-Achtmal entschieden, siebenmal wie empfohlen. **Bei den Dailies gegen
-Claudes Empfehlung**: Sie lautete, sie eine Woche neben der Tagesgrube
-stehen zu lassen.
-
-**Gemessen:**
-
-- **Die Grube hat eine scharfe Kante.** Derselbe Held gewinnt Stufe 11
-  zu 92 % und Stufe 13 zu 8 %; ein Viertel mehr auf alle Werte macht
-  aus den 8 % 96 %. Deshalb reicht ein Viertel als Aufschlag.
-- **Die sieben Sätze** stehen auf Stufe 11 bis 13
-  (`tool/tagesgrube_sim.dart`, 40 Läufe je Feld). Ohne Form gewinnt der
-  Bot zwischen 20 % (Sonntag) und 78 % (Donnerstag), im Mittel jeden
-  zweiten Lauf; in Form jeden. Ein Sieg dauert ihm rund eine Minute.
-- **Ohne Dailies** (`runway_sim`, fleißiger Spieler): an Tag 30 Level 18
-  statt 21 und 1.991 Gold statt 2.482; an Tag 60 Level 29 statt 33,
-  37 Seiten statt 41, 4.286 Gold statt 5.759. Nicht ausgeglichen.
-- **Dieselbe Grube auf jedem Gerät:** Ein Test hält die Karte vom 12.10.
-  als Zahl fest. Er läuft in der VM und im Browser
-  (`dart test -p chrome`), beide ergeben dieselbe.
-
-**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto):
-
-- **Die Raumzeile war „dunkel, dunkel, dunkel“.** Die Farben der Palette
-  sind für Schrift gemacht; als Feld wurde das Gold ein Braun. Sie hat
-  jetzt drei eigene Farben und einen Rand.
-- Das Zeichen der Form hing am Titel statt am rechten Rand.
-- **Breite Dialoge deckten die Kante ihres Holzrahmens zu**, links und
-  rechts eine Lücke so hoch wie der Text. Das traf jeden Dialog mit
-  einem Satz und ist jetzt in `HolzRahmen` behoben (`gotchas.md`).
-
-Neu: `packages/action_combat/lib/src/daily_pit.dart`,
-`tool/tagesgrube_sim.dart`, `lib/action/daily_pit_screen.dart`,
-`lib/combat/daily_pit_controller.dart`, `tagesgrube_text.dart` und vier
-Widgets unter `lib/combat/widgets/`. Die Karte kennt jetzt ihre Räume
-(`Level.rooms`), die Welt zählt den Schaden je Raum. Gelöscht:
-`dailies.dart`, `dailiesUnlockedProvider`, `todayDailiesProvider` und
-die Sterne im Fahrstuhl.
-
-App 768 (vorher 736), action_combat 305 (vorher 276). Eingang in fünf
-Zuständen, beide Rückfragen, beide Ergebnisblätter und der Lauf
-gerendert und angesehen, **der Lauf mit Würfeln statt Figuren. Nicht
-gespielt, nicht am Handy.**
-
-Gemergt am 11.10. als PR #112, zusammen mit #110 und #111.
-
-### Offen
-
-- **Wie schwer sie für Menschen ist.** Der Bot ist eine untere Schranke;
-  ob „ohne Form“ ein fairer Kampf ist oder eine Wand, zeigt das Spielen.
-- **Teilen geht über die Zwischenablage**, nicht über das Teilen-Blatt
-  des Handys. Das sind am Handy drei Schritte statt einem, und es ist
-  dort nicht geprüft.
-- Die Startseite zeigt nicht, dass die Tagesgrube heute noch offen ist;
-  man findet sie erst im Eingang der Grube.
-- Ob ein Blitz mit einer Zahl daneben als „noch 2 offen“ gelesen wird.
-- **Schlüssel**: Beute fiel bisher nebenbei bei den vier Dailies. Jetzt
-  muss man dafür eine geschaffte Stufe von sich aus noch einmal spielen.
-- Die Stufen sind grob: Donnerstag ist ohne Form deutlich leichter als
-  Sonntag. Genauer ginge es nur über eigene Werte je Satz.
-- Ein Deploy mitten am Tag kann die Grube für den Rest des Tages ändern,
-  wenn er am Bau der Grube etwas ändert.
-- ~~`konzept.md` kennt die Tagesgrube nicht.~~ Das stimmte nicht:
-  Abschnitt 8 nannte sie seit PR #110 als ungebaut. Nach dem Merge
-  nachgezogen.
-- Die Dialoge im hängenden Rahmen füllen die ganze Höhe des Bildschirms,
-  auch wenn sie zwei Zeilen tragen. Das war vorher schon so.
-- AktivesBrett hat ADR-0072 nicht gesehen.
-
-## 11.10.2026: Schadenszahlen, die man lesen kann
-
-Frederik schickte ein Reel über Schadenszahlen in einem Roguelike
-(„damage numbers that feel good and don't break your game“). Die Zahlen
-der Grube stiegen gerade hoch, waren immer gleich groß und stapelten
-sich. Als Prototyp gebaut, dann „Sehr gut mach das“: PR #111.
-
-| Aus dem Reel | In der Grube |
-|---|---|
-| Punch bei der Geburt | die Zahl erscheint 1,6-fach und setzt sich in 0,12 s |
-| Bogen, Seiten wechseln | Treffer fliegen abwechselnd links und rechts im Wurf; Heilung, Zeit und Beute steigen weiter gerade |
-| erst am Ende verblassen | voll sichtbar bis 70 % der Lebenszeit, vorher 50 % |
-| eine Farbe je Sache | neu: Dauerschaden ist violett |
-| Größe folgt dem Schaden | gemessen am Schnitt der letzten zwölf Treffer des Helden, 0,8- bis 1,6-fach |
-| ein kritischer Treffer als Moment | größer, schräg, zittert 0,3 s — kritische gibt es weiter nur im Prototyp |
-| zusammenzählen | Treffer auf denselben Gegner binnen 0,3 s werden eine Summe |
-| nie zu viele | höchstens 40 zugleich |
-
-**Anders als im Reel:** Zusammengezählt wird nur 0,3 s lang, nicht
-solange die Zahl in der Luft ist — der Grundangriff fällt etwa jede
-halbe Sekunde, sonst stünde über jedem Gegner nur eine wachsende Summe.
-Dauerschaden ist violett und nicht giftgrün, weil Grün die Heilung ist.
-Und die Zahlen werden nicht wiederverwendet; bei höchstens 40 lohnt es
-nicht.
-
-`HitLanded` trägt dafür ein Pflichtfeld `overTime`, das nur die Anzeige
-liest. Die Rechnung steht in `lib/action/damage_popup.dart`
-(`DamagePopup`, `HitAverage`, `DamagePopups`).
-
-App 736 (vorher 716). **Nicht angesehen**, weder gerendert noch
-gespielt. Gemergt am 11.10. als PR #111.
-
-### Offen
-
-- Ob Bogen, Größe und das Fenster von 0,3 s sich gut anfühlen.
-
-## 09.10.2026: das nächste Level — fünf Ideen, nach und nach
-
-Frederik fragte, was das Konzept auf das nächste Level bringt und Erfolg
-sichert. Claude hat fünf Ideen vorgeschlagen, Frederik: „finde alle Ideen
-super, halt die auf jeden Fall fest, das bauen wir nach und nach.“ Die
-Richtung steht in [ADR-0071](../decisions/0071-das-naechste-level.md),
-die Einzelheiten und die Fragen für die Konzeptrunden in der Vorlage
-[`docs/vorlagen/das-naechste-level.md`](../vorlagen/das-naechste-level.md).
-
-| Idee | in einem Satz |
-|---|---|
-| **Tagesgrube** | dieselbe Grube für alle, aus dem Datum gesät, ein Versuch, ein Einheitsheld; stärker macht nur, ob man heute in Form ist; danach ein Text zum Teilen, wie bei Wordle |
-| **Lagerfeuer** | abends eine Minute für Rückfrage, Truhe, Aufgaben und Wochenrückblick statt fünf Dingen, die um Mitternacht verfallen |
-| **Schatten** | ganz unten wartet man selbst, wie man vor 30 Tagen war; die vier Wächter werden innere Gegner |
-| **Saisons** | sechs Wochen, ein Thema aus einem gelesenen Buch: Seiten, Vorlagen, ein Wächter, etwas fürs Haus |
-| **Seilschaft** | zwei bis vier an einem Seil; wer einen fälligen Tag verpasst, wird einmal die Woche gehalten; der erste Server |
-
-**Positionierung:** das Spiel, das dich wegschickt. **Grundsatz:**
-weniger Systeme, die enger zusammenhängen — vier der fünf bündeln, was
-es schon gibt. **Nichts davon ist gebaut**; jede Idee bekommt vor dem
-Bau ihre Konzeptrunde.
-
-**Beim Nachsehen im Code gefunden**, beides steht in der Vorlage:
-
-- **Die Tagesgrube ist fast da.** Karte, Wächter und Besetzung kommen
-  schon aus dem Startwert; nur `PitScreen._neuerLauf` würfelt ihn frei.
-- **Der Schatten kann nicht an den Werten von damals hängen**: Sie sind
-  nach 32 bis 40 Häkchen je Wert gedeckelt. Und nicht jede Erfahrung
-  trägt ein Datum — Häkchen und Rückfragen schon, Seiten und erste Siege
-  nicht.
-
-Dabei aufgeräumt: Die Einträge vom 26.09. bis 01.10. stehen jetzt
-wortgleich in [`verlauf.md`](verlauf.md).
-
-### Offen
-
-- Reihenfolge (Tagesgrube, Lagerfeuer, Schatten, Saisons, Seilschaft)
-  und Messlatte (zehn Fremde, zwei Wochen, drei teilen noch) sind
-  Claudes Vorschlag, nicht ausdrücklich bestätigt.
-- ~~Ob die vier Dailies in der Tagesgrube aufgehen (ADR-0040).~~
-  Entschieden am 11.10.: Sie gehen (ADR-0072).
-- AktivesBrett hat ADR-0071 nicht gesehen.
-
-## 07.10.2026, danach: das Handbuch steht im Baum
-
-Frederik: „Ja“ zum Handbuch als nächstem Block. In zwei Fragerunden
-entschieden, zweimal gegen Claudes Empfehlung:
-[ADR-0070](../decisions/0070-das-handbuch-steht-im-baum.md).
-
-| Was | Wie |
-|---|---|
-| **Kein Handbuch-Bildschirm mehr** | die fünf Seiten sind Knoten unter *Gewohnheiten*, der Baum ist immer offen |
-| **Sie kosten einen Punkt** | nichts im Baum ist kostenlos; dafür beginnt jeder mit **neun Punkten** statt einem |
-| **Ins Buch einsortiert** | „Zwei Minuten reichen“ ist Regel 3 unter „Die vier Regeln“, die anderen vier hängen unter *Gewohnheiten* |
-| **Direkt zur nächsten** | nach einer bestandenen Seite steht ein Knopf mit der nächsten; ist sie noch zu, öffnet der Tipp sie, der Preis steht darauf |
-| **Der Baum schlägt vor** | solange nichts offen ist, steht bei „Weiterlesen“ der nächste Schritt zu den Grundlagen: zuerst „Geist“, ein Punkt |
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **Neun, weil der Weg neun kostet**: Geist, Selbstentwicklung,
-  Gewohnheiten, Die vier Regeln und die fünf Seiten
-  (`theoryBasicsPath`). Ein Test hält beide Zahlen zusammen.
-- **Gezählt wird nur noch der Graph.** Die fünf Seiten stehen im Graphen
-  und im alten Zweig; beides zusammen zählte sie doppelt.
-- **Alte Stände behalten alles** und bekommen acht Punkte dazu. Wer das
-  Handbuch bestanden hatte, hat die Seiten und ihren Weg offen, ohne
-  dafür bezahlt zu haben.
-- **Die Einführung „Gewohnheiten“ ist umgeschrieben**: Sie verwies auf
-  das Handbuch als schon Gelesenes und steht jetzt davor.
-- **Der Kreis der Fähigkeiten erscheint wie bisher** (fünf Seiten
-  bestanden oder eine Fähigkeit gelernt).
-
-Gelöscht: `branch_screen.dart`, `lesson_tile.dart`, `handbookProvider`
-und die zwei Provider daran. ADR-0025 ist abgelöst.
-
-**Gemessen** (`runway_sim`, fleißiger Spieler): an Tag 60 sind 41 Seiten
-gelesen statt 38, Level und Gold bleiben praktisch gleich. Die acht
-Punkte mehr stehen gegen fünf Seiten, die vorher nichts kosteten.
-
-**Dabei gefunden: Der erste Lauf ist härter, als ADR-0068 sagt.** Die
-93 % für Stufe 1 an Tag 0 enthielten die 275 Erfahrung des Handbuchs,
-also Level 3. Seit ADR-0068 geht es aber vor jeder Seite hinab. Auf
-Level 1 gemessen (`pit_sim`, 12 Läufe je Feld): **Stufe 1 bei 67 %,
-Stufe 2 bei 17 %** (vorher 92 % und 75 %); je Wächter zwischen 42 %
-(Schlund) und 100 % (Sumpftroll). Das ist keine Folge dieses Umbaus,
-sondern eine Annahme der Simulation, die seit gestern nicht mehr
-stimmte; `pit_sim` rechnet Tag 0 jetzt auf Level 1. **Nicht
-nachgestellt**, Balance ist zurückgestellt.
-
-**Beim Ansehen gefunden** (gerendert in 390 × 844): Der Preis auf dem
-Knopf zur nächsten Seite ging im Holz unter, er ist jetzt hell.
-
-theory 193 (vorher 174), App 716 (vorher 707). Der Baum eines neuen
-Stands, *Gewohnheiten* mit den neuen Knoten, „Die vier Regeln“ und das
-Ergebnis mit dem Knopf gerendert und angesehen. **Nicht gespielt, nicht
-am Handy.**
-
-Gemergt am 07.10. als PR #109, zusammen mit #107 und #108.
-
-### Offen
-
-- **Stufe 1 am ersten Tag** gewinnt der Bot in zwei von drei Läufen. Ob
-  das als erster Eindruck trägt, und ob eine Niederlage dort jetzt zu
-  oft kommt, zeigt das Spielen.
-- Neun Punkte auf einmal sind eine große Wahl beim ersten Blick auf den
-  Baum. Der Vorschlag führt, erklärt aber nicht, warum.
-- Ein Tipp auf den Knopf zur nächsten Seite gibt einen Punkt aus, ohne
-  Rückfrage.
-- Wer die neun Punkte woanders ausgibt, hat die drei Vorlagen aus den
-  Grundlagen und ihre Plätze für eigene Gewohnheiten erst später.
-- Die umgeschriebene Einführung „Gewohnheiten“ ist nicht gegengelesen.
-- `konzept.md` zeigt den Baum noch mit zwei Wurzeln und dem Handbuch
-  davor.
-- AktivesBrett hat weder ADR-0068 noch -0069 noch diesen gesehen.
-
-## 07.10.2026: die Grube erklärt sich im ersten Lauf
-
-Frederik: „bau gerne weiter“. Der nächste Block war die Lücke, die
-ADR-0068 selbst offen ließ: Wer nach dem ersten Häkchen hinabsteigt,
-sah eine stehende Figur und keinen Knopf. In einer Fragerunde
-entschieden:
-[ADR-0069](../decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md).
-
-| Was | Wie |
-|---|---|
-| **Laufen** | ein Geister-Steuerkreuz links unten, ein Finger zieht reihum in alle vier Richtungen; weg nach anderthalb Feldern |
-| **Schlägt von selbst** | beim ersten Schlag steht vier Sekunden die Waffe in zwei drehenden Pfeilen über dem Helden |
-| **Wie lange** | bis die erste Stufe geschafft ist, abgeleitet aus der Reihe; unsere Stände sehen nichts davon |
-| **Niederlage** | solange keine Stufe geschafft ist, steht neben „Nochmal“ das Buch „Stärker werden“ und führt in die Theorie |
-
-**Nicht gewählt** (Frederik): Zeichen für die Uhr und für „Rot heißt
-weg“.
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **Die Zeichen nehmen keinen Tipp an**; das echte Steuerkreuz liegt
-  darunter.
-- **Das Zeichen am Helden weicht der Kopfzeile aus** und sitzt dann
-  unter ihm.
-- **Das Buch ersetzt die Grube im Stapel**: „Zurück“ aus der Theorie
-  führt zum Eingang, nicht in den verlorenen Lauf.
-- **„Zurück“ nach einer Niederlage trägt jetzt die Farbe für Leder.**
-
-**Beim Bauen gefunden, ein alter Fehler:** Flame ruft im Bau
-`update(0)`, und der Bildzähler weckte die Kopfzeile mitten im Layout.
-Das geschah nach jeder Niederlage, nur im Debug-Build sichtbar, und kein
-Test ging durch eine Niederlage (`gotchas.md`).
-
-**Beim Ansehen gefunden** (gerendert in 390 × 844): Das Zeichen am
-Helden lag unter der Kopfzeile, wenn die Kamera am Rand der Grube
-anhält. Und der neue Knopf war in den Farben des Themes auf Leder kaum
-zu lesen.
-
-Neu: `lib/action/lauf_zeichen.dart`, `lauf_zeichen_view.dart`,
-`test/erster_lauf_test.dart`. App 707 (vorher 691). Geisterkreuz,
-Zeichen am Helden und die Niederlage mit Buch gerendert und angesehen,
-**mit Würfeln statt Figuren. Nicht gespielt, nicht am Handy.**
-
-Gemergt am 07.10. als PR #108.
-
-### Offen
-
-- Ob zwei drehende Pfeile um die Waffe als „von selbst“ gelesen werden.
-- Uhr, Zeitkugeln, Tor und die Ankündigungen des Wächters erklärt weiter
-  nichts.
-- Wer mit einer Fähigkeit hinabsteigt, erfährt nicht, dass Halten und
-  Ziehen zielt.
-- Steht der Held am oberen Rand der Grube, liegt er selbst unter der
-  Kopfzeile; der Zähler „0 / 17 erledigt“ ist auf heller Wand schwer zu
-  lesen. Beides älter als dieser Block.
-- AktivesBrett hat weder ADR-0068 noch diesen gesehen.
-
-## 06.10.2026: der erste Start — Frage, dann Kreis für Kreis
-
-Frederik: „weiter an der UX und UI arbeiten“, aus vier Blöcken gewählt:
-**der erste Start**. In drei Fragerunden entschieden:
-[ADR-0068](../decisions/0068-erster-start-deckt-die-bereiche-auf.md).
-
-| Was | Wie |
-|---|---|
-| **Die erste Frage** | statt „Heute“ steht „Was willst du jeden Tag tun?“: sechs Vorschläge (ein Tipp legt an) und ein Feld für Eigenes mit den vier Werten als Zeichen |
-| **Kreise nach und nach** | Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf, Fähigkeiten mit dem Handbuch, Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2; jeder wächst an seinem Platz heran |
-| **Der nächste leuchtet** | ein Punkt am Kreis und drei Pulse: Kampf, dann Theorie, dann Fähigkeiten |
-| **Kampf früh** | die Grube ist nie mehr gesperrt, Stufe 1 geht mit der Waffe allein (`pit_sim` Tag 0: 93 % für den Bot) |
-| **Abgeleitet** | kein Feld im Spielstand; eure Stände und jeder eingefügte sehen sofort alles |
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **Die Frage ist eine Karte, kein Dialog.**
-- **Der erste Vorschlag startet die Startvorlage**; die anderen und das
-  freie Feld verbrauchen den einen Platz für eine eigene Gewohnheit.
-- **Die Theorie kommt auch ohne Kampf**, mit dem dritten Häkchen.
-- **„Ich habe schon einen Stand“ steht in der ersten Frage** — Einfügen
-  gab es sonst nur im Charakter, und der kommt erst mit Level 2.
-- **Tagesaufgaben stehen erst ab dem ersten Häkchen da.**
-
-Gelöscht: `lib/action/pit_gate.dart`, `combatUnlockedProvider` und der
-Satz am gesperrten Kreis; auch die Höhle im Dorf ist offen. ADR-0020 ist
-abgelöst, das Handbuch sperrt weiter den Baum (ADR-0025).
-
-**Beim Ansehen gefunden** (gerendert in 390 × 844 mit Roboto): Der
-Leuchtring sah aus wie der Fortschrittsring der Gewohnheiten daneben,
-jetzt ist es ein Punkt. Die Vorschläge standen mit doppeltem Abstand
-untereinander.
-
-App 691 (vorher 670), gear 118 (vorher 117). Die Frage, das Feld für
-Eigenes und die Startseite nach dem ersten Häkchen und nach dem ersten
-Lauf gerendert und angesehen. **Nicht gespielt, nicht am Handy.**
-
-### Offen
-
-- Ob Stufe 1 am ersten Tag für einen Menschen so leicht ist wie für den
-  Bot, und was eine Niederlage im allerersten Lauf auslöst.
-- ~~**Die Grube erklärt nichts**~~: Laufen und Schlagen seit ADR-0069;
-  Uhr und Tor weiter ohne Einführung.
-- ~~Das Handbuch ist weiter fünf Lektionen lang, bevor der Baum
-  aufgeht.~~ Seit ADR-0070 steht es im Baum.
-- Auslöser, Wochentage und Belohnung fragt am ersten Tag niemand von
-  selbst; das geht erst über die Kachel.
-- Level 2 für den Charakter und drei Häkchen für die Theorie sind
-  gesetzt, nicht gemessen.
-- AktivesBrett hat das nicht gesehen; die Kette aus ADR-0020/-0025 war
-  eine gemeinsame Linie.
-
-## 04.10.2026: Zeitziele laufen als Timer
-
-Die Sitzung begann bei Regel 3, „Mach es einfach“. Zwei Vorschläge für
-eine **kleine Fassung** je Gewohnheit (zählt voll / trägt nur die Kette)
-hat Frederik abgelehnt („find ich beides nicht so gut“), drei weitere
-(Wiederholungen zählen, Ziel in Stufen, Vorbereiten) nicht aufgegriffen.
-Stattdessen: „wenn die Zeit-Sachen als richtiger Timer angezeigt
-werden“. In einer Fragerunde entschieden:
-[ADR-0067](../decisions/0067-zeitziele-als-timer.md).
-
-| Was | Wie |
-|---|---|
-| **Starten** | eine Zeit-Gewohnheit trägt statt des Plus einen Timer-Knopf; ein Tipp auf sie öffnet das Blatt mit dem Ring |
-| **Laufen** | gerechnet aus der Startzeit, nicht aus Ticks: läuft weiter, wenn das Blatt zu ist, die App im Hintergrund liegt oder neu lädt; Restzeit auf der Kachel und in „Heute“ |
-| **Fertig** | bei null von selbst abgehakt, mit Klang und aufsteigenden Zahlen; war die App zu, beim Zurückkommen |
-| **Anhalten** | was gelaufen ist, bleibt als Minuten stehen, der nächste Start macht dort weiter |
-| **Von Hand** | „schon erledigt“ im Blatt |
-| **Startvorlage** | „Zwei Minuten lesen“ läuft zwei Minuten, als einzige Vorlage |
-| **Nur einer** | ein zweiter Start hält den ersten an |
-| **Keine Zahl** | Erfahrung, Gold und Ketten ändern sich nicht (`timer_test.dart`) |
-
-**Ohne Rückfrage entschieden**, weil es sonst nicht aufgeht:
-
-- **Über Mitternacht gehört die Zeit dem Tag des Starts**: Wer um 23:50
-  zwanzig Minuten liest, hat gestern gelesen.
-- **Ein laufender Timer ist eine Behauptung wie ein Häkchen**: Wer
-  startet und die App schließt, ist nach Ablauf abgehakt.
-- **Das Plus „+5 Minuten“ gibt es nicht mehr**, nur noch für Mengen.
-- Ein zweiter Start kostet den ersten seinen Rest unter einer Minute.
-
-Neu: `packages/habits/lib/src/timer.dart`,
-`lib/habits/widgets/habit_countdown.dart`, `habit_timer_sheet.dart`. Der
-Ablauf eines Häkchens steht jetzt an einer Stelle für Tipp, Plus und
-Timer (`_mitFeier` in `habit_check_flow.dart`).
-
-habits 324 (vorher 298), App 670 (vorher 656). Blatt, Kacheln und
-Startseite gerendert in 390 × 844 und angesehen, nichts gefunden.
-**Nicht am Handy, nicht im Browser gespielt** — und gerade hier zählt
-das: Ob der Timer eine Nacht im Hintergrund eines Handy-Browsers
-übersteht, zeigt nur das Gerät.
-
-### Offen
-
-- **Regel 3 selbst hat weiter weder Mechanik noch Theorie-Seite.**
-- **Kein Klang im Hintergrund**: Die Web-Fassung meldet null erst beim
-  Zurückkommen. Eine Meldung kann erst die Android-App.
-- Abgerechnet wird nur, wo eine Anzeige steht (Kachel, „Heute“, Blatt).
-  Wer in der Grube ist, bekommt Häkchen und Tagesform erst danach.
-- „Zwei Minuten lesen“ kostet von Hand jetzt zwei Tipps statt einem.
-- Angehalten mitten in einer Minute zeigt die Kachel „12 / 20 Minuten“,
-  das Blatt „07:20“.
-- Eigene Gewohnheiten bekommen ihr Zeitziel nur beim Anlegen; eine
-  bestehende ohne Ziel bekommt keinen Timer (ADR-0028).
-- `tracker.dart` ist auf 1.858 Zeilen gewachsen.
 
 ---
 
