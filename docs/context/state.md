@@ -133,6 +133,31 @@ vom 02.10.
 
 ---
 
+## 19.10.2026, danach: die App wird store-fähig
+
+Frederik: „ja leg los mit dem Code“. Der Code-Teil aus
+[`play-store.md`](../vorlagen/play-store.md), soweit er ohne euch geht:
+
+| Was | Wie |
+|---|---|
+| **Zurück fragt nach** | auch in der Grube, nicht nur in der Tagesgrube: „Lauf abbrechen?“, der Lauf hält an. Eine Stelle für beide (`lauf_verlassen.dart`) |
+| **Tablets** | `PhoneFrame` zeigt die App ab 600 dp kürzester Seite im Rahmen, quer verkleinert (`gotchas.md`) |
+| **Startbild** | Lederfarbe statt Weiß, ab Android 12 auch im Startbild des Systems |
+| **Signieren** | `build.gradle.kts` liest `android/key.properties`; ohne sie wie bisher der Debug-Schlüssel |
+
+**Der erste Android-Build auf diesem Rechner** lief durch:
+`app-release.aab`, 57 MB, mit dem Debug-Schlüssel. Flutter meldet
+„failed to strip debug symbols“ — dafür fehlen die cmdline-tools. Gradle
+hat SDK Platform 35 beim Bauen selbst nachgeladen.
+
+**Ohne Rückfrage entschieden:** Wer die Grube abbricht, verliert, was
+gefallen ist — gebucht wird nur am Ende eines Laufs, wie bisher. Im
+Rahmen auf dem Tablet hält sich die App weiter für so groß wie das
+Tablet, wie im Browser.
+
+App 857 (vorher 850). **Nicht am Handy, nicht am Tablet, das Startbild
+nicht gesehen.**
+
 ## 19.10.2026: der Play Store am 20.11.
 
 Frederik: „Wir wollen bald die App in den Android Store kriegen um
