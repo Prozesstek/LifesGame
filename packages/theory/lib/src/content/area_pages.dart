@@ -21,28 +21,32 @@ const Lesson kraftPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ein Muskel passt sich an',
-      body: 'Muskeln wachsen nicht, weil man trainiert, sondern weil sie '
-          'etwas gefordert hat, das sie noch nicht gewohnt waren. Bleibt die '
+      body:
+          'Muskeln wachsen nicht, weil man trainiert, sondern weil sie etwas '
+          'gefordert hat, das sie **noch nicht gewohnt** waren. Bleibt die '
           'Last immer gleich, gibt es keinen Grund zur Anpassung. Deshalb '
           'steigert gutes Training die Anforderung langsam — mehr Gewicht, '
-          'mehr Wiederholungen oder mehr Sätze. Das heißt progressive '
-          'Überlastung.',
+          'mehr Wiederholungen oder mehr Sätze. Das heißt **progressive '
+          'Überlastung**.',
     ),
     LessonSection(
       heading: 'Gewachsen wird in der Pause',
-      body: 'Das Training selbst ermüdet den Muskel und macht ihn kurzfristig '
-          'schwächer. Stärker wird er danach, wenn er sich erholt und dabei '
-          'etwas über den alten Stand hinaus aufbaut. Wer die Pause '
+      body:
+          'Das Training selbst ermüdet den Muskel und macht ihn kurzfristig '
+          'schwächer. Stärker wird er danach, **wenn er sich erholt** und '
+          'dabei etwas über den alten Stand hinaus aufbaut. Wer die Pause '
           'weglässt, trainiert nur die Ermüdung. Schlaf und Eiweiß gehören '
-          'deshalb genauso zum Training wie die Hantel.',
+          'deshalb genauso zum Training wie die Hantel.\n\n'
+          '==Gewachsen wird in der Pause, nicht beim Training.==',
     ),
     LessonSection(
       heading: 'Kraft hat mehrere Gesichter',
-      body: 'Maximalkraft ist, wie viel man einmal bewegen kann. Schnellkraft '
-          'ist, wie schnell man Kraft aufbauen kann, etwa beim Sprung. '
-          'Kraftausdauer ist, wie lange man eine Last immer wieder bewegen '
-          'kann. Jede davon wird etwas anders trainiert — und in diesem '
-          'Gebiet geht es um alle drei.',
+      body:
+          '**Maximalkraft** ist, wie viel man einmal bewegen kann. '
+          '**Schnellkraft** ist, wie schnell man Kraft aufbauen kann, etwa '
+          'beim Sprung. **Kraftausdauer** ist, wie lange man eine Last immer '
+          'wieder bewegen kann. Jede davon wird etwas anders trainiert — und '
+          'in diesem Gebiet geht es um alle drei.',
     ),
   ],
   questions: <Question>[
@@ -91,26 +95,31 @@ const Lesson ernaehrungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Drei große Nährstoffe',
-      body: 'Eiweiß, Kohlenhydrate und Fett liefern fast die ganze Energie aus '
-          'dem Essen. Kohlenhydrate und Fett sind vor allem Brennstoff. '
-          'Eiweiß ist dazu Baustoff: Aus ihm baut der Körper Muskeln, Enzyme '
-          'und vieles mehr. Keiner der drei ist böse — es kommt auf Menge '
-          'und Herkunft an.',
+      body:
+          'Eiweiß, Kohlenhydrate und Fett liefern fast die ganze Energie aus '
+          'dem Essen. Kohlenhydrate und Fett sind vor allem **Brennstoff**. '
+          'Eiweiß ist dazu **Baustoff**: Aus ihm baut der Körper Muskeln, '
+          'Enzyme und vieles mehr. Keiner der drei ist böse — es kommt auf '
+          'Menge und Herkunft an.\n\n'
+          '==Keiner der drei Nährstoffe ist böse — es kommt auf Menge und '
+          'Herkunft an.==',
     ),
     LessonSection(
       heading: 'Die kleinen Dinge',
-      body: 'Vitamine und Mineralstoffe liefern kaum Energie, sind aber für '
+      body:
+          'Vitamine und Mineralstoffe liefern kaum Energie, sind aber für '
           'fast jeden Vorgang im Körper nötig. Man braucht sie in kleinen '
-          'Mengen, dafür regelmäßig. Wer abwechslungsreich isst, mit viel '
+          'Mengen, dafür regelmäßig. Wer **abwechslungsreich** isst, mit viel '
           'Gemüse und Obst, deckt die meisten davon ohne Nachrechnen.',
     ),
     LessonSection(
       heading: 'Die Energiebilanz',
-      body: 'Der Körper verbraucht auch in Ruhe Energie — das ist der '
-          'Grundumsatz. Dazu kommt, was Bewegung kostet. Wer dauerhaft mehr '
-          'isst, als er verbraucht, speichert den Rest. Das ist keine Frage '
-          'der Moral, sondern eine Rechnung, die über Wochen aufgeht, nicht '
-          'über einen einzelnen Tag.',
+      body:
+          'Der Körper verbraucht auch in Ruhe Energie — das ist der '
+          '**Grundumsatz**. Dazu kommt, was Bewegung kostet. Wer dauerhaft '
+          'mehr isst, als er verbraucht, speichert den Rest. Das ist keine '
+          'Frage der Moral, sondern eine Rechnung, die **über Wochen** '
+          'aufgeht, nicht über einen einzelnen Tag.',
     ),
   ],
   questions: <Question>[
@@ -160,24 +169,28 @@ const Lesson schlafRegenerationPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Schlaf hat Phasen',
-      body: 'Eine Nacht besteht aus mehreren Zyklen von etwa anderthalb '
-          'Stunden. In jedem wechseln leichter Schlaf, Tiefschlaf und '
-          'REM-Schlaf, in dem man am lebhaftesten träumt. Der Tiefschlaf '
+      body:
+          'Eine Nacht besteht aus mehreren Zyklen von etwa anderthalb '
+          'Stunden. In jedem wechseln leichter Schlaf, **Tiefschlaf** und '
+          '**REM-Schlaf**, in dem man am lebhaftesten träumt. Der Tiefschlaf '
           'liegt eher früh in der Nacht, der REM-Schlaf eher gegen Morgen. '
           'Wer die Nacht kürzt, verliert also nicht von allem gleich viel.',
     ),
     LessonSection(
       heading: 'Die innere Uhr',
-      body: 'Der Körper folgt einem Rhythmus von ungefähr vierundzwanzig '
-          'Stunden. Gestellt wird diese Uhr vor allem durch Licht: Helles '
+      body:
+          'Der Körper folgt einem Rhythmus von ungefähr vierundzwanzig '
+          'Stunden. Gestellt wird diese Uhr **vor allem durch Licht**: Helles '
           'Licht am Morgen macht wach, Dunkelheit am Abend lässt den Körper '
           'Melatonin ausschütten, das Signal für die Nacht. Helle Bildschirme '
-          'spät am Abend schieben dieses Signal nach hinten.',
+          'spät am Abend schieben dieses Signal nach hinten.\n\n'
+          '==Licht am Morgen stellt die innere Uhr.==',
     ),
     LessonSection(
       heading: 'Erholung ist mehr als Schlaf',
-      body: 'Auch am Tag braucht der Körper Phasen, in denen nichts verlangt '
-          'wird. Ruhe, ein Spaziergang oder lockere Bewegung helfen, sich '
+      body:
+          'Auch am Tag braucht der Körper **Phasen, in denen nichts verlangt '
+          'wird**. Ruhe, ein Spaziergang oder lockere Bewegung helfen, sich '
           'von Belastung zu erholen. In diesem Gebiet geht es darum, wie '
           'Schlaf, Stress und Pausen zusammenhängen — und wo man ansetzt.',
     ),
@@ -228,24 +241,28 @@ const Lesson selbstentwicklungPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Erst hinsehen',
-      body: 'Veränderung beginnt mit der Frage, wie es gerade ist — nicht, wie '
-          'es sein sollte. Wer ehrlich beobachtet, wann er aufschiebt, was '
-          'ihm Kraft gibt und was sie nimmt, hat einen Ausgangspunkt. Ohne '
-          'ihn arbeitet man an einem Bild von sich, das nicht stimmt.',
+      body:
+          'Veränderung beginnt mit der Frage, **wie es gerade ist** — nicht, '
+          'wie es sein sollte. Wer ehrlich beobachtet, wann er aufschiebt, '
+          'was ihm Kraft gibt und was sie nimmt, hat einen Ausgangspunkt. '
+          'Ohne ihn arbeitet man an einem Bild von sich, das nicht stimmt.',
     ),
     LessonSection(
       heading: 'Ziele und Systeme',
-      body: 'Ein Ziel sagt, wo man hinwill. Ein System sagt, was man jeden Tag '
-          'tut. Zwei Menschen können dasselbe Ziel haben und ganz '
+      body:
+          'Ein **Ziel** sagt, wo man hinwill. Ein **System** sagt, was man '
+          'jeden Tag tut. Zwei Menschen können dasselbe Ziel haben und ganz '
           'unterschiedlich weit kommen — der Unterschied liegt fast immer im '
-          'System. Das Ziel gibt die Richtung, das System macht die Strecke.',
+          'System. Das Ziel gibt die Richtung, das System macht die Strecke.\n\n'
+          '==Das Ziel gibt die Richtung, das System macht die Strecke.==',
     ),
     LessonSection(
       heading: 'Worum es hier geht',
-      body: 'In diesem Gebiet geht es um die Werkzeuge dafür: wie Gedanken '
+      body:
+          'In diesem Gebiet geht es um die Werkzeuge dafür: wie Gedanken '
           'wirken, wie man Unbehagen aushält, was Motivation wirklich ist. '
           'Kein Teil davon verlangt, ein anderer Mensch zu werden. Es geht '
-          'darum, mit dem Menschen, der man ist, besser umzugehen.',
+          'darum, mit dem Menschen, der man ist, **besser umzugehen**.',
     ),
   ],
   questions: <Question>[
@@ -295,24 +312,28 @@ const Lesson beziehungenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Menschen brauchen Menschen',
-      body: 'Enge Beziehungen gehören zu den stärksten Einflüssen auf '
+      body:
+          'Enge Beziehungen gehören zu den **stärksten Einflüssen** auf '
           'Gesundheit und Zufriedenheit, die die Forschung kennt. Dauerhafte '
           'Einsamkeit belastet den Körper ähnlich wie andere bekannte '
           'Risiken. Freundschaft ist deshalb kein Luxus für die Zeit, die '
-          'übrig bleibt.',
+          'übrig bleibt.\n\n'
+          '==Freundschaft ist kein Luxus für die Zeit, die übrig bleibt.==',
     ),
     LessonSection(
       heading: 'Vertrauen entsteht im Kleinen',
-      body: 'Vertrauen wächst selten durch große Gesten. Es wächst in vielen '
-          'kleinen Momenten: zuhören, sich melden, halten, was man zugesagt '
+      body:
+          'Vertrauen wächst selten durch große Gesten. Es wächst in **vielen '
+          'kleinen Momenten**: zuhören, sich melden, halten, was man zugesagt '
           'hat. Jeder davon ist unscheinbar. Zusammen entscheiden sie, ob '
           'jemand da ist, wenn es darauf ankommt.',
     ),
     LessonSection(
       heading: 'Konflikte gehören dazu',
-      body: 'Wo Menschen einander nahe sind, gibt es auch Reibung. Eine gute '
-          'Beziehung ist nicht eine ohne Streit, sondern eine, in der Streit '
-          'nichts kaputt macht. In diesem Gebiet geht es um Umfeld, '
+      body:
+          'Wo Menschen einander nahe sind, gibt es auch Reibung. Eine gute '
+          'Beziehung ist nicht eine ohne Streit, sondern eine, **in der '
+          'Streit nichts kaputt macht**. In diesem Gebiet geht es um Umfeld, '
           'Zugehörigkeit, Grenzen — und darum, um Hilfe zu bitten.',
     ),
   ],
@@ -362,25 +383,30 @@ const Lesson medienPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Aufmerksamkeit ist das Produkt',
-      body: 'Viele Plattformen kosten kein Geld. Bezahlt wird mit Zeit und '
-          'Aufmerksamkeit, die an Werbekunden weiterverkauft werden. Daraus '
+      body:
+          'Viele Plattformen kosten kein Geld. Bezahlt wird mit **Zeit und '
+          'Aufmerksamkeit**, die an Werbekunden weiterverkauft werden. Daraus '
           'folgt ein einfaches Ziel: Du sollst möglichst lange bleiben. '
-          'Alles, was du dort siehst, ist auch daraufhin ausgewählt.',
+          'Alles, was du dort siehst, ist auch daraufhin ausgewählt.\n\n'
+          '==Wenn es nichts kostet, bezahlst du mit Aufmerksamkeit.==',
     ),
     LessonSection(
       heading: 'Was der Algorithmus zeigt',
-      body: 'Empfehlungen zeigen nicht, was wichtig oder wahr ist, sondern was '
-          'Menschen wie dich bisher gehalten hat. Das sind oft Dinge, die '
-          'aufregen, überraschen oder bestätigen, was man schon glaubt. So '
-          'kann ein Bild der Welt entstehen, das schiefer ist als die Welt.',
+      body:
+          'Empfehlungen zeigen nicht, was wichtig oder wahr ist, sondern '
+          '**was Menschen wie dich bisher gehalten hat**. Das sind oft Dinge, '
+          'die aufregen, überraschen oder bestätigen, was man schon glaubt. '
+          'So kann ein Bild der Welt entstehen, das schiefer ist als die '
+          'Welt.',
     ),
     LessonSection(
       heading: 'Quellen prüfen',
       body:
-          'Wer etwas behauptet, woher weiß er es, und was hat er davon? Diese '
-          'zwei Fragen helfen bei fast jeder Nachricht. In diesem Gebiet '
-          'geht es um Werbung, Desinformation, Informationsblasen — und '
-          'darum, wie Vergleiche mit anderen im Netz auf einen wirken.',
+          'Wer etwas behauptet, **woher weiß er es**, und **was hat er '
+          'davon**? Diese zwei Fragen helfen bei fast jeder Nachricht. In '
+          'diesem Gebiet geht es um Werbung, Desinformation, '
+          'Informationsblasen — und darum, wie Vergleiche mit anderen im Netz '
+          'auf einen wirken.',
     ),
   ],
   questions: <Question>[
@@ -430,24 +456,27 @@ const Lesson denkenPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Prüfen statt glauben',
-      body: 'Wissenschaft ist weniger ein Haufen Fakten als eine Methode: eine '
-          'Vermutung aufstellen, sie so prüfen, dass sie scheitern könnte, '
-          'und dem Ergebnis glauben statt dem Wunsch. Diese Methode lässt '
-          'sich auf fast alles anwenden, auch auf den eigenen Alltag.',
+      body:
+          'Wissenschaft ist weniger ein Haufen Fakten als **eine Methode**: '
+          'eine Vermutung aufstellen, sie so prüfen, dass sie scheitern '
+          'könnte, und dem Ergebnis glauben statt dem Wunsch. Diese Methode '
+          'lässt sich auf fast alles anwenden, auch auf den eigenen Alltag.',
     ),
     LessonSection(
       heading: 'Eine gute Behauptung kann scheitern',
-      body: 'Eine Aussage, die zu jedem denkbaren Ergebnis passt, sagt nichts. '
+      body:
+          'Eine Aussage, die zu jedem denkbaren Ergebnis passt, sagt nichts. '
           '„Dieses Mittel hilft, wenn man fest daran glaubt" lässt sich nie '
           'widerlegen — hilft es nicht, hat man eben nicht genug geglaubt. '
-          'Brauchbar wird eine Behauptung erst, wenn man sagen kann, was sie '
-          'widerlegen würde.',
+          'Brauchbar wird eine Behauptung erst, wenn man sagen kann, **was '
+          'sie widerlegen würde**.\n\n'
+          '==Brauchbar ist eine Behauptung erst, wenn sie scheitern kann.==',
     ),
     LessonSection(
       heading: 'Wissen ist vorläufig',
       body:
           'Was heute als gesichert gilt, kann sich mit besseren Daten ändern. '
-          'Das ist keine Schwäche, sondern der Kern der Sache. In diesem '
+          'Das ist **keine Schwäche**, sondern der Kern der Sache. In diesem '
           'Gebiet geht es um Quellen, Ursachen, Stichproben und Studien — und '
           'darum, sich selbst zu testen.',
     ),

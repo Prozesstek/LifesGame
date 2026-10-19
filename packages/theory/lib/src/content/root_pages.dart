@@ -20,10 +20,12 @@ const Lesson koerperRootPage = Lesson(
       heading: 'Der Körper ist keine Nebensache',
       body:
           'Konzentration, Geduld und Selbstbeherrschung fühlen sich an wie '
-          'Eigenschaften des Charakters. Sie hängen aber messbar an Schlaf, '
-          'Bewegung und Essen. Wer zu wenig geschlafen hat, ist nicht '
+          'Eigenschaften des Charakters. Sie hängen aber messbar **an Schlaf, '
+          'Bewegung und Essen**. Wer zu wenig geschlafen hat, ist nicht '
           'plötzlich ein anderer Mensch — er hat weniger von dem, woraus '
-          'diese Eigenschaften gemacht sind.',
+          'diese Eigenschaften gemacht sind.\n\n'
+          '==Geduld und Selbstbeherrschung hängen an Schlaf, Bewegung und '
+          'Essen.==',
     ),
     LessonSection(
       heading: 'Kleine Hebel, große Wirkung',
@@ -31,16 +33,16 @@ const Lesson koerperRootPage = Lesson(
           'Die drei großen Stellschrauben sind unspektakulär: wann du '
           'schläfst, ob du dich bewegst, was in Reichweite liegt, wenn du '
           'Hunger hast. Keine davon verlangt Disziplin im Moment der '
-          'Entscheidung — sie verlangen eine Entscheidung vorher, die dann '
-          'für viele Tage gilt.',
+          'Entscheidung — sie verlangen **eine Entscheidung vorher**, die '
+          'dann für viele Tage gilt.',
     ),
     LessonSection(
       heading: 'Was dieser Zweig gibt',
       body:
-          'Im Spiel zahlt dieser Zweig auf Ausdauer und Stärke ein, also auf '
-          'Trefferpunkte und Angriff. Das ist kein Zufall: Es sind die '
-          'beiden Werte, die einen Kampf am direktesten entscheiden — und '
-          'im Leben ist es ähnlich unmittelbar.',
+          'Im Spiel zahlt dieser Zweig auf **Ausdauer und Stärke** ein, also '
+          'auf Trefferpunkte und Angriff. Das ist kein Zufall: Es sind die '
+          'beiden Werte, die einen Kampf am direktesten entscheiden — und im '
+          'Leben ist es ähnlich unmittelbar.',
     ),
   ],
   questions: <Question>[
@@ -94,24 +96,26 @@ const Lesson geistRootPage = Lesson(
       heading: 'Zeit hat jeder gleich viel',
       body:
           'Der Tag hat für alle vierundzwanzig Stunden. Was sich '
-          'unterscheidet, ist, wie viel davon überhaupt bei einer Sache '
-          'ankommt. Wer acht Stunden an etwas sitzt und dabei alle zehn '
+          'unterscheidet, ist, wie viel davon überhaupt **bei einer Sache '
+          'ankommt**. Wer acht Stunden an etwas sitzt und dabei alle zehn '
           'Minuten unterbrochen wird, hat nicht acht Stunden gearbeitet.',
     ),
     LessonSection(
       heading: 'Der Kopf ist kein zuverlässiger Zeuge',
       body:
           'Gedanken fühlen sich an wie Beobachtungen der Wirklichkeit. Sie '
-          'sind aber Vorschläge — oft nützliche, manchmal völlig falsche. '
-          'Den Unterschied zu bemerken ist eine Fähigkeit, die man üben '
-          'kann, und sie ist der Kern dieses Zweigs.',
+          'sind aber **Vorschläge** — oft nützliche, manchmal völlig falsche. '
+          'Den Unterschied zu bemerken ist eine Fähigkeit, die man üben kann, '
+          'und sie ist der Kern dieses Zweigs.\n\n'
+          '==Gedanken sind Vorschläge, keine Beobachtungen.==',
     ),
     LessonSection(
       heading: 'Was dieser Zweig gibt',
       body:
-          'Hier geht es um Klarheit und Disziplin — im Spiel um Energie und '
-          'Verteidigung. Wer im Kampf Energie hat, kann etwas tun, statt nur '
-          'zu reagieren. Die Übersetzung ist absichtlich wörtlich gemeint.',
+          'Hier geht es um **Klarheit und Disziplin** — im Spiel um Energie '
+          'und Verteidigung. Wer im Kampf Energie hat, kann etwas tun, statt '
+          'nur zu reagieren. Die Übersetzung ist absichtlich wörtlich '
+          'gemeint.',
     ),
   ],
   questions: <Question>[
@@ -162,26 +166,27 @@ const Lesson wissenschaftRootPage = Lesson(
     LessonSection(
       heading: 'Der Ratgebermarkt ist voll',
       body:
-          'Zu jedem Thema in diesem Spiel gibt es tausend Ratschläge, und '
-          'sie widersprechen sich. Ohne ein Werkzeug, mit dem man sie '
-          'auseinanderhält, bleibt nur, dem lautesten zu glauben. Dieser '
+          'Zu jedem Thema in diesem Spiel gibt es tausend Ratschläge, und sie '
+          'widersprechen sich. Ohne ein Werkzeug, mit dem man sie '
+          'auseinanderhält, bleibt nur, **dem lautesten zu glauben**. Dieser '
           'Zweig ist dieses Werkzeug.',
     ),
     LessonSection(
       heading: 'Zwei Fragen reichen erstaunlich weit',
       body:
           '„Woher weißt du das?" und „Könnte es auch anders herum sein?" '
-          'sortieren den größten Teil des Unsinns aus, ohne dass man eine '
-          'einzige Studie lesen muss. Beide Fragen sind unbequem, und '
-          'deshalb stellt sie kaum jemand.',
+          '**sortieren den größten Teil des Unsinns aus**, ohne dass man eine '
+          'einzige Studie lesen muss. Beide Fragen sind unbequem, und deshalb '
+          'stellt sie kaum jemand.\n\n'
+          '==Woher weißt du das? Könnte es auch anders herum sein?==',
     ),
     LessonSection(
       heading: 'Am Ende zählt der eigene Versuch',
       body:
           'Was im Durchschnitt vieler Menschen wirkt, muss bei dir nicht '
           'wirken. Deshalb endet dieser Zweig nicht bei fremden Ergebnissen, '
-          'sondern bei einem eigenen Test — dem einzigen, dessen Stichprobe '
-          'genau zu dir passt.',
+          'sondern bei einem **eigenen Test** — dem einzigen, dessen '
+          'Stichprobe genau zu dir passt.',
     ),
   ],
   questions: <Question>[
@@ -232,8 +237,8 @@ const Lesson gesellschaftRootPage = Lesson(
     LessonSection(
       heading: 'Niemand ändert sich allein',
       body:
-          'Gewohnheiten entstehen selten im luftleeren Raum. Wer mit wem '
-          'isst, wer wann anruft, wen man am Wochenende sieht — das '
+          'Gewohnheiten entstehen selten im luftleeren Raum. **Wer mit wem '
+          'isst**, wer wann anruft, wen man am Wochenende sieht — das '
           'entscheidet oft mehr über einen Vorsatz als der Vorsatz selbst.',
     ),
     LessonSection(
@@ -241,15 +246,16 @@ const Lesson gesellschaftRootPage = Lesson(
       body:
           'Es ist erheblich leichter, sich eine Umgebung zu suchen, in der '
           'das gewünschte Verhalten normal ist, als es gegen eine Umgebung '
-          'durchzusetzen, in der es auffällt. Das ist keine Schwäche, '
-          'sondern eine Abkürzung.',
+          'durchzusetzen, in der es auffällt. Das ist keine Schwäche, sondern '
+          '**eine Abkürzung**.\n\n'
+          '==Such dir eine Umgebung, in der dein Ziel normal ist.==',
     ),
     LessonSection(
       heading: 'Grenzen gehören dazu',
       body:
           'Wer nie ablehnt, hat keine Zeit für das, was er sich vorgenommen '
           'hat. Nein zu sagen, ohne den anderen zu verlieren, ist eine '
-          'erlernbare Fertigkeit — und einer der Knoten in diesem Zweig.',
+          '**erlernbare Fertigkeit** — und einer der Knoten in diesem Zweig.',
     ),
   ],
   questions: <Question>[

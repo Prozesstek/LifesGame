@@ -22,25 +22,30 @@ const Lesson _umfeld = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Verhalten überträgt sich',
-      body: 'Essgewohnheiten, Rauchen, Sport, sogar die Einstellung zu Geld — '
+      body:
+          'Essgewohnheiten, Rauchen, Sport, sogar die Einstellung zu Geld — '
           'all das ähnelt sich innerhalb von Gruppen weit über den Zufall '
           'hinaus. Das passiert nicht durch Überredung, sondern durch '
-          'Normalität: Was im Umfeld üblich ist, wird zum Maßstab dafür, was '
-          'man selbst für normal hält.',
+          '**Normalität**: Was im Umfeld üblich ist, wird zum Maßstab dafür, '
+          'was man selbst für normal hält.',
     ),
     LessonSection(
       heading: 'Nähe zählt mehr als Absicht',
-      body: 'Entscheidend ist nicht, wen man bewundert, sondern mit wem man '
-          'Zeit verbringt. Ein Vorbild, das man nur liest, verändert wenig. '
-          'Drei Kollegen, mit denen man täglich Mittag isst, verändern viel '
-          '— unabhängig davon, ob man das will.',
+      body:
+          'Entscheidend ist nicht, wen man bewundert, sondern **mit wem man '
+          'Zeit verbringt**. Ein Vorbild, das man nur liest, verändert wenig. '
+          'Drei Kollegen, mit denen man täglich Mittag isst, verändern viel — '
+          'unabhängig davon, ob man das will.\n\n'
+          '==Nicht wen du bewunderst, zählt, sondern mit wem du Zeit '
+          'verbringst.==',
     ),
     LessonSection(
       heading: 'Umgebung ist wählbar',
-      body: 'Das klingt entmutigend, ist aber der stärkste Hebel im ganzen '
+      body:
+          'Das klingt entmutigend, ist aber **der stärkste Hebel** im ganzen '
           'Baum. Wer sein Umfeld ändert, muss sich anschließend deutlich '
-          'seltener zusammenreißen — die neue Normalität übernimmt einen '
-          'Teil der Arbeit. Das ist dieselbe Logik wie beim Auslöser einer '
+          'seltener zusammenreißen — die neue Normalität übernimmt einen Teil '
+          'der Arbeit. Das ist dieselbe Logik wie beim Auslöser einer '
           'Gewohnheit, nur eine Stufe größer.',
     ),
   ],
@@ -94,26 +99,30 @@ const Lesson _zugehoerigkeit = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Zwei Kräfte statt einer',
-      body: 'Wer allein trainiert, hält es durch, solange die Motivation '
+      body:
+          'Wer allein trainiert, hält es durch, solange die Motivation '
           'reicht. Wer in einer Gruppe trainiert, hält es auch dann durch, '
           'wenn sie nicht reicht — weil jemand fragt, wo er war. Die '
-          'Gewohnheit hängt dann nicht mehr allein am eigenen Willen, '
-          'sondern zusätzlich an einer Beziehung.',
+          'Gewohnheit hängt dann nicht mehr allein am eigenen Willen, sondern '
+          'zusätzlich **an einer Beziehung**.',
     ),
     LessonSection(
       heading: 'Die richtige Gruppe erkennen',
-      body: 'Nützlich ist eine Gruppe, in der das gewünschte Verhalten '
-          'normal ist und niemand dafür bewundert wird. Wo Laufen '
+      body:
+          'Nützlich ist eine Gruppe, in der das gewünschte Verhalten **normal '
+          'ist** und niemand dafür bewundert wird. Wo Laufen '
           'selbstverständlich ist, läuft man mit. Wo es als Leistung gilt, '
           'bleibt es eine Anstrengung, die man erbringen oder lassen kann.',
     ),
     LessonSection(
       heading: 'Sichtbarkeit verpflichtet',
-      body: 'Schon eine einzige Person, die Bescheid weiß, verändert das '
-          'Verhalten messbar. Es braucht keine Gruppe und keinen Vertrag — '
-          'es reicht, dass jemand nachfragen könnte. Genau das macht ein '
+      body:
+          'Schon **eine einzige Person**, die Bescheid weiß, verändert das '
+          'Verhalten messbar. Es braucht keine Gruppe und keinen Vertrag — es '
+          'reicht, dass jemand nachfragen könnte. Genau das macht ein '
           'geteilter Fortschritt in dieser App: Er macht sichtbar, was sonst '
-          'nur im eigenen Kopf stattfindet.',
+          'nur im eigenen Kopf stattfindet.\n\n'
+          '==Es reicht, dass jemand nachfragen könnte.==',
     ),
   ],
   questions: <Question>[
@@ -166,26 +175,30 @@ const Lesson _grenzen = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Jedes Ja ist ein Nein',
-      body: 'Zeit lässt sich nicht vermehren. Wer zusagt, sagt damit '
-          'gleichzeitig etwas anderem ab — nur ist das andere im Moment der '
+      body:
+          'Zeit lässt sich nicht vermehren. Wer zusagt, **sagt damit '
+          'gleichzeitig etwas anderem ab** — nur ist das andere im Moment der '
           'Zusage nicht im Raum. Deshalb fällt Zusagen leicht und das '
           'Ergebnis später schwer. Die Frage ist nie „Will ich das tun?", '
-          'sondern „Wovon nehme ich die Zeit?"',
+          'sondern „Wovon nehme ich die Zeit?"\n\n'
+          '==Jedes Ja ist ein Nein zu etwas anderem.==',
     ),
     LessonSection(
       heading: 'Kurz, klar, ohne Begründungskette',
-      body: 'Lange Rechtfertigungen laden zum Verhandeln ein: Jeder Grund, den '
-          'man nennt, lässt sich entkräften. Ein Nein ohne Begründung wirkt '
-          'zunächst härter, führt aber seltener zu Streit. „Das geht bei mir '
-          'nicht" ist vollständig. Wer möchte, ergänzt eine Alternative — '
-          'aber keine Verteidigung.',
+      body:
+          '**Lange Rechtfertigungen** laden zum Verhandeln ein: Jeder Grund, '
+          'den man nennt, lässt sich entkräften. Ein Nein ohne Begründung '
+          'wirkt zunächst härter, führt aber seltener zu Streit. „Das geht '
+          'bei mir nicht" ist vollständig. Wer möchte, ergänzt eine '
+          'Alternative — aber keine Verteidigung.',
     ),
     LessonSection(
       heading: 'Der Preis des Dauer-Ja',
-      body: 'Wer nie ablehnt, wirkt eine Weile verlässlich und wird danach '
+      body:
+          'Wer nie ablehnt, wirkt eine Weile verlässlich und wird danach '
           'unzuverlässig — weil irgendwann etwas platzt. Das kostet mehr '
-          'Vertrauen als ein rechtzeitiges Nein. Ein kurzer Moment vor der '
-          'Zusage genügt meist, um beides zu vermeiden.',
+          'Vertrauen als ein **rechtzeitiges Nein**. Ein kurzer Moment vor '
+          'der Zusage genügt meist, um beides zu vermeiden.',
     ),
   ],
   questions: <Question>[
