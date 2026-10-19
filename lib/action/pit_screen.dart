@@ -23,6 +23,7 @@ import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'action_game.dart';
 import 'hero_power.dart';
+import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
 import 'pit_run_view.dart';
 
@@ -43,6 +44,10 @@ class PitScreen extends ConsumerStatefulWidget {
   /// Woran Tests den Weg zur Theorie nach einer Niederlage finden.
   static const Key lesenKey = ValueKey<String>('grube-lesen');
 
+  /// Woran Tests die Knöpfe der Rückfrage finden.
+  static const Key abbrechenKey = ValueKey<String>('grube-abbrechen');
+  static const Key bleibenKey = ValueKey<String>('grube-bleiben');
+
   @override
   ConsumerState<PitScreen> createState() => _PitScreenState();
 }
@@ -53,6 +58,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   late ActionGame _game;
   bool _ergebnisGezeigt = false;
   bool _verloren = false;
+  bool _abgebrochen = false;
 
   @override
   void initState() {
@@ -131,7 +137,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   /// einbringt, rechnet `LadderController.recordRun`.
   Future<void> _zeigeErgebnis() async {
     if (!mounted || _ergebnisGezeigt) return;
-    _ergebnisGezeigt = true;
+    // Mit `setState`: Der `PopScope` liest den Wert beim Bauen, und nach
+    // einem Sieg geht es ohne Rückfrage zurück.
+    setState(() => _ergebnisGezeigt = true);
 
     final welt = _game.sim;
     final gewonnen = welt.isWon;
@@ -233,6 +241,25 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     );
   }
 
+  /// „Zurück“ mitten im Lauf — auch die Geste vom Rand: fragen, bevor er
+  /// verloren ist. Gebucht wird nur in [_zeigeErgebnis], wer jetzt geht,
+  /// verliert also auch, was schon gefallen ist.
+  Future<void> _fragtNachAbbrechen() async {
+    final abbrechen = await fragtVorDemGehen(
+      context,
+      anhalten: _game.pauseEngine,
+      weiter: _game.resumeEngine,
+      titel: 'Lauf abbrechen?',
+      satz: 'Was bisher gefallen ist, geht verloren.',
+      gehen: 'Abbrechen',
+      gehenKey: PitScreen.abbrechenKey,
+      bleibenKey: PitScreen.bleibenKey,
+    );
+    if (!mounted || !abbrechen) return;
+    setState(() => _abgebrochen = true);
+    Navigator.of(context).pop();
+  }
+
   void _nochmal() {
     _game.frame.dispose();
     setState(() {
@@ -249,6 +276,18 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     // soll danach wissen, wofür er liest (ADR-0068).
     final zeigtWeg = ref.watch(ersterStartProvider).grubeErklaertSich;
 
+    // Gehen ohne Frage, sobald der Lauf vorbei ist: Das Ergebnis ist
+    // gebucht, oder er ist verloren und „Zurück“ steht schon da.
+    return PopScope(
+      canPop: _ergebnisGezeigt || _abgebrochen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _fragtNachAbbrechen();
+      },
+      child: _seite(zeigtWeg),
+    );
+  }
+
+  Widget _seite(bool zeigtWeg) {
     return Scaffold(
       backgroundColor: Palette.background,
       appBar: AppBar(

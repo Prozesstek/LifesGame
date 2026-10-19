@@ -123,4 +123,61 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   });
+
+  group('Auf einem Tablet gibt es einen', () {
+    // **Mit targetSdk 36 dreht Android die App auf Tablets mit**, das
+    // Hochformat im Manifest gilt dort nicht mehr. Gebaut ist alles für
+    // ein Handy; im Rahmen bleibt es eins. Die Überschreibung wird wie
+    // oben im Testkörper zurückgesetzt.
+    Widget vonSelbst() => const PhoneFrame(
+      child: MaterialApp(
+        home: Scaffold(body: Center(child: Text('Inhalt'))),
+      ),
+    );
+
+    testWidgets('ein Tablet im Hochformat zeigt die App in Handygröße', (
+      tester,
+    ) async {
+      useDesktopView(tester, size: const Size(800, 1280));
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+      await tester.pumpWidget(vonSelbst());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(MaterialApp)), PhoneFrame.phoneSize);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('quer passt er verkleinert, statt überzulaufen', (
+      tester,
+    ) async {
+      useDesktopView(tester, size: const Size(1280, 800));
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+      await tester.pumpWidget(vonSelbst());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(MaterialApp)), PhoneFrame.phoneSize);
+      // Auf dem Bildschirm ist er niedriger als das Fenster.
+      final unten = tester.getBottomLeft(find.byType(MaterialApp)).dy;
+      expect(unten, lessThanOrEqualTo(800));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('ein Handy bleibt ohne Rahmen', (tester) async {
+      useDesktopView(tester, size: const Size(390, 844));
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+      await tester.pumpWidget(vonSelbst());
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byType(MaterialApp)), const Size(390, 844));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+  });
 }

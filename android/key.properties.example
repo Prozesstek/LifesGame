@@ -1,0 +1,13 @@
+# Vorlage für android/key.properties — die echte Datei ist gitignored.
+#
+# Den Schlüssel einmal erzeugen (keytool liegt bei Android Studio unter
+# jbr/bin) und die .jks-Datei NICHT ins Repo legen:
+#
+#   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA #     -keysize 2048 -validity 10000 -alias upload
+#
+# Dann diese Datei als android/key.properties kopieren und ausfüllen.
+# Der Schlüssel liegt außerhalb des Repos — am besten ein absoluter Pfad.
+storeFile=C:/Users/DEIN_NAME/schluessel/upload-keystore.jks
+storePassword=
+keyAlias=upload
+keyPassword=

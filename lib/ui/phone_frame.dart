@@ -52,15 +52,43 @@ class PhoneFrame extends StatelessWidget {
   /// Geräten auch. Andersherum gilt das nicht.
   static const Size phoneSize = Size(390, 844);
 
+  /// Ab welcher kürzesten Seite ein Gerät als Tablet zählt — dieselbe
+  /// Grenze, ab der Android das Hochformat nicht mehr einhält.
+  ///
+  /// **Warum der Rahmen dort erscheint:** Mit targetSdk 36 dreht Android
+  /// eine App auf Tablets und aufgeklappten Faltbaren mit, egal was im
+  /// Manifest steht. Gebaut ist alles für ein Handy im Hochformat; auf
+  /// 1280 × 800 gestreckt zerfiele es. Im Rahmen sieht das Tablet ein
+  /// Handy, verkleinert, wenn es quer nicht ganz passt.
+  static const double tabletShortestSide = 600;
+
   /// Dicke des gezeichneten Gehäuserands.
   static const double _bezel = 8;
 
   @override
   Widget build(BuildContext context) {
-    if (!(enabled ?? showsFrameByDefault)) return child;
+    final vonSelbst = enabled == null;
+    if (!(enabled ?? (showsFrameByDefault || _isHandheld))) return child;
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Auf einem Handy oder Tablet entscheidet die Größe: Ein Handy
+        // ist selbst der Rahmen, ein Tablet bekommt einen.
+        if (vonSelbst && _isHandheld) {
+          if (constraints.biggest.shortestSide < tabletShortestSide) {
+            return child;
+          }
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: ColoredBox(
+              color: const Color(0xFF0C0803),
+              child: Center(
+                child: FittedBox(child: _Screen(child: child)),
+              ),
+            ),
+          );
+        }
+
         // Passt der Rahmen samt Gehäuse nicht ins Fenster, wird die App
         // einfach normal gezeigt. Ein Rahmen, der selbst überläuft, wäre
         // schlimmer als gar keiner.

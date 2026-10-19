@@ -7,10 +7,10 @@ import '../combat/daily_pit_controller.dart';
 import '../combat/widgets/tagesgrube_ergebnis.dart';
 import '../habits/habits_controller.dart';
 import '../home/erster_start_provider.dart';
-import '../ui/holz.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'action_game.dart';
+import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
 import 'pit_run_view.dart';
 
@@ -115,42 +115,21 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
   /// **Der Lauf hält an, solange die Frage steht** — sonst fiele der
   /// Held, während man sie liest.
   Future<void> _fragtNachAufgeben() async {
-    _game.pauseEngine();
-    final aufgeben = await showDialog<bool>(
-      context: context,
-      builder: (context) => HolzDialog(
-        child: AlertDialog(
-          backgroundColor: Palette.surface,
-          elevation: 0,
-          insetPadding: EdgeInsets.zero,
-          shape: const RoundedRectangleBorder(),
-          title: const Text('Aufgeben?'),
-          content: const Text(
-            'Der Versuch von heute ist gebraucht. Wer jetzt geht, hat ihn '
-            'abgebrochen.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              key: DailyPitScreen.aufgebenKey,
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Aufgeben'),
-            ),
-            FilledButton(
-              key: DailyPitScreen.bleibenKey,
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Weiterkämpfen'),
-            ),
-          ],
-        ),
-      ),
+    final aufgeben = await fragtVorDemGehen(
+      context,
+      anhalten: _game.pauseEngine,
+      weiter: _game.resumeEngine,
+      titel: 'Aufgeben?',
+      satz:
+          'Der Versuch von heute ist gebraucht. Wer jetzt geht, hat ihn '
+          'abgebrochen.',
+      gehen: 'Aufgeben',
+      gehenKey: DailyPitScreen.aufgebenKey,
+      bleibenKey: DailyPitScreen.bleibenKey,
     );
-    if (!mounted) return;
-    if (aufgeben ?? false) {
-      setState(() => _vorbei = true);
-      Navigator.of(context).pop();
-    } else {
-      _game.resumeEngine();
-    }
+    if (!mounted || !aufgeben) return;
+    setState(() => _vorbei = true);
+    Navigator.of(context).pop();
   }
 
   @override
