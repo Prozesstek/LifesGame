@@ -8,7 +8,10 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
+import 'package:lifes_game/character/widgets/ability_sheet.dart';
+import 'package:lifes_game/ui/wackeln.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
+import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:progression/progression.dart';
@@ -21,8 +24,9 @@ import 'test_view.dart';
 ///
 /// **Die Plätze standen bis zum 25.09. im Charakter**, und die Tests
 /// dazu in `character_test.dart`. Sie sind hierher gewandert und um das
-/// erweitert, was es dort nicht gab: den ganzen Katalog, die grauen
-/// Einträge und das Blatt mit den Werten.
+/// erweitert, was es dort nicht gab: das Raster und das Blatt mit den
+/// Werten. Seit Issue #138 stehen dort nur die eigenen Fähigkeiten; was
+/// es sonst gibt, steht in der Sammlung (ADR-0080).
 void main() {
   const habitId = 'habit-drei-aufgaben';
   const tag = Day(2026, 8, 17);
@@ -169,23 +173,71 @@ void main() {
       expect(find.text('Auf welchen Platz?'), findsNothing);
     });
 
-    testWidgets('ein leerer Platz sagt, wo etwas herkommt', (tester) async {
-      // **Er ist antippbar, aber er wählt nicht.** Das Blatt mit den
-      // Werten ist der Weg, und wer oben tippt, soll das erfahren
-      // statt auf einen toten Knopf zu treffen.
+    /// Die Kacheln, die gerade wackeln, weil sie gewählt werden können.
+    Finder wackelnd() => find.byWidgetPredicate((w) => w is Wackeln && w.aktiv);
+
+    testWidgets('Platz antippen, dann eine Fähigkeit (Issue #138)', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(3)));
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AbilitiesScreen)),
+      );
+      expect(wackelnd(), findsNothing);
+
+      await tester.tap(find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')));
+      await tester.pumpAndSettle();
+
+      // Alles Eigene wackelt und lässt sich wählen.
+      final eigene = container.read(unlockedAbilitiesProvider);
+      expect(wackelnd(), findsNWidgets(eigene.length));
+
+      await tester.tap(
+        find.descendant(of: wackelnd().first, matching: find.byType(InkWell)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(container.read(chosenAbilitiesProvider).at(0), isNotNull);
+      expect(wackelnd(), findsNothing);
+    });
+
+    testWidgets('ein zweiter Tipp auf den Platz bricht ab', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(aufLevel(3)));
 
+      final platz = find.bySemanticsLabel(RegExp(r'^Platz \d, leer$'));
+      await tester.tap(platz);
+      await tester.pumpAndSettle();
+      await tester.tap(platz);
+      await tester.pumpAndSettle();
+
+      expect(wackelnd(), findsNothing);
+    });
+
+    testWidgets('ohne eigene Fähigkeit schickt der Platz zur Sammlung', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(const SaveData.empty()),
+            todayProvider.overrideWithValue(tag),
+            playerLevelProvider.overrideWithValue(
+              LevelCurve.levelFor(LevelCurve.totalXpFor(3)),
+            ),
+          ],
+          child: const MaterialApp(home: AbilitiesScreen()),
+        ),
+      );
+
       await tester.tap(find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')));
-      // Nicht bis zur Ruhe pumpen: Der leere Platz leuchtet dreimal auf,
-      // und bis dahin wäre der Hinweis schon wieder weg.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(
-        find.textContaining('gedrückt und zieh sie hierher'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Sammlung'), findsOneWidget);
+      expect(wackelnd(), findsNothing);
     });
 
     testWidgets('der Waffenplatz zeigt seine Werte, legt aber nichts an', (
@@ -312,40 +364,41 @@ void main() {
       expect(find.text(rueckfall.name), findsWidgets);
     });
 
-    testWidgets('eine gesperrte lässt sich nicht ziehen', (tester) async {
+    testWidgets('eine gesperrte steht gar nicht da', (tester) async {
+      // Seit Issue #138 nur Eigenes im Raster; was fehlt, steht in der
+      // Sammlung. Sternenfall braucht sechzig Tage Kette.
       useTallView(tester);
       await tester.pumpWidget(appMit(aufLevel(10)));
 
-      // Sternenfall braucht sechzig Tage Kette, die hat hier niemand.
-      await ziehe(
-        tester,
-        PitAbilities.sternenfall.name,
-        find.bySemanticsLabel(RegExp(r'^Platz \d, leer$')).first,
-      );
-
-      expect(containerOf(tester).read(chosenAbilitiesProvider).isEmpty, isTrue);
+      expect(find.text(PitAbilities.sternenfall.name), findsNothing);
     });
   });
 
-  group('Der Katalog darunter', () {
-    testWidgets('jede wählbare Fähigkeit steht da, auch die gesperrten', (
-      tester,
-    ) async {
-      // **Das ist der Grund für den Bildschirm.** Im Charakter zeigte
-      // das Auswahlblatt nur das Freigeschaltete — neunzehn Fähigkeiten,
-      // von denen ein frischer Charakter keine einzige sah.
+  group('Das Raster darunter', () {
+    testWidgets('nur, was freigeschaltet ist (Issue #138)', (tester) async {
+      // Bis dahin stand hier der ganze Katalog, Gesperrtes grau. Das
+      // steht jetzt in der Sammlung, mit dem Hinweis, woher.
+      final saved = aufLevel(10);
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(saved),
+          todayProvider.overrideWithValue(tag),
+        ],
+      );
+      addTearDown(container.dispose);
+      final eigene = container.read(unlockedAbilitiesProvider);
+
+      useTallView(tester);
+      await tester.pumpWidget(appMit(saved));
+
+      expect(find.byType(Wackeln), findsNWidgets(eigene.length));
+    });
+
+    testWidgets('ein frischer Stand hat ein leeres Raster', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      for (final ability in AbilityCatalog.choosable) {
-        final pit = PitAbilities.byId(ability.moveId)!;
-        await tester.scrollUntilVisible(
-          find.text(pit.name),
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
-        expect(find.text(pit.name), findsOneWidget, reason: pit.name);
-      }
+      expect(find.byType(Wackeln), findsNothing);
     });
 
     testWidgets('die Überschriften zählen mit, was offen ist', (tester) async {
@@ -422,14 +475,47 @@ void main() {
       expect(find.text(PitAbilities.funkenstoss.description), findsOneWidget);
     });
 
+    /// Öffnet das Blatt einer gesperrten Fähigkeit. Im Raster steht sie
+    /// seit Issue #138 nicht mehr; das Blatt kann es weiter.
+    Future<void> gesperrt(
+      WidgetTester tester, {
+      required List<String?> freiePlaetze,
+    }) async {
+      final ability = AbilityCatalog.byMoveId(PitAbilities.sternenfall.id)!;
+      useTallView(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () => showAbilitySheet(
+                    context,
+                    karte: AbilityCard.faehigkeit(
+                      ability: ability,
+                      pit: PitAbilities.sternenfall,
+                      unlocked: false,
+                      currentFreeIndex: null,
+                      attack: 10,
+                    ),
+                    freiePlaetze: freiePlaetze,
+                  ),
+                  child: const Text('los'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('los'));
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('auch eine gesperrte erklärt sich vollständig', (tester) async {
       // **Der ausdrückliche Wunsch**, und dieselbe Hausregel wie beim
       // gesperrten Stück im Laden: Ein Ziel, das man nicht sieht, ist
       // keins.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
-      await oeffne(tester, PitAbilities.sternenfall);
+      await gesperrt(tester, freiePlaetze: const <String?>[]);
 
       expect(find.text('Mana'), findsOneWidget);
       expect(find.text('Abklingzeit'), findsOneWidget);
@@ -448,10 +534,7 @@ void main() {
     });
 
     testWidgets('eine gesperrte lässt sich nicht anlegen', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(aufLevel(10)));
-
-      await oeffne(tester, PitAbilities.sternenfall);
+      await gesperrt(tester, freiePlaetze: const <String?>[null]);
 
       final knopf = tester.widget<InkWell>(
         find.ancestor(of: find.text('Platz 2'), matching: find.byType(InkWell)),

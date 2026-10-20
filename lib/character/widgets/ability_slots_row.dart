@@ -22,10 +22,11 @@ import '../../ui/level_abzeichen.dart';
 /// offen und trägt, was die getragene Waffe mitbringt. Er wird nicht
 /// gewählt — antippen zeigt seine Werte, mehr nicht.
 ///
-/// **Sie wählt nichts mehr aus** (ADR-0049). Bis zum 25.09. hing an
+/// **Sie wählt nichts selbst aus** (ADR-0049). Bis zum 25.09. hing an
 /// dieser Reihe ein eigenes Auswahlblatt; seit die Fähigkeiten einen
-/// eigenen Bildschirm haben, meldet sie nur den angetippten Platz, und
-/// das Blatt mit den Werten entscheidet.
+/// eigenen Bildschirm haben, meldet sie nur den angetippten Platz. Seit
+/// Issue #138 wählt der Bildschirm danach die Fähigkeit dafür aus dem
+/// Raster ([gewaehlt]).
 class AbilitySlotsRow extends StatelessWidget {
   const AbilitySlotsRow({
     required this.level,
@@ -33,6 +34,7 @@ class AbilitySlotsRow extends StatelessWidget {
     required this.chosen,
     required this.onTapSlot,
     this.gezogen,
+    this.gewaehlt,
     this.nimmtAn = _nimmtNichts,
     this.onAblegen = _legtNichts,
     this.einladen = false,
@@ -57,6 +59,11 @@ class AbilitySlotsRow extends StatelessWidget {
 
   /// Die Id der Fähigkeit, die gerade gezogen wird, oder null (ADR-0057).
   final String? gezogen;
+
+  /// Der Platz (ab 1), für den gerade gewählt wird, oder null — er steht
+  /// da wie ein Platz, über dem eine gezogene Fähigkeit schwebt
+  /// (Issue #138).
+  final int? gewaehlt;
 
   /// Ob der Platz [slot] (ab 1) eine gezogene Fähigkeit nimmt. **Die
   /// Regel steht beim Bildschirm**, weil sie dieselbe ist wie für die
@@ -99,11 +106,17 @@ class AbilitySlotsRow extends StatelessWidget {
                       isWeaponSlot: slot == 1,
                       move: _moveIn(slot),
                       onTap: slot > open ? null : () => onTapSlot(slot),
-                      dragState: SlotDragState.fuer(
-                        zieht: gezogen != null,
-                        passt: nimmtAn(slot),
-                        schwebt: kandidaten.isNotEmpty,
-                      ),
+                      dragState: gewaehlt == slot
+                          ? SlotDragState.fuer(
+                              zieht: true,
+                              passt: true,
+                              schwebt: true,
+                            )
+                          : SlotDragState.fuer(
+                              zieht: gezogen != null,
+                              passt: nimmtAn(slot),
+                              schwebt: kandidaten.isNotEmpty,
+                            ),
                     ),
                   ),
                 ),
