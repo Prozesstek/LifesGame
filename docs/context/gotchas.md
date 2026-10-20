@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein `Center` um eine `SingleChildScrollView` zentriert kurzen Inhalt
+
+Ausrüstung und Fähigkeiten legten ihren Inhalt so:
+
+```dart
+SafeArea(child: Center(child: ConstrainedBox(
+  constraints: BoxConstraints(maxWidth: 560),
+  child: SingleChildScrollView(...),
+)))
+```
+
+Das `Center` sollte nur die Breite auf 560 mitten halten. Es lässt aber
+auch die Höhe locker, und eine `SingleChildScrollView` nimmt dann nur so
+viel Höhe, wie ihr Inhalt braucht — und steht senkrecht in der Mitte.
+Solange dort der ganze Katalog stand, war der Inhalt länger als der
+Bildschirm, und niemand sah es. Seit dort nur Eigenes steht (#137,
+#138), begann der Bildschirm mit einer Lücke von 200 Punkten.
+
+Kein Test meldet das, es ist kein Überlauf. Gesehen hat es die Vorschau
+in 390 × 844.
+
+**Abhilfe:** `Align(alignment: Alignment.topCenter, ...)` statt
+`Center`.
+
+**Regel:** Wer einen Bildschirm in der Breite mittig hält, nimmt
+`Align(topCenter)`. Und eine Vorschau wird auch mit **wenig** Inhalt
+angesehen, nicht nur mit viel.
+
 ## Ein `Stack` um eine Kachel lässt sie schrumpfen
 
 Der Ring des Mentors (`ZeigeRing`, ADR-0079) legt sich als `Stack` um

@@ -159,7 +159,11 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
         actions: const <Widget>[SammlungKnopf(art: SammelArt.ausruestung)],
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          // **Oben, nicht in der Mitte**: Ein kurzer Inhalt — wenige
+          // eigene Fähigkeiten, ein leerer Rucksack — rutschte sonst in
+          // die Mitte des Bildschirms (beim Ansehen gefunden, 20.10.).
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               maxWidth: EquipmentScreen._maxWidth,

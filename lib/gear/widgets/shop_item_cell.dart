@@ -28,10 +28,18 @@ class ShopItemCell extends StatelessWidget {
     required this.isEquipped,
     required this.onTap,
     this.block,
+    this.gesammelt = false,
     super.key,
   });
 
   final GearCopy copy;
+
+  /// Ob das Stück schon in der Sammlung steht, also je besessen war
+  /// (ADR-0080) — im Laden oben links mit dem Zeichen der Sammlung
+  /// (Frederik, 20.10.). Was dort fehlt, ist neu.
+  final bool gesammelt;
+
+  static const Key gesammeltKey = ValueKey<String>('schon-gesammelt');
   final bool isSelected;
   final bool isOwned;
   final bool isEquipped;
@@ -89,7 +97,7 @@ class ShopItemCell extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: item.name,
+      label: gesammelt ? '${item.name}, schon in der Sammlung' : item.name,
       child: Druck(
         // **Der Rahmen gehört der Seltenheit, die Wahl liegt außen
         // herum.** Bis zum 01.10. färbte die Wahl den Rand selbst; dann
@@ -122,52 +130,69 @@ class ShopItemCell extends StatelessWidget {
                     width: RarityBadge.rahmenBreite,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Stack(
+                  clipBehavior: Clip.none,
                   children: <Widget>[
-                    Expanded(
-                      child: Opacity(
-                        opacity: isOutOfReach ? outOfReachOpacity : 1,
-                        child: bild == null
-                            ? Icon(
-                                GearIcons.fallbackFor(item.slot),
-                                size: 30,
-                                color: isOwned
-                                    ? Palette.muted
-                                    : Palette.textDim,
-                              )
-                            : Image.asset(
-                                bild,
-                                fit: BoxFit.contain,
-                                filterQuality: FilterQuality.none,
-                                errorBuilder: (context, error, stack) => Icon(
-                                  GearIcons.fallbackFor(item.slot),
-                                  size: 30,
-                                  color: Palette.muted,
-                                ),
-                              ),
-                      ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: Opacity(
+                            opacity: isOutOfReach ? outOfReachOpacity : 1,
+                            child: bild == null
+                                ? Icon(
+                                    GearIcons.fallbackFor(item.slot),
+                                    size: 30,
+                                    color: isOwned
+                                        ? Palette.muted
+                                        : Palette.textDim,
+                                  )
+                                : Image.asset(
+                                    bild,
+                                    fit: BoxFit.contain,
+                                    filterQuality: FilterQuality.none,
+                                    errorBuilder: (context, error, stack) =>
+                                        Icon(
+                                          GearIcons.fallbackFor(item.slot),
+                                          size: 30,
+                                          color: Palette.muted,
+                                        ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            height: 1.15,
+                            fontWeight: FontWeight.bold,
+                            // Die Farbe der Seltenheit, auch wenn das Stück
+                            // gerade nicht zu haben ist: Dass es nicht geht,
+                            // sagen das blasse Bild und die Fußnote.
+                            color: RarityBadge.colorOf(item.rarity),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        // **Preis oder Besitz, nie beides.** Was einem gehört,
+                        // hat keinen Preis mehr — es hat einen Zustand.
+                        _fussnote(),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10,
-                        height: 1.15,
-                        fontWeight: FontWeight.bold,
-                        // Die Farbe der Seltenheit, auch wenn das Stück
-                        // gerade nicht zu haben ist: Dass es nicht geht,
-                        // sagen das blasse Bild und die Fußnote.
-                        color: RarityBadge.colorOf(item.rarity),
+                    if (gesammelt)
+                      const Positioned(
+                        left: -2,
+                        top: -4,
+                        child: Icon(
+                          Icons.collections_bookmark,
+                          key: gesammeltKey,
+                          size: 15,
+                          color: Palette.accent,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    // **Preis oder Besitz, nie beides.** Was einem gehört,
-                    // hat keinen Preis mehr — es hat einen Zustand.
-                    _fussnote(),
                   ],
                 ),
               ),
