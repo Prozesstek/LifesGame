@@ -13,10 +13,10 @@ void main() {
       // Er trägt die Fähigkeit der Waffe (ADR-0013). Wer keine Waffe hat,
       // hat trotzdem den Platz.
       expect(AbilitySlots.openAt(1), 1);
-      expect(AbilitySlots.openAt(2), 1);
     });
 
-    test('die drei freien Slots öffnen auf 3, 6 und 10', () {
+    test('die drei freien Slots öffnen auf 2, 6 und 10 (ADR-0079)', () {
+      expect(AbilitySlots.openAt(2), 2);
       expect(AbilitySlots.openAt(3), 2);
       expect(AbilitySlots.openAt(5), 2);
       expect(AbilitySlots.openAt(6), 3);
@@ -51,7 +51,7 @@ void main() {
   group('Ab welchem Level ein einzelner Slot aufgeht', () {
     test('nennt für jeden Slot seine Stufe', () {
       expect(AbilitySlots.levelForSlot(1), 1);
-      expect(AbilitySlots.levelForSlot(2), 3);
+      expect(AbilitySlots.levelForSlot(2), 2);
       expect(AbilitySlots.levelForSlot(3), 6);
       expect(AbilitySlots.levelForSlot(4), 10);
     });
@@ -74,7 +74,8 @@ void main() {
 
   group('Der nächste Slot', () {
     test('nennt die Stufe, auf die es sich zu warten lohnt', () {
-      expect(AbilitySlots.nextUnlockAfter(1), 3);
+      expect(AbilitySlots.nextUnlockAfter(1), 2);
+      expect(AbilitySlots.nextUnlockAfter(2), 6);
       expect(AbilitySlots.nextUnlockAfter(3), 6);
       expect(AbilitySlots.nextUnlockAfter(5), 6);
       expect(AbilitySlots.nextUnlockAfter(6), 10);

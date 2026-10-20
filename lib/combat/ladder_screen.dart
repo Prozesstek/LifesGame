@@ -6,6 +6,10 @@ import 'package:gear/gear.dart';
 import '../action/pit_screen.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
+import '../home/erster_start.dart';
+import '../mentor/mentor.dart';
+import '../mentor/mentor_kasten.dart';
+import '../mentor/zeigefinger.dart';
 import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
@@ -45,57 +49,66 @@ class LadderScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Die Grube')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: LadderScreen._maxWidth),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: Column(
-                children: <Widget>[
-                  const TagesgrubeKarte(),
-                  const Spacer(),
-                  EingangsGlut(
-                    ebene: stufe,
-                    child: _Ebene(stufe: stufe),
-                  ),
-                  _Belohnung(stand: stand, stufe: stufe),
-                  const Spacer(),
-                  // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
-                  // kann lang werden („Angriff +10 %, Leben +10 %, …“).
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      _Schluessel(),
-                      SizedBox(width: 16),
-                      Flexible(child: TagesformKreis()),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => PitScreen(stage: PitStage(stufe)),
+      body: MentorFlaeche(
+        ort: MentorOrt.eingang,
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: LadderScreen._maxWidth,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: Column(
+                  children: <Widget>[
+                    const TagesgrubeKarte(),
+                    const Spacer(),
+                    EingangsGlut(
+                      ebene: stufe,
+                      child: _Ebene(stufe: stufe),
+                    ),
+                    _Belohnung(stand: stand, stufe: stufe),
+                    const Spacer(),
+                    // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
+                    // kann lang werden („Angriff +10 %, Leben +10 %, …“).
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _Schluessel(),
+                        SizedBox(width: 16),
+                        Flexible(child: TagesformKreis()),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Zeigefinger(
+                      schritt: Schritt.grube,
+                      radius: 10,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => PitScreen(stage: PitStage(stufe)),
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          key: LadderScreen.hinabKey,
+                          child: const Icon(
+                            Icons.keyboard_double_arrow_down_rounded,
+                            size: 26,
+                            semanticLabel: 'Hinab',
+                          ),
                         ),
-                      ),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      key: LadderScreen.hinabKey,
-                      child: const Icon(
-                        Icons.keyboard_double_arrow_down_rounded,
-                        size: 26,
-                        semanticLabel: 'Hinab',
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

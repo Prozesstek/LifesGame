@@ -70,26 +70,52 @@ class ErsterStartStand {
   final int level;
 }
 
-/// Welche Bereiche die Startseite zeigt, und welcher gerade dran ist.
+/// Die Schritte, durch die der Mentor einen neuen Spieler bringt
+/// (ADR-0079), in ihrer Reihenfolge.
+///
+/// Der letzte — die erste Beute anlegen — steht nicht hier: Den ersten
+/// Gegenstand legt das Spiel von selbst an, und der Mentor sagt seinen
+/// Satz im Beute-Dialog des ersten Siegs (`showLoot`).
+enum Schritt {
+  /// Was willst du jeden Tag tun?
+  gewohnheit,
+
+  /// Das erste Häkchen.
+  abhaken,
+
+  /// Die erste Seite — sie bringt jedem Funkenstoß.
+  ersteSeite,
+
+  /// Die erste Fähigkeit auf einen Platz.
+  faehigkeitAnlegen,
+
+  /// Der erste Sieg in der Grube.
+  grube,
+}
+
+/// Welche Bereiche die Startseite zeigt, welcher gerade dran ist, und
+/// bei welchem Schritt der Mentor steht.
 ///
 /// **Abgeleitet, nie gezählt** (ADR-0068). Es gibt keinen gespeicherten
 /// Tutorial-Schritt: Ein Stand, der schon weiter ist, sieht sofort alles,
 /// und ein eingefügter Stand braucht keine Übernahme.
 ///
-/// Die Reihenfolge ist „Kampf früh“: fragen, abhaken, kämpfen, lesen,
-/// Fähigkeit anlegen. Laden, Ausrüstung und Charakter kommen dazu, sobald
-/// es dort etwas zu tun gibt.
+/// Die Reihenfolge ist seit ADR-0079 die des Mentors: fragen, abhaken,
+/// lesen, Fähigkeit anlegen, kämpfen. Bis dahin hieß sie „Kampf früh“
+/// (ADR-0068): Die Grube kam mit dem ersten Häkchen, die Theorie erst
+/// danach. Laden, Ausrüstung und Charakter kommen dazu, sobald es dort
+/// etwas zu tun gibt.
 class ErsterStart {
   const ErsterStart._(
     this.sichtbar,
-    this.leuchtet,
+    this.schritt,
     this.fragtNachGewohnheit,
     this.grubeErklaertSich,
     this.zeigtTagesgrube,
   );
 
-  /// Alles offen, nichts leuchtet — für Tests anderer Bereiche und für
-  /// jeden Stand, der durch ist.
+  /// Alles offen, kein Schritt — für Tests anderer Bereiche und für jeden
+  /// Stand, der durch ist.
   static const ErsterStart allesOffen = ErsterStart._(
     <Bereich>{
       Bereich.gewohnheiten,
@@ -106,12 +132,14 @@ class ErsterStart {
     true,
   );
 
-  /// Ab so vielen Häkchen zeigt sich die Theorie auch ohne Kampf.
+  /// Ab so vielen Häkchen zeigt sich die Grube auch ohne gelesene Seite.
   ///
-  /// **Niemand muss kämpfen, um zu lesen.** Wer die Grube auslässt, wäre
-  /// sonst für immer vom Baum ausgesperrt — von dem Teil, der die
-  /// Gewohnheiten trägt.
-  static const int haekchenFuerTheorie = 3;
+  /// **Niemand muss lesen, um zu kämpfen**, nur nicht gleich: Der Mentor
+  /// will erst die Theorie zeigen (ADR-0079). Wer eine Woche lang
+  /// abhakt und nichts liest, sähe die Grube sonst nie. Bis ADR-0079
+  /// stand hier dieselbe Regel umgekehrt, die Theorie nach drei
+  /// Häkchen.
+  static const int haekchenFuerKampf = 7;
 
   /// Ab diesem Level zeigt sich der Charakter: Mit dem ersten Aufstieg
   /// gibt es dort zum ersten Mal etwas zu sehen.
@@ -119,8 +147,8 @@ class ErsterStart {
 
   final Set<Bereich> sichtbar;
 
-  /// Der Kreis, der als Nächstes dran ist — höchstens einer.
-  final Bereich? leuchtet;
+  /// Wo der Mentor steht — null, wenn der Weg gegangen ist.
+  final Schritt? schritt;
 
   /// Ob „Heute“ statt einer Liste die erste Frage stellt.
   final bool fragtNachGewohnheit;
@@ -139,26 +167,55 @@ class ErsterStart {
   /// verbrauchte ihn beim Ausprobieren.
   final bool zeigtTagesgrube;
 
+  /// Der Kreis, der als Nächstes dran ist — höchstens einer. Es ist der
+  /// Kreis des Schritts; bei der Gewohnheit und beim Häkchen ist das Ziel
+  /// „Heute“ in der Mitte, kein Kreis.
+  Bereich? get leuchtet => switch (schritt) {
+    Schritt.ersteSeite => Bereich.theorie,
+    Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
+    Schritt.grube => Bereich.kampf,
+    Schritt.gewohnheit || Schritt.abhaken || null => null,
+  };
+
   bool zeigt(Bereich bereich) => sichtbar.contains(bereich);
 
   /// Ob alle sieben Kreise stehen.
   bool get fertig => sichtbar.length == Bereich.values.length;
 
-  /// Tagesaufgaben und Truhe kommen mit dem ersten Häkchen — vorher
-  /// stünden dort drei Aufgaben, bevor es eine Gewohnheit gibt.
-  bool get zeigtTagesaufgaben => zeigt(Bereich.kampf);
+  /// Tagesaufgaben und Truhe kommen mit dem ersten Häkchen, wie die
+  /// Theorie — vorher stünden dort drei Aufgaben, bevor es eine
+  /// Gewohnheit gibt.
+  bool get zeigtTagesaufgaben => zeigt(Bereich.theorie);
 
   static ErsterStart aus(ErsterStartStand s) {
-    // **Jede Bedingung nennt auch, was erst später kommen kann.** So
-    // bleibt die Reihe geschlossen, auch wenn ein Stand einen Schritt
-    // übersprungen hat (Entwicklermodus, eingefügter Stand).
-    final faehigkeiten = s.grundlagenGelesen || s.gelernt > 0 || s.angelegt > 0;
-    final theorie =
-        faehigkeiten ||
-        s.hatGekaempft ||
-        s.seiten > 0 ||
-        s.haekchen >= haekchenFuerTheorie;
-    final kampf = theorie || s.haekchen > 0;
+    // **Ein Schritt ist erledigt, wenn er getan ist oder ein späterer,
+    // der ihn braucht.** So bleibt die Reihe geschlossen, auch wenn ein
+    // Stand einen übersprungen hat (Entwicklermodus, eingefügter Stand).
+    // Das Häkchen folgt bewusst **nicht** aus der Seite: Wer zuerst
+    // liest, steht noch auf Level 1, und der zweite Platz geht erst mit
+    // dem Aufstieg auf, den das Häkchen bringt.
+    final gewonnen = s.stufenGeschafft > 0;
+    final angelegt = gewonnen || s.angelegt > 0;
+    final gelesen = angelegt || s.seiten > 0;
+    final abgehakt = gewonnen || s.haekchen > 0;
+    final angefangen = abgehakt || gelesen || s.hatGewohnheit;
+
+    final schritt = !angefangen
+        ? Schritt.gewohnheit
+        : !abgehakt
+        ? Schritt.abhaken
+        : !gelesen
+        ? Schritt.ersteSeite
+        : !angelegt
+        ? Schritt.faehigkeitAnlegen
+        : !gewonnen
+        ? Schritt.grube
+        : null;
+
+    final faehigkeiten =
+        gelesen || s.grundlagenGelesen || s.gelernt > 0 || s.angelegt > 0;
+    final theorie = abgehakt || faehigkeiten;
+    final kampf = angelegt || s.hatGekaempft || s.haekchen >= haekchenFuerKampf;
 
     final sichtbar = <Bereich>{
       Bereich.gewohnheiten,
@@ -173,29 +230,10 @@ class ErsterStart {
 
     return ErsterStart._(
       Set<Bereich>.unmodifiable(sichtbar),
-      _naechster(s, kampf: kampf, theorie: theorie, faehigkeiten: faehigkeiten),
+      schritt,
       !s.hatGewohnheit && s.haekchen == 0,
       s.stufenGeschafft == 0,
       s.hatGekaempft,
     );
-  }
-
-  /// Der jüngste Kreis der Hauptlinie, der noch nicht benutzt wurde.
-  ///
-  /// Jede Bedingung erledigt sich selbst: Wer gekämpft hat, bei dem
-  /// leuchtet der Kampf nie wieder. Laden, Ausrüstung und Charakter
-  /// leuchten nicht — sie erscheinen nur.
-  static Bereich? _naechster(
-    ErsterStartStand s, {
-    required bool kampf,
-    required bool theorie,
-    required bool faehigkeiten,
-  }) {
-    if (faehigkeiten && s.gelernt > 0 && s.angelegt == 0) {
-      return Bereich.faehigkeiten;
-    }
-    if (theorie && s.gelernt == 0 && s.angelegt == 0) return Bereich.theorie;
-    if (kampf && !theorie && !s.hatGekaempft) return Bereich.kampf;
-    return null;
   }
 }

@@ -249,9 +249,10 @@ void main() {
     // Errungenschaften sollen daneben stehen, nicht darüber.
     test('er ist gedeckelt und kleiner als die Reihe', () {
       // Seit ADR-0073 mit „Zehn Truhen“: 75 und 25 mehr; seit ADR-0074
-      // mit „Sieben Tage in Form“ noch einmal so viel.
-      expect(AchievementCatalog.lifetimeXp, 1830);
-      expect(AchievementCatalog.lifetimeGold, 610);
+      // mit „Sieben Tage in Form“ noch einmal so viel; seit ADR-0079 mit
+      // der „Ersten Seite“ 30 und 10 dazu.
+      expect(AchievementCatalog.lifetimeXp, 1860);
+      expect(AchievementCatalog.lifetimeGold, 620);
       expect(AchievementCatalog.lifetimeXp, lessThan(LadderRewards.lifetimeXp));
       expect(
         AchievementCatalog.lifetimeGold,

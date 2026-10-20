@@ -84,7 +84,7 @@ void main() {
 
       // Drei gesperrte Plätze nennen ihre Stufe, statt zu fehlen.
       expect(
-        find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')),
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 2\$')),
         findsOneWidget,
       );
       expect(
@@ -126,12 +126,14 @@ void main() {
       expect(find.text(klinge.name), findsNothing);
     });
 
-    testWidgets('auf Level 3 geht der zweite Platz auf', (tester) async {
+    testWidgets('auf Level 2 geht der zweite Platz auf (ADR-0079)', (
+      tester,
+    ) async {
       useTallView(tester);
-      await tester.pumpWidget(appMit(aufLevel(3)));
+      await tester.pumpWidget(appMit(aufLevel(2)));
 
       expect(
-        find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')),
+        find.bySemanticsLabel(RegExp('gesperrt, ab Level 2\$')),
         findsNothing,
       );
       expect(
@@ -161,7 +163,7 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
-      await tester.tap(find.bySemanticsLabel(RegExp('gesperrt, ab Level 3\$')));
+      await tester.tap(find.bySemanticsLabel(RegExp('gesperrt, ab Level 2\$')));
       await tester.pumpAndSettle();
 
       expect(find.text('Auf welchen Platz?'), findsNothing);

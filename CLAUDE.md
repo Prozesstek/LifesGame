@@ -104,7 +104,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die **dreizehn** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
 | `packages/achievements/` | Errungenschaften, reines Dart, 24 Tests | nur Dart-SDK |
-| `packages/achievements/lib/src/catalog.dart` | die **20 Meilensteine und 8 Entdeckungen** samt Bedingungen | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 381 Tests | nur Dart-SDK |
@@ -150,7 +150,10 @@ durch die Grube ersetzt und gelöscht.
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm: **sieben** Kreise, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
-| `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint und welcher leuchtet — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)) | Flutter |
+| `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
+| `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Bild (`Mentor.bild`, noch ein Platzhalter) | Flutter |
+| `lib/mentor/mentor_kasten.dart` | sein Kasten über einem Bildschirm (`MentorFlaeche`) — **nimmt keinen Tipp an** | Flutter |
+| `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
 | `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab | Flutter |
@@ -281,7 +284,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 863 Tests
+flutter test             # 882 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -787,16 +790,23 @@ Faktor steigt.
 ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md)).
 Bis dahin hing sie am Moveset, Waffe plus eine Fähigkeit (ADR-0020);
 gemessen war das im Rundenkampf, und in der Grube ist Stufe 1 mit der
-Waffe allein schlagbar. Wer zuerst kämpft, weiß danach, wofür er liest.
+Waffe allein schlagbar. Nur ihr Kreis kommt seit
+[ADR-0079](docs/decisions/0079-der-mentor.md) später.
 
-**Dafür kommen die Bereiche nach und nach.** Die Startseite fragt zuerst
-nach einer Gewohnheit, und jeder Kreis erscheint, wenn es dort etwas zu
-tun gibt; der nächste trägt einen Punkt:
+**Dafür kommen die Bereiche nach und nach, und der Mentor sagt, was
+dran ist** (ADR-0079). Die Startseite fragt zuerst nach einer
+Gewohnheit, jeder Kreis erscheint, wenn es dort etwas zu tun gibt, und
+der nächste trägt einen Punkt. Der Weg: Gewohnheit, abhaken, erste
+Seite (sie bringt jedem **Funkenstoß** über die Errungenschaft „Erste
+Seite“), Fähigkeit anlegen (der zweite Platz geht **auf Level 2** auf),
+Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 
 | Frage | Antwortet |
 |---|---|
-| Welcher Kreis steht da? | `ErsterStart.aus` — Kampf mit dem ersten Häkchen, Theorie nach dem ersten Lauf (oder dem dritten Häkchen), Fähigkeiten mit der ersten gelernten Fähigkeit (oder den fünf Grundlagen-Seiten), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
-| Welcher leuchtet? | `ErsterStart.leuchtet` — höchstens einer, und jede Bedingung erledigt sich selbst |
+| Welcher Kreis steht da? | `ErsterStart.aus` — Theorie mit dem ersten Häkchen, Fähigkeiten mit der ersten Seite, Kampf mit der ersten angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
+| Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; null nach dem ersten Sieg |
+| Was sagt er hier? | `Mentor.satz(schritt, ort)` — eine Tabelle; ein Bildschirm legt `MentorFlaeche` um sich und `Zeigefinger` um sein Ziel |
+| Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
 | Erklärt sich die Grube noch? | `ErsterStart.grubeErklaertSich` — bis die erste Stufe geschafft ist ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) |
 
@@ -804,8 +814,11 @@ tun gibt; der nächste trägt einen Punkt:
 verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in
 `Bereich` und eine Bedingung dort. **Tests, die von einem leeren Stand
 aus einen Kreis antippen**, überschreiben `ersterStartProvider` mit
-`ErsterStart.allesOffen`; `test/erster_start_test.dart` geht den Weg vom
-leeren Stand bis in die Grube.
+`ErsterStart.allesOffen` — dann schweigt auch der Mentor;
+`test/mentor_test.dart` geht den Weg vom leeren Stand bis zur ersten
+Fähigkeit. **Seine Sätze sind die Ausnahme von ADR-0060**: Er erklärt
+ohne Antippen, weil er nach dem ersten Sieg für immer schweigt. Sein
+Kasten nimmt keinen Tipp an — der Mentor zeigt, er sperrt nicht.
 
 **Die Grube erklärt sich, bis die erste Stufe geschafft ist**
 ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)): ein
@@ -909,8 +922,8 @@ Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),
 Charakterwerte und Gold, Gold kauft Ausrüstung (`gear`), die Waffe bringt
 den Grundangriff mit, der Baum die Fähigkeiten (`abilities`), Werte plus Ausrüstung plus Fähigkeiten
 gehen in die Grube (`action_combat`), und alles zusammen verdient
-Errungenschaften (`achievements`), die Titel (`identity`) und vier
-Fähigkeiten vergeben.
+Errungenschaften (`achievements`), die Titel (`identity`) und sieben
+Fähigkeiten vergeben — darunter Funkenstoß, die erste für jeden.
 
 Es gibt genau **sechzehn** Stellen, an denen etwas zusammenläuft:
 

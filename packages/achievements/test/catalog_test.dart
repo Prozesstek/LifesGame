@@ -25,12 +25,13 @@ void main() {
       }
     });
 
-    test('20 Meilensteine und 8 Entdeckungen', () {
+    test('22 Meilensteine und 8 Entdeckungen', () {
       // Der zwanzigste ist „Zehn Truhen“ (ADR-0073), die Quelle des
-      // Glückstranks.
-      expect(AchievementCatalog.milestoneCount, 21);
+      // Glückstranks; der zweiundzwanzigste die „Erste Seite“
+      // (ADR-0079), die Quelle von Funkenstoß.
+      expect(AchievementCatalog.milestoneCount, 22);
       expect(AchievementCatalog.discoveryCount, 8);
-      expect(AchievementCatalog.all, hasLength(29));
+      expect(AchievementCatalog.all, hasLength(30));
     });
 
     test('jeder Bereich ist besetzt', () {
@@ -108,15 +109,16 @@ void main() {
     // Code -- wer eine Stufe verschiebt oder einen Eintrag ergänzt, sieht
     // hier, dass der ADR nachzuziehen ist.
     // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr; seit
-    // ADR-0074 mit „Sieben Tage in Form“ (mittel) noch einmal so viel.
-    test('über ein Spielerleben: 1830 Erfahrung, 610 Gold, 405 Ruhm', () {
-      expect(AchievementCatalog.lifetimeXp, 1830);
-      expect(AchievementCatalog.lifetimeGold, 610);
-      expect(AchievementCatalog.lifetimeFame, 405);
+    // ADR-0074 mit „Sieben Tage in Form“ (mittel) noch einmal so viel;
+    // seit ADR-0079 mit der „Ersten Seite“ (klein) 30, 10 und 5 dazu.
+    test('über ein Spielerleben: 1860 Erfahrung, 620 Gold, 410 Ruhm', () {
+      expect(AchievementCatalog.lifetimeXp, 1860);
+      expect(AchievementCatalog.lifetimeGold, 620);
+      expect(AchievementCatalog.lifetimeFame, 410);
     });
 
     test(
-        'der Ruhm teilt sich in 285 aus Meilensteinen und 120 aus Entdeckungen',
+        'der Ruhm teilt sich in 290 aus Meilensteinen und 120 aus Entdeckungen',
         () {
       var meilensteine = 0;
       var entdeckungen = 0;
@@ -127,7 +129,7 @@ void main() {
           entdeckungen += a.tier.fame;
         }
       }
-      expect(meilensteine, 285);
+      expect(meilensteine, 290);
       expect(entdeckungen, 120);
     });
 
@@ -172,9 +174,10 @@ void main() {
     // Die vier aus ADR-0017, zurückgeholt über ADR-0033 -- einer je
     // Bereich. Dazu seit ADR-0073 der Glückstrank, ein zweiter bei den
     // Gewohnheiten. Seit ADR-0074 die Bestform, eine Ultimate, ein
-    // dritter. Dass die Ids drüben in der Grube ankommen, prüft
+    // dritter. Seit ADR-0079 Funkenstoß aus der ersten Seite. Dass die
+    // Ids drüben in der Grube ankommen, prüft
     // `test/abilities_seam_test.dart` in der App; hier ist es ein Wort.
-    test('sechs Fähigkeiten, jeder Bereich mindestens eine', () {
+    test('sieben Fähigkeiten, jeder Bereich mindestens eine', () {
       final jeBereich = <AchievementArea, int>{};
       for (final a in AchievementCatalog.all) {
         if (a.moveId == null) continue;
@@ -194,6 +197,7 @@ void main() {
           'mend',
           'glueckstrank',
           'bestform',
+          'funkenstoss',
         },
       );
     });

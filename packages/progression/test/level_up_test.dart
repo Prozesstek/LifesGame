@@ -17,17 +17,18 @@ void main() {
     expect(auf.newSlots, isEmpty);
   });
 
-  test('der Sprung auf Level 3 öffnet den zweiten Platz', () {
-    expect(LevelUp.between(2, 3).newSlots, <int>[2]);
+  test('der Sprung auf Level 2 öffnet den zweiten Platz (ADR-0079)', () {
+    expect(LevelUp.between(1, 2).newSlots, <int>[2]);
+    expect(LevelUp.between(2, 3).newSlots, isEmpty);
   });
 
   test('mehrere Level auf einmal zählen alles dazwischen', () {
-    final auf = LevelUp.between(2, 6);
+    final auf = LevelUp.between(1, 6);
 
-    expect(auf.theoryPoints, 4 * TheoryPoints.perLevel);
+    expect(auf.theoryPoints, 5 * TheoryPoints.perLevel);
     expect(
       auf.powerGain,
-      closeTo(PowerCurve.factorFor(6) / PowerCurve.factorFor(2), 1e-9),
+      closeTo(PowerCurve.factorFor(6) / PowerCurve.factorFor(1), 1e-9),
     );
     expect(auf.newSlots, <int>[2, 3]);
   });

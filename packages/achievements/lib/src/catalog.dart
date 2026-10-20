@@ -197,6 +197,20 @@ abstract final class AchievementCatalog {
     ),
 
     // ---------------- Theorie ----------------
+    // Funkenstoß ist die Fähigkeit der ersten Seite (ADR-0079): Jeder
+    // bekommt dieselbe, egal welche Seite er zuerst liest — so fühlt
+    // sich der Anfang für alle gleich an, und der Mentor kann sagen, was
+    // als Nächstes kommt.
+    Achievement(
+      id: 'erste-seite',
+      name: 'Erste Seite',
+      area: AchievementArea.theorie,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Eine Seite bestehen',
+      measure: _passedLessons,
+      moveId: 'funkenstoss',
+    ),
     Achievement(
       id: 'wissbegierig',
       name: 'der Wissbegierige',

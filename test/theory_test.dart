@@ -1231,6 +1231,9 @@ void main() {
       Future<void> bestehe(WidgetTester tester) async {
         await zuDenFragen(tester, _first);
         await answerAll(tester, correctly: true);
+        // Die erste Seite bringt seit ADR-0079 eine Errungenschaft und
+        // Funkenstoß; beide feiern über dem Ergebnis.
+        await feiernSchliessen(tester);
       }
 
       testWidgets('nach einer bestandenen Seite steht die nächste da, mit '

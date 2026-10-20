@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../home/erster_start.dart';
+import '../mentor/mentor.dart';
+import '../mentor/mentor_kasten.dart';
+import '../mentor/zeigefinger.dart';
 import '../ui/druck.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
@@ -106,75 +110,81 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
         // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
         // auf dem Gewohnheiten-Bildschirm.
         body: AufstiegHost(
-          child: Column(
-            children: <Widget>[
-              // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
-              // `OnDark`: Ihre Karte ist Pergament.
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-                child: ReviewSection(),
-              ),
-              Expanded(
-                child: OnDark(
-                  child: Column(
-                    children: <Widget>[
-                      _Header(
-                        area: graph.nodeById(_areaId),
-                        areas: <(TheoryNode, ({int passed, int total}))>[
-                          for (final id in theoryRootIds)
-                            if (graph.nodeById(id) case final TheoryNode wurzel)
-                              (
-                                wurzel,
-                                progress.progressBelow(
-                                  id,
-                                  graph,
-                                  includeSelf: true,
+          child: MentorFlaeche(
+            ort: MentorOrt.baum,
+            child: Column(
+              children: <Widget>[
+                // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
+                // `OnDark`: Ihre Karte ist Pergament.
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: ReviewSection(),
+                ),
+                Expanded(
+                  child: OnDark(
+                    child: Column(
+                      children: <Widget>[
+                        _Header(
+                          area: graph.nodeById(_areaId),
+                          areas: <(TheoryNode, ({int passed, int total}))>[
+                            for (final id in theoryRootIds)
+                              if (graph.nodeById(id)
+                                  case final TheoryNode wurzel)
+                                (
+                                  wurzel,
+                                  progress.progressBelow(
+                                    id,
+                                    graph,
+                                    includeSelf: true,
+                                  ),
                                 ),
-                              ),
-                        ],
-                        areaIndex: _current,
-                        onSelectArea: _goToArea,
-                        // Erst im Gebiet, das gerade offen ist, dann
-                        // irgendwo, zuletzt der Weg der Grundlagen.
-                        next: ref.watch(suggestedStepProvider(_areaId)),
-                        onRead: _go,
-                      ),
-                      Expanded(
-                        child: PageView.builder(
-                          controller: _pages,
-                          itemCount: theoryRootIds.length,
-                          onPageChanged: (i) => setState(() => _current = i),
-                          itemBuilder: (context, i) {
-                            final id = theoryRootIds[i];
-
-                            return TreeView(
-                              graph: graph,
-                              progress: progress,
-                              availablePoints: available,
-                              path: _paths[id]!,
-                              panelOpen: _panelOpen[id]!,
-                              onTogglePanel: () => setState(
-                                () => _panelOpen[id] = !_panelOpen[id]!,
-                              ),
-                              onEnter: (node) => setState(() {
-                                _paths[id]!.add(node.id);
-                                _panelOpen[id] = true;
-                              }),
-                              onLeave: _leave,
-                              onAction: _act,
-                              onPrevArea: i > 0 ? () => _goToArea(i - 1) : null,
-                              onNextArea: i < theoryRootIds.length - 1
-                                  ? () => _goToArea(i + 1)
-                                  : null,
-                            );
-                          },
+                          ],
+                          areaIndex: _current,
+                          onSelectArea: _goToArea,
+                          // Erst im Gebiet, das gerade offen ist, dann
+                          // irgendwo, zuletzt der Weg der Grundlagen.
+                          next: ref.watch(suggestedStepProvider(_areaId)),
+                          onRead: _go,
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: PageView.builder(
+                            controller: _pages,
+                            itemCount: theoryRootIds.length,
+                            onPageChanged: (i) => setState(() => _current = i),
+                            itemBuilder: (context, i) {
+                              final id = theoryRootIds[i];
+
+                              return TreeView(
+                                graph: graph,
+                                progress: progress,
+                                availablePoints: available,
+                                path: _paths[id]!,
+                                panelOpen: _panelOpen[id]!,
+                                onTogglePanel: () => setState(
+                                  () => _panelOpen[id] = !_panelOpen[id]!,
+                                ),
+                                onEnter: (node) => setState(() {
+                                  _paths[id]!.add(node.id);
+                                  _panelOpen[id] = true;
+                                }),
+                                onLeave: _leave,
+                                onAction: _act,
+                                onPrevArea: i > 0
+                                    ? () => _goToArea(i - 1)
+                                    : null,
+                                onNextArea: i < theoryRootIds.length - 1
+                                    ? () => _goToArea(i + 1)
+                                    : null,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -331,10 +341,15 @@ class _Header extends StatelessWidget {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: ContinueReadingTile(
-                node: naechste.node,
-                cost: naechste.needsOpening ? naechste.node.cost : null,
-                onTap: () => onRead(naechste),
+              // Hierhin zeigt der Mentor, solange die erste Seite fehlt
+              // (ADR-0079): Der Vorschlag ist der kürzeste Weg zu ihr.
+              child: Zeigefinger(
+                schritt: Schritt.ersteSeite,
+                child: ContinueReadingTile(
+                  node: naechste.node,
+                  cost: naechste.needsOpening ? naechste.node.cost : null,
+                  onTap: () => onRead(naechste),
+                ),
               ),
             ),
           ],

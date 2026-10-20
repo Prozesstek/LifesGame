@@ -197,10 +197,15 @@ void main() {
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();
       await schonErledigt(tester);
-      // Die Feier zum ersten Häkchen liegt jetzt über der Liste.
-      await tester.tapAt(const Offset(10, 10));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.check_circle));
+      // Die Feiern zum ersten Häkchen liegen jetzt über der Liste — die
+      // Errungenschaft und, seit ADR-0079 die erste Seite 30 Erfahrung
+      // mehr bringt, auch ein Aufstieg.
+      final kreis = find.byIcon(Icons.check_circle).hitTestable();
+      for (var i = 0; i < 4 && kreis.evaluate().isEmpty; i++) {
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(kreis);
       await tester.pump();
 
       expect(container.read(totalXpProvider), xpVorher);

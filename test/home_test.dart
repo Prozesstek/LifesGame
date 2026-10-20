@@ -1,3 +1,4 @@
+import 'package:action_combat/action_combat.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -166,17 +167,22 @@ void main() {
       expect(find.byType(LadderScreen), findsOneWidget);
     });
 
-    testWidgets('ohne Fähigkeit steht der Kampf offen (ADR-0068)', (
+    testWidgets('ohne angelegte Fähigkeit steht der Kampf offen (ADR-0068)', (
       tester,
     ) async {
-      // Der Gegenbeweis zu ADR-0020: Handbuch gelesen, nichts gelernt,
-      // nichts angelegt — und die Grube geht trotzdem auf.
+      // Der Gegenbeweis zu ADR-0020: Handbuch gelesen, nichts angelegt —
+      // und die Grube geht trotzdem auf. Seit ADR-0079 steht ihr Kreis
+      // erst nach der ersten angelegten Fähigkeit, einem Lauf oder einer
+      // Woche Häkchen; hier nach einem verlorenen Lauf.
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             savedGameProvider.overrideWithValue(
-              SaveData(theory: _mitHandbuch()),
+              SaveData(
+                theory: _mitHandbuch(),
+                ladder: const LadderProgress.empty().recordDefeat(1),
+              ),
             ),
           ],
           child: const LifesGameApp(),

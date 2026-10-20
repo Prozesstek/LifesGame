@@ -67,7 +67,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel(RegExp('0 Ruhm')), findsWidgets);
-      expect(find.text('0 / 29'), findsOneWidget);
+      // Oben die Summe — und seit es dreissig sind, steht „Beständig“
+      // (dreissig Tage) mit derselben Zahl darunter.
+      expect(find.text('0 / 30'), findsNWidgets(2));
     });
   });
 
@@ -164,7 +166,7 @@ void main() {
         find.bySemanticsLabel(RegExp('Errungenschaften:')),
         findsOneWidget,
       );
-      expect(find.textContaining(' / 29'), findsOneWidget);
+      expect(find.textContaining(' / 30'), findsOneWidget);
 
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();

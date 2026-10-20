@@ -40,20 +40,23 @@ void main() {
 
       expect(start.sichtbar, <Bereich>{Bereich.gewohnheiten});
       expect(start.fragtNachGewohnheit, isTrue);
+      expect(start.schritt, Schritt.gewohnheit);
       expect(start.leuchtet, isNull);
       expect(start.zeigtTagesaufgaben, isFalse);
     });
 
-    test('mit einer Gewohnheit wird nicht mehr gefragt', () {
+    test('mit einer Gewohnheit wird nicht mehr gefragt, sondern abgehakt', () {
       final start = ErsterStart.aus(
         const ErsterStartStand(hatGewohnheit: true, billigstesStueck: billig),
       );
 
       expect(start.fragtNachGewohnheit, isFalse);
+      expect(start.schritt, Schritt.abhaken);
       expect(start.sichtbar, <Bereich>{Bereich.gewohnheiten});
     });
 
-    test('das erste Häkchen deckt den Kampf auf, und er leuchtet', () {
+    test('das erste Häkchen deckt die Theorie auf, und sie leuchtet '
+        '(ADR-0079)', () {
       final start = ErsterStart.aus(
         const ErsterStartStand(
           hatGewohnheit: true,
@@ -62,93 +65,141 @@ void main() {
         ),
       );
 
-      expect(start.zeigt(Bereich.kampf), isTrue);
-      expect(start.zeigt(Bereich.theorie), isFalse);
-      expect(start.leuchtet, Bereich.kampf);
+      expect(start.zeigt(Bereich.theorie), isTrue);
+      expect(start.zeigt(Bereich.kampf), isFalse);
+      expect(start.schritt, Schritt.ersteSeite);
+      expect(start.leuchtet, Bereich.theorie);
       expect(start.zeigtTagesaufgaben, isTrue);
     });
 
-    test('nach dem ersten Lauf kommt die Theorie, auch nach einem '
-        'verlorenen', () {
+    test('die erste Seite deckt die Fähigkeiten auf, und sie leuchten', () {
+      // Sie bringt jedem Funkenstoß (ADR-0079).
       final start = ErsterStart.aus(
         const ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 1,
-          hatGekaempft: true,
-          billigstesStueck: billig,
-        ),
-      );
-
-      expect(start.zeigt(Bereich.theorie), isTrue);
-      expect(start.zeigt(Bereich.faehigkeiten), isFalse);
-      expect(start.leuchtet, Bereich.theorie);
-    });
-
-    test('niemand muss kämpfen, um zu lesen', () {
-      // Wer die Grube auslässt, wäre sonst für immer vom Baum
-      // ausgesperrt.
-      final start = ErsterStart.aus(
-        const ErsterStartStand(
-          hatGewohnheit: true,
-          haekchen: ErsterStart.haekchenFuerTheorie,
-          billigstesStueck: billig,
-        ),
-      );
-
-      expect(start.zeigt(Bereich.theorie), isTrue);
-      expect(start.leuchtet, Bereich.theorie, reason: 'nicht mehr der Kampf');
-    });
-
-    test('das Handbuch deckt die Fähigkeiten auf; die Theorie leuchtet, bis '
-        'eine gelernt ist', () {
-      final start = ErsterStart.aus(
-        const ErsterStartStand(
-          hatGewohnheit: true,
-          haekchen: 1,
-          hatGekaempft: true,
-          seiten: 5,
-          grundlagenGelesen: true,
+          seiten: 1,
+          gelernt: 1,
+          level: 2,
           billigstesStueck: billig,
         ),
       );
 
       expect(start.zeigt(Bereich.faehigkeiten), isTrue);
-      expect(start.leuchtet, Bereich.theorie);
-    });
-
-    test('gelernt, aber nicht angelegt: die Fähigkeiten leuchten', () {
-      // Der Fall, den früher der Satz am gesperrten Kampf fing: Wer die
-      // Fähigkeit hat, darf nicht in die Theorie zurückgeschickt werden.
-      final start = ErsterStart.aus(
-        const ErsterStartStand(
-          hatGewohnheit: true,
-          haekchen: 1,
-          hatGekaempft: true,
-          seiten: 8,
-          grundlagenGelesen: true,
-          gelernt: 1,
-          billigstesStueck: billig,
-        ),
-      );
-
+      expect(start.zeigt(Bereich.kampf), isFalse);
+      expect(start.schritt, Schritt.faehigkeitAnlegen);
       expect(start.leuchtet, Bereich.faehigkeiten);
     });
 
-    test('ist eine angelegt, leuchtet nichts mehr', () {
+    test('die erste angelegte Fähigkeit deckt die Grube auf', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          seiten: 1,
+          gelernt: 1,
+          angelegt: 1,
+          level: 2,
+          billigstesStueck: billig,
+        ),
+      );
+
+      expect(start.zeigt(Bereich.kampf), isTrue);
+      expect(start.schritt, Schritt.grube);
+      expect(start.leuchtet, Bereich.kampf);
+    });
+
+    test('nach dem ersten Sieg ist der Weg gegangen', () {
       final start = ErsterStart.aus(
         const ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 1,
           hatGekaempft: true,
-          seiten: 8,
-          grundlagenGelesen: true,
+          stufenGeschafft: 1,
+          seiten: 1,
           gelernt: 1,
           angelegt: 1,
+          jeBesessen: 1,
+          level: 3,
           billigstesStueck: billig,
         ),
       );
 
+      expect(start.schritt, isNull);
       expect(start.leuchtet, isNull);
+    });
+
+    test('ein verlorener Lauf beendet den Weg nicht', () {
+      // Der Mentor wartet auf den Sieg: Erst der bringt die Beute, mit
+      // der er sich verabschiedet.
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          hatGekaempft: true,
+          seiten: 1,
+          gelernt: 1,
+          angelegt: 1,
+          level: 2,
+          billigstesStueck: billig,
+        ),
+      );
+
+      expect(start.schritt, Schritt.grube);
+    });
+
+    test('wer zuerst liest, wird zum Häkchen geschickt', () {
+      // Ohne Häkchen steht er auf Level 1, und der zweite Platz geht erst
+      // mit dem Aufstieg auf, den das Häkchen bringt.
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          seiten: 1,
+          gelernt: 1,
+          billigstesStueck: billig,
+        ),
+      );
+
+      expect(start.schritt, Schritt.abhaken);
+      expect(start.zeigt(Bereich.theorie), isTrue);
+      expect(start.zeigt(Bereich.faehigkeiten), isTrue);
+    });
+
+    test('niemand muss lesen, um zu kämpfen — nur nicht gleich', () {
+      // Wer eine Woche abhakt und nichts liest, sähe die Grube sonst nie.
+      final vorher = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: ErsterStart.haekchenFuerKampf - 1,
+          billigstesStueck: billig,
+        ),
+      );
+      final dann = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: ErsterStart.haekchenFuerKampf,
+          billigstesStueck: billig,
+        ),
+      );
+
+      expect(vorher.zeigt(Bereich.kampf), isFalse);
+      expect(dann.zeigt(Bereich.kampf), isTrue);
+      expect(dann.leuchtet, Bereich.theorie, reason: 'gezeigt wird weiter');
+    });
+
+    test('wer schon gekämpft hat, sieht die Grube', () {
+      // Stände aus der Zeit von „Kampf früh“ (ADR-0068).
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          hatGekaempft: true,
+          billigstesStueck: billig,
+        ),
+      );
+
+      expect(start.zeigt(Bereich.kampf), isTrue);
+      expect(start.schritt, Schritt.ersteSeite);
     });
 
     test('der Laden kommt, sobald das billigste Stück bezahlbar war', () {
@@ -223,30 +274,31 @@ void main() {
         ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 1,
-          hatGekaempft: true,
-          goldVerdient: 30,
-          jeBesessen: 1,
+          seiten: 1,
+          gelernt: 1,
+          goldVerdient: 45,
+          level: 2,
           billigstesStueck: billig,
         ),
         ErsterStartStand(
           hatGewohnheit: true,
-          haekchen: 2,
-          hatGekaempft: true,
-          seiten: 5,
-          grundlagenGelesen: true,
-          goldVerdient: 120,
-          jeBesessen: 1,
-          level: 3,
+          haekchen: 1,
+          seiten: 1,
+          gelernt: 1,
+          angelegt: 1,
+          goldVerdient: 45,
+          level: 2,
           billigstesStueck: billig,
         ),
         ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 9,
           hatGekaempft: true,
+          stufenGeschafft: 1,
           seiten: 8,
           grundlagenGelesen: true,
-          gelernt: 1,
-          angelegt: 1,
+          gelernt: 2,
+          angelegt: 2,
           goldVerdient: 300,
           jeBesessen: 2,
           level: 4,
@@ -261,11 +313,12 @@ void main() {
         bisher = jetzt;
       }
       expect(ErsterStart.aus(weg.last).fertig, isTrue);
-      expect(ErsterStart.aus(weg.last).leuchtet, isNull);
+      expect(ErsterStart.aus(weg.last).schritt, isNull);
     });
 
-    test('allesOffen zeigt alle sieben und nichts leuchtet', () {
+    test('allesOffen zeigt alle sieben, und der Mentor schweigt', () {
       expect(ErsterStart.allesOffen.fertig, isTrue);
+      expect(ErsterStart.allesOffen.schritt, isNull);
       expect(ErsterStart.allesOffen.leuchtet, isNull);
       expect(ErsterStart.allesOffen.fragtNachGewohnheit, isFalse);
     });
@@ -405,15 +458,30 @@ void main() {
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
     });
 
-    testWidgets('nach dem ersten Häkchen leuchtet der Kampf, und die Grube '
-        'geht mit der Waffe allein auf', (tester) async {
-      final c = await starte(tester, SaveData(habits: einHaekchen));
+    testWidgets('nach dem ersten Häkchen leuchtet die Theorie (ADR-0079)', (
+      tester,
+    ) async {
+      await starte(tester, SaveData(habits: einHaekchen));
 
-      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Kampf']);
-      expect(leuchtet(tester), 'Kampf');
+      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
       // Die Tagesaufgaben warten am Lagerfeuer (ADR-0076).
       expect(find.byType(LagerfeuerKarte), findsOneWidget);
+    });
+
+    testWidgets('wer schon unten war, geht mit der Waffe allein hinab', (
+      tester,
+    ) async {
+      // Die Grube ist nie gesperrt (ADR-0068): Ist ihr Kreis einmal da,
+      // geht sie ohne gelesene Seite und ohne Fähigkeit auf.
+      final c = await starte(
+        tester,
+        SaveData(
+          habits: einHaekchen,
+          ladder: const LadderProgress.empty().recordDefeat(1),
+        ),
+      );
 
       // Keine Seite gelesen, keine Fähigkeit: nur der Waffenzug.
       expect(c.read(activeMovesProvider), hasLength(1));

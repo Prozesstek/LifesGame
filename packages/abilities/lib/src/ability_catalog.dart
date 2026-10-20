@@ -106,10 +106,13 @@ abstract final class AbilityCatalog {
   /// Häkchen.
   static const List<Ability> choosable = <Ability>[
     // --- Körper: der Einstieg ---
+    // **Die erste Fähigkeit für jeden** (ADR-0079): Sie kommt mit der
+    // ersten bestandenen Seite, welche es auch ist. Bis dahin hing sie
+    // an „Die kleinste Dosis, die wirkt“.
     Ability(
       moveId: 'funkenstoss',
-      source: FromTheory('koerper-bewegung'),
-      requirement: 'Körper: „Die kleinste Dosis, die wirkt" bestehen',
+      source: FromAchievement('erste-seite'),
+      requirement: 'Eine Seite bestehen',
       rarity: Rarity.common,
     ),
     Ability(

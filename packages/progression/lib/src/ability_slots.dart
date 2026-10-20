@@ -23,7 +23,12 @@ abstract final class AbilitySlots {
   /// Der erste steht auf Level 1: Er trägt die Fähigkeit der getragenen
   /// Waffe, und ohne ihn hätte eine Waffe von Anfang an einen Teil, der
   /// nirgends hinkann.
-  static const List<int> unlockLevels = <int>[1, 3, 6, 10];
+  ///
+  /// **Der zweite steht seit ADR-0079 auf Level 2**, vorher auf 3. Die
+  /// erste Seite bringt jedem Funkenstoß, und ein Häkchen samt dieser
+  /// Seite bringt Level 2 — so lässt sich die erste Fähigkeit anlegen,
+  /// sobald man sie hat, und geht mit in den ersten Lauf.
+  static const List<int> unlockLevels = <int>[1, 2, 6, 10];
 
   /// Wie viele Slots auf [level] offen sind — mindestens einer.
   static int openAt(int level) {
@@ -45,7 +50,7 @@ abstract final class AbilitySlots {
   ///
   /// **Ein eigener Platz, kein fünfter in [unlockLevels]**: Auf ihm liegt
   /// nur eine Ultimate, und eine Ultimate liegt nur auf ihm. Level 15 setzt
-  /// die Reihe 1, 3, 6, 10 fort; ein fleissiger Spieler steht dort nach
+  /// die Reihe 1, 2, 6, 10 fort; ein fleissiger Spieler steht dort nach
   /// etwa drei Wochen.
   static const int ultimateLevel = 15;
 
