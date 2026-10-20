@@ -49,9 +49,10 @@ ProviderContainer _containerAtLevel(int level) {
 
 /// Gibt alle Startpunkte bis auf einen aus, auf dem Weg der Grundlagen.
 ///
-/// Seit ADR-0070 beginnt jeder mit neun Punkten. Tests, die „kein Punkt
-/// mehr übrig“ brauchen, kaufen danach noch eine Wurzel und stehen bei
-/// null.
+/// Seit ADR-0078 beginnt jeder mit einem Punkt, dann gibt es hier nichts
+/// auszugeben; die Hilfe bleibt, damit die Tests stimmen, falls die Zahl
+/// wieder wächst. Tests, die „kein Punkt mehr übrig“ brauchen, kaufen
+/// danach noch eine Wurzel und stehen bei null.
 void _bisAufEinenPunkt(ProviderContainer container) {
   final notifier = container.read(theoryProgressProvider.notifier);
   for (final id in theoryBasicsPath.take(TheoryPoints.atStart - 1)) {
@@ -286,7 +287,7 @@ void main() {
       final container = _containerAtLevel(4);
       addTearDown(container.dispose);
 
-      // Die Startpunkte und drei Aufstiege (ADR-0070).
+      // Der Startpunkt und drei Aufstiege (ADR-0078).
       expect(
         container.read(availableTheoryPointsProvider),
         TheoryPoints.atStart + 3,
@@ -1284,12 +1285,11 @@ void main() {
         useTallView(tester);
         final container = ProviderContainer();
         addTearDown(container.dispose);
+        // Fünf Seiten offen, als hätte jemand dafür aufsteigen müssen —
+        // seit ADR-0078 gibt es zum Start nur einen Punkt.
         final notifier = container.read(theoryProgressProvider.notifier);
         for (final id in theoryBasicsPath.take(5)) {
-          notifier.openNode(
-            id,
-            availablePoints: container.read(availableTheoryPointsProvider),
-          );
+          notifier.openNode(id, availablePoints: 1);
         }
         final vorher = container.read(spentTheoryPointsProvider);
 

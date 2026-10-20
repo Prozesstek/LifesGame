@@ -3,9 +3,10 @@ import 'package:test/test.dart';
 
 void main() {
   group('Theoriepunkte entstehen beim Aufstieg', () {
-    test('Level 1 hat die Startpunkte (ADR-0070)', () {
+    test('Level 1 hat einen Punkt, Level 2 zwei (ADR-0078)', () {
       expect(TheoryPoints.earnedAt(1), TheoryPoints.atStart);
-      expect(TheoryPoints.earnedAt(1), 9);
+      expect(TheoryPoints.earnedAt(1), 1);
+      expect(TheoryPoints.earnedAt(2), 2);
     });
 
     test('jeder Aufstieg gibt einen Punkt dazu (ADR-0035)', () {
@@ -15,11 +16,16 @@ void main() {
       expect(TheoryPoints.earnedAt(10), start + 9);
     });
 
-    test('schon am Anfang reicht es für Wurzel, Zwischenebene und Thema', () {
+    test(
+        'wenn der zweite Platz aufgeht, reicht es für Wurzel, '
+        'Zwischenebene und Thema', () {
       // Der Weg zur ersten Fähigkeit kostet seit ADR-0051 drei Punkte.
-      // Seit ADR-0070 gibt es sie vom Start weg — wer sie dort ausgibt,
-      // hat sechs weniger für die Grundlagen.
-      expect(TheoryPoints.earnedAt(1), greaterThanOrEqualTo(3));
+      // Seit ADR-0078 gibt es sie nicht mehr vom Start weg, sondern erst
+      // auf dem Level, auf dem der zweite Platz aufgeht — genau dann,
+      // wenn man sie braucht, und keinen Punkt früher.
+      final level = AbilitySlots.levelForSlot(2)!;
+
+      expect(TheoryPoints.earnedAt(level), greaterThanOrEqualTo(3));
     });
 
     test('unter Level 1 gibt es nichts', () {
@@ -35,8 +41,8 @@ void main() {
   });
 
   group('Der Vorrat über ein Spielerleben', () {
-    test('sind 58 Punkte — neun vom Start und einer je Aufstieg', () {
-      expect(TheoryPoints.lifetimeTotal, 58);
+    test('sind 50 Punkte — einer vom Start und einer je Aufstieg', () {
+      expect(TheoryPoints.lifetimeTotal, 50);
       expect(
         TheoryPoints.lifetimeTotal,
         TheoryPoints.atStart +

@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 19.10.2026 · Frederik, AktivesBrett
+**Zuletzt aktualisiert:** 20.10.2026 · Frederik
 
 ---
 
@@ -27,7 +27,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 |---|---|---|
 | **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076 |
-| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **neun Startpunkte**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070 |
+| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
@@ -132,6 +132,47 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026: ein Startpunkt statt neun
+
+Frederik hat einen Bekannten spielen sehen: eine eigene Gewohnheit (10
+Liegestütze) angelegt, abgehakt, damit Level 2 und **zehn Punkte** —
+und dann in der Theorie **Körper komplett** gelesen, Wurzel und sechs
+Themen. Die Grundlagen hat er nie gesehen. Frederik: „Mein Bauchgefühl
+würde trotzdem nur ein Skillpunkt für Level 2 geben, da der Nutzer schon
+so daran gewöhnt wird, dass ein Level ein Skillpunkt bringt.“
+[ADR-0078](../decisions/0078-ein-startpunkt.md).
+
+| | vorher (ADR-0070) | jetzt |
+|---|---|---|
+| Level 1 | 9 Punkte | **1** |
+| Level 2 | 10 | **2** |
+| Level 3, zweiter Fähigkeitsplatz | 11 | **3** — genau der Weg zur ersten Fähigkeit |
+| ein Spielerleben | 58 | 50 |
+
+**Ohne Rückfrage entschieden:** „ein Skillpunkt für Level 2“ gelesen
+als: einer zum Start, einer je Aufstieg, auf Level 2 also zwei. Mit null
+zum Start stünde die Theorie offen, und nichts ließe sich öffnen.
+
+**Gerechnet:** Ein Häkchen und die erste Seite geben genau 100
+Erfahrung (15 + 30 für „Erster Schritt“ + 55), also Level 2 und den
+Punkt für die nächste Seite. Ohne Häkchen bleibt man nach der ersten
+Seite stehen — gewollt. `runway_sim`, Tag 60: Level 29 wie vorher, aber
+28 Seiten statt 37 und 4.061 Gold statt 4.286.
+
+**Alte Stände**: Wer seine neun Punkte ausgegeben hat, behält alles
+Gelesene, bekommt aber die nächsten acht Aufstiege keinen freien Punkt.
+Das trifft eure beiden Stände und den des Bekannten.
+
+App 863, progression 44, beide unverändert in der Zahl.
+
+### Offen
+
+- **Das Tutorial**: Frederik wünscht sich einen festen Weg für neue
+  Spieler — Gewohnheit, erste Seite, erste Fähigkeit, Grube, erster
+  Gegenstand, mit Erklärung und Tooltips. Die Konzeptrunde läuft.
+- Ob alte Stände ihre acht Punkte zurückbekommen sollen.
+- AktivesBrett hat ADR-0078 nicht gesehen.
 
 ## 19.10.2026, spät: jede Seite ist gesetzt
 

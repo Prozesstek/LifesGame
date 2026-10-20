@@ -17,25 +17,24 @@ abstract final class TheoryPoints {
   /// Regel wie bei der Kurve und den Slots.
   static const int perLevel = 1;
 
-  /// Die Punkte, mit denen jeder anfängt (ADR-0070).
+  /// Die Punkte, mit denen jeder anfängt (ADR-0078).
   ///
-  /// **Neun: so viel, wie die Grundlagen kosten.** Seit das Handbuch im
-  /// Baum steht, kosten seine fünf Seiten wie alles einen Punkt, und der
-  /// Weg zu ihnen — Geist, Selbstentwicklung, Gewohnheiten, Die vier
-  /// Regeln — vier weitere (`theoryBasicsPath` in `package:theory`).
-  /// Vorher gab es einen Punkt (ADR-0051), und das Handbuch war
-  /// kostenlos.
+  /// **Einer: genug für die erste Seite.** Jeder weitere kommt mit einem
+  /// Aufstieg, und das soll man vom ersten Tag an lernen — ein Level,
+  /// ein Punkt. Mit den neun aus ADR-0070 stand ein Neuer auf Level 2 mit
+  /// zehn Punkten da und las ein ganzes Gebiet am Stück, ohne dass ein
+  /// Aufstieg etwas bedeutete.
   ///
-  /// **Niemand muss sie dort ausgeben.** Wer sie in ein anderes Gebiet
-  /// steckt, hat die Grundlagen nicht gelesen; das ist die Wahl, die
-  /// diese Zahl kauft. Dass sie zum Weg passt, prüft
+  /// Knapp wird es auf Level 3, wo der zweite Fähigkeitsplatz aufgeht:
+  /// Dort gibt es drei Punkte, und genau so viel kostet der Weg Wurzel,
+  /// Zwischenebene, Thema zur ersten Fähigkeit. Das prüft
   /// `test/abilities_seam_test.dart` in der App — dieses Package kennt
   /// den Baum nicht.
-  static const int atStart = 9;
+  static const int atStart = 1;
 
   /// Alle Punkte, die ein Spielerleben hergibt.
   ///
-  /// **58: die neun vom Start und einer je Aufstieg.** Der Baum ist seit
+  /// **50: einer vom Start und einer je Aufstieg.** Der Baum ist seit
   /// ADR-0050 größer, als diese Zahl je öffnen kann — die Knappheit ist
   /// der Zweck (ADR-0037).
   static const int lifetimeTotal =

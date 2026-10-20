@@ -71,7 +71,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
-| `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **neun zum Start** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)) | nur Dart-SDK |
+| `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 333 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
@@ -567,12 +567,13 @@ in `area_pages.dart`.
 ([ADR-0051](docs/decisions/0051-wurzeln-kosten-einen-punkt.md)) **und
 das frühere Handbuch** ([ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md)).
 Kein Knoten ist kostenlos: Er wäre von Anfang an offen und zöge seine
-Eltern mit auf. Dafür **beginnt jeder mit neun Punkten**
-(`TheoryPoints.atStart`) — so viel, wie der **Weg der Grundlagen**
-kostet (`theoryBasicsPath`: Geist, Selbstentwicklung, Gewohnheiten, Die
-vier Regeln und die fünf Seiten). `abilities_seam_test.dart` hält fest,
-dass beide Zahlen dieselbe sind; wer einen Knoten auf den Weg legt oder
-die Startpunkte ändert, zieht das andere nach.
+Eltern mit auf. **Zum Start gibt es einen Punkt, jeder Aufstieg bringt
+einen** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md),
+`TheoryPoints.atStart`): Ein Level ist ein Punkt, vom ersten Tag an.
+Bis dahin gab es neun, so viel wie der **Weg der Grundlagen** kostet
+(`theoryBasicsPath`: Geist, Selbstentwicklung, Gewohnheiten, Die vier
+Regeln und die fünf Seiten), und ein Neuer las auf Level 2 mit zehn
+Punkten ein ganzes Gebiet am Stück.
 
 | Frage | Antwortet |
 |---|---|
@@ -821,20 +822,23 @@ Seine fünf Seiten stehen als Knoten unter *Gewohnheiten*, der Baum ist
 immer offen, und einen eigenen Handbuch-Bildschirm gibt es nicht. Bis
 dahin hing daran erst der Kampf (ADR-0018), dann der Baum (ADR-0025).
 **Niemand muss die Grundlagen lesen**: Der Baum schlägt den Weg vor,
-solange nichts offen ist, und wer die neun Punkte woanders ausgibt, hat
+solange nichts offen ist, und wer seine Punkte woanders ausgibt, hat
 gewählt.
 
-Die Arithmetik hat sich verschoben und wird weiter geprüft. Früher gab
-das Handbuch kostenlos 275 Erfahrung und damit Level 3, die Stufe des
-zweiten Fähigkeitsplatzes. Jetzt muss gelten: Wer den Weg der Grundlagen
-liest, hat danach den zweiten Platz, einen Punkt übrig, für den es eine
-Fähigkeit gibt, und stand unterwegs nie ohne Punkt da. Wer an
-`TheoryRewards`, der Levelkurve, den Startpunkten oder dem Weg dreht,
-lässt `flutter test test/progression_test.dart` laufen. Wer an den
+Die Arithmetik hat sich zweimal verschoben und wird weiter geprüft.
+Früher gab das Handbuch kostenlos 275 Erfahrung und damit Level 3, die
+Stufe des zweiten Fähigkeitsplatzes. Seit ADR-0078 muss gelten: Die
+erste Seite ist vom Start weg bezahlbar, und **ein Häkchen plus diese
+Seite bringen den ersten Aufstieg** und damit den Punkt für die nächste.
+Wer an `TheoryRewards`, `HabitRewards`, der Levelkurve, den kleinen
+Errungenschaften oder den Startpunkten dreht, lässt
+`flutter test test/progression_test.dart` laufen. Wer an den
 Fähigkeitsquellen oder den Theoriepunkten dreht, zusätzlich
 `flutter test test/abilities_seam_test.dart` — dort steht, dass auf der
 Stufe, auf der der zweite Platz aufgeht, ein Knoten mit Fähigkeit
-erreichbar und bezahlbar sein muss.
+erreichbar und bezahlbar sein muss. **Dort ist seit ADR-0078 kein Punkt
+Luft**: drei Punkte auf Level 3, drei für Wurzel, Zwischenebene und
+Thema.
 
 **Vier Kurven müssen zusammenpassen.** Belohnung (`theory/rewards.dart`),
 Häkchen-Ertrag (`habits/rewards.dart`), Level

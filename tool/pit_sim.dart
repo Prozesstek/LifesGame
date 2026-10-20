@@ -529,9 +529,11 @@ int _quote(
 }
 
 /// Was der Weg der Grundlagen an Erfahrung bringt, jede Seite fehlerfrei
-/// (ADR-0070): neun Knoten, vom Start weg bezahlbar.
-const int _grundlagenXp =
-    TheoryPoints.atStart *
+/// (ADR-0070): neun Knoten. Seit ADR-0078 nicht mehr vom Start weg
+/// bezahlbar, sondern mit den ersten Aufstiegen — wer Gewohnheiten
+/// abhakt, hat sie nach ein paar Tagen gelesen.
+final int _grundlagenXp =
+    theoryBasicsPath.length *
     (TheoryRewards.xpForPass + TheoryRewards.xpPerfectBonus);
 
 /// Derselbe Aufbau wie in `tool/balance_sim.dart`: die ersten fünf
