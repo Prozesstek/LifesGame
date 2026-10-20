@@ -54,13 +54,14 @@ void main() {
     usePhoneView(tester);
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: LevelUpSheet(levelUp: LevelUp.between(2, 3))),
+        home: Scaffold(body: LevelUpSheet(levelUp: LevelUp.between(1, 2))),
       ),
     );
     await tester.pumpAndSettle();
 
+    // Seit ADR-0079 geht der zweite Platz auf Level 2 auf.
     expect(find.text('Aufgestiegen!'), findsOneWidget);
-    expect(find.text('Level 3'), findsOneWidget);
+    expect(find.text('Level 2'), findsOneWidget);
     expect(find.text('Im Kampf 4 % stärker'), findsOneWidget);
     expect(find.text('+1 Theoriepunkt für den Skillbaum'), findsOneWidget);
     expect(find.text('Fähigkeitsplatz 2 ist offen'), findsOneWidget);

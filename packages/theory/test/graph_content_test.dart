@@ -79,15 +79,16 @@ void main() {
   });
 
   group('Fähigkeiten am Baum', () {
-    test('neunundzwanzig Knoten bringen eine Fähigkeit mit', () {
+    test('achtundzwanzig Knoten bringen eine Fähigkeit mit', () {
       // Seit ADR-0022 hängen elf der fünfzehn wählbaren Fähigkeiten am
       // Baum; seit ADR-0073 sieben aus Frederiks zehn dazu und die
       // Wassergrube, eine Ultimate; seit ADR-0074 neun aus AktivesBretts
-      // zehn und das Rückspulen. Die Zahl steht hier, damit ein
-      // versehentlich entfernter Eintrag auffällt.
+      // zehn und das Rückspulen. Seit ADR-0079 kommt Funkenstoß aus der
+      // ersten Seite, nicht mehr aus „Die kleinste Dosis“. Die Zahl steht
+      // hier, damit ein versehentlich entfernter Eintrag auffällt.
       final mitFaehigkeit = nodes.where((n) => n.unlocksAbility != null);
 
-      expect(mitFaehigkeit.length, 29);
+      expect(mitFaehigkeit.length, 28);
     });
 
     test('keine Wurzel bringt eine Fähigkeit mit', () {

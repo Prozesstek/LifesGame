@@ -8,9 +8,9 @@ import 'package:lifes_game/character/widgets/ability_unlock_sheet.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
-import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/lesson_result_view.dart';
 import 'package:lifes_game/action/pit_text.dart';
+import 'package:lifes_game/progression/level_provider.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 
@@ -60,8 +60,8 @@ void main() {
       );
     });
 
-    test('auf Level 3 geht der erste freie Platz auf', () {
-      expect(firstFreeSlot(chosen: const ChosenAbilities.empty(), level: 3), 0);
+    test('auf Level 2 geht der erste freie Platz auf (ADR-0079)', () {
+      expect(firstFreeSlot(chosen: const ChosenAbilities.empty(), level: 2), 0);
     });
 
     test('ein belegter Platz schiebt den nächsten weiter', () {
@@ -83,6 +83,35 @@ void main() {
   });
 
   group('Der Screen erscheint, wenn eine Seite sitzt', () {
+    /// Ein Stand, in dem die **erste** Seite schon bestanden ist, auf
+    /// festem Level.
+    ///
+    /// Seit ADR-0079 bringt die erste Seite die Errungenschaft „Erste
+    /// Seite“ und mit ihr Funkenstoß, und die Feier der Errungenschaft
+    /// stünde vor der des Knotens. Das feste Level hält den Aufstieg
+    /// heraus, der sonst ebenfalls davor käme.
+    ProviderContainer behaelter({int level = 1, Iterable<Lesson>? gelesen}) {
+      var progress = const TheoryProgress.empty();
+      final seiten =
+          gelesen ??
+          <Lesson>[theoryGraph.nodeById(theoryRootIds.first)!.lesson];
+      for (final lesson in seiten) {
+        progress = progress.submit(lesson, <int?>[
+          for (final question in lesson.questions) question.correctIndex,
+        ]).progress;
+      }
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(SaveData(theory: progress)),
+          playerLevelProvider.overrideWithValue(
+            LevelCurve.levelFor(LevelCurve.totalXpFor(level)),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
     /// Ohne [abwarten] endet es einen Bildaufbau nach „Auswerten“.
     Future<void> bestehen(
       WidgetTester tester,
@@ -122,8 +151,7 @@ void main() {
       // Sonst deckte sie die Zahl zu, die sie gebracht hat — derselbe
       // Grund wie beim Häkchen, dessen Feier auf die Münzen wartet.
       useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+      final container = behaelter();
 
       await bestehen(tester, container, abwarten: false);
       await tester.pump(LessonResultView.zaehlen ~/ 2);
@@ -135,8 +163,7 @@ void main() {
 
     testWidgets('bestanden feiert die Fähigkeit', (tester) async {
       useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+      final container = behaelter();
 
       await bestehen(tester, container);
 
@@ -155,14 +182,13 @@ void main() {
       // Waffe. Die Feier ausfallen zu lassen hiesse: etwas erreicht,
       // nichts gesehen.
       useTallView(tester);
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+      final container = behaelter();
 
       await bestehen(tester, container);
 
       expect(find.byType(AbilityUnlockSheet), findsOneWidget);
       expect(find.text('Direkt ausrüsten'), findsNothing);
-      expect(find.textContaining('Level 3'), findsOneWidget);
+      expect(find.textContaining('Level 2'), findsOneWidget);
     });
 
     testWidgets('mit freiem Platz legt „Direkt ausrüsten" sie hin', (
@@ -170,28 +196,9 @@ void main() {
     ) async {
       useTallView(tester);
 
-      // Genug Erfahrung für Level 3, ohne den Knoten selbst zu bestehen —
-      // sonst gäbe es nichts mehr freizuschalten.
-      var progress = const TheoryProgress.empty();
-      for (final lesson in habitsBranch.lessons) {
-        progress = progress.submit(lesson, <int?>[
-          for (final question in lesson.questions) question.correctIndex,
-        ]).progress;
-      }
-
-      final container = ProviderContainer(
-        overrides: [
-          savedGameProvider.overrideWithValue(SaveData(theory: progress)),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        LevelCurve.levelFor(
-          container.read(theoryProgressProvider).totalXp,
-        ).level,
-        greaterThanOrEqualTo(3),
-      );
+      // Das Handbuch gelesen, auf Level 3 — ohne den Knoten selbst zu
+      // bestehen, sonst gäbe es nichts mehr freizuschalten.
+      final container = behaelter(level: 3, gelesen: habitsBranch.lessons);
 
       await bestehen(tester, container);
 
@@ -207,26 +214,15 @@ void main() {
 
     testWidgets('„Ins Inventar" legt nichts hin', (tester) async {
       useTallView(tester);
-
-      var progress = const TheoryProgress.empty();
-      for (final lesson in habitsBranch.lessons) {
-        progress = progress.submit(lesson, <int?>[
-          for (final question in lesson.questions) question.correctIndex,
-        ]).progress;
-      }
-
-      final container = ProviderContainer(
-        overrides: [
-          savedGameProvider.overrideWithValue(SaveData(theory: progress)),
-        ],
-      );
-      addTearDown(container.dispose);
+      final container = behaelter(level: 3, gelesen: habitsBranch.lessons);
 
       await bestehen(tester, container);
       await tester.tap(find.text('Ins Inventar'));
       await tester.pumpAndSettle();
 
       // Die Fähigkeit ist verdient — sie liegt nur auf keinem Platz.
+      // Funkenstoß aus der ersten Seite auch nicht: Angelegt wird nur,
+      // was jemand anlegt.
       expect(container.read(chosenAbilitiesProvider).isEmpty, isTrue);
       expect(
         container.read(unlockedAbilitiesProvider).map((a) => a.moveId),

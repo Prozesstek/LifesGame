@@ -178,7 +178,14 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     );
 
     if (!mounted) return;
-    if (gewonnen) await _beute(stufe, ersterSieg: ersterSieg);
+    if (gewonnen) {
+      await _beute(
+        stufe,
+        ersterSieg: ersterSieg,
+        // Der erste Sieg überhaupt: Hier endet der Weg des Mentors.
+        ersteBeute: vorherReihe.highestDefeated == 0,
+      );
+    }
     if (!mounted) return;
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
     if (!mounted) return;
@@ -198,7 +205,11 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   /// Die Beute des Wächters (ADR-0048): Der erste Sieg auf einer Stufe
   /// bringt sie ohne Schlüssel, jeder weitere nur mit einem — und nur,
   /// wenn man ihn einsetzen will.
-  Future<void> _beute(int stufe, {required bool ersterSieg}) async {
+  Future<void> _beute(
+    int stufe, {
+    required bool ersterSieg,
+    required bool ersteBeute,
+  }) async {
     final controller = ref.read(loadoutProvider.notifier);
     if (!ersterSieg) {
       final schluessel = ref.read(availableKeysProvider);
@@ -225,6 +236,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
           : 'Die Beute des Wächters',
       worn: getragen?.uid == beute.uid ? null : getragen,
       usedKey: !ersterSieg,
+      mentor: ersteBeute,
       onReveal: () => ref
           .read(soundPlayerProvider)
           .play(selten ? SoundEffect.errungenschaft : SoundEffect.beute),

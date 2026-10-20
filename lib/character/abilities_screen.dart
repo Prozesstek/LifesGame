@@ -8,6 +8,10 @@ import 'package:progression/progression.dart';
 import '../action/hero_power.dart';
 import '../action/pit_text.dart';
 import '../gear/widgets/rarity_badge.dart';
+import '../home/erster_start.dart';
+import '../mentor/mentor.dart';
+import '../mentor/mentor_kasten.dart';
+import '../mentor/zeigefinger.dart';
 import '../progression/level_provider.dart';
 import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
@@ -82,100 +86,103 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         title: const Text('Fähigkeiten'),
         backgroundColor: Palette.surface,
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            // **Kein ListView**, aus demselben Grund wie bei der
-            // Ausrüstung: Beim Hochrollen während des Ziehens verwürfe sie
-            // die Kachel, von der gezogen wird.
-            child: SingleChildScrollView(
-              controller: _scroll,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  AbilitySlotsRow(
-                    einladen: offen.any((id) => !chosen.contains(id)),
-                    level: level.level,
-                    weaponMove: weaponMove,
-                    chosen: chosen,
-                    gezogen: _gezogen,
-                    // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
-                    // die belegten plus der nächste leere.
-                    // Eine Ultimate liegt nie auf einem der drei Plätze.
-                    nimmtAn: (slot) =>
-                        !zieheUltimate &&
-                        slot >= 2 &&
-                        slot - 2 < _belegung(chosen, level.level).length,
-                    onAblegen: _lege,
-                    onTapSlot: (slot) => _tippePlatz(
-                      context,
-                      ref,
-                      slot: slot,
+      body: MentorFlaeche(
+        ort: MentorOrt.faehigkeiten,
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxWidth),
+              // **Kein ListView**, aus demselben Grund wie bei der
+              // Ausrüstung: Beim Hochrollen während des Ziehens verwürfe sie
+              // die Kachel, von der gezogen wird.
+              child: SingleChildScrollView(
+                controller: _scroll,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    AbilitySlotsRow(
+                      einladen: offen.any((id) => !chosen.contains(id)),
+                      level: level.level,
                       weaponMove: weaponMove,
-                      attack: attack,
-                      offen: offen,
+                      chosen: chosen,
+                      gezogen: _gezogen,
+                      // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
+                      // die belegten plus der nächste leere.
+                      // Eine Ultimate liegt nie auf einem der drei Plätze.
+                      nimmtAn: (slot) =>
+                          !zieheUltimate &&
+                          slot >= 2 &&
+                          slot - 2 < _belegung(chosen, level.level).length,
+                      onAblegen: _lege,
+                      onTapSlot: (slot) => _tippePlatz(
+                        context,
+                        ref,
+                        slot: slot,
+                        weaponMove: weaponMove,
+                        attack: attack,
+                        offen: offen,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  UltimatePlatz(
-                    level: level.level,
-                    ultimate: chosen.ultimate,
-                    zieht: _gezogen != null,
-                    nimmtAn:
-                        zieheUltimate &&
-                        AbilitySlots.ultimateOpenAt(level.level),
-                    einladen: offeneUltimates.isNotEmpty,
-                    onAblegen: _legeUltimate,
-                    onTap: () => _tippeUltimatePlatz(
+                    const SizedBox(height: 10),
+                    UltimatePlatz(
+                      level: level.level,
+                      ultimate: chosen.ultimate,
+                      zieht: _gezogen != null,
+                      nimmtAn:
+                          zieheUltimate &&
+                          AbilitySlots.ultimateOpenAt(level.level),
+                      einladen: offeneUltimates.isNotEmpty,
+                      onAblegen: _legeUltimate,
+                      onTap: () => _tippeUltimatePlatz(
+                        context,
+                        ref,
+                        offen: offeneUltimates,
+                        attack: attack,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: <Widget>[
+                        const Icon(
+                          Icons.auto_awesome,
+                          size: 20,
+                          color: Palette.textOnDark,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${offen.length} / ${AbilityCatalog.choosable.length}',
+                          semanticsLabel:
+                              '${offen.length} von '
+                              '${AbilityCatalog.choosable.length} '
+                              'freigeschaltet',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.textOnDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    for (final rarity in Rarity.values)
+                      ..._gruppe(
+                        context,
+                        ref,
+                        rarity: rarity,
+                        offen: offen,
+                        chosen: chosen,
+                        attack: attack,
+                      ),
+                    ..._ultimates(
                       context,
                       ref,
                       offen: offeneUltimates,
-                      attack: attack,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: <Widget>[
-                      const Icon(
-                        Icons.auto_awesome,
-                        size: 20,
-                        color: Palette.textOnDark,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${offen.length} / ${AbilityCatalog.choosable.length}',
-                        semanticsLabel:
-                            '${offen.length} von '
-                            '${AbilityCatalog.choosable.length} '
-                            'freigeschaltet',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.textOnDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  for (final rarity in Rarity.values)
-                    ..._gruppe(
-                      context,
-                      ref,
-                      rarity: rarity,
-                      offen: offen,
                       chosen: chosen,
                       attack: attack,
                     ),
-                  ..._ultimates(
-                    context,
-                    ref,
-                    offen: offeneUltimates,
-                    chosen: chosen,
-                    attack: attack,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -248,17 +255,25 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
               rahmenFarbe: RarityBadge.colorOfStufe(ability.rarity.index),
               onStart: () => _beginneZiehen(ability.moveId),
               onEnde: _beendeZiehen,
-              child: _Kachel(
-                ability: ability,
-                unlocked: offen.contains(ability.moveId),
-                imEinsatz: chosen.contains(ability.moveId),
-                ausgeblendet: _gezogen == ability.moveId,
-                onTap: () => _zeigeFaehigkeit(
-                  context,
-                  ref,
+              // Der Mentor zeigt auf das, was gelernt und noch nicht
+              // angelegt ist (ADR-0079) — beim ersten Mal Funkenstoß.
+              child: Zeigefinger(
+                schritt: Schritt.faehigkeitAnlegen,
+                aktiv:
+                    offen.contains(ability.moveId) &&
+                    !chosen.contains(ability.moveId),
+                child: _Kachel(
                   ability: ability,
                   unlocked: offen.contains(ability.moveId),
-                  attack: attack,
+                  imEinsatz: chosen.contains(ability.moveId),
+                  ausgeblendet: _gezogen == ability.moveId,
+                  onTap: () => _zeigeFaehigkeit(
+                    context,
+                    ref,
+                    ability: ability,
+                    unlocked: offen.contains(ability.moveId),
+                    attack: attack,
+                  ),
                 ),
               ),
             ),

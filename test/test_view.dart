@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/achievements/widgets/achievement_unlock_sheet.dart';
+import 'package:lifes_game/character/widgets/ability_unlock_sheet.dart';
 import 'package:lifes_game/habits/widgets/habit_timer_sheet.dart';
+import 'package:lifes_game/progression/show_level_up.dart';
 import 'package:theory/theory.dart';
 
 /// Gibt dem Test ein hohes Fenster.
@@ -58,4 +61,43 @@ Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
   }
   await tester.tap(start);
   await tester.pumpAndSettle();
+}
+
+/// Schließt jede Feier, die gerade über dem Bildschirm liegt —
+/// Errungenschaft, Aufstieg, neue Fähigkeit —, bis keine mehr da ist.
+///
+/// Seit ADR-0079 bringt die erste Seite die Errungenschaft „Erste Seite“
+/// und mit ihr Funkenstoß. Tests, die nach der ersten Seite auf den
+/// Bildschirm darunter schauen, räumen hiermit die beiden Feiern weg.
+/// „Ins Inventar“, nicht „Direkt ausrüsten“: Angelegt wird nichts.
+Future<void> feiernSchliessen(WidgetTester tester) async {
+  for (var i = 0; i < 6; i++) {
+    final Finder knopf;
+    if (find.byType(AchievementUnlockSheet).evaluate().isNotEmpty) {
+      knopf = find.descendant(
+        of: find.byType(AchievementUnlockSheet),
+        matching: find.text('Weiter'),
+      );
+    } else if (find.byType(LevelUpSheet).evaluate().isNotEmpty) {
+      knopf = find.descendant(
+        of: find.byType(LevelUpSheet),
+        matching: find.text('Weiter'),
+      );
+    } else if (find.byType(AbilityUnlockSheet).evaluate().isNotEmpty) {
+      final inventar = find.descendant(
+        of: find.byType(AbilityUnlockSheet),
+        matching: find.text('Ins Inventar'),
+      );
+      knopf = inventar.evaluate().isNotEmpty
+          ? inventar
+          : find.descendant(
+              of: find.byType(AbilityUnlockSheet),
+              matching: find.text('Weiter'),
+            );
+    } else {
+      return;
+    }
+    await tester.tap(knopf);
+    await tester.pumpAndSettle();
+  }
 }

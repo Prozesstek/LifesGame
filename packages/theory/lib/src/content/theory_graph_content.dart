@@ -81,8 +81,9 @@ final TheoryGraph theoryGraph = TheoryGraph(
       id: 'koerper-bewegung',
       lesson: koerperBranch.lessons[1],
       iconId: 'run',
+      // Funkenstoß kam bis ADR-0079 von hier; jetzt bringt ihn die
+      // erste bestandene Seite, welche es auch ist.
       parentIds: const <String>['kraft-muskulatur'],
-      unlocksAbility: 'funkenstoss',
     ),
     const TheoryNode(
       id: 'kraft-hypertrophie',

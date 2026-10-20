@@ -1,7 +1,7 @@
 # ADR-0068: Der erste Start deckt die Bereiche nach und nach auf
 
 **Datum:** 06.10.2026
-**Status:** Aktiv
+**Status:** Aktiv — die Reihenfolge „Kampf früh“ abgelöst durch [ADR-0079](0079-der-mentor.md)
 **Entschieden von:** Frederik (in drei Fragerunden mit Claude)
 
 ## Kontext

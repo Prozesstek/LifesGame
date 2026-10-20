@@ -110,10 +110,10 @@ void main() {
 
     test('ein bestandener Knoten öffnet genau seine Fähigkeit', () {
       final offen = AbilityCatalog.unlockedBy(
-        const AbilityProgress(passedNodeIds: <String>{'koerper-bewegung'}),
+        const AbilityProgress(passedNodeIds: <String>{'koerper-ernaehrung'}),
       );
 
-      expect(offen.map((a) => a.moveId), <String>['funkenstoss']);
+      expect(offen.map((a) => a.moveId), <String>['wurzelgriff']);
     });
 
     test('jede wählbare hängt am Baum oder an einer Streak-Marke', () {

@@ -3,6 +3,26 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein `Stack` um eine Kachel lässt sie schrumpfen
+
+Der Ring des Mentors (`ZeigeRing`, ADR-0079) legt sich als `Stack` um
+sein Ziel: das Ziel, darüber ein `Positioned` mit dem Ring. Um die
+Kachel von Funkenstoß im Raster der Fähigkeiten gelegt, schrumpfte die
+Kachel auf ihren Inhalt und saß klein in der Ecke ihrer Zelle, der Ring
+in voller Größe darum.
+
+Ein `Stack` reicht seinem Kind standardmäßig **lockere** Maße weiter
+(`StackFit.loose`). Das Raster gibt seiner Zelle feste; die Kachel
+füllte sie nur, weil sie musste. Im `Stack` durfte sie kleiner sein, und
+sie war es. Kein Test meldet das, es ist kein Überlauf.
+
+**Abhilfe:** `fit: StackFit.passthrough` — das Kind bekommt dieselben
+Maße wie der `Stack` selbst.
+
+**Regel:** Wer etwas „nur darüberlegt“, gibt dem `Stack` `passthrough`,
+sonst verändert er, was darunter liegt. Gesehen hat es nur die Vorschau
+in 390 × 844.
+
 ## Auf einem Tablet gilt das Hochformat aus dem Manifest nicht mehr
 
 `android:screenOrientation="portrait"` steht im Manifest, und

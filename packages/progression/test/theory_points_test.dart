@@ -17,15 +17,13 @@ void main() {
     });
 
     test(
-        'wenn der zweite Platz aufgeht, reicht es für Wurzel, '
-        'Zwischenebene und Thema', () {
-      // Der Weg zur ersten Fähigkeit kostet seit ADR-0051 drei Punkte.
-      // Seit ADR-0078 gibt es sie nicht mehr vom Start weg, sondern erst
-      // auf dem Level, auf dem der zweite Platz aufgeht — genau dann,
-      // wenn man sie braucht, und keinen Punkt früher.
-      final level = AbilitySlots.levelForSlot(2)!;
-
-      expect(TheoryPoints.earnedAt(level), greaterThanOrEqualTo(3));
+        'auf Level 3 reicht es für Wurzel, Zwischenebene und Thema', () {
+      // Der Weg zu einer Fähigkeit im Baum kostet seit ADR-0051 drei
+      // Punkte. Seit ADR-0078 gibt es sie nicht mehr vom Start weg,
+      // sondern auf Level 3. Den zweiten Platz, der seit ADR-0079 auf
+      // Level 2 aufgeht, füllt schon die erste Seite mit Funkenstoß —
+      // die Fähigkeit aus dem Baum ist die zweite.
+      expect(TheoryPoints.earnedAt(3), greaterThanOrEqualTo(3));
     });
 
     test('unter Level 1 gibt es nichts', () {

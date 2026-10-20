@@ -26,17 +26,17 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
-| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076 |
+| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
-| **Errungenschaften** | 21 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073, -0074 |
+| **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073, -0074 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 863, dazu die acht Packages (theory 204, habits 333, gear
+**Tests:** App 882, dazu die acht Packages (theory 204, habits 333, gear
 120, action_combat 381, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,76 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026, danach: der Mentor führt durch den ersten Start
+
+Frederik: „Super wäre natürlich noch ein klares Tutorial … Gewohnheit →
+erste Theorie-Seite → erste Fähigkeit ausrüsten → Grube → erster
+Gegenstand ausrüsten. Und das halt bisschen fester begleitend bei neuen
+Nutzern mit Erklärung und Tooltips.“ In einer Fragerunde entschieden:
+[ADR-0079](../decisions/0079-der-mentor.md).
+
+| Frage | Antwort |
+|---|---|
+| Reihenfolge | **Frederiks**, gegen Claudes Empfehlung (Grube vor der Fähigkeit, ohne eine Zahl zu ändern) |
+| Erste Fähigkeit | **für alle dieselbe, mit der ersten Seite** — „damit alle das gleiche Feeling haben“ |
+| Wie fest | **Zeigefinger**: Kasten mit Satz, Ring ums Ziel, alles bleibt tippbar |
+| Überspringen | **nein** |
+| Wer erklärt | **eine Figur** — das Bild schickt Frederik |
+
+| Was | Wie |
+|---|---|
+| **Funkenstoß mit der ersten Seite** | neue Errungenschaft „Erste Seite“ (30 EP, 10 Gold, 5 Ruhm); „Die kleinste Dosis“ bringt ihn nicht mehr |
+| **Zweiter Platz auf Level 2** | statt 3 — ein Häkchen und die erste Seite bringen mindestens 115 Erfahrung |
+| **Der Weg** | Gewohnheit → abhaken → erste Seite → Fähigkeit anlegen → Grube → im Beute-Dialog „Anlegen“ |
+| **Die Kreise** | in derselben Reihenfolge: Theorie mit dem Häkchen, Fähigkeiten mit der Seite, Kampf mit der angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen) |
+| **Der Mentor** | ein Kasten auf Startseite, Baum, Fähigkeiten und Eingang; sein letzter Satz im Beute-Dialog des ersten Siegs. Er nimmt keinen Tipp an |
+| **Der Ring** | um Fragekarte, „Heute“, „Weiterlesen“, die neue Fähigkeit, „Hinab“, „Anlegen“; pulsiert fünfmal und bleibt stehen |
+
+**Abgeleitet, nicht gespeichert** (`ErsterStart.schritt`), wie die
+Kreise seit ADR-0068: Wer schon weiter ist, sieht den Mentor nie.
+
+**Ohne Rückfrage entschieden:**
+
+- **Er heißt im Code Mentor**, nicht „Führer“: Das Wort ist im
+  Deutschen zu belastet. Einen Namen auf dem Bildschirm hat er noch
+  nicht.
+- **Funkenstoß** als erste Fähigkeit, über eine Errungenschaft — sie
+  vergeben schon Fähigkeiten, und auf Funkenstoß ist `pit_sim` gemessen.
+- **Der erste Gegenstand ist kein eigener Schritt**: Das Spiel legt ihn
+  ohnehin selbst an, wenn der Platz leer ist. Der Mentor spricht deshalb
+  im Beute-Dialog und zeigt dort auf „Anlegen“.
+- **Wer zuerst liest, wird zum Häkchen geschickt**: Auf Level 1 ist der
+  zweite Platz zu.
+- **Die Grube zeigt sich nach sieben Häkchen auch ohne Seite** — nicht
+  zu sperren, aber nicht gleich.
+- **Auf der Startseite steht der Kasten über der unteren Reihe**, in der
+  leeren Mitte.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Die Funkenstoß-Kachel
+schrumpfte im Ring auf ihren Inhalt (`gotchas.md`), und oben auf der
+Startseite deckte der Kasten Gewohnheiten und Theorie zu.
+
+**Nebenbei behoben:** Unter einem zu teuren Knoten stand „Jeder
+Levelaufstieg gibt zwei“ — seit ADR-0035 ist es einer.
+
+Neu: `lib/mentor/` (drei Dateien), `test/mentor_test.dart` (16 Tests).
+App 882 (vorher 863), achievements 24, abilities 43, progression 44,
+theory 204 — die Pakete gleich in der Zahl. Startseite in fünf
+Schritten, Baum, Fähigkeiten, Eingang und Beute gerendert und
+angesehen. **Nicht am Handy, nicht im Browser gespielt.**
+
+### Offen
+
+- **Das Bild des Mentors** — und ob er einen Namen bekommt.
+- **Die erste Grube ist leichter**: Wer folgt, geht mit Funkenstoß und
+  auf Level 2 hinab. Nicht neu gemessen.
+- Ob der Mentor in den Gewohnheiten, im Laden oder in der Ausrüstung
+  auch etwas sagen soll — dort schweigt er bisher.
+- Ob er sich nach dem ersten Sieg verabschieden soll; bisher endet er
+  mit dem Satz zur Beute.
+- AktivesBrett hat ADR-0079 nicht gesehen, auch nicht, dass der zweite
+  Platz jetzt auf Level 2 aufgeht.
 
 ## 20.10.2026: ein Startpunkt statt neun
 

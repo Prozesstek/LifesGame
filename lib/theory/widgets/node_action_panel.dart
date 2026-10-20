@@ -96,7 +96,7 @@ class NodeActionPanel extends StatelessWidget {
       case NodeState.tooExpensive:
         return _hint(
           'Du brauchst ${node.cost == 1 ? "einen Punkt" : "${node.cost} Punkte"}'
-          ' — du hast $availablePoints. Jeder Levelaufstieg gibt zwei.',
+          ' — du hast $availablePoints. Jeder Aufstieg gibt einen.',
         );
       case NodeState.unreachable:
         return _hint(
