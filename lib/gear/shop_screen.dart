@@ -106,6 +106,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           gewaehlteUid: gewaehlt.uid,
           isOwned: (_) => false,
           isEquipped: (_) => false,
+          // Ob es schon in der Sammlung steht: je besessen, auch verkauft.
+          gesammelt: (c) => loadout.everOwnedIds.contains(c.itemId),
           blockFor: (c) =>
               loadout.blockFor(c, availableGold: gold, highestRung: rung),
           onWaehle: (uid) => setState(() => _gewaehlt = uid),
@@ -188,6 +190,7 @@ class _Raster extends StatelessWidget {
     required this.gewaehlteUid,
     required this.isOwned,
     required this.isEquipped,
+    required this.gesammelt,
     required this.blockFor,
     required this.onWaehle,
   });
@@ -196,6 +199,7 @@ class _Raster extends StatelessWidget {
   final String? gewaehlteUid;
   final bool Function(GearCopy) isOwned;
   final bool Function(GearCopy) isEquipped;
+  final bool Function(GearCopy) gesammelt;
 
   /// **Dieselbe Frage wie beim Kaufknopf.** Stünde die Bedingung hier ein
   /// zweites Mal, zeigte die Kachel irgendwann „kaufbar" und der Knopf
@@ -226,6 +230,7 @@ class _Raster extends StatelessWidget {
                   isSelected: copy.uid == gewaehlteUid,
                   isOwned: isOwned(copy),
                   isEquipped: isEquipped(copy),
+                  gesammelt: gesammelt(copy),
                   block: blockFor(copy),
                   onTap: () => onWaehle(copy.uid),
                 ),

@@ -326,6 +326,17 @@ void main() {
       );
     });
 
+    testWidgets('ein leerer Rucksack lässt die Plätze oben stehen', (
+      tester,
+    ) async {
+      // Ein kurzer Inhalt rutschte in einem `Center` in die Mitte
+      // (`gotchas.md`).
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      expect(tester.getTopLeft(find.byType(CharacterFigure)).dy, lessThan(200));
+    });
+
     testWidgets('ein leerer Stand hat einen leeren Rucksack', (tester) async {
       // Was man nie hatte, steht in der Sammlung (ADR-0080), nicht hier.
       useTallView(tester);

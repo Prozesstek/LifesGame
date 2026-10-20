@@ -199,10 +199,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen, **sperren** | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar oder alles Schlechtere einer Seltenheit, mit Rückfrage und Feier | Flutter |
-| `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
+| `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht; im Laden mit dem Zeichen der Sammlung, wenn man das Stück schon einmal hatte | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
-| `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter **nur die eigenen** ([ADR-0082](docs/decisions/0082-nur-eigene-faehigkeiten.md)); **Platz antippen, dann eine Fähigkeit** — oder ziehen | Flutter |
+| `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter **nur die eigenen** ([ADR-0082](docs/decisions/0082-nur-eigene-faehigkeiten.md)), **ein Raster ohne Überschriften** in drei Ordnungen; **Platz antippen, dann eine Fähigkeit** — oder ziehen | Flutter |
+| `lib/character/faehigkeit_ordnung.dart` | wie die eigenen Fähigkeiten geordnet stehen: Seltenheit, A bis Z, Art — reine Rechnung | Flutter |
 | `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — es kann auch gesperrte, aufgerufen wird es seit ADR-0082 nur für eigene | Flutter |
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze — zeigt nur, wählt nicht | Flutter |
 | `lib/character/widgets/ultimate_platz.dart` | der Platz der Ultimate und ihr **goldener Doppelrand** (`UltimateRand`) — eine Stelle für Platz, Kachel und Blatt | Flutter |
@@ -291,7 +292,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 903 Tests
+flutter test             # 911 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

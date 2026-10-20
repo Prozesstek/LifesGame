@@ -8,7 +8,11 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
+import 'package:lifes_game/character/faehigkeit_ordnung.dart';
 import 'package:lifes_game/character/widgets/ability_sheet.dart';
+import 'package:lifes_game/character/widgets/ability_slots_row.dart';
+import 'package:lifes_game/gear/gear_grouping.dart';
+import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/ui/wackeln.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -392,6 +396,50 @@ void main() {
       await tester.pumpWidget(appMit(saved));
 
       expect(find.byType(Wackeln), findsNWidgets(eigene.length));
+    });
+
+    testWidgets('ein Raster ohne Überschriften, mit drei Ordnungen', (
+      tester,
+    ) async {
+      // Frederik, 20.10.: geordnet wie die Ausrüstung, aber ohne die
+      // Überschriften je Seltenheit.
+      useTallView(tester);
+      await tester.pumpWidget(appMit(aufLevel(10)));
+
+      expect(find.byType(RarityBadge), findsNothing);
+      for (final o in FaehigkeitOrdnung.values) {
+        expect(find.bySemanticsLabel(o.label), findsOneWidget);
+      }
+
+      await tester.tap(find.bySemanticsLabel('A bis Z'));
+      await tester.pumpAndSettle();
+      final namen = <String>[
+        for (final kachel in tester.widgetList<Wackeln>(find.byType(Wackeln)))
+          tester
+              .widgetList<Text>(
+                find.descendant(
+                  of: find.byWidget(kachel),
+                  matching: find.byType(Text),
+                ),
+              )
+              .first
+              .data!,
+      ];
+      final sortiert = [...namen]
+        ..sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+      expect(namen, sortiert);
+    });
+
+    testWidgets('ein kurzes Raster steht oben, nicht in der Mitte', (
+      tester,
+    ) async {
+      // Seit nur noch Eigenes dasteht, ist der Inhalt oft kürzer als der
+      // Bildschirm — in einem `Center` rutschte er in die Mitte
+      // (`gotchas.md`).
+      useTallView(tester);
+      await tester.pumpWidget(appMit(const SaveData.empty()));
+
+      expect(tester.getTopLeft(find.byType(AbilitySlotsRow)).dy, lessThan(150));
     });
 
     testWidgets('ein frischer Stand hat ein leeres Raster', (tester) async {

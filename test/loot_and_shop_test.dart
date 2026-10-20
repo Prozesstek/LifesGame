@@ -260,6 +260,35 @@ void main() {
       child: const MaterialApp(home: ShopScreen()),
     );
 
+    testWidgets('was schon in der Sammlung steht, trägt ihr Zeichen', (
+      tester,
+    ) async {
+      // Frederik, 20.10.: Im Laden soll stehen, ob man das Stück schon
+      // einmal hatte — auch verkauft zählt es (ADR-0080).
+      useTallView(tester);
+      await tester.pumpWidget(app(stand()));
+      await tester.pumpAndSettle();
+      expect(find.byKey(ShopItemCell.gesammeltKey), findsNothing);
+
+      final erstes = tester
+          .widget<ShopItemCell>(find.byType(ShopItemCell).first)
+          .copy;
+      final schonGehabt = const Loadout.empty()
+          .addFree(angebot(erstes.itemId))
+          .sell('test-${erstes.itemId}');
+      await tester.pumpWidget(app(stand(loadout: schonGehabt)));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(ShopItemCell).first,
+          matching: find.byKey(ShopItemCell.gesammeltKey),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(ShopItemCell.gesammeltKey), findsOneWidget);
+    });
+
     testWidgets('heute: sechs Angebote, eins je Platz', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(app(stand()));

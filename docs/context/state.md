@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 903, dazu die acht Packages (theory 204, habits 333, gear
+**Tests:** App 911, dazu die acht Packages (theory 204, habits 333, gear
 128, action_combat 392, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,35 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026, nachts: Sammlung im Laden, Fähigkeiten ohne Überschriften
+
+Frederik: „Beim Store kann noch dazu stehen welchen Gegenstand man schon
+hat und vielleicht die Fähigkeiten zwar nach Seltenheit sortiert etc
+wie die Items aber ohne extra Überschriften.“ Auf meinen ersten Entwurf
+(Anzahl der Exemplare im Rucksack): „Ne quasi ob man das Item schonmal
+in der Sammlung hatte.“
+
+| Was | Wie |
+|---|---|
+| **Laden** | ein Angebot, das schon in der Sammlung steht (je besessen, auch verkauft), trägt oben links ihr Zeichen; Neues hat keins |
+| **Fähigkeiten** | ein Raster **ohne Überschriften**, drei Ordnungen als Knöpfe wie bei der Ausrüstung: Seltenheit, A bis Z, Art; die Ultimates am Ende |
+
+**Ohne Rückfrage entschieden:** „etc wie die Items“ gelesen als die
+Knöpfe zum Ordnen; die Ausrüstung behält ihre Überschriften. Bei
+Fähigkeiten gibt es kein Set und keinen Platz, dafür die **Art**
+(Angriff, Umgebung, Schutz).
+
+**Beim Ansehen gefunden — ein Fehler aus Block 3:** Mit nur wenigen
+eigenen Fähigkeiten stand der Bildschirm mit einer Lücke von 200 Punkten
+oben. Ein `Center` um die `SingleChildScrollView` zentrierte kurzen
+Inhalt senkrecht (`gotchas.md`); bei der Ausrüstung mit leerem Rucksack
+genauso. Beide stehen jetzt oben, mit je einem Test, der ohne die
+Korrektur fehlschlägt.
+
+Neu: `lib/character/faehigkeit_ordnung.dart`,
+`test/faehigkeit_ordnung_test.dart`. App 911 (vorher 903). Fähigkeiten
+und Laden in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
 
 ## 20.10.2026, zuletzt: nur eigene Fähigkeiten (Block 3, #138)
 

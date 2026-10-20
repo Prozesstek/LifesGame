@@ -21,6 +21,7 @@ import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
 import '../ui/wackeln.dart';
 import 'abilities_controller.dart';
+import 'faehigkeit_ordnung.dart';
 import 'widgets/ability_sheet.dart';
 import 'widgets/ability_slots_row.dart';
 import 'widgets/ultimate_platz.dart';
@@ -93,7 +94,11 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       body: MentorFlaeche(
         ort: MentorOrt.faehigkeiten,
         child: SafeArea(
-          child: Center(
+          child: Align(
+            // **Oben, nicht in der Mitte**: Ein kurzer Inhalt — wenige
+            // eigene Fähigkeiten, ein leerer Rucksack — rutschte sonst in
+            // die Mitte des Bildschirms (beim Ansehen gefunden, 20.10.).
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _maxWidth),
               // **Kein ListView**, aus demselben Grund wie bei der
@@ -167,22 +172,19 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                             color: Palette.textOnDark,
                           ),
                         ),
+                        const Spacer(),
+                        _Ordnungswahl(
+                          aktiv: _ordnung,
+                          onWaehle: (o) => setState(() => _ordnung = o),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    for (final rarity in Rarity.values)
-                      ..._gruppe(
-                        context,
-                        ref,
-                        rarity: rarity,
-                        offen: offen,
-                        chosen: chosen,
-                        attack: attack,
-                      ),
-                    ..._ultimates(
+                    _raster(
                       context,
                       ref,
-                      offen: offeneUltimates,
+                      offen: offen,
+                      offeneUltimates: offeneUltimates,
                       chosen: chosen,
                       attack: attack,
                     ),
@@ -196,188 +198,116 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     );
   }
 
-  /// Eine Seltenheitsstufe mit Überschrift und Raster.
+  /// Das Raster der eigenen Fähigkeiten — **eines, ohne Überschriften**
+  /// (Frederik, 20.10.), in der gewählten Ordnung. Die Ultimates stehen
+  /// am Ende; ihr goldener Doppelrand sagt, was sie sind.
   ///
-  /// Gruppiert statt sortiert: Die Stufe ist die einzige Ordnung, die
-  /// etwas über die Fähigkeit aussagt — die Quelle sagt nur, wo man sie
-  /// herbekommt, und die steht im Blatt.
-  List<Widget> _gruppe(
+  /// **Nur, was man hat** (Issue #138). Was es sonst gibt und woher,
+  /// steht in der Sammlung (ADR-0080).
+  Widget _raster(
     BuildContext context,
     WidgetRef ref, {
-    required Rarity rarity,
     required Set<String> offen,
+    required Set<String> offeneUltimates,
     required ChosenAbilities chosen,
     required int attack,
   }) {
-    // **Nur, was man hat** (Issue #138). Was es sonst gibt und woher, steht
-    // in der Sammlung (ADR-0080).
-    final stufe = <Ability>[
+    final eigene = ordneFaehigkeiten(<Ability>[
       for (final ability in AbilityCatalog.choosable)
-        if (ability.rarity == rarity && offen.contains(ability.moveId)) ability,
-    ];
-    if (stufe.isEmpty) return const <Widget>[];
-
-    return <Widget>[
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          children: <Widget>[
-            RarityBadge.stufe(stufe: rarity.index, label: rarity.label),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '${stufe.length}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Palette.textOnDarkDim,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      GridView.count(
-        // Das Raster sitzt in einer ListView: eigene Höhe, kein eigenes
-        // Scrollen. Sonst scrollten zwei Flächen ineinander.
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: _columns,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 0.78,
-        children: <Widget>[
-          for (final ability in stufe)
-            HaltenUndZiehen<String>(
-              data: ability.moveId,
-              // **Nur Freigeschaltetes lässt sich ziehen.** Eine graue
-              // Fähigkeit auf einen Platz zu legen hieße, sie zu benutzen,
-              // bevor sie verdient ist.
-              aktiv: offen.contains(ability.moveId),
-              bild: MoveBild(
-                moveId: ability.moveId,
-                side: HaltenUndZiehen.schwebeSeite - 12,
-                fallback: const Icon(Icons.bolt, color: Palette.accent),
-              ),
-              rahmenFarbe: RarityBadge.colorOfStufe(ability.rarity.index),
-              onStart: () => _beginneZiehen(ability.moveId),
-              onEnde: _beendeZiehen,
-              // Der Mentor zeigt auf das, was gelernt und noch nicht
-              // angelegt ist (ADR-0079) — beim ersten Mal Funkenstoß.
-              child: Zeigefinger(
-                schritt: Schritt.faehigkeitAnlegen,
-                aktiv:
-                    offen.contains(ability.moveId) &&
-                    !chosen.contains(ability.moveId),
-                // Wird für einen Platz gewählt, wackelt, was dorthin kann.
-                child: Wackeln(
-                  aktiv:
-                      _waehlt != null &&
-                      chosen.at(_waehlt! - 2) != ability.moveId,
-                  child: _Kachel(
-                    ability: ability,
-                    unlocked: true,
-                    imEinsatz: chosen.contains(ability.moveId),
-                    ausgeblendet: _gezogen == ability.moveId,
-                    onTap: () {
-                      final platz = _waehlt;
-                      if (platz != null) {
-                        _lege(platz, ability.moveId);
-                        return;
-                      }
-                      _zeigeFaehigkeit(
-                        context,
-                        ref,
-                        ability: ability,
-                        unlocked: true,
-                        attack: attack,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-      const SizedBox(height: 16),
-    ];
-  }
-
-  /// Die Ultimates — eine eigene Gruppe mit goldenem Doppelrand statt
-  /// einer Seltenheit (ADR-0073).
-  List<Widget> _ultimates(
-    BuildContext context,
-    WidgetRef ref, {
-    required Set<String> offen,
-    required ChosenAbilities chosen,
-    required int attack,
-  }) {
-    final eigene = <Ability>[
-      for (final ability in AbilityCatalog.ultimates)
         if (offen.contains(ability.moveId)) ability,
-    ];
-    if (eigene.isEmpty) return const <Widget>[];
-    return <Widget>[
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          children: <Widget>[
-            const Icon(Icons.auto_awesome, size: 16, color: Palette.goldOnDark),
-            const SizedBox(width: 6),
-            Text(
-              '${offen.length} / ${AbilityCatalog.ultimates.length}',
-              semanticsLabel:
-                  'Ultimates: ${offen.length} von '
-                  '${AbilityCatalog.ultimates.length} freigeschaltet',
-              style: const TextStyle(
-                fontSize: 11,
-                color: Palette.textOnDarkDim,
-              ),
+    ], _ordnung);
+    final ultimates = ordneFaehigkeiten(<Ability>[
+      for (final ability in AbilityCatalog.ultimates)
+        if (offeneUltimates.contains(ability.moveId)) ability,
+    ], _ordnung);
+
+    return GridView.count(
+      // Das Raster sitzt in einer ListView: eigene Höhe, kein eigenes
+      // Scrollen. Sonst scrollten zwei Flächen ineinander.
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: _columns,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      childAspectRatio: 0.78,
+      children: <Widget>[
+        for (final ability in eigene)
+          HaltenUndZiehen<String>(
+            data: ability.moveId,
+            aktiv: true,
+            bild: MoveBild(
+              moveId: ability.moveId,
+              side: HaltenUndZiehen.schwebeSeite - 12,
+              fallback: const Icon(Icons.bolt, color: Palette.accent),
             ),
-          ],
-        ),
-      ),
-      GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: _columns,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 0.78,
-        children: <Widget>[
-          for (final ability in eigene)
-            HaltenUndZiehen<String>(
-              data: ability.moveId,
-              aktiv: offen.contains(ability.moveId),
-              bild: MoveBild(
-                moveId: ability.moveId,
-                side: HaltenUndZiehen.schwebeSeite - 12,
-                fallback: const Icon(Icons.auto_awesome, color: Palette.gold),
-              ),
-              rahmenFarbe: Palette.rahmenGoldHell,
-              onStart: () => _beginneZiehen(ability.moveId),
-              onEnde: _beendeZiehen,
-              child: UltimateRand(
-                hell: offen.contains(ability.moveId),
+            rahmenFarbe: RarityBadge.colorOfStufe(ability.rarity.index),
+            onStart: () => _beginneZiehen(ability.moveId),
+            onEnde: _beendeZiehen,
+            // Der Mentor zeigt auf das, was gelernt und noch nicht
+            // angelegt ist (ADR-0079) — beim ersten Mal Funkenstoß.
+            child: Zeigefinger(
+              schritt: Schritt.faehigkeitAnlegen,
+              aktiv: !chosen.contains(ability.moveId),
+              // Wird für einen Platz gewählt, wackelt, was dorthin kann.
+              child: Wackeln(
+                aktiv:
+                    _waehlt != null &&
+                    chosen.at(_waehlt! - 2) != ability.moveId,
                 child: _Kachel(
                   ability: ability,
-                  unlocked: offen.contains(ability.moveId),
-                  imEinsatz: chosen.ultimate == ability.moveId,
+                  unlocked: true,
+                  imEinsatz: chosen.contains(ability.moveId),
                   ausgeblendet: _gezogen == ability.moveId,
-                  ohneRand: true,
-                  onTap: () => _zeigeUltimate(
-                    context,
-                    ref,
-                    ability: ability,
-                    unlocked: offen.contains(ability.moveId),
-                    attack: attack,
-                  ),
+                  onTap: () {
+                    final platz = _waehlt;
+                    if (platz != null) {
+                      _lege(platz, ability.moveId);
+                      return;
+                    }
+                    _zeigeFaehigkeit(
+                      context,
+                      ref,
+                      ability: ability,
+                      unlocked: true,
+                      attack: attack,
+                    );
+                  },
                 ),
               ),
             ),
-        ],
-      ),
-      const SizedBox(height: 16),
-    ];
+          ),
+        for (final ability in ultimates)
+          HaltenUndZiehen<String>(
+            data: ability.moveId,
+            aktiv: true,
+            bild: MoveBild(
+              moveId: ability.moveId,
+              side: HaltenUndZiehen.schwebeSeite - 12,
+              fallback: const Icon(Icons.auto_awesome, color: Palette.gold),
+            ),
+            rahmenFarbe: Palette.rahmenGoldHell,
+            onStart: () => _beginneZiehen(ability.moveId),
+            onEnde: _beendeZiehen,
+            child: UltimateRand(
+              hell: true,
+              child: _Kachel(
+                ability: ability,
+                unlocked: true,
+                imEinsatz: chosen.ultimate == ability.moveId,
+                ausgeblendet: _gezogen == ability.moveId,
+                ohneRand: true,
+                onTap: () => _zeigeUltimate(
+                  context,
+                  ref,
+                  ability: ability,
+                  unlocked: true,
+                  attack: attack,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   void _legeUltimate(String moveId) {
@@ -459,6 +389,10 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
   /// Der Platz, für den gerade gewählt wird, oder null (Issue #138):
   /// Platz antippen, dann eine Fähigkeit.
   int? _waehlt;
+
+  /// Wie das Raster geordnet ist. Gehört zur Ansicht, nicht zum
+  /// Spielstand, wie bei der Ausrüstung.
+  FaehigkeitOrdnung _ordnung = FaehigkeitOrdnung.values.first;
 
   void _beginneZiehen(String moveId) {
     setState(() {
@@ -617,6 +551,51 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
           null => null,
         },
     ];
+  }
+}
+
+/// Die drei Ordnungen als Reihe von Chips — wie bei der Ausrüstung.
+class _Ordnungswahl extends StatelessWidget {
+  const _Ordnungswahl({required this.aktiv, required this.onWaehle});
+
+  final FaehigkeitOrdnung aktiv;
+  final ValueChanged<FaehigkeitOrdnung> onWaehle;
+
+  static IconData _zeichen(FaehigkeitOrdnung o) => switch (o) {
+    FaehigkeitOrdnung.seltenheit => Icons.diamond_outlined,
+    FaehigkeitOrdnung.alphabetisch => Icons.sort_by_alpha_rounded,
+    FaehigkeitOrdnung.art => Icons.category_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (final o in FaehigkeitOrdnung.values)
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Druck(
+              child: ChoiceChip(
+                label: Icon(
+                  _zeichen(o),
+                  size: 18,
+                  color: Palette.text,
+                  semanticLabel: o.label,
+                ),
+                labelPadding: EdgeInsets.zero,
+                padding: const EdgeInsets.all(6),
+                selected: o == aktiv,
+                onSelected: (_) => onWaehle(o),
+                selectedColor: Palette.accentOnDark,
+                backgroundColor: Palette.surface,
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 
