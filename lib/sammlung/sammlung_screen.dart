@@ -8,6 +8,7 @@ import '../achievements/achievements_screen.dart';
 import '../action/action_sprites.dart';
 import '../character/widgets/ability_slots_row.dart';
 import '../gear/gear_icon.dart';
+import '../gear/widgets/gear_sheet.dart';
 import '../gear/widgets/rarity_badge.dart';
 import '../theory/widgets/node_icon.dart';
 import '../ui/druck.dart';
@@ -273,7 +274,7 @@ class SammelKachel extends StatelessWidget {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: () => zeigeSammelBlatt(context, art: art, eintrag: eintrag),
+            onTap: () => _tippe(context),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
               child: Column(
@@ -307,6 +308,20 @@ class SammelKachel extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Ein gesammeltes Stück öffnet sein volles Blatt mit allen Werten
+  /// (Issue #137) — das gab es vorher über den Katalog der Ausrüstung.
+  /// Alles andere zeigt, was es ist oder woher es kommt.
+  void _tippe(BuildContext context) {
+    if (art == SammelArt.ausruestung && eintrag.gesammelt) {
+      final item = GearCatalog.byId(eintrag.id);
+      if (item != null) {
+        showGearSheet(context, item);
+        return;
+      }
+    }
+    zeigeSammelBlatt(context, art: art, eintrag: eintrag);
   }
 
   /// Ein Stück trägt den Rahmen seiner Seltenheit — erst, wenn man es

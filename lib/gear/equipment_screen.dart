@@ -5,8 +5,6 @@ import 'package:gear/gear.dart';
 
 import '../character/widgets/equipment_slot_tile.dart';
 import '../character/widgets/set_card.dart';
-import '../combat/ladder_controller.dart';
-import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
@@ -23,8 +21,8 @@ import '../ui/gold_icon.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
 
-/// Der Ausrüstungs-Bildschirm: sechs Plätze oben, der ganze Katalog
-/// darunter (ADR-0057).
+/// Der Ausrüstungs-Bildschirm: sechs Plätze oben, darunter der Rucksack
+/// (ADR-0057, Issue #137).
 ///
 /// **Gebaut wie der Fähigkeiten-Bildschirm** (ADR-0049), aus demselben
 /// Grund: Im Charakter standen nur die sechs Plätze, und was es sonst zu
@@ -32,9 +30,13 @@ import '../sammlung/sammlung_knopf.dart';
 /// Tages. Achtundvierzig Stücke, von denen man die meisten nie zu sehen
 /// bekommt, sind kein Ziel.
 ///
-/// **Der Katalog, nicht das Inventar.** Jedes Stück steht einmal da,
-/// besessene farbig, der Rest grau. Wer ein Stück mehrfach hat, sieht
-/// die Zahl auf der Kachel, und im Blatt jedes Exemplar mit seinem Wurf.
+/// **Seit Issue #137 das Inventar, nicht der Katalog** — wie bei Diablo:
+/// Jedes Exemplar, das nicht getragen wird, ist eine Kachel, mit einem
+/// Pfeil, ob es besser, gleich oder schlechter ist als das Getragene,
+/// und einem Schloss, wenn es gesperrt ist. Was man noch nie hatte, steht
+/// in der Sammlung (ADR-0080). Bis dahin stand hier der ganze Katalog,
+/// Nicht-Besessenes grau.
+///
 /// Seit Issue #88 ist er der einzige Ort für Besessenes: Der Laden hat
 /// sein Inventar abgegeben und verkauft nur noch, was es heute gibt.
 class EquipmentScreen extends ConsumerStatefulWidget {
@@ -72,7 +74,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
 
   /// Was gerade gezogen wird, oder null. Die Plätze lesen es, um zu
   /// zeigen, wohin das Stück gehört.
-  GearItem? _gezogen;
+  GearCopy? _gezogen;
 
   @override
   void dispose() {
@@ -80,8 +82,8 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     super.dispose();
   }
 
-  void _beginneZiehen(GearItem item) {
-    setState(() => _gezogen = item);
+  void _beginneZiehen(GearCopy copy) {
+    setState(() => _gezogen = copy);
     zuDenPlaetzen(_scroll);
   }
 
@@ -90,12 +92,12 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     setState(() => _gezogen = null);
   }
 
-  /// Legt das beste Exemplar des gezogenen Stücks an
-  /// (`Loadout.bestCopyOf`). Ein bestimmtes anderes legt man im Blatt an.
-  void _lege(GearItem item) {
-    final copy = ref.read(loadoutProvider).bestCopyOf(item.id);
+  /// Legt genau das gezogene Exemplar an — seit jedes eine eigene
+  /// Kachel hat, ist klar, welches gemeint ist.
+  void _lege(GearCopy copy) {
     _beendeZiehen();
-    if (copy == null) return;
+    final item = copy.item;
+    if (item == null) return;
     ref.read(loadoutProvider.notifier).equip(copy.uid);
     HapticFeedback.selectionClick();
     _sage('${item.name} angelegt.');
@@ -117,8 +119,16 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     );
   }
 
+  /// Was im Rucksack liegt: alles, was man hat und nicht trägt.
+  static List<GearCopy> _rucksack(Loadout loadout) => <GearCopy>[
+    for (final copy in loadout.ownedCopies)
+      if (!loadout.isEquipped(copy.uid)) copy,
+  ];
+
   /// Was beim Ziehen unter dem Finger hängt: das Bild des Stücks.
-  static Widget _schwebeBild(GearItem item) {
+  static Widget _schwebeBild(GearCopy copy) {
+    final item = copy.item;
+    if (item == null) return const SizedBox.shrink();
     const seite = HaltenUndZiehen.schwebeSeite - 12;
     final ersatz = Icon(
       GearIcons.fallbackFor(item.slot),
@@ -140,10 +150,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   @override
   Widget build(BuildContext context) {
     final loadout = ref.watch(loadoutProvider);
-    final rung = ref.watch(ladderProvider).highestDefeated;
-    final besessen = <String>{
-      for (final copy in loadout.ownedCopies) copy.itemId,
-    };
+    final rucksack = _rucksack(loadout);
 
     return Scaffold(
       appBar: AppBar(
@@ -196,38 +203,16 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                     const SizedBox(height: 16),
                     SetCard(loadout: loadout),
                   ],
-                  // **Aus dem Laden hierher** (Issue #88): Seit der Laden
-                  // nur noch kauft, steht alles Besessene hier — auch das
-                  // Aufräumen. Nur sichtbar, wenn es etwas zu räumen gibt.
-                  if (loadout.junk case final ausschuss
-                      when ausschuss.isNotEmpty) ...<Widget>[
+                  // **Aufräumen je Seltenheit** (Issue #137): ein Knopf für
+                  // jede, in der etwas Schlechteres liegt. Gesperrtes bleibt.
+                  // Nur sichtbar, wenn es etwas zu räumen gibt.
+                  if (loadout.junk.isNotEmpty) ...<Widget>[
                     const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      onPressed: () => sellJunkWithConfirm(context, ref),
-                      icon: const Icon(
-                        Icons.cleaning_services_outlined,
-                        size: 18,
-                      ),
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            '×${ausschuss.length}',
-                            semanticsLabel:
-                                'Alles Schlechtere verkaufen, '
-                                '${ausschuss.length} Stück, '
-                                '${junkRefund(ausschuss)} Gold',
-                          ),
-                          const SizedBox(width: 10),
-                          const GoldIcon(size: 16),
-                          const SizedBox(width: 3),
-                          Text('+${junkRefund(ausschuss)}', semanticsLabel: ''),
-                        ],
-                      ),
-                    ),
+                    _Aufraeumen(loadout: loadout),
                   ],
                   const SizedBox(height: 20),
-                  // Wie viel man hat, und wie geordnet wird — ohne Worte.
+                  // Wie viel im Rucksack liegt, und wie geordnet wird —
+                  // ohne Worte.
                   Row(
                     children: <Widget>[
                       const Icon(
@@ -237,10 +222,8 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${besessen.length} / ${GearCatalog.all.length}',
-                        semanticsLabel:
-                            '${besessen.length} von '
-                            '${GearCatalog.all.length} Stücken im Besitz',
+                        '${rucksack.length}',
+                        semanticsLabel: '${rucksack.length} Stück im Rucksack',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -256,12 +239,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                   ),
                   const SizedBox(height: 12),
                   for (final gruppe in groupGear(_gruppierung))
-                    ..._gruppe(
-                      gruppe,
-                      loadout: loadout,
-                      besessen: besessen,
-                      rung: rung,
-                    ),
+                    ..._gruppe(gruppe, loadout: loadout, rucksack: rucksack),
                   const SizedBox(height: 4),
                   FilledButton(
                     onPressed: () => Navigator.of(context).push(
@@ -284,16 +262,28 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   }
 
   /// Eine Gruppe mit Überschrift und Raster. Das alphabetische Raster hat
-  /// keine Überschrift, es ist die eine Gruppe.
+  /// keine Überschrift, es ist die eine Gruppe. **Eine leere Gruppe steht
+  /// nicht da**: Der Rucksack zeigt, was drin ist, nicht, was fehlt.
   List<Widget> _gruppe(
     GearGroup gruppe, {
     required Loadout loadout,
-    required Set<String> besessen,
-    required int rung,
+    required List<GearCopy> rucksack,
   }) {
-    final zaehler =
-        '${gruppe.items.where((i) => besessen.contains(i.id)).length} '
-        '/ ${gruppe.items.length}';
+    final reihenfolge = <String, int>{
+      for (final (i, item) in gruppe.items.indexed) item.id: i,
+    };
+    final drin =
+        <GearCopy>[
+          for (final copy in rucksack)
+            if (reihenfolge.containsKey(copy.itemId)) copy,
+        ]..sort((a, b) {
+          final nachStueck = reihenfolge[a.itemId]!.compareTo(
+            reihenfolge[b.itemId]!,
+          );
+          if (nachStueck != 0) return nachStueck;
+          return b.bonus.total.compareTo(a.bonus.total);
+        });
+    if (drin.isEmpty) return const <Widget>[];
 
     return <Widget>[
       if (gruppe.title case final String titel)
@@ -324,7 +314,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                 ),
               const SizedBox(width: 8),
               Text(
-                zaehler,
+                '${drin.length}',
                 style: const TextStyle(
                   fontSize: 11,
                   color: Palette.textOnDarkDim,
@@ -341,28 +331,25 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
         crossAxisSpacing: 8,
         childAspectRatio: 0.78,
         children: <Widget>[
-          for (final item in gruppe.items)
-            HaltenUndZiehen<GearItem>(
-              data: item,
-              bild: _schwebeBild(item),
-              rahmenFarbe: RarityBadge.rahmenOf(item.rarity),
-              // **Nur was man hat, lässt sich ziehen.** Ein graues Stück
-              // auf einen Platz zu legen hieße, etwas anzulegen, das es
-              // nicht gibt.
-              aktiv: besessen.contains(item.id),
-              onStart: () => _beginneZiehen(item),
-              onEnde: _beendeZiehen,
-              child: _Kachel(
-                item: item,
-                anzahl: loadout.ownedCopies
-                    .where((c) => c.itemId == item.id)
-                    .length,
-                angelegt: loadout.equippedCopyIn(item.slot)?.itemId == item.id,
-                gesperrt: !GearGates.isOpen(item.rarity, highestRung: rung),
-                ausgeblendet: _gezogen?.id == item.id,
-                onTap: () => showGearSheet(context, item),
+          for (final copy in drin)
+            if (copy.item case final GearItem item)
+              HaltenUndZiehen<GearCopy>(
+                data: copy,
+                // Im Rucksack liegt nur, was man hat — alles lässt sich
+                // ziehen.
+                aktiv: true,
+                bild: _schwebeBild(copy),
+                rahmenFarbe: RarityBadge.rahmenOf(item.rarity),
+                onStart: () => _beginneZiehen(copy),
+                onEnde: _beendeZiehen,
+                child: ExemplarKachel(
+                  copy: copy,
+                  vergleich: loadout.vergleiche(copy),
+                  gesperrt: loadout.isLocked(copy.uid),
+                  ausgeblendet: _gezogen?.uid == copy.uid,
+                  onTap: () => showGearSheet(context, item),
+                ),
               ),
-            ),
         ],
       ),
       const SizedBox(height: 16),
@@ -439,23 +426,23 @@ class _Ablage extends StatelessWidget {
   final GearSlot slot;
 
   /// Was der Bildschirm gerade gezogen weiß, oder null.
-  final GearItem? gezogen;
+  final GearCopy? gezogen;
 
-  final ValueChanged<GearItem> onAblegen;
+  final ValueChanged<GearCopy> onAblegen;
 
   /// Baut die Kachel im passenden Zustand.
   final Widget Function(SlotDragState dragState) child;
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<GearItem>(
-      onWillAcceptWithDetails: (details) => details.data.slot == slot,
+    return DragTarget<GearCopy>(
+      onWillAcceptWithDetails: (details) => details.data.item?.slot == slot,
       onAcceptWithDetails: (details) => onAblegen(details.data),
       builder: (context, kandidaten, _) {
         return child(
           SlotDragState.fuer(
             zieht: gezogen != null,
-            passt: gezogen?.slot == slot,
+            passt: gezogen?.item?.slot == slot,
             schwebt: kandidaten.isNotEmpty,
           ),
         );
@@ -510,162 +497,190 @@ class _Gruppenwahl extends StatelessWidget {
   };
 }
 
-/// Ein Stück im Raster.
-///
-/// **Nicht besessen heißt grau, nicht weg.** Die Zeichnung bleibt
-/// erkennbar, damit man weiß, worauf man zuarbeitet. Ein Schloss steht
-/// nur da, wo die Seltenheit noch an der Grube hängt (ADR-0034), dort
-/// hilft auch Gold nicht.
-class _Kachel extends StatelessWidget {
-  const _Kachel({
-    required this.item,
-    required this.anzahl,
-    required this.angelegt,
+/// Die Knöpfe zum Aufräumen: einer je Seltenheit, in der etwas
+/// Schlechteres liegt (Issue #137) — mit Zahl und Erlös.
+class _Aufraeumen extends ConsumerWidget {
+  const _Aufraeumen({required this.loadout});
+
+  final Loadout loadout;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: <Widget>[
+        const Icon(
+          Icons.cleaning_services_outlined,
+          size: 18,
+          color: Palette.textOnDark,
+          semanticLabel: 'Schlechteres verkaufen',
+        ),
+        for (final stufe in GearRarity.values)
+          if (loadout.junkOf(stufe) case final ausschuss
+              when ausschuss.isNotEmpty)
+            OutlinedButton(
+              key: ValueKey<String>('aufraeumen-${stufe.name}'),
+              onPressed: () => sellJunkWithConfirm(context, ref, stufe),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                side: BorderSide(color: RarityBadge.rahmenOf(stufe), width: 2),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    '×${ausschuss.length}',
+                    semanticsLabel:
+                        '${stufe.label}: ${ausschuss.length} Stück '
+                        'verkaufen, ${junkRefund(ausschuss)} Gold',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: RarityBadge.colorOf(stufe),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const GoldIcon(size: 14),
+                  const SizedBox(width: 2),
+                  Text('+${junkRefund(ausschuss)}', semanticsLabel: ''),
+                ],
+              ),
+            ),
+      ],
+    );
+  }
+}
+
+/// Ein Exemplar im Rucksack: Bild im Rahmen seiner Seltenheit, ein Pfeil
+/// gegen das Getragene und, wenn es gesperrt ist, ein Schloss.
+class ExemplarKachel extends StatelessWidget {
+  const ExemplarKachel({
+    required this.copy,
+    required this.vergleich,
     required this.gesperrt,
     required this.onTap,
     this.ausgeblendet = false,
+    super.key,
   });
 
-  final GearItem item;
-
-  /// Wie viele Exemplare man davon besitzt.
-  final int anzahl;
-
-  /// Ob eines davon auf seinem Platz liegt.
-  final bool angelegt;
-
-  /// Ob die Seltenheit noch gesperrt ist.
+  final GearCopy copy;
+  final GearVergleich vergleich;
   final bool gesperrt;
+  final VoidCallback onTap;
 
   /// Ob das Stück gerade gezogen wird. Dann bleibt an seiner Stelle ein
   /// Schatten, und das Stück selbst hängt unter dem Finger.
   final bool ausgeblendet;
 
-  final VoidCallback onTap;
-
   static const double _bildSeite = 36;
 
-  /// Wie deckend der Rahmen eines Stücks ist, das man nicht hat.
-  static const double _rahmenOhneBesitz = 0.4;
-
-  bool get _besessen => anzahl > 0;
+  /// Der Pfeil: grün hoch, rot runter, braun gleich — wie in
+  /// AktivesBretts Skizze zu #136.
+  static (IconData, Color, String) pfeil(GearVergleich v) => switch (v) {
+    GearVergleich.besser => (
+      Icons.arrow_upward_rounded,
+      Palette.success,
+      'besser',
+    ),
+    GearVergleich.gleich => (
+      Icons.drag_handle_rounded,
+      Palette.accent,
+      'gleich gut',
+    ),
+    GearVergleich.schlechter => (
+      Icons.arrow_downward_rounded,
+      Palette.enemy,
+      'schlechter',
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
-    final rahmen = RarityBadge.rahmenOf(item.rarity);
+    final item = copy.item;
+    if (item == null) return const SizedBox.shrink();
     final pfad = GearIcons.forItemId(item.id);
     final ersatz = SizedBox.square(
       dimension: _bildSeite,
-      child: Icon(
-        GearIcons.fallbackFor(item.slot),
-        color: _besessen ? Palette.accent : Palette.muted,
-      ),
+      child: Icon(GearIcons.fallbackFor(item.slot), color: Palette.accent),
     );
+    final (zeichen, farbe, wort) = pfeil(vergleich);
 
     return Opacity(
       opacity: ausgeblendet ? 0.3 : 1,
       child: Semantics(
         button: true,
-        label: _besessen
-            ? '${item.name}, $anzahl im Besitz'
-            : '${item.name}, nicht im Besitz',
+        label:
+            '${item.name}, $wort als das Getragene'
+            '${gesperrt ? ', gesperrt' : ''}',
+        excludeSemantics: true,
         child: Druck(
           child: Material(
-            color: _besessen ? Palette.surface : Palette.surfaceSunken,
+            color: Palette.surface,
             borderRadius: BorderRadius.circular(10),
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
-                // **Der Rahmen gehört der Seltenheit**, auch beim
-                // angelegten Stück: Dass es anliegt, sagt der Haken am
-                // Bild. Was man nicht hat, trägt ihn blasser.
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: rahmen.withValues(
-                      alpha: _besessen ? 1 : _rahmenOhneBesitz,
-                    ),
+                    color: RarityBadge.rahmenOf(item.rarity),
                     width: RarityBadge.rahmenBreite,
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: Stack(
+                  clipBehavior: Clip.none,
                   children: <Widget>[
-                    Stack(
-                      clipBehavior: Clip.none,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Ausgegraut(
-                          aktiv: !_besessen,
-                          child: pfad == null
-                              ? ersatz
-                              : PixelArt(
-                                  assetPath: pfad,
-                                  side: _bildSeite,
-                                  fallback: ersatz,
-                                ),
+                        const SizedBox(height: 4),
+                        if (pfad == null)
+                          ersatz
+                        else
+                          PixelArt(
+                            assetPath: pfad,
+                            side: _bildSeite,
+                            fallback: ersatz,
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 9,
+                            height: 1.15,
+                            fontWeight: FontWeight.bold,
+                            color: RarityBadge.colorOf(item.rarity),
+                          ),
                         ),
-                        if (angelegt)
-                          const Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Icon(
-                              Icons.check_circle,
-                              size: 12,
-                              color: Palette.accent,
-                            ),
-                          )
-                        else if (!_besessen && gesperrt)
-                          const Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Icon(
-                              Icons.lock,
-                              size: 12,
-                              color: Palette.muted,
-                            ),
-                          ),
-                        if (anzahl > 1)
-                          Positioned(
-                            left: -4,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Palette.accent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                '×$anzahl',
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: Palette.surface,
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 9,
-                        height: 1.15,
-                        fontWeight: FontWeight.bold,
-                        color: _besessen
-                            ? RarityBadge.colorOf(item.rarity)
-                            : Palette.muted,
+                    Positioned(
+                      right: -1,
+                      top: -3,
+                      child: Icon(
+                        zeichen,
+                        key: ValueKey<String>('pfeil-${vergleich.name}'),
+                        size: 16,
+                        color: farbe,
                       ),
                     ),
+                    if (gesperrt)
+                      const Positioned(
+                        left: -1,
+                        top: -3,
+                        child: Icon(
+                          Icons.lock,
+                          key: ValueKey<String>('gesperrt'),
+                          size: 13,
+                          color: Palette.gold,
+                        ),
+                      ),
                   ],
                 ),
               ),

@@ -7,6 +7,24 @@ import 'keys.dart';
 import 'prices.dart';
 import 'set_catalog.dart';
 
+/// Wie ein Exemplar gegen das steht, was auf seinem Platz getragen wird
+/// — die Pfeile im Inventar (Issue #137).
+///
+/// **Erst die Seltenheit, dann die Summe der Werte**: Eine höhere
+/// Seltenheit vervielfacht im Kampf (ADR-0042) und wiegt mehr als ein
+/// paar Punkte Wurf. Dieselbe Regel entscheidet, was „alles
+/// Schlechtere“ verkauft ([Loadout.junk]).
+enum GearVergleich {
+  /// Besser als das Getragene — oder der Platz ist leer.
+  besser,
+
+  /// So gut wie das Getragene, oder es ist das Getragene selbst.
+  gleich,
+
+  /// Schlechter als das Getragene.
+  schlechter,
+}
+
 /// Warum ein Kauf nicht geht. Null heißt: geht.
 enum PurchaseBlock {
   /// Gibt es nicht — Tippfehler oder ein Stück aus einer neueren Version.
@@ -37,7 +55,7 @@ enum PurchaseBlock {
 /// gespeicherter Kontostand könnte von der Rechnung abweichen, eine
 /// Historie *ist* die Rechnung.
 ///
-/// **Jede Methode, die einen neuen Loadout baut, gibt alle vier Felder
+/// **Jede Methode, die einen neuen Loadout baut, gibt alle fünf Felder
 /// weiter** — und zwar über [_copyWith], das keines vergessen kann. Die
 /// Falle aus `gotchas.md` (ein Feld mit Standardwert, das still
 /// verschwindet) gab es hier mit `soldIds` schon einmal.
@@ -47,15 +65,18 @@ class Loadout {
     Map<String, int> sold = const <String, int>{},
     Map<GearSlot, String> equipped = const <GearSlot, String>{},
     this.keysConsumed = 0,
+    Set<String> locked = const <String>{},
   })  : _acquired = List<GearCopy>.unmodifiable(acquired),
         _sold = Map<String, int>.unmodifiable(sold),
-        _equipped = Map<GearSlot, String>.unmodifiable(equipped);
+        _equipped = Map<GearSlot, String>.unmodifiable(equipped),
+        _locked = Set<String>.unmodifiable(locked);
 
   const Loadout.empty()
       : _acquired = const <GearCopy>[],
         _sold = const <String, int>{},
         _equipped = const <GearSlot, String>{},
-        keysConsumed = 0;
+        keysConsumed = 0,
+        _locked = const <String>{};
 
   /// Was ein Verkauf **vor** ADR-0048 zurückgab. Nur für die Übernahme
   /// alter Stände: Deren Verkäufe behalten ihre alte Rechnung.
@@ -111,12 +132,24 @@ class Loadout {
       }
     }
 
+    // Gesperrt bleibt nur, was es noch gibt.
+    final locked = <String>{};
+    final rawLocked = json['locked'];
+    if (rawLocked is List) {
+      for (final uid in rawLocked) {
+        if (uid is String && uids.contains(uid) && !sold.containsKey(uid)) {
+          locked.add(uid);
+        }
+      }
+    }
+
     final keys = json['keys'];
     return Loadout(
       acquired: acquired,
       sold: sold,
       equipped: equipped,
       keysConsumed: keys is int && keys > 0 ? keys : 0,
+      locked: locked,
     );
   }
 
@@ -174,6 +207,10 @@ class Loadout {
   final Map<String, int> _sold;
   final Map<GearSlot, String> _equipped;
 
+  /// Welche Exemplare gesperrt sind (Issue #137): Sie lassen sich nicht
+  /// verkaufen, weder einzeln noch mit allem Schlechteren.
+  final Set<String> _locked;
+
   /// Wie viele Schlüssel schon eingesetzt oder verfallen sind
   /// ([GearKeys]). Fällt nie.
   final int keysConsumed;
@@ -183,12 +220,14 @@ class Loadout {
     Map<String, int>? sold,
     Map<GearSlot, String>? equipped,
     int? keysConsumed,
+    Set<String>? locked,
   }) {
     return Loadout(
       acquired: acquired ?? _acquired,
       sold: sold ?? _sold,
       equipped: equipped ?? _equipped,
       keysConsumed: keysConsumed ?? this.keysConsumed,
+      locked: locked ?? _locked,
     );
   }
 
@@ -200,6 +239,7 @@ class Loadout {
         for (final entry in _equipped.entries) entry.key.name: entry.value,
       },
       if (keysConsumed > 0) 'keys': keysConsumed,
+      if (_locked.isNotEmpty) 'locked': _locked.toList()..sort(),
     };
   }
 
@@ -344,12 +384,14 @@ class Loadout {
     return (item.price * GearPrices.refundShare).floor();
   }
 
-  bool canSell(String uid) => owns(uid);
+  bool canSell(String uid) => owns(uid) && !isLocked(uid);
 
-  /// Verkauft ein Exemplar. Ein getragenes wird dabei abgelegt.
+  /// Verkauft ein Exemplar. Ein getragenes wird dabei abgelegt, ein
+  /// gesperrtes nicht verkauft.
   Loadout sell(String uid) => sellAll(<String>[uid]);
 
   /// Verkauft mehrere auf einmal — für „alles Schlechtere verkaufen".
+  /// **Gesperrtes bleibt**, egal wer es hereinreicht.
   Loadout sellAll(Iterable<String> uids) {
     final sold = <String, int>{..._sold};
     final equipped = <GearSlot, String>{..._equipped};
@@ -357,6 +399,7 @@ class Loadout {
       final copy = copyByUid(uid);
       final item = copy?.item;
       if (copy == null || item == null || sold.containsKey(uid)) continue;
+      if (isLocked(uid)) continue;
       sold[uid] = refundFor(item);
       if (equipped[item.slot] == uid) equipped.remove(item.slot);
     }
@@ -364,30 +407,60 @@ class Loadout {
     return _copyWith(sold: sold, equipped: equipped);
   }
 
-  /// Was sich gefahrlos verkaufen lässt: nicht getragen und nicht besser
-  /// als das, was auf dem Platz getragen wird.
+  /// Was sich verkaufen lässt, ohne etwas zu verlieren: nicht getragen,
+  /// nicht gesperrt und **nicht besser** als das Getragene
+  /// ([vergleiche]) — auf Wunsch nur einer [rarity].
   ///
-  /// **Nie dabei:** Set-Teile, Episches und Legendäres — ihr Wert steckt
-  /// nicht in der Zahl. Waffen nur, wenn es dieselbe Waffe ist wie die
-  /// getragene: Eine andere bringt einen anderen Grundangriff mit.
-  List<GearCopy> get junk {
+  /// **Seit Issue #137 ohne Ausnahmen.** Bis dahin blieben Set-Teile,
+  /// Episches, Legendäres und fremde Waffen immer liegen, weil ihr Wert
+  /// nicht in der Zahl steckt. Jetzt gibt es dafür das Schloss: Was man
+  /// behalten will, sperrt man (Frederik, 20.10.).
+  List<GearCopy> junkOf([GearRarity? rarity]) {
     final ergebnis = <GearCopy>[];
     for (final copy in ownedCopies) {
       final item = copy.item;
-      if (item == null || isEquipped(copy.uid)) continue;
-      if (item.isSetPiece || item.rarity.index >= GearRarity.epic.index) {
+      if (item == null || isEquipped(copy.uid) || isLocked(copy.uid)) {
         continue;
       }
-      final getragen = equippedCopyIn(item.slot);
-      final getragenItem = getragen?.item;
-      if (getragen == null || getragenItem == null) continue;
-      if (item.slot == GearSlot.waffe && item.id != getragenItem.id) continue;
-      final schlechtereStufe = item.rarity.index < getragenItem.rarity.index;
-      final gleichUndSchwaecher = item.rarity == getragenItem.rarity &&
-          copy.bonus.total <= getragen.bonus.total;
-      if (schlechtereStufe || gleichUndSchwaecher) ergebnis.add(copy);
+      if (rarity != null && item.rarity != rarity) continue;
+      if (vergleiche(copy) == GearVergleich.besser) continue;
+      ergebnis.add(copy);
     }
     return List<GearCopy>.unmodifiable(ergebnis);
+  }
+
+  /// Alles Schlechtere, über alle Seltenheiten.
+  List<GearCopy> get junk => junkOf();
+
+  /// Wie [copy] gegen das steht, was auf seinem Platz getragen wird.
+  GearVergleich vergleiche(GearCopy copy) {
+    final item = copy.item;
+    final getragen = item == null ? null : equippedCopyIn(item.slot);
+    final getragenItem = getragen?.item;
+    if (item == null || getragen == null || getragenItem == null) {
+      return GearVergleich.besser;
+    }
+    if (getragen.uid == copy.uid) return GearVergleich.gleich;
+    final stufe = item.rarity.index.compareTo(getragenItem.rarity.index);
+    if (stufe != 0) {
+      return stufe > 0 ? GearVergleich.besser : GearVergleich.schlechter;
+    }
+    final werte = copy.bonus.total.compareTo(getragen.bonus.total);
+    if (werte == 0) return GearVergleich.gleich;
+    return werte > 0 ? GearVergleich.besser : GearVergleich.schlechter;
+  }
+
+  // --- Sperren ---
+
+  bool isLocked(String uid) => _locked.contains(uid);
+
+  /// Sperrt ein Exemplar oder gibt es wieder frei. Was man nicht besitzt,
+  /// lässt sich nicht sperren.
+  Loadout toggleLock(String uid) {
+    if (!owns(uid)) return this;
+    final locked = <String>{..._locked};
+    if (!locked.remove(uid)) locked.add(uid);
+    return _copyWith(locked: locked);
   }
 
   int get soldCount => _sold.length;

@@ -108,10 +108,10 @@ class GearController extends Notifier<Loadout> {
     return Loadout.refundFor(item);
   }
 
-  /// Verkauft alles Schlechtere auf einmal (`Loadout.junk`). Gibt den
-  /// Erlös zurück.
-  int sellJunk() {
-    final weg = state.junk;
+  /// Verkauft alles Schlechtere auf einmal (`Loadout.junkOf`), auf
+  /// Wunsch nur einer [rarity]. Gibt den Erlös zurück.
+  int sellJunk([GearRarity? rarity]) {
+    final weg = state.junkOf(rarity);
     var erloes = 0;
     for (final copy in weg) {
       final item = copy.item;
@@ -127,6 +127,11 @@ class GearController extends Notifier<Loadout> {
 
   void unequip(GearSlot slot) {
     state = state.unequip(slot);
+  }
+
+  /// Sperrt ein Exemplar oder gibt es frei (Issue #137).
+  void toggleLock(String uid) {
+    state = state.toggleLock(uid);
   }
 }
 

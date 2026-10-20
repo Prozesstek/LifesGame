@@ -412,7 +412,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.cleaning_services_outlined));
+      // Seit Issue #137 ein Knopf je Seltenheit.
+      final stufe = GearCatalog.byId('gear-streitkolben')!.rarity;
+      await tester.tap(
+        find.byKey(ValueKey<String>('aufraeumen-${stufe.name}')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
       await tester.pumpAndSettle();

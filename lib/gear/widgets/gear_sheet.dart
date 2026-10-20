@@ -364,6 +364,7 @@ class _Exemplar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final gesperrt = ref.watch(loadoutProvider).isLocked(copy.uid);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -422,9 +423,22 @@ class _Exemplar extends ConsumerWidget {
                     child: const Text('Anlegen'),
                   ),
                 const SizedBox(height: 4),
-                TextButton(
-                  onPressed: () => sellWithConfirm(context, ref, copy),
-                  child: const Text('Verkaufen'),
+                // **Gesperrtes lässt sich nicht verkaufen** (Issue #137),
+                // also steht der Knopf erst wieder da, wenn es frei ist.
+                if (!gesperrt)
+                  TextButton(
+                    onPressed: () => sellWithConfirm(context, ref, copy),
+                    child: const Text('Verkaufen'),
+                  ),
+                TextButton.icon(
+                  key: ValueKey<String>('schloss-${copy.uid}'),
+                  onPressed: () =>
+                      ref.read(loadoutProvider.notifier).toggleLock(copy.uid),
+                  icon: Icon(
+                    gesperrt ? Icons.lock : Icons.lock_open_outlined,
+                    size: 16,
+                  ),
+                  label: Text(gesperrt ? 'Gesperrt' : 'Sperren'),
                 ),
               ],
             ),
