@@ -107,8 +107,9 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 381 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 392 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
+| `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_ability.dart` | was eine Fähigkeit **in der Grube tut** — Mana, Abklingzeit, Wirkungen als Daten; dazu die vier **Ultimates**, die drei **Passive** und die Passive der **Ausrüstung** (ADR-0077) |
 | `packages/action_combat/lib/src/effects.dart` | **die eine Stelle, die jede Wirkung ausführt** — Sturm, Haken, Strudel, Stillstand samt Stun-Leiste, Self-Buff, Zufall, Bumerang ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
@@ -145,6 +146,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_text.dart` | Name, Beschreibung **und alle Werte** einer Fähigkeit oder Waffe — **eine Stelle** für alle Bildschirme | Flutter |
 | `lib/action/action_sprites.dart` | wer in der Grube wie aussieht — Bild je Gegnerart und je Wächter (`forBoss`), **eine Tabelle** | Flutter |
 | `lib/action/boss_text.dart` | wie die vier Wächter heißen, und die Zeile unter dem Namen beim Auftritt | Flutter |
+| `lib/action/gegner_text.dart` | wie die Gegnerarten heißen — **eine Tabelle** | Flutter |
+| `lib/sammlung/sammlung.dart` | **die Sammlung** ([ADR-0080](docs/decisions/0080-die-sammlung.md)): was in welchem Reiter steht und **woher es kommt** — reine Rechnung, eine Stelle | Flutter |
+| `lib/sammlung/sammlung_screen.dart` | sechs Reiter mit Prozent — Ausrüstung, Fähigkeiten, Gegner, Titel, Seiten und die **Errungenschaften, die hier eingezogen sind**; ein Fragezeichen sagt auf Tipp, woher | Flutter |
+| `lib/sammlung/sammlung_knopf.dart` | der Weg hinein, oben rechts in Ausrüstung und Fähigkeiten | Flutter |
+| `lib/sammlung/figur_bild.dart` | eine Figur der Grube als stehendes Bild, auf sie zugeschnitten | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
@@ -284,7 +290,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 882 Tests
+flutter test             # 898 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -297,7 +303,7 @@ dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je St
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 381 Tests
+dart test                              # 392 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -925,7 +931,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und sieben
 Fähigkeiten vergeben — darunter Funkenstoß, die erste für jeden.
 
-Es gibt genau **sechzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **siebzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -945,6 +951,7 @@ Es gibt genau **sechzehn** Stellen, an denen etwas zusammenläuft:
 | `ladderProvider` | wie weit die Grube gegangen ist (ADR-0032, ADR-0039) |
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |
 | `fameProvider` | Ruhm aus Errungenschaften **und der Tagesgrube** (ADR-0072) |
+| `sammelEintraegeProvider` | **die Sammlung** — je Besessenes, Gelerntes, Bestiarium, Titel und Seiten (ADR-0080) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt

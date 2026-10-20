@@ -13,6 +13,7 @@
 library;
 
 export 'src/balance.dart';
+export 'src/bestiarium.dart';
 export 'src/bot.dart';
 export 'src/cast.dart';
 export 'src/daily_pit.dart';

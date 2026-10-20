@@ -150,6 +150,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final vorherReihe = ref.read(ladderProvider);
     final ersterSieg = gewonnen && stufe > vorherReihe.highestDefeated;
     final vorherBest = vorherReihe.bestTimes[stufe];
+    ref.read(ladderProvider.notifier).recordKills(welt);
     final ertrag = ref
         .read(ladderProvider.notifier)
         .recordRun(
