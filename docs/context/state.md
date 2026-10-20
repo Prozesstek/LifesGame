@@ -36,8 +36,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 898, dazu die acht Packages (theory 204, habits 333, gear
-120, action_combat 392, progression 44, abilities 43, identity 25,
+**Tests:** App 900, dazu die acht Packages (theory 204, habits 333, gear
+128, action_combat 392, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,49 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026, spät: der Rucksack und das Schloss (Block 2, #137)
+
+Der zweite Block aus #137:
+[ADR-0081](../decisions/0081-der-rucksack-und-das-schloss.md). Die
+Fragen dazu standen schon in der Runde zur Sammlung.
+
+| Was | Wie |
+|---|---|
+| **Der Rucksack** | unter den sechs Plätzen, was man hat und nicht trägt — jedes Exemplar eine Kachel, in den vier Ordnungen von vorher |
+| **Der Pfeil** | grün hoch, braun gleich, rot runter gegen das Getragene; erst die Seltenheit, dann die Summe der Werte |
+| **Aufräumen** | ein Knopf je Seltenheit, im Rahmen ihrer Farbe, mit Zahl und Erlös |
+| **Das Schloss** | im Blatt je Exemplar; gesperrt steht kein „Verkaufen“ mehr da, und auch das Aufräumen lässt es liegen |
+| **Ziehen** | genau das Exemplar, das man hält — vorher kam das beste drauf |
+
+**Aufräumen ohne Ausnahmen**: Bis dahin blieben Set-Teile, Episches,
+Legendäres und fremde Waffen immer liegen. Jetzt fliegt alles mit, was
+nicht besser ist — außer es ist gesperrt. **Wer bisher darauf gezählt
+hat, muss sperren.**
+
+**Ohne Rückfrage entschieden:**
+
+- **Seltenheit vor Summe** beim Pfeil — dieselbe Regel wie vorher beim
+  Ausschuss.
+- **„Gleich“ zählt beim Aufräumen mit**, wie bisher: Ein zweites
+  Exemplar mit genau demselben Wurf bringt nichts.
+- **Das Schloss steht im Blatt**, nicht auf der Kachel: Halten ist dort
+  schon das Ziehen.
+- **Ein gesammeltes Stück öffnet in der Sammlung sein volles Blatt**;
+  dort ist jetzt auch das Blatt eines Stücks zu haben, das man nicht
+  mehr besitzt.
+
+Neu im Spielstand: `locked` im `Loadout`, nur wenn etwas gesperrt ist.
+gear 128 (vorher 120), App 900 (vorher 898). Den Rucksack mit Pfeilen,
+Schloss und zwei Aufräum-Knöpfen in 390 × 844 gerendert und angesehen.
+**Nicht am Handy, nicht im Browser.**
+
+### Offen
+
+- **Block 3 (#138)**: nur die eigenen Fähigkeiten, Platz antippen und
+  dann wackeln.
+- Ob die Aufräum-Knöpfe ohne Wort verständlich sind — Rahmenfarbe, Zahl
+  und Gold.
 
 ## 20.10.2026, abends: die Sammlung (Block 1 von #137 und #138)
 

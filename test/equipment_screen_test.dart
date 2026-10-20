@@ -15,7 +15,6 @@ import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
-import 'package:lifes_game/ui/palette.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
 
 import 'gear_helpers.dart';
@@ -25,8 +24,10 @@ import 'test_view.dart';
 ///
 /// **Die Plätze standen bis zum 28.09. im Charakter**, und die Tests dazu
 /// in `character_test.dart`. Sie sind hierher gewandert und um das
-/// erweitert, was es dort nicht gab: den ganzen Katalog, die Ordnungen
-/// und das Blatt mit den Exemplaren.
+/// erweitert, was es dort nicht gab: den Rucksack, die Ordnungen und das
+/// Blatt mit den Exemplaren. Seit Issue #137 steht unten der Rucksack aus
+/// Exemplaren statt des Katalogs; was man nie hatte, steht in der
+/// Sammlung.
 void main() {
   const tag = Day(2026, 9, 28);
 
@@ -85,6 +86,38 @@ void main() {
     of: find.byType(EquipmentSlotTile),
     matching: find.bySemanticsLabel(RegExp(RegExp.escape(text))),
   );
+
+  /// Öffnet das Blatt eines Stücks, das man nicht hat. Im Rucksack steht
+  /// es nicht mehr (Issue #137); das Blatt selbst gibt es weiter.
+  Future<void> blattVon(WidgetTester tester, GearItem item) async {
+    useTallView(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          savedGameProvider.overrideWithValue(const SaveData.empty()),
+          todayProvider.overrideWithValue(tag),
+        ],
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () => showGearSheet(context, item),
+                  child: const Text('los'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('los'));
+    await tester.pumpAndSettle();
+  }
+
+  /// Die Kachel genau dieses Exemplars im Rucksack.
+  Finder kachelVon(String uid) =>
+      find.byWidgetPredicate((w) => w is ExemplarKachel && w.copy.uid == uid);
 
   Future<void> oeffne(WidgetTester tester, GearItem item) async {
     await tester.scrollUntilVisible(
@@ -181,16 +214,16 @@ void main() {
     Future<void> ziehe(
       WidgetTester tester,
       GearItem item,
-      GearSlot ziel,
-    ) async {
+      GearSlot ziel, {
+      Finder? kachel,
+    }) async {
+      final wo = kachel ?? find.text(item.name).last;
       await tester.scrollUntilVisible(
-        find.text(item.name).last,
+        wo,
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.text(item.name).last),
-      );
+      final gesture = await tester.startGesture(tester.getCenter(wo));
       await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
       // Das Hochrollen läuft ab, erst danach stehen die Plätze fest.
       await tester.pumpAndSettle();
@@ -248,70 +281,105 @@ void main() {
       expect(loadout.equippedIn(GearSlot.helm), isNull);
     });
 
-    testWidgets('mehrfach besessen: das beste Exemplar kommt drauf', (
+    testWidgets('mehrfach besessen: genau das gezogene kommt drauf', (
       tester,
     ) async {
+      // Seit Issue #137 ist jedes Exemplar eine Kachel; vorher kam beim
+      // Ziehen das beste drauf, weil nicht zu sehen war, welches gemeint
+      // ist.
       useTallView(tester);
       await tester.pumpWidget(appMit(mitZweiExemplaren()));
-      // Erst ablegen, damit das Ziehen etwas ändert.
+      // Erst ablegen, damit beide im Rucksack liegen.
       containerOf(
         tester,
       ).read(loadoutProvider.notifier).unequip(doppelt().slot);
       await tester.pumpAndSettle();
 
-      await ziehe(tester, doppelt(), doppelt().slot);
+      await ziehe(
+        tester,
+        doppelt(),
+        doppelt().slot,
+        kachel: kachelVon('test-a'),
+      );
 
       expect(
         containerOf(
           tester,
         ).read(loadoutProvider).equippedCopyIn(doppelt().slot)?.uid,
-        'test-b',
-      );
-    });
-
-    testWidgets('was man nicht hat, lässt sich nicht ziehen', (tester) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
-      final item = GearCatalog.forSlot(GearSlot.waffe).first;
-      await ziehe(tester, item, GearSlot.waffe);
-
-      expect(
-        containerOf(tester).read(loadoutProvider).equippedIn(GearSlot.waffe),
-        isNull,
+        'test-a',
       );
     });
   });
 
-  group('Der Katalog darunter', () {
-    testWidgets('jedes Stück steht da, auch was man nicht hat', (tester) async {
-      // **Das ist der Grund für den Bildschirm.** Im Laden sieht man
-      // sechs Angebote am Tag, im Charakter sechs Plätze. Die übrigen
-      // Stücke standen nirgends.
+  group('Der Rucksack (Issue #137)', () {
+    testWidgets('nur, was man hat und nicht trägt', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
+
+      final waffen = GearCatalog.forSlot(GearSlot.waffe);
+      // Die erste Waffe liegt (gekauft wird angelegt), die übrigen im
+      // Rucksack.
+      expect(find.byType(ExemplarKachel), findsNWidgets(waffen.length - 1));
+      expect(
+        find.bySemanticsLabel('${waffen.length - 1} Stück im Rucksack'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('ein leerer Stand hat einen leeren Rucksack', (tester) async {
+      // Was man nie hatte, steht in der Sammlung (ADR-0080), nicht hier.
       useTallView(tester);
       await tester.pumpWidget(appMit(const SaveData.empty()));
 
+      expect(find.byType(ExemplarKachel), findsNothing);
+    });
+
+    testWidgets('zwei Exemplare sind zwei Kacheln', (tester) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitZweiExemplaren()));
+      ProviderScope.containerOf(
+        tester.element(find.byType(EquipmentScreen)),
+      ).read(loadoutProvider.notifier).unequip(doppelt().slot);
+      await tester.pumpAndSettle();
+
+      expect(kachelVon('test-a'), findsOneWidget);
+      expect(kachelVon('test-b'), findsOneWidget);
+    });
+
+    testWidgets('ein Pfeil sagt, ob es besser ist als das Getragene', (
+      tester,
+    ) async {
+      useTallView(tester);
+      // test-a liegt (zuerst bekommen), test-b ist zwei Punkte stärker.
+      await tester.pumpWidget(appMit(mitZweiExemplaren()));
+
       expect(
-        find.bySemanticsLabel(
-          '0 von ${GearCatalog.all.length} Stücken im Besitz',
+        find.descendant(
+          of: kachelVon('test-b'),
+          matching: find.byKey(const ValueKey<String>('pfeil-besser')),
         ),
         findsOneWidget,
       );
-      for (final item in GearCatalog.all) {
-        await tester.scrollUntilVisible(
-          find.text(item.name),
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
-        expect(find.text(item.name), findsOneWidget, reason: item.name);
-      }
+
+      ProviderScope.containerOf(
+        tester.element(find.byType(EquipmentScreen)),
+      ).read(loadoutProvider.notifier).equip('test-b');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: kachelVon('test-a'),
+          matching: find.byKey(const ValueKey<String>('pfeil-schlechter')),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('nach Seltenheit stehen die Stufen als Marken da', (
       tester,
     ) async {
       useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
 
       // Im alphabetischen Raster gibt es keine Überschriften.
       expect(find.text(GearRarity.legendary.label), findsNothing);
@@ -329,12 +397,11 @@ void main() {
 
     testWidgets('nach Set steht auch, was zu keinem gehört', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
+      await tester.pumpWidget(appMit(mitAllenWaffen()));
 
       await tester.tap(find.byIcon(Icons.link_rounded));
       await tester.pumpAndSettle();
 
-      expect(find.text(GearSets.all.first.name), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Ohne Set'),
         200,
@@ -351,21 +418,20 @@ void main() {
       return (kachel.decoration! as BoxDecoration).border!.top.color;
     }
 
-    testWidgets('ein Stück im Besitz trägt Rahmen und Namen seiner Stufe', (
+    testWidgets('ein Stück trägt Rahmen und Namen seiner Stufe', (
       tester,
     ) async {
       // **Der Wunsch** (Frederik, 01.10.): Man soll die Seltenheit sehen,
-      // ohne das Blatt zu öffnen. Alle acht Waffen decken alle fünf
-      // Stufen ab.
+      // ohne das Blatt zu öffnen.
       useTallView(tester);
       await tester.pumpWidget(appMit(mitAllenWaffen()));
 
-      final waffen = GearCatalog.forSlot(GearSlot.waffe);
-      expect(waffen.map((w) => w.rarity).toSet(), GearRarity.values.toSet());
+      final waffen = GearCatalog.forSlot(GearSlot.waffe).skip(1);
       for (final item in waffen) {
-        // Die letzte Fundstelle ist die Kachel im Katalog, die erste
-        // kann der Platz oben sein.
-        final name = find.text(item.name).last;
+        final name = find.descendant(
+          of: find.byType(ExemplarKachel),
+          matching: find.text(item.name),
+        );
         expect(
           tester.widget<Text>(name).style!.color,
           RarityBadge.colorOf(item.rarity),
@@ -379,12 +445,7 @@ void main() {
       }
     });
 
-    testWidgets('auch das angelegte behält den Rahmen seiner Stufe', (
-      tester,
-    ) async {
-      // Bis zum 01.10. färbte „angelegt“ den Rand um, und das getragene
-      // Stück war das einzige ohne Seltenheit. Dass es anliegt, sagt der
-      // Haken.
+    testWidgets('das angelegte zeigt seine Stufe am Platz', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitAllenWaffen()));
 
@@ -398,45 +459,79 @@ void main() {
         tester.widget<Text>(amPlatz).style!.color,
         RarityBadge.colorOf(getragen.rarity),
       );
-      expect(
-        randUm(tester, find.text(getragen.name).last),
-        RarityBadge.rahmenOf(getragen.rarity),
-      );
     });
 
-    testWidgets('was man nicht hat, bleibt grau', (tester) async {
-      // Der Name leuchtet erst, wenn das Stück einem gehört — sonst
-      // sähe der leere Katalog aus wie ein voller.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
-      final fremd = GearCatalog.all.firstWhere(
-        (i) => i.rarity == GearRarity.legendary,
-      );
-      await tester.scrollUntilVisible(
-        find.text(fremd.name),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(
-        tester.widget<Text>(find.text(fremd.name)).style!.color,
-        Palette.muted,
-      );
-    });
-
-    testWidgets('mehrere Exemplare stehen als Zahl auf der Kachel', (
+    testWidgets('gesperrt: Schloss auf der Kachel, kein Verkaufen im Blatt', (
       tester,
     ) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitZweiExemplaren()));
 
-      await tester.scrollUntilVisible(
-        find.text('×2'),
-        200,
-        scrollable: find.byType(Scrollable).first,
+      await tester.tap(kachelVon('test-b'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('schloss-test-b')));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(EquipmentScreen)),
       );
-      expect(find.text('×2'), findsOneWidget);
+      expect(container.read(loadoutProvider).isLocked('test-b'), isTrue);
+      // Im Blatt steht das gesperrte Exemplar ohne „Verkaufen“, das
+      // angelegte daneben behält seins.
+      expect(find.widgetWithText(TextButton, 'Verkaufen'), findsOneWidget);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: kachelVon('test-b'),
+          matching: find.byKey(const ValueKey<String>('gesperrt')),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('aufräumen geht je Seltenheit', (tester) async {
+      final helme = GearCatalog.forSlot(GearSlot.helm);
+      final legendaer = helme.firstWhere(
+        (i) => i.rarity == GearRarity.legendary,
+      );
+      final gewoehnlich = helme.firstWhere(
+        (i) => i.rarity == GearRarity.common,
+      );
+      final selten = helme.firstWhere((i) => i.rarity == GearRarity.rare);
+      final stand = SaveData(
+        loadout: const Loadout.empty()
+            .addFree(angebot(legendaer.id))
+            .addFree(angebot(gewoehnlich.id))
+            .addFree(angebot(selten.id)),
+      );
+      useTallView(tester);
+      await tester.pumpWidget(appMit(stand));
+
+      expect(
+        find.byKey(const ValueKey<String>('aufraeumen-common')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('aufraeumen-rare')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('aufraeumen-epic')),
+        findsNothing,
+      );
+
+      await tester.tap(find.byKey(const ValueKey<String>('aufraeumen-rare')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
+      await tester.pumpAndSettle();
+
+      final loadout = ProviderScope.containerOf(
+        tester.element(find.byType(EquipmentScreen)),
+      ).read(loadoutProvider);
+      expect(loadout.owns('test-${selten.id}'), isFalse);
+      expect(loadout.owns('test-${gewoehnlich.id}'), isTrue);
     });
   });
 
@@ -444,13 +539,10 @@ void main() {
     testWidgets('ein fremdes Stück nennt Werte, Preis und Herkunft', (
       tester,
     ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
       final item = GearCatalog.all.firstWhere(
         (i) => i.rarity == GearRarity.common,
       );
-      await oeffne(tester, item);
+      await blattVon(tester, item);
 
       expect(find.byType(GearSheet), findsOneWidget);
       expect(find.text(item.why), findsOneWidget);
@@ -464,13 +556,10 @@ void main() {
     testWidgets('ein Set-Teil zeigt sein Bild und sein Set', (tester) async {
       // **Wer wechselt, soll wissen, ob Ablegen ein Set kostet.** Das
       // stand bis zum 28.09. im Auswahlblatt am Platz, jetzt im Blatt.
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
       final teil = GearCatalog.all.firstWhere(
         (i) => i.setId != null && GearIcons.forItemId(i.id) != null,
       );
-      await oeffne(tester, teil);
+      await blattVon(tester, teil);
 
       expect(
         find.descendant(
@@ -485,13 +574,10 @@ void main() {
     testWidgets('ein legendäres nennt die Stufe, ab der es geht', (
       tester,
     ) async {
-      useTallView(tester);
-      await tester.pumpWidget(appMit(const SaveData.empty()));
-
       final legendaer = GearCatalog.all.firstWhere(
         (i) => i.rarity == GearRarity.legendary,
       );
-      await oeffne(tester, legendaer);
+      await blattVon(tester, legendaer);
 
       expect(
         find.textContaining('Verdient ab Stufe ${GearGates.legendaryRung}'),

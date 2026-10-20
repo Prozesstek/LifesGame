@@ -273,8 +273,6 @@ void main() {
 
   group('Alles Schlechtere', () {
     test('ein schwächerer Wurf desselben Stücks ist Ausschuss', () {
-      // Ein Stück ohne Set — Set-Teile sind nie Ausschuss.
-      expect(GearCatalog.byId('gear-streitkolben')!.isSetPiece, isFalse);
       const stark = GearCopy(
         uid: 's',
         itemId: 'gear-streitkolben',
@@ -291,21 +289,43 @@ void main() {
       expect(l.junk.map((c) => c.uid), <String>['w']);
     });
 
-    test('eine andere Waffe ist nie Ausschuss — sie schlägt anders', () {
-      final l = const Loadout.empty()
-          .addFree(_angebot('gear-kriegsstab'))
-          .addFree(_angebot(bogen.id));
-      expect(l.junk, isEmpty);
-    });
-
-    test('Set-Teile und Episches bleiben liegen', () {
+    test('Episches unter Legendärem ist Ausschuss — außer gesperrt', () {
+      // Seit Issue #137 gibt es keine Ausnahmen mehr für Set-Teile,
+      // Episches oder fremde Waffen; was bleiben soll, sperrt man.
       final ringe = GearCatalog.forSlot(GearSlot.ring);
       final episch = ringe.firstWhere((i) => i.rarity == GearRarity.epic);
       final bester = ringe.firstWhere((i) => i.rarity == GearRarity.legendary);
       final l = const Loadout.empty()
           .addFree(_angebot(bester.id))
           .addFree(_angebot(episch.id));
-      expect(l.junk, isEmpty);
+      expect(l.junk.map((c) => c.itemId), <String>[episch.id]);
+
+      final gesperrt = l.toggleLock('test-${episch.id}');
+      expect(gesperrt.junk, isEmpty);
+    });
+
+    test('je Seltenheit für sich', () {
+      final helme = GearCatalog.forSlot(GearSlot.helm);
+      final legendaer = helme.firstWhere(
+        (i) => i.rarity == GearRarity.legendary,
+      );
+      final gewoehnlich = helme.firstWhere(
+        (i) => i.rarity == GearRarity.common,
+      );
+      final selten = helme.firstWhere((i) => i.rarity == GearRarity.rare);
+      final l = const Loadout.empty()
+          .addFree(_angebot(legendaer.id))
+          .addFree(_angebot(gewoehnlich.id))
+          .addFree(_angebot(selten.id));
+
+      expect(
+        l.junkOf(GearRarity.common).map((c) => c.itemId),
+        <String>[gewoehnlich.id],
+      );
+      expect(l.junkOf(GearRarity.rare).map((c) => c.itemId), <String>[
+        selten.id,
+      ]);
+      expect(l.junkOf(GearRarity.epic), isEmpty);
     });
 
     test('alles auf einmal verkaufen', () {
@@ -324,6 +344,112 @@ void main() {
       final aufgeraeumt = l.sellAll(ausschuss);
       expect(aufgeraeumt.junk, isEmpty);
       expect(aufgeraeumt.equippedIn(GearSlot.helm), rare);
+    });
+  });
+
+  group('Der Vergleich (Issue #137)', () {
+    const stark = GearCopy(
+      uid: 's',
+      itemId: 'gear-streitkolben',
+      bonus: GearBonus(attack: 11),
+      paid: 0,
+    );
+    const schwach = GearCopy(
+      uid: 'w',
+      itemId: 'gear-streitkolben',
+      bonus: GearBonus(attack: 9),
+      paid: 0,
+    );
+    const gleich = GearCopy(
+      uid: 'g',
+      itemId: 'gear-streitkolben',
+      bonus: GearBonus(attack: 11),
+      paid: 0,
+    );
+
+    test('auf einem leeren Platz ist alles besser', () {
+      expect(const Loadout.empty().vergleiche(stark), GearVergleich.besser);
+    });
+
+    test('schwächer, gleich, stärker als das Getragene', () {
+      final l =
+          const Loadout.empty().addFree(stark).addFree(schwach).addFree(gleich);
+
+      expect(l.vergleiche(schwach), GearVergleich.schlechter);
+      expect(l.vergleiche(gleich), GearVergleich.gleich);
+      expect(l.vergleiche(stark), GearVergleich.gleich, reason: 'getragen');
+      expect(l.equip('w').vergleiche(stark), GearVergleich.besser);
+    });
+
+    test('die Seltenheit geht vor der Summe', () {
+      final waffen = GearCatalog.forSlot(GearSlot.waffe);
+      final selten = waffen.firstWhere((i) => i.rarity == GearRarity.rare);
+      final gewoehnlich = waffen.firstWhere(
+        (i) => i.rarity == GearRarity.common,
+      );
+      final getragen = GearCopy(
+        uid: 'getragen',
+        itemId: gewoehnlich.id,
+        bonus: const GearBonus(attack: 999),
+        paid: 0,
+      );
+      final neu = GearCopy(
+        uid: 'neu',
+        itemId: selten.id,
+        bonus: const GearBonus(attack: 1),
+        paid: 0,
+      );
+      final l = const Loadout.empty().addFree(getragen).addFree(neu);
+
+      expect(l.vergleiche(neu), GearVergleich.besser);
+    });
+  });
+
+  group('Das Schloss (Issue #137)', () {
+    final a = _angebot(klinge.id, uid: 'a');
+
+    test('sperren und wieder freigeben', () {
+      final l = const Loadout.empty().buy(a, availableGold: _viel);
+
+      expect(l.isLocked('a'), isFalse);
+      expect(l.toggleLock('a').isLocked('a'), isTrue);
+      expect(l.toggleLock('a').toggleLock('a').isLocked('a'), isFalse);
+    });
+
+    test('was man nicht hat, lässt sich nicht sperren', () {
+      const l = Loadout.empty();
+      expect(l.toggleLock('gibt-es-nicht'), same(l));
+    });
+
+    test('Gesperrtes wird nicht verkauft, auch nicht einzeln', () {
+      final l =
+          const Loadout.empty().buy(a, availableGold: _viel).toggleLock('a');
+
+      expect(l.canSell('a'), isFalse);
+      expect(l.sell('a'), same(l));
+      expect(l.sellAll(<String>['a']), same(l));
+    });
+
+    test('überlebt Speichern, und andere Schritte vergessen es nicht', () {
+      final l = const Loadout.empty()
+          .buy(a, availableGold: _viel)
+          .toggleLock('a')
+          .buy(_angebot(bogen.id), availableGold: _viel)
+          .useKey(earned: 2)
+          .unequip(GearSlot.waffe);
+
+      expect(l.isLocked('a'), isTrue);
+      expect(Loadout.fromJson(l.toJson()).isLocked('a'), isTrue);
+    });
+
+    test('ein gesperrter, aber verkaufter Eintrag fällt beim Lesen weg', () {
+      final json =
+          const Loadout.empty().buy(a, availableGold: _viel).sell('a').toJson();
+      json['locked'] = <String>['a', 'fremd'];
+
+      final l = Loadout.fromJson(json);
+      expect(l.isLocked('a'), isFalse);
+      expect(l.isLocked('fremd'), isFalse);
     });
   });
 

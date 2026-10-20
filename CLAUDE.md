@@ -85,7 +85,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, reines Dart, 120 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, **Vergleich und Schloss**, reines Dart, 128 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -195,10 +195,10 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88) | Flutter |
-| `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter der ganze Katalog in vier Ordnungen; **gewechselt wird per Ziehen** | Flutter |
-| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen | Flutter |
+| `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen** | Flutter |
+| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen, **sperren** | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
-| `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar oder alles Schlechtere, mit Rückfrage und Feier | Flutter |
+| `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar oder alles Schlechtere einer Seltenheit, mit Rückfrage und Feier | Flutter |
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
@@ -290,7 +290,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 898 Tests
+flutter test             # 900 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -314,7 +314,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 204 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
-cd packages/gear        ; dart test    # 120 Tests, prüft Preise, Sets, Würfel, Laden, Beute und Übernahme
+cd packages/gear        ; dart test    # 128 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -722,7 +722,8 @@ Tiefe. Wer an `GearRolls` dreht, lässt `tool/runway_sim.dart` laufen.
 | Was steht zum Verkauf? | `dailyOffersProvider` → `DailyShop.offersFor` |
 | Was ist ein Schlüssel wert? | `GearLoot.drop`, Seltenheit nach `GearRolls.weightsFor(stufe)` |
 | Wie viele Schlüssel? | `availableKeysProvider` — verdient minus verbraucht, gedeckelt |
-| Was ist Ausschuss? | `Loadout.junk` — nie Set-Teile, Episches, Legendäres, fremde Waffen |
+| Was ist Ausschuss? | `Loadout.junkOf(seltenheit)` — nicht getragen, **nicht gesperrt** und nicht besser als das Getragene; seit ADR-0081 ohne Ausnahmen, dafür gibt es das Schloss |
+| Ist es besser? | `Loadout.vergleiche` — erst die Seltenheit, dann die Summe der Werte; ein leerer Platz macht alles besser |
 
 **Verkauf bringt ein Viertel**, egal ob gekauft oder erbeutet
 (`GearPrices.refundShare`); bei der Hälfte wäre Beute eine Goldquelle

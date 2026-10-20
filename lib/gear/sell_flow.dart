@@ -48,24 +48,28 @@ Future<bool> sellWithConfirm(
   );
 }
 
-/// Verkauft alles Schlechtere auf einmal (`Loadout.junk`): was nicht
-/// getragen wird und schwächer ist als das Getragene. Set-Teile,
-/// Episches und Legendäres bleiben.
-Future<bool> sellJunkWithConfirm(BuildContext context, WidgetRef ref) {
-  final ausschuss = ref.read(loadoutProvider).junk;
+/// Verkauft alles Schlechtere einer [rarity] auf einmal
+/// (`Loadout.junkOf`): was nicht getragen, nicht gesperrt und nicht
+/// besser ist als das Getragene (Issue #137).
+Future<bool> sellJunkWithConfirm(
+  BuildContext context,
+  WidgetRef ref, [
+  GearRarity? rarity,
+]) {
+  final ausschuss = ref.read(loadoutProvider).junkOf(rarity);
   final anzahl = ausschuss.length;
   final erloes = junkRefund(ausschuss);
+  final welche = rarity == null ? '' : ' ${rarity.label}';
 
   return _nachRueckfrage(
     context,
     ref,
-    titel: '$anzahl Stück verkaufen?',
+    titel: '$anzahl$welche Stück verkaufen?',
     text:
-        'Alles, was nicht getragen wird und schwächer ist als das '
-        'Getragene. Set-Teile, Episches und Legendäres bleiben. '
-        'Das bringt $erloes Gold.',
+        'Alles, was nicht getragen wird und nicht besser ist als das '
+        'Getragene. Gesperrtes bleibt. Das bringt $erloes Gold.',
     verkaufe: () {
-      final erhalten = ref.read(loadoutProvider.notifier).sellJunk();
+      final erhalten = ref.read(loadoutProvider.notifier).sellJunk(rarity);
       return (
         ok: true,
         meldung: '$anzahl Stück verkauft — $erhalten Gold zurück.',
