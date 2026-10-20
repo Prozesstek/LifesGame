@@ -3,12 +3,12 @@
 //     dart run tool/runway_sim.dart
 //
 // Spielt 60 Tage durch: jeden Tag alle fünf Gewohnheiten und die Truhe,
-// bis zu zwei Seiten, solange Punkte da sind (am ersten Tag sieben, wie
-// früher mit dem Handbuch — seit ADR-0070 kosten auch sie einen Punkt
-// und kommen aus den neun vom Start), eine Rückfrage und eine neue
-// Stufe der Grube, soweit die Reichweite reicht. Seit ADR-0048 auch die
-// Beute: Jeder Sieg über den Wächter setzt einen Schlüssel ein, der
-// erste auf einer Stufe keinen.
+// bis zu zwei Seiten, solange Punkte da sind (am ersten Tag bis zu
+// sieben, wie früher mit dem Handbuch — seit ADR-0078 gibt es zum Start
+// nur einen Punkt, der Rest kommt mit dem Level), eine Rückfrage und
+// eine neue Stufe der Grube, soweit die Reichweite reicht. Seit
+// ADR-0048 auch die Beute: Jeder Sieg über den Wächter setzt einen
+// Schlüssel ein, der erste auf einer Stufe keinen.
 //
 // **Seit ADR-0072 ohne Dailies.** Bis dahin zahlten vier Stufen des
 // Tages je ein Viertel ihres Erstsiegs — rund ein Fünftel von Erfahrung
@@ -92,8 +92,8 @@ void main() {
     int xpGesamt() => tracker.totalXp + seiten * seiteXp + reiheXp + rueckXp;
     var level = LevelCurve.levelFor(xpGesamt()).level;
 
-    // Lesen: bis zu zwei Seiten am Tag, am ersten sieben — der fleissige
-    // Spieler las dort schon immer das Handbuch dazu. Kostenlose Knoten
+    // Lesen: bis zu zwei Seiten am Tag, am ersten bis zu sieben — so
+    // viele, wie die Punkte hergeben (ADR-0078). Kostenlose Knoten
     // gibt es seit ADR-0070 keine mehr; der Zweig bleibt für den Fall,
     // dass wieder einer dazukommt.
     for (var i = 0; i < (tag == 1 ? 7 : 2); i++) {

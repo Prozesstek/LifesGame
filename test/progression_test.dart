@@ -259,88 +259,80 @@ void _goldZuflussPasstZuDenPreisen() {
     });
   });
 
-  group('Die Grundlagen führen zum zweiten Platz (ADR-0070)', () {
-    // **Der Zusammenhang, der die alte Kette ersetzt.** Bis ADR-0070
-    // gab das Handbuch kostenlos 275 Erfahrung und damit Level 3, die
-    // Stufe des zweiten Fähigkeitsplatzes (ADR-0018). Jetzt kosten seine
-    // Seiten Punkte, und der Weg zu ihnen ist neun Knoten lang.
-    //
-    // Was gelten muss, damit daraus keine Sackgasse wird: Wer diesen Weg
-    // liest und sonst nichts tut, hat danach den zweiten Platz offen
-    // **und** einen Punkt übrig, für den es eine Fähigkeit gibt. Wer an
-    // TheoryRewards, der Levelkurve, den Startpunkten oder dem Weg
-    // dreht, soll es hier merken.
+  group('Ein Punkt zum Start, einer je Aufstieg (ADR-0078)', () {
+    // **Der Zusammenhang, der die Neun ersetzt.** Mit ADR-0070 gab es
+    // zum Start so viele Punkte, wie der Weg der Grundlagen kostet, und
+    // ein Neuer las danach ein ganzes Gebiet am Stück. Jetzt gibt es
+    // einen, und der Rest kommt mit dem Level. Was dafür gelten muss:
+    // Die erste Seite ist sofort zu haben, und wer abhakt und sie liest,
+    // steigt auf — so lernt man vom ersten Tag an, wofür ein Level gut
+    // ist. Wer an TheoryRewards, HabitRewards, der Levelkurve, den
+    // Erfolgen oder den Startpunkten dreht, soll es hier merken.
 
-    TheoryProgress gelesen(Iterable<String> ids) {
-      var progress = const TheoryProgress.empty();
-      for (final id in ids) {
-        final lesson = theoryGraph.nodeById(id)!.lesson;
-        progress = progress.openNode(id);
-        progress = progress.submit(lesson, _perfect(lesson)).progress;
-      }
-      return progress;
-    }
+    test('auf Level 1 lässt sich die erste Seite des Weges öffnen', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-    test('wer den Weg der Grundlagen liest, hat den zweiten Platz', () {
-      final xp = gelesen(theoryBasicsPath).totalXp;
-      final level = LevelCurve.levelFor(xp).level;
+      expect(container.read(suggestedStepProvider('geist'))?.node.id, 'geist');
+      expect(
+        container
+            .read(theoryProgressProvider.notifier)
+            .openNode(
+              theoryBasicsPath.first,
+              availablePoints: container.read(availableTheoryPointsProvider),
+            ),
+        isTrue,
+      );
+      expect(container.read(availableTheoryPointsProvider), 0);
+    });
+
+    test('ein Häkchen und die erste Seite bringen den ersten Aufstieg', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final habits = container.read(habitTrackerProvider.notifier);
+      final template = HabitCatalog.starter;
+      habits.activate(template.id);
+      habits.toggle(template.id, const Day(2026, 1, 1));
+
+      final theory = container.read(theoryProgressProvider.notifier);
+      final erste = theoryGraph.nodeById(theoryBasicsPath.first)!;
+      theory.openNode(
+        erste.id,
+        availablePoints: container.read(availableTheoryPointsProvider),
+      );
+      theory.submit(erste.lesson, _perfect(erste.lesson));
 
       expect(
-        level,
-        greaterThanOrEqualTo(AbilitySlots.levelForSlot(2)!),
+        container.read(playerLevelProvider).level,
+        2,
         reason:
-            'Die Grundlagen geben $xp Erfahrung und damit nur Level '
-            '$level. Der zweite Fähigkeitsplatz braucht Level '
-            '${AbilitySlots.levelForSlot(2)}.',
+            'Ein Häkchen und die erste Seite geben '
+            '${container.read(totalXpProvider)} Erfahrung, Level 2 braucht '
+            '${LevelCurve.totalXpFor(2)}.',
+      );
+      expect(
+        container.read(availableTheoryPointsProvider),
+        TheoryPoints.perLevel,
+        reason:
+            'Der Aufstieg soll genau den Punkt für die nächste Seite '
+            'bringen.',
       );
     });
 
-    test('und danach einen Punkt übrig, für den es eine Fähigkeit gibt', () {
-      final stand = gelesen(theoryBasicsPath);
-      final level = LevelCurve.levelFor(stand.totalXp).level;
-      final frei = TheoryPoints.availableAt(
-        level: level,
-        spent: stand.spentPointsIn(theoryGraph),
-      );
+    test('ohne Aufstieg geht es nach der ersten Seite nicht weiter', () {
+      // Das ist gewollt, nicht übersehen: Der zweite Punkt kommt aus dem
+      // Level, nicht aus dem Lesen allein.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-      final zuHaben = theoryGraph.nodes.where(
-        (node) =>
-            node.unlocksAbility != null &&
-            stand.canOpenNode(node.id, theoryGraph, availablePoints: frei),
-      );
+      final theory = container.read(theoryProgressProvider.notifier);
+      final erste = theoryGraph.nodeById(theoryBasicsPath.first)!;
+      theory.openNode(erste.id, availablePoints: 1);
+      theory.submit(erste.lesson, _perfect(erste.lesson));
 
-      expect(frei, greaterThan(0));
-      expect(
-        zuHaben,
-        isNotEmpty,
-        reason:
-            'Nach den Grundlagen sind $frei Punkte frei, aber kein Knoten '
-            'mit Fähigkeit ist dafür zu haben.',
-      );
-    });
-
-    test('die Punkte reichen auf dem ganzen Weg, Seite für Seite', () {
-      // Niemand soll mitten in den Grundlagen ohne Punkt dastehen: Vor
-      // jedem Schritt muss der nächste Knoten bezahlbar sein, allein aus
-      // den Startpunkten und dem, was die gelesenen Seiten an Leveln
-      // gebracht haben.
-      for (var i = 0; i < theoryBasicsPath.length; i++) {
-        final stand = gelesen(theoryBasicsPath.take(i));
-        final frei = TheoryPoints.availableAt(
-          level: LevelCurve.levelFor(stand.totalXp).level,
-          spent: stand.spentPointsIn(theoryGraph),
-        );
-
-        expect(
-          stand.canOpenNode(
-            theoryBasicsPath[i],
-            theoryGraph,
-            availablePoints: frei,
-          ),
-          isTrue,
-          reason: 'Schritt ${i + 1}: ${theoryBasicsPath[i]}',
-        );
-      }
+      expect(container.read(playerLevelProvider).level, 1);
+      expect(container.read(availableTheoryPointsProvider), 0);
     });
   });
 }

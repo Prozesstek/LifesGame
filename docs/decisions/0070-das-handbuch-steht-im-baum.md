@@ -1,7 +1,7 @@
 # ADR-0070: Das Handbuch steht im Baum
 
 **Datum:** 07.10.2026
-**Status:** Aktiv
+**Status:** Aktiv — die neun Startpunkte abgelöst durch [ADR-0078](0078-ein-startpunkt.md)
 **Entschieden von:** Frederik (in zwei Fragerunden mit Claude)
 
 ## Kontext

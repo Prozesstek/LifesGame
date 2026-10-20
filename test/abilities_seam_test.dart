@@ -200,9 +200,10 @@ void main() {
       // ist.
       //
       // Seit ADR-0051 ist der Weg drei Schritte lang: Wurzel,
-      // Zwischenebene und Thema, drei Punkte. Seit ADR-0070 gibt es sie
-      // vom Start weg; knapp wird es hier nur, wenn jemand die
-      // Startpunkte wieder kürzt.
+      // Zwischenebene und Thema, drei Punkte. Seit ADR-0078 gibt es zum
+      // Start einen Punkt und je Aufstieg einen, auf Level 3 also genau
+      // drei: **Hier ist kein Punkt Luft.** Wer den Platz früher aufgehen
+      // lässt oder einen Knoten auf diesen Weg legt, fällt hier um.
       final level = AbilitySlots.levelForSlot(2)!;
       final punkte = TheoryPoints.earnedAt(level);
 
@@ -263,25 +264,21 @@ void main() {
     });
   });
 
-  group('Startpunkte und der Weg der Grundlagen (ADR-0070)', () {
+  group('Startpunkte und der Weg der Grundlagen (ADR-0078)', () {
     // `packages/progression` kennt den Baum nicht und `packages/theory`
-    // die Punkte nicht. Dass beide Zahlen dieselbe sind, kann nur hier
+    // die Punkte nicht. Was beide zusammen zusagen, kann nur hier
     // stehen.
-    test('jeder beginnt mit so vielen Punkten, wie die Grundlagen '
-        'kosten', () {
-      final kosten = theoryBasicsPath.fold(
-        0,
-        (sum, id) => sum + theoryGraph.nodeById(id)!.cost,
-      );
+    test('die Startpunkte bezahlen die erste Seite des Weges', () {
+      // Bis ADR-0078 bezahlten sie den ganzen Weg, neun Punkte. Jetzt
+      // nur noch den ersten Schritt; der Rest kommt mit dem Level.
+      final erste = theoryGraph.nodeById(theoryBasicsPath.first)!;
 
       expect(
-        TheoryPoints.atStart,
-        kosten,
-        reason:
-            'Der Weg der Grundlagen kostet $kosten Punkte, zum Start gibt '
-            'es ${TheoryPoints.atStart}. Wer einen Knoten auf den Weg '
-            'legt oder die Startpunkte ändert, zieht das andere nach.',
+        erste.parentIds,
+        isEmpty,
+        reason: 'Der Weg beginnt an einer Wurzel.',
       );
+      expect(TheoryPoints.atStart, greaterThanOrEqualTo(erste.cost));
     });
 
     test('die fünf Seiten des früheren Handbuchs liegen alle darauf', () {

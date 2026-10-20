@@ -15,8 +15,8 @@
 ///
 /// **Das Handbuch steht seit ADR-0070 hier**, als fünf Knoten unter
 /// *Gewohnheiten*: Seine Seiten stammen aus demselben Buch wie die vier
-/// Regeln daneben. Sie kosten wie alles einen Punkt; dafür beginnt jeder
-/// mit so vielen, wie [theoryBasicsPath] kostet.
+/// Regeln daneben. Sie kosten wie alles einen Punkt, und seit ADR-0078
+/// kommen die Punkte dafür mit dem Level — zum Start gibt es einen.
 ///
 /// Die Themen der ersten Stunde stammen aus den alten flachen Zweigen und
 /// werden hier nur verdrahtet — der Inhalt steht weiterhin in
@@ -586,10 +586,10 @@ const List<TheoryPlaceholder> theoryPlaceholders = <TheoryPlaceholder>[
 /// Handbuchs und alles, was auf dem Weg zu ihnen liegt — in der
 /// Reihenfolge, in der man sie öffnen kann.
 ///
-/// Er ist der Grund für die Zahl der Startpunkte
-/// (`TheoryPoints.atStart`): Wer nichts anderes kauft, kann genau diesen
-/// Weg gehen. Und er ist das, was der Baum vorschlägt, solange noch
-/// nichts gelesen ist (`TheoryProgress.nextOnPath`).
+/// Er ist das, was der Baum vorschlägt, solange noch nichts gelesen ist
+/// (`TheoryProgress.nextOnPath`). Bis ADR-0078 war er auch der Grund für
+/// die Zahl der Startpunkte; jetzt bezahlt der eine Startpunkt seinen
+/// ersten Schritt, und jeder weitere kommt mit einem Aufstieg.
 ///
 /// „Mach es offensichtlich" und „Mach es attraktiv" gehören nicht dazu:
 /// Sie liegen daneben, nicht auf dem Weg.
