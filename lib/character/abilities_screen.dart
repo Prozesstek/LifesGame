@@ -19,6 +19,7 @@ import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
+import '../ui/wackeln.dart';
 import 'abilities_controller.dart';
 import 'widgets/ability_sheet.dart';
 import 'widgets/ability_slots_row.dart';
@@ -110,6 +111,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                       weaponMove: weaponMove,
                       chosen: chosen,
                       gezogen: _gezogen,
+                      gewaehlt: _waehlt,
                       // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
                       // die belegten plus der nächste leere.
                       // Eine Ultimate liegt nie auf einem der drei Plätze.
@@ -207,9 +209,11 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     required ChosenAbilities chosen,
     required int attack,
   }) {
+    // **Nur, was man hat** (Issue #138). Was es sonst gibt und woher, steht
+    // in der Sammlung (ADR-0080).
     final stufe = <Ability>[
       for (final ability in AbilityCatalog.choosable)
-        if (ability.rarity == rarity) ability,
+        if (ability.rarity == rarity && offen.contains(ability.moveId)) ability,
     ];
     if (stufe.isEmpty) return const <Widget>[];
 
@@ -222,8 +226,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '${stufe.where((a) => offen.contains(a.moveId)).length} '
-                '/ ${stufe.length}',
+                '${stufe.length}',
                 style: const TextStyle(
                   fontSize: 11,
                   color: Palette.textOnDarkDim,
@@ -265,17 +268,30 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                 aktiv:
                     offen.contains(ability.moveId) &&
                     !chosen.contains(ability.moveId),
-                child: _Kachel(
-                  ability: ability,
-                  unlocked: offen.contains(ability.moveId),
-                  imEinsatz: chosen.contains(ability.moveId),
-                  ausgeblendet: _gezogen == ability.moveId,
-                  onTap: () => _zeigeFaehigkeit(
-                    context,
-                    ref,
+                // Wird für einen Platz gewählt, wackelt, was dorthin kann.
+                child: Wackeln(
+                  aktiv:
+                      _waehlt != null &&
+                      chosen.at(_waehlt! - 2) != ability.moveId,
+                  child: _Kachel(
                     ability: ability,
-                    unlocked: offen.contains(ability.moveId),
-                    attack: attack,
+                    unlocked: true,
+                    imEinsatz: chosen.contains(ability.moveId),
+                    ausgeblendet: _gezogen == ability.moveId,
+                    onTap: () {
+                      final platz = _waehlt;
+                      if (platz != null) {
+                        _lege(platz, ability.moveId);
+                        return;
+                      }
+                      _zeigeFaehigkeit(
+                        context,
+                        ref,
+                        ability: ability,
+                        unlocked: true,
+                        attack: attack,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -295,6 +311,11 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     required ChosenAbilities chosen,
     required int attack,
   }) {
+    final eigene = <Ability>[
+      for (final ability in AbilityCatalog.ultimates)
+        if (offen.contains(ability.moveId)) ability,
+    ];
+    if (eigene.isEmpty) return const <Widget>[];
     return <Widget>[
       Padding(
         padding: const EdgeInsets.only(bottom: 8),
@@ -323,7 +344,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         crossAxisSpacing: 8,
         childAspectRatio: 0.78,
         children: <Widget>[
-          for (final ability in AbilityCatalog.ultimates)
+          for (final ability in eigene)
             HaltenUndZiehen<String>(
               data: ability.moveId,
               aktiv: offen.contains(ability.moveId),
@@ -435,8 +456,15 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     }
   }
 
+  /// Der Platz, für den gerade gewählt wird, oder null (Issue #138):
+  /// Platz antippen, dann eine Fähigkeit.
+  int? _waehlt;
+
   void _beginneZiehen(String moveId) {
-    setState(() => _gezogen = moveId);
+    setState(() {
+      _gezogen = moveId;
+      _waehlt = null;
+    });
     zuDenPlaetzen(_scroll);
   }
 
@@ -451,6 +479,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
   /// `ChosenAbilities.withAt`, nicht dieser Bildschirm.
   void _lege(int slot, String moveId) {
     _beendeZiehen();
+    if (_waehlt != null) setState(() => _waehlt = null);
     ref.read(chosenAbilitiesProvider.notifier).choose(slot - 2, moveId);
     HapticFeedback.selectionClick();
     ScaffoldMessenger.of(context)
@@ -486,34 +515,34 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       return;
     }
 
-    final moveId = ref.read(chosenAbilitiesProvider).at(slot - 2);
-    if (moveId == null) {
+    // **Platz antippen, dann eine Fähigkeit** (Issue #138). Ein zweiter
+    // Tipp auf denselben Platz bricht ab. Was ein belegter Platz kann,
+    // zeigt das Blatt seiner Fähigkeit unten im Raster.
+    if (_waehlt == slot) {
+      setState(() => _waehlt = null);
+      return;
+    }
+    final chosen = ref.read(chosenAbilitiesProvider);
+    final level = ref.read(playerLevelProvider).level;
+    final nimmt = slot - 2 < _belegung(chosen, level).length;
+    if (offen.isEmpty || !nimmt) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
           SnackBar(
             content: Text(
               offen.isEmpty
-                  ? 'Noch keine Fähigkeit freigeschaltet. Was es dafür '
-                        'braucht, steht bei den grauen.'
-                  : 'Halte unten eine Fähigkeit gedrückt und zieh sie '
-                        'hierher.',
+                  ? 'Noch keine Fähigkeit freigeschaltet. Was es gibt, '
+                        'steht in der Sammlung.'
+                  : 'Erst Platz ${chosen.length + 2} belegen.',
             ),
             duration: const Duration(seconds: 3),
           ),
         );
       return;
     }
-
-    final ability = AbilityCatalog.byMoveId(moveId);
-    if (ability == null) return;
-    await _zeigeFaehigkeit(
-      context,
-      ref,
-      ability: ability,
-      unlocked: offen.contains(moveId),
-      attack: attack,
-    );
+    HapticFeedback.selectionClick();
+    setState(() => _waehlt = slot);
   }
 
   /// Zeigt das Blatt und führt aus, was daraus zurückkommt.

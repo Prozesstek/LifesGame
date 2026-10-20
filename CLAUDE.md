@@ -202,8 +202,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
-| `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter der ganze Katalog; **auch hier per Ziehen** | Flutter |
-| `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — auch bei gesperrten | Flutter |
+| `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter **nur die eigenen** ([ADR-0082](docs/decisions/0082-nur-eigene-faehigkeiten.md)); **Platz antippen, dann eine Fähigkeit** — oder ziehen | Flutter |
+| `lib/character/widgets/ability_sheet.dart` | das Blatt mit **allen** Werten — es kann auch gesperrte, aufgerufen wird es seit ADR-0082 nur für eigene | Flutter |
 | `lib/character/widgets/ability_slots_row.dart` | die vier Fähigkeitsplätze — zeigt nur, wählt nicht | Flutter |
 | `lib/character/widgets/ultimate_platz.dart` | der Platz der Ultimate und ihr **goldener Doppelrand** (`UltimateRand`) — eine Stelle für Platz, Kachel und Blatt | Flutter |
 | `lib/character/abilities_controller.dart` | Riverpod-Brücke Fähigkeiten ↔ UI, **enthält keine Regeln** | Flutter |
@@ -235,6 +235,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
+| `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Hantel, Herz, Schild, Tropfen; **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)) | Flutter |
 | `lib/ui/ruhm_zahl.dart` | Ruhm als Zeichen mit Zahl, überall dasselbe | Flutter |
@@ -290,7 +291,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 900 Tests
+flutter test             # 903 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 900, dazu die acht Packages (theory 204, habits 333, gear
+**Tests:** App 903, dazu die acht Packages (theory 204, habits 333, gear
 128, action_combat 392, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,41 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026, zuletzt: nur eigene Fähigkeiten (Block 3, #138)
+
+Der dritte Block:
+[ADR-0082](../decisions/0082-nur-eigene-faehigkeiten.md).
+
+| Was | Wie |
+|---|---|
+| **Nur Eigenes** | im Raster nur, was freigeschaltet ist, Fähigkeiten wie Ultimates; der Rest steht in der Sammlung |
+| **Platz antippen** | Platz 2 bis 4 wird gewählt und leuchtet; alles, was dorthin kann, wackelt kurz und behält einen goldenen Rand |
+| **Dann eine Fähigkeit** | ein Tipp legt sie auf den Platz; ein zweiter Tipp auf den Platz bricht ab |
+| **Ohne eigene** | ein Platz sagt, dass es in der Sammlung steht |
+
+**Ohne Rückfrage entschieden:**
+
+- **Auch ein belegter Platz wählt** — wer dort tippt, will meist
+  tauschen. Was die Fähigkeit kann, zeigt ihr Blatt im Raster.
+- **Das Wackeln endet nach vier Schwüngen**, der Rand bleibt.
+- **Der Waffenplatz zeigt weiter seine Werte.**
+
+**Was damit wegfällt:** Das volle Blatt einer **gesperrten** Fähigkeit
+(ADR-0049: „ein Ziel, das man nicht sieht, ist keins“) ruft kein
+Bildschirm mehr auf; die Sammlung zeigt nur, woher sie kommt. Das Blatt
+kann es noch.
+
+Neu: `lib/ui/wackeln.dart`. App 903 (vorher 900). Die Auswahl mitten im
+Wackeln in 390 × 844 gerendert und angesehen. **Nicht am Handy, nicht
+im Browser.**
+
+### Offen
+
+- Ob die Sammlung bei Fähigkeiten das volle Blatt zeigen soll, wenn man
+  das Ziel genauer kennen will.
+- Damit sind #137 und #138 gebaut; die drei PRs (#140, #141 und dieser)
+  bauen aufeinander auf und werden in dieser Reihenfolge gemergt.
 
 ## 20.10.2026, spät: der Rucksack und das Schloss (Block 2, #137)
 
