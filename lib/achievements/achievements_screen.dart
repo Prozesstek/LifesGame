@@ -8,7 +8,10 @@ import '../ui/palette.dart';
 import 'achievements_controller.dart';
 import '../ui/druck.dart';
 
-/// Die Errungenschaften, nach Spielbereichen sortiert.
+/// Die Errungenschaften, nach Spielbereichen sortiert — **ein Reiter
+/// der Sammlung** (Issue #138). Bis zum 20.10. waren sie ein eigener
+/// Bildschirm; seitdem stehen sie dort neben Ausrüstung, Fähigkeiten und
+/// Gegnern, und die Karte im Charakter führt in die Sammlung.
 ///
 /// **Vier Reiter wie im Laden** (ADR-0033, Punkt 11) — und aus demselben
 /// Grund: Siebenundzwanzig Einträge untereinander sind eine Rolle, durch
@@ -20,16 +23,18 @@ import '../ui/druck.dart';
 /// Ziel nur eine Absage ist. Eine Entdeckung zeigt ??? — sie verliert
 /// alles, wenn man sie vorher lesen kann, und der leere Platz sagt
 /// trotzdem, dass es etwas zu finden gibt.
-class AchievementsScreen extends ConsumerStatefulWidget {
-  const AchievementsScreen({super.key});
-
-  static const double _maxWidth = 560;
+///
+/// Braucht eine begrenzte Höhe: Die Liste darunter füllt, was bleibt.
+class ErrungenschaftenAnsicht extends ConsumerStatefulWidget {
+  const ErrungenschaftenAnsicht({super.key});
 
   @override
-  ConsumerState<AchievementsScreen> createState() => _AchievementsScreenState();
+  ConsumerState<ErrungenschaftenAnsicht> createState() =>
+      _ErrungenschaftenAnsichtState();
 }
 
-class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
+class _ErrungenschaftenAnsichtState
+    extends ConsumerState<ErrungenschaftenAnsicht> {
   AchievementArea _area = AchievementArea.values.first;
 
   @override
@@ -38,42 +43,27 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     final verdient = ref.watch(earnedAchievementIdsProvider);
     final eintraege = AchievementCatalog.inArea(_area);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Errungenschaften'),
-        backgroundColor: Palette.surface,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AchievementsScreen._maxWidth,
-            ),
-            child: Column(
-              children: <Widget>[
-                _RuhmZeile(
-                  fame: ref.watch(fameProvider),
-                  verdient: verdient.length,
-                  gesamt: AchievementCatalog.all.length,
-                ),
-                _BereichsReiter(
-                  aktiv: _area,
-                  onWaehle: (area) => setState(() => _area = area),
-                ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    itemCount: eintraege.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) =>
-                        _Eintrag(achievement: eintraege[index], stats: stats),
-                  ),
-                ),
-              ],
-            ),
+    return Column(
+      children: <Widget>[
+        _RuhmZeile(
+          fame: ref.watch(fameProvider),
+          verdient: verdient.length,
+          gesamt: AchievementCatalog.all.length,
+        ),
+        _BereichsReiter(
+          aktiv: _area,
+          onWaehle: (area) => setState(() => _area = area),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            itemCount: eintraege.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) =>
+                _Eintrag(achievement: eintraege[index], stats: stats),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -108,7 +98,7 @@ class _RuhmZeile extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Palette.accent,
+                color: Palette.accentOnDark,
               ),
             ),
           ),
@@ -117,7 +107,10 @@ class _RuhmZeile extends StatelessWidget {
             child: Text(
               '$verdient / $gesamt',
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Palette.textDim),
+              style: const TextStyle(
+                fontSize: 13,
+                color: Palette.textOnDarkDim,
+              ),
             ),
           ),
         ],

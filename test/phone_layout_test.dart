@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
-import 'package:lifes_game/achievements/achievements_screen.dart';
+import 'package:lifes_game/sammlung/sammlung.dart';
+import 'package:lifes_game/sammlung/sammlung_screen.dart';
 import 'package:lifes_game/action/pit_screen.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
@@ -113,16 +114,19 @@ void main() {
     // Zeile, die es gibt.
     final vorgestern = _heute.previous.previous;
     tracker = tracker
-        .setWeekdays(
-          HabitCatalog.all[0].id,
-          const <int>{1, 3, 5},
-          today: vorgestern,
-        )
-        .setWeekdays(
-          HabitCatalog.all[1].id,
-          const <int>{1, 2, 3, 4, 6, 7},
-          today: vorgestern,
-        );
+        .setWeekdays(HabitCatalog.all[0].id, const <int>{
+          1,
+          3,
+          5,
+        }, today: vorgestern)
+        .setWeekdays(HabitCatalog.all[1].id, const <int>{
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+        }, today: vorgestern);
 
     // **Ein Stapel** (ADR-0065): Die dritte hängt an der vierten, und die
     // ist heute schon abgehakt — damit ist die eingerückte Kachel gebaut,
@@ -176,7 +180,9 @@ void main() {
     'Fähigkeiten': const AbilitiesScreen(),
     'Ausrüstung': const EquipmentScreen(),
     'Gegnerreihe': const LadderScreen(),
-    'Errungenschaften': const AchievementsScreen(),
+    'Errungenschaften': const SammlungScreen(
+      anfang: SammelArt.errungenschaften,
+    ),
   };
 
   group('Jeder Bildschirm passt aufs Handy', () {

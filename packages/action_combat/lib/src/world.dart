@@ -1669,6 +1669,11 @@ class ActionWorld {
       if (_gemeldet.contains(entity.id)) continue;
       _gemeldet.add(entity.id);
       _kills++;
+      // Für die Sammlung (Issue #138): Was im Lauf entsteht, zählt nicht,
+      // und der Wächter steht als seine Art da ([bossFiel]).
+      if (!entity.lootless && entity.kind != EnemyKind.endgegner) {
+        _killsJeArt[entity.kind] = (_killsJeArt[entity.kind] ?? 0) + 1;
+      }
       // Was im Lauf entsteht und was ein Begleiter tötet, lädt nicht.
       if (!entity.lootless && !entity.lastHitByCompanion) {
         _chargeUltimate(ActionBalance.ultimatePerKill);
@@ -1697,6 +1702,20 @@ class ActionWorld {
   }
 
   final Set<int> _gemeldet = <int>{};
+
+  final Map<EnemyKind, int> _killsJeArt = <EnemyKind, int>{};
+
+  /// Wie viele Gegner jeder Art dieser Lauf gefällt hat — ohne den
+  /// Wächter und ohne, was im Lauf entstand.
+  Map<EnemyKind, int> get killsJeArt =>
+      Map<EnemyKind, int>.unmodifiable(_killsJeArt);
+
+  /// Ob der Wächter dieses Laufs gefallen ist. Eine Halle ohne Wächter
+  /// hat keinen.
+  bool get bossFiel {
+    final boss = _boss;
+    return boss != null && !boss.isAlive;
+  }
 
   /// Zahlt den Teil des Topfs, der an [gefallen] hängt.
   ///

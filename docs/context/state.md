@@ -32,12 +32,12 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
-| **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel | ADR-0033, -0073, -0074 |
+| **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel — **in der Sammlung**, mit Ausrüstung, Fähigkeiten, Gegnern (in Stufen), Titeln und Seiten | ADR-0033, -0073, -0074, -0080 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 882, dazu die acht Packages (theory 204, habits 333, gear
-120, action_combat 381, progression 44, abilities 43, identity 25,
+**Tests:** App 898, dazu die acht Packages (theory 204, habits 333, gear
+120, action_combat 392, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,57 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 20.10.2026, abends: die Sammlung (Block 1 von #137 und #138)
+
+Frederik: „guck dir meine issues an“, dann „ja fang mit 137 und 138
+an“. Beide wollen, dass Ausrüstung und Fähigkeiten nur noch zeigen, was
+man hat, und alles andere in einer **Sammlung** steht. In zwei
+Fragerunden entschieden: [ADR-0080](../decisions/0080-die-sammlung.md).
+Gebaut wird in drei Blöcken mit je einem PR; dies ist der erste.
+
+| Was | Wie |
+|---|---|
+| **Sechs Reiter** | Ausrüstung, Fähigkeiten, Gegner, Titel, Seiten, Errungenschaften — jeder mit Prozent, oben alles in einer Zahl |
+| **Fragezeichen** | Bild und Name verdeckt; ein Tipp sagt, woher („Im Laden und als Beute, ab Ebene 10“, die Bedingung einer Fähigkeit, der Weg im Baum) |
+| **Gegner in Stufen** | 1, 10, 100 Siege, Wächter 1, 5, 25 — ein Stern je Stufe, jeder zählt in die Prozente |
+| **Das Bestiarium** | neu gespeichert, in der Reihe; Grube und Tagesgrube zählen. **Erst ab jetzt** |
+| **Die Errungenschaften** | ziehen ganz um: kein eigener Bildschirm mehr, die Karte im Charakter führt in den Reiter |
+| **Der Weg hinein** | ein Knopf mit Prozent oben rechts in Ausrüstung und Fähigkeiten |
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Ausrüstung zählt „je besessen“**, auch Verkauftes — Aufräumen
+  soll die Sammlung nicht leeren.
+- **Kein Schleimling** unter den Gegnern: Er entsteht nur aus dem
+  Schleim. Was im Lauf entsteht, zählt nicht.
+- **Ein abgebrochener Lauf zählt keine Gegner**, wie er nichts einbringt.
+- **Die Waffenzüge stehen nicht unter den Fähigkeiten**: Sie kommen mit
+  ihrer Waffe, die bei der Ausrüstung steht.
+- **Die Reiter in zwei Reihen** statt in einer Zeile zum Wischen — sonst
+  lagen am Handy drei außerhalb des Bildes (beim Ansehen gefunden).
+- **Eine Entdeckung verrät sich auch als Titel nicht** (ADR-0033).
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): „10 Ruhm“ oben in
+den Errungenschaften stand dunkelbraun auf dunklem Leder, schon im alten
+Bildschirm. Jetzt in den Farben für dunklen Grund.
+
+Neu: `lib/sammlung/` (fünf Dateien), `lib/action/gegner_text.dart`,
+`packages/action_combat/lib/src/bestiarium.dart`, `bestiarium_test.dart`
+(11), `test/sammlung_test.dart` (16). App 898 (vorher 882),
+action_combat 392 (vorher 381). Alle sechs Reiter und zwei Blätter
+gerendert und angesehen. **Nicht am Handy, nicht im Browser.**
+
+### Offen
+
+- **Block 2 (#137)**: das Inventar aus Exemplaren, Pfeile, „Alles
+  Schlechtere“ je Seltenheit, das Schloss.
+- **Block 3 (#138)**: nur die eigenen Fähigkeiten, Platz antippen und
+  dann wackeln.
+- Ob die Stufen der Gegner (1, 10, 100) zu weit auseinander liegen: Ein
+  Kobold fällt oft, ein Troll selten.
+- AktivesBrett hat ADR-0080 nicht gesehen: Die Errungenschaften stehen
+  jetzt in der Sammlung.
 
 ## 20.10.2026, danach: der Mentor führt durch den ersten Start
 

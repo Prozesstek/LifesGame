@@ -12,6 +12,8 @@ import '../home/erster_start.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../sammlung/sammlung.dart';
+import '../sammlung/sammlung_knopf.dart';
 import '../progression/level_provider.dart';
 import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
@@ -85,6 +87,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       appBar: AppBar(
         title: const Text('Fähigkeiten'),
         backgroundColor: Palette.surface,
+        actions: const <Widget>[SammlungKnopf(art: SammelArt.faehigkeiten)],
       ),
       body: MentorFlaeche(
         ort: MentorOrt.faehigkeiten,

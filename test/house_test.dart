@@ -126,7 +126,7 @@ void main() {
       );
       await laufenLassen(tester, 4);
       await tippe(tester, 'Trophäen ansehen');
-      expect(find.byType(AchievementsScreen), findsOneWidget);
+      expect(find.byType(ErrungenschaftenAnsicht), findsOneWidget);
 
       await tester.pageBack();
       await tester.pump();

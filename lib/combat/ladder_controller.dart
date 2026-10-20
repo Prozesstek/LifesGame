@@ -63,6 +63,16 @@ class LadderController extends Notifier<LadderProgress> {
     );
   }
 
+  /// Trägt ein, was ein Lauf gefällt hat — für die Gegner der Sammlung
+  /// (Issue #138). Grube und Tagesgrube rufen das am Ende jedes Laufs,
+  /// gewonnen oder verloren.
+  void recordKills(ActionWorld welt) {
+    state = state.recordKills(
+      welt.killsJeArt,
+      waechter: welt.bossFiel ? welt.bossKind : null,
+    );
+  }
+
   /// Setzt die Reihe zurück. Nur der Entwicklermodus ruft das.
   void reset() {
     state = const LadderProgress.empty();

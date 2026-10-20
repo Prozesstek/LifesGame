@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/achievements/achievements_card.dart';
 import 'package:lifes_game/achievements/achievements_screen.dart';
+import 'package:lifes_game/sammlung/sammlung.dart';
+import 'package:lifes_game/sammlung/sammlung_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
@@ -31,7 +33,10 @@ void main() {
     return SaveData(habits: tracker);
   }
 
-  Widget appMit(SaveData saved, {Widget screen = const AchievementsScreen()}) {
+  Widget appMit(
+    SaveData saved, {
+    Widget screen = const SammlungScreen(anfang: SammelArt.errungenschaften),
+  }) {
     return ProviderScope(
       overrides: [savedGameProvider.overrideWithValue(saved)],
       child: MaterialApp(home: screen),
@@ -171,7 +176,7 @@ void main() {
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AchievementsScreen), findsOneWidget);
+      expect(find.byType(ErrungenschaftenAnsicht), findsOneWidget);
     });
   });
 }

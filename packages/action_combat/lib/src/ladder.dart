@@ -1,3 +1,5 @@
+import 'bestiarium.dart';
+import 'entity.dart';
 import 'stage.dart';
 
 /// Was ein erstmals besiegter Gegner einbringt.
@@ -97,6 +99,7 @@ class LadderProgress {
     this.partial = const <int, Payout>{},
     this.dailyPartial = const <int, Map<int, Payout>>{},
     this.bestTimes = const <int, double>{},
+    this.bestiarium = const Bestiarium.leer(),
   });
 
   const LadderProgress.empty() : this();
@@ -142,6 +145,21 @@ class LadderProgress {
   /// eine Bestzeit gibt einer geschafften Stufe wieder einen Grund. Sie
   /// zahlt nichts und schaltet nichts frei — sie kann fallen, und darf es.
   final Map<int, double> bestTimes;
+
+  /// Wie oft welche Art Gegner und welcher Wächter fiel — die Gegner der
+  /// Sammlung (Issue #138). Grube und Tagesgrube zählen beide.
+  final Bestiarium bestiarium;
+
+  /// Trägt ein, was ein Lauf gefällt hat — gewonnen oder verloren.
+  LadderProgress recordKills(
+    Map<EnemyKind, int> gegner, {
+    BossKind? waechter,
+  }) {
+    if (gegner.isEmpty && waechter == null) return this;
+    return copyWith(
+      bestiarium: bestiarium.mit(gegner: gegner, waechter: waechter),
+    );
+  }
 
   /// Hält einen Sieg in [seconds] fest, wenn er schneller war als der
   /// bisher beste. Auf eine Zehntelsekunde gerundet — mehr liest niemand.
@@ -206,6 +224,7 @@ class LadderProgress {
     Map<int, Payout>? partial,
     Map<int, Map<int, Payout>>? dailyPartial,
     Map<int, double>? bestTimes,
+    Bestiarium? bestiarium,
   }) {
     return LadderProgress(
       highestDefeated: highestDefeated ?? this.highestDefeated,
@@ -215,6 +234,7 @@ class LadderProgress {
       partial: partial ?? this.partial,
       dailyPartial: dailyPartial ?? this.dailyPartial,
       bestTimes: bestTimes ?? this.bestTimes,
+      bestiarium: bestiarium ?? this.bestiarium,
     );
   }
 
@@ -354,6 +374,7 @@ class LadderProgress {
         'best': <String, Object?>{
           for (final entry in bestTimes.entries) '${entry.key}': entry.value,
         },
+      if (!bestiarium.istLeer) 'kills': bestiarium.toJson(),
     };
   }
 
@@ -422,6 +443,7 @@ class LadderProgress {
       ),
       dailyPartial: tagesTeile,
       bestTimes: _zeitenLesen(json['best']),
+      bestiarium: Bestiarium.fromJson(json['kills']),
     );
   }
 

@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ui/palette.dart';
 import 'achievements_controller.dart';
-import 'achievements_screen.dart';
+import '../sammlung/sammlung.dart';
+import '../sammlung/sammlung_screen.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
 import '../ui/ruhm_zahl.dart';
 
-/// Der Weg zu den Errungenschaften, vom Charakter aus.
+/// Der Weg zu den Errungenschaften, vom Charakter aus — seit dem 20.10.
+/// in die Sammlung, beim Reiter der Errungenschaften (Issue #138).
 ///
 /// **Warum vom Charakter und nicht vom Startbildschirm** (ADR-0033,
 /// Punkt 11): ADR-0013 trennt beide Bildschirme nach einer Frage — der
@@ -31,7 +33,10 @@ class AchievementsCard extends ConsumerWidget {
         color: Palette.surfaceRaised,
         child: InkWell(
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const AchievementsScreen()),
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  const SammlungScreen(anfang: SammelArt.errungenschaften),
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),

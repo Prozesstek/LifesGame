@@ -20,6 +20,8 @@ import 'widgets/character_figure.dart';
 import 'widgets/gear_sheet.dart';
 import 'widgets/rarity_badge.dart';
 import '../ui/gold_icon.dart';
+import '../sammlung/sammlung.dart';
+import '../sammlung/sammlung_knopf.dart';
 
 /// Der Ausrüstungs-Bildschirm: sechs Plätze oben, der ganze Katalog
 /// darunter (ADR-0057).
@@ -147,6 +149,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
       appBar: AppBar(
         title: const Text('Ausrüstung'),
         backgroundColor: Palette.surface,
+        actions: const <Widget>[SammlungKnopf(art: SammelArt.ausruestung)],
       ),
       body: SafeArea(
         child: Center(

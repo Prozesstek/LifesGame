@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../audio/sound_effects.dart';
 import '../combat/daily_pit_controller.dart';
+import '../combat/ladder_controller.dart';
 import '../combat/widgets/tagesgrube_ergebnis.dart';
 import '../habits/habits_controller.dart';
 import '../home/erster_start_provider.dart';
@@ -90,6 +91,8 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
     final lauf = ref
         .read(dailyPitProvider.notifier)
         .finish(widget.day, _game.sim);
+    // Die Gegner der Sammlung zählen auch hier (Issue #138).
+    ref.read(ladderProvider.notifier).recordKills(_game.sim);
     setState(() => _vorbei = true);
     if (lauf == null) return;
     if (lauf.won) ref.read(soundPlayerProvider).play(SoundEffect.sieg);

@@ -8,7 +8,8 @@ import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
 import '../achievements/achievements_controller.dart';
-import '../achievements/achievements_screen.dart';
+import '../sammlung/sammlung.dart';
+import '../sammlung/sammlung_screen.dart';
 import '../character/character_screen.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
@@ -117,7 +118,8 @@ class HouseScreen extends ConsumerWidget {
           case VillagePlace.trophaeen:
             await Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const AchievementsScreen(),
+                builder: (_) =>
+                    const SammlungScreen(anfang: SammelArt.errungenschaften),
               ),
             );
           case VillagePlace.ruestung:
