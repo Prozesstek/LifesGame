@@ -85,7 +85,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute, **Vergleich und Schloss**, reines Dart, 128 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 133 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -107,7 +107,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 392 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 400 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -116,6 +116,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter (auch das **Spiegelbild**), der Fels | nur Dart-SDK |
 | `packages/action_combat/lib/src/hero_states.dart` | **was am Helden abläuft** ([ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)): Rage, Ruhepuls, zweiter Atem, Unsichtbarkeit, Parade, Bestform, Stacking, Kettenblitz, Blink, Rückspulen — und **die Grenze des Grundangriffs** (`_heroFactor`) | nur Dart-SDK |
 | `packages/action_combat/lib/src/gear_powers.dart` | **was die Ausrüstung am Helden tut** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)): Lebensraub und Blutpakt, Frostreif, Irrlichter, Flickwerk, Falkenblick, Hasenlauf, Seelenernte, Echo — und die Grundangriffe Speer und Sichel | nur Dart-SDK |
+| `packages/action_combat/lib/src/item_drops.dart` | **Beute in der Grube** ([ADR-0083](docs/decisions/0083-beute-in-der-grube.md)): die erste Stufe der Kaskade — *ob* ein Gegner etwas fallen lässt —, am Boden liegen, hinlaufen, einsammeln. Was es ist, weiß die Grube nicht | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und Kräfte der Ausrüstung** Fähigkeiten verändern — und alle Kräfte selbst (`PitGearPowers`); eine Kraft am Helden kommt als `GrantPassive` (ADR-0077) | nur Dart-SDK |
@@ -135,6 +136,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
+| `lib/action/pit_beute.dart` | **was ein Fund ist** (ADR-0083): würfelt beim Fallen mit `GearLoot.cascade` aus Ebene, Startwert des Laufs und Nummer des Fundes — reine Rechnung | Flutter |
+| `lib/action/beute_am_boden.dart` | zeichnet Funde am Boden: das Zeichen des Platzes im Rand der Seltenheit, Episches im Schein, **Legendäres unter einer Lichtsäule** — nur Darstellung | Flutter |
 | `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
 | `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
 | `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
@@ -219,7 +222,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `tool/item_icons.py` | **zeichnet** die zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre sechs Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek) | Python |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
-| `tool/kampf_klaenge.py` | **rechnet** die fünf Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
+| `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
 | `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
@@ -292,7 +295,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 911 Tests
+flutter test             # 919 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -300,12 +303,13 @@ dart run tool/pit_sim.dart             # Stufe für Stufe, bis zur Wand
 dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
 dart run tool/pit_sim.dart ausruestung   # nur: was jede Kraft der Ausrüstung trägt
+dart run tool/pit_sim.dart beute         # nur: wie viel Ausrüstung je Lauf fällt
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 392 Tests
+dart test                              # 400 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -316,7 +320,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 204 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
-cd packages/gear        ; dart test    # 128 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 133 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
@@ -712,17 +716,25 @@ gewürfelte Werte (85–115 % je Wert) im **Kampfmassstab**
 `test/loot_and_shop_test.dart` hält). In den Kampf gehen sie als eigener
 Summand (`ActionStats.gearAttack` usw.), sonst verschwände der Wurf in
 der Rundung. Der Laden verkauft **sechs Angebote am Tag**, aus dem Datum
-und der tiefsten Stufe gewürfelt (`DailyShop`). Der Wächter lässt
-**Beute** fallen (`GearLoot`): beim ersten Sieg auf einer Stufe immer,
-sonst gegen einen **Schlüssel** — einer je Häkchen, Seite und richtiger
-Rückfrage (`earnedKeysProvider`), höchstens zehn (`GearKeys`). Die Zahl
-der Würfe hängt damit nur an Gewohnheiten und Theorie, ihre Güte an der
-Tiefe. Wer an `GearRolls` dreht, lässt `tool/runway_sim.dart` laufen.
+und der tiefsten Stufe gewürfelt (`DailyShop`). **Seit
+[ADR-0083](docs/decisions/0083-beute-in-der-grube.md) fällt Beute in
+der Grube selbst**, über eine **Kaskade** in vier Stufen: *ob* etwas
+fällt (die Grube, `ActionBalance.itemDropChance` — der Wächter immer),
+welcher Platz, welche Seltenheit (beim Wächter eine Stufe höher), welches
+Stück (`GearLoot.cascade`). Die Grube meldet nur die Nummer des Fundes;
+was es ist, würfelt `PitBeute` aus dem Startwert des Laufs. **Hinlaufen
+sammelt ein**, was am Ende noch liegt, ist weg, eingesammelt bleibt auch
+nach einer Niederlage. Ein **Schlüssel** — einer je Häkchen, Seite und
+richtiger Rückfrage (`earnedKeysProvider`), höchstens zehn (`GearKeys`)
+— öffnet nach jedem Lauf einen Extra-Wurf. Die Tagesgrube wirft nichts.
+Wer an der Kaskade dreht, lässt `dart run tool/pit_sim.dart beute` und
+`tool/runway_sim.dart` laufen.
 
 | Frage | Antwortet |
 |---|---|
 | Was steht zum Verkauf? | `dailyOffersProvider` → `DailyShop.offersFor` |
-| Was ist ein Schlüssel wert? | `GearLoot.drop`, Seltenheit nach `GearRolls.weightsFor(stufe)` |
+| Was fällt in der Grube? | erst `ActionBalance.itemDropChance` (ob), dann `GearLoot.cascade` (Platz, Seltenheit, Stück) |
+| Was ist ein Schlüssel wert? | ein Extra-Wurf auf der Kaskade nach dem Lauf (`GearController.takeKeyLoot`) |
 | Wie viele Schlüssel? | `availableKeysProvider` — verdient minus verbraucht, gedeckelt |
 | Was ist Ausschuss? | `Loadout.junkOf(seltenheit)` — nicht getragen, **nicht gesperrt** und nicht besser als das Getragene; seit ADR-0081 ohne Ausnahmen, dafür gibt es das Schloss |
 | Ist es besser? | `Loadout.vergleiche` — erst die Seltenheit, dann die Summe der Werte; ein leerer Platz macht alles besser |

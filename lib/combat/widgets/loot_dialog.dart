@@ -12,12 +12,12 @@ import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 
-/// Fragt, ob ein Schlüssel die Beute des Wächters öffnen soll
-/// (ADR-0048). Gibt `true` zurück, wenn ja.
+/// Fragt nach einem Lauf, ob ein Schlüssel einen Extra-Wurf auf der
+/// Kaskade öffnen soll (ADR-0048, ADR-0083). Gibt `true` zurück, wenn ja.
 ///
 /// **Gefragt, nicht automatisch.** Ein Schlüssel ist ein Wurf, und wer
-/// ihn lieber auf einer tieferen Stufe einsetzt, soll ihn behalten
-/// können — sonst kostete jeder Lauf um die Bestzeit einen.
+/// ihn lieber auf einer tieferen Ebene einsetzt, soll ihn behalten
+/// können — die Seltenheit hängt an der Ebene.
 Future<bool> askToOpenLoot(
   BuildContext context, {
   required int stage,
@@ -29,15 +29,15 @@ Future<bool> askToOpenLoot(
     builder: (dialogContext) => HolzDialog(
       child: AlertDialog(
         backgroundColor: Palette.surface,
-        title: const Text('Die Beute des Wächters'),
+        title: const Text('Ein Schlüssel'),
         content: Text(
-          'Ein Schlüssel öffnet sie: ein gewürfeltes Stück von Stufe '
+          'Er öffnet einen Extra-Wurf: ein gewürfeltes Stück von Ebene '
           '$stage. Du hast $keys Schlüssel.',
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Liegen lassen'),
+            child: const Text('Behalten'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),

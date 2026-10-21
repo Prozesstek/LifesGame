@@ -158,6 +158,62 @@ void main() {
     });
   });
 
+  group('Die Kaskade (ADR-0083)', () {
+    test('wiederholbar, und eindeutig je Lauf und Fund', () {
+      final a = GearLoot.cascade(stage: 5, run: 123456, nth: 1);
+      final b = GearLoot.cascade(stage: 5, run: 123456, nth: 1);
+      expect(a.uid, b.uid);
+      expect(a.itemId, b.itemId);
+      expect(a.bonus, b.bonus);
+      expect(GearLoot.cascade(stage: 5, run: 123456, nth: 2).uid, isNot(a.uid));
+      // Dieselbe Ebene am selben Tag noch einmal: ein anderer Lauf, also
+      // eine andere Uid — sonst wäre das zweite Stück schon „besessen".
+      expect(GearLoot.cascade(stage: 5, run: 654321, nth: 1).uid, isNot(a.uid));
+    });
+
+    test('kostet nichts, und auch der größte Lauf rechnet sicher', () {
+      final groesster = GearLoot.cascade(
+        stage: 100,
+        run: (1 << 30) - 1,
+        nth: 40,
+        boss: true,
+      );
+      expect(groesster.paid, 0);
+      expect(groesster.item, isNotNull);
+    });
+
+    test('jeder Platz kann fallen', () {
+      final plaetze = <GearSlot>{
+        for (var n = 0; n < 100; n++)
+          GearLoot.cascade(stage: 3, run: 77, nth: n).item!.slot,
+      };
+      expect(plaetze, GearSlot.values.toSet());
+    });
+
+    test('der Wächter wirft eine Stufe seltener', () {
+      var mehr = 0;
+      for (var n = 0; n < 200; n++) {
+        final fuss = GearLoot.cascade(stage: 12, run: 9, nth: n);
+        final boss = GearLoot.cascade(stage: 12, run: 9, nth: n, boss: true);
+        expect(
+          boss.item!.rarity.index,
+          greaterThanOrEqualTo(fuss.item!.rarity.index),
+        );
+        if (boss.item!.rarity.index > fuss.item!.rarity.index) mehr++;
+      }
+      expect(mehr, greaterThan(150));
+    });
+
+    test('auch der Wächter hält die Sperren der Ebene', () {
+      for (var n = 0; n < 300; n++) {
+        final flach = GearLoot.cascade(stage: 9, run: 5, nth: n, boss: true);
+        expect(flach.item!.rarity.index, lessThan(GearRarity.epic.index));
+        final mitte = GearLoot.cascade(stage: 15, run: 5, nth: n, boss: true);
+        expect(mitte.item!.rarity, isNot(GearRarity.legendary));
+      }
+    });
+  });
+
   group('Die Schlüssel', () {
     test('verdient minus verbraucht, höchstens zehn', () {
       expect(GearKeys.available(earned: 0, consumed: 0), 0);

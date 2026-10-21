@@ -95,7 +95,15 @@ enum SoundEffect {
   funke('Sound/Funke.wav'),
 
   /// Ein Level mitten im Lauf.
-  aufstieg('Sound/Aufstieg.wav');
+  aufstieg('Sound/Aufstieg.wav'),
+
+  // Seit der Beute in der Grube (ADR-0083).
+
+  /// Der Held sammelt einen Fund ein.
+  fund('Sound/Fund.wav'),
+
+  /// Etwas Legendäres fällt — der einzige lange Klang der Grube.
+  legendaer('Sound/Legendaer.wav');
 
   const SoundEffect(this.asset);
 

@@ -92,6 +92,39 @@ abstract final class GearRolls {
     }
     return GearCatalog.forSlot(slot).first;
   }
+
+  /// Wie oft jeder Platz fällt — die zweite Stufe der Kaskade
+  /// (ADR-0083). Heute alle gleich; wer einen Platz seltener machen
+  /// will, dreht hier.
+  static const Map<GearSlot, int> slotWeights = <GearSlot, int>{
+    GearSlot.waffe: 1,
+    GearSlot.ruestung: 1,
+    GearSlot.helm: 1,
+    GearSlot.schuhe: 1,
+    GearSlot.ring: 1,
+    GearSlot.talisman: 1,
+  };
+
+  /// Welcher Platz fällt — gewichtet nach [slotWeights].
+  static GearSlot rollSlot(GearDice dice) {
+    final gesamt = slotWeights.values.fold<int>(0, (s, g) => s + g);
+    var rest = dice.next() * gesamt;
+    for (final eintrag in slotWeights.entries) {
+      if (rest < eintrag.value) return eintrag.key;
+      rest -= eintrag.value;
+    }
+    return slotWeights.keys.first;
+  }
+
+  /// [rarity] eine Stufe seltener — aber nur, wenn es die auf [stage]
+  /// überhaupt gibt (ADR-0034): Der Wächter von Ebene 5 wirft kein
+  /// Episches.
+  static GearRarity oneUp(GearRarity rarity, int stage) {
+    final hoeher = rarity.index + 1;
+    if (hoeher >= GearRarity.values.length) return rarity;
+    final naechste = GearRarity.values[hoeher];
+    return weightsFor(stage).containsKey(naechste) ? naechste : rarity;
+  }
 }
 
 /// Die sechs Angebote des Tages — eins je Platz, aus dem Datum gewürfelt.
@@ -141,6 +174,40 @@ abstract final class GearLoot {
     final item = GearRolls.pick(slot, rarity, dice);
     return GearCopy(
       uid: 'beute-$stage-$dayIndex-$nth',
+      itemId: item.id,
+      bonus: GearRolls.rollBonus(item, dice),
+      paid: 0,
+    );
+  }
+
+  /// **Die Kaskade** (ADR-0083): was ein Gegner in der Grube fallen
+  /// lässt, gewürfelt in Stufen, jede mit eigener Tabelle.
+  ///
+  /// 1. **Ob** etwas fällt — das entscheidet die Grube
+  ///    (`ActionBalance.itemDropChance`), denn dort steht, wer zäh ist.
+  /// 2. **Welcher Platz** — [GearRolls.slotWeights].
+  /// 3. **Welche Seltenheit** — [GearRolls.weightsFor] nach der Ebene;
+  ///    beim Wächter ([boss]) eine Stufe höher, soweit die Ebene sie
+  ///    erlaubt ([GearRolls.oneUp]).
+  /// 4. **Welches Stück** mit welchen Werten — [GearRolls.pick] und
+  ///    [GearRolls.rollBonus].
+  ///
+  /// [run] ist der Startwert des Laufs, [nth] der wievielte Fund darin;
+  /// beide zusammen machen den Wurf wiederholbar und die Uid eindeutig,
+  /// auch wenn dieselbe Ebene am selben Tag zweimal gespielt wird.
+  static GearCopy cascade({
+    required int stage,
+    required int run,
+    required int nth,
+    bool boss = false,
+  }) {
+    final dice = GearDice(run * 31 + stage * 7727 + nth * 104729 + 11);
+    final slot = GearRolls.rollSlot(dice);
+    var rarity = GearRolls.rollRarity(stage, dice);
+    if (boss) rarity = GearRolls.oneUp(rarity, stage);
+    final item = GearRolls.pick(slot, rarity, dice);
+    return GearCopy(
+      uid: 'beute-$stage-r$run-$nth',
       itemId: item.id,
       bonus: GearRolls.rollBonus(item, dice),
       paid: 0,

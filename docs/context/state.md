@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 20.10.2026 · Frederik
+**Zuletzt aktualisiert:** 21.10.2026 · AktivesBrett
 
 ---
 
@@ -36,8 +36,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 911, dazu die acht Packages (theory 204, habits 333, gear
-128, action_combat 392, progression 44, abilities 43, identity 25,
+**Tests:** App 919, dazu die acht Packages (theory 204, habits 333, gear
+133, action_combat 400, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,61 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 21.10.2026: Beute in der Grube — die Kaskade (Block 1 von #136)
+
+AktivesBrett: „ich möchte das Ticket 136 Loot System angehen“. Das
+Ticket: Items fallen in der Grube, nicht nur am Ende; Legendäres sticht
+hervor; am Boden nur die Gruppe mit dem Rand der Seltenheit, am Ende
+das Stück; ein „Cascading Drop System“. Dazu eine Skizze des
+Siegerblatts und ein Bild aus Summoners War (Verkaufen mit Häkchen). In
+vier Fragerunden entschieden:
+[ADR-0083](../decisions/0083-beute-in-der-grube.md). Gebaut in zwei
+Blöcken; dies ist der erste.
+
+| Was | Wie |
+|---|---|
+| **Die Kaskade** | Würfel in Stufen: *ob* (13 % je Gegner, 30 % bei zähen, der Wächter immer), welcher Platz, welche Seltenheit (Wächter eine Stufe höher), welches Stück |
+| **Am Boden** | das Zeichen des Platzes im Rand der Seltenheit; Episches im violetten Schein, **Legendäres unter einer goldenen Lichtsäule** mit eigenem Klang |
+| **Einsammeln** | hinlaufen; was am Ende liegt, ist weg; **eingesammelt bleibt auch nach einer Niederlage**; die Wächterbeute kommt von selbst |
+| **Nach dem Lauf** | die Funde im Ergebnisblatt als Kacheln; nach einem Sieg springt der beste auf; dann fragt der **Schlüssel**: ein Extra-Wurf |
+| **Tagesgrube** | wirft nichts |
+
+**Gemessen** (`dart run tool/pit_sim.dart beute 40`, Tag 30): In
+gewonnenen Läufen fallen auf Ebene 1 und 5 im Schnitt 4,3 Stücke, auf
+Ebene 10 5,3 — das Ziel waren 4 bis 6. Der Bot läuft keinem Fund nach
+und holt gut die Hälfte.
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Grube kennt keine Ausrüstung**: Sie meldet nur die Nummer des
+  Fundes, die App würfelt den Rest (`PitBeute`). Die Uid trägt den
+  Startwert des Laufs, sonst wäre der zweite Lauf auf derselben Ebene
+  am selben Tag schon „besessen“.
+- **Ein eigener Würfel für die Beute**, damit sie keinen kritischen
+  Treffer verschiebt (Test).
+- **Gewürfelt wird beim Fallen**, damit Rand und Lichtsäule stimmen.
+- **Der Schlüssel fragt nach jedem Lauf**, auch nach einer Niederlage.
+- **Bis zum neuen Siegerblatt** springt nach einem Sieg der beste Fund
+  auf (wie vorher die Wächterbeute) — dort legt man an.
+
+Neu: `item_drops.dart`, `beute_in_der_grube_test.dart` (8),
+`GearLoot.cascade` mit fünf Tests, `lib/action/pit_beute.dart`,
+`beute_am_boden.dart`, `test/pit_beute_test.dart` (7), zwei Klänge
+(`Fund`, `Legendaer`). `takeLoot` ist weg (`takeRunLoot`,
+`takeKeyLoot`). App 919 (vorher 911), action_combat 400 (vorher 392),
+gear 133 (vorher 128). **Nicht gespielt, nicht am Handy, nicht im
+Browser angesehen.**
+
+### Offen
+
+- **Block 2**: das Siegerblatt nach der Skizze — Kacheln drehen sich um,
+  das Seltenste zuletzt, Pfeil gegen das Getragene, Antippen öffnet das
+  Blatt, **Häkchen und „Verkaufen“ mit dem Gold der Auswahl**; dazu das
+  Verkaufen mit Häkchen im Rucksack.
+- Ob vier bis sechs Stücke je Lauf den Rucksack zu schnell füllen.
+- Werte, die mit der Tiefe wachsen (#115), sind nicht gebaut.
+- Frederik hat ADR-0083 nicht gesehen.
 
 ## 20.10.2026, nachts: Sammlung im Laden, Fähigkeiten ohne Überschriften
 

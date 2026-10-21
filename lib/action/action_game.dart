@@ -5,10 +5,12 @@ import 'dart:ui' as ui;
 import 'package:action_combat/action_combat.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:gear/gear.dart';
 
 import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
 import 'action_sprites.dart';
+import 'beute_am_boden.dart';
 import 'beute_bild.dart';
 import 'beute_regen.dart';
 import 'damage_popup.dart';
@@ -17,6 +19,7 @@ import 'kampfgefuehl.dart';
 import 'neue_arten_bild.dart';
 import 'lauf_zeichen.dart';
 import 'minimap.dart';
+import 'pit_beute.dart';
 import 'pit_tints.dart';
 
 /// Die Halle, gezeichnet.
@@ -36,7 +39,11 @@ class ActionGame extends Game {
     required this.startXp,
     this.onRunEnded,
     this.zeichen,
-  });
+    this.funde,
+  }) : assert(
+         !sim.dropsItems || funde != null,
+         'Eine Grube mit Beute braucht jemanden, der sie würfelt',
+       );
 
   final ActionWorld sim;
 
@@ -59,6 +66,11 @@ class ActionGame extends Game {
   /// sich nicht mehr erklärt. Gezeichnet werden sie über dem Spielfeld
   /// (`LaufZeichenView`); hier erfahren sie nur, was geschehen ist.
   final LaufZeichen? zeichen;
+
+  /// Was an Beute gefallen ist (ADR-0083) — in der Grube, nicht in der
+  /// Tagesgrube und nicht im Prototyp. Würfelt beim Fallen, was es ist;
+  /// gezeichnet wird es mit [BeuteAmBoden].
+  final PitBeute? funde;
 
   /// Wird genau einmal gerufen, wenn der Lauf vorbei ist.
   final VoidCallback? onRunEnded;
@@ -326,6 +338,13 @@ class ActionGame extends Game {
           );
         case RunEnded():
           _endeGemeldet = true;
+        case ItemDropped():
+          final item = funde?.fallen(event).item;
+          if (item?.rarity == GearRarity.legendary) {
+            _klaenge.melde(SoundEffect.legendaer);
+          }
+        case ItemCollected():
+          _klaenge.melde(SoundEffect.fund);
         case HookThrown() ||
             LuckRolled() ||
             TrapSprung() ||
@@ -446,6 +465,10 @@ class ActionGame extends Game {
     _drawZones(canvas);
     _neueArten.drawBoden(canvas, sim);
     _drawOrbs(canvas);
+    final funde = this.funde;
+    if (funde != null) {
+      BeuteAmBoden.zeichne(canvas, sim.itemDrops, funde, sim.elapsed);
+    }
     if (bilder == null) {
       _drawEntities(canvas);
     } else {

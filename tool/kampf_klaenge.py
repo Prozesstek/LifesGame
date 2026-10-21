@@ -1,4 +1,4 @@
-"""Erzeugt die acht Klänge der Grube nach `assets/Sound/`.
+"""Erzeugt die zehn Klänge der Grube nach `assets/Sound/`.
 
 **Platzhalter.** Die Klänge sind gerechnet, nicht aufgenommen: Rauschen,
 ein paar Sinus- und Rechteckwellen, eine Hüllkurve. Damit gehören sie
@@ -203,6 +203,53 @@ def aufstieg():
     return _klang(dauer, stimme, 0.5)
 
 
+def fund():
+    """Ein Fund wird eingesammelt (ADR-0083): ein kurzer, voller Griff —
+    ein tiefer Schlag und darüber zwei Töne aufwärts, wie ein Beutel, der
+    zugeht. Tiefer und runder als die Münze, damit beide zu trennen sind."""
+    dauer = 0.22
+    ton, tief = _Ton(), _Ton()
+
+    def stimme(t, anteil):
+        zweiter = t >= 0.06
+        lokal = t - 0.06 if zweiter else t
+        h = _huelle(lokal, dauer, anstieg=0.003, schaerfe=4)
+        hertz = 784 if zweiter else 587
+        schlag = _huelle(t, 0.08, anstieg=0.002, schaerfe=6)
+        return h * ton.sinus(hertz) + 0.6 * schlag * tief.sinus(
+            _gleiten(180, 90, anteil)
+        )
+
+    return _klang(dauer, stimme, 0.42)
+
+
+def legendaer():
+    """Etwas Legendäres fällt (ADR-0083): ein heller Glockenakkord, der
+    langsam aufsteigt und lange nachklingt, mit einem Schimmer darüber.
+    Der einzige Klang der Grube, der länger als eine Sekunde dauert —
+    man soll stehen bleiben und hinsehen."""
+    dauer = 1.6
+    stimmen = [_Ton() for _ in range(4)]
+    schimmer = _Ton()
+    noten = (523, 659, 784, 1047)
+
+    def stimme(t, anteil):
+        summe = 0.0
+        for i, (hertz, welle) in enumerate(zip(noten, stimmen)):
+            einsatz = i * 0.09
+            if t < einsatz:
+                welle.sinus(hertz)
+                continue
+            h = _huelle(t - einsatz, dauer, anstieg=0.006, schaerfe=2.6)
+            summe += h * welle.sinus(hertz)
+        zittern = 0.5 + 0.5 * math.sin(2 * math.pi * 7 * t)
+        h = _huelle(t, dauer, anstieg=0.2, schaerfe=3)
+        summe += 0.25 * h * zittern * schimmer.sinus(2093)
+        return summe
+
+    return _klang(dauer, stimme, 0.5)
+
+
 KLAENGE = {
     "Treffer": treffer,
     "Getroffen": getroffen,
@@ -212,6 +259,8 @@ KLAENGE = {
     "Muenze": muenze,
     "Funke": funke,
     "Aufstieg": aufstieg,
+    "Fund": fund,
+    "Legendaer": legendaer,
 }
 
 
