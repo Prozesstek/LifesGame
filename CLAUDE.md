@@ -107,7 +107,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 400 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 401 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -137,7 +137,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
 | `lib/action/pit_beute.dart` | **was ein Fund ist** (ADR-0083): würfelt beim Fallen mit `GearLoot.cascade` aus Ebene, Startwert des Laufs und Nummer des Fundes — reine Rechnung | Flutter |
-| `lib/action/beute_am_boden.dart` | zeichnet Funde am Boden: den **Umriss** des Platzes (`GearIcons.gruppeFor`) im Rand der Seltenheit, Episches im Schein, **Legendäres unter einer Lichtsäule** — nur Darstellung | Flutter |
+| `lib/action/beute_am_boden.dart` | zeichnet Funde am Boden, **ein Feld groß**: den **Umriss** des Platzes (`GearIcons.gruppeFor`) im Rand der Seltenheit, Episches im Schein, **Legendäres unter einer Lichtsäule** — nur Darstellung | Flutter |
 | `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
 | `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
 | `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
@@ -312,7 +312,7 @@ dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je St
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 400 Tests
+dart test                              # 401 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -386,7 +386,11 @@ die Passive der Plätze und der Ausrüstung an einer Stelle, ausgeführt
 wird in `gear_powers.dart`. **Jede Heilung ausser dem Lebensraub geht
 über `_healHero`**: Dort macht der Blutpakt des vollen Vampirsets sie zu
 Schaden am nächsten Gegner. Wer eine neue Heilung baut und `_hero.hp`
-selbst setzt, heilt am Blutpakt vorbei. `ausruestung_kraefte_test.dart`.
+selbst setzt, heilt am Blutpakt vorbei. **Der Lebensraub rechnet am
+ganzen Schlag**, nicht an dem, was der Gegner noch an Leben hatte
+(`_afterHeroHit` bekommt den ungekappten Schaden) — sonst heilt der
+letzte Schlag auf einen fast Toten fast nichts.
+`ausruestung_kraefte_test.dart`.
 
 Eine Wirkung ist ein **Datum** (`PitEffect`, `sealed`), keine Methode:
 Eine neue Art trägt man dort ein, und der Analyzer zeigt auf die eine

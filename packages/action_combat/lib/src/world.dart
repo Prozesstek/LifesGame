@@ -1479,7 +1479,8 @@ class ActionWorld {
     roh = roh * streuung - target.defense / ActionBalance.defenseDivisor;
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
-    final wirklich = target.takeDamage(_mitigate(target, schaden));
+    final geplant = _mitigate(target, schaden);
+    final wirklich = target.takeDamage(geplant);
     if (target.isHero && wirklich > 0) _heroStruck();
     _knockBack(attacker, target);
     if (attacker.isHero) {
@@ -1506,7 +1507,10 @@ class ActionWorld {
       _healHero((wirklich * leech).round());
     }
     if (attacker.isHero && !byCompanion) {
-      _afterHeroHit(target, wirklich, kritisch);
+      // Der Lebensraub rechnet am ganzen Schlag, nicht an dem, was der
+      // Gegner noch an Leben hatte (AktivesBrett, 21.10.) — sonst heilt
+      // der letzte Schlag auf einen fast Toten fast nichts.
+      _afterHeroHit(target, wirklich > 0 ? geplant : 0, kritisch);
     }
     if (target.isHero && !attacker.isHero && _reflectLeft > 0) {
       final zurueck = attacker.takeDamage(

@@ -9,6 +9,7 @@ import 'package:gear/gear.dart';
 import '../gear/gear_icon.dart';
 import '../gear/widgets/rarity_badge.dart';
 import '../ui/palette.dart';
+import '../ui/pixel_art.dart';
 import 'pit_beute.dart';
 
 /// Wie Beute am Boden der Grube aussieht (ADR-0083) — **nur
@@ -23,8 +24,16 @@ import 'pit_beute.dart';
 /// Episches liegt in einem violetten Schein, Legendäres unter einer
 /// goldenen Lichtsäule, die man auch vom Rand des Bildes aus sieht.
 abstract final class BeuteAmBoden {
-  /// Wie groß ein Fund gezeichnet wird, von der Mitte zum Rand.
-  static const double halbeKante = 9;
+  /// Wie groß der Umriss steht: **die Hälfte der Zeichnung**
+  /// (`PixelArt.artSize` 64 → 32), ein Feld der Grube, so groß wie der
+  /// Held (AktivesBrett, 21.10. — vorher 14 Punkte, im Lauf kaum zu
+  /// sehen). Halb, damit je zwei mal zwei Bildpunkte zu einem werden und
+  /// nichts schief verwischt.
+  static const double umrissKante = PixelArt.artSize / 2;
+
+  /// Wie groß der Rahmen darum ist, von der Mitte zum Rand: zwei Punkte
+  /// Luft, sonst stößt ein Stiefel an die Kante.
+  static const double halbeKante = umrissKante / 2 + 2;
 
   /// Wie hoch die Lichtsäule über Legendärem steigt.
   static const double saeulenHoehe = 140;
@@ -99,11 +108,10 @@ abstract final class BeuteAmBoden {
     );
     final umriss = _umrisse[item.slot];
     if (umriss != null) {
-      final innen = halbeKante * 0.8;
       canvas.drawImageRect(
         umriss,
         Rect.fromLTWH(0, 0, umriss.width.toDouble(), umriss.height.toDouble()),
-        Rect.fromCenter(center: mitte, width: innen * 2, height: innen * 2),
+        Rect.fromCenter(center: mitte, width: umrissKante, height: umrissKante),
         Paint()
           ..filterQuality = FilterQuality.medium
           ..colorFilter = ColorFilter.mode(rahmen, BlendMode.srcIn),
@@ -148,9 +156,9 @@ abstract final class BeuteAmBoden {
     final gold = RarityBadge.rahmenOf(GearRarity.legendary);
     final atem = 0.55 + 0.2 * math.sin(zeit * 3);
     final saeule = Rect.fromLTRB(
-      mitte.dx - 7,
+      mitte.dx - halbeKante * 0.7,
       mitte.dy - saeulenHoehe,
-      mitte.dx + 7,
+      mitte.dx + halbeKante * 0.7,
       mitte.dy,
     );
     canvas.drawRect(

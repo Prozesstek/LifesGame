@@ -37,7 +37,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
 **Tests:** App 929, dazu die acht Packages (theory 204, habits 333, gear
-133, action_combat 400, progression 44, abilities 43, identity 25,
+133, action_combat 401, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,32 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 21.10.2026, zuletzt: Lebensraub am ganzen Schlag, Funde ein Feld groß
+
+AktivesBrett nach dem Spielen: „beim Life steal ist es wichtig, das ich
+auch wirklich so viel schaden mache wie ich kann und nicht nur wie die
+Gegner Leben haben“ — mit dem Vampirset heilte man sich teils nicht
+genug. Und die Funde am Boden sollen größer sein.
+
+| Was | Wie |
+|---|---|
+| **Lebensraub** | rechnet am **ungekappten** Schlag: 2000 auf einen Gegner mit 200 raubt aus 2000. Beim Blutpakt auch der Schaden aus dem Raub |
+| **Funde am Boden** | der Umriss 32 Punkte, ein Feld und die Hälfte der 64er-Zeichnung; der Rahmen 36 mit zwei Punkten Luft (vorher 14 und 18) |
+
+In einer Frage entschieden: ein Feld groß statt 64 Punkte, und weiter
+der Umriss in der Farbe der Seltenheit statt der echten Zeichnung.
+
+**Gemessen** (`pit_sim ausruestung 40`, Stufe 13, Sichel): ein Teil
+45 % (vorher 43 %), zwei Teile 63 % (63 %), **alle vier 55 %
+(vorher 28 %)**. Der Blutpakt ist damit nicht mehr schwächer als zwei
+Teile ohne Preis — knapp darunter. Die übrigen Kräfte unverändert.
+
+action_combat 401 (vorher 400): ein Test, dass ein angeschlagener
+Gegner denselben Raub bringt. Ein alter Test ging davon aus, dass der
+Raub allein nie mehr als drei Prozent heilt; er vergleicht jetzt mit
+demselben Lauf ohne Kill-Heilung. Die Funde in Stufen gerendert und
+angesehen. **Nicht gespielt.**
 
 ## 21.10.2026, danach: das Siegerblatt und Verkaufen mit Häkchen (Block 2 von #136)
 

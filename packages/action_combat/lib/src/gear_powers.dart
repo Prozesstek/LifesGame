@@ -129,9 +129,10 @@ extension _GearPowers on ActionWorld {
 
   // --- Ein Treffer mit eigener Hand ---
 
-  /// Was nach einem eigenen Treffer des Helden geschieht, der [wirklich]
-  /// abzog: Lebensraub, beim Blutpakt doppelt und mit Schaden, und Mana
-  /// aus kritischen Treffern.
+  /// Was nach einem eigenen Treffer des Helden geschieht: Lebensraub, beim
+  /// Blutpakt doppelt und mit Schaden, und Mana aus kritischen Treffern.
+  /// [wirklich] ist der **ganze Schlag**, nicht gekappt am Leben des
+  /// Ziels — ein Schlag für 2000 auf einen Gegner mit 200 raubt aus 2000.
   void _afterHeroHit(ActionEntity ziel, int wirklich, bool kritisch) {
     final falke = _gear<CritEdge>();
     if (kritisch && falke != null) _gainMana(falke.manaOnCrit.toDouble());
