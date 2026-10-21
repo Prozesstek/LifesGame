@@ -18,6 +18,7 @@ part 'aim.dart';
 part 'boss.dart';
 part 'effects.dart';
 part 'enemies.dart';
+part 'entwickler.dart';
 part 'gear_powers.dart';
 part 'hero_states.dart';
 part 'item_drops.dart';

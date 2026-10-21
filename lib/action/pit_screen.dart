@@ -13,6 +13,8 @@ import '../character/abilities_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/lauf_ergebnis.dart';
+import '../dev/dev_controller.dart';
+import '../dev/grube_werkbank.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
 import '../home/erster_start_provider.dart';
@@ -366,6 +368,21 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         title: Text('Die Grube · Stufe ${widget.stage.number}'),
         backgroundColor: Palette.backgroundRaised,
         foregroundColor: Palette.textOnDark,
+        actions: <Widget>[
+          // Die Werkbank: Funde und Gegner von Hand — nur im
+          // Entwicklermodus und nur auf dem Dev-Stand, damit der echte
+          // Stand keine erfundene Beute bekommt (ADR-0021).
+          if (devModeAvailable &&
+              ref.watch(activeSlotProvider).isDev &&
+              !_ergebnisGezeigt)
+            IconButton(
+              key: GrubeWerkbank.knopfKey,
+              tooltip: 'Werkbank',
+              icon: const Icon(Icons.science_outlined),
+              onPressed: () =>
+                  GrubeWerkbank.zeige(context, game: _game, funde: _funde),
+            ),
+        ],
       ),
       body: OnDark(
         child: Stack(

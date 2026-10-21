@@ -85,7 +85,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 136 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 137 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -107,7 +107,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 401 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 407 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -117,6 +117,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/hero_states.dart` | **was am Helden abläuft** ([ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)): Rage, Ruhepuls, zweiter Atem, Unsichtbarkeit, Parade, Bestform, Stacking, Kettenblitz, Blink, Rückspulen — und **die Grenze des Grundangriffs** (`_heroFactor`) | nur Dart-SDK |
 | `packages/action_combat/lib/src/gear_powers.dart` | **was die Ausrüstung am Helden tut** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)): Lebensraub und Blutpakt, Frostreif, Irrlichter, Flickwerk, Falkenblick, Hasenlauf, Seelenernte, Echo — und die Grundangriffe Speer und Sichel | nur Dart-SDK |
 | `packages/action_combat/lib/src/item_drops.dart` | **Beute in der Grube** ([ADR-0083](docs/decisions/0083-beute-in-der-grube.md)): die erste Stufe der Kaskade — *ob* ein Gegner etwas fallen lässt —, am Boden liegen, hinlaufen, einsammeln. Was es ist, weiß die Grube nicht | nur Dart-SDK |
+| `packages/action_combat/lib/src/entwickler.dart` | **nur Entwicklermodus**: Gegner beschwören und Funde legen, auf dem Weg des Spiels (`EntwicklerWerkzeug`) — der Wächter ist ausgenommen | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und Kräfte der Ausrüstung** Fähigkeiten verändern — und alle Kräfte selbst (`PitGearPowers`); eine Kraft am Helden kommt als `GrantPassive` (ADR-0077) | nur Dart-SDK |
@@ -228,7 +229,8 @@ durch die Grube ersetzt und gelöscht.
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
 | `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
-| `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat | Flutter |
+| `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat — Erfahrung, Gold, Punkte, Fähigkeiten **und Kampfwerte** (im Kampfmassstab, als eigener Summand in `heroPowerProvider`) | Flutter |
+| `lib/dev/grube_werkbank.dart` | **die Werkbank in der Grube**, nur auf dem Dev-Stand: Funde jeder Seltenheit vor den Helden legen, Gegner jeder Art beschwören; der Lauf steht still, solange sie offen ist | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
@@ -298,7 +300,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 929 Tests
+flutter test             # 934 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -312,7 +314,7 @@ dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je St
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 401 Tests
+dart test                              # 407 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -323,7 +325,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 204 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 44 Tests
-cd packages/gear        ; dart test    # 136 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog

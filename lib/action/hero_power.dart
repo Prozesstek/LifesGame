@@ -4,6 +4,7 @@ import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
 import 'package:progression/progression.dart';
 
+import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
@@ -43,6 +44,9 @@ final heroPowerProvider = Provider<HeroPower>((ref) {
   final level = ref.watch(playerLevelProvider).level;
   final loadout = ref.watch(loadoutProvider);
   final form = ref.watch(dailyFormProvider);
+  // Der Entwicklermodus legt Kampfwerte als eigenen Summanden dazu; ohne
+  // Zuschläge sind es Nullen (`dev_mode_test.dart`).
+  final dev = ref.watch(grantedStatsProvider);
 
   final stufe = PowerCurve.factorFor(level);
   final waffe = loadout.equippedIn(GearSlot.waffe)?.rarity.powerFactor ?? 1.0;
@@ -58,10 +62,10 @@ final heroPowerProvider = Provider<HeroPower>((ref) {
       maxHp: werte.base.maxHp,
       defense: werte.base.defense,
       energy: werte.base.maxEnergy,
-      gearAttack: werte.bonus.attack,
-      gearMaxHp: werte.bonus.maxHp,
-      gearDefense: werte.bonus.defense,
-      gearEnergy: werte.bonus.maxEnergy,
+      gearAttack: werte.bonus.attack + dev.attack,
+      gearMaxHp: werte.bonus.maxHp + dev.maxHp,
+      gearDefense: werte.bonus.defense + dev.defense,
+      gearEnergy: werte.bonus.maxEnergy + dev.mana,
       levelFactor: stufe,
       weaponFactor: waffe,
       armorFactor: ruestung,

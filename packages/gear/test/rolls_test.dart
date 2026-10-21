@@ -204,6 +204,22 @@ void main() {
   });
 
   group('Die Kaskade (ADR-0083)', () {
+    test('eine gewünschte Seltenheit ersetzt nur die dritte Stufe', () {
+      // Der Entwicklermodus legt Funde einer bestimmten Seltenheit.
+      for (var nth = 1; nth <= 20; nth++) {
+        final gewuerfelt = GearLoot.cascade(stage: 3, run: 77, nth: nth);
+        final legendaer = GearLoot.cascade(
+          stage: 3,
+          run: 77,
+          nth: nth,
+          rarity: GearRarity.legendary,
+        );
+        expect(legendaer.item!.rarity, GearRarity.legendary);
+        expect(legendaer.item!.slot, gewuerfelt.item!.slot, reason: 'Platz');
+        expect(legendaer.uid, gewuerfelt.uid);
+      }
+    });
+
     test('wiederholbar, und eindeutig je Lauf und Fund', () {
       final a = GearLoot.cascade(stage: 5, run: 123456, nth: 1);
       final b = GearLoot.cascade(stage: 5, run: 123456, nth: 1);

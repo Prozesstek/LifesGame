@@ -195,17 +195,23 @@ abstract final class GearLoot {
   /// [run] ist der Startwert des Laufs, [nth] der wievielte Fund darin;
   /// beide zusammen machen den Wurf wiederholbar und die Uid eindeutig,
   /// auch wenn dieselbe Ebene am selben Tag zweimal gespielt wird.
+  ///
+  /// [rarity] ersetzt die dritte Stufe — **nur für den Entwicklermodus**,
+  /// der einen Fund einer bestimmten Seltenheit beschwört. Gewürfelt wird
+  /// trotzdem, damit Platz und Werte dieselben Würfe nehmen.
   static GearCopy cascade({
     required int stage,
     required int run,
     required int nth,
     bool boss = false,
+    GearRarity? rarity,
   }) {
     final dice = GearDice(run * 31 + stage * 7727 + nth * 104729 + 11);
     final slot = GearRolls.rollSlot(dice);
-    var rarity = GearRolls.rollRarity(stage, dice);
-    if (boss) rarity = GearRolls.oneUp(rarity, stage);
-    final item = GearRolls.pick(slot, rarity, dice);
+    final gewuerfelt = GearRolls.rollRarity(stage, dice);
+    final seltenheit =
+        rarity ?? (boss ? GearRolls.oneUp(gewuerfelt, stage) : gewuerfelt);
+    final item = GearRolls.pick(slot, seltenheit, dice);
     return GearCopy(
       uid: 'beute-$stage-r$run-$nth',
       itemId: item.id,

@@ -36,8 +36,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 929, dazu die acht Packages (theory 204, habits 333, gear
-136, action_combat 401, progression 44, abilities 43, identity 25,
+**Tests:** App 934, dazu die acht Packages (theory 204, habits 333, gear
+137, action_combat 407, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,42 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 21.10.2026, nachts: der Entwicklermodus bekommt Kampfwerte, Ebenen und eine Werkbank
+
+AktivesBrett: „dass man sich Stats geben kann … und dass man zu einem
+bestimmten Level vorspringen kann und dass man in dem Level Items und
+Gegner beschwören kann … ich möchte testen, wie Legendarys aussehen,
+ohne die ganze Zeit Gegner töten zu müssen, und schauen, wie viel
+Schaden ich an bestimmten Gegnern mache.“
+
+| Was | Wie |
+|---|---|
+| **Kampfwerte** | Knöpfe für Angriff, Leben, Abwehr und Mana im Dev-Bildschirm; im Kampfmassstab wie der Wurf eines Stücks, danach mal Level, Seltenheit und Tagesform. Oben steht, was der Held im Kampf hat |
+| **Ebene wählen** | Feld „Ebene“ mit **Hinab** (ein Lauf dort, die Reihe bleibt, Beute fällt) und **Dorthin** (die Reihe so gesetzt, dass die Ebene die nächste ist) |
+| **Werkbank in der Grube** | ein Kolben oben rechts hält den Lauf an und öffnet ein Blatt: ein Fund jeder Seltenheit vor den Helden, ein Gegner jeder Art zwei, drei Felder in Blickrichtung |
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Werkbank gibt es nur auf dem Dev-Stand** (ADR-0021): Was sie
+  legt, landet beim Einsammeln im Rucksack, und erfundene Beute gehört
+  nicht in den echten Stand. Wer sie nicht sieht, schaltet im
+  Entwicklermodus auf den Dev-Stand um.
+- **Der Wächter lässt sich nicht beschwören** — sein Verhalten hängt
+  daran, dass es genau einen gibt und er in seinem Raum steht.
+- **Ein beschworener Gegner ist ein ganz normaler**: Werte der Stufe,
+  zählt für die Sammlung, lässt Beute fallen.
+- **„Dorthin“ zahlt, was darunter liegt**, weil die Reihe ihre
+  Belohnung aus der höchsten Stufe ableitet; zurückspringen nimmt es
+  wieder weg. Nur im Dev-Stand gedacht, gesperrt ist es nicht.
+- **Ein gewünschter Fund würfelt trotzdem** Platz und Werte — nur die
+  Seltenheit steht fest (`GearLoot.cascade(rarity:)`).
+
+Neu: `packages/action_combat/lib/src/entwickler.dart`,
+`lib/dev/grube_werkbank.dart`, `entwickler_test.dart` (6),
+`test/grube_werkbank_test.dart` (2). App 934 (vorher 929),
+action_combat 407 (vorher 401), gear 137 (vorher 136). **Nicht im
+Browser angesehen, nicht gespielt.**
 
 ## 21.10.2026, ganz zuletzt: die Würfel hingen zusammen, die Säule ist ein Strahl
 

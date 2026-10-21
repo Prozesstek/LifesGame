@@ -33,6 +33,18 @@ void main() {
       expect(copy.itemId, erwartet.itemId);
     });
 
+    test('ein gewünschter Fund hat die gewünschte Seltenheit '
+        '(Entwicklermodus)', () {
+      final beute = PitBeute(stage: 2, run: 5)
+        ..wuensche(1, GearRarity.legendary);
+      expect(beute.fallen(fund(1)).item!.rarity, GearRarity.legendary);
+      // Die übrigen würfeln weiter — auf Ebene 2 gibt es nichts Episches.
+      expect(
+        beute.fallen(fund(2)).item!.rarity.index,
+        lessThan(GearRarity.epic.index),
+      );
+    });
+
     test('derselbe Fund zweimal gemeldet bleibt derselbe', () {
       final beute = PitBeute(stage: 4, run: 7);
       final a = beute.fallen(fund(1));

@@ -20,6 +20,11 @@ class PitBeute {
   final int run;
 
   final Map<int, GearCopy> _funde = <int, GearCopy>{};
+  final Map<int, GearRarity> _gewuenscht = <int, GearRarity>{};
+
+  /// **Nur Entwicklermodus**: Der Fund mit der Nummer [nth] soll [rarity]
+  /// haben. Muss vor dem Fallen gesagt werden — danach ist gewürfelt.
+  void wuensche(int nth, GearRarity rarity) => _gewuenscht[nth] = rarity;
 
   /// Nimmt einen Fund aus der Grube auf und gibt zurück, was es ist.
   GearCopy fallen(ItemDropped fund) {
@@ -30,6 +35,7 @@ class PitBeute {
         run: run,
         nth: fund.nth,
         boss: fund.boss,
+        rarity: _gewuenscht[fund.nth],
       ),
     );
   }
