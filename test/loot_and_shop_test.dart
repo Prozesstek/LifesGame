@@ -175,52 +175,66 @@ void main() {
     });
   });
 
-  group('Die Beute des Wächters', () {
-    test('der erste Sieg bringt ein Stück, ohne Schlüssel', () {
+  group('Beute aus der Grube (ADR-0083)', () {
+    List<GearCopy> funde(int n) => <GearCopy>[
+      for (var i = 1; i <= n; i++)
+        GearLoot.cascade(stage: 3, run: 4711, nth: i, boss: i == n),
+    ];
+
+    test('die Funde eines Laufs landen im Rucksack, ohne Schlüssel', () {
       final c = mit(const SaveData());
-      final beute = c
-          .read(loadoutProvider.notifier)
-          .takeLoot(stage: 1, useKey: false);
-      expect(beute, isNotNull);
-      expect(c.read(loadoutProvider).owns(beute!.uid), isTrue);
+      final lauf = funde(4);
+      c.read(loadoutProvider.notifier).takeRunLoot(lauf);
+      for (final copy in lauf) {
+        expect(c.read(loadoutProvider).owns(copy.uid), isTrue);
+      }
       expect(c.read(loadoutProvider).keysConsumed, 0);
     });
 
-    test('ohne Schlüssel bleibt die Beute liegen', () {
+    test('derselbe Fund zweimal ist ein Exemplar', () {
+      final c = mit(const SaveData());
+      final lauf = funde(2);
+      c.read(loadoutProvider.notifier)
+        ..takeRunLoot(lauf)
+        ..takeRunLoot(lauf);
+      expect(c.read(loadoutProvider).ownedCopies, hasLength(2));
+    });
+
+    test('ohne Schlüssel kein Extra-Wurf', () {
       final c = mit(const SaveData());
       expect(
-        c.read(loadoutProvider.notifier).takeLoot(stage: 3, useKey: true),
+        c
+            .read(loadoutProvider.notifier)
+            .takeKeyLoot(stage: 3, run: 4711, nth: 5),
         isNull,
       );
       expect(c.read(loadoutProvider).ownedCopies, isEmpty);
     });
 
-    test('mit Schlüssel: ein Stück, ein Schlüssel weniger', () {
+    test('mit Schlüssel: ein Stück mehr, ein Schlüssel weniger', () {
       final c = mit(stand(tage: 1));
       final vorher = c.read(availableKeysProvider);
       final beute = c
           .read(loadoutProvider.notifier)
-          .takeLoot(stage: 3, useKey: true);
+          .takeKeyLoot(stage: 3, run: 4711, nth: 5);
       expect(beute, isNotNull);
+      expect(c.read(loadoutProvider).owns(beute!.uid), isTrue);
       expect(c.read(availableKeysProvider), vorher - 1);
     });
 
-    test('zwei Beuten sind zwei Exemplare', () {
+    test('der Extra-Wurf ist nicht einer der Funde', () {
       final c = mit(stand(tage: 1));
-      final a = c
-          .read(loadoutProvider.notifier)
-          .takeLoot(stage: 3, useKey: true);
-      final b = c
-          .read(loadoutProvider.notifier)
-          .takeLoot(stage: 3, useKey: true);
-      expect(a!.uid, isNot(b!.uid));
-      expect(c.read(loadoutProvider).ownedCopies, hasLength(2));
+      final lauf = funde(4);
+      final controller = c.read(loadoutProvider.notifier)..takeRunLoot(lauf);
+      final extra = controller.takeKeyLoot(stage: 3, run: 4711, nth: 5);
+      expect(lauf.map((f) => f.uid), isNot(contains(extra!.uid)));
+      expect(c.read(loadoutProvider).ownedCopies, hasLength(5));
     });
 
     test('Beute kostet kein Gold', () {
       final c = mit(stand(tage: 1));
       final vorher = c.read(goldProvider);
-      c.read(loadoutProvider.notifier).takeLoot(stage: 3, useKey: true);
+      c.read(loadoutProvider.notifier).takeRunLoot(funde(3));
       expect(c.read(goldProvider), greaterThanOrEqualTo(vorher));
     });
   });

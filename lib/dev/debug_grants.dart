@@ -21,6 +21,10 @@ class DebugGrants {
     this.bonusTheoryPoints = 0,
     this.bonusAbilityPoints = 0,
     this.unlockedAbilityIds = const <String>{},
+    this.bonusAttack = 0,
+    this.bonusMaxHp = 0,
+    this.bonusDefense = 0,
+    this.bonusMana = 0,
   });
 
   const DebugGrants.none() : this();
@@ -47,12 +51,25 @@ class DebugGrants {
   /// Fähigkeiten, die ohne ihre Bedingung als freigeschaltet gelten.
   final Set<String> unlockedAbilityIds;
 
+  /// Kampfwerte obendrauf — **im Kampfmassstab**, wie ein Wurf der
+  /// Ausrüstung (`ActionStats.gearAttack` und die anderen): Sie gehen als
+  /// eigener Summand in `heroPowerProvider` und werden danach mit Level,
+  /// Seltenheit und Tagesform vervielfacht wie jeder andere Wert.
+  final int bonusAttack;
+  final int bonusMaxHp;
+  final int bonusDefense;
+  final int bonusMana;
+
   bool get isEmpty {
     return bonusXp == 0 &&
         bonusGold == 0 &&
         bonusTheoryPoints == 0 &&
         bonusAbilityPoints == 0 &&
-        unlockedAbilityIds.isEmpty;
+        unlockedAbilityIds.isEmpty &&
+        bonusAttack == 0 &&
+        bonusMaxHp == 0 &&
+        bonusDefense == 0 &&
+        bonusMana == 0;
   }
 
   bool get isNotEmpty => !isEmpty;
@@ -63,6 +80,10 @@ class DebugGrants {
     int? bonusTheoryPoints,
     int? bonusAbilityPoints,
     Set<String>? unlockedAbilityIds,
+    int? bonusAttack,
+    int? bonusMaxHp,
+    int? bonusDefense,
+    int? bonusMana,
   }) {
     return DebugGrants(
       bonusXp: bonusXp ?? this.bonusXp,
@@ -70,6 +91,10 @@ class DebugGrants {
       bonusTheoryPoints: bonusTheoryPoints ?? this.bonusTheoryPoints,
       bonusAbilityPoints: bonusAbilityPoints ?? this.bonusAbilityPoints,
       unlockedAbilityIds: unlockedAbilityIds ?? this.unlockedAbilityIds,
+      bonusAttack: bonusAttack ?? this.bonusAttack,
+      bonusMaxHp: bonusMaxHp ?? this.bonusMaxHp,
+      bonusDefense: bonusDefense ?? this.bonusDefense,
+      bonusMana: bonusMana ?? this.bonusMana,
     );
   }
 
@@ -82,6 +107,10 @@ class DebugGrants {
     int gold = 0,
     int theoryPoints = 0,
     int abilityPoints = 0,
+    int attack = 0,
+    int maxHp = 0,
+    int defense = 0,
+    int mana = 0,
   }) {
     int atLeastZero(int value) => value < 0 ? 0 : value;
 
@@ -90,6 +119,10 @@ class DebugGrants {
       bonusGold: atLeastZero(bonusGold + gold),
       bonusTheoryPoints: atLeastZero(bonusTheoryPoints + theoryPoints),
       bonusAbilityPoints: atLeastZero(bonusAbilityPoints + abilityPoints),
+      bonusAttack: atLeastZero(bonusAttack + attack),
+      bonusMaxHp: atLeastZero(bonusMaxHp + maxHp),
+      bonusDefense: atLeastZero(bonusDefense + defense),
+      bonusMana: atLeastZero(bonusMana + mana),
     );
   }
 
@@ -106,6 +139,10 @@ class DebugGrants {
       'theoryPoints': bonusTheoryPoints,
       'abilityPoints': bonusAbilityPoints,
       'abilities': unlockedAbilityIds.toList()..sort(),
+      'attack': bonusAttack,
+      'maxHp': bonusMaxHp,
+      'defense': bonusDefense,
+      'mana': bonusMana,
     };
   }
 
@@ -124,6 +161,10 @@ class DebugGrants {
       unlockedAbilityIds: abilities is List
           ? <String>{...abilities.whereType<String>()}
           : const <String>{},
+      bonusAttack: number(json['attack']),
+      bonusMaxHp: number(json['maxHp']),
+      bonusDefense: number(json['defense']),
+      bonusMana: number(json['mana']),
     );
   }
 }

@@ -1,10 +1,13 @@
 import 'package:abilities/abilities.dart';
+import 'package:action_combat/action_combat.dart' show PitStage;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../action/action_prototype_screen.dart';
+import '../action/hero_power.dart';
+import '../action/pit_screen.dart';
 import '../action/pit_text.dart';
 import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
@@ -93,6 +96,42 @@ class DevScreen extends ConsumerWidget {
                 const _Note(
                   'Fähigkeitspunkte werden gespeichert, wirken aber noch '
                   'nicht — das Feature aus ADR-0013 ist nicht gebaut.',
+                ),
+
+                const _SectionTitle('Kampfwerte'),
+                _ButtonRow(
+                  entries: <String, VoidCallback>{
+                    'Angriff +100': () => _grants(ref).addStats(attack: 100),
+                    'Angriff +1000': () => _grants(ref).addStats(attack: 1000),
+                    'Leben +500': () => _grants(ref).addStats(maxHp: 500),
+                    'Leben +5000': () => _grants(ref).addStats(maxHp: 5000),
+                    'Abwehr +100': () => _grants(ref).addStats(defense: 100),
+                    'Mana +50': () => _grants(ref).addStats(mana: 50),
+                  },
+                ),
+                const _Note(
+                  'Im Kampfmassstab, wie der Wurf eines Ausrüstungsstücks — '
+                  'Level, Seltenheit und Tagesform vervielfachen ihn noch. '
+                  '„Nur Zuschläge zurücksetzen“ nimmt sie wieder weg.',
+                ),
+
+                const _SectionTitle('Grube'),
+                _EbenenWahl(
+                  onHinab: (ebene) => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => PitScreen(stage: PitStage(ebene)),
+                    ),
+                  ),
+                  onSpringen: (ebene) =>
+                      ref.read(ladderProvider.notifier).devSpringeZu(ebene),
+                ),
+                const _Note(
+                  '„Hinab“ startet einen Lauf auf dieser Ebene, ohne die '
+                  'Reihe zu ändern — ein Sieg zählt dort nicht, Beute schon. '
+                  '„Dorthin“ setzt die Reihe so, dass die Ebene die nächste '
+                  'ist; alles darunter gilt als geschafft. In der Grube '
+                  'öffnet der Kolben oben rechts die Werkbank: Funde jeder '
+                  'Seltenheit und Gegner jeder Art.',
                 ),
 
                 const _SectionTitle('Ausrüstung'),
@@ -331,7 +370,17 @@ class _CurrentValues extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final level = ref.watch(playerLevelProvider);
+    final kampf = ref.watch(heroPowerProvider).stats;
+    final geschenkt = ref.watch(grantedStatsProvider);
     final zeilen = <String, String>{
+      'Angriff · Leben · Abwehr im Kampf':
+          '${kampf.combatAttack} · ${kampf.combatMaxHp} · '
+          '${kampf.combatDefense}',
+      'davon geschenkt (vor Level)':
+          '+${geschenkt.attack} · +${geschenkt.maxHp} · '
+          '+${geschenkt.defense} · Mana +${geschenkt.mana}',
+      'Nächste Ebene der Grube':
+          '${ref.watch(ladderProvider).highestDefeated + 1}',
       'Level': '${level.level}',
       'Erfahrung':
           '${ref.watch(effectiveXpProvider)}'
@@ -506,6 +555,73 @@ class _FreeInputState extends State<_FreeInput> {
           FilledButton(onPressed: _submit, child: const Text('Geben')),
         ],
       ),
+    );
+  }
+}
+
+/// Eine Ebene eingeben, dann hinab oder dorthin springen.
+class _EbenenWahl extends StatefulWidget {
+  const _EbenenWahl({required this.onHinab, required this.onSpringen});
+
+  final void Function(int ebene) onHinab;
+  final void Function(int ebene) onSpringen;
+
+  @override
+  State<_EbenenWahl> createState() => _EbenenWahlState();
+}
+
+class _EbenenWahlState extends State<_EbenenWahl> {
+  final TextEditingController _controller = TextEditingController(text: '20');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int? get _ebene {
+    final wert = int.tryParse(_controller.text.trim());
+    if (wert == null) return null;
+    return wert.clamp(1, PitStage.count);
+  }
+
+  void _mit(void Function(int) handlung) {
+    final ebene = _ebene;
+    if (ebene != null) handlung(ebene);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: TextField(
+            key: const ValueKey<String>('dev-ebene'),
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: const InputDecoration(
+              isDense: true,
+              labelText: 'Ebene (1–${PitStage.count})',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        FilledButton(
+          key: const ValueKey<String>('dev-hinab'),
+          onPressed: () => _mit(widget.onHinab),
+          child: const Text('Hinab'),
+        ),
+        const SizedBox(width: 6),
+        OutlinedButton(
+          key: const ValueKey<String>('dev-dorthin'),
+          onPressed: () => _mit(widget.onSpringen),
+          child: const Text('Dorthin'),
+        ),
+      ],
     );
   }
 }

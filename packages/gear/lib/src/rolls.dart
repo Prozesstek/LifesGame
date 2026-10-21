@@ -92,6 +92,39 @@ abstract final class GearRolls {
     }
     return GearCatalog.forSlot(slot).first;
   }
+
+  /// Wie oft jeder Platz fällt — die zweite Stufe der Kaskade
+  /// (ADR-0083). Heute alle gleich; wer einen Platz seltener machen
+  /// will, dreht hier.
+  static const Map<GearSlot, int> slotWeights = <GearSlot, int>{
+    GearSlot.waffe: 1,
+    GearSlot.ruestung: 1,
+    GearSlot.helm: 1,
+    GearSlot.schuhe: 1,
+    GearSlot.ring: 1,
+    GearSlot.talisman: 1,
+  };
+
+  /// Welcher Platz fällt — gewichtet nach [slotWeights].
+  static GearSlot rollSlot(GearDice dice) {
+    final gesamt = slotWeights.values.fold<int>(0, (s, g) => s + g);
+    var rest = dice.next() * gesamt;
+    for (final eintrag in slotWeights.entries) {
+      if (rest < eintrag.value) return eintrag.key;
+      rest -= eintrag.value;
+    }
+    return slotWeights.keys.first;
+  }
+
+  /// [rarity] eine Stufe seltener — aber nur, wenn es die auf [stage]
+  /// überhaupt gibt (ADR-0034): Der Wächter von Ebene 5 wirft kein
+  /// Episches.
+  static GearRarity oneUp(GearRarity rarity, int stage) {
+    final hoeher = rarity.index + 1;
+    if (hoeher >= GearRarity.values.length) return rarity;
+    final naechste = GearRarity.values[hoeher];
+    return weightsFor(stage).containsKey(naechste) ? naechste : rarity;
+  }
 }
 
 /// Die sechs Angebote des Tages — eins je Platz, aus dem Datum gewürfelt.
@@ -146,6 +179,46 @@ abstract final class GearLoot {
       paid: 0,
     );
   }
+
+  /// **Die Kaskade** (ADR-0083): was ein Gegner in der Grube fallen
+  /// lässt, gewürfelt in Stufen, jede mit eigener Tabelle.
+  ///
+  /// 1. **Ob** etwas fällt — das entscheidet die Grube
+  ///    (`ActionBalance.itemDropChance`), denn dort steht, wer zäh ist.
+  /// 2. **Welcher Platz** — [GearRolls.slotWeights].
+  /// 3. **Welche Seltenheit** — [GearRolls.weightsFor] nach der Ebene;
+  ///    beim Wächter ([boss]) eine Stufe höher, soweit die Ebene sie
+  ///    erlaubt ([GearRolls.oneUp]).
+  /// 4. **Welches Stück** mit welchen Werten — [GearRolls.pick] und
+  ///    [GearRolls.rollBonus].
+  ///
+  /// [run] ist der Startwert des Laufs, [nth] der wievielte Fund darin;
+  /// beide zusammen machen den Wurf wiederholbar und die Uid eindeutig,
+  /// auch wenn dieselbe Ebene am selben Tag zweimal gespielt wird.
+  ///
+  /// [rarity] ersetzt die dritte Stufe — **nur für den Entwicklermodus**,
+  /// der einen Fund einer bestimmten Seltenheit beschwört. Gewürfelt wird
+  /// trotzdem, damit Platz und Werte dieselben Würfe nehmen.
+  static GearCopy cascade({
+    required int stage,
+    required int run,
+    required int nth,
+    bool boss = false,
+    GearRarity? rarity,
+  }) {
+    final dice = GearDice(run * 31 + stage * 7727 + nth * 104729 + 11);
+    final slot = GearRolls.rollSlot(dice);
+    final gewuerfelt = GearRolls.rollRarity(stage, dice);
+    final seltenheit =
+        rarity ?? (boss ? GearRolls.oneUp(gewuerfelt, stage) : gewuerfelt);
+    final item = GearRolls.pick(slot, seltenheit, dice);
+    return GearCopy(
+      uid: 'beute-$stage-r$run-$nth',
+      itemId: item.id,
+      bonus: GearRolls.rollBonus(item, dice),
+      paid: 0,
+    );
+  }
 }
 
 /// Ein kleiner, vorhersagbarer Würfel (Park–Miller) — derselbe wie für
@@ -155,12 +228,35 @@ abstract final class GearLoot {
 /// **Nicht `dart:math`:** Dessen Folge zu einem Startwert ist zwischen
 /// Plattformen nicht zugesagt. Diese Rechnung bleibt unter 2⁵³ und ergibt
 /// im Browser und im Test dasselbe Angebot.
+///
+/// **Der Startwert wird erst gemischt** ([_mische]). Ohne das ist der
+/// Würfel linear: Startwerte im gleichen Abstand — Fund 1, 2, 3 eines
+/// Laufs, die sechs Plätze eines Tages — ergeben erste Würfe im gleichen
+/// Abstand. Die Funde eines Laufs fielen dadurch gemeinsam: auf Ebene 22
+/// in jedem zwölften Lauf drei Legendäre, fast nie eins oder zwei
+/// (AktivesBrett, 21.10.; `rolls_test.dart`, „Funde hängen nicht
+/// zusammen“).
 class GearDice {
-  GearDice(int seed) : _zustand = (seed.abs() * 6007 + 7727) % _m {
+  GearDice(int seed) : _zustand = (_mische(seed) * 6007 + 7727) % _m {
     if (_zustand == 0) _zustand = 1;
     for (var i = 0; i < 3; i++) {
       next();
     }
+  }
+
+  /// Xorshift über 32 Bit — mit Masken, damit Browser (32 Bit) und VM
+  /// (64 Bit) dasselbe rechnen. Höhere Bits des Startwerts werden vorher
+  /// hineingefaltet; `%` und `~/` sind unter 2⁵³ auf beiden genau.
+  static int _mische(int seed) {
+    const voll = 0xFFFFFFFF;
+    final betrag = seed.abs();
+    var x = (betrag % 0x100000000) ^ (betrag ~/ 0x100000000);
+    for (var i = 0; i < 3; i++) {
+      x = (x ^ (x << 13)) & voll;
+      x = (x ^ (x >> 17)) & voll;
+      x = (x ^ (x << 5)) & voll;
+    }
+    return x;
   }
 
   static const int _m = 2147483647;

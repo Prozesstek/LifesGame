@@ -158,6 +158,123 @@ void main() {
     });
   });
 
+  group('Der Würfel', () {
+    // Läuft auch im Browser: `dart test -p chrome test/rolls_test.dart`.
+    test('rechnet überall dasselbe', () {
+      final wuerfel = GearDice(123456789012);
+      expect(wuerfel.next(), closeTo(0.0759585113972039, 1e-15));
+      expect(wuerfel.next(), closeTo(0.593324424785864, 1e-15));
+    });
+
+    test('Funde eines Laufs hängen nicht zusammen', () {
+      // Bis zum 21.10. ergaben Startwerte im gleichen Abstand erste Würfe
+      // im gleichen Abstand: Auf Ebene 22 brachte jeder zwölfte Lauf drei
+      // Legendäre, kaum einer eins. Erwartet bei 5 % und sechs Funden:
+      // ein Legendäres in 23 % der Läufe, zwei oder mehr in gut 3 %.
+      const laeufe = 3000;
+      var genauEins = 0;
+      var mehrere = 0;
+      for (var l = 0; l < laeufe; l++) {
+        final run = l * 7919 + 13;
+        var legendaer = 0;
+        for (var n = 1; n <= 6; n++) {
+          final copy = GearLoot.cascade(stage: 22, run: run, nth: n);
+          if (copy.item!.rarity == GearRarity.legendary) legendaer++;
+        }
+        if (legendaer == 1) genauEins++;
+        if (legendaer >= 2) mehrere++;
+      }
+      expect(genauEins / laeufe, inInclusiveRange(0.18, 0.28));
+      expect(mehrere / laeufe, inInclusiveRange(0.01, 0.06));
+    });
+
+    test('die sechs Angebote eines Tages hängen nicht zusammen', () {
+      // Unabhängig gewürfelt hat ein Tag in rund 10 % der Fälle nur zwei
+      // Seltenheiten oder weniger; vorher waren es 22 %.
+      const tage = 2000;
+      var arm = 0;
+      for (var tag = 20000; tag < 20000 + tage; tag++) {
+        final seltenheiten = DailyShop.offersFor(tag, highestRung: 22)
+            .map((c) => c.item!.rarity)
+            .toSet();
+        if (seltenheiten.length <= 2) arm++;
+      }
+      expect(arm / tage, lessThan(0.15));
+    });
+  });
+
+  group('Die Kaskade (ADR-0083)', () {
+    test('eine gewünschte Seltenheit ersetzt nur die dritte Stufe', () {
+      // Der Entwicklermodus legt Funde einer bestimmten Seltenheit.
+      for (var nth = 1; nth <= 20; nth++) {
+        final gewuerfelt = GearLoot.cascade(stage: 3, run: 77, nth: nth);
+        final legendaer = GearLoot.cascade(
+          stage: 3,
+          run: 77,
+          nth: nth,
+          rarity: GearRarity.legendary,
+        );
+        expect(legendaer.item!.rarity, GearRarity.legendary);
+        expect(legendaer.item!.slot, gewuerfelt.item!.slot, reason: 'Platz');
+        expect(legendaer.uid, gewuerfelt.uid);
+      }
+    });
+
+    test('wiederholbar, und eindeutig je Lauf und Fund', () {
+      final a = GearLoot.cascade(stage: 5, run: 123456, nth: 1);
+      final b = GearLoot.cascade(stage: 5, run: 123456, nth: 1);
+      expect(a.uid, b.uid);
+      expect(a.itemId, b.itemId);
+      expect(a.bonus, b.bonus);
+      expect(GearLoot.cascade(stage: 5, run: 123456, nth: 2).uid, isNot(a.uid));
+      // Dieselbe Ebene am selben Tag noch einmal: ein anderer Lauf, also
+      // eine andere Uid — sonst wäre das zweite Stück schon „besessen".
+      expect(GearLoot.cascade(stage: 5, run: 654321, nth: 1).uid, isNot(a.uid));
+    });
+
+    test('kostet nichts, und auch der größte Lauf rechnet sicher', () {
+      final groesster = GearLoot.cascade(
+        stage: 100,
+        run: (1 << 30) - 1,
+        nth: 40,
+        boss: true,
+      );
+      expect(groesster.paid, 0);
+      expect(groesster.item, isNotNull);
+    });
+
+    test('jeder Platz kann fallen', () {
+      final plaetze = <GearSlot>{
+        for (var n = 0; n < 100; n++)
+          GearLoot.cascade(stage: 3, run: 77, nth: n).item!.slot,
+      };
+      expect(plaetze, GearSlot.values.toSet());
+    });
+
+    test('der Wächter wirft eine Stufe seltener', () {
+      var mehr = 0;
+      for (var n = 0; n < 200; n++) {
+        final fuss = GearLoot.cascade(stage: 12, run: 9, nth: n);
+        final boss = GearLoot.cascade(stage: 12, run: 9, nth: n, boss: true);
+        expect(
+          boss.item!.rarity.index,
+          greaterThanOrEqualTo(fuss.item!.rarity.index),
+        );
+        if (boss.item!.rarity.index > fuss.item!.rarity.index) mehr++;
+      }
+      expect(mehr, greaterThan(150));
+    });
+
+    test('auch der Wächter hält die Sperren der Ebene', () {
+      for (var n = 0; n < 300; n++) {
+        final flach = GearLoot.cascade(stage: 9, run: 5, nth: n, boss: true);
+        expect(flach.item!.rarity.index, lessThan(GearRarity.epic.index));
+        final mitte = GearLoot.cascade(stage: 15, run: 5, nth: n, boss: true);
+        expect(mitte.item!.rarity, isNot(GearRarity.legendary));
+      }
+    });
+  });
+
   group('Die Schlüssel', () {
     test('verdient minus verbraucht, höchstens zehn', () {
       expect(GearKeys.available(earned: 0, consumed: 0), 0);

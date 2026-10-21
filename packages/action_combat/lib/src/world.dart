@@ -18,8 +18,10 @@ part 'aim.dart';
 part 'boss.dart';
 part 'effects.dart';
 part 'enemies.dart';
+part 'entwickler.dart';
 part 'gear_powers.dart';
 part 'hero_states.dart';
+part 'item_drops.dart';
 part 'summons.dart';
 
 /// Ein Lauf durch eine Halle.
@@ -44,9 +46,13 @@ class ActionWorld {
     String? weaponMoveId,
     List<PitModifier> modifiers = const <PitModifier>[],
     this.rewardPot = const (xp: 0, gold: 0),
+    this.dropsItems = false,
     int seed = 1,
   })  : _level = level,
         _rng = math.Random(seed),
+        // Eigener Würfel für die Beute (ADR-0083): Ob etwas fällt, soll
+        // keinen kritischen Treffer und keine Kugel verschieben.
+        _lootRng = math.Random(seed * 31 + 7),
         weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
         _mana = heroStats.maxMana.toDouble(),
         // Sets und legendäre Kräfte werden hier einmal angewendet; die
@@ -183,6 +189,11 @@ class ActionWorld {
   /// sind die Tests geschrieben, die eine Mechanik prüfen statt einer
   /// Stufe.
   final PitStage? stage;
+
+  /// Ob Gegner in diesem Lauf Ausrüstung fallen lassen (ADR-0083). In der
+  /// Grube ja, in der Tagesgrube nicht — sie zahlt nur Ruhm (ADR-0072).
+  /// Tests und Simulationen schalten es ein, wenn sie es brauchen.
+  final bool dropsItems;
 
   /// Die Fähigkeiten, die in diesen Lauf mitgehen, in Platzreihenfolge.
   ///
@@ -337,6 +348,16 @@ class ActionWorld {
   final List<_Zone> _zones = <_Zone>[];
   final List<HealthOrb> _orbs = <HealthOrb>[];
 
+  // --- Beute in der Grube (ADR-0083) ---
+
+  final math.Random _lootRng;
+
+  /// Was am Boden liegt, und die Nummern dessen, was eingesammelt ist —
+  /// in der Reihenfolge des Fundes.
+  final List<_ItemDrop> _items = <_ItemDrop>[];
+  final List<int> _collectedItems = <int>[];
+  int _itemsDropped = 0;
+
   // --- Was die Darstellung sehen darf ---
 
   /// Kopien, keine Verweise: Die Darstellung soll zeichnen, nicht
@@ -420,6 +441,21 @@ class ActionWorld {
           ),
     ];
   }
+
+  /// Was an Beute am Boden liegt (ADR-0083).
+  List<ItemDropView> get itemDrops => <ItemDropView>[
+        for (final fund in _items)
+          if (!fund.taken)
+            ItemDropView(id: fund.id, nth: fund.nth, position: fund.position),
+      ];
+
+  /// Die Nummern der eingesammelten Funde, in der Reihenfolge des
+  /// Einsammelns — das, was nach dem Lauf in den Rucksack geht.
+  List<int> get collectedItems => List<int>.unmodifiable(_collectedItems);
+
+  /// Wie viele Funde in diesem Lauf gefallen sind, eingesammelt oder
+  /// nicht.
+  int get itemsDropped => _itemsDropped;
 
   // --- Was der Held gesetzt hat (ADR-0073) ---
 
@@ -905,6 +941,7 @@ class ActionWorld {
     _tickRocks(dt);
     _separate();
     _moveOrbs(dt);
+    _moveItems(dt);
     _collectDead();
     _updateGate();
     _tickEntrance(dt);
@@ -1443,7 +1480,8 @@ class ActionWorld {
     roh = roh * streuung - target.defense / ActionBalance.defenseDivisor;
 
     final schaden = math.max(ActionBalance.minDamage, roh.round());
-    final wirklich = target.takeDamage(_mitigate(target, schaden));
+    final geplant = _mitigate(target, schaden);
+    final wirklich = target.takeDamage(geplant);
     if (target.isHero && wirklich > 0) _heroStruck();
     _knockBack(attacker, target);
     if (attacker.isHero) {
@@ -1470,7 +1508,10 @@ class ActionWorld {
       _healHero((wirklich * leech).round());
     }
     if (attacker.isHero && !byCompanion) {
-      _afterHeroHit(target, wirklich, kritisch);
+      // Der Lebensraub rechnet am ganzen Schlag, nicht an dem, was der
+      // Gegner noch an Leben hatte (AktivesBrett, 21.10.) — sonst heilt
+      // der letzte Schlag auf einen fast Toten fast nichts.
+      _afterHeroHit(target, wirklich > 0 ? geplant : 0, kritisch);
     }
     if (target.isHero && !attacker.isHero && _reflectLeft > 0) {
       final zurueck = attacker.takeDamage(
@@ -1680,6 +1721,7 @@ class ActionWorld {
       }
       _maybeDropOrb(entity);
       _maybeDropTime(entity);
+      _maybeDropItem(entity);
       _dropLoot(entity);
       _onKill();
       _events.add(

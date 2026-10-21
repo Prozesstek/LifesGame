@@ -13,6 +13,7 @@
 //     dart run tool/pit_sim.dart mana     # nur: bremst Mana?
 //     dart run tool/pit_sim.dart faehigkeiten   # nur: je Fähigkeit
 //     dart run tool/pit_sim.dart ausruestung    # nur: je Kraft (ADR-0077)
+//     dart run tool/pit_sim.dart beute          # nur: Funde je Lauf (ADR-0083)
 
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
@@ -35,6 +36,11 @@ void main(List<String> args) {
   // `ausruestung` rechnet nur die Tabelle je Kraft (ADR-0077).
   if (args.isNotEmpty && args.first == 'ausruestung') {
     _jeKraft(args.length > 1 ? int.parse(args[1]) : 12);
+    return;
+  }
+  // `beute` zählt nur, wie viel in einem Lauf fällt (ADR-0083).
+  if (args.isNotEmpty && args.first == 'beute') {
+    _beute(args.length > 1 ? int.parse(args[1]) : 40);
     return;
   }
   final laeufe = args.isEmpty ? 12 : int.parse(args.first);
@@ -255,6 +261,56 @@ void _jeFaehigkeit(int laeufe) {
       zeile.write('$quote %'.padLeft(10));
     }
     print(zeile);
+  }
+  print('');
+}
+
+/// **Wie viel fällt** (ADR-0083): Funde je Lauf, Tag 30 mit Funkenstoß,
+/// Steinhaut und Blütentau, je Ebene. Gezählt wird, was **fällt** — der
+/// Bot läuft keinem Fund nach, er sammelt nur ein, was ihm vor die Füße
+/// fällt. Ein Mensch, der hinläuft, kommt auf die erste Spalte.
+void _beute(int laeufe) {
+  final stats = _statsNach(30);
+  const plaetze = <String>['funkenstoss', 'steinhaut', 'bluetentau'];
+  print(
+    'Funde je Lauf — Tag 30, Bogen, Funkenstoß, Steinhaut, Blütentau, '
+    '$laeufe Läufe je Ebene\n',
+  );
+  print(
+    '  Ebene   gefallen   vom Bot geholt   Siege   '
+    'gefallen je Sieg',
+  );
+  for (final ebene in <int>[1, 5, 10, 15, 20, 30]) {
+    var gefallen = 0;
+    var geholt = 0;
+    var siege = 0;
+    var gefallenImSieg = 0;
+    for (var seed = 0; seed < laeufe; seed++) {
+      final stage = PitStage(ebene);
+      final welt = ActionWorld(
+        level: LevelBuilder.build(stage: stage, seed: seed),
+        heroStats: stats,
+        stage: stage,
+        abilityIds: plaetze,
+        weaponMoveId: 'basic_attack',
+        dropsItems: true,
+        seed: seed,
+      );
+      PitBot.play(welt);
+      gefallen += welt.itemsDropped;
+      geholt += welt.collectedItems.length;
+      if (welt.isWon) {
+        siege++;
+        gefallenImSieg += welt.itemsDropped;
+      }
+    }
+    String zahl(num wert) => wert.toStringAsFixed(1).padLeft(8);
+    print(
+      '  ${'$ebene'.padLeft(5)}${zahl(gefallen / laeufe)}   '
+      '${zahl(geholt / laeufe)}         '
+      '${'${(siege * 100 / laeufe).round()} %'.padLeft(5)}   '
+      '${zahl(siege == 0 ? 0 : gefallenImSieg / siege)}',
+    );
   }
   print('');
 }

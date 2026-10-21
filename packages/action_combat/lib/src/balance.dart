@@ -715,4 +715,25 @@ abstract final class ActionBalance {
 
   /// Wie breit der Stich des Langspeers ist — von der Mitte zum Rand.
   static const double spearHalfWidth = 9;
+
+  // --- Beute in der Grube (ADR-0083) ---
+
+  /// **Die erste Stufe der Kaskade: ob überhaupt etwas fällt.** Was dann
+  /// fällt — Platz, Seltenheit, Stück —, würfelt `package:gear`
+  /// (`GearLoot.cascade`); die Grube weiß nur, wer gefallen ist.
+  ///
+  /// Gemessen gegen die Zahl der Gegner (rund 20 auf Ebene 1, 28 ab
+  /// Ebene 10, 36 auf Ebene 30, davon 2 bis 5 zähe): Wer alles fällt,
+  /// findet mit dem Stück des Wächters 4 bis 6 je Lauf.
+  static const double itemDropChance = 0.13;
+
+  /// Dasselbe für zähe Gegner — Troll und Grimlock.
+  static const double itemDropChanceTough = 0.3;
+
+  /// Wie gross ein Fund am Boden ist, und ab wie weit er zum Helden
+  /// gleitet. Kleiner als bei den Kugeln: Beute soll man holen, nicht
+  /// im Vorbeigehen einsaugen.
+  static const double itemRadius = 8;
+  static const double itemMagnetRange = 30;
+  static const double itemMagnetSpeed = 160;
 }

@@ -30,6 +30,15 @@ class LadderController extends Notifier<LadderProgress> {
     state = state.recordDefeat(rung);
   }
 
+  /// **Nur Entwicklermodus**: Setzt die Reihe so, dass [ebene] die
+  /// nächste ist. Was darunter liegt, gilt als geschafft und zahlt, wie es
+  /// abgeleitet wird (`LadderProgress` rechnet aus der höchsten Stufe);
+  /// zurückspringen nimmt es wieder weg.
+  void devSpringeZu(int ebene) {
+    final hoechste = (ebene - 1).clamp(0, PitStage.count - 1);
+    state = state.copyWith(highestDefeated: hoechste);
+  }
+
   /// Was ein Lauf auf [stage] noch einbringen kann — der Rest des Topfs
   /// (ADR-0041). Geht in die Welt, die ihn je Gegner ausschüttet.
   Payout potFor(int stage) => state.potFor(stage);

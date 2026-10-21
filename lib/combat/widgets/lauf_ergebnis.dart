@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gear/gear.dart';
 
 import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import 'siegerblatt_funde.dart';
 
 /// Das Blatt am Ende eines Laufs in der Grube (Frederik, 30.09.) —
 /// **Sieg und Niederlage im selben Aufbau.**
@@ -18,6 +20,11 @@ import '../../ui/palette.dart';
 /// als der Topf der Stufe ist es nie (`loot_test.dart`). Ein zweiter Sieg
 /// bringt nichts (ADR-0032); dann fehlen die Zeilen, und der Tipp auf die
 /// Überschrift sagt warum.
+///
+/// **Darunter die Funde** (ADR-0083), nach AktivesBretts Skizze zu #136:
+/// Sie drehen sich nacheinander um, tragen den Pfeil gegen das Getragene,
+/// öffnen beim Antippen ihr Blatt und lassen sich mit Häkchen verkaufen
+/// ([SiegerblattFunde]) — auch nach einer Niederlage.
 class LaufErgebnis extends StatefulWidget {
   const LaufErgebnis({
     required this.won,
@@ -27,6 +34,7 @@ class LaufErgebnis extends StatefulWidget {
     this.earnedGold = 0,
     this.newBest = false,
     this.timedOut = false,
+    this.beute = const <GearCopy>[],
     super.key,
   });
 
@@ -42,6 +50,12 @@ class LaufErgebnis extends StatefulWidget {
   /// Ob die Zeit abgelaufen ist (ADR-0046) — dann trägt die Uhr einen
   /// Strich.
   final bool timedOut;
+
+  /// Was in diesem Lauf eingesammelt wurde, in der Reihenfolge des Fundes.
+  final List<GearCopy> beute;
+
+  /// Woran Tests die Funde finden.
+  static const Key fundeKey = ValueKey<String>('lauf-funde');
 
   /// Woran Tests den Knopf finden.
   static const Key weiterKey = ValueKey<String>('lauf-weiter');
@@ -90,6 +104,8 @@ class _LaufErgebnisState extends State<LaufErgebnis>
     return HolzDialog(
       child: AlertDialog(
         backgroundColor: Palette.surface,
+        // Viele Funde machen das Blatt höher als ein kleines Handy.
+        scrollable: true,
         elevation: 0,
         insetPadding: EdgeInsets.zero,
         shape: const RoundedRectangleBorder(),
@@ -138,8 +154,20 @@ class _LaufErgebnisState extends State<LaufErgebnis>
                 semanticLabel: '${widget.earnedGold} Gold',
               ),
             ],
+            if (widget.beute.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 16),
+              SiegerblattFunde(
+                key: LaufErgebnis.fundeKey,
+                funde: widget.beute,
+                // Erst wenn Erfahrung und Gold da sind — ohne sie gleich.
+                vorlauf: Duration(milliseconds: _hatBeute ? 1200 : 300),
+              ),
+            ],
             const SizedBox(height: 22),
-            _WeiterKnopf(ablauf: _ablauf, beginn: _hatBeute ? 0.75 : 0.2),
+            _WeiterKnopf(
+              ablauf: _ablauf,
+              beginn: _hatBeute || widget.beute.isNotEmpty ? 0.75 : 0.2,
+            ),
           ],
         ),
       ),

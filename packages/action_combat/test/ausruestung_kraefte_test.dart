@@ -169,6 +169,37 @@ void main() {
       fail('kein Treffer in fünf Sekunden');
     });
 
+    test('rechnet am ganzen Schlag, nicht am Rest des Lebens', () {
+      // Zwei gleiche Läufe; in einem hat der Gegner fast kein Leben mehr.
+      // Der Schlag zieht dort weniger ab, der Raub bleibt derselbe.
+      (HitLanded, HeroHealed) ersterRaub({required bool angeschlagen}) {
+        final welt = _welt(
+          modifiers: PitGearPowers.nachtmantel.modifiers,
+          level: _dicht,
+        );
+        welt.debugWound(welt.heroView.id, 0.5);
+        if (angeschlagen) {
+          final gegner = welt.views.firstWhere(
+            (v) => v.faction != Faction.held && v.kind != EnemyKind.endgegner,
+          );
+          welt.debugWound(gegner.id, 0.05);
+        }
+        for (var i = 0; i < _schritte(5); i++) {
+          welt.step(Vec2.zero);
+          final jetzt = welt.drainEvents();
+          final treffer = _treffer(jetzt).firstOrNull;
+          if (treffer == null) continue;
+          return (treffer, jetzt.whereType<HeroHealed>().single);
+        }
+        fail('kein Treffer in fünf Sekunden');
+      }
+
+      final (voll, heilungVoll) = ersterRaub(angeschlagen: false);
+      final (rest, heilungRest) = ersterRaub(angeschlagen: true);
+      expect(rest.amount, lessThan(voll.amount), reason: 'gekappt am Leben');
+      expect(heilungRest.amount, heilungVoll.amount);
+    });
+
     test('ohne Stück heilt kein Treffer', () {
       final welt = _welt(level: _dicht);
       welt.debugWound(welt.heroView.id, 0.5);
@@ -284,10 +315,22 @@ void main() {
       final alle = _laufe(vier, _schritte(1));
       expect(alle.whereType<EntityDied>(), isNotEmpty);
       // Kein Gegner mehr in Sicht: Die Kill-Heilung verpufft, und geheilt
-      // hat höchstens der Lebensraub.
-      final geheilt =
-          alle.whereType<HeroHealed>().fold<int>(0, (s, e) => s + e.amount);
-      expect(geheilt, lessThan((vier.heroMaxHp * 0.03).round()));
+      // hat nur der Lebensraub — genau so viel wie im selben Lauf ganz ohne
+      // Kill-Heilung. (Seit der Raub am ganzen Schlag rechnet, kann er
+      // allein mehr heilen als die drei Prozent eines Kills.)
+      final ohneKillHeilung = _welt(
+        modifiers: <PitModifier>[
+          ..._vampir.where(
+            (m) => !(m is GrantPassive && m.passive is HealOnKill),
+          ),
+        ],
+        level: _dicht,
+      );
+      ohneKillHeilung.debugWound(ohneKillHeilung.heroView.id, 0.5);
+      final vergleich = _laufe(ohneKillHeilung, _schritte(1));
+      int geheilt(List<ActionEvent> e) =>
+          e.whereType<HeroHealed>().fold<int>(0, (s, h) => s + h.amount);
+      expect(geheilt(alle), geheilt(vergleich));
     });
   });
 

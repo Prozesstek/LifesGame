@@ -10,6 +10,7 @@ import '../achievements/achievement_stats.dart';
 import '../save/save_providers.dart';
 import '../theory/review_controller.dart';
 import '../theory/theory_controller.dart';
+import 'verkauf_auswahl.dart';
 
 /// Bindeglied zwischen Ausrüstung und Oberfläche.
 ///
@@ -71,27 +72,37 @@ class GearController extends Notifier<Loadout> {
     );
   }
 
-  /// Nimmt die Beute des Wächters auf (ADR-0048).
+  /// Legt die Funde eines Laufs in den Rucksack (ADR-0083).
   ///
-  /// [useKey] heißt: dafür wird ein Schlüssel eingesetzt. Der erste Sieg
-  /// auf einer Stufe kostet keinen. Gibt das Exemplar zurück, oder null,
-  /// wenn ein Schlüssel nötig war und keiner da ist.
-  GearCopy? takeLoot({required int stage, required bool useKey}) {
-    if (useKey) {
-      final verdient = ref.read(earnedKeysProvider);
-      final da = GearKeys.available(
-        earned: verdient,
-        consumed: state.keysConsumed,
-      );
-      if (da <= 0) return null;
-      state = state.useKey(earned: verdient);
+  /// **Eingesammelt ist eingesammelt**, auch nach einer Niederlage: Was der
+  /// Held aufgehoben hat, bleibt. Was am Boden liegen blieb, steht gar
+  /// nicht erst in [funde].
+  void takeRunLoot(List<GearCopy> funde) {
+    var neu = state;
+    for (final copy in funde) {
+      neu = neu.addFree(copy);
     }
-    final beute = GearLoot.drop(
-      stage: stage,
-      dayIndex: ref.read(dayIndexProvider),
-      nth: state.lootCount + 1,
+    state = neu;
+  }
+
+  /// Ein Schlüssel öffnet nach dem Lauf einen Extra-Wurf auf der Kaskade
+  /// (ADR-0083) — so bleibt Abhaken die Quelle von mehr Beute (ADR-0048).
+  ///
+  /// [run] ist der Startwert des Laufs, [nth] die nächste freie Nummer
+  /// darin. Gibt das Exemplar zurück, oder null ohne Schlüssel.
+  GearCopy? takeKeyLoot({
+    required int stage,
+    required int run,
+    required int nth,
+  }) {
+    final verdient = ref.read(earnedKeysProvider);
+    final da = GearKeys.available(
+      earned: verdient,
+      consumed: state.keysConsumed,
     );
-    state = state.addFree(beute);
+    if (da <= 0) return null;
+    final beute = GearLoot.cascade(stage: stage, run: run, nth: nth);
+    state = state.useKey(earned: verdient).addFree(beute);
     return beute;
   }
 
@@ -118,6 +129,21 @@ class GearController extends Notifier<Loadout> {
       if (item != null) erloes += Loadout.refundFor(item);
     }
     state = state.sellAll(weg.map((c) => c.uid));
+    return erloes;
+  }
+
+  /// Verkauft, was mit Häkchen ausgewählt ist (ADR-0083) — nur, was
+  /// [VerkaufAuswahl.waehlbar] ist: Gesperrtes und Getragenes bleiben,
+  /// egal wer sie hereinreicht. Gibt den Erlös zurück.
+  int sellSelected(Iterable<String> uids) {
+    final weg = <String>[
+      for (final uid in uids)
+        if (state.copyByUid(uid) case final copy?
+            when VerkaufAuswahl.waehlbar(state, copy))
+          uid,
+    ];
+    final erloes = VerkaufAuswahl.erloes(state, weg);
+    state = state.sellAll(weg);
     return erloes;
   }
 
