@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
-import '../../gear/gear_icon.dart';
-import '../../gear/widgets/rarity_badge.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
-import '../../ui/pixel_art.dart';
+import 'siegerblatt_funde.dart';
 
 /// Das Blatt am Ende eines Laufs in der Grube (Frederik, 30.09.) —
 /// **Sieg und Niederlage im selben Aufbau.**
@@ -23,8 +21,10 @@ import '../../ui/pixel_art.dart';
 /// bringt nichts (ADR-0032); dann fehlen die Zeilen, und der Tipp auf die
 /// Überschrift sagt warum.
 ///
-/// **Darunter die Funde** (ADR-0083): was eingesammelt wurde, als
-/// Kacheln im Rand ihrer Seltenheit — auch nach einer Niederlage.
+/// **Darunter die Funde** (ADR-0083), nach AktivesBretts Skizze zu #136:
+/// Sie drehen sich nacheinander um, tragen den Pfeil gegen das Getragene,
+/// öffnen beim Antippen ihr Blatt und lassen sich mit Häkchen verkaufen
+/// ([SiegerblattFunde]) — auch nach einer Niederlage.
 class LaufErgebnis extends StatefulWidget {
   const LaufErgebnis({
     required this.won,
@@ -104,6 +104,8 @@ class _LaufErgebnisState extends State<LaufErgebnis>
     return HolzDialog(
       child: AlertDialog(
         backgroundColor: Palette.surface,
+        // Viele Funde machen das Blatt höher als ein kleines Handy.
+        scrollable: true,
         elevation: 0,
         insetPadding: EdgeInsets.zero,
         shape: const RoundedRectangleBorder(),
@@ -154,11 +156,11 @@ class _LaufErgebnisState extends State<LaufErgebnis>
             ],
             if (widget.beute.isNotEmpty) ...<Widget>[
               const SizedBox(height: 16),
-              _Funde(
+              SiegerblattFunde(
                 key: LaufErgebnis.fundeKey,
-                ablauf: _ablauf,
-                beginn: _hatBeute ? 0.6 : 0.15,
                 funde: widget.beute,
+                // Erst wenn Erfahrung und Gold da sind — ohne sie gleich.
+                vorlauf: Duration(milliseconds: _hatBeute ? 1200 : 300),
               ),
             ],
             const SizedBox(height: 22),
@@ -290,76 +292,6 @@ class _BeuteZeile extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-/// Die Funde des Laufs als Kacheln im Rand ihrer Seltenheit (ADR-0083).
-class _Funde extends StatelessWidget {
-  const _Funde({
-    required this.ablauf,
-    required this.beginn,
-    required this.funde,
-    super.key,
-  });
-
-  final Animation<double> ablauf;
-  final double beginn;
-  final List<GearCopy> funde;
-
-  static const double _kante = 44;
-
-  @override
-  Widget build(BuildContext context) {
-    final herein = CurvedAnimation(
-      parent: ablauf,
-      curve: Interval(beginn, beginn + 0.2, curve: Curves.easeOut),
-    );
-    return Semantics(
-      container: true,
-      label: '${funde.length} Funde',
-      child: FadeTransition(
-        opacity: herein,
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 6,
-          runSpacing: 6,
-          children: <Widget>[
-            for (final copy in funde)
-              if (copy.item case final item?) _kachel(item),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _kachel(GearItem item) {
-    final bild = GearIcons.forItemId(item.id);
-    final ersatz = Icon(
-      GearIcons.fallbackFor(item.slot),
-      size: 24,
-      color: Palette.textDim,
-    );
-    return Semantics(
-      container: true,
-      label: '${item.name}, ${item.rarity.label}',
-      excludeSemantics: true,
-      child: Container(
-        width: _kante,
-        height: _kante,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: Palette.background.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: RarityBadge.rahmenOf(item.rarity),
-            width: 2,
-          ),
-        ),
-        child: bild == null
-            ? ersatz
-            : PixelArt(assetPath: bild, side: _kante - 10, fallback: ersatz),
       ),
     );
   }

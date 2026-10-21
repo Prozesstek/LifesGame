@@ -9,6 +9,7 @@ import '../progression/show_level_up.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'gear_controller.dart';
+import 'verkauf_auswahl.dart';
 
 /// **Der einzige Weg, etwas zu verkaufen** (ADR-0048, ADR-0057,
 /// Issue #88): ein Exemplar oder alles Schlechtere, jeweils nach
@@ -70,6 +71,34 @@ Future<bool> sellJunkWithConfirm(
         'Getragene. Gesperrtes bleibt. Das bringt $erloes Gold.',
     verkaufe: () {
       final erhalten = ref.read(loadoutProvider.notifier).sellJunk(rarity);
+      return (
+        ok: true,
+        meldung: '$anzahl Stück verkauft — $erhalten Gold zurück.',
+      );
+    },
+  );
+}
+
+/// Verkauft, was mit Häkchen ausgewählt ist (ADR-0083) — im Siegerblatt
+/// und im Rucksack. Gesperrtes und Getragenes bleiben
+/// (`VerkaufAuswahl.waehlbar`).
+Future<bool> sellSelectedWithConfirm(
+  BuildContext context,
+  WidgetRef ref,
+  Set<String> auswahl,
+) {
+  final loadout = ref.read(loadoutProvider);
+  final uids = VerkaufAuswahl.bereinigt(loadout, auswahl);
+  final anzahl = uids.length;
+  final erloes = VerkaufAuswahl.erloes(loadout, uids);
+
+  return _nachRueckfrage(
+    context,
+    ref,
+    titel: '$anzahl Stück verkaufen?',
+    text: 'Das bringt $erloes Gold. Diese Würfe sind danach weg.',
+    verkaufe: () {
+      final erhalten = ref.read(loadoutProvider.notifier).sellSelected(uids);
       return (
         ok: true,
         meldung: '$anzahl Stück verkauft — $erhalten Gold zurück.',

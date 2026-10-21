@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 919, dazu die acht Packages (theory 204, habits 333, gear
+**Tests:** App 929, dazu die acht Packages (theory 204, habits 333, gear
 133, action_combat 400, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -133,6 +133,50 @@ vom 02.10.
 
 ---
 
+## 21.10.2026, danach: das Siegerblatt und Verkaufen mit Häkchen (Block 2 von #136)
+
+AktivesBrett: „ok mach block 2“. Gebaut nach der Skizze im Ticket und
+den Antworten aus den Fragerunden zu
+[ADR-0083](../decisions/0083-beute-in-der-grube.md).
+
+| Was | Wie |
+|---|---|
+| **Die Funde drehen sich um** | erst liegt jeder da wie am Boden — der Umriss seines Platzes in der Farbe der Seltenheit —, dann dreht sich eine Kachel nach der anderen, **das Seltenste zuletzt**, mit Klang; Legendäres mit seinem eigenen und einem goldenen Schein |
+| **Pfeil gegen das Getragene** | grün hoch, rot runter, braun gleich — wie im Rucksack |
+| **Antippen** | öffnet das Blatt des Stücks: anlegen, sperren, alle Werte |
+| **Häkchen** | ein Knopf schaltet auf Auswahl; ein Tipp setzt ein Häkchen, „Verkaufen“ zeigt Anzahl und Gold der Auswahl, mit Rückfrage. **Dasselbe im Rucksack** der Ausrüstung |
+| **Am Boden** | statt eines Zeichens der Umriss eines Schwerts, Stiefels, Rings … in der Farbe der Seltenheit |
+
+**Ohne Rückfrage entschieden:**
+
+- **Der beste Fund springt nur noch beim ersten Sieg überhaupt auf.**
+  Das Siegerblatt zeigt jeden Fund mit Pfeil, ein Dialog danach sagte
+  dasselbe noch einmal; beim ersten Sieg erklärt er, was eine Truhe ist.
+- **Kein Häkchen auf Angelegtem und Gesperrtem**, dort steht auch kein
+  Kreis. Verkauftes verschwindet aus dem Siegerblatt.
+- **Der Umriss ist ein gewöhnliches Stück des Platzes**, ganz in der
+  Farbe der Seltenheit gefüllt (`GearIcons.gruppeFor`) — man sieht
+  „ein Schuh“, nicht welcher.
+- **Beim Ziehen im Rucksack** gilt: Solange die Auswahl an ist, zieht
+  man nichts auf einen Platz.
+
+Neu: `lib/gear/verkauf_auswahl.dart` (die Regel, reine Rechnung),
+`lib/gear/widgets/verkauf_leiste.dart`,
+`lib/combat/widgets/siegerblatt_funde.dart`,
+`test/verkauf_mit_haekchen_test.dart` (10). App 929 (vorher 919). Das
+Siegerblatt in 390 × 844 gerendert und angesehen, mitten im Aufdecken
+und mit Auswahl; dabei gefunden: Angelegtes trug einen leeren Kreis,
+und ein Laufmännchen stand für Schuhe. **Nicht gespielt, nicht am
+Handy.**
+
+### Offen
+
+- Ob das Aufdecken (gut eine Sekunde Vorlauf, dann ein Drittel Sekunde
+  je Kachel) bei sechs Funden zu lang ist.
+- Der Rucksack hat keine Grenze; ob Verkaufen mit Häkchen reicht,
+  zeigt das Spielen.
+- Frederik hat ADR-0083 nicht gesehen.
+
 ## 21.10.2026: Beute in der Grube — die Kaskade (Block 1 von #136)
 
 AktivesBrett: „ich möchte das Ticket 136 Loot System angehen“. Das
@@ -180,7 +224,7 @@ Browser angesehen.**
 
 ### Offen
 
-- **Block 2**: das Siegerblatt nach der Skizze — Kacheln drehen sich um,
+- ~~**Block 2**~~ (gebaut, Eintrag darüber): das Siegerblatt nach der Skizze — Kacheln drehen sich um,
   das Seltenste zuletzt, Pfeil gegen das Getragene, Antippen öffnet das
   Blatt, **Häkchen und „Verkaufen“ mit dem Gold der Auswahl**; dazu das
   Verkaufen mit Häkchen im Rucksack.

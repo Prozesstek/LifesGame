@@ -137,7 +137,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
 | `lib/action/pit_beute.dart` | **was ein Fund ist** (ADR-0083): würfelt beim Fallen mit `GearLoot.cascade` aus Ebene, Startwert des Laufs und Nummer des Fundes — reine Rechnung | Flutter |
-| `lib/action/beute_am_boden.dart` | zeichnet Funde am Boden: das Zeichen des Platzes im Rand der Seltenheit, Episches im Schein, **Legendäres unter einer Lichtsäule** — nur Darstellung | Flutter |
+| `lib/action/beute_am_boden.dart` | zeichnet Funde am Boden: den **Umriss** des Platzes (`GearIcons.gruppeFor`) im Rand der Seltenheit, Episches im Schein, **Legendäres unter einer Lichtsäule** — nur Darstellung | Flutter |
 | `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
 | `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
 | `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
@@ -201,7 +201,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen** | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen, **sperren** | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
-| `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar oder alles Schlechtere einer Seltenheit, mit Rückfrage und Feier | Flutter |
+| `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
+| `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
+| `lib/gear/widgets/verkauf_leiste.dart` | Auswahl an/aus und „Verkaufen“ mit Anzahl und Gold | Flutter |
 | `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht; im Laden mit dem Zeichen der Sammlung, wenn man das Stück schon einmal hatte | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
@@ -259,7 +261,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/tagesform_kreis.dart` | die **Tagesform als Blitz**, der sich mit jedem Häkchen auflädt; Tipp zeigt, was sie bringt | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
-| `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein, zuletzt „Weiter“ | Flutter |
+| `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein, die Funde, zuletzt „Weiter“ | Flutter |
+| `lib/combat/widgets/siegerblatt_funde.dart` | **die Funde im Siegerblatt** (ADR-0083): drehen sich nacheinander um, **das Seltenste zuletzt**, Pfeil gegen das Getragene, Tipp öffnet das Blatt, Häkchen verkaufen | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile — **immer offen**, schlägt den Weg der Grundlagen vor | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
@@ -295,7 +298,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 919 Tests
+flutter test             # 929 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

@@ -136,6 +136,14 @@ class ActionGame extends Game {
         },
       ),
     );
+    // Die Umrisse der Beute (ADR-0083) — bis sie da sind, ein Zeichen.
+    if (funde != null) {
+      unawaited(
+        BeuteAmBoden.laden().catchError((Object fehler) {
+          debugPrint('Beute ohne Bilder: $fehler');
+        }),
+      );
+    }
   }
 
   // --- Zielen ---

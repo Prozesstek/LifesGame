@@ -56,10 +56,10 @@ des Laufs und dieser Nummer, was es ist (`PitBeute`).
 
 **Nach dem Lauf**, in zwei Schritten gebaut:
 
-1. *(dieser PR)* Die Funde gehen in den Rucksack und stehen im
+1. *(PR #144)* Die Funde gehen in den Rucksack und stehen im
    Ergebnisblatt als Kacheln; nach einem Sieg springt der beste Fund auf
    (Truhe, Vergleich, Anlegen), danach fragt der Schlüssel.
-2. *(nächster PR)* Das Siegerblatt nach der Skizze: Kacheln, die sich
+2. *(PR danach)* Das Siegerblatt nach der Skizze: Kacheln, die sich
    nacheinander umdrehen, das Seltenste zuletzt; der Pfeil gegen das
    Getragene; Antippen öffnet das Blatt des Stücks; **Häkchen und
    „Verkaufen“ mit dem Gold der Auswahl** — und dasselbe Verkaufen mit
@@ -116,5 +116,16 @@ und die Lichtsäule müssen schon wissen, was es ist.
   zu viel sind, stand schon vorher als offen in `state.md`.
 - **Zwei neue Klänge**, gerechnet in `tool/kampf_klaenge.py`: `Fund`
   und `Legendaer`.
+- **Der beste Fund springt nur noch beim ersten Sieg überhaupt auf**
+  (Schritt 2): Das Siegerblatt zeigt jetzt jeden Fund, und ein Dialog
+  danach sagte dasselbe noch einmal. Beim ersten Sieg bleibt er, weil er
+  erklärt, was eine Truhe ist.
+- **Am Boden und auf der Rückseite steht ein Umriss**, kein Zeichen:
+  das Bild eines gewöhnlichen Stücks des Platzes
+  (`GearIcons.gruppeFor`), ganz in der Farbe der Seltenheit.
+- **Verkaufen mit Häkchen hat eine Regel an einer Stelle**
+  (`VerkaufAuswahl`): Angelegtes und Gesperrtes bekommt kein Häkchen,
+  und was nicht mehr verkäuflich ist, fällt aus der Auswahl. Der Erlös
+  ist ein Viertel wie bei jedem Verkauf (`GearPrices.refundShare`).
 - **Nicht gespielt, nicht am Handy.**
 - **Frederik hat diese Runde nicht gesehen.**

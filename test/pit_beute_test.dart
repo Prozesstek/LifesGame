@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:lifes_game/action/beute_am_boden.dart';
@@ -73,16 +74,19 @@ void main() {
 
   group('Das Ergebnisblatt', () {
     Future<void> zeige(WidgetTester tester, List<GearCopy> beute) async {
+      // Mit Funden braucht das Blatt den Rucksack (Pfeil, Verkaufen).
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LaufErgebnis(
-              won: true,
-              stage: 3,
-              seconds: 60,
-              earnedXp: 20,
-              earnedGold: 8,
-              beute: beute,
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: LaufErgebnis(
+                won: true,
+                stage: 3,
+                seconds: 60,
+                earnedXp: 20,
+                earnedGold: 8,
+                beute: beute,
+              ),
             ),
           ),
         ),
@@ -97,10 +101,9 @@ void main() {
       await zeige(tester, beute);
       expect(find.byKey(LaufErgebnis.fundeKey), findsOneWidget);
       for (final copy in beute) {
-        final item = copy.item!;
         expect(
-          find.bySemanticsLabel('${item.name}, ${item.rarity.label}'),
-          findsWidgets,
+          find.byKey(ValueKey<String>('fund-${copy.uid}')),
+          findsOneWidget,
         );
       }
     });

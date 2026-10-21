@@ -156,7 +156,6 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
     final vorherReihe = ref.read(ladderProvider);
-    final ersterSieg = gewonnen && stufe > vorherReihe.highestDefeated;
     final vorherBest = vorherReihe.bestTimes[stufe];
     ref.read(ladderProvider.notifier).recordKills(welt);
     final ertrag = ref
@@ -195,8 +194,6 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     await _beute(
       stufe,
       funde: funde,
-      gewonnen: gewonnen,
-      ersterSieg: ersterSieg,
       naechsteNummer: welt.itemsDropped + 1,
       // Der erste Sieg überhaupt: Hier endet der Weg des Mentors.
       ersteBeute: gewonnen && vorherReihe.highestDefeated == 0,
@@ -217,28 +214,26 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     }
   }
 
-  /// Nach dem Lauf (ADR-0083): Nach einem Sieg springt der beste Fund
-  /// auf, und ein Schlüssel öffnet auf Wunsch einen Extra-Wurf auf der
-  /// Kaskade — nach Sieg und Niederlage.
+  /// Nach dem Lauf (ADR-0083): Ein Schlüssel öffnet auf Wunsch einen
+  /// Extra-Wurf auf der Kaskade — nach Sieg und Niederlage. Die Funde
+  /// selbst stehen schon im Siegerblatt, zum Antippen und Verkaufen.
   ///
-  /// **Übergang bis zum neuen Siegerblatt**: Dort stehen später alle
-  /// Funde als Kacheln zum Antippen und Verkaufen; bis dahin zeigt das
-  /// Blatt sie nur, und angelegt wird über diesen Dialog.
+  /// **Nur beim allerersten Sieg** springt vorher der beste Fund noch
+  /// einmal auf: Dort sagt der Mentor seinen letzten Satz und zeigt auf
+  /// „Anlegen“ (ADR-0079).
   Future<void> _beute(
     int stufe, {
     required List<GearCopy> funde,
-    required bool gewonnen,
-    required bool ersterSieg,
     required int naechsteNummer,
     required bool ersteBeute,
   }) async {
-    final bester = gewonnen ? _bester(funde) : null;
+    final bester = ersteBeute ? _bester(funde) : null;
     if (bester != null) {
       await _zeigeFund(
         bester,
-        headline: ersterSieg ? 'Erster Sieg auf Ebene $stufe' : 'Bester Fund',
+        headline: 'Erster Sieg auf Ebene $stufe',
         usedKey: false,
-        mentor: ersteBeute,
+        mentor: true,
       );
       if (!mounted) return;
     }

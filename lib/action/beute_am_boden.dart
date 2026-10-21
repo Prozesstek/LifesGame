@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gear/gear.dart';
 
 import '../gear/gear_icon.dart';
@@ -12,9 +14,11 @@ import 'pit_beute.dart';
 /// Wie Beute am Boden der Grube aussieht (ADR-0083) — **nur
 /// Darstellung**.
 ///
-/// **Man sieht die Gruppe, nicht das Stück**: das Zeichen des Platzes
-/// (Waffe, Schuh, Ring …) in einem Rahmen in der Farbe der Seltenheit.
-/// Welcher Schuh es ist, zeigt erst das Ende des Laufs.
+/// **Man sieht die Gruppe, nicht das Stück**: der Umriss eines Schwerts,
+/// eines Stiefels, eines Rings (`GearIcons.gruppeFor`) in der Farbe der
+/// Seltenheit, in einem Rahmen derselben Farbe. Welcher Schuh es ist,
+/// zeigt erst das Ende des Laufs. Bis die Umrisse geladen sind, steht ein
+/// Zeichen da ([laden]).
 ///
 /// Episches liegt in einem violetten Schein, Legendäres unter einer
 /// goldenen Lichtsäule, die man auch vom Rand des Bildes aus sieht.
@@ -27,6 +31,21 @@ abstract final class BeuteAmBoden {
 
   static final Map<(GearSlot, Color), TextPainter> _zeichen =
       <(GearSlot, Color), TextPainter>{};
+
+  static final Map<GearSlot, ui.Image> _umrisse = <GearSlot, ui.Image>{};
+  static Future<void>? _laden;
+
+  /// Lädt die Umrisse einmal je App-Lauf. **Nicht abwarten**: Bis sie da
+  /// sind, zeichnet [zeichne] das Zeichen des Platzes.
+  static Future<void> laden() => _laden ??= _ladeAlle();
+
+  static Future<void> _ladeAlle() async {
+    for (final slot in GearSlot.values) {
+      final daten = await rootBundle.load(GearIcons.gruppeFor(slot));
+      final codec = await ui.instantiateImageCodec(daten.buffer.asUint8List());
+      _umrisse[slot] = (await codec.getNextFrame()).image;
+    }
+  }
 
   /// Zeichnet jeden Fund, der am Boden liegt. [zeit] lässt die Säule
   /// atmen und den Fund leicht schweben — aus der Zeit des Laufs, damit
@@ -78,6 +97,19 @@ abstract final class BeuteAmBoden {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
+    final umriss = _umrisse[item.slot];
+    if (umriss != null) {
+      final innen = halbeKante * 0.8;
+      canvas.drawImageRect(
+        umriss,
+        Rect.fromLTWH(0, 0, umriss.width.toDouble(), umriss.height.toDouble()),
+        Rect.fromCenter(center: mitte, width: innen * 2, height: innen * 2),
+        Paint()
+          ..filterQuality = FilterQuality.medium
+          ..colorFilter = ColorFilter.mode(rahmen, BlendMode.srcIn),
+      );
+      return;
+    }
     final zeichen = _zeichen.putIfAbsent((item.slot, rahmen), () {
       final icon = GearIcons.fallbackFor(item.slot);
       return TextPainter(

@@ -10,6 +10,7 @@ import '../achievements/achievement_stats.dart';
 import '../save/save_providers.dart';
 import '../theory/review_controller.dart';
 import '../theory/theory_controller.dart';
+import 'verkauf_auswahl.dart';
 
 /// Bindeglied zwischen Ausrüstung und Oberfläche.
 ///
@@ -128,6 +129,21 @@ class GearController extends Notifier<Loadout> {
       if (item != null) erloes += Loadout.refundFor(item);
     }
     state = state.sellAll(weg.map((c) => c.uid));
+    return erloes;
+  }
+
+  /// Verkauft, was mit Häkchen ausgewählt ist (ADR-0083) — nur, was
+  /// [VerkaufAuswahl.waehlbar] ist: Gesperrtes und Getragenes bleiben,
+  /// egal wer sie hereinreicht. Gibt den Erlös zurück.
+  int sellSelected(Iterable<String> uids) {
+    final weg = <String>[
+      for (final uid in uids)
+        if (state.copyByUid(uid) case final copy?
+            when VerkaufAuswahl.waehlbar(state, copy))
+          uid,
+    ];
+    final erloes = VerkaufAuswahl.erloes(state, weg);
+    state = state.sellAll(weg);
     return erloes;
   }
 
