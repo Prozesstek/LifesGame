@@ -158,6 +158,51 @@ void main() {
     });
   });
 
+  group('Der Würfel', () {
+    // Läuft auch im Browser: `dart test -p chrome test/rolls_test.dart`.
+    test('rechnet überall dasselbe', () {
+      final wuerfel = GearDice(123456789012);
+      expect(wuerfel.next(), closeTo(0.0759585113972039, 1e-15));
+      expect(wuerfel.next(), closeTo(0.593324424785864, 1e-15));
+    });
+
+    test('Funde eines Laufs hängen nicht zusammen', () {
+      // Bis zum 21.10. ergaben Startwerte im gleichen Abstand erste Würfe
+      // im gleichen Abstand: Auf Ebene 22 brachte jeder zwölfte Lauf drei
+      // Legendäre, kaum einer eins. Erwartet bei 5 % und sechs Funden:
+      // ein Legendäres in 23 % der Läufe, zwei oder mehr in gut 3 %.
+      const laeufe = 3000;
+      var genauEins = 0;
+      var mehrere = 0;
+      for (var l = 0; l < laeufe; l++) {
+        final run = l * 7919 + 13;
+        var legendaer = 0;
+        for (var n = 1; n <= 6; n++) {
+          final copy = GearLoot.cascade(stage: 22, run: run, nth: n);
+          if (copy.item!.rarity == GearRarity.legendary) legendaer++;
+        }
+        if (legendaer == 1) genauEins++;
+        if (legendaer >= 2) mehrere++;
+      }
+      expect(genauEins / laeufe, inInclusiveRange(0.18, 0.28));
+      expect(mehrere / laeufe, inInclusiveRange(0.01, 0.06));
+    });
+
+    test('die sechs Angebote eines Tages hängen nicht zusammen', () {
+      // Unabhängig gewürfelt hat ein Tag in rund 10 % der Fälle nur zwei
+      // Seltenheiten oder weniger; vorher waren es 22 %.
+      const tage = 2000;
+      var arm = 0;
+      for (var tag = 20000; tag < 20000 + tage; tag++) {
+        final seltenheiten = DailyShop.offersFor(tag, highestRung: 22)
+            .map((c) => c.item!.rarity)
+            .toSet();
+        if (seltenheiten.length <= 2) arm++;
+      }
+      expect(arm / tage, lessThan(0.15));
+    });
+  });
+
   group('Die Kaskade (ADR-0083)', () {
     test('wiederholbar, und eindeutig je Lauf und Fund', () {
       final a = GearLoot.cascade(stage: 5, run: 123456, nth: 1);

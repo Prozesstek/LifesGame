@@ -222,12 +222,35 @@ abstract final class GearLoot {
 /// **Nicht `dart:math`:** Dessen Folge zu einem Startwert ist zwischen
 /// Plattformen nicht zugesagt. Diese Rechnung bleibt unter 2⁵³ und ergibt
 /// im Browser und im Test dasselbe Angebot.
+///
+/// **Der Startwert wird erst gemischt** ([_mische]). Ohne das ist der
+/// Würfel linear: Startwerte im gleichen Abstand — Fund 1, 2, 3 eines
+/// Laufs, die sechs Plätze eines Tages — ergeben erste Würfe im gleichen
+/// Abstand. Die Funde eines Laufs fielen dadurch gemeinsam: auf Ebene 22
+/// in jedem zwölften Lauf drei Legendäre, fast nie eins oder zwei
+/// (AktivesBrett, 21.10.; `rolls_test.dart`, „Funde hängen nicht
+/// zusammen“).
 class GearDice {
-  GearDice(int seed) : _zustand = (seed.abs() * 6007 + 7727) % _m {
+  GearDice(int seed) : _zustand = (_mische(seed) * 6007 + 7727) % _m {
     if (_zustand == 0) _zustand = 1;
     for (var i = 0; i < 3; i++) {
       next();
     }
+  }
+
+  /// Xorshift über 32 Bit — mit Masken, damit Browser (32 Bit) und VM
+  /// (64 Bit) dasselbe rechnen. Höhere Bits des Startwerts werden vorher
+  /// hineingefaltet; `%` und `~/` sind unter 2⁵³ auf beiden genau.
+  static int _mische(int seed) {
+    const voll = 0xFFFFFFFF;
+    final betrag = seed.abs();
+    var x = (betrag % 0x100000000) ^ (betrag ~/ 0x100000000);
+    for (var i = 0; i < 3; i++) {
+      x = (x ^ (x << 13)) & voll;
+      x = (x ^ (x >> 17)) & voll;
+      x = (x ^ (x << 5)) & voll;
+    }
+    return x;
   }
 
   static const int _m = 2147483647;

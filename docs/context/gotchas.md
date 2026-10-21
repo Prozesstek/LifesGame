@@ -3,6 +3,37 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein linearer Würfel macht aus gleichen Abständen gleiche Würfe
+
+Die Beute der Grube (ADR-0083) würfelt jeden Fund mit eigenem Würfel:
+
+```dart
+GearDice(run * 31 + stage * 7727 + nth * 104729 + 11)
+```
+
+`GearDice` ist ein Park-Miller-Würfel, und der ist **linear**: Startwert
+mal Faktor, modulo einer Zahl. Startwerte im gleichen Abstand — Fund 1,
+2, 3 — ergeben erste Würfe im gleichen Abstand. War der erste Fund
+legendär, waren es die Nachbarn meist auch. Auf Ebene 22 brachte jeder
+zwölfte Lauf drei Legendäre und fast keiner eins oder zwei; richtig
+wären 23 % mit einem und 0,2 % mit dreien. Der Laden hatte dasselbe
+schwächer (`Tag * 31 + Platz * 7919`): doppelt so viele Tage mit nur
+zwei Seltenheiten.
+
+Gefunden hat es ein Spieler: „in einem Level habe ich 3 Legendarys
+bekommen und in den nächsten 5 nicht mal ein Lilanes“. Die Tests
+prüften, dass ein Wurf wiederholbar ist und jede Seltenheit vorkommt —
+nicht, ob zwei Würfe voneinander unabhängig sind.
+
+**Abhilfe:** `GearDice` mischt den Startwert erst (Xorshift über 32 Bit,
+mit Masken, damit Browser und VM dasselbe rechnen). `rolls_test.dart`
+zählt jetzt, wie oft ein Lauf mehrere Legendäre bringt.
+
+**Regel:** Wer einen Würfel je Ding aus einer Formel mit Abständen sät,
+prüft die **Verteilung über viele Dinge**, nicht nur ein Ding. Dieselbe
+Bauart steckt in der Tagestruhe und den Tagesaufgaben (`package:habits`)
+und in der Tagesgrube — dort nicht nachgemessen.
+
 ## Ein `Center` um eine `SingleChildScrollView` zentriert kurzen Inhalt
 
 Ausrüstung und Fähigkeiten legten ihren Inhalt so:

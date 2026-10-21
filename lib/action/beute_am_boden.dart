@@ -35,8 +35,10 @@ abstract final class BeuteAmBoden {
   /// Luft, sonst stößt ein Stiefel an die Kante.
   static const double halbeKante = umrissKante / 2 + 2;
 
-  /// Wie hoch die Lichtsäule über Legendärem steigt.
-  static const double saeulenHoehe = 140;
+  /// Wie hoch die Lichtsäule über Legendärem steigt — gut über den
+  /// halben Bildschirm, damit man sie aus dem Nachbarraum sieht (vorher
+  /// 140).
+  static const double saeulenHoehe = 420;
 
   static final Map<(GearSlot, Color), TextPainter> _zeichen =
       <(GearSlot, Color), TextPainter>{};
@@ -151,29 +153,36 @@ abstract final class BeuteAmBoden {
     );
   }
 
-  /// Die goldene Lichtsäule über Legendärem.
+  /// Die goldene Lichtsäule über Legendärem: **hoch, hell und dünn**
+  /// (AktivesBrett, 21.10.) — ein weißgoldener Kern, kaum breiter als
+  /// ein Strich, in einem schmalen Schein, der erst weit oben ausläuft.
   static void _saeule(Canvas canvas, Offset mitte, double zeit) {
     final gold = RarityBadge.rahmenOf(GearRarity.legendary);
-    final atem = 0.55 + 0.2 * math.sin(zeit * 3);
-    final saeule = Rect.fromLTRB(
-      mitte.dx - halbeKante * 0.7,
-      mitte.dy - saeulenHoehe,
-      mitte.dx + halbeKante * 0.7,
-      mitte.dy,
-    );
-    canvas.drawRect(
-      saeule,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: <Color>[
-            gold.withValues(alpha: atem),
-            gold.withValues(alpha: 0),
-          ],
-        ).createShader(saeule)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-    );
+    final atem = 0.85 + 0.15 * math.sin(zeit * 3);
+    // Von unten bis gut zur Hälfte voll, dann läuft es aus.
+    void strahl(double halbeBreite, Color farbe, double unschaerfe) {
+      final flaeche = Rect.fromLTRB(
+        mitte.dx - halbeBreite,
+        mitte.dy - saeulenHoehe,
+        mitte.dx + halbeBreite,
+        mitte.dy,
+      );
+      canvas.drawRect(
+        flaeche,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: <Color>[farbe, farbe, farbe.withValues(alpha: 0)],
+            stops: const <double>[0, 0.55, 1],
+          ).createShader(flaeche)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, unschaerfe),
+      );
+    }
+
+    strahl(8, gold.withValues(alpha: 0.35 * atem), 8);
+    strahl(3.5, gold.withValues(alpha: 0.9 * atem), 2.5);
+    strahl(1.2, Color.lerp(gold, Colors.white, 0.75)!, 0.8);
     canvas.drawCircle(
       mitte,
       halbeKante * 2.4,

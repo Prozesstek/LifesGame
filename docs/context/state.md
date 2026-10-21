@@ -37,7 +37,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
 **Tests:** App 929, dazu die acht Packages (theory 204, habits 333, gear
-133, action_combat 401, progression 44, abilities 43, identity 25,
+136, action_combat 401, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,41 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 21.10.2026, ganz zuletzt: die Würfel hingen zusammen, die Säule ist ein Strahl
+
+AktivesBrett: „in einem Level habe ich 3 Legendarys bekommen und in den
+nächsten 5 nicht mal ein Lilanes. Irgendwas scheint da nicht richtig zu
+sein“ — und die Säule über Legendärem soll „viel größer, heller und
+dünner“ sein.
+
+**Es war ein Fehler.** Jeder Fund hatte seinen eigenen Würfel mit einem
+Startwert im gleichen Abstand zum vorigen, und der Würfel ist linear:
+Die Funde eines Laufs fielen gemeinsam (`gotchas.md`). Gemessen über
+4000 Läufe mit sechs Funden auf Ebene 22:
+
+| Legendäre je Lauf | erwartet | vorher | jetzt |
+|---|---|---|---|
+| keins | 74 % | 90 % | 74 % |
+| eins | 23 % | 1 % | 23 % |
+| zwei | 3 % | 1 % | 3 % |
+| drei | 0,2 % | 8 % | 0,1 % |
+
+Die Gewichte selbst stimmten und bleiben: auf Ebene 20 bis 30 je Fund
+5 % legendär und 15 % episch, auf 10 bis 19 7 % episch, darunter weder
+noch; der Wächter würfelt eine Stufe höher. **Der Laden hatte dasselbe**,
+schwächer: Tage mit nur zwei Seltenheiten kamen doppelt so oft. Behoben
+ist es im Würfel selbst (`GearDice` mischt den Startwert), deshalb
+**sieht der Laden heute andere Angebote** als vor dem Update.
+
+**Die Säule** ist jetzt 420 Punkte hoch statt 140, ein weißgoldener
+Kern von gut zwei Punkten in einem schmalen goldenen Schein, voll bis
+über die Hälfte. Gerendert und angesehen.
+
+gear 136 (vorher 133): der Würfel rechnet im Browser wie in der VM
+(auch mit `dart test -p chrome` geprüft), Funde eines Laufs und Angebote
+eines Tages hängen nicht zusammen. **Nicht gemessen:** Tagestruhe,
+Tagesaufgaben und Tagesgrube säen ihre Würfel auf dieselbe Art.
 
 ## 21.10.2026, zuletzt: Lebensraub am ganzen Schlag, Funde ein Feld groß
 
