@@ -6,7 +6,7 @@ import 'package:lifes_game/ui/palette.dart';
 
 /// Das Blatt am Ende eines Laufs: Überschrift, Ebene und Zeit, Beute, die
 /// hereinkommt, zuletzt „Weiter“ — nach einer Niederlage statt der Beute
-/// drei Tipps (ADR-0083).
+/// drei Tipps (ADR-0084).
 ///
 /// Die Grenze aus ADR-0032 bleibt bewacht: Was das Blatt an Beute zeigt,
 /// ist genau, was `LadderController.recordRun` gebucht hat. Ein zweiter

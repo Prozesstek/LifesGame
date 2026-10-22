@@ -2,7 +2,7 @@
 enum StaerkerWeg { faehigkeiten, ausruestung, baum, gewohnheiten, laden }
 
 /// Ein Tipp nach einer Niederlage: ein kurzer Satz und der Bereich, in den
-/// ein Tipp darauf führt (ADR-0083).
+/// ein Tipp darauf führt (ADR-0084).
 class StaerkerTipp {
   const StaerkerTipp(this.weg, this.satz);
 
@@ -56,7 +56,7 @@ class StaerkerStand {
 }
 
 /// **Was nach einer Niederlage stärker macht** — drei Tipps aus dem
-/// eigenen Stand (ADR-0083).
+/// eigenen Stand (ADR-0084).
 ///
 /// Erst das, was sofort und ohne Kosten hilft (ein leerer Platz, ein
 /// besseres Stück im Rucksack), dann das, was etwas kostet (Punkte,

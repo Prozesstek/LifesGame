@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gear/gear.dart';
 
 import '../../action/staerker_werden.dart';
 import '../../home/home_screen.dart';
@@ -7,6 +8,7 @@ import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import 'siegerblatt_funde.dart';
 
 /// Das Blatt am Ende eines Laufs in der Grube (Frederik, 30.09.) —
 /// **Sieg und Niederlage im selben Aufbau.**
@@ -17,9 +19,14 @@ import '../../ui/pixel_art.dart';
 /// und blenden von der Farbe der Überschrift in ihre eigene —, zuletzt
 /// mittig „Weiter“.
 ///
-/// **Nach einer Niederlage keine Beute, dafür drei Wege** (ADR-0083):
-/// Was gefallen ist, hat die Grube schon wieder genommen. An die Stelle
-/// von Erfahrung und Gold treten drei Tipps aus dem eigenen Stand
+/// **Darunter die Funde** (ADR-0083), nach AktivesBretts Skizze zu #136:
+/// Sie drehen sich nacheinander um, tragen den Pfeil gegen das Getragene,
+/// öffnen beim Antippen ihr Blatt und lassen sich mit Häkchen verkaufen
+/// ([SiegerblattFunde]).
+///
+/// **Nach einer Niederlage keine Beute und keine Funde, dafür drei Wege**
+/// (ADR-0084): Was gefallen ist, hat die Grube schon wieder genommen. An
+/// ihre Stelle treten drei Tipps aus dem eigenen Stand
 /// ([StaerkerWerden]); ein Tipp schliesst das Blatt und gibt seinen
 /// [StaerkerWeg] zurück. Ein zweiter Sieg bringt nichts (ADR-0032); dann
 /// fehlen die Zeilen, und der Tipp auf die Überschrift sagt warum.
@@ -33,6 +40,7 @@ class LaufErgebnis extends StatefulWidget {
     this.newBest = false,
     this.timedOut = false,
     this.tipps = const <StaerkerTipp>[],
+    this.beute = const <GearCopy>[],
     super.key,
   });
 
@@ -48,6 +56,12 @@ class LaufErgebnis extends StatefulWidget {
   /// Ob die Zeit abgelaufen ist (ADR-0046) — dann trägt die Uhr einen
   /// Strich.
   final bool timedOut;
+
+  /// Was in diesem Lauf eingesammelt wurde, in der Reihenfolge des Fundes.
+  final List<GearCopy> beute;
+
+  /// Woran Tests die Funde finden.
+  static const Key fundeKey = ValueKey<String>('lauf-funde');
 
   /// Was nach einer Niederlage stärker macht. Nach einem Sieg leer.
   final List<StaerkerTipp> tipps;
@@ -101,6 +115,8 @@ class _LaufErgebnisState extends State<LaufErgebnis>
     return HolzDialog(
       child: AlertDialog(
         backgroundColor: Palette.surface,
+        // Viele Funde machen das Blatt höher als ein kleines Handy.
+        scrollable: true,
         elevation: 0,
         insetPadding: EdgeInsets.zero,
         shape: const RoundedRectangleBorder(),
@@ -149,6 +165,15 @@ class _LaufErgebnisState extends State<LaufErgebnis>
                 semanticLabel: '${widget.earnedGold} Gold',
               ),
             ],
+            if (widget.beute.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 16),
+              SiegerblattFunde(
+                key: LaufErgebnis.fundeKey,
+                funde: widget.beute,
+                // Erst wenn Erfahrung und Gold da sind — ohne sie gleich.
+                vorlauf: Duration(milliseconds: _hatBeute ? 1200 : 300),
+              ),
+            ],
             if (_hatTipps) ...<Widget>[
               const SizedBox(height: 18),
               for (final (i, tipp) in widget.tipps.indexed) ...<Widget>[
@@ -163,7 +188,9 @@ class _LaufErgebnisState extends State<LaufErgebnis>
             const SizedBox(height: 22),
             _WeiterKnopf(
               ablauf: _ablauf,
-              beginn: _hatBeute || _hatTipps ? 0.75 : 0.2,
+              beginn: _hatBeute || _hatTipps || widget.beute.isNotEmpty
+                  ? 0.75
+                  : 0.2,
             ),
           ],
         ),

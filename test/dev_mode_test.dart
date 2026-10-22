@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:abilities/abilities.dart';
+import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/character/abilities_controller.dart';
+import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/dev/debug_grants.dart';
 import 'package:lifes_game/dev/dev_controller.dart';
 import 'package:lifes_game/dev/save_slot.dart';
@@ -52,6 +54,33 @@ void main() {
       expect(container.read(goldEarnedProvider), 0);
     });
 
+    test('geschenkte Kampfwerte stärken den Helden in der Grube', () {
+      final container = containerMit(const SaveData.empty());
+      final vorher = container.read(heroPowerProvider).stats;
+
+      container
+          .read(devGrantsProvider.notifier)
+          .addStats(attack: 100, maxHp: 500, defense: 100, mana: 50);
+
+      final nachher = container.read(heroPowerProvider).stats;
+      expect(nachher.combatAttack, greaterThan(vorher.combatAttack));
+      expect(nachher.combatMaxHp, greaterThan(vorher.combatMaxHp));
+      expect(nachher.combatDefense, greaterThan(vorher.combatDefense));
+      // Der verdiente Teil bleibt, wo er war.
+      expect(container.read(totalXpProvider), 0);
+    });
+
+    test('„Dorthin“ setzt die nächste Ebene der Grube', () {
+      final container = containerMit(const SaveData.empty());
+      final reihe = container.read(ladderProvider.notifier);
+
+      reihe.devSpringeZu(20);
+      expect(container.read(ladderProvider).highestDefeated, 19);
+
+      reihe.devSpringeZu(0);
+      expect(container.read(ladderProvider).highestDefeated, 0);
+    });
+
     test('geschenkte Theoriepunkte kommen oben drauf', () {
       final container = containerMit(const SaveData.empty());
       final vorher = container.read(availableTheoryPointsProvider);
@@ -90,6 +119,7 @@ void main() {
         ..addXp(1000)
         ..addGold(500)
         ..addTheoryPoints(5)
+        ..addStats(attack: 100, maxHp: 500)
         ..grantAllAbilities();
 
       expect(container.read(devGrantsProvider).isNotEmpty, isTrue);
@@ -111,6 +141,10 @@ void main() {
           bonusTheoryPoints: 3,
           bonusAbilityPoints: 2,
           unlockedAbilityIds: <String>{'heavy_attack'},
+          bonusAttack: 100,
+          bonusMaxHp: 500,
+          bonusDefense: 30,
+          bonusMana: 20,
         ),
       );
 
@@ -121,6 +155,10 @@ void main() {
       expect(gelesen.grants.bonusTheoryPoints, 3);
       expect(gelesen.grants.bonusAbilityPoints, 2);
       expect(gelesen.grants.unlockedAbilityIds, <String>{'heavy_attack'});
+      expect(gelesen.grants.bonusAttack, 100);
+      expect(gelesen.grants.bonusMaxHp, 500);
+      expect(gelesen.grants.bonusDefense, 30);
+      expect(gelesen.grants.bonusMana, 20);
     });
 
     test('ein alter Stand ohne Zuschläge liest sich als leer', () {
@@ -166,6 +204,12 @@ void main() {
       final container = containerMit(const SaveData.empty());
 
       expect(container.read(devGrantsProvider).isEmpty, isTrue);
+      expect(container.read(grantedStatsProvider), (
+        attack: 0,
+        maxHp: 0,
+        defense: 0,
+        mana: 0,
+      ));
       expect(
         container.read(effectiveXpProvider),
         container.read(totalXpProvider),

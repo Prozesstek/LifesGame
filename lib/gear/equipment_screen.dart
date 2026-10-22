@@ -14,9 +14,11 @@ import 'gear_grouping.dart';
 import 'gear_icon.dart';
 import 'sell_flow.dart';
 import 'shop_screen.dart';
+import 'verkauf_auswahl.dart';
 import 'widgets/character_figure.dart';
 import 'widgets/gear_sheet.dart';
 import 'widgets/rarity_badge.dart';
+import 'widgets/verkauf_leiste.dart';
 import '../ui/gold_icon.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
@@ -75,6 +77,37 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   /// Was gerade gezogen wird, oder null. Die Plätze lesen es, um zu
   /// zeigen, wohin das Stück gehört.
   GearCopy? _gezogen;
+
+  /// **Verkaufen mit Häkchen** (ADR-0083): ob die Auswahl an ist, und was
+  /// angehakt ist. Gehört zur Ansicht, nicht zum Spielstand.
+  bool _waehlen = false;
+  Set<String> _auswahl = <String>{};
+
+  void _umschalten() => setState(() {
+    _waehlen = !_waehlen;
+    _auswahl = <String>{};
+  });
+
+  void _hake(GearCopy copy, Loadout loadout) {
+    if (!VerkaufAuswahl.waehlbar(loadout, copy)) {
+      _sage('Gesperrtes bleibt liegen.');
+      return;
+    }
+    setState(() {
+      _auswahl = _auswahl.contains(copy.uid)
+          ? (<String>{..._auswahl}..remove(copy.uid))
+          : <String>{..._auswahl, copy.uid};
+    });
+  }
+
+  Future<void> _verkaufeAuswahl() async {
+    final verkauft = await sellSelectedWithConfirm(context, ref, _auswahl);
+    if (!verkauft || !mounted) return;
+    setState(() {
+      _auswahl = <String>{};
+      _waehlen = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -151,6 +184,8 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   Widget build(BuildContext context) {
     final loadout = ref.watch(loadoutProvider);
     final rucksack = _rucksack(loadout);
+    // Was inzwischen verkauft, gesperrt oder angelegt ist, fällt heraus.
+    final auswahl = VerkaufAuswahl.bereinigt(loadout, _auswahl);
 
     return Scaffold(
       appBar: AppBar(
@@ -214,6 +249,19 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                     const SizedBox(height: 16),
                     _Aufraeumen(loadout: loadout),
                   ],
+                  // **Mit Häkchen verkaufen** (ADR-0083): wie Aufräumen,
+                  // aber man wählt selbst, was geht.
+                  if (rucksack.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 12),
+                    VerkaufLeiste(
+                      waehlen: _waehlen,
+                      anzahl: auswahl.length,
+                      gold: VerkaufAuswahl.erloes(loadout, auswahl),
+                      onUmschalten: _umschalten,
+                      onVerkaufen: _verkaufeAuswahl,
+                      aufDunkel: true,
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   // Wie viel im Rucksack liegt, und wie geordnet wird —
                   // ohne Worte.
@@ -243,7 +291,12 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                   ),
                   const SizedBox(height: 12),
                   for (final gruppe in groupGear(_gruppierung))
-                    ..._gruppe(gruppe, loadout: loadout, rucksack: rucksack),
+                    ..._gruppe(
+                      gruppe,
+                      loadout: loadout,
+                      rucksack: rucksack,
+                      auswahl: auswahl,
+                    ),
                   const SizedBox(height: 4),
                   FilledButton(
                     onPressed: () => Navigator.of(context).push(
@@ -272,6 +325,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     GearGroup gruppe, {
     required Loadout loadout,
     required List<GearCopy> rucksack,
+    required Set<String> auswahl,
   }) {
     final reihenfolge = <String, int>{
       for (final (i, item) in gruppe.items.indexed) item.id: i,
@@ -340,18 +394,23 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
               HaltenUndZiehen<GearCopy>(
                 data: copy,
                 // Im Rucksack liegt nur, was man hat — alles lässt sich
-                // ziehen.
-                aktiv: true,
+                // ziehen, ausser beim Auswählen: Dann ist ein Tipp ein
+                // Häkchen.
+                aktiv: !_waehlen,
                 bild: _schwebeBild(copy),
                 rahmenFarbe: RarityBadge.rahmenOf(item.rarity),
                 onStart: () => _beginneZiehen(copy),
                 onEnde: _beendeZiehen,
                 child: ExemplarKachel(
+                  key: ValueKey<String>('rucksack-${copy.uid}'),
                   copy: copy,
                   vergleich: loadout.vergleiche(copy),
                   gesperrt: loadout.isLocked(copy.uid),
                   ausgeblendet: _gezogen?.uid == copy.uid,
-                  onTap: () => showGearSheet(context, item),
+                  ausgewaehlt: _waehlen ? auswahl.contains(copy.uid) : null,
+                  onTap: _waehlen
+                      ? () => _hake(copy, loadout)
+                      : () => showGearSheet(context, item),
                 ),
               ),
         ],
@@ -565,6 +624,7 @@ class ExemplarKachel extends StatelessWidget {
     required this.gesperrt,
     required this.onTap,
     this.ausgeblendet = false,
+    this.ausgewaehlt,
     super.key,
   });
 
@@ -572,6 +632,10 @@ class ExemplarKachel extends StatelessWidget {
   final GearVergleich vergleich;
   final bool gesperrt;
   final VoidCallback onTap;
+
+  /// Beim Verkaufen mit Häkchen (ADR-0083): ob es angehakt ist. Null heißt,
+  /// die Auswahl ist aus — dann steht kein Kreis da.
+  final bool? ausgewaehlt;
 
   /// Ob das Stück gerade gezogen wird. Dann bleibt an seiner Stelle ein
   /// Schatten, und das Stück selbst hängt unter dem Finger.
@@ -616,7 +680,8 @@ class ExemplarKachel extends StatelessWidget {
         button: true,
         label:
             '${item.name}, $wort als das Getragene'
-            '${gesperrt ? ', gesperrt' : ''}',
+            '${gesperrt ? ', gesperrt' : ''}'
+            '${ausgewaehlt == true ? ', ausgewählt' : ''}',
         excludeSemantics: true,
         child: Druck(
           child: Material(
@@ -683,6 +748,21 @@ class ExemplarKachel extends StatelessWidget {
                           key: ValueKey<String>('gesperrt'),
                           size: 13,
                           color: Palette.gold,
+                        ),
+                      ),
+                    if (ausgewaehlt case final bool an when !gesperrt)
+                      Positioned(
+                        right: -2,
+                        bottom: -4,
+                        child: Icon(
+                          an
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          key: ValueKey<String>(
+                            an ? 'auswahl-an' : 'auswahl-aus',
+                          ),
+                          size: 18,
+                          color: an ? Palette.success : Palette.muted,
                         ),
                       ),
                   ],

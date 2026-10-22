@@ -14,6 +14,8 @@ import '../character/abilities_screen.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/lauf_ergebnis.dart';
+import '../dev/dev_controller.dart';
+import '../dev/grube_werkbank.dart';
 import '../gear/equipment_screen.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
@@ -29,6 +31,7 @@ import 'action_game.dart';
 import 'hero_power.dart';
 import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
+import 'pit_beute.dart';
 import 'pit_run_view.dart';
 import 'staerker_werden.dart';
 import 'staerker_werden_provider.dart';
@@ -62,6 +65,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   final math.Random _wuerfel = math.Random();
 
   late ActionGame _game;
+
+  /// Was in diesem Lauf an Beute fällt (ADR-0083) — je Lauf neu.
+  late PitBeute _funde;
   bool _ergebnisGezeigt = false;
   bool _verloren = false;
   bool _abgebrochen = false;
@@ -98,6 +104,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       orElse: () => '',
     );
 
+    _funde = PitBeute(stage: widget.stage.number, run: seed);
     final welt = ActionWorld(
       level: LevelBuilder.build(stage: widget.stage, seed: seed),
       // Der Rest des Topfs — je Gegner ein Teil, der Wächter den Rest
@@ -112,11 +119,14 @@ class _PitScreenState extends ConsumerState<PitScreen> {
       ultimateId: ref.read(activeUltimateProvider),
       weaponMoveId: waffe,
       modifiers: veraenderungen,
+      // Gegner werfen Ausrüstung (ADR-0083) — in der Tagesgrube nicht.
+      dropsItems: true,
       seed: seed,
     );
 
     return ActionGame(
       sim: welt,
+      funde: _funde,
       klang: ref.read(soundPlayerProvider),
       // Wo der Balken unten beginnt — dieselbe Erfahrung, aus der die
       // Startseite das Level rechnet.
@@ -154,7 +164,6 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
     final vorherReihe = ref.read(ladderProvider);
-    final ersterSieg = gewonnen && stufe > vorherReihe.highestDefeated;
     final vorherBest = vorherReihe.bestTimes[stufe];
     ref.read(ladderProvider.notifier).recordKills(welt);
     final ertrag = ref
@@ -162,10 +171,18 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         .recordRun(stufe, won: gewonnen, seconds: welt.elapsed);
     final best = ref.read(ladderProvider).bestTimes[stufe];
     final neueBestzeit = gewonnen && best != null && best != vorherBest;
+    // **Nur ein Sieg behält, was eingesammelt ist** (ADR-0084, vorher
+    // auch eine Niederlage, ADR-0083). Was am Boden liegen blieb, ist
+    // ohnehin weg; nach einer Niederlage hat die Grube auch das
+    // Eingesammelte schon wieder genommen.
+    final funde = gewonnen
+        ? _funde.eingesammelt(welt.collectedItems)
+        : const <GearCopy>[];
+    ref.read(loadoutProvider.notifier).takeRunLoot(funde);
     if (gewonnen) ref.read(soundPlayerProvider).play(SoundEffect.sieg);
 
     final sekunden = welt.elapsed.round();
-    // Nach einer Niederlage drei Wege, stärker zu werden (ADR-0083) —
+    // Nach einer Niederlage drei Wege, stärker zu werden (ADR-0084) —
     // gelesen nach dem Buchen, aus dem Stand, wie er jetzt ist.
     final tipps = gewonnen
         ? const <StaerkerTipp>[]
@@ -181,15 +198,18 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         earnedGold: ertrag.gold,
         newBest: neueBestzeit,
         timedOut: welt.isTimedOut,
+        beute: funde,
         tipps: tipps,
       ),
     );
 
     if (!mounted) return;
+    // Der Schlüssel öffnet nur nach einem Sieg (ADR-0084).
     if (gewonnen) {
       await _beute(
         stufe,
-        ersterSieg: ersterSieg,
+        funde: funde,
+        naechsteNummer: welt.itemsDropped + 1,
         // Der erste Sieg überhaupt: Hier endet der Weg des Mentors.
         ersteBeute: vorherReihe.highestDefeated == 0,
       );
@@ -228,27 +248,76 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     ).pushReplacement(MaterialPageRoute<void>(builder: (_) => ziel));
   }
 
-  /// Die Beute des Wächters (ADR-0048): Der erste Sieg auf einer Stufe
-  /// bringt sie ohne Schlüssel, jeder weitere nur mit einem — und nur,
-  /// wenn man ihn einsetzen will.
+  /// Nach einem Sieg (ADR-0083): Ein Schlüssel öffnet auf Wunsch einen
+  /// Extra-Wurf auf der Kaskade — seit ADR-0084 nur nach einem Sieg,
+  /// vorher auch nach einer Niederlage. Die Funde
+  /// selbst stehen schon im Siegerblatt, zum Antippen und Verkaufen.
+  ///
+  /// **Nur beim allerersten Sieg** springt vorher der beste Fund noch
+  /// einmal auf: Dort sagt der Mentor seinen letzten Satz und zeigt auf
+  /// „Anlegen“ (ADR-0079).
   Future<void> _beute(
     int stufe, {
-    required bool ersterSieg,
+    required List<GearCopy> funde,
+    required int naechsteNummer,
     required bool ersteBeute,
   }) async {
-    final controller = ref.read(loadoutProvider.notifier);
-    if (!ersterSieg) {
-      final schluessel = ref.read(availableKeysProvider);
-      if (schluessel <= 0) return;
-      final oeffnen = await askToOpenLoot(
-        context,
-        stage: stufe,
-        keys: schluessel,
+    final bester = ersteBeute ? _bester(funde) : null;
+    if (bester != null) {
+      await _zeigeFund(
+        bester,
+        headline: 'Erster Sieg auf Ebene $stufe',
+        usedKey: false,
+        mentor: true,
       );
-      if (!oeffnen || !mounted) return;
+      if (!mounted) return;
     }
-    final beute = controller.takeLoot(stage: stufe, useKey: !ersterSieg);
-    if (beute == null || !mounted) return;
+
+    final schluessel = ref.read(availableKeysProvider);
+    if (schluessel <= 0) return;
+    final oeffnen = await askToOpenLoot(
+      context,
+      stage: stufe,
+      keys: schluessel,
+    );
+    if (!oeffnen || !mounted) return;
+    final extra = ref
+        .read(loadoutProvider.notifier)
+        .takeKeyLoot(stage: stufe, run: _funde.run, nth: naechsteNummer);
+    if (extra == null || !mounted) return;
+    await _zeigeFund(
+      extra,
+      headline: 'Der Schlüssel',
+      usedKey: true,
+      mentor: false,
+    );
+  }
+
+  /// Das beste Stück eines Laufs: erst die Seltenheit, dann die Summe der
+  /// Werte — dieselbe Regel wie der Pfeil im Rucksack (ADR-0081).
+  static GearCopy? _bester(List<GearCopy> funde) {
+    GearCopy? bester;
+    for (final copy in funde) {
+      final item = copy.item;
+      if (item == null) continue;
+      final b = bester?.item;
+      if (b == null ||
+          item.rarity.index > b.rarity.index ||
+          (item.rarity == b.rarity && copy.bonus.total > bester!.bonus.total)) {
+        bester = copy;
+      }
+    }
+    return bester;
+  }
+
+  /// Ein Fund springt auf — mit der Truhe, dem Vergleich zum Getragenen
+  /// und „Anlegen“.
+  Future<void> _zeigeFund(
+    GearCopy beute, {
+    required String headline,
+    required bool usedKey,
+    required bool mentor,
+  }) async {
     final slot = beute.item?.slot;
     final getragen = slot == null
         ? null
@@ -257,17 +326,17 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     final anlegen = await showLoot(
       context,
       loot: beute,
-      headline: ersterSieg
-          ? 'Erster Sieg auf Stufe $stufe'
-          : 'Die Beute des Wächters',
+      headline: headline,
       worn: getragen?.uid == beute.uid ? null : getragen,
-      usedKey: !ersterSieg,
-      mentor: ersteBeute,
+      usedKey: usedKey,
+      mentor: mentor,
       onReveal: () => ref
           .read(soundPlayerProvider)
           .play(selten ? SoundEffect.errungenschaft : SoundEffect.beute),
     );
-    if (anlegen && mounted) controller.equip(beute.uid);
+    if (anlegen && mounted) {
+      ref.read(loadoutProvider.notifier).equip(beute.uid);
+    }
   }
 
   /// Nach einer Niederlage zur Theorie — an die Stelle der Grube, damit
@@ -328,6 +397,21 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         title: Text('Die Grube · Stufe ${widget.stage.number}'),
         backgroundColor: Palette.backgroundRaised,
         foregroundColor: Palette.textOnDark,
+        actions: <Widget>[
+          // Die Werkbank: Funde und Gegner von Hand — nur im
+          // Entwicklermodus und nur auf dem Dev-Stand, damit der echte
+          // Stand keine erfundene Beute bekommt (ADR-0021).
+          if (devModeAvailable &&
+              ref.watch(activeSlotProvider).isDev &&
+              !_ergebnisGezeigt)
+            IconButton(
+              key: GrubeWerkbank.knopfKey,
+              tooltip: 'Werkbank',
+              icon: const Icon(Icons.science_outlined),
+              onPressed: () =>
+                  GrubeWerkbank.zeige(context, game: _game, funde: _funde),
+            ),
+        ],
       ),
       body: OnDark(
         child: Stack(

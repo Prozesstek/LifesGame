@@ -13,7 +13,7 @@ import 'package:progression/progression.dart';
 /// Deshalb gibt es kein Aufheben: Jedes Stück fliegt von selbst zum
 /// Helden.
 ///
-/// **Gebucht wird es erst mit dem Sieg** (ADR-0083). Geht der Lauf
+/// **Gebucht wird es erst mit dem Sieg** (ADR-0084). Geht der Lauf
 /// verloren, nimmt [verliere] alles wieder: Die Kasse zählt herunter,
 /// der Balken läuft zurück, und Münzen und Funken springen vom Helden weg
 /// und verlöschen.
@@ -31,6 +31,7 @@ class BeuteRegen {
 
   final math.Random _zufall;
   final List<Beutestueck> _stuecke = <Beutestueck>[];
+  final List<GehenderFund> _gehendeFunde = <GehenderFund>[];
 
   double _gold = 0;
   double _xp = 0;
@@ -154,16 +155,32 @@ class BeuteRegen {
   }
 
   /// Die Niederlage nimmt alles, was in diesem Lauf gefallen ist — vom
-  /// Helden bei [held] aus (ADR-0083).
+  /// Helden bei [held] aus (ADR-0084). [funde] sind die Nummern der
+  /// eingesammelten Gegenstände (ADR-0083); auch sie verlassen ihn.
   ///
   /// Was noch fliegt, kommt nicht mehr an und verlischt, wo es ist. Gibt
   /// zurück, ob es etwas zu nehmen gab; ohne gibt es auch kein Bild.
-  bool verliere(Vec2 held) {
+  bool verliere(Vec2 held, {List<int> funde = const <int>[]}) {
     if (_verlustAlter != null) return false;
     for (final stueck in _stuecke) {
       stueck.verliere(losAb: 0);
     }
-    if (_gold <= 0 && _xp <= 0 && _stuecke.isEmpty) return false;
+    if (_gold <= 0 && _xp <= 0 && _stuecke.isEmpty && funde.isEmpty) {
+      return false;
+    }
+    for (final (i, nth) in funde.indexed) {
+      final winkel = -math.pi / 2 + (i - (funde.length - 1) / 2) * 0.7;
+      _gehendeFunde.add(
+        GehenderFund(
+          nth: nth,
+          vonX: held.x,
+          vonY: held.y,
+          richtungX: math.cos(winkel),
+          richtungY: math.sin(winkel),
+          losAb: math.min(i * 0.18, verlustDauer * 0.75),
+        ),
+      );
+    }
     final goldVorher = gold;
     final xpVorher = xp;
     _verlustAlter = 0;
@@ -223,6 +240,10 @@ class BeuteRegen {
 
     var goldKam = false;
     var xpKam = false;
+    for (final fund in _gehendeFunde) {
+      fund.alter += dt;
+    }
+    _gehendeFunde.removeWhere((f) => f.vorbei);
     for (final stueck in _stuecke) {
       stueck.update(dt, held);
       if (!stueck.angekommen || stueck.verloren) continue;
@@ -258,7 +279,11 @@ class BeuteRegen {
   bool get hatGold => _geworfenesGold > 0;
 
   /// Ob nichts mehr unterwegs ist — und keine Niederlage mehr nimmt.
-  bool get leer => _stuecke.isEmpty && !verliert;
+  bool get leer => _stuecke.isEmpty && _gehendeFunde.isEmpty && !verliert;
+
+  /// Die eingesammelten Gegenstände, die eine Niederlage gerade nimmt.
+  List<GehenderFund> get gehendeFunde =>
+      List<GehenderFund>.unmodifiable(_gehendeFunde);
 
   /// Was beim Helden angekommen ist. Abgerundet, mit einem Hauch Luft:
   /// Drei Münzen zu je einem Drittel sind ein Goldstück, nicht 0,999.
@@ -290,6 +315,59 @@ class BeuteRegen {
   /// keiner zu sehen ist.
   double? get aufstieg =>
       _aufstiegAlter >= aufstiegDauer ? null : _aufstiegAlter / aufstiegDauer;
+}
+
+/// Ein eingesammelter Gegenstand, den die Niederlage wieder nimmt
+/// (ADR-0084): Er springt in einem Bogen nach oben vom Helden weg und
+/// verblasst. Gezeichnet wird er wie am Boden (`BeuteAmBoden`).
+class GehenderFund {
+  GehenderFund({
+    required this.nth,
+    required this.vonX,
+    required this.vonY,
+    required this.richtungX,
+    required this.richtungY,
+    required this.losAb,
+  });
+
+  /// Die Nummer des Fundes im Lauf.
+  final int nth;
+  final double vonX;
+  final double vonY;
+  final double richtungX;
+  final double richtungY;
+
+  /// Ab welchem Alter er den Helden verlässt.
+  final double losAb;
+
+  double alter = 0;
+
+  /// Wie lange er unterwegs ist, ab [losAb].
+  static const double dauer = 1.0;
+
+  /// Wie weit er fliegt.
+  static const double weite = 70;
+
+  double get _t => ((alter - losAb) / dauer).clamp(0.0, 1.0);
+
+  bool get vorbei => alter - losAb >= dauer;
+
+  /// Wie deutlich er zu sehen ist: erst ab [losAb], verblasst in der
+  /// zweiten Hälfte.
+  double get sichtbar {
+    if (alter < losAb) return 0;
+    return (2 - 2 * _t).clamp(0.0, 1.0);
+  }
+
+  /// Wo er steht — abbremsend nach aussen, dazu ein Bogen nach oben.
+  double get x => vonX + richtungX * weite * _aus(_t);
+  double get y =>
+      vonY + richtungY * weite * _aus(_t) - 28 * math.sin(math.pi * _t);
+
+  /// Wie gross, 1 am Helden, kleiner, je weiter er weg ist.
+  double get groesse => 1 - 0.35 * _t;
+
+  static double _aus(double t) => 1 - (1 - t) * (1 - t);
 }
 
 /// Was in einem Bild angekommen ist.
@@ -342,7 +420,7 @@ class Beutestueck {
   bool angekommen = false;
 
   /// Ob die Niederlage das Stück genommen hat. Dann kommt es nie an,
-  /// zählt nichts und verlischt (ADR-0083).
+  /// zählt nichts und verlischt (ADR-0084).
   bool verloren = false;
 
   /// Ab welchem Alter ein genommenes Stück zu sehen ist und sich bewegt.

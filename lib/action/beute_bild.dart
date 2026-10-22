@@ -20,7 +20,7 @@ abstract final class BeuteBild {
     for (final stueck in regen.stuecke) {
       final sichtbar = stueck.sichtbar;
       if (sichtbar <= 0) continue;
-      // Was die Niederlage nimmt, verblasst (ADR-0083). Eine Ebene nur
+      // Was die Niederlage nimmt, verblasst (ADR-0084). Eine Ebene nur
       // dann, sonst kostete jede Münze eine.
       if (sichtbar < 1) {
         canvas.saveLayer(

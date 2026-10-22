@@ -10,7 +10,7 @@ import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'staerker_werden.dart';
 
-/// Die Zahlen für die Tipps nach einer Niederlage (ADR-0083).
+/// Die Zahlen für die Tipps nach einer Niederlage (ADR-0084).
 ///
 /// **Trägt zusammen, rechnet nichts**: welche Tipps es werden, steht in
 /// [StaerkerWerden.tipps].

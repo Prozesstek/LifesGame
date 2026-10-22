@@ -133,7 +133,7 @@ class LadderProgress {
   /// ist — gesammelt in Läufen, die verloren gingen (ADR-0041). Mit dem
   /// Sieg zählt der volle Betrag, und der Eintrag ist bedeutungslos.
   ///
-  /// **Seit ADR-0083 nur noch Historie**: Eine Niederlage bringt nichts
+  /// **Seit ADR-0084 nur noch Historie**: Eine Niederlage bringt nichts
   /// mehr, also kommt nichts dazu. Was alte Stände so verdient haben,
   /// zählt weiter, sonst fiele nachträglich ein Level.
   final Map<int, Payout> partial;
@@ -191,7 +191,7 @@ class LadderProgress {
 
   /// Trägt einen Lauf ein: ob er gewonnen wurde.
   ///
-  /// **Nur ein Sieg zahlt, und dann den ganzen Topf** (ADR-0083). Was im
+  /// **Nur ein Sieg zahlt, und dann den ganzen Topf** (ADR-0084). Was im
   /// Lauf gefallen ist, war ein Versprechen: Eine Niederlage nimmt es
   /// wieder, das Bild zeigt das, und gebucht wird nur, dass verloren
   /// wurde. Bis dahin behielt ein verlorener Lauf seine Beute (ADR-0041).

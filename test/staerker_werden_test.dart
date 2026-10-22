@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/action/staerker_werden.dart';
 
-/// Die drei Tipps nach einer Niederlage (ADR-0083): aus dem eigenen
+/// Die drei Tipps nach einer Niederlage (ADR-0084): aus dem eigenen
 /// Stand, immer drei, nie zwei in denselben Bereich.
 void main() {
   List<StaerkerWeg> wege(StaerkerStand stand) =>

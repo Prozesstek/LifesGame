@@ -49,6 +49,21 @@ class DevController extends Notifier<DebugGrants> {
   void addAbilityPoints(int amount) =>
       state = state.plus(abilityPoints: amount);
 
+  /// Kampfwerte im Kampfmassstab — Angriff, Leben, Abwehr, Mana.
+  void addStats({
+    int attack = 0,
+    int maxHp = 0,
+    int defense = 0,
+    int mana = 0,
+  }) {
+    state = state.plus(
+      attack: attack,
+      maxHp: maxHp,
+      defense: defense,
+      mana: mana,
+    );
+  }
+
   /// Schaltet eine Fähigkeit frei, ohne ihre Bedingung zu erfüllen.
   ///
   /// Bewusst nur freischalten, nicht anlegen: Welche Fähigkeit auf welchem
@@ -87,6 +102,18 @@ final grantedTheoryPointsProvider = Provider<int>((ref) {
 final grantedAbilityPointsProvider = Provider<int>((ref) {
   return ref.watch(devGrantsProvider).bonusAbilityPoints;
 });
+
+/// Geschenkte Kampfwerte: Angriff, Leben, Abwehr, Mana.
+final grantedStatsProvider =
+    Provider<({int attack, int maxHp, int defense, int mana})>((ref) {
+      final g = ref.watch(devGrantsProvider);
+      return (
+        attack: g.bonusAttack,
+        maxHp: g.bonusMaxHp,
+        defense: g.bonusDefense,
+        mana: g.bonusMana,
+      );
+    });
 
 /// Fähigkeiten, die per Dev-Modus offen sind — als Move-Ids.
 final grantedAbilityIdsProvider = Provider<Set<String>>((ref) {

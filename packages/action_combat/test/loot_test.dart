@@ -75,7 +75,7 @@ void main() {
   });
 
   group('Der Topf einer Stufe', () {
-    test('verloren bringt nichts — gewonnen den ganzen Topf (ADR-0083)', () {
+    test('verloren bringt nichts — gewonnen den ganzen Topf (ADR-0084)', () {
       const vorher = LadderProgress(highestDefeated: 6);
       final voll = LadderRewards.xpFor(7);
 
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('Teile aus alten Ständen zählen weiter — nie mehr als der Topf', () {
-      // Bis ADR-0083 behielt ein verlorener Lauf, was gefallen war. Was
+      // Bis ADR-0084 behielt ein verlorener Lauf, was gefallen war. Was
       // ein Stand so verdient hat, bleibt, sonst fiele ein Level.
       final alt = LadderProgress.fromJson(<String, Object?>{
         'defeated': 6,

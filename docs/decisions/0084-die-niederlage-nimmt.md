@@ -1,4 +1,4 @@
-# ADR-0083: Die Niederlage nimmt, was gefallen ist — und zeigt drei Wege
+# ADR-0084: Die Niederlage nimmt, was gefallen ist — und zeigt drei Wege
 
 **Datum:** 22.10.2026
 **Status:** Aktiv
@@ -14,8 +14,14 @@ kann, damit der Lose Screen nicht so traurig aussieht.“
 
 Bis dahin galt ADR-0041: Erfahrung und Gold fallen je Gegner, und **ein
 verlorener Lauf behält, was gefallen ist** (`LadderProgress.partial`).
-Der nächste Versuch spielte nur noch um den Rest des Topfs. Items gab es
-schon vorher nur nach einem Sieg, als Beute des Wächters (ADR-0048).
+Der nächste Versuch spielte nur noch um den Rest des Topfs.
+
+**Während dieser ADR entstand, kam ADR-0083 nach `main`** (AktivesBrett,
+21.10.): Gegenstände fallen jetzt in der Grube, man sammelt sie ein, und
+**„eingesammelt bleibt eingesammelt, auch nach einer Niederlage“** —
+„Bei Niederlage alles weg“ steht dort als verworfen. Dazu öffnet ein
+Schlüssel nach **jedem** Lauf einen Extra-Wurf. Beides widersprach
+Frederiks Wunsch; er hat in einer zweiten Fragerunde entschieden (unten).
 
 Das Blatt „Niederlage“ zeigte entweder diese Teilbeute oder gar nichts,
 dazu nach dem ersten Lauf das Buch (ADR-0069).
@@ -23,12 +29,16 @@ dazu nach dem ersten Lauf das Buch (ADR-0069).
 ## Entscheidung
 
 **Nur ein Sieg zahlt, und dann den ganzen Topf.** Eine Niederlage bucht
-nichts außer, dass verloren wurde (`LadderProgress.bookRun`). Im Lauf
+nichts außer, dass verloren wurde (`LadderProgress.bookRun`). **Auch die
+eingesammelten Gegenstände** kommen nur nach einem Sieg in den Rucksack,
+und **der Schlüssel öffnet nur nach einem Sieg** (`PitScreen`) — beides
+gegen ADR-0083, auf Frederiks ausdrücklichen Wunsch. Im Lauf
 regnet es weiter Münzen und Funken; geht er verloren, **nimmt die Grube
 sie zurück**, wo sie gesammelt wurden: Die Kasse zählt herunter und
 glüht rot, der Balken läuft zurück, ein Aufstieg im Lauf fällt wieder
-ab, Münzen und Funken springen vom Helden weg und verlöschen
-(`BeuteRegen.verliere`). Dazu klingt der Ton einer falschen Antwort.
+ab, Münzen und Funken springen vom Helden weg und verlöschen, und die
+eingesammelten Funde fliegen als ihre Kachel im Bogen davon
+(`BeuteRegen.verliere`, `GehenderFund`). Dazu klingt der Ton einer falschen Antwort.
 Erst dann kommt das Blatt.
 
 **Das Blatt zeigt drei Tipps aus dem eigenen Stand**
@@ -46,9 +56,12 @@ Stelle der Grube wie das Buch:
 Reicht das nicht für drei, füllen allgemeine Sätze auf (Häkchen, Seiten,
 Laden). **Nie zwei Tipps in denselben Bereich.**
 
-In einer Fragerunde entschieden: die Animation **in der Grube**, nicht
-im Blatt; die Tipps **aus dem Spielstand und antippbar**, nicht aus
-einer festen Liste. Beides wie empfohlen.
+In der ersten Fragerunde entschieden: die Animation **in der Grube**,
+nicht im Blatt; die Tipps **aus dem Spielstand und antippbar**, nicht
+aus einer festen Liste. Beides wie empfohlen. In der zweiten, nach dem
+Merge von ADR-0083: **auch die Funde gehen** (statt zu bleiben oder es
+erst mit AktivesBrett zu klären), und **der Schlüssel nur nach einem
+Sieg** (gegen Claudes Empfehlung, ihn nach jedem Lauf zu lassen).
 
 ## Begründung
 
@@ -75,6 +88,9 @@ sich nur, wer ihn bekommt: nicht mehr, wer oft verliert.
 | Feste Liste von Ratschlägen | passt oft nicht zum Stand, führt nirgends hin |
 | Im Lauf gar nichts mehr fallen lassen | der Goldregen (16.10.) ist das, was den Lauf belohnend macht; er bleibt, nur als Versprechen |
 | Alte Teilbeute (`partial`) bei der nächsten Niederlage streichen | sie ist längst in der Erfahrung gezählt — ein Level fiele nachträglich |
+| Funde bleiben nach einer Niederlage (ADR-0083) | Frederik: „auch weg, mit Animation“ |
+| Erst mit AktivesBrett klären, Funde bis dahin lassen | Frederik hat entschieden; AktivesBrett erfährt es über diesen ADR |
+| Schlüssel-Wurf nach jedem Lauf (Claudes Empfehlung) | Frederik: nach einer Niederlage gibt es gar nichts |
 
 ## Konsequenzen
 
@@ -85,6 +101,12 @@ sich nur, wer ihn bekommt: nicht mehr, wer oft verliert.
   versucht, hatte bisher am Ende denselben Topf, aber verteilt über zehn
   Läufe. Jetzt zahlt nur der zehnte. `runway_sim` rechnet nur mit Siegen,
   seine Zahlen ändern sich nicht.
+- **AktivesBretts Entscheidung aus ADR-0083 ist in zwei Punkten
+  gekippt** (Funde, Schlüssel), ohne dass er gefragt wurde. ADR-0083
+  trägt den Vermerk; er sollte es wissen, bevor er weiter an der Beute
+  baut.
+- **Verlieren kostet jetzt auch Gegenstände** — bei vier bis sechs
+  Funden je Lauf ist das spürbar mehr als nur Gold und Erfahrung.
 - **„Abbrechen“ und „verlieren“ sind jetzt gleich**: Beides bringt
   nichts. Der Satz der Rückfrage („Was bisher gefallen ist, geht
   verloren“) stimmte schon und stimmt weiter.

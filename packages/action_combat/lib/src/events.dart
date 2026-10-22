@@ -342,6 +342,31 @@ class ShieldRaised extends ActionEvent {
   final Vec2 at;
 }
 
+/// Ein Gegner hat Ausrüstung fallen lassen (ADR-0083) — der [nth]-te
+/// Fund dieses Laufs. Was es ist, würfelt die App (`GearLoot.cascade`);
+/// die Grube weiß nur, ob er vom Wächter ([boss]) kommt.
+class ItemDropped extends ActionEvent {
+  const ItemDropped({
+    required this.id,
+    required this.nth,
+    required this.at,
+    required this.boss,
+  });
+
+  final int id;
+  final int nth;
+  final Vec2 at;
+  final bool boss;
+}
+
+/// Der Held hat den Fund [id] eingesammelt.
+class ItemCollected extends ActionEvent {
+  const ItemCollected({required this.id, required this.at});
+
+  final int id;
+  final Vec2 at;
+}
+
 /// Das Echo hat die Fähigkeit [id] noch einmal treffen lassen.
 class AbilityEchoed extends ActionEvent {
   const AbilityEchoed({required this.id, required this.at});

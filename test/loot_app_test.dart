@@ -7,7 +7,7 @@ import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 
 /// Erfahrung und Gold je Gegner, durch die App (ADR-0041): Seit
-/// ADR-0083 nimmt eine Niederlage, was gefallen ist, und der Sieg zahlt
+/// ADR-0084 nimmt eine Niederlage, was gefallen ist, und der Sieg zahlt
 /// den ganzen Topf.
 void main() {
   ProviderContainer container() {
@@ -22,7 +22,7 @@ void main() {
     return c;
   }
 
-  test('verloren bringt nichts, gewonnen den ganzen Topf (ADR-0083)', () {
+  test('verloren bringt nichts, gewonnen den ganzen Topf (ADR-0084)', () {
     final c = container();
     final reihe = c.read(ladderProvider.notifier);
     final voll = (xp: LadderRewards.xpFor(7), gold: LadderRewards.goldFor(7));

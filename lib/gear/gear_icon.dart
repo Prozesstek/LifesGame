@@ -115,6 +115,22 @@ abstract final class GearIcons {
   /// Alle Item-Ids, für die es ein Bild gibt.
   static Iterable<String> get itemIds => _dateien.keys;
 
+  /// **Das Bild einer Gruppe** (ADR-0083): Beute am Boden der Grube und
+  /// auf der Rückseite im Siegerblatt zeigt nur, *welcher Platz* es ist —
+  /// ein Schwert, ein Stiefel —, nicht welches Stück. Gezeichnet wird der
+  /// Umriss dieses Bildes in der Farbe der Seltenheit, damit es nicht wie
+  /// ein bestimmtes Stück aussieht.
+  static String gruppeFor(GearSlot slot) {
+    return switch (slot) {
+      GearSlot.waffe => 'assets/Waffen/Schwerter/Uebungsklinge.png',
+      GearSlot.ruestung => 'assets/Ruestung/Lederwams.png',
+      GearSlot.helm => 'assets/Helme/Eisenhaube.png',
+      GearSlot.schuhe => 'assets/Schuhe/FesteStiefel.png',
+      GearSlot.ring => 'assets/Ringe/SchlichterRing.png',
+      GearSlot.talisman => 'assets/Talismane/Bernsteinamulett.png',
+    };
+  }
+
   /// Das Ersatzzeichen für einen Platz, solange die Bilder fehlen.
   static IconData fallbackFor(GearSlot slot) {
     return switch (slot) {

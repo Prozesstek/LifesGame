@@ -13,7 +13,7 @@ import 'beute_regen.dart';
 ///
 /// **Gezählt wird, was angekommen ist**, nicht was gefallen ist — die
 /// Zahl soll mit den Münzen steigen, nicht vor ihnen. Nach einer
-/// Niederlage zählt sie herunter und glüht rot (ADR-0083).
+/// Niederlage zählt sie herunter und glüht rot (ADR-0084).
 class LaufKasse extends StatelessWidget {
   const LaufKasse({super.key, required this.regen});
 
@@ -67,7 +67,7 @@ class LaufKasse extends StatelessWidget {
 ///
 /// Nur in der Grube der Reihe; Tagesgrube und Prototyp zahlen keine
 /// Erfahrung und zeigen ihn nicht. Nach einer Niederlage läuft er
-/// zurück, und ein Aufstieg im Lauf fällt wieder ab (ADR-0083).
+/// zurück, und ein Aufstieg im Lauf fällt wieder ab (ADR-0084).
 class ErfahrungsLeiste extends StatelessWidget {
   const ErfahrungsLeiste({super.key, required this.regen});
 
