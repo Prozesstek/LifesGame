@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/action/staerker_werden.dart';
 import 'package:lifes_game/combat/widgets/lauf_ergebnis.dart';
 import 'package:lifes_game/ui/palette.dart';
 
 /// Das Blatt am Ende eines Laufs: Überschrift, Ebene und Zeit, Beute, die
-/// hereinkommt, zuletzt „Weiter“ — für Sieg und Niederlage gleich.
+/// hereinkommt, zuletzt „Weiter“ — nach einer Niederlage statt der Beute
+/// drei Tipps (ADR-0084).
 ///
 /// Die Grenze aus ADR-0032 bleibt bewacht: Was das Blatt an Beute zeigt,
 /// ist genau, was `LadderController.recordRun` gebucht hat. Ein zweiter
@@ -17,6 +19,8 @@ void main() {
     int gold = 22,
     bool newBest = false,
     bool timedOut = false,
+    List<StaerkerTipp> tipps = const <StaerkerTipp>[],
+    void Function(StaerkerWeg?)? danach,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -24,18 +28,22 @@ void main() {
           builder: (context) => Scaffold(
             body: Center(
               child: TextButton(
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => LaufErgebnis(
-                    won: won,
-                    stage: 12,
-                    seconds: 84,
-                    earnedXp: xp,
-                    earnedGold: gold,
-                    newBest: newBest,
-                    timedOut: timedOut,
-                  ),
-                ),
+                onPressed: () async {
+                  final weg = await showDialog<StaerkerWeg>(
+                    context: context,
+                    builder: (_) => LaufErgebnis(
+                      won: won,
+                      stage: 12,
+                      seconds: 84,
+                      earnedXp: xp,
+                      earnedGold: gold,
+                      newBest: newBest,
+                      timedOut: timedOut,
+                      tipps: tipps,
+                    ),
+                  );
+                  danach?.call(weg);
+                },
                 child: const Text('los'),
               ),
             ),
@@ -134,13 +142,52 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('was gefallen ist, steht da (ADR-0041)', (tester) async {
-      await zeige(tester, won: false, xp: 12, gold: 5);
+    final dreiTipps = StaerkerWerden.tipps(
+      const StaerkerStand(
+        leerePlaetze: 1,
+        ungenutzteFaehigkeiten: 2,
+        freiePunkte: 2,
+      ),
+    );
+
+    testWidgets('drei Tipps statt Beute, sie kommen nacheinander herein', (
+      tester,
+    ) async {
+      await zeige(tester, won: false, xp: 0, gold: 0, tipps: dreiTipps);
+      final erster = find.text(dreiTipps.first.satz);
+      expect(deckkraftVon(tester, erster).opacity, 0);
+
+      await tester.pumpAndSettle();
+      for (final tipp in dreiTipps) {
+        expect(find.text(tipp.satz), findsOneWidget);
+        expect(find.byKey(LaufErgebnis.tippKey(tipp.weg)), findsOneWidget);
+      }
+      expect(find.textContaining('+'), findsNothing);
+      expect(find.byTooltip(RegExp('Ohne den Wächter')), findsOneWidget);
+    });
+
+    testWidgets('ein Tipp schliesst das Blatt und sagt, wohin', (tester) async {
+      StaerkerWeg? gewaehlt;
+      await zeige(
+        tester,
+        won: false,
+        xp: 0,
+        gold: 0,
+        tipps: dreiTipps,
+        danach: (weg) => gewaehlt = weg,
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('+12'), findsOneWidget);
-      expect(find.text('+5'), findsOneWidget);
-      expect(find.byTooltip(RegExp('bleibt dir')), findsOneWidget);
+      await tester.tap(find.byKey(LaufErgebnis.tippKey(StaerkerWeg.baum)));
+      await tester.pumpAndSettle();
+      expect(find.byType(LaufErgebnis), findsNothing);
+      expect(gewaehlt, StaerkerWeg.baum);
+    });
+
+    testWidgets('ein Sieg zeigt keine Tipps', (tester) async {
+      await zeige(tester, tipps: dreiTipps);
+      await tester.pumpAndSettle();
+      expect(find.text(dreiTipps.first.satz), findsNothing);
     });
 
     testWidgets('und nennt keinen Verlust an Werten', (tester) async {
@@ -148,7 +195,7 @@ void main() {
       await zeige(tester, won: false, xp: 0, gold: 0);
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip(RegExp('kostet nichts')), findsOneWidget);
+      expect(find.byTooltip(RegExp('Werte wachsen')), findsOneWidget);
       expect(find.textContaining('verlierst'), findsNothing);
     });
   });

@@ -50,19 +50,13 @@ class LadderController extends Notifier<LadderProgress> {
   /// selbst entscheidet und die Differenz nicht selbst ausrechnet. Was
   /// zählt, entscheidet `LadderProgress.bookRun` allein:
   ///
-  /// - [collected] ist, was die Welt je Gegner ausgeschüttet hat. Ein
-  ///   verlorener Lauf behält es (ADR-0041), ein gewonnener bekommt den
-  ///   ganzen Topf.
+  /// - Nur ein Sieg zahlt, und dann den ganzen Topf. Eine Niederlage
+  ///   nimmt, was im Lauf gefallen ist (ADR-0084).
   /// - Eine geschaffte Stufe zahlt nichts mehr (ADR-0032) — seit ADR-0072
   ///   auch nicht mehr als Stufe des Tages.
-  Payout recordRun(
-    int stage, {
-    required bool won,
-    Payout collected = (xp: 0, gold: 0),
-    double? seconds,
-  }) {
+  Payout recordRun(int stage, {required bool won, double? seconds}) {
     final vorher = state;
-    var neu = state.bookRun(stage, won: won, collected: collected);
+    var neu = state.bookRun(stage, won: won);
     // Nur ein Sieg hat eine Zeit, die zählt (ADR-0048).
     if (won && seconds != null) neu = neu.recordTime(stage, seconds);
     state = neu;

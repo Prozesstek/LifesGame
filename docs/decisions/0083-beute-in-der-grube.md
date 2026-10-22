@@ -1,7 +1,7 @@
 # ADR-0083: Beute in der Grube — die Kaskade
 
 **Datum:** 21.10.2026
-**Status:** Aktiv
+**Status:** Aktiv — in zwei Punkten abgelöst durch ADR-0084: Eingesammeltes behält nur ein Sieg, und der Schlüssel öffnet nur nach einem Sieg
 **Entschieden von:** AktivesBrett, in vier Fragerunden mit Claude
 **Ergänzt:** [ADR-0048](0048-exemplare-tagesladen-und-beute.md) (Beute und
 Schlüssel), [ADR-0041](0041-beute-je-gegner.md) (Gold je Gegner)

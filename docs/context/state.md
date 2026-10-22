@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.10.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 22.10.2026 · Frederik
 
 ---
 
@@ -28,7 +28,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
-| **Kampf** | die Grube: Echtzeit, 30 Stufen, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
+| **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
@@ -36,8 +36,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 934, dazu die acht Packages (theory 204, habits 333, gear
-137, action_combat 407, progression 44, abilities 43, identity 25,
+**Tests:** App 951, dazu die acht Packages (theory 204, habits 333, gear
+137, action_combat 406, progression 44, abilities 43, identity 25,
 achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -132,6 +132,57 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 22.10.2026: die Niederlage nimmt — und zeigt drei Wege
+
+Frederik: „wenn man einen Lauf verliert [soll] man kein Gold und kein XP
+und keine Items bekommen. Stattdessen … eine Animation wie diese Sachen
+einem wieder weggenommen werden und vielleicht 3 Tipps wie man seinen
+Charakter stärker machen kann.“ In zwei Fragerunden entschieden: [ADR-0084](../decisions/0084-die-niederlage-nimmt.md).
+
+| Was | Wie |
+|---|---|
+| **Nur ein Sieg zahlt** | dann den ganzen Topf; eine Niederlage bucht nur, dass verloren wurde. Bis dahin behielt sie, was gefallen war (ADR-0041) |
+| **Items** | was in der Grube eingesammelt wurde (ADR-0083, seit dem 21.10.), fliegt mit weg und kommt nicht in den Rucksack; **gegen AktivesBretts Entscheidung** dort („man behält sie“), auf Frederiks Wunsch |
+| **Schlüssel** | öffnen den Extra-Wurf **nur noch nach einem Sieg** (ADR-0083: nach jedem Lauf) |
+| **In der Grube** | die Kasse zählt herunter und glüht rot, der Balken läuft zurück, ein Aufstieg im Lauf fällt ab, Münzen und Funken springen vom Helden weg und verlöschen; dazu der Ton einer falschen Antwort. Erst dann kommt das Blatt |
+| **Drei Tipps** | aus dem Stand: leerer Fähigkeitsplatz, Besseres im Rucksack, freie Punkte, Häkchen bis In Form, Besseres im Laden; sonst allgemeine Sätze. Jeder ein Knopf in seinen Bereich, an die Stelle der Grube |
+
+**Ohne Rückfrage entschieden:**
+
+- **Alte Teilbeute bleibt**: Was ein Stand in verlorenen Läufen schon
+  gesammelt hat, ist längst Erfahrung; es zu streichen ließe ein Level
+  fallen. Es wächst nur nicht mehr.
+- **Die Tagesgrube bleibt, wie sie ist**: Sie zahlt nur Ruhm, antreten
+  zählt.
+- **Was sofort und umsonst hilft, steht vorn** (Platz, Rucksack), dann
+  was kostet (Punkte, Häkchen, Gold). Nie zwei Tipps in denselben
+  Bereich.
+- **Das Buch nach dem ersten Lauf bleibt** neben „Nochmal“.
+
+**Beim Mergen gefunden:** Während des Baus kam AktivesBretts Beute in
+der Grube nach `main` (#145), mit eigenem ADR-0083 — daher ist dieser
+ADR-0084. Frederik hat danach entschieden: Auch die Funde gehen, der
+Schlüssel nur nach einem Sieg. ADR-0083 trägt den Vermerk.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Der Balken wurde
+beim Zurücklaufen weiß statt rot; jetzt glüht auch die Füllung rot.
+
+Neu: `staerker_werden.dart`, `staerker_werden_provider.dart`,
+`test/staerker_werden_test.dart`. App 951 (vorher 934), action_combat
+406 (vorher 407: zwei Tests zur Teilbeute wurden einer). Blatt und Grube
+mitten im Nehmen gerendert und angesehen, die Grube mit Würfeln. **Nicht
+gespielt, nicht am Handy, nicht gehört.**
+
+### Offen
+
+- **Verlieren ist jetzt teurer**: Wer eine Stufe oft versucht, bekam
+  den Topf bisher über alle Läufe verteilt. `runway_sim` rechnet nur
+  mit Siegen und merkt davon nichts.
+- Ob 1,4 Sekunden Nehmen plus Ausklingen zu lang sind, wenn man nur
+  „Nochmal“ drücken will.
+- **AktivesBrett hat ADR-0084 nicht gesehen** — und dass seine
+  Entscheidung „eingesammelt bleibt“ damit gekippt ist.
 
 ## 21.10.2026, nachts: der Entwicklermodus bekommt Kampfwerte, Ebenen und eine Werkbank
 

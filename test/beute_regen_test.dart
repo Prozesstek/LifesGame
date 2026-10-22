@@ -129,6 +129,124 @@ void main() {
     });
   });
 
+  group('die Niederlage nimmt (ADR-0084)', () {
+    BeuteRegen gesammelt({int startXp = 0, int xp = 30, int gold = 12}) {
+      final regen = BeuteRegen(startXp: startXp)
+        ..wirf(LootDropped(at: fall, xp: xp, gold: gold), gross: false);
+      allesEinsammeln(regen);
+      return regen;
+    }
+
+    test('Kasse und Erfahrung zählen bis null herunter', () {
+      final regen = gesammelt();
+      expect(regen.gold, 12);
+      expect(regen.verliere(held), isTrue);
+      expect(regen.leer, isFalse, reason: 'Das Ergebnis wartet darauf.');
+
+      var vorher = regen.gold;
+      var faellt = true;
+      for (var i = 0; i < 60 * 3 && !regen.leer; i++) {
+        regen.update(1 / 60, held);
+        faellt = faellt && regen.gold <= vorher;
+        vorher = regen.gold;
+      }
+      expect(faellt, isTrue, reason: 'Nie steigt die Kasse dabei.');
+      expect(regen.leer, isTrue);
+      expect(regen.gold, 0);
+      expect(regen.xp, 0);
+    });
+
+    test('Stücke verlassen den Helden und verlöschen, ohne anzukommen', () {
+      final regen = gesammelt()..verliere(held);
+      expect(regen.stuecke, isNotEmpty);
+      expect(regen.stuecke.every((s) => s.verloren), isTrue);
+
+      var ankunft = false;
+      var gesehen = 0.0;
+      for (var i = 0; i < 60 * 3 && !regen.leer; i++) {
+        final a = regen.update(1 / 60, held);
+        ankunft = ankunft || a.gold || a.xp;
+        for (final s in regen.stuecke) {
+          if (s.sichtbar > gesehen) gesehen = s.sichtbar;
+        }
+      }
+      expect(ankunft, isFalse);
+      expect(gesehen, 1, reason: 'Man sieht sie, bevor sie verblassen.');
+      expect(regen.stuecke, isEmpty);
+    });
+
+    test('was noch fliegt, kommt nicht mehr an', () {
+      final regen = BeuteRegen(startXp: 0)
+        ..wirf(const LootDropped(at: fall, xp: 8, gold: 4), gross: false);
+      regen.update(1 / 60, held);
+      expect(regen.verliere(held), isTrue);
+      allesEinsammeln(regen);
+      expect(regen.gold, 0);
+      expect(regen.xp, 0);
+    });
+
+    test('ein Aufstieg im Lauf fällt wieder ab', () {
+      final regen = gesammelt(startXp: LevelCurve.totalXpFor(2) - 3, xp: 10);
+      expect(regen.stand?.level, 2);
+      regen.verliere(held);
+      allesEinsammeln(regen);
+      expect(regen.stand?.level, 1);
+    });
+
+    test('ohne Beute gibt es nichts zu nehmen und nichts zu warten', () {
+      final regen = BeuteRegen(startXp: 0);
+      expect(regen.verliere(held), isFalse);
+      expect(regen.leer, isTrue);
+    });
+
+    test('auch eingesammelte Gegenstände gehen — erst dann ist es leer', () {
+      final regen = BeuteRegen(startXp: 0);
+      expect(regen.verliere(held, funde: <int>[1, 2, 3]), isTrue);
+      expect(regen.gehendeFunde.map((f) => f.nth), <int>[1, 2, 3]);
+      expect(regen.leer, isFalse);
+
+      final start = regen.gehendeFunde.first;
+      var hoechstens = 0.0;
+      var weiteste = 0.0;
+      for (var i = 0; i < 60 * 3 && !regen.leer; i++) {
+        regen.update(1 / 60, held);
+        for (final f in regen.gehendeFunde) {
+          hoechstens = f.sichtbar > hoechstens ? f.sichtbar : hoechstens;
+          final weg =
+              (Offset(f.x, f.y) - Offset(start.vonX, start.vonY)).distance;
+          weiteste = weg > weiteste ? weg : weiteste;
+        }
+      }
+      expect(regen.leer, isTrue);
+      expect(regen.gehendeFunde, isEmpty);
+      expect(hoechstens, 1, reason: 'Man sieht sie, bevor sie verblassen.');
+      expect(weiteste, greaterThan(40), reason: 'Sie verlassen den Helden.');
+    });
+
+    test('das Ergebnis wartet nie länger als die Niederlage dauert', () {
+      final regen = gesammelt()
+        ..verliere(held, funde: List<int>.generate(12, (i) => i + 1));
+      var zeit = 0.0;
+      while (!regen.leer && zeit < 10) {
+        regen.update(1 / 60, held);
+        zeit += 1 / 60;
+      }
+      expect(
+        zeit,
+        // Ein Bild Spielraum für die Rundung des Takts.
+        lessThanOrEqualTo(
+          BeuteRegen.verlustDauer + BeuteRegen.verlorenLebt + 1 / 30,
+        ),
+      );
+    });
+
+    test('nur einmal', () {
+      final regen = gesammelt();
+      expect(regen.verliere(held), isTrue);
+      expect(regen.verliere(held), isFalse);
+    });
+  });
+
   group('die Anzeige', () {
     Widget umrahmt(Widget kind) => MaterialApp(
       home: Scaffold(body: Center(child: kind)),

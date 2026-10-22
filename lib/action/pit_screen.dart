@@ -10,13 +10,17 @@ import '../progression/show_level_up.dart';
 import '../achievements/show_achievement_unlock.dart';
 import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
+import '../character/abilities_screen.dart';
 import '../combat/ladder_controller.dart';
 import '../combat/widgets/loot_dialog.dart';
 import '../combat/widgets/lauf_ergebnis.dart';
 import '../dev/dev_controller.dart';
 import '../dev/grube_werkbank.dart';
+import '../gear/equipment_screen.dart';
 import '../gear/gear_controller.dart';
 import '../gear/set_effects.dart';
+import '../gear/shop_screen.dart';
+import '../habits/habits_screen.dart';
 import '../home/erster_start_provider.dart';
 import '../home/home_screen.dart' show HomeScreen;
 import '../theory/skill_tree_screen.dart';
@@ -29,6 +33,8 @@ import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
 import 'pit_beute.dart';
 import 'pit_run_view.dart';
+import 'staerker_werden.dart';
+import 'staerker_werden_provider.dart';
 
 /// Ein Lauf durch eine Stufe der Grube — der Kampf des Spiels (ADR-0039).
 ///
@@ -162,22 +168,26 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     ref.read(ladderProvider.notifier).recordKills(welt);
     final ertrag = ref
         .read(ladderProvider.notifier)
-        .recordRun(
-          stufe,
-          won: gewonnen,
-          collected: (xp: welt.runXp, gold: welt.runGold),
-          seconds: welt.elapsed,
-        );
+        .recordRun(stufe, won: gewonnen, seconds: welt.elapsed);
     final best = ref.read(ladderProvider).bestTimes[stufe];
     final neueBestzeit = gewonnen && best != null && best != vorherBest;
-    // **Eingesammelt ist eingesammelt**, auch nach einer Niederlage
-    // (ADR-0083). Was am Boden liegen blieb, ist weg.
-    final funde = _funde.eingesammelt(welt.collectedItems);
+    // **Nur ein Sieg behält, was eingesammelt ist** (ADR-0084, vorher
+    // auch eine Niederlage, ADR-0083). Was am Boden liegen blieb, ist
+    // ohnehin weg; nach einer Niederlage hat die Grube auch das
+    // Eingesammelte schon wieder genommen.
+    final funde = gewonnen
+        ? _funde.eingesammelt(welt.collectedItems)
+        : const <GearCopy>[];
     ref.read(loadoutProvider.notifier).takeRunLoot(funde);
     if (gewonnen) ref.read(soundPlayerProvider).play(SoundEffect.sieg);
 
     final sekunden = welt.elapsed.round();
-    await showDialog<void>(
+    // Nach einer Niederlage drei Wege, stärker zu werden (ADR-0084) —
+    // gelesen nach dem Buchen, aus dem Stand, wie er jetzt ist.
+    final tipps = gewonnen
+        ? const <StaerkerTipp>[]
+        : ref.read(staerkerTippsProvider);
+    final weg = await showDialog<StaerkerWeg>(
       context: context,
       barrierDismissible: false,
       builder: (context) => LaufErgebnis(
@@ -189,17 +199,21 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         newBest: neueBestzeit,
         timedOut: welt.isTimedOut,
         beute: funde,
+        tipps: tipps,
       ),
     );
 
     if (!mounted) return;
-    await _beute(
-      stufe,
-      funde: funde,
-      naechsteNummer: welt.itemsDropped + 1,
-      // Der erste Sieg überhaupt: Hier endet der Weg des Mentors.
-      ersteBeute: gewonnen && vorherReihe.highestDefeated == 0,
-    );
+    // Der Schlüssel öffnet nur nach einem Sieg (ADR-0084).
+    if (gewonnen) {
+      await _beute(
+        stufe,
+        funde: funde,
+        naechsteNummer: welt.itemsDropped + 1,
+        // Der erste Sieg überhaupt: Hier endet der Weg des Mentors.
+        ersteBeute: vorherReihe.highestDefeated == 0,
+      );
+    }
     if (!mounted) return;
     await showAchievementUnlocks(context, ref, before: vorherErrungen);
     if (!mounted) return;
@@ -211,13 +225,32 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     // genau der nächste Schritt.
     if (gewonnen) {
       await Navigator.of(context).maybePop();
+    } else if (weg != null) {
+      _gehe(weg);
     } else {
       setState(() => _verloren = true);
     }
   }
 
-  /// Nach dem Lauf (ADR-0083): Ein Schlüssel öffnet auf Wunsch einen
-  /// Extra-Wurf auf der Kaskade — nach Sieg und Niederlage. Die Funde
+  /// Ein Tipp nach einer Niederlage führt in seinen Bereich — an die
+  /// Stelle der Grube, wie das Buch: „Zurück“ führt von dort zum Eingang
+  /// und nicht in den verlorenen Lauf.
+  void _gehe(StaerkerWeg weg) {
+    final Widget ziel = switch (weg) {
+      StaerkerWeg.faehigkeiten => const AbilitiesScreen(),
+      StaerkerWeg.ausruestung => const EquipmentScreen(),
+      StaerkerWeg.baum => const SkillTreeScreen(),
+      StaerkerWeg.gewohnheiten => const HabitsScreen(),
+      StaerkerWeg.laden => const ShopScreen(),
+    };
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => ziel));
+  }
+
+  /// Nach einem Sieg (ADR-0083): Ein Schlüssel öffnet auf Wunsch einen
+  /// Extra-Wurf auf der Kaskade — seit ADR-0084 nur nach einem Sieg,
+  /// vorher auch nach einer Niederlage. Die Funde
   /// selbst stehen schon im Siegerblatt, zum Antippen und Verkaufen.
   ///
   /// **Nur beim allerersten Sieg** springt vorher der beste Fund noch
@@ -309,11 +342,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   /// Nach einer Niederlage zur Theorie — an die Stelle der Grube, damit
   /// „Zurück“ von dort zum Eingang führt und nicht in den verlorenen
   /// Lauf.
-  void _zurTheorie() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const SkillTreeScreen()),
-    );
-  }
+  void _zurTheorie() => _gehe(StaerkerWeg.baum);
 
   /// „Zurück“ mitten im Lauf — auch die Geste vom Rand: fragen, bevor er
   /// verloren ist. Gebucht wird nur in [_zeigeErgebnis], wer jetzt geht,

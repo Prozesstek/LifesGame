@@ -67,8 +67,6 @@ typedef Payout = ({int xp, int gold});
 
 const Payout _nichts = (xp: 0, gold: 0);
 
-Payout _plus(Payout a, Payout b) => (xp: a.xp + b.xp, gold: a.gold + b.gold);
-
 Payout _minus(Payout a, Payout b) => (
       xp: a.xp - b.xp < 0 ? 0 : a.xp - b.xp,
       gold: a.gold - b.gold < 0 ? 0 : a.gold - b.gold
@@ -134,6 +132,10 @@ class LadderProgress {
   /// Was aus dem Topf einer **noch nicht** geschafften Stufe schon gezahlt
   /// ist — gesammelt in Läufen, die verloren gingen (ADR-0041). Mit dem
   /// Sieg zählt der volle Betrag, und der Eintrag ist bedeutungslos.
+  ///
+  /// **Seit ADR-0084 nur noch Historie**: Eine Niederlage bringt nichts
+  /// mehr, also kommt nichts dazu. Was alte Stände so verdient haben,
+  /// zählt weiter, sonst fiele nachträglich ein Level.
   final Map<int, Payout> partial;
 
   /// Dasselbe für die Dailies von damals, je Tag und Stufe.
@@ -187,26 +189,18 @@ class LadderProgress {
     return _minus(voll, partial[rung] ?? _nichts);
   }
 
-  /// Trägt einen Lauf ein: was er aus dem Topf gesammelt hat, und ob er
-  /// gewonnen wurde. **Mehr als der Topf zählt nie** — was die Welt meldet,
-  /// wird auf [potFor] gekappt.
-  LadderProgress bookRun(
-    int rung, {
-    required bool won,
-    required Payout collected,
-  }) {
-    // Eine geschaffte Stufe ändert nur noch, wie oft dort verloren wurde.
-    if (rung != highestDefeated + 1) return won ? this : recordDefeat(rung);
-
-    if (won) {
-      final ohne = Map<int, Payout>.of(partial)..remove(rung);
-      return defeat(rung).copyWith(partial: ohne);
-    }
-    final gesammelt = _hoechstens(collected, potFor(rung));
-    final bisher = partial[rung] ?? _nichts;
-    return recordDefeat(rung).copyWith(
-      partial: <int, Payout>{...partial, rung: _plus(bisher, gesammelt)},
-    );
+  /// Trägt einen Lauf ein: ob er gewonnen wurde.
+  ///
+  /// **Nur ein Sieg zahlt, und dann den ganzen Topf** (ADR-0084). Was im
+  /// Lauf gefallen ist, war ein Versprechen: Eine Niederlage nimmt es
+  /// wieder, das Bild zeigt das, und gebucht wird nur, dass verloren
+  /// wurde. Bis dahin behielt ein verlorener Lauf seine Beute (ADR-0041).
+  LadderProgress bookRun(int rung, {required bool won}) {
+    if (!won) return recordDefeat(rung);
+    // Eine geschaffte Stufe zahlt nichts mehr (ADR-0032).
+    if (rung != highestDefeated + 1) return this;
+    final ohne = Map<int, Payout>.of(partial)..remove(rung);
+    return defeat(rung).copyWith(partial: ohne);
   }
 
   /// Ob [rung] am Tag [day] als Daily gezahlt hat — für alte Stände.

@@ -9,7 +9,9 @@ import 'package:lifes_game/action/lauf_zeichen.dart';
 import 'package:lifes_game/action/lauf_zeichen_view.dart';
 import 'package:lifes_game/action/pit_run_view.dart';
 import 'package:lifes_game/action/pit_screen.dart';
+import 'package:lifes_game/action/staerker_werden.dart';
 import 'package:lifes_game/combat/widgets/lauf_ergebnis.dart';
+import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -351,6 +353,28 @@ void main() {
       expect(find.byType(SkillTreeScreen), findsOneWidget);
       // An die Stelle der Grube, nicht darüber: „Zurück“ führt nicht in
       // den verlorenen Lauf.
+      expect(find.byType(PitScreen), findsNothing);
+    });
+
+    testWidgets('ein Tipp der Niederlage führt in seinen Bereich (ADR-0084)', (
+      tester,
+    ) async {
+      await hinab(tester);
+      final game = spielVon(tester);
+      for (var i = 0; i < 20000 && !game.sim.isOver; i++) {
+        game.update(0.05);
+      }
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      final tipp = find.byKey(LaufErgebnis.tippKey(StaerkerWeg.gewohnheiten));
+      expect(tipp, findsOneWidget);
+      await tester.tap(tipp);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(HabitsScreen), findsOneWidget);
       expect(find.byType(PitScreen), findsNothing);
     });
 

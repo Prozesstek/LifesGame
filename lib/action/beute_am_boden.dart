@@ -10,6 +10,7 @@ import '../gear/gear_icon.dart';
 import '../gear/widgets/rarity_badge.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
+import 'beute_regen.dart';
 import 'pit_beute.dart';
 
 /// Wie Beute am Boden der Grube aussieht (ADR-0083) — **nur
@@ -82,6 +83,28 @@ abstract final class BeuteAmBoden {
           break;
       }
       _kachel(canvas, mitte, item);
+    }
+  }
+
+  /// Zeichnet, was eine Niederlage gerade nimmt (ADR-0084): dieselbe
+  /// Kachel wie am Boden, im Flug vom Helden weg, kleiner und blasser.
+  static void zeichneGehende(
+    Canvas canvas,
+    List<GehenderFund> gehende,
+    PitBeute beute,
+  ) {
+    for (final fund in gehende) {
+      final sichtbar = fund.sichtbar;
+      final item = beute.fund(fund.nth)?.item;
+      if (sichtbar <= 0 || item == null) continue;
+      final mitte = Offset(fund.x, fund.y);
+      canvas
+        ..saveLayer(null, Paint()..color = Color.fromRGBO(0, 0, 0, sichtbar))
+        ..translate(mitte.dx, mitte.dy)
+        ..scale(fund.groesse)
+        ..translate(-mitte.dx, -mitte.dy);
+      _kachel(canvas, mitte, item);
+      canvas.restore();
     }
   }
 

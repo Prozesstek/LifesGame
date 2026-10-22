@@ -84,11 +84,7 @@ void main() {
 
       for (var stufe = 1; stufe <= 18; stufe++) {
         expect(stand.potFor(stufe), (xp: 0, gold: 0), reason: 'Stufe $stufe');
-        final danach = stand.bookRun(
-          stufe,
-          won: true,
-          collected: (xp: 999, gold: 999),
-        );
+        final danach = stand.bookRun(stufe, won: true);
         expect(danach.earnedXp, stand.earnedXp, reason: 'Stufe $stufe');
         expect(danach.earnedGold, stand.earnedGold, reason: 'Stufe $stufe');
       }
@@ -96,7 +92,7 @@ void main() {
 
     test('ein Sieg dort verändert die alte Historie nicht', () {
       final stand = LadderProgress.fromJson(alterStand());
-      final danach = stand.bookRun(8, won: true, collected: (xp: 9, gold: 9));
+      final danach = stand.bookRun(8, won: true);
 
       expect(danach, stand);
     });
@@ -104,7 +100,7 @@ void main() {
     test('eine Niederlage auf geschaffter Stufe zählt weiter als Niederlage',
         () {
       const stand = LadderProgress(highestDefeated: 10);
-      final danach = stand.bookRun(4, won: false, collected: (xp: 9, gold: 9));
+      final danach = stand.bookRun(4, won: false);
 
       expect(danach.defeatsAt(4), 1);
       expect(danach.earnedXp, stand.earnedXp);

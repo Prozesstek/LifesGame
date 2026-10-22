@@ -346,6 +346,16 @@ class ActionGame extends Game {
           );
         case RunEnded():
           _endeGemeldet = true;
+          // **Verloren nimmt alles wieder** (ADR-0084): Was gefallen ist,
+          // verlässt den Helden, bevor das Blatt kommt.
+          if (!sim.isWon &&
+              beute.verliere(
+                sim.heroView.position,
+                // Auch das Eingesammelte (ADR-0083) geht wieder.
+                funde: funde == null ? const <int>[] : sim.collectedItems,
+              )) {
+            _klaenge.melde(SoundEffect.falsch);
+          }
         case ItemDropped():
           final item = funde?.fallen(event).item;
           if (item?.rarity == GearRarity.legendary) {
@@ -431,7 +441,10 @@ class ActionGame extends Game {
       // niemand. Gezählt mit der wirklichen Zeit und gedeckelt, damit ein
       // hängendes Stück das Ende nie aufhält.
       _endeWartet += wirklich;
-      if (beute.leer || _endeWartet >= endeWartetHoechstens) {
+      final hoechstens = beute.verloren
+          ? BeuteRegen.verlustDauer + BeuteRegen.verlorenLebt
+          : endeWartetHoechstens;
+      if (beute.leer || _endeWartet >= hoechstens) {
         _endeGemeldet = false;
         onRunEnded?.call();
       }
@@ -439,6 +452,7 @@ class ActionGame extends Game {
   }
 
   /// So lange wartet das Ergebnis höchstens auf die Beute in der Luft.
+  /// Nach einer Niederlage wartet es, bis alles genommen ist.
   static const double endeWartetHoechstens = 1.6;
   double _endeWartet = 0;
 
@@ -495,6 +509,10 @@ class ActionGame extends Game {
     if (bilder == null) _drawSwings(canvas);
     _drawBursts(canvas);
     BeuteBild.zeichne(canvas, beute);
+    final gefunden = this.funde;
+    if (gefunden != null) {
+      BeuteAmBoden.zeichneGehende(canvas, beute.gehendeFunde, gefunden);
+    }
     _drawPopups(canvas);
 
     canvas.restore();

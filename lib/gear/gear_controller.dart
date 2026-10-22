@@ -74,9 +74,9 @@ class GearController extends Notifier<Loadout> {
 
   /// Legt die Funde eines Laufs in den Rucksack (ADR-0083).
   ///
-  /// **Eingesammelt ist eingesammelt**, auch nach einer Niederlage: Was der
-  /// Held aufgehoben hat, bleibt. Was am Boden liegen blieb, steht gar
-  /// nicht erst in [funde].
+  /// **Nur nach einem Sieg** (ADR-0084; bis dahin auch nach einer
+  /// Niederlage): `PitScreen` reicht nach einer Niederlage nichts herein.
+  /// Was am Boden liegen blieb, steht gar nicht erst in [funde].
   void takeRunLoot(List<GearCopy> funde) {
     var neu = state;
     for (final copy in funde) {

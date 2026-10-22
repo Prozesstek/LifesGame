@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
+import '../../action/staerker_werden.dart';
+import '../../home/home_screen.dart';
+import '../../ui/druck.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 import 'siegerblatt_funde.dart';
 
 /// Das Blatt am Ende eines Laufs in der Grube (Frederik, 30.09.) —
@@ -15,16 +19,17 @@ import 'siegerblatt_funde.dart';
 /// und blenden von der Farbe der Überschrift in ihre eigene —, zuletzt
 /// mittig „Weiter“.
 ///
-/// **Beute auch nach einer Niederlage**, wenn etwas gefallen ist: Ein
-/// verlorener Lauf behält sie (ADR-0041), also steht sie auch da. Mehr
-/// als der Topf der Stufe ist es nie (`loot_test.dart`). Ein zweiter Sieg
-/// bringt nichts (ADR-0032); dann fehlen die Zeilen, und der Tipp auf die
-/// Überschrift sagt warum.
-///
 /// **Darunter die Funde** (ADR-0083), nach AktivesBretts Skizze zu #136:
 /// Sie drehen sich nacheinander um, tragen den Pfeil gegen das Getragene,
 /// öffnen beim Antippen ihr Blatt und lassen sich mit Häkchen verkaufen
-/// ([SiegerblattFunde]) — auch nach einer Niederlage.
+/// ([SiegerblattFunde]).
+///
+/// **Nach einer Niederlage keine Beute und keine Funde, dafür drei Wege**
+/// (ADR-0084): Was gefallen ist, hat die Grube schon wieder genommen. An
+/// ihre Stelle treten drei Tipps aus dem eigenen Stand
+/// ([StaerkerWerden]); ein Tipp schliesst das Blatt und gibt seinen
+/// [StaerkerWeg] zurück. Ein zweiter Sieg bringt nichts (ADR-0032); dann
+/// fehlen die Zeilen, und der Tipp auf die Überschrift sagt warum.
 class LaufErgebnis extends StatefulWidget {
   const LaufErgebnis({
     required this.won,
@@ -34,6 +39,7 @@ class LaufErgebnis extends StatefulWidget {
     this.earnedGold = 0,
     this.newBest = false,
     this.timedOut = false,
+    this.tipps = const <StaerkerTipp>[],
     this.beute = const <GearCopy>[],
     super.key,
   });
@@ -57,8 +63,14 @@ class LaufErgebnis extends StatefulWidget {
   /// Woran Tests die Funde finden.
   static const Key fundeKey = ValueKey<String>('lauf-funde');
 
+  /// Was nach einer Niederlage stärker macht. Nach einem Sieg leer.
+  final List<StaerkerTipp> tipps;
+
   /// Woran Tests den Knopf finden.
   static const Key weiterKey = ValueKey<String>('lauf-weiter');
+
+  /// Woran Tests einen Tipp finden.
+  static Key tippKey(StaerkerWeg weg) => ValueKey<String>('tipp-${weg.name}');
 
   @override
   State<LaufErgebnis> createState() => _LaufErgebnisState();
@@ -75,15 +87,14 @@ class _LaufErgebnisState extends State<LaufErgebnis>
 
   bool get _hatBeute => widget.earnedXp > 0 || widget.earnedGold > 0;
 
+  bool get _hatTipps => !widget.won && widget.tipps.isNotEmpty;
+
   Color get _farbe => widget.won ? Palette.success : Palette.enemy;
 
   String get _fussnote {
     if (!widget.won) {
-      return _hatBeute
-          ? 'Was gefallen ist, bleibt dir. Die Stufe zählt erst mit dem '
-                'Wächter.'
-          : 'Das kostet nichts außer diesem Lauf. Werte wachsen über '
-                'Häkchen und Lektionen, nicht über Siege.';
+      return 'Ohne den Wächter bleibt nichts: Was gefallen ist, ist wieder '
+          'weg. Werte wachsen über Häkchen und Lektionen, nicht über Siege.';
     }
     return _hatBeute
         ? 'Einmal je Stufe — wer sie noch einmal räumt, bekommt nichts '
@@ -163,10 +174,23 @@ class _LaufErgebnisState extends State<LaufErgebnis>
                 vorlauf: Duration(milliseconds: _hatBeute ? 1200 : 300),
               ),
             ],
+            if (_hatTipps) ...<Widget>[
+              const SizedBox(height: 18),
+              for (final (i, tipp) in widget.tipps.indexed) ...<Widget>[
+                if (i > 0) const SizedBox(height: 8),
+                _TippKnopf(
+                  ablauf: _ablauf,
+                  beginn: 0.15 + 0.15 * i,
+                  tipp: tipp,
+                ),
+              ],
+            ],
             const SizedBox(height: 22),
             _WeiterKnopf(
               ablauf: _ablauf,
-              beginn: _hatBeute || widget.beute.isNotEmpty ? 0.75 : 0.2,
+              beginn: _hatBeute || _hatTipps || widget.beute.isNotEmpty
+                  ? 0.75
+                  : 0.2,
             ),
           ],
         ),
@@ -292,6 +316,108 @@ class _BeuteZeile extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Ein Tipp nach einer Niederlage: das Zeichen des Bereichs, ein Satz,
+/// ein Pfeil. Gleitet herein wie eine Zeile Beute; ein Tipp schliesst das
+/// Blatt und sagt, wohin.
+class _TippKnopf extends StatelessWidget {
+  const _TippKnopf({
+    required this.ablauf,
+    required this.beginn,
+    required this.tipp,
+  });
+
+  final Animation<double> ablauf;
+  final double beginn;
+  final StaerkerTipp tipp;
+
+  Widget get _zeichen {
+    const groesse = 26.0;
+    Widget bild(String pfad, IconData ersatz) => PixelArt(
+      assetPath: pfad,
+      side: groesse,
+      fallback: Icon(ersatz, size: 22),
+    );
+    return switch (tipp.weg) {
+      StaerkerWeg.faehigkeiten => bild(
+        HomeScreen.abilitySymbol,
+        Icons.auto_awesome,
+      ),
+      StaerkerWeg.ausruestung => bild(
+        HomeScreen.gearSymbol,
+        Icons.shield_outlined,
+      ),
+      StaerkerWeg.baum => bild(
+        HomeScreen.theorySymbol,
+        Icons.account_tree_outlined,
+      ),
+      StaerkerWeg.gewohnheiten => const Icon(
+        Icons.check_circle_outline,
+        size: groesse,
+        color: Palette.success,
+      ),
+      StaerkerWeg.laden => const Icon(
+        Icons.storefront_outlined,
+        size: groesse,
+        color: Palette.gold,
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final herein = CurvedAnimation(
+      parent: ablauf,
+      curve: Interval(beginn, beginn + 0.2, curve: Curves.easeOutBack),
+    );
+    return AnimatedBuilder(
+      animation: herein,
+      builder: (context, child) {
+        final t = herein.value;
+        return Opacity(
+          opacity: t.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, 24 * (1 - t)),
+            child: IgnorePointer(ignoring: t < 0.5, child: child),
+          ),
+        );
+      },
+      child: Druck(
+        child: Material(
+          color: Palette.surfaceRaised,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            key: LaufErgebnis.tippKey(tipp.weg),
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => Navigator.of(context).pop(tipp.weg),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              child: Row(
+                children: <Widget>[
+                  SizedBox.square(dimension: 26, child: _zeichen),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: Text(
+                      tipp.satz,
+                      style: const TextStyle(fontSize: 14, color: Palette.text),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: Palette.textDim,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
