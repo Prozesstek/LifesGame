@@ -1,0 +1,18 @@
+name: haustier
+description: >-
+  Das Haustier fuer Lifes Game (Prototyp): drei Arten, Wachstum aus Tagen
+  mit Haekchen, Laune aus dem heutigen Tag, Zubehoer und Preise. Reines
+  Dart, damit sich alles ohne laufende App pruefen laesst.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Bewusst leer, wie bei den anderen Packages: Das Haustier kennt weder
+# Gewohnheiten noch Gebiete. Die App reicht Zahlen herein.
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0

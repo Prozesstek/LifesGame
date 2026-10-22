@@ -27,6 +27,7 @@ import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../haustier/widgets/haustier_karte.dart';
 import '../skills/widgets/gebiet_frage_karte.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
@@ -176,6 +177,13 @@ class HomeScreen extends ConsumerWidget {
                                   .customWithoutArea
                                   .isNotEmpty) ...<Widget>[
                                 const GebietFrageKarte(),
+                                const SizedBox(height: 10),
+                              ],
+                              // **Das Haustier** (Prototyp, 22.10.2026) —
+                              // über „Heute“, wo abgehakt wird. Nur im
+                              // Entwicklermodus, bis ihr es gespielt habt.
+                              if (devModeAvailable) ...<Widget>[
+                                const HaustierKarte(),
                                 const SizedBox(height: 10),
                               ],
                               // Ohne Gewohnheit ist „Heute“ die erste
