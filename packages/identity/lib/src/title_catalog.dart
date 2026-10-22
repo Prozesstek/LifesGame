@@ -10,10 +10,12 @@ import 'title.dart';
 /// kein Grund, beides zusammenzulegen — vier Titel kommen aus
 /// Entdeckungen, deren Bedingung niemand vorher lesen soll.
 ///
-/// **Dreizehn Titel: die sieben aus ADR-0014 und sechs neue.** Die sechs
-/// kommen aus Entdeckungen und sagen etwas über den Stil statt über die
-/// Menge — sie sind der Platz, an dem das Persönlichkeitsprofil aus
-/// Issue #41 gelandet ist (ADR-0033, Punkt 9).
+/// **Fünfundzwanzig Titel: die sieben aus ADR-0014, sechs aus
+/// Entdeckungen und zwölf aus den Gebieten.** Die sechs aus Entdeckungen
+/// sagen etwas über den Stil statt über die Menge — sie sind der Platz,
+/// an dem das Persönlichkeitsprofil aus Issue #41 gelandet ist (ADR-0033,
+/// Punkt 9). Die zwölf aus den Gebieten sagen, worin jemand lange dabei
+/// ist (ADR-0085).
 abstract final class TitleCatalog {
   /// In der Reihenfolge, in der sie im Spiel erscheinen sollen: erst die
   /// Meilensteine nach Schwelle, dann die Entdeckungen.
@@ -34,6 +36,20 @@ abstract final class TitleCatalog {
     CharacterTitle(id: 'alchemist', label: 'der Alchemist'),
     CharacterTitle(id: 'unbeugsam', label: 'der Unbeugsame'),
     CharacterTitle(id: 'stratege', label: 'der Stratege'),
+
+    // --- aus den Gebieten, je 10, 25 und 50 (ADR-0085) ---
+    CharacterTitle(id: 'ruestig', label: 'der Rüstige'),
+    CharacterTitle(id: 'gestaehlt', label: 'der Gestählte'),
+    CharacterTitle(id: 'unverwuestlich', label: 'der Unverwüstliche'),
+    CharacterTitle(id: 'wach', label: 'der Wache'),
+    CharacterTitle(id: 'gesammelt', label: 'der Gesammelte'),
+    CharacterTitle(id: 'weise', label: 'der Weise'),
+    CharacterTitle(id: 'neugierig', label: 'der Neugierige'),
+    CharacterTitle(id: 'forscher', label: 'der Forscher'),
+    CharacterTitle(id: 'gelehrt', label: 'der Gelehrte'),
+    CharacterTitle(id: 'zugewandt', label: 'der Zugewandte'),
+    CharacterTitle(id: 'vertraut', label: 'der Vertraute'),
+    CharacterTitle(id: 'ratgeber', label: 'der Ratgeber'),
   ];
 
   static CharacterTitle? byId(String? id) {

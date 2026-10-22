@@ -24,6 +24,8 @@ import '../character/show_ability_unlock.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
 import '../progression/show_level_up.dart';
+import '../skills/gebiet_zeichen.dart';
+import '../skills/skills_provider.dart';
 import '../ui/aufstieg.dart';
 import '../ui/beute_flug.dart';
 import '../ui/palette.dart';
@@ -110,6 +112,10 @@ void _mitFeier(
   final formVorher = ref.read(dailyFormProvider);
   final schluesselVorher = ref.read(availableKeysProvider);
   final trackerVorher = ref.read(habitTrackerProvider);
+  final area = habit.area;
+  final skillVorher = area == null
+      ? null
+      : ref.read(skillsProvider).of(area).level;
 
   final result = tat(ref.read(habitTrackerProvider.notifier));
   if (result == null) return;
@@ -141,7 +147,15 @@ void _mitFeier(
   // wo das Ergebnis wartet, bis der Brunnen eingesammelt ist. Sonst
   // deckte der Aufstieg den Balken zu, der ihn gerade füllt.
   final feiern = _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
-  if (!_fliegen(context, result, klang, danach: feiern)) {
+  // Der Balken unter dem Level weiss so, welches Gebiet er zeigt.
+  if (area != null) ref.read(zuletztGebietProvider.notifier).setze(area);
+  if (!_fliegen(
+    context,
+    result,
+    klang,
+    zumGebiet: area != null,
+    danach: feiern,
+  )) {
     WidgetsBinding.instance.addPostFrameCallback((_) => feiern());
   }
   sayHabitFeedback(
@@ -157,13 +171,18 @@ void _mitFeier(
     werteVorher,
     formVorher,
     schluesselVorher,
+    skillVorher,
   );
   if (moment.tagGeschafft) AufstiegHost.maybeOf(context)?.konfetti();
 }
 
 /// **Erfahrung und Gold fliegen zur Leiste oben** — als Funken und
 /// Münzen, und die Zahlen dort steigen, wenn sie ankommen. Nur, wo es
-/// eine Leiste gibt (die Startseite); sonst steigen nur die Zahlen auf.
+/// eine Leiste gibt; sonst steigen nur die Zahlen auf.
+///
+/// **Die Erfahrung fliegt zweimal** ([zumGebiet], ADR-0085): einmal zum
+/// Level, einmal grün zum Balken des Gebiets darunter. Derselbe Betrag,
+/// zwei Ziele — so sieht man, dass ein Häkchen für beides zählt.
 ///
 /// Der Klang ist schon geholt: Bis das letzte Stück ankommt, ist ein
 /// `ref` womöglich nicht mehr zu lesen. [danach] kommt, wenn alles
@@ -172,14 +191,16 @@ bool _fliegen(
   BuildContext context,
   CheckResult result,
   SoundPlayer klang, {
+  required bool zumGebiet,
   required VoidCallback danach,
 }) {
   return AufstiegHost.maybeOf(context)?.fliege(
         gold: result.goldGained,
         xp: result.xpGained,
+        gebiet: zumGebiet ? result.xpGained : 0,
         beiAnkunft: (ziel) => klang.play(switch (ziel) {
           FlugZiel.gold => SoundEffect.muenze,
-          FlugZiel.erfahrung => SoundEffect.funke,
+          FlugZiel.erfahrung || FlugZiel.gebiet => SoundEffect.funke,
         }),
         wennGelandet: danach,
       ) ??
@@ -367,6 +388,10 @@ int _punkt(WidgetRef ref, Habit habit, CharacterStats werteVorher) {
 /// **Die Zahlen steigen dort auf, wo getippt wurde** — Erfahrung, Gold,
 /// ein gewonnener Punkt und die Tagesform. Dasselbe, was die Leiste unten
 /// sagt, nur dort, wo der Blick ist.
+///
+/// **Die Erfahrung steht zweimal da** (ADR-0085): fürs Level und, grün
+/// mit dem Zeichen des Gebiets, für den Skill. Steigt dabei der Skill,
+/// sagt es eine dritte Zeile.
 void _steigen(
   BuildContext context,
   WidgetRef ref,
@@ -375,7 +400,14 @@ void _steigen(
   CharacterStats werteVorher,
   DailyForm formVorher,
   int schluesselVorher,
+  int? skillVorher,
 ) {
+  final area = habit.area;
+  final skillNachher = area == null
+      ? null
+      : ref.read(skillsProvider).of(area).level;
+  final skillAuf =
+      skillVorher != null && skillNachher != null && skillNachher > skillVorher;
   final punkt = _punkt(ref, habit, werteVorher);
   final form = DailyFormText.gainAfterCheck(
     stat: habit.stat,
@@ -387,6 +419,18 @@ void _steigen(
       '+${result.xpGained} EP  +${result.goldGained} G',
       color: Palette.goldOnDark,
     ),
+    if (area != null)
+      AufstiegZeile(
+        '+${result.xpGained} EP ${area.label}',
+        color: Palette.successOnDark,
+        icon: gebietZeichen(area),
+      ),
+    if (area != null && skillAuf)
+      AufstiegZeile(
+        '${area.label} $skillNachher!',
+        color: Palette.successOnDark,
+        icon: Icons.arrow_upward_rounded,
+      ),
     if (punkt > 0)
       AufstiegZeile(
         '+$punkt ${habit.stat.label}',

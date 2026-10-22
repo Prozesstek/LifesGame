@@ -75,12 +75,14 @@ void main() {
         id: 'custom-1',
         name: 'Kaltduschen',
         stat: HabitStat.disziplin,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.schwer,
       );
       const leicht = CustomHabit(
         id: 'custom-2',
         name: 'Fenster auf',
         stat: HabitStat.disziplin,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.leicht,
       );
       var tracker = const HabitTracker.empty();
@@ -112,8 +114,9 @@ void main() {
     });
 
     test('am Deckel gibt es keinen mehr', () {
-      final tracker = _mitKette(60);
-      final morgen = _danach(60);
+      // Seit ADR-0085 liegt der Deckel bei einem Jahr, nicht bei 60.
+      final tracker = _mitKette(365);
+      final morgen = _danach(365);
 
       expect(tracker.nextMilestoneFor(id, morgen), isNull);
       expect(tracker.checksToNextMilestone(id, morgen), 0);

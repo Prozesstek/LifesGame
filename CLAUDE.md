@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 204 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 208 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
@@ -67,18 +67,20 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, reines Dart, 44 Tests | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, **Skill-Kurve**, reines Dart, 52 Tests | nur Dart-SDK |
 | `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 333 Tests | nur Dart-SDK |
+| `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 345 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/stack.dart` | **Gewohnheiten koppeln**: wie die Tagesliste zu Stapeln geordnet wird, was „jetzt dran“ ist, und dass kein Kreis entsteht ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/timer.dart` | der **Timer** eines Zeitziels: ein Zeitpunkt, kein Zähler — gerechnet wird aus der Startzeit ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_rule.dart` | **wie eine Kette läuft**: erledigt, getragen, verpasst — eine Stelle für Kette, Tageskette und Erfahrung | nur Dart-SDK |
+| `packages/habits/lib/src/skill_area.dart` | die **vier Gebiete** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Körper, Geist, Wissenschaft, Gesellschaft — gleich benannt wie die Wurzeln des Baums | nur Dart-SDK |
 | `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_quests.dart` | die **drei Tagesaufgaben**: aus dem Datum gewürfelt, Stand aus der Historie, ein Schlüssel je abgeholter ([ADR-0055](docs/decisions/0055-tageskette-aufgaben-und-wiederholen.md)) | nur Dart-SDK |
@@ -102,9 +104,9 @@ durch die Grube ersetzt und gelöscht.
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 43 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen — und die **Ultimates** (`ultimates`), die nie unter den wählbaren stehen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
-| `packages/identity/lib/src/title_catalog.dart` | die **dreizehn** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
-| `packages/achievements/` | Errungenschaften, reines Dart, 24 Tests | nur Dart-SDK |
-| `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
+| `packages/identity/lib/src/title_catalog.dart` | die **fünfundzwanzig** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
+| `packages/achievements/` | Errungenschaften, reines Dart, 25 Tests | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **34 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 406 Tests | nur Dart-SDK |
@@ -157,6 +159,14 @@ durch die Grube ersetzt und gelöscht.
 | `lib/sammlung/sammlung_screen.dart` | sechs Reiter mit Prozent — Ausrüstung, Fähigkeiten, Gegner, Titel, Seiten und die **Errungenschaften, die hier eingezogen sind**; ein Fragezeichen sagt auf Tipp, woher | Flutter |
 | `lib/sammlung/sammlung_knopf.dart` | der Weg hinein, oben rechts in Ausrüstung und Fähigkeiten | Flutter |
 | `lib/sammlung/figur_bild.dart` | eine Figur der Grube als stehendes Bild, auf sie zugeschnitten | Flutter |
+| `lib/skills/skills.dart` | **die Skills je Gebiet** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Häkchen, Seiten und Rückfragen eines Gebiets zusammengezählt, dazu das Gesamtlevel — **eine Stelle**, die Errungenschaften rechnen dasselbe | Flutter |
+| `lib/skills/skills_provider.dart` | `skillsProvider`, und welches Gebiet zuletzt abgehakt wurde (`zuletztGebietProvider`, nur Darstellung) | Flutter |
+| `lib/skills/gebiet_zeichen.dart` | das Zeichen eines Gebiets — **das seiner Wurzel im Baum**, keine eigene Tabelle | Flutter |
+| `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
+| `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
+| `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke — **eine Stelle** für Kachel und Kopf des Baums | Flutter |
+| `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** unter dem Level: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
+| `lib/skills/widgets/gebiet_frage_karte.dart` | die **einmalige Frage** nach dem Gebiet einer alten eigenen Gewohnheit, über „Heute“ | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
@@ -168,9 +178,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
-| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile; der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab | Flutter |
+| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile, darunter der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **auch oben auf dem Gewohnheiten-Bildschirm** | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme** | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
 | `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
 | `lib/lagerfeuer/am_feuer.dart` | **was am Feuer wartet** und ob es brennt (ab 18 Uhr oder Tag geschafft) — reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/lagerfeuer/am_feuer_provider.dart` | trägt das zusammen, **rechnet nichts** | Flutter |
@@ -185,8 +195,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/habits/habits_screen.dart` | **„Heute“ oben**, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
-| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
+| `lib/habits/habits_screen.dart` | oben die Leiste der Startseite, **„Heute“** darunter, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
+| `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **die Erfahrung fliegt zweimal**, zum Level und grün zum Gebiet ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)); **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
 | `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/habits/widgets/haekchen_kreis.dart` | der Kreis, der beim Abhaken **aufspringt** — Blitz, Ring, acht Striche; nur beim Setzen; **eine Stelle** für Kachel und „Heute“ | Flutter |
 | `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
@@ -237,7 +247,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
 | `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`) | Flutter |
-| `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
+| `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken, grüne Funken zum Gebiet** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
 | `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
 | `lib/ui/sprung.dart` | **wie etwas aufspringt** — eine gedämpfte Feder für Häkchen und Flamme | Flutter |
@@ -302,7 +312,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 951 Tests
+flutter test             # 967 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -321,16 +331,16 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 333 Tests
+dart test                              # 345 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 204 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 44 Tests
+cd packages/theory      ; dart test    # 208 Tests, prüft auch den Inhalt
+cd packages/progression ; dart test    # 52 Tests
 cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
-cd packages/achievements; dart test    # 24 Tests, prüft den ganzen Katalog
+cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog
 ```
 
 **Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)
@@ -685,6 +695,28 @@ um, und das Level könnte nachträglich fallen. Wer an der Kettenregel
 dreht, lässt `week_plan_test.dart` und `curve_sim.dart` laufen — die
 Tabelle im ADR ist gemessen.
 
+**Seit [ADR-0085](docs/decisions/0085-skills-je-gebiet.md) hat jedes Gebiet einen Skill, und er steht vorne.** Die
+Kette misst Gleichmäßigkeit und kann fallen, der Skill misst Menge und
+wächst nur. Ein Häkchen zahlt seine Erfahrung zweimal: fürs Level und für
+den Skill seines Gebiets — und das sieht man: Die Funken teilen sich am
+Finger, ein Strom fliegt zum Level, ein grüner zum Balken des Gebiets
+darunter. Über 60 Tage steigt der Kettenbonus langsam weiter (100 Tage
+×2,2, 180 ×2,4, 365 ×2,6).
+
+| Frage | Antwortet |
+|---|---|
+| Zu welchem Gebiet gehört eine Gewohnheit? | `Habit.area` — eine Vorlage im Katalog, eine eigene beim Anlegen, eine alte **einmal** gefragt (`HabitTracker.assignArea`, `GebietFrageKarte`) |
+| Was zahlt in einen Skill ein? | `Skills.aus` — `HabitTracker.xpIn`, `TheoryProgress.xpInArea`, `ReviewLog.xpFor`; Grube, Errungenschaften und Truhe nicht |
+| Wie schnell steigt er? | `SkillCurve` — eine Gewohnheit täglich: 10 nach 50 Tagen, 50 nach 425, 100 nach 1307 |
+| Was bringt er? | je Gebiet drei Titel bei 10, 25 und 50 (`AchievementArea.gebiete`); im Kampf nichts |
+| Wo sieht man ihn? | Kachel (`SkillAbzeichen`, `RewardLine`), Leiste (`GebietsBalken`), Charakter (`SkillKarte`), Kopf des Baums, „Heute“ |
+
+**Ein Skill darf nur wachsen** — sonst nähme er einen Titel zurück.
+Deshalb lässt sich das Gebiet einer eigenen Gewohnheit nur setzen, wenn
+sie keins hat, nie wechseln. Wer an der Kurve oder den Kettenstufen
+dreht, lässt `flutter test test/skills_test.dart` und
+`test/progression_test.dart` laufen.
+
 **Das Streak-Eis deckt einen Tag, verlängert die Kette aber nicht**
 ([ADR-0036](docs/decisions/0036-streak-eis-als-gegenstand.md)). Drei
 Regeln stehen an je einer Stelle:
@@ -708,7 +740,8 @@ auf die der Laden ausgelegt ist: Wer an den Gewichten dreht, lässt
 `daily_chest_test.dart` laufen.
 
 Der Grad ist gemessen, nicht geschätzt: Fünf „schwere" eigene
-Gewohnheiten erreichen Level 50 in 188 Tagen statt in 240. Wer an
+Gewohnheiten erreichen Level 50 in 179 Tagen statt in 223 (seit den
+Kettenstufen über 60 Tage, [ADR-0085](docs/decisions/0085-skills-je-gebiet.md); vorher 188 und 240). Wer an
 `HabitDifficulty` dreht, lässt `flutter test test/progression_test.dart`
 laufen — dort steht die Spanne als Test.
 
@@ -963,7 +996,7 @@ gehen in die Grube (`action_combat`), und alles zusammen verdient
 Errungenschaften (`achievements`), die Titel (`identity`) und sieben
 Fähigkeiten vergeben — darunter Funkenstoß, die erste für jeden.
 
-Es gibt genau **siebzehn** Stellen, an denen etwas zusammenläuft:
+Es gibt genau **achtzehn** Stellen, an denen etwas zusammenläuft:
 
 | Provider | führt zusammen |
 |---|---|
@@ -984,6 +1017,7 @@ Es gibt genau **siebzehn** Stellen, an denen etwas zusammenläuft:
 | `heroPowerProvider` | Werte, Level, Seltenheit **und Tagesform** zur Stärke in der Grube (ADR-0042, ADR-0043) |
 | `fameProvider` | Ruhm aus Errungenschaften **und der Tagesgrube** (ADR-0072) |
 | `sammelEintraegeProvider` | **die Sammlung** — je Besessenes, Gelerntes, Bestiarium, Titel und Seiten (ADR-0080) |
+| `skillsProvider` | **die Skills je Gebiet** — Häkchen, Seiten und Rückfragen (ADR-0085) |
 
 **Zwei davon lösen einen Zirkelbezug auf, und das ist kein Zufall.**
 Errungenschaften im Laden zahlen Gold, und ob sie verdient sind, hängt

@@ -25,7 +25,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067 |
+| **Gewohnheiten** | **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085 |
 | **Startseite** | sieben Kreise, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
@@ -36,9 +36,9 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 951, dazu die acht Packages (theory 204, habits 333, gear
-137, action_combat 406, progression 44, abilities 43, identity 25,
-achievements 24). **In der CI laufen nur die App-Tests** — der Umbau,
+**Tests:** App 967, dazu die acht Packages (theory 208, habits 345, gear
+137, action_combat 406, progression 52, abilities 43, identity 25,
+achievements 25). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
 ## Offen, gesammelt
@@ -132,6 +132,75 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 22.10.2026, abends: Skills je Gebiet — was bleibt, wenn die Kette fällt
+
+Frederik: „Jemand der 30 Tage eine Streak aufrecht erhält hat ein
+höheres Gefühl als jemand der 100 mal 25 Tage Streaks hatte … So hat
+Sport seinen eigenen Skill in welche Theorie einzahlen als auch die
+Gewohnheiten die dazu passen. Dadurch kann sich mehr mit anderen
+verglichen werden und wir verlieren keine Spieler nachdem sie eine 300
+Tage Streak verloren haben.“ In zwei Fragerunden entschieden, siebenmal
+wie empfohlen, einmal dagegen:
+[ADR-0085](../decisions/0085-skills-je-gebiet.md).
+
+**Der Befund vorher:** Eine verlorene 300-Tage-Kette kostete schon keine
+Erfahrung (300 → 60, ×2 blieb), weh tat nur die Zahl auf der Kachel. Ab
+Tag 60 brachte eine längere Kette nichts mehr, und bei Level 50 ist nach
+188 bis 240 Tagen Schluss.
+
+| Was | Wie |
+|---|---|
+| **Vier Skills** | Körper, Geist, Wissenschaft, Gesellschaft — die Wurzeln des Baums; 1 bis 100, wachsen nur |
+| **Was einzahlt** | Häkchen (mit Kette und Grad), bestandene Seiten des Gebiets, richtige Rückfragen; das Level bekommt alles weiter |
+| **Die Kette** | wächst über 60 Tage weiter: 100 Tage ×2,2, 180 ×2,4, 365 ×2,6 |
+| **Titel** | je Gebiet drei, bei 10, 25 und 50 — zwölf neue, im Reiter „Gebiete“ der Errungenschaften |
+| **Vorne steht der Skill** | auf der Kachel Zeichen und Stufe, darunter die Flamme mit dem Bonus; die Tage am Stück im Tipp, dazu die Tage gesamt |
+| **Charakter** | Gesamtlevel, die vier Skills, ein Teilen-Knopf — über der Kette |
+| **Baum** | der Skill des Gebiets neben seinem Namen |
+| **Alte eigene Gewohnheiten** | fragen **einmal** nach ihrem Gebiet, auf der Startseite über „Heute“ — **gegen Claudes Empfehlung** (aus dem Wert ableiten) |
+
+**Danach, auf Frederiks Wunsch** („eine Animation und besser
+ausgeschildert, dass … XP zu dem Charakter Level und Level des Gebietes
+dazu kommt“): Die Funken eines Häkchens teilen sich, ein Strom fliegt zum
+Level, ein grüner zum **Balken des Gebiets**, der dafür unter dem
+Level-Balken einblendet und danach verblasst. Unter „+33 EP +5 G“ steigt
+grün „+33 EP Körper“ auf, die Kachel nennt die Erfahrung zweimal, und
+„Heute“ trägt rechts das Zeichen des Gebiets. **Der Gewohnheiten-
+Bildschirm hat jetzt oben die Leiste** — die Lücke vom 18.10. ist zu.
+
+**Gemessen** (eine Gewohnheit täglich, ohne Seiten): Skill 10 nach 50
+Tagen, 25 nach 159, 50 nach 425, 100 nach 1307. Durch die neuen
+Kettenstufen kommt **Level 50 früher**: fünf Vorlagen nach 223 Tagen
+statt 240, fünf „schwere“ nach 179 statt 188. Bis Tag 60 ändert sich
+nichts. Die Errungenschaften zahlen über ein Spielerleben 2880 Erfahrung
+und 960 Gold statt 1860 und 620 — über Jahre verteilt.
+
+**Ohne Rückfrage entschieden** (die ganze Liste im ADR): die zwölf
+Titelnamen; ein eigener Reiter „Gebiete“; eine Seite in zwei Gebieten
+zählt für beide Skills; das Gebiet einer eigenen Gewohnheit steht ab dem
+Anlegen fest; Grün als Farbe der Gebiete.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844, auch mitten im
+Flug): Auf der Kachel mit Timer standen beide Erfahrungszahlen als
+„+…“; die Zeile schrumpft jetzt als Ganzes.
+
+Neu: `skill_area.dart`, `skill_curve.dart`, `lib/skills/` (acht
+Dateien), `skill_area_test.dart`, `skill_curve_test.dart`,
+`area_xp_test.dart`, `test/skills_test.dart`. App 967 (vorher 951),
+habits 345 (333), theory 208 (204), progression 52 (44), achievements
+25 (24). **Nicht gespielt, nicht am Handy, nicht gehört.**
+
+### Offen
+
+- **Die Namen der zwölf Titel** sind Claudes Vorschlag — gegenlesen.
+- **AktivesBrett hat ADR-0085 nicht gesehen**: Die Kachel zeigt jetzt
+  den Skill statt der Tage, und der Kettenbonus geht bis ×2,6.
+- Ob der Balken des Gebiets am Handy lesbar ist — Name und Stufe stehen
+  in zehn Punkten.
+- Ob Skill 10 nach 50 Tagen zu langsam ist; mit Seiten geht es schneller.
+- Vergleichen geht nur über den kopierten Text. Eine Rangliste braucht
+  einen Server.
 
 ## 22.10.2026: die Niederlage nimmt — und zeigt drei Wege
 
@@ -1145,8 +1214,8 @@ erst im `dispose` an, und die CI läuft auf einem älteren Flutter
   als zwei gelesen wird.
 - Wer direkt nach dem Abhaken einen Bereich öffnet, sieht die Feier erst
   beim Zurückkommen: Der Host läuft dahinter nicht weiter.
-- Der Gewohnheiten-Bildschirm hat keine Leiste, zu der etwas fliegen
-  könnte.
+- ~~Der Gewohnheiten-Bildschirm hat keine Leiste, zu der etwas fliegen
+  könnte.~~ Hat sie seit dem 22.10. (ADR-0085).
 
 ## 16.10.2026, spät: der Schlund glüht
 

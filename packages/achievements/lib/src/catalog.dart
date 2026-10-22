@@ -25,11 +25,16 @@ int _everOwnedCount(AchievementStats s) => s.everOwnedCount;
 int _slotsEverOwned(AchievementStats s) => s.slotsEverOwned;
 int _completeSetsEverOwned(AchievementStats s) => s.completeSetsEverOwned;
 int _soldCount(AchievementStats s) => s.soldCount;
+int _skillKoerper(AchievementStats s) => s.skillKoerper;
+int _skillGeist(AchievementStats s) => s.skillGeist;
+int _skillWissenschaft(AchievementStats s) => s.skillWissenschaft;
+int _skillGesellschaft(AchievementStats s) => s.skillGesellschaft;
 
 /// Alle Errungenschaften des Spiels an einem Ort.
 ///
-/// **20 Meilensteine und 8 Entdeckungen** — der erste Satz aus ADR-0033,
-/// dazu „Zehn Truhen“ aus ADR-0073.
+/// **34 Meilensteine und 8 Entdeckungen** — der erste Satz aus ADR-0033,
+/// dazu „Zehn Truhen“ aus ADR-0073, „Erste Seite“ aus ADR-0079 und die
+/// zwölf Titel der Gebiete aus ADR-0085.
 /// Gleiche Regel wie bei Preisen, Belohnungen und Titeln: Steht eine
 /// dieser Bedingungen irgendwo anders im Code, ist das ein Bug.
 ///
@@ -382,6 +387,143 @@ abstract final class AchievementCatalog {
       tier: AchievementTier.entdeckung,
       requirement: 'Ein Ausrüstungsstück verkaufen',
       measure: _soldCount,
+    ),
+    // ---------------- Gebiete (ADR-0085) ----------------
+    // Je Skill drei Titel, bei 10, 25 und 50. Sie sind der Grund, eine
+    // lange Zeit in einem Gebiet sichtbar zu machen: Wer 100 Ketten zu
+    // 25 Tagen hatte, trägt am Ende denselben Titel wie jemand mit einer
+    // langen — und behält ihn, wenn eine Kette fällt.
+    Achievement(
+      id: 'ruestig',
+      name: 'der Rüstige',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Körper auf Stufe 10',
+      measure: _skillKoerper,
+      target: 10,
+      titleId: 'ruestig',
+    ),
+    Achievement(
+      id: 'gestaehlt',
+      name: 'der Gestählte',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: 'Körper auf Stufe 25',
+      measure: _skillKoerper,
+      target: 25,
+      titleId: 'gestaehlt',
+    ),
+    Achievement(
+      id: 'unverwuestlich',
+      name: 'der Unverwüstliche',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.gross,
+      requirement: 'Körper auf Stufe 50',
+      measure: _skillKoerper,
+      target: 50,
+      titleId: 'unverwuestlich',
+    ),
+    Achievement(
+      id: 'wach',
+      name: 'der Wache',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Geist auf Stufe 10',
+      measure: _skillGeist,
+      target: 10,
+      titleId: 'wach',
+    ),
+    Achievement(
+      id: 'gesammelt',
+      name: 'der Gesammelte',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: 'Geist auf Stufe 25',
+      measure: _skillGeist,
+      target: 25,
+      titleId: 'gesammelt',
+    ),
+    Achievement(
+      id: 'weise',
+      name: 'der Weise',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.gross,
+      requirement: 'Geist auf Stufe 50',
+      measure: _skillGeist,
+      target: 50,
+      titleId: 'weise',
+    ),
+    Achievement(
+      id: 'neugierig',
+      name: 'der Neugierige',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Wissenschaft auf Stufe 10',
+      measure: _skillWissenschaft,
+      target: 10,
+      titleId: 'neugierig',
+    ),
+    Achievement(
+      id: 'forscher',
+      name: 'der Forscher',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: 'Wissenschaft auf Stufe 25',
+      measure: _skillWissenschaft,
+      target: 25,
+      titleId: 'forscher',
+    ),
+    Achievement(
+      id: 'gelehrt',
+      name: 'der Gelehrte',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.gross,
+      requirement: 'Wissenschaft auf Stufe 50',
+      measure: _skillWissenschaft,
+      target: 50,
+      titleId: 'gelehrt',
+    ),
+    Achievement(
+      id: 'zugewandt',
+      name: 'der Zugewandte',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Gesellschaft auf Stufe 10',
+      measure: _skillGesellschaft,
+      target: 10,
+      titleId: 'zugewandt',
+    ),
+    Achievement(
+      id: 'vertraut',
+      name: 'der Vertraute',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.mittel,
+      requirement: 'Gesellschaft auf Stufe 25',
+      measure: _skillGesellschaft,
+      target: 25,
+      titleId: 'vertraut',
+    ),
+    Achievement(
+      id: 'ratgeber',
+      name: 'der Ratgeber',
+      area: AchievementArea.gebiete,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.gross,
+      requirement: 'Gesellschaft auf Stufe 50',
+      measure: _skillGesellschaft,
+      target: 50,
+      titleId: 'ratgeber',
     ),
   ];
 

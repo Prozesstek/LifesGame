@@ -37,6 +37,10 @@ class AchievementStats {
     this.slotsEverOwned = 0,
     this.completeSetsEverOwned = 0,
     this.soldCount = 0,
+    this.skillKoerper = 1,
+    this.skillGeist = 1,
+    this.skillWissenschaft = 1,
+    this.skillGesellschaft = 1,
   });
 
   const AchievementStats.empty() : this();
@@ -129,4 +133,18 @@ class AchievementStats {
   /// Wie viele Tagestruhen je geöffnet wurden (ADR-0044). Eine Historie
   /// von Tagen, sie wächst nur.
   final int openedChests;
+
+  // --- Gebiete (ADR-0085) ---
+  //
+  // Das Level des Skills je Gebiet. Es wächst nur: Erfahrung aus Häkchen,
+  // Seiten und Rückfragen wird aus Historien gerechnet, und das Gebiet
+  // einer eigenen Gewohnheit lässt sich nur einmal setzen, nie wechseln.
+
+  final int skillKoerper;
+
+  final int skillGeist;
+
+  final int skillWissenschaft;
+
+  final int skillGesellschaft;
 }

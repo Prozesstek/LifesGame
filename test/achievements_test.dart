@@ -72,9 +72,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel(RegExp('0 Ruhm')), findsWidgets);
-      // Oben die Summe — und seit es dreissig sind, steht „Beständig“
-      // (dreissig Tage) mit derselben Zahl darunter.
-      expect(find.text('0 / 30'), findsNWidgets(2));
+      // Oben die Summe, seit ADR-0085 zweiundvierzig — darunter
+      // „Beständig“ mit seinen dreissig Tagen.
+      expect(find.text('0 / 42'), findsOneWidget);
+      expect(find.text('0 / 30'), findsOneWidget);
     });
   });
 
@@ -125,7 +126,7 @@ void main() {
     });
   });
 
-  group('Die vier Reiter', () {
+  group('Die Reiter', () {
     testWidgets('jeder Bereich ist erreichbar und zählt mit', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitStreak(3)));
@@ -146,6 +147,15 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text(area.label), findsOneWidget);
       }
+
+      // Seit ADR-0085 sind es fünf Reiter, und die Gebiete stehen
+      // hinten: zurück zum ersten.
+      await tester.dragUntilVisible(
+        find.text(AchievementArea.gewohnheiten.label),
+        leiste,
+        const Offset(80, 0),
+      );
+      await tester.pumpAndSettle();
 
       // Gewohnheiten: zwei von dreizehn bei drei Tagen Kette (seit
       // ADR-0073 mit „Zehn Truhen“, seit ADR-0074 „Sieben Tage in Form“).
@@ -171,7 +181,7 @@ void main() {
         find.bySemanticsLabel(RegExp('Errungenschaften:')),
         findsOneWidget,
       );
-      expect(find.textContaining(' / 30'), findsOneWidget);
+      expect(find.textContaining(' / 42'), findsOneWidget);
 
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
+import '../../skills/widgets/gebiets_balken.dart';
 import '../../ui/aufstieg.dart';
 import '../../ui/beute_flug.dart';
 import '../../ui/druck.dart';
@@ -26,6 +27,14 @@ import '../../ui/palette.dart';
 /// zieht sie ab, und so steigen Zahl und Balken mit jedem Stück, das
 /// ankommt. Deshalb nimmt sie die Erfahrung und schlägt das Level selbst
 /// nach — wie `playerLevelProvider`, nur ohne das, was noch unterwegs ist.
+///
+/// **Darunter der Balken des Gebiets** (ADR-0085): Er blendet sich ein,
+/// wenn ein Häkchen seine grünen Funken wirft, und sagt damit, dass
+/// dieselbe Erfahrung auch in den Skill geht (`GebietsBalken`). Sein Platz
+/// ist immer reserviert; ohne Häkchen ist er leer.
+///
+/// **Steht seit ADR-0085 auch auf dem Gewohnheiten-Bildschirm** — dort
+/// flog bis dahin nichts, weil es kein Ziel gab.
 class StatusLeiste extends StatefulWidget {
   const StatusLeiste({required this.xp, required this.gold, super.key});
 
@@ -39,6 +48,14 @@ class StatusLeiste extends StatefulWidget {
 
 class _StatusLeisteState extends State<StatusLeiste> {
   bool _offen = false;
+
+  /// Wie hoch die Fläche um den Balken ist. Bis ADR-0085 waren es 32 —
+  /// zwölf mehr für den Balken des Gebiets darunter.
+  static const double _hoehe = 44;
+
+  /// Wo der Level-Balken steht: in der Mitte, solange darunter nichts
+  /// leuchtet, und das ist fast immer.
+  static const double _oben = 16;
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +95,34 @@ class _StatusLeisteState extends State<StatusLeiste> {
                       onTap: () => setState(() => _offen = !_offen),
                       // Etwas Luft über und unter dem Balken, damit er
                       // sich treffen lässt; er selbst ist nur 12 hoch.
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        // Ein breiter Balken springt kaum — ein Hauch
-                        // reicht, damit man das Ankommen sieht.
-                        child: FlugZielMarke(
-                          ziel: FlugZiel.erfahrung,
-                          staerke: 0.04,
-                          child: HolzBalken(
-                            value: level.ratio,
-                            color: Palette.accent,
-                          ),
+                      // Unten wartet der Balken des Gebiets (ADR-0085).
+                      child: SizedBox(
+                        height: _hoehe,
+                        child: Stack(
+                          children: <Widget>[
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: _oben,
+                              // Ein breiter Balken springt kaum — ein
+                              // Hauch reicht, damit man das Ankommen
+                              // sieht.
+                              child: FlugZielMarke(
+                                ziel: FlugZiel.erfahrung,
+                                staerke: 0.04,
+                                child: HolzBalken(
+                                  value: level.ratio,
+                                  color: Palette.accent,
+                                ),
+                              ),
+                            ),
+                            const Positioned(
+                              left: 0,
+                              right: 0,
+                              top: _oben + 14,
+                              child: GebietsBalken(),
+                            ),
+                          ],
                         ),
                       ),
                     ),

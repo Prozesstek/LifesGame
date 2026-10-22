@@ -24,6 +24,7 @@ void main() {
       id: id,
       name: name,
       stat: stat,
+      area: SkillArea.koerper,
       difficulty: difficulty,
       goal: goal,
       priority: priority,

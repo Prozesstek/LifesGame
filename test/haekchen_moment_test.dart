@@ -13,6 +13,8 @@ import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/skills/skills_provider.dart';
+import 'package:lifes_game/skills/widgets/gebiets_balken.dart';
 import 'package:lifes_game/ui/aufstieg.dart';
 import 'package:lifes_game/ui/beute_flug.dart';
 import 'package:lifes_game/ui/konfetti.dart';
@@ -309,6 +311,56 @@ void main() {
       expect(host.unterwegs(FlugZiel.erfahrung).value, 0);
     });
 
+    // ADR-0085: Dieselbe Erfahrung zählt fürs Level und für den Skill —
+    // und genau das soll man sehen.
+    testWidgets('die Erfahrung fliegt zweimal: zum Level und grün zum Gebiet', (
+      tester,
+    ) async {
+      final (container, _) = await startseite(tester, mitGestern());
+      final habit = drei[1];
+      final area = habit.area;
+
+      double sichtbar() => tester
+          .widget<FadeTransition>(
+            find.descendant(
+              of: find.byType(GebietsBalken),
+              matching: find.byType(FadeTransition),
+            ),
+          )
+          .opacity
+          .value;
+
+      expect(sichtbar(), 0, reason: 'ohne Häkchen ist der Balken leer');
+      expect(find.byKey(TodayCard.gebietKey(habit.id)), findsOneWidget);
+
+      await tester.tap(inDerKarte(find.text(habit.name)));
+      await tester.pump();
+
+      final host = tester.state<AufstiegHostState>(find.byType(AufstiegHost));
+      final xp = host.unterwegs(FlugZiel.erfahrung).value;
+      expect(xp, greaterThan(0));
+      expect(host.unterwegs(FlugZiel.gebiet).value, xp, reason: 'derselbe');
+      expect(container.read(zuletztGebietProvider), area);
+
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(sichtbar(), greaterThan(0.5));
+      expect(
+        find.descendant(
+          of: find.byType(GebietsBalken),
+          matching: find.text(area.label),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('+$xp EP ${area.label}', findRichText: true),
+        findsOneWidget,
+      );
+
+      await tester.pumpAndSettle();
+      expect(host.unterwegs(FlugZiel.gebiet).value, 0);
+      expect(sichtbar(), 0, reason: 'danach verblasst er wieder');
+    });
+
     testWidgets('das erste Häkchen des Tages zündet die Flamme', (
       tester,
     ) async {
@@ -387,8 +439,11 @@ void main() {
     });
   });
 
-  testWidgets('auf dem Gewohnheiten-Bildschirm fliegt nichts', (tester) async {
-    // Dort gibt es keine Leiste oben — nur die Zahlen steigen auf.
+  testWidgets('auf dem Gewohnheiten-Bildschirm fliegt es zur Leiste oben', (
+    tester,
+  ) async {
+    // Bis ADR-0085 gab es dort keine Leiste, und nur die Zahlen stiegen
+    // auf. Seitdem steht sie oben, mit dem Balken des Gebiets darunter.
     useTallView(tester);
     final container = ProviderContainer(
       overrides: [
@@ -405,10 +460,13 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.byType(StatusLeiste), findsOneWidget);
+
     await tester.tap(find.text(drei.first.name));
     await tester.pump();
     final host = tester.state<AufstiegHostState>(find.byType(AufstiegHost));
-    expect(host.unterwegs(FlugZiel.gold).value, 0);
+    expect(host.unterwegs(FlugZiel.gold).value, greaterThan(0));
+    expect(host.unterwegs(FlugZiel.gebiet).value, greaterThan(0));
     expect(
       container.read(habitTrackerProvider).isChecked(drei.first.id, heute),
       isTrue,

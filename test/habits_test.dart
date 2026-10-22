@@ -536,6 +536,7 @@ void main() {
         controller.addCustom(
           name: 'Eigene $i',
           stat: HabitStat.staerke,
+          area: SkillArea.koerper,
           difficulty: HabitDifficulty.mittel,
         );
       }
@@ -570,6 +571,7 @@ void main() {
       final habit = controller.addCustom(
         name: 'Wasser trinken',
         stat: HabitStat.ausdauer,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
         goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
       );
@@ -609,6 +611,7 @@ void main() {
           .addCustom(
             name: 'Frisch angelegt',
             stat: HabitStat.staerke,
+            area: SkillArea.koerper,
             difficulty: HabitDifficulty.mittel,
           );
       await tester.pump();
@@ -636,6 +639,7 @@ void main() {
         controller.addCustom(
           name: 'Eigene $i',
           stat: HabitStat.klarheit,
+          area: SkillArea.koerper,
           difficulty: HabitDifficulty.mittel,
         );
       }
@@ -658,7 +662,9 @@ void main() {
       await tester.tap(find.byIcon(Icons.add_circle_outline).first);
       await tester.pump();
 
-      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
+      // Die Erfahrung steht zweimal da: fürs Level und für das Gebiet
+      // (ADR-0085).
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsNWidgets(2));
       expect(find.text('+${HabitRewards.goldPerCheck}'), findsOneWidget);
     });
 
@@ -676,7 +682,7 @@ void main() {
       // Die Zahlen stehen jetzt ohne „Heute" davor, in der Farbe des
       // Erfolgs.
       expect(find.bySemanticsLabel(RegExp('Heute geholt')), findsOneWidget);
-      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsNWidgets(2));
     });
 
     testWidgets('mit laufender Kette steht dort mehr', (tester) async {
@@ -694,8 +700,10 @@ void main() {
 
       expect(
         find.text('+${HabitRewards.xpFor(3)}'),
-        findsOneWidget,
-        reason: 'die Kachel muss den Multiplikator in Erfahrung umrechnen',
+        findsNWidgets(2),
+        reason:
+            'die Kachel muss den Multiplikator in Erfahrung umrechnen — '
+            'fürs Level und fürs Gebiet',
       );
       expect(HabitRewards.xpFor(3), greaterThan(HabitRewards.xpPerCheck));
     });
@@ -711,6 +719,7 @@ void main() {
       final habit = controller.addCustom(
         name: 'Liegestütze',
         stat: HabitStat.staerke,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       );
       var tag = _heute;

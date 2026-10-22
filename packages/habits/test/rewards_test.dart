@@ -15,9 +15,18 @@ void main() {
       expect(HabitRewards.multiplierFor(7), 1.4);
     });
 
-    test('ist bei x2 gedeckelt — auch nach Jahren', () {
-      expect(HabitRewards.multiplierFor(60), HabitRewards.multiplierCap);
+    test('wächst über 60 Tage weiter, langsam (ADR-0085)', () {
+      expect(HabitRewards.multiplierFor(60), 2.0);
+      expect(HabitRewards.multiplierFor(99), 2.0);
+      expect(HabitRewards.multiplierFor(100), 2.2);
+      expect(HabitRewards.multiplierFor(180), 2.4);
+      expect(HabitRewards.multiplierFor(364), 2.4);
+    });
+
+    test('ist nach einem Jahr gedeckelt — auch nach zehn', () {
+      expect(HabitRewards.multiplierFor(365), HabitRewards.multiplierCap);
       expect(HabitRewards.multiplierFor(3650), HabitRewards.multiplierCap);
+      expect(HabitRewards.multiplierCap, 2.6);
     });
 
     test('Meilensteine steigen streng und enden am Deckel', () {
@@ -35,7 +44,8 @@ void main() {
     test('nextMilestoneAfter zeigt das nächste Ziel, am Deckel nichts', () {
       expect(HabitRewards.nextMilestoneAfter(0)?.days, 3);
       expect(HabitRewards.nextMilestoneAfter(3)?.days, 7);
-      expect(HabitRewards.nextMilestoneAfter(60), isNull);
+      expect(HabitRewards.nextMilestoneAfter(60)?.days, 100);
+      expect(HabitRewards.nextMilestoneAfter(365), isNull);
     });
 
     test('kein Ertrag ohne Häkchen', () {

@@ -33,6 +33,7 @@ ProviderContainer _container(Day heute, List<Day> tage) {
       .addCustom(
         name: 'Liegestütze',
         stat: HabitStat.staerke,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       )!
       .id;

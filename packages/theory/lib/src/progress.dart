@@ -489,6 +489,19 @@ class TheoryProgress {
     return _records.values.fold(0, (sum, r) => sum + r.xpAwarded);
   }
 
+  /// Erfahrung aus den Seiten dieses Gebiets — der Anteil der Theorie am
+  /// **Skill** (ADR-0085).
+  ///
+  /// Ein Gebiet ist die Wurzel samt allem, was daran hängt, wie bei
+  /// [isAreaComplete]. Eine Seite mit zwei Eltern („Stress" an Körper
+  /// *und* Geist) zählt deshalb für beide Skills: Sie steht in beiden
+  /// Gebieten. Das Level zählt sie trotzdem nur einmal ([totalXp]).
+  int xpInArea(TheoryGraph graph, String rootId) {
+    return graph
+        .descendantsOf(rootId, includeSelf: true)
+        .fold(0, (sum, n) => sum + (_records[n.lesson.id]?.xpAwarded ?? 0));
+  }
+
   int get totalGold {
     return _records.values.fold(0, (sum, r) => sum + r.goldAwarded);
   }

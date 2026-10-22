@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 import 'aufstieg.dart';
 import 'muenz_bild.dart';
 
-/// Wohin ein Stück fliegt: die Goldzahl oder der Erfahrungsbalken.
-enum FlugZiel { gold, erfahrung }
+/// Wohin ein Stück fliegt: die Goldzahl, der Erfahrungsbalken — oder
+/// der Balken des Gebiets, zu dem die Gewohnheit gehört (ADR-0085).
+///
+/// Erfahrung und Gebiet bekommen **denselben Betrag**: Ein Häkchen zählt
+/// fürs Level und für seinen Skill. Zwei Ströme zu zwei Balken zeigen
+/// genau das.
+enum FlugZiel { gold, erfahrung, gebiet }
 
 /// **Was ein Häkchen auswirft** — Münzen, die zur Goldzahl fliegen, und
 /// Funken zum Erfahrungsbalken. Reine Rechnung, ohne Leinwand.
@@ -30,7 +35,7 @@ class BeuteFlug {
     if (betrag <= 0) return 0;
     return switch (ziel) {
       FlugZiel.gold => betrag.clamp(3, 8),
-      FlugZiel.erfahrung => (betrag ~/ 3).clamp(3, 8),
+      FlugZiel.erfahrung || FlugZiel.gebiet => (betrag ~/ 3).clamp(3, 8),
     };
   }
 
@@ -43,6 +48,10 @@ class BeuteFlug {
   /// Die Funken heben einen Hauch nach den Münzen ab — sonst flöge alles
   /// als ein Klumpen.
   static const double funkenVersatz = 0.1;
+
+  /// Die grünen Funken des Gebiets noch einen Hauch später: Erst sieht
+  /// man das Level, dann, dass es ein zweites Mal zählt.
+  static const double gebietVersatz = 0.22;
 
   /// Welcher Teil der Flugzeit aufs Aufplatzen geht.
   static const double platzen = 0.18;
@@ -69,7 +78,11 @@ class BeuteFlug {
   }) {
     final anzahl = stueckeFuer(betrag, ziel);
     if (anzahl == 0) return 0;
-    final versatz = ziel == FlugZiel.erfahrung ? funkenVersatz : 0.0;
+    final versatz = switch (ziel) {
+      FlugZiel.gold => 0.0,
+      FlugZiel.erfahrung => funkenVersatz,
+      FlugZiel.gebiet => gebietVersatz,
+    };
     for (var i = 0; i < anzahl; i++) {
       final winkel = _zufall.nextDouble() * 2 * math.pi;
       final weit = streuung * (0.5 + _zufall.nextDouble() * 0.5);
@@ -214,12 +227,14 @@ class BeuteFlugMaler extends CustomPainter {
             glimmt: true,
           );
         case FlugZiel.erfahrung:
+        case FlugZiel.gebiet:
           MuenzBild.funke(
             canvas,
             stueck.ort,
             spur: stueck.vorher,
             radius: funkenRadius,
             flackern: 0.8 + 0.2 * math.sin(stueck.alter * 30 + stueck.phase),
+            gebiet: stueck.ziel == FlugZiel.gebiet,
           );
       }
     }

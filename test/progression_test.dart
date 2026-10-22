@@ -119,11 +119,12 @@ void main() {
       // Schwierigkeitsgrad selbst; er spricht sich damit einen Faktor auf
       // die Erfahrung zu. Solange fünf „schwere" Gewohnheiten dieselbe
       // Kurve gehen wie fünf Vorlagen, ist das eine Farbe und kein
-      // Schlupfloch. Gemessen am 06.09.2026:
+      // Schlupfloch. Gemessen am 06.09.2026, am 22.10.2026 neu mit den
+      // Kettenstufen über 60 Tage (ADR-0085; in Klammern vorher):
       //
-      //   Vorlagen / mittel  240 Tage bis Level 50, 18 bis Level 10
-      //   nur „leicht"       297 Tage             , 22
-      //   nur „schwer"       188 Tage             , 15
+      //   Vorlagen / mittel  223 Tage bis Level 50 (240), 18 bis Level 10
+      //   nur „leicht"       271 Tage             (297), 22
+      //   nur „schwer"       179 Tage             (188), 15
       final schwer = _daysToLevel(
         LevelCurve.maxLevel,
         difficulty: HabitDifficulty.schwer,
@@ -180,6 +181,7 @@ int _daysToLevel(int target, {HabitDifficulty? difficulty}) {
         id: 'eigen-$i',
         name: 'Eigene $i',
         stat: HabitStat.values[i % HabitStat.values.length],
+        area: SkillArea.koerper,
         difficulty: difficulty,
       );
       tracker = tracker.addCustom(habit, slots: HabitRewards.maxActiveHabits);

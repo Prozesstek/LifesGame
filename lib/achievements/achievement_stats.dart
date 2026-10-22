@@ -7,6 +7,8 @@ import 'package:theory/theory.dart';
 
 import '../combat/ladder_controller.dart';
 import '../habits/habits_controller.dart';
+import '../skills/skills.dart';
+import '../theory/review_controller.dart';
 import '../theory/theory_controller.dart';
 
 /// Die Schwellen, die zu einer Bedingung gehören und nicht zu dem
@@ -56,10 +58,19 @@ AchievementStats buildAchievementStats({
   required HabitTracker habits,
   required TheoryProgress theory,
   required TheoryGraph graph,
+  required ReviewLog reviews,
   required int passedPages,
   required LadderProgress ladder,
   required Loadout loadout,
 }) {
+  // Dieselbe Rechnung wie `skillsProvider` — eine Stelle, zwei Leser.
+  final skills = Skills.aus(
+    habits: habits,
+    theory: theory,
+    graph: graph,
+    reviews: reviews,
+  );
+
   return AchievementStats(
     // --- Gewohnheiten ---
     totalChecks: habits.totalChecks,
@@ -102,6 +113,12 @@ AchievementStats buildAchievementStats({
     slotsEverOwned: loadout.slotsEverOwned,
     completeSetsEverOwned: loadout.completeSetsEverOwned,
     soldCount: loadout.soldCount,
+
+    // --- Gebiete (ADR-0085) ---
+    skillKoerper: skills.of(SkillArea.koerper).level,
+    skillGeist: skills.of(SkillArea.geist).level,
+    skillWissenschaft: skills.of(SkillArea.wissenschaft).level,
+    skillGesellschaft: skills.of(SkillArea.gesellschaft).level,
   );
 }
 
@@ -119,6 +136,7 @@ AchievementStats achievementStatsWithLoadout(Ref ref, Loadout loadout) {
     habits: ref.read(habitTrackerProvider),
     theory: ref.read(theoryProgressProvider),
     graph: ref.read(theoryGraphProvider),
+    reviews: ref.read(reviewLogProvider),
     passedPages: ref.read(passedPagesProvider),
     ladder: ref.read(ladderProvider),
     loadout: loadout,

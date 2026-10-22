@@ -14,6 +14,7 @@ void main() {
       id: id,
       name: id,
       stat: stat,
+      area: SkillArea.koerper,
       difficulty: HabitDifficulty.mittel,
       priority: HabitPriority.normal,
     );

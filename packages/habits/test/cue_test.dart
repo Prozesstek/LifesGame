@@ -55,6 +55,7 @@ void main() {
         id: 'eigen-1',
         name: 'Zehn Liegestütze',
         stat: HabitStat.staerke,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       );
       final t = const HabitTracker.empty()

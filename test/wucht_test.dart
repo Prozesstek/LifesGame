@@ -50,6 +50,7 @@ String _vorDemPunkt(ProviderContainer c) {
       .addCustom(
         name: 'Liegestütze',
         stat: HabitStat.staerke,
+        area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       )!
       .id;

@@ -16,9 +16,9 @@ void main() {
       expect(TitleCatalog.all, isNotEmpty);
     });
 
-    test('dreizehn Titel: sieben aus Meilensteinen, sechs aus Entdeckungen',
+    test('fünfundzwanzig Titel: sieben, sechs aus Entdeckungen, zwölf Gebiete',
         () {
-      expect(TitleCatalog.all, hasLength(13));
+      expect(TitleCatalog.all, hasLength(25));
     });
 
     test('jede Id kommt nur einmal vor', () {

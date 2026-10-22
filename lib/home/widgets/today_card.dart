@@ -11,6 +11,7 @@ import '../../habits/habits_screen.dart';
 import '../../habits/widgets/habit_check_tile.dart';
 import '../../habits/widgets/haekchen_kreis.dart';
 import '../../habits/widgets/habit_countdown.dart';
+import '../../skills/gebiet_zeichen.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/holz.dart';
@@ -44,6 +45,11 @@ class TodayCard extends ConsumerWidget {
   /// Woran Tests die Flamme des Vorsatzes vom Lagerfeuer finden
   /// (ADR-0076).
   static const Key flammeKey = ValueKey<String>('heute-zuerst');
+
+  /// Das Zeichen des Gebiets an der Zeile von [habitId] (ADR-0085).
+  static Key gebietKey(String habitId) {
+    return ValueKey<String>('heute-gebiet-$habitId');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -475,6 +481,18 @@ class _Zeile extends StatelessWidget {
                     ],
                   ),
                 ),
+                // **Wohin sie zählt** (ADR-0085): das Zeichen ihres
+                // Gebiets, grün wie sein Balken in der Leiste oben. Wer
+                // abhakt, sieht die grünen Funken genau dorthin fliegen.
+                if (habit.area case final SkillArea gebiet) ...<Widget>[
+                  const SizedBox(width: 8),
+                  Icon(
+                    gebietZeichen(gebiet),
+                    key: TodayCard.gebietKey(habit.id),
+                    size: 15,
+                    color: done ? Palette.textDim : Palette.success,
+                  ),
+                ],
                 if (timed && !done) ...<Widget>[
                   const SizedBox(width: 8),
                   HabitCountdown(

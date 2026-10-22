@@ -72,18 +72,29 @@ abstract final class HabitRewards {
 
   /// Deckel des Streak-Multiplikators.
   ///
-  /// Das Konzept empfiehlt x2 (Abschnitt 3.7): Bei x3 wird der Verlust
+  /// Das Konzept empfahl x2 (Abschnitt 3.7): Bei x3 würde der Verlust
   /// einer langen Streak so schmerzhaft, dass Nutzer aufgeben statt neu
-  /// anzufangen.
-  static const double multiplierCap = 2.0;
+  /// anzufangen. **Seit ADR-0085 sind es x2,6, erreicht nach einem Jahr.**
+  /// Der Einwand gilt nicht mehr in voller Stärke: Seit ADR-0064 fällt
+  /// eine Kette nur auf die Stufe darunter, und was sie eingebracht hat,
+  /// bleibt im Skill. Ab Tag 60 brachte eine längere Kette vorher gar
+  /// nichts mehr.
+  static const double multiplierCap = 2.6;
 
   /// Die Meilensteine, aufsteigend. Der letzte trifft [multiplierCap].
+  ///
+  /// Über 60 Tage hinaus in kleinen Schritten (ADR-0085): Wer ein Jahr
+  /// durchhält, bekommt ein Drittel mehr als nach zwei Monaten — und
+  /// verliert bei einem verpassten Tag nur eine Stufe.
   static const List<StreakMilestone> streakMilestones = <StreakMilestone>[
     StreakMilestone(days: 3, multiplier: 1.2),
     StreakMilestone(days: 7, multiplier: 1.4),
     StreakMilestone(days: 14, multiplier: 1.6),
     StreakMilestone(days: 30, multiplier: 1.8),
-    StreakMilestone(days: 60, multiplier: multiplierCap),
+    StreakMilestone(days: 60, multiplier: 2.0),
+    StreakMilestone(days: 100, multiplier: 2.2),
+    StreakMilestone(days: 180, multiplier: 2.4),
+    StreakMilestone(days: 365, multiplier: multiplierCap),
   ];
 
   /// Der Multiplikator, der zu einer Streak von [streak] Tagen gehört.

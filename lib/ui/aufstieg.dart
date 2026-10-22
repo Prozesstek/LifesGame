@@ -9,13 +9,21 @@ import 'pixel_art.dart';
 
 /// Eine aufsteigende Zeile, wie über einem gefallenen Gegner in der Grube.
 class AufstiegZeile {
-  const AufstiegZeile(this.text, {this.color = Palette.accent, this.bild});
+  const AufstiegZeile(
+    this.text, {
+    this.color = Palette.accent,
+    this.bild,
+    this.icon,
+  });
 
   final String text;
   final Color color;
 
   /// Ein kleines Bild vor dem Text — der Schlüssel (ADR-0048).
   final String? bild;
+
+  /// Ein Zeichen vor dem Text — das Gebiet eines Häkchens (ADR-0085).
+  final IconData? icon;
 }
 
 /// **Zahlen steigen dort auf, wo getippt wurde.**
@@ -103,9 +111,9 @@ class AufstiegHostState extends State<AufstiegHost>
   int get konfettiInDerLuft => _konfetti.length;
 
   /// Lässt [gold] als Münzen und [xp] als Funken vom letzten Finger zu
-  /// ihren Zielen fliegen. **Ohne Ziel fliegt nichts** — auf dem
-  /// Gewohnheiten-Bildschirm gibt es keine Leiste, dort steigen nur die
-  /// Zahlen auf.
+  /// ihren Zielen fliegen, [gebiet] als grüne Funken zum Balken des
+  /// Gebiets (ADR-0085). **Ohne Ziel fliegt nichts** — wo keine Leiste
+  /// ist, steigen nur die Zahlen auf.
   ///
   /// [beiAnkunft] klingt, wenn etwas ankommt, höchstens alle
   /// [AufstiegHost.klangAbstand] Sekunden je Ziel. [wennGelandet] kommt,
@@ -116,6 +124,7 @@ class AufstiegHostState extends State<AufstiegHost>
   bool fliege({
     required int gold,
     required int xp,
+    int gebiet = 0,
     void Function(FlugZiel ziel)? beiAnkunft,
     VoidCallback? wennGelandet,
   }) {
@@ -127,6 +136,7 @@ class AufstiegHostState extends State<AufstiegHost>
     for (final (ziel, betrag) in <(FlugZiel, int)>[
       (FlugZiel.gold, gold),
       (FlugZiel.erfahrung, xp),
+      (FlugZiel.gebiet, gebiet),
     ]) {
       final nach = _mitteVon(ziel, box);
       if (nach == null || betrag <= 0) continue;
@@ -327,6 +337,7 @@ class _Zeile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bild = zeile.bild;
+    final icon = zeile.icon;
     // **Das Bild steht im Text, nicht daneben.** Eine `Row` liefe in der
     // schmalen Fläche über; ein Text darf über seinen Rand hinaus stehen,
     // und genau so sollen die Zahlen aussehen.
@@ -340,6 +351,20 @@ class _Zeile extends StatelessWidget {
                 assetPath: bild,
                 side: 22,
                 fallback: const SizedBox(width: 22, height: 22),
+              ),
+            ),
+            const TextSpan(text: ' '),
+          ],
+          if (icon != null) ...<InlineSpan>[
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Icon(
+                icon,
+                size: 18,
+                color: zeile.color,
+                shadows: const <Shadow>[
+                  Shadow(color: Color(0xCC1A0E05), offset: Offset(1, 1)),
+                ],
               ),
             ),
             const TextSpan(text: ' '),

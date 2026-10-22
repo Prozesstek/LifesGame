@@ -1,3 +1,5 @@
+import 'skill_area.dart';
+
 /// Der Charakterwert, auf den eine Gewohnheit einzahlt.
 ///
 /// Vier Werte, weil der Kampf genau vier kennt. Jede Gewohnheit speist
@@ -219,6 +221,13 @@ sealed class Habit {
   /// Der Charakterwert, auf den sie einzahlt.
   HabitStat get stat;
 
+  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085).
+  ///
+  /// Null nur bei einer eigenen Gewohnheit, die vor den Skills angelegt
+  /// wurde und noch nicht gefragt ist — ihre Häkchen zählen dann für das
+  /// Level, aber für keinen Skill, bis sie eins hat.
+  SkillArea? get area;
+
   /// Ein Satz, warum diese Gewohnheit wirkt.
   String get why;
 
@@ -255,6 +264,7 @@ class HabitTemplate extends Habit {
     required this.id,
     required this.name,
     required this.stat,
+    required this.area,
     required this.branchId,
     required this.why,
     this.timerMinutes,
@@ -270,6 +280,11 @@ class HabitTemplate extends Habit {
 
   @override
   final HabitStat stat;
+
+  /// Das Gebiet ihrer Lektion — dieselbe Wurzel, unter der die Lektion
+  /// im Baum hängt. Geprüft in `test/skills_test.dart`.
+  @override
+  final SkillArea area;
 
   /// Der Theoriezweig, aus dem die Vorlage stammt.
   final String branchId;
@@ -306,11 +321,17 @@ class HabitTemplate extends Habit {
 /// Charakterwerte werden aus der Historie *gerechnet*, nicht mitgezählt
 /// (ADR-0008). Wer die Schwierigkeit nachträglich hochsetzt, schriebe
 /// damit jedes Häkchen der Vergangenheit um.
+///
+/// **Das Gebiet gehört dazu** (ADR-0085), mit einer Ausnahme: Wer eine
+/// Gewohnheit vor den Skills angelegt hat, wählt ihr Gebiet einmal nach
+/// ([withArea]). Danach steht es fest — ein Skill darf nur wachsen, sonst
+/// nähme ein Wechsel einen Titel wieder weg.
 class CustomHabit extends Habit {
   const CustomHabit({
     required this.id,
     required this.name,
     required this.stat,
+    required this.area,
     required this.difficulty,
     this.goal,
     this.priority = HabitPriority.normal,
@@ -325,6 +346,12 @@ class CustomHabit extends Habit {
 
   @override
   final HabitStat stat;
+
+  /// Pflicht beim Anlegen, nicht null in neuen Ständen. `required`, obwohl
+  /// es null sein darf: Ein Standardwert hier wäre der Fehler aus
+  /// `gotchas.md` — [editable] oder [withArea] verlöre es unbemerkt.
+  @override
+  final SkillArea? area;
 
   @override
   final HabitDifficulty difficulty;
@@ -371,10 +398,27 @@ class CustomHabit extends Habit {
       id: id,
       name: name ?? this.name,
       stat: stat,
+      area: area,
       difficulty: difficulty,
       goal: goal,
       priority: priority ?? this.priority,
       why: why ?? this.why,
+    );
+  }
+
+  /// Eine Kopie mit Gebiet — **nur, solange sie keins hat**. Hat sie
+  /// schon eins, bleibt sie, wie sie ist.
+  CustomHabit withArea(SkillArea value) {
+    if (area != null) return this;
+    return CustomHabit(
+      id: id,
+      name: name,
+      stat: stat,
+      area: value,
+      difficulty: difficulty,
+      goal: goal,
+      priority: priority,
+      why: why,
     );
   }
 
@@ -383,6 +427,7 @@ class CustomHabit extends Habit {
       'id': id,
       'name': name,
       'stat': stat.name,
+      if (area != null) 'area': area!.name,
       'difficulty': difficulty.name,
       'priority': priority.name,
       'why': why,
@@ -413,6 +458,8 @@ class CustomHabit extends Habit {
       id: id,
       name: name.trim(),
       stat: wert,
+      // Fehlt in Ständen von vor ADR-0085; die Startseite fragt dann.
+      area: SkillArea.tryParse(json['area']),
       difficulty: schwierigkeit is String
           ? HabitDifficulty.tryParse(schwierigkeit) ?? HabitDifficulty.mittel
           : HabitDifficulty.mittel,
