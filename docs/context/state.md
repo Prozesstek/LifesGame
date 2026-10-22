@@ -34,11 +34,11 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
 | **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel — **in der Sammlung**, mit Ausrüstung, Fähigkeiten, Gegnern (in Stufen), Titeln und Seiten | ADR-0033, -0073, -0074, -0080 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
-| **Prototyp** | das Dorf, nur im Entwicklermodus | — |
+| **Prototyp** | das Dorf **und das Haustier** (drei Eier, wächst an Tagen mit Häkchen), nur im Entwicklermodus | [`haustier.md`](../vorlagen/haustier.md) |
 
-**Tests:** App 967, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 979, dazu die acht Packages (theory 208, habits 345, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
-achievements 25). **In der CI laufen nur die App-Tests** — der Umbau,
+achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
 ## Offen, gesammelt
@@ -132,6 +132,51 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 22.10.2026, spät: ein Haustier — Prototyp im Entwicklermodus
+
+Frederik: „Nicht jede Spielergruppe will sich über den Kampf vergleichen.
+Wir brauchen andere Möglichkeiten Fortschritt zu zeigen wie z.B.
+Haustiere … oder zum Beispiel ein eigenes Haus oder Dorf was ausgebaut
+werden kann.“ In zwei Fragerunden entschieden, siebenmal wie empfohlen,
+einmal dagegen (drei Eier statt eines Drachen). Das Konzept steht in
+[`docs/vorlagen/haustier.md`](../vorlagen/haustier.md); **der ADR kommt,
+wenn ihr beide es gespielt habt.**
+
+| Was | Wie |
+|---|---|
+| **Drei Eier** | Drache, Eule, Katze — gewählt wird einmal, über „Heute“ auf der Startseite |
+| **Wachsen** | an Tagen mit Häkchen, nie zurück: Level 2 nach 1 Tag, 10 nach 45, 27 nach 351; sechs Stufen vom Ei bis „Uralt“ |
+| **Laune** | schläft nachts, wartet ohne Häkchen, munter mit einem, spielt „In Form“, ruht am Ruhetag — **es leidet nie** |
+| **Sprung** | mit jedem Häkchen von heute |
+| **Prägung** | ab „Ausgewachsen“ das stärkste Gebiet: Stirnband, Punkt, Brille oder Herz (ADR-0085) |
+| **Zubehör** | zehn Stücke auf drei Plätzen, sieben für Gold (25 bis 120), drei an Stufen verdient |
+| **Gold** | Zubehör ist der zweite Abfluss: Leiste und Laden der Ausrüstung ziehen es ab |
+
+**Nur im Entwicklermodus** (`devModeAvailable`): im Debug-Build und in
+der Entwicklerfassung unter `/LifesGame/dev/`. Der Store-Build kennt es
+nicht. Im Blatt lassen sich dort Tage vorspulen, um spätere Stufen
+anzusehen; gespeichert wird davon nichts.
+
+**Das Bild ist gezeichnet** (Formen, nicht Pixel), damit es atmen,
+blinzeln, schlafen und springen kann. **Beim Ansehen gefunden:** Die
+Prägung am Kopf lag hinter dem Kopf, und die „Z“ des Schlafs erschienen
+als Kästchen — jetzt Linien.
+
+Neu: `packages/haustier` (21 Tests), `lib/haustier/` (vier Dateien),
+`test/haustier_test.dart` (12). App 979 (vorher 967). Alle Arten und
+Stufen, die Startseite und das Blatt in 390 × 844 gerendert und
+angesehen. **Nicht gespielt, nicht am Handy.**
+
+### Offen
+
+- **Spielen**, dann der ADR — und ob es in den Store-Build geht.
+- **AktivesBrett hat es nicht gesehen.**
+- Zubehör konkurriert mit Ausrüstung um Gold; `runway_sim` zählt es
+  nicht.
+- Ein Grafikpaket mit drei Tieren in sechs Stufen — oder gezeichnet
+  bleiben.
+- Das Haus als sein Zuhause ist der nächste Schritt.
 
 ## 22.10.2026, abends: Skills je Gebiet — was bleibt, wenn die Kette fällt
 

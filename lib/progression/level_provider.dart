@@ -7,6 +7,7 @@ import 'package:progression/progression.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
+import '../haustier/haustier_controller.dart';
 import '../theory/theory_controller.dart';
 import '../theory/review_controller.dart';
 
@@ -86,7 +87,10 @@ final goldEarnedProvider = Provider<int>((ref) {
 /// bezahlbar ist, und was gekauft wurde, bleibt gekauft.
 final goldProvider = Provider<int>((ref) {
   final int spent = ref.watch(loadoutProvider).spentGold;
-  return ref.watch(spendableIncomeProvider) - spent;
+  // Seit dem Haustier (Prototyp, 22.10.2026) der zweite Abfluss: sein
+  // Zubehör. Ohne diese Zeile zeigte die Leiste Gold, das schon weg ist.
+  final int haustier = ref.watch(haustierProvider).spentGold;
+  return ref.watch(spendableIncomeProvider) - spent - haustier;
 });
 
 /// Zufluss einschließlich Dev-Zuschlag, **ohne** Abzug des Besitzes.

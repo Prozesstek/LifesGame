@@ -48,6 +48,11 @@ dependencies:
   identity:
     path: packages/identity
 
+  # Das Haustier -- Prototyp vom 22.10.2026, nur im Entwicklermodus zu
+  # sehen. Reines Dart wie die anderen.
+  haustier:
+    path: packages/haustier
+
   # State Management (ADR-0001).
   flutter_riverpod: ^3.0.1
 

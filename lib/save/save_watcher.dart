@@ -10,6 +10,7 @@ import '../combat/ladder_controller.dart';
 import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
+import '../haustier/haustier_controller.dart';
 import '../theory/theory_controller.dart';
 import 'save_data.dart';
 import 'save_providers.dart';
@@ -45,6 +46,7 @@ SaveData currentSave(WidgetRef ref) {
     grants: ref.read(devGrantsProvider),
     reviews: ref.read(reviewLogProvider),
     dailyPit: ref.read(dailyPitProvider),
+    haustier: ref.read(haustierProvider),
   );
 }
 
@@ -55,7 +57,7 @@ class SaveWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Neun Bereiche, neun Zeilen. Kommt ein zehnter dazu, gehört er
+    // Zehn Bereiche, zehn Zeilen. Kommt ein elfter dazu, gehört er
     // hier dazu — sonst überlebt er keinen Neustart.
     ref.listen(theoryProgressProvider, (_, _) => _save(ref));
     ref.listen(habitTrackerProvider, (_, _) => _save(ref));
@@ -66,6 +68,7 @@ class SaveWatcher extends ConsumerWidget {
     ref.listen(devGrantsProvider, (_, _) => _save(ref));
     ref.listen(reviewLogProvider, (_, _) => _save(ref));
     ref.listen(dailyPitProvider, (_, _) => _save(ref));
+    ref.listen(haustierProvider, (_, _) => _save(ref));
 
     return child;
   }

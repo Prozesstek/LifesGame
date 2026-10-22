@@ -4,6 +4,7 @@ import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
+import 'package:haustier/haustier.dart';
 import 'package:identity/identity.dart';
 import 'package:theory/theory.dart';
 
@@ -31,6 +32,7 @@ class SaveData {
     this.grants = const DebugGrants.none(),
     this.reviews = const ReviewLog.empty(),
     this.dailyPit = const DailyPitLog.empty(),
+    this.haustier = const HaustierStand.leer(),
   });
 
   const SaveData.empty() : this();
@@ -72,6 +74,11 @@ class SaveData {
   /// steht nicht hier, er wird gerechnet.
   final DailyPitLog dailyPit;
 
+  /// Das Haustier (Prototyp, 22.10.2026): gewähltes Ei, Name, gekauftes
+  /// und angelegtes Zubehör. Wie weit es gewachsen ist, steht nicht hier —
+  /// das folgt aus den Häkchen.
+  final HaustierStand haustier;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
@@ -82,7 +89,8 @@ class SaveData {
         abilities.isEmpty &&
         ladder.highestDefeated == 0 &&
         reviews.isEmpty &&
-        dailyPit.isEmpty;
+        dailyPit.isEmpty &&
+        haustier.isEmpty;
   }
 
   Map<String, Object?> toJson() {
@@ -99,6 +107,7 @@ class SaveData {
       // Nur schreiben, wenn etwas drinsteht: Ein Stand ohne Tagesgrube
       // sieht aus wie vor ADR-0072.
       if (!dailyPit.isEmpty) 'dailyPit': dailyPit.toJson(),
+      if (!haustier.isEmpty) 'haustier': haustier.toJson(),
     };
   }
 
@@ -117,6 +126,7 @@ class SaveData {
     final grants = json['grants'];
     final reviews = json['reviews'];
     final dailyPit = json['dailyPit'];
+    final haustier = json['haustier'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -146,6 +156,9 @@ class SaveData {
       dailyPit: dailyPit is Map<String, Object?>
           ? DailyPitLog.fromJson(dailyPit)
           : const DailyPitLog.empty(),
+      haustier: haustier is Map<String, Object?>
+          ? HaustierStand.fromJson(haustier)
+          : const HaustierStand.leer(),
     );
   }
 
@@ -199,6 +212,7 @@ class SaveData {
     DebugGrants? grants,
     ReviewLog? reviews,
     DailyPitLog? dailyPit,
+    HaustierStand? haustier,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
@@ -210,6 +224,7 @@ class SaveData {
       grants: grants ?? this.grants,
       reviews: reviews ?? this.reviews,
       dailyPit: dailyPit ?? this.dailyPit,
+      haustier: haustier ?? this.haustier,
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 
 import '../combat/ladder_controller.dart';
 import '../habits/habits_controller.dart';
+import '../haustier/haustier_controller.dart';
 import '../progression/level_provider.dart';
 import '../achievements/achievement_stats.dart';
 import '../save/save_providers.dart';
@@ -38,7 +39,10 @@ class GearController extends Notifier<Loadout> {
     );
     final income =
         ref.read(incomeWithoutAchievementsProvider) + ausErrungenschaften;
-    final available = income - state.spentGold;
+    // Das Zubehör des Haustiers ist der zweite Abfluss (Prototyp,
+    // 22.10.2026) — sonst gäbe man dasselbe Gold zweimal aus.
+    final available =
+        income - state.spentGold - ref.read(haustierProvider).spentGold;
     // Die hoechste geschlagene Sprosse entscheidet ueber Episches und
     // Legendaeres (ADR-0034). Gelesen, nicht beobachtet: Ein Sieg waehrend
     // des Einkaufens soll den Laden nicht neu aufsetzen.
