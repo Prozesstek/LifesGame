@@ -117,6 +117,10 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                   child: Column(
                     children: <Widget>[
+                      // **Level und Gold oben rechts** (22.10.2026), der
+                      // Ring um das Abzeichen ist der Erfahrungsbalken.
+                      StatusLeiste(xp: xp, gold: gold),
+                      const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -155,9 +159,7 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
 
-                      const SizedBox(height: 12),
-                      StatusLeiste(xp: xp, gold: gold),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       // **Heute** (ADR-0053) bekommt, was übrig bleibt. Bis
                       // zum 28.09. stand hier die Figur und gab an vollen

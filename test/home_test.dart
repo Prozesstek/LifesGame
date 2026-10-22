@@ -13,7 +13,6 @@ import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/home/widgets/status_leiste.dart';
-import 'package:lifes_game/ui/holz.dart';
 import 'package:lifes_game/ui/level_abzeichen.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -457,15 +456,27 @@ void main() {
       const satz = '0 von 100 Erfahrung bis Level 2';
       expect(find.text(satz), findsNothing);
 
-      // Der erste ist das Level; darunter wartet seit ADR-0085 der
-      // Balken des Gebiets.
-      await tester.tap(find.byType(HolzBalken).first);
-      await tester.pumpAndSettle();
+      // Seit dem 22.10. ist der Erfahrungsbalken ein Ring um das
+      // Level-Abzeichen oben rechts; der Satz steht im Tipp darauf.
+      await tester.tap(find.byKey(StatusLeiste.ringKey));
+      await tester.pump(const Duration(milliseconds: 200));
       expect(find.text(satz), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    });
 
-      await tester.tap(find.byType(HolzBalken).first);
-      await tester.pumpAndSettle();
-      expect(find.text(satz), findsNothing);
+    testWidgets('Level und Gold stehen oben rechts, über den Kreisen', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pump();
+
+      final ring = tester.getCenter(find.byKey(StatusLeiste.ringKey));
+      final breite = tester.getSize(find.byType(HomeScreen)).width;
+      final kreis = tester.getTopLeft(find.text('Gewohnheiten').first);
+
+      expect(ring.dx, greaterThan(breite / 2), reason: 'rechts');
+      expect(ring.dy, lessThan(kreis.dy), reason: 'über den Kreisen');
     });
 
     testWidgets('die Figur steht nicht mehr auf der Startseite', (

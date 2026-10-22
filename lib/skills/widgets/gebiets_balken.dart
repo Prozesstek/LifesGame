@@ -29,7 +29,10 @@ import '../skills_provider.dart';
 /// fliegt, zieht er ab, also steigt die Stufe mit dem Funken, der sie
 /// vollmacht.
 class GebietsBalken extends ConsumerStatefulWidget {
-  const GebietsBalken({super.key});
+  const GebietsBalken({this.aufDunkel = false, super.key});
+
+  /// Auf Leder statt Pergament — oben rechts neben dem Level-Ring.
+  final bool aufDunkel;
 
   /// Wie hoch er ist — so hoch wie der Balken darüber.
   static const double hoehe = 12;
@@ -119,6 +122,7 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
   }
 
   Widget _zeile(SkillArea? area, SkillLevel skill) {
+    final farbe = widget.aufDunkel ? Palette.successOnDark : Palette.success;
     return Semantics(
       label: area == null ? null : '${area.label}, Stufe ${skill.level}',
       excludeSemantics: true,
@@ -130,7 +134,7 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
               width: 16,
               child: area == null
                   ? null
-                  : Icon(gebietZeichen(area), size: 13, color: Palette.success),
+                  : Icon(gebietZeichen(area), size: 13, color: farbe),
             ),
             SizedBox(
               width: 62,
@@ -138,11 +142,11 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
                 area?.label ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.clip,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   height: 1.1,
                   fontWeight: FontWeight.w800,
-                  color: Palette.success,
+                  color: farbe,
                 ),
               ),
             ),
@@ -150,7 +154,7 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
               child: FlugZielMarke(
                 ziel: FlugZiel.gebiet,
                 staerke: 0.04,
-                child: HolzBalken(value: skill.ratio, color: Palette.success),
+                child: HolzBalken(value: skill.ratio, color: farbe),
               ),
             ),
             SizedBox(
@@ -159,11 +163,11 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
                 area == null ? '' : '${skill.level}',
                 textAlign: TextAlign.right,
                 maxLines: 1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   height: 1.1,
                   fontWeight: FontWeight.w900,
-                  color: Palette.success,
+                  color: farbe,
                 ),
               ),
             ),

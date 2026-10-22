@@ -184,7 +184,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
-| `lib/home/widgets/status_leiste.dart` | Level-Abzeichen, Balken und Gold in einer Zeile, darunter der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **auch oben auf dem Gewohnheiten-Bildschirm** | Flutter |
+| `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **auch oben auf dem Gewohnheiten-Bildschirm** | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
 | `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
@@ -318,7 +318,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 979 Tests
+flutter test             # 980 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

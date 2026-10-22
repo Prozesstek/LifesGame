@@ -36,7 +36,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Prototyp** | das Dorf **und das Haustier** (drei Eier, wächst an Tagen mit Häkchen), nur im Entwicklermodus | [`haustier.md`](../vorlagen/haustier.md) |
 
-**Tests:** App 979, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 980, dazu die acht Packages (theory 208, habits 345, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +132,24 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 22.10.2026, zuletzt: Level und Gold oben rechts, der Balken als Ring
+
+Frederik: „ich hätte glaube gerne das Level und Gold beim Startbildschirm
+oben rechts und vielleicht der Levelbalken als Kreis darum.“ Gebaut ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Oben rechts** | das Level-Abzeichen in einem Ring, der sich mit der Erfahrung bis zum nächsten Level füllt, daneben das Gold — über den Kreisen |
+| **Der Ring** | die Funken eines Häkchens fliegen hinein; ein Tipp sagt, wie viel noch fehlt |
+| **Das Gebiet** | der grüne Balken blendet beim Häkchen links neben dem Ring ein (ADR-0085) |
+| **Weg** | die Leiste als Karte zwischen den Kreisen und „Heute“; „Heute“ und das Haustier rücken nach oben |
+| **Gewohnheiten** | oben dieselbe Zeile, damit beide Bildschirme gleich aussehen |
+
+Startseite und Gewohnheiten in 390 × 844 gerendert, auch mitten im Flug.
+Ein Test hält fest, dass der Ring rechts und über den Kreisen steht. App
+980 (vorher 979). **Baut auf #149 (Haustier) auf. Nicht am Handy.**
 
 ## 22.10.2026, spät: ein Haustier — Prototyp im Entwicklermodus
 
