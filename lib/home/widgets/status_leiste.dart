@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
@@ -6,176 +8,176 @@ import '../../ui/aufstieg.dart';
 import '../../ui/beute_flug.dart';
 import '../../ui/druck.dart';
 import '../../ui/gold_icon.dart';
-import '../../ui/holz.dart';
 import '../../ui/level_abzeichen.dart';
 import '../../ui/palette.dart';
 
-/// Level, Fortschritt und Gold in einer Zeile auf der Startseite.
+/// **Level und Gold oben rechts** — das Abzeichen mit einem Ring darum,
+/// der die Erfahrung bis zum nächsten Level zeigt, daneben das Gold
+/// (Frederik, 22.10.2026).
 ///
-/// **Bis zum 28.09. stand hier eine Karte unter der Figur** (`LevelCard`),
-/// mit „Level 12“, „340 Gold“ und einem Satz unter dem Balken. Die Figur
-/// ist seitdem im Ausrüstungs-Bildschirm, und die Zahlen sind auf ihre
-/// Zeichen geschrumpft: das Abzeichen für das Level, die Münze für das
-/// Gold. „Heute“ bekommt den Platz.
+/// **Bis dahin eine Karte zwischen den Kreisen und „Heute“**, mit einem
+/// geraden Balken. Oben rechts steht es, wo man es in Spielen sucht, und
+/// „Heute“ bekommt den Platz.
 ///
-/// **Der Satz unter dem Balken kommt nur auf Tipp.** Wie viel Erfahrung
-/// bis zum nächsten Level fehlt, braucht man selten, und dann genügt ein
-/// Tipp auf den Balken.
+/// **Links daneben wartet der Balken des Gebiets** (ADR-0085): Er blendet
+/// sich ein, wenn ein Häkchen seine grünen Funken wirft, und sagt damit,
+/// dass dieselbe Erfahrung auch in den Skill geht (`GebietsBalken`). Sein
+/// Platz ist immer reserviert; ohne Häkchen ist er leer.
 ///
 /// **Sie zeigt, was angekommen ist** (18.10.). Ein Häkchen wirft Münzen
-/// zur Goldzahl und Funken zum Balken (`BeuteFlug`); was noch fliegt,
-/// zieht sie ab, und so steigen Zahl und Balken mit jedem Stück, das
+/// zur Goldzahl und Funken in den Ring (`BeuteFlug`); was noch fliegt,
+/// zieht sie ab, und so steigen Zahl und Ring mit jedem Stück, das
 /// ankommt. Deshalb nimmt sie die Erfahrung und schlägt das Level selbst
 /// nach — wie `playerLevelProvider`, nur ohne das, was noch unterwegs ist.
 ///
-/// **Darunter der Balken des Gebiets** (ADR-0085): Er blendet sich ein,
-/// wenn ein Häkchen seine grünen Funken wirft, und sagt damit, dass
-/// dieselbe Erfahrung auch in den Skill geht (`GebietsBalken`). Sein Platz
-/// ist immer reserviert; ohne Häkchen ist er leer.
-///
-/// **Steht seit ADR-0085 auch auf dem Gewohnheiten-Bildschirm** — dort
-/// flog bis dahin nichts, weil es kein Ziel gab.
-class StatusLeiste extends StatefulWidget {
+/// **Steht auf der Startseite und auf dem Gewohnheiten-Bildschirm**, beide
+/// Male auf dunklem Leder.
+class StatusLeiste extends StatelessWidget {
   const StatusLeiste({required this.xp, required this.gold, super.key});
 
   /// Die ganze Erfahrung, wie `effectiveXpProvider` sie nennt.
   final int xp;
   final int gold;
 
-  @override
-  State<StatusLeiste> createState() => _StatusLeisteState();
-}
-
-class _StatusLeisteState extends State<StatusLeiste> {
-  bool _offen = false;
-
-  /// Wie hoch die Fläche um den Balken ist. Bis ADR-0085 waren es 32 —
-  /// zwölf mehr für den Balken des Gebiets darunter.
-  static const double _hoehe = 44;
-
-  /// Wo der Level-Balken steht: in der Mitte, solange darunter nichts
-  /// leuchtet, und das ist fast immer.
-  static const double _oben = 16;
+  /// Der Ring, zum Finden in Tests: Ein Tipp sagt, wie viel noch fehlt.
+  static const Key ringKey = ValueKey<String>('level-ring');
 
   @override
   Widget build(BuildContext context) {
     final host = AufstiegHost.maybeOf(context);
-    if (host == null) {
-      return _leiste(LevelCurve.levelFor(widget.xp), widget.gold);
-    }
-    final gold = host.unterwegs(FlugZiel.gold);
-    final xp = host.unterwegs(FlugZiel.erfahrung);
+    if (host == null) return _leiste(LevelCurve.levelFor(xp), gold);
+    final unterwegsGold = host.unterwegs(FlugZiel.gold);
+    final unterwegsXp = host.unterwegs(FlugZiel.erfahrung);
     return ListenableBuilder(
-      listenable: Listenable.merge(<Listenable>[gold, xp]),
+      listenable: Listenable.merge(<Listenable>[unterwegsGold, unterwegsXp]),
       builder: (context, _) => _leiste(
-        LevelCurve.levelFor(widget.xp - xp.value),
-        widget.gold - gold.value,
+        LevelCurve.levelFor(xp - unterwegsXp.value),
+        gold - unterwegsGold.value,
       ),
     );
   }
 
   Widget _leiste(PlayerLevel level, int gold) {
-    return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              LevelAbzeichen(level: level.level),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  label: 'Erfahrung bis zum nächsten Level',
-                  child: Druck(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => setState(() => _offen = !_offen),
-                      // Etwas Luft über und unter dem Balken, damit er
-                      // sich treffen lässt; er selbst ist nur 12 hoch.
-                      // Unten wartet der Balken des Gebiets (ADR-0085).
-                      child: SizedBox(
-                        height: _hoehe,
-                        child: Stack(
-                          children: <Widget>[
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              top: _oben,
-                              // Ein breiter Balken springt kaum — ein
-                              // Hauch reicht, damit man das Ankommen
-                              // sieht.
-                              child: FlugZielMarke(
-                                ziel: FlugZiel.erfahrung,
-                                staerke: 0.04,
-                                child: HolzBalken(
-                                  value: level.ratio,
-                                  color: Palette.accent,
-                                ),
-                              ),
-                            ),
-                            const Positioned(
-                              left: 0,
-                              right: 0,
-                              top: _oben + 14,
-                              child: GebietsBalken(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+    return Row(
+      children: <Widget>[
+        // Der Platz des Gebiets: leer, bis ein Häkchen fliegt.
+        const Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: GebietsBalken(aufDunkel: true),
+          ),
+        ),
+        Tooltip(
+          triggerMode: TooltipTriggerMode.tap,
+          message: level.isMaxLevel
+              ? 'Höchste Stufe erreicht'
+              : '${level.xpIntoLevel} von ${level.xpForLevel} Erfahrung '
+                    'bis Level ${level.level + 1}',
+          child: Druck(
+            child: FlugZielMarke(
+              ziel: FlugZiel.erfahrung,
+              staerke: 0.12,
+              child: LevelRing(
+                key: ringKey,
+                level: level.level,
+                anteil: level.ratio,
               ),
-              const SizedBox(width: 12),
-              FlugZielMarke(
-                ziel: FlugZiel.gold,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const GoldIcon(),
-                    const SizedBox(width: 5),
-                    // Die Zahl schrumpft nicht, der Balken gibt nach —
-                    // ein Goldbetrag mit Auslassungspunkten wäre keine
-                    // Zahl mehr.
-                    Text(
-                      '$gold',
-                      maxLines: 1,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.gold,
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        FlugZielMarke(
+          ziel: FlugZiel.gold,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const GoldIcon(),
+              const SizedBox(width: 5),
+              // Die Zahl schrumpft nicht — ein Goldbetrag mit
+              // Auslassungspunkten wäre keine Zahl mehr.
+              Text(
+                '$gold',
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Palette.goldOnDark,
                 ),
               ),
             ],
           ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 160),
-            alignment: Alignment.topCenter,
-            child: _offen
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      level.isMaxLevel
-                          ? 'Höchste Stufe erreicht'
-                          : '${level.xpIntoLevel} von ${level.xpForLevel} '
-                                'Erfahrung bis Level ${level.level + 1}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                  )
-                : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+}
+
+/// **Das Level-Abzeichen mit einem Ring darum**: Der Ring füllt sich mit
+/// der Erfahrung bis zum nächsten Level, von oben im Uhrzeigersinn.
+class LevelRing extends StatelessWidget {
+  const LevelRing({
+    required this.level,
+    required this.anteil,
+    this.groesse = 54,
+    super.key,
+  });
+
+  final int level;
+
+  /// Wie voll der Ring ist, 0..1.
+  final double anteil;
+
+  final double groesse;
+
+  /// Wie breit der Ring ist.
+  static const double breite = 4.5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Level $level, ${(anteil * 100).round()} Prozent zum nächsten',
+      excludeSemantics: true,
+      child: SizedBox.square(
+        dimension: groesse,
+        child: CustomPaint(
+          painter: _RingMaler(anteil.clamp(0.0, 1.0)),
+          child: Center(
+            child: LevelAbzeichen(level: level, size: groesse - 2 * breite - 4),
           ),
-        ],
+        ),
       ),
     );
   }
+}
+
+class _RingMaler extends CustomPainter {
+  _RingMaler(this.anteil);
+
+  final double anteil;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final mitte = size.center(Offset.zero);
+    final radius = size.shortestSide / 2 - LevelRing.breite / 2;
+    final bahn = Paint()
+      ..color = Palette.textOnDarkDim.withValues(alpha: 0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = LevelRing.breite;
+    canvas.drawCircle(mitte, radius, bahn);
+    if (anteil <= 0) return;
+    canvas.drawArc(
+      Rect.fromCircle(center: mitte, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * anteil,
+      false,
+      Paint()
+        ..color = Palette.accentOnDark
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = LevelRing.breite
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RingMaler alt) => alt.anteil != anteil;
 }
