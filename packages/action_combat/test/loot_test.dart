@@ -75,42 +75,24 @@ void main() {
   });
 
   group('Der Topf einer Stufe', () {
-    test('verloren behält man, was gefallen ist — gewonnen den Rest', () {
+    test('verloren bringt nichts — gewonnen den ganzen Topf (ADR-0083)', () {
       const vorher = LadderProgress(highestDefeated: 6);
       final voll = LadderRewards.xpFor(7);
 
-      final verloren = vorher.bookRun(
-        7,
-        won: false,
-        collected: (xp: 20, gold: 5),
-      );
-      expect(verloren.earnedXp, vorher.earnedXp + 20);
+      final verloren = vorher.bookRun(7, won: false);
+      expect(verloren.earnedXp, vorher.earnedXp);
+      expect(verloren.earnedGold, vorher.earnedGold);
       expect(verloren.highestDefeated, 6);
+      expect(verloren.defeatsAt(7), 1);
       expect(
         verloren.potFor(7).xp,
-        voll - 20,
-        reason: 'Der nächste Versuch füllt nur den Rest.',
+        voll,
+        reason: 'Der nächste Versuch spielt um den ganzen Topf.',
       );
 
-      final gewonnen = verloren.bookRun(
-        7,
-        won: true,
-        collected: verloren.potFor(7),
-      );
-      // **Genau so viel wie vorher am Ende** — nicht mehr, nicht weniger.
+      final gewonnen = verloren.bookRun(7, won: true);
       expect(gewonnen.earnedXp, vorher.earnedXp + voll);
       expect(gewonnen.highestDefeated, 7);
-    });
-
-    test('mehr als der Topf zählt nie', () {
-      const vorher = LadderProgress(highestDefeated: 6);
-      final gierig = vorher.bookRun(
-        7,
-        won: false,
-        collected: (xp: 99999, gold: 99999),
-      );
-      expect(gierig.earnedXp, vorher.earnedXp + LadderRewards.xpFor(7));
-      expect(gierig.potFor(7), (xp: 0, gold: 0));
     });
 
     test('eine längst geschaffte Stufe hat keinen Topf', () {
@@ -120,13 +102,27 @@ void main() {
       }
     });
 
-    test('Teile überleben einen Neustart — und nie mehr als der Topf', () {
-      final stand = const LadderProgress(highestDefeated: 6).bookRun(
-        7,
-        won: false,
-        collected: (xp: 20, gold: 5),
+    test('Teile aus alten Ständen zählen weiter — nie mehr als der Topf', () {
+      // Bis ADR-0083 behielt ein verlorener Lauf, was gefallen war. Was
+      // ein Stand so verdient hat, bleibt, sonst fiele ein Level.
+      final alt = LadderProgress.fromJson(<String, Object?>{
+        'defeated': 6,
+        'partial': <String, Object?>{
+          '7': <int>[20, 5],
+        },
+      });
+      const ohne = LadderProgress(highestDefeated: 6);
+      expect(alt.earnedXp, ohne.earnedXp + 20);
+      expect(alt.potFor(7).xp, LadderRewards.xpFor(7) - 20);
+      expect(LadderProgress.fromJson(alt.toJson()).earnedXp, alt.earnedXp);
+
+      // Eine neue Niederlage legt nichts dazu.
+      expect(alt.bookRun(7, won: false).earnedXp, alt.earnedXp);
+      // Der Sieg bringt den Rest, zusammen genau den Topf.
+      expect(
+        alt.bookRun(7, won: true).earnedXp,
+        ohne.earnedXp + LadderRewards.xpFor(7),
       );
-      expect(LadderProgress.fromJson(stand.toJson()).earnedXp, stand.earnedXp);
 
       final erfunden = LadderProgress.fromJson(<String, Object?>{
         'defeated': 6,

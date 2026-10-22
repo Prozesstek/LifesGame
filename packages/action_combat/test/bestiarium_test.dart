@@ -114,7 +114,7 @@ void main() {
       // beim nächsten Sieg nicht still herausfallen.
       final reihe = const LadderProgress.empty()
           .recordKills(<EnemyKind, int>{EnemyKind.fussvolk: 2})
-          .bookRun(1, won: true, collected: (xp: 0, gold: 0))
+          .bookRun(1, won: true)
           .recordTime(1, 40)
           .recordDefeat(2);
 

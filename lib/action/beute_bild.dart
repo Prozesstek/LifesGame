@@ -18,12 +18,23 @@ abstract final class BeuteBild {
 
   static void zeichne(Canvas canvas, BeuteRegen regen) {
     for (final stueck in regen.stuecke) {
+      final sichtbar = stueck.sichtbar;
+      if (sichtbar <= 0) continue;
+      // Was die Niederlage nimmt, verblasst (ADR-0083). Eine Ebene nur
+      // dann, sonst kostete jede Münze eine.
+      if (sichtbar < 1) {
+        canvas.saveLayer(
+          null,
+          Paint()..color = Color.fromRGBO(0, 0, 0, sichtbar),
+        );
+      }
       switch (stueck.art) {
         case BeuteArt.gold:
           _muenzeZeichnen(canvas, stueck);
         case BeuteArt.erfahrung:
           _funkeZeichnen(canvas, stueck);
       }
+      if (sichtbar < 1) canvas.restore();
     }
   }
 

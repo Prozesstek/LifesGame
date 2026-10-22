@@ -12,7 +12,8 @@ import 'beute_regen.dart';
 /// bei jeder Münze kurz auf.
 ///
 /// **Gezählt wird, was angekommen ist**, nicht was gefallen ist — die
-/// Zahl soll mit den Münzen steigen, nicht vor ihnen.
+/// Zahl soll mit den Münzen steigen, nicht vor ihnen. Nach einer
+/// Niederlage zählt sie herunter und glüht rot (ADR-0083).
 class LaufKasse extends StatelessWidget {
   const LaufKasse({super.key, required this.regen});
 
@@ -23,6 +24,7 @@ class LaufKasse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final leuchten = regen.goldLeuchten;
+    final farbe = regen.verloren ? Palette.enemyOnDark : Palette.goldOnDark;
     // Auf einem dunklen Schild: Die Kopfzeile liegt über dem Spielfeld,
     // und auf heller Wand verschwände Gold sonst.
     return Transform.scale(
@@ -32,7 +34,7 @@ class LaufKasse extends StatelessWidget {
           color: Palette.chipOnDark.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: Palette.goldOnDark.withValues(alpha: 0.4 + 0.6 * leuchten),
+            color: farbe.withValues(alpha: 0.4 + 0.6 * leuchten),
           ),
         ),
         child: Padding(
@@ -49,7 +51,7 @@ class LaufKasse extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Color.lerp(Palette.goldOnDark, Colors.white, leuchten),
+                  color: Color.lerp(farbe, Colors.white, leuchten),
                 ),
               ),
             ],
@@ -64,7 +66,8 @@ class LaufKasse extends StatelessWidget {
 /// nächsten ist — mit allem, was in diesem Lauf schon angekommen ist.
 ///
 /// Nur in der Grube der Reihe; Tagesgrube und Prototyp zahlen keine
-/// Erfahrung und zeigen ihn nicht.
+/// Erfahrung und zeigen ihn nicht. Nach einer Niederlage läuft er
+/// zurück, und ein Aufstieg im Lauf fällt wieder ab (ADR-0083).
 class ErfahrungsLeiste extends StatelessWidget {
   const ErfahrungsLeiste({super.key, required this.regen});
 
@@ -77,6 +80,7 @@ class ErfahrungsLeiste extends StatelessWidget {
     final stand = regen.stand;
     if (stand == null) return const SizedBox.shrink();
     final leuchten = regen.xpLeuchten;
+    final glut = regen.verloren ? Palette.enemyOnDark : Palette.accentOnDark;
     return Semantics(
       label:
           'Level ${stand.level}, '
@@ -95,9 +99,7 @@ class ErfahrungsLeiste extends StatelessWidget {
                 boxShadow: <BoxShadow>[
                   if (leuchten > 0)
                     BoxShadow(
-                      color: Palette.accentOnDark.withValues(
-                        alpha: 0.6 * leuchten,
-                      ),
+                      color: glut.withValues(alpha: 0.6 * leuchten),
                       blurRadius: 8,
                     ),
                 ],
@@ -107,11 +109,7 @@ class ErfahrungsLeiste extends StatelessWidget {
                 widthFactor: stand.ratio.clamp(0.0, 1.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color.lerp(
-                      Palette.accentOnDark,
-                      Colors.white,
-                      leuchten * 0.6,
-                    ),
+                    color: Color.lerp(glut, Colors.white, leuchten * 0.6),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

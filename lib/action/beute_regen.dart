@@ -9,8 +9,14 @@ import 'package:progression/progression.dart';
 /// **Nur Darstellung.** Die Welt hat Gold und Erfahrung schon gezählt,
 /// sobald sie `LootDropped` meldet (ADR-0041); was hier fliegt, ist
 /// dieselbe Summe, in Stücke zerlegt. Ein Stück, das nie ankommt, kostet
-/// also nichts — es zeigt nur zu spät, was längst gebucht ist. Deshalb
-/// gibt es kein Aufheben: Jedes Stück fliegt von selbst zum Helden.
+/// also nichts — es zeigt nur zu spät, was die Welt schon gezählt hat.
+/// Deshalb gibt es kein Aufheben: Jedes Stück fliegt von selbst zum
+/// Helden.
+///
+/// **Gebucht wird es erst mit dem Sieg** (ADR-0083). Geht der Lauf
+/// verloren, nimmt [verliere] alles wieder: Die Kasse zählt herunter,
+/// der Balken läuft zurück, und Münzen und Funken springen vom Helden weg
+/// und verlöschen.
 ///
 /// **Eine reine Rechnung, ohne Leinwand**, wie `Kampfgefuehl` und
 /// `DamagePopup`: Was ankommt und wann der Balken überläuft, prüft ein
@@ -32,6 +38,13 @@ class BeuteRegen {
   double _goldPuls = double.infinity;
   double _xpPuls = double.infinity;
   double _aufstiegAlter = double.infinity;
+
+  /// Seit wann die Niederlage nimmt, oder null, solange sie es nicht tut.
+  double? _verlustAlter;
+
+  /// Was beim Helden angekommen war, als die Niederlage kam.
+  double _verlustGold = 0;
+  double _verlustXp = 0;
 
   // --- Wie viel fällt ---
 
@@ -71,6 +84,18 @@ class BeuteRegen {
 
   /// Wie lange der Aufstieg mitten im Lauf gross dasteht.
   static const double aufstiegDauer = 1.8;
+
+  /// Wie lange eine Niederlage braucht, um alles zu nehmen. In den ersten
+  /// drei Vierteln verlässt ein Stück nach dem anderen den Helden, die
+  /// letzten verlöschen danach noch [verlorenLebt] lang.
+  static const double verlustDauer = 1.4;
+
+  /// Wie lange ein genommenes Stück noch zu sehen ist.
+  static const double verlorenLebt = 0.9;
+
+  /// Höchstens so viele Stücke je Art verlassen den Helden — mehr wäre
+  /// ein Klumpen statt einer Rechnung, die man mitzählen kann.
+  static const int verlorenHoechstens = 24;
 
   // --- Was fliegt ---
 
@@ -128,6 +153,61 @@ class BeuteRegen {
     );
   }
 
+  /// Die Niederlage nimmt alles, was in diesem Lauf gefallen ist — vom
+  /// Helden bei [held] aus (ADR-0083).
+  ///
+  /// Was noch fliegt, kommt nicht mehr an und verlischt, wo es ist. Gibt
+  /// zurück, ob es etwas zu nehmen gab; ohne gibt es auch kein Bild.
+  bool verliere(Vec2 held) {
+    if (_verlustAlter != null) return false;
+    for (final stueck in _stuecke) {
+      stueck.verliere(losAb: 0);
+    }
+    if (_gold <= 0 && _xp <= 0 && _stuecke.isEmpty) return false;
+    final goldVorher = gold;
+    final xpVorher = xp;
+    _verlustAlter = 0;
+    _verlustGold = _gold;
+    _verlustXp = _xp;
+    _nimm(BeuteArt.gold, held, muenzenFuer(goldVorher, gross: true));
+    _nimm(BeuteArt.erfahrung, held, funkenFuer(xpVorher, gross: true));
+    return true;
+  }
+
+  /// Legt [anzahl] Stücke an den Helden, die ihn nacheinander verlassen.
+  void _nimm(BeuteArt art, Vec2 held, int anzahl) {
+    final n = math.min(anzahl, verlorenHoechstens);
+    for (var i = 0; i < n; i++) {
+      _stuecke.add(
+        _neu(
+          art,
+          held,
+          wert: 0,
+          tempo: art == BeuteArt.gold ? 110 : 70,
+          sammeltAb: double.infinity,
+          sprung: art == BeuteArt.gold ? 200 : 0,
+        )..verliere(losAb: verlustDauer * 0.75 * i / n),
+      );
+    }
+  }
+
+  /// Wie weit die Niederlage genommen hat, 0 bis 1 — die Kasse zählt im
+  /// selben Takt herunter, in dem die Stücke den Helden verlassen.
+  double get _genommen {
+    final alter = _verlustAlter;
+    if (alter == null) return 0;
+    return (alter / (verlustDauer * 0.75)).clamp(0.0, 1.0);
+  }
+
+  /// Ob die Niederlage gerade nimmt.
+  bool get verliert {
+    final alter = _verlustAlter;
+    return alter != null && alter < verlustDauer + verlorenLebt;
+  }
+
+  /// Ob eine Niederlage genommen hat oder gerade nimmt.
+  bool get verloren => _verlustAlter != null;
+
   /// Rechnet [dt] Sekunden weiter, zum Helden bei [held] hin.
   ///
   /// Gibt zurück, was in diesem Bild angekommen ist — für die Klänge.
@@ -136,24 +216,29 @@ class BeuteRegen {
     _xpPuls += dt;
     _aufstiegAlter += dt;
     final levelVorher = stand?.level;
+    final goldVorher = gold;
+    final xpVorher = xp;
+    final verlust = _verlustAlter;
+    if (verlust != null) _verlustAlter = verlust + dt;
 
-    var gold = false;
-    var xp = false;
+    var goldKam = false;
+    var xpKam = false;
     for (final stueck in _stuecke) {
       stueck.update(dt, held);
-      if (!stueck.angekommen) continue;
+      if (!stueck.angekommen || stueck.verloren) continue;
       switch (stueck.art) {
         case BeuteArt.gold:
           _gold += stueck.wert;
-          gold = true;
+          goldKam = true;
         case BeuteArt.erfahrung:
           _xp += stueck.wert;
-          xp = true;
+          xpKam = true;
       }
     }
     _stuecke.removeWhere((s) => s.angekommen);
-    if (gold) _goldPuls = 0;
-    if (xp) _xpPuls = 0;
+    // Auch das Herunterzählen leuchtet: jede Zahl weniger ein Puls.
+    if (goldKam || gold < goldVorher) _goldPuls = 0;
+    if (xpKam || xp < xpVorher) _xpPuls = 0;
 
     final levelNachher = stand?.level;
     final aufstieg =
@@ -161,7 +246,7 @@ class BeuteRegen {
         levelNachher != null &&
         levelNachher > levelVorher;
     if (aufstieg) _aufstiegAlter = 0;
-    return (gold: gold, xp: xp, aufstieg: aufstieg);
+    return (gold: goldKam, xp: xpKam, aufstieg: aufstieg);
   }
 
   // --- Was die Anzeige liest ---
@@ -172,13 +257,20 @@ class BeuteRegen {
   /// da, auch wenn die erste Münze noch fliegt.
   bool get hatGold => _geworfenesGold > 0;
 
-  /// Ob nichts mehr unterwegs ist.
-  bool get leer => _stuecke.isEmpty;
+  /// Ob nichts mehr unterwegs ist — und keine Niederlage mehr nimmt.
+  bool get leer => _stuecke.isEmpty && !verliert;
 
   /// Was beim Helden angekommen ist. Abgerundet, mit einem Hauch Luft:
   /// Drei Münzen zu je einem Drittel sind ein Goldstück, nicht 0,999.
-  int get gold => (_gold + 1e-6).floor();
-  int get xp => (_xp + 1e-6).floor();
+  ///
+  /// Nach einer Niederlage zählt es herunter, bis nichts mehr da ist.
+  int get gold => _zaehle(_gold, _verlustGold);
+  int get xp => _zaehle(_xp, _verlustXp);
+
+  int _zaehle(double angekommen, double beimVerlust) {
+    if (_verlustAlter == null) return (angekommen + 1e-6).floor();
+    return (beimVerlust * (1 - _genommen) + 1e-6).floor();
+  }
 
   /// Wie stark Kasse oder Balken gerade aufleuchten, 0 bis 1.
   double get goldLeuchten => _leuchten(_goldPuls);
@@ -249,11 +341,34 @@ class Beutestueck {
   double alter = 0;
   bool angekommen = false;
 
+  /// Ob die Niederlage das Stück genommen hat. Dann kommt es nie an,
+  /// zählt nichts und verlischt (ADR-0083).
+  bool verloren = false;
+
+  /// Ab welchem Alter ein genommenes Stück zu sehen ist und sich bewegt.
+  double losAb = 0;
+
+  /// Nimmt das Stück: Es verlässt den Helden in [losAb] Sekunden.
+  void verliere({required double losAb}) {
+    verloren = true;
+    this.losAb = alter + losAb;
+  }
+
+  /// Wie deutlich es zu sehen ist, 0 bis 1. Nur ein genommenes Stück
+  /// verblasst — in der zweiten Hälfte seiner Zeit.
+  double get sichtbar {
+    if (!verloren) return 1;
+    final seit = alter - losAb;
+    if (seit < 0) return 0;
+    const halb = BeuteRegen.verlorenLebt / 2;
+    return (1 - (seit - halb) / halb).clamp(0.0, 1.0);
+  }
+
   /// Wo es im letzten Bild stand — für die Spur des Funkens.
   double vorherX = 0;
   double vorherY = 0;
 
-  bool get fliegt => alter >= sammeltAb;
+  bool get fliegt => !verloren && alter >= sammeltAb;
 
   static const double _schwere = 700;
   static const double _abprall = 0.35;
@@ -263,6 +378,12 @@ class Beutestueck {
     vorherX = x;
     vorherY = y;
     alter += dt;
+    if (verloren) {
+      // Genommen: erst warten, dann wegspringen und verlöschen.
+      if (alter - losAb >= BeuteRegen.verlorenLebt) angekommen = true;
+      if (alter >= losAb) _spring(dt);
+      return;
+    }
     if (alter >= BeuteRegen.hoechstensUnterwegs) {
       angekommen = true;
       return;

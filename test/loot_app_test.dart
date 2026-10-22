@@ -6,9 +6,9 @@ import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 
-/// Erfahrung und Gold je Gegner, durch die App (ADR-0041): Ein
-/// verlorener Lauf behält, was gefallen ist, und der Sieg zahlt genau den
-/// Rest — zusammen so viel wie vorher der Abschluss allein.
+/// Erfahrung und Gold je Gegner, durch die App (ADR-0041): Seit
+/// ADR-0083 nimmt eine Niederlage, was gefallen ist, und der Sieg zahlt
+/// den ganzen Topf.
 void main() {
   ProviderContainer container() {
     final c = ProviderContainer(
@@ -22,24 +22,20 @@ void main() {
     return c;
   }
 
-  test('verloren behalten, gewonnen den Rest — zusammen der Abschluss', () {
+  test('verloren bringt nichts, gewonnen den ganzen Topf (ADR-0083)', () {
     final c = container();
     final reihe = c.read(ladderProvider.notifier);
     final voll = (xp: LadderRewards.xpFor(7), gold: LadderRewards.goldFor(7));
     final vorher = c.read(totalXpProvider);
 
     expect(reihe.potFor(7), voll);
-    final verloren = reihe.recordRun(
-      7,
-      won: false,
-      collected: (xp: 20, gold: 5),
-    );
-    expect(verloren, (xp: 20, gold: 5));
-    expect(c.read(totalXpProvider), vorher + 20);
-    expect(reihe.potFor(7), (xp: voll.xp - 20, gold: voll.gold - 5));
+    final verloren = reihe.recordRun(7, won: false);
+    expect(verloren, (xp: 0, gold: 0));
+    expect(c.read(totalXpProvider), vorher);
+    expect(reihe.potFor(7), voll);
 
     final gewonnen = reihe.recordRun(7, won: true);
-    expect(gewonnen, (xp: voll.xp - 20, gold: voll.gold - 5));
+    expect(gewonnen, voll);
     expect(c.read(totalXpProvider), vorher + voll.xp);
   });
 }

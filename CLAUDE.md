@@ -107,7 +107,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **22 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 392 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 391 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -135,7 +135,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/pit_run_view.dart` | Spielfeld, Steuerung, Kopfzeile, **Tasten** — geteilt mit dem Prototyp | Flutter |
 | `lib/action/lauf_zeichen.dart` | **die Zeichen des ersten Laufs**: Geister-Steuerkreuz bis zum ersten Schritt, Waffe in drehenden Pfeilen beim ersten Schlag — reine Rechnung, ein Stand je Lauf ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) | Flutter |
 | `lib/action/lauf_zeichen_view.dart` | zeichnet sie über dem Spielfeld, **nimmt keinen Tipp an** und läuft aus der Zeit des Laufs | Flutter |
-| `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat** | Flutter |
+| `lib/action/beute_regen.dart` | **der Goldregen**: was ein Gegner bringt, fliegt als Münzen und Funken zum Helden, dazu Kasse, Balken und Aufstieg — reine Rechnung, **nur Darstellung dessen, was die Welt schon gezahlt hat**; nach einer Niederlage **nimmt er alles zurück** (`verliere`, [ADR-0083](docs/decisions/0083-die-niederlage-nimmt.md)) | Flutter |
+| `lib/action/staerker_werden.dart` | **drei Tipps nach einer Niederlage** aus dem eigenen Stand — leerer Platz, Besseres im Rucksack, freie Punkte, Häkchen bis In Form, Laden; nie zwei in denselben Bereich — reine Rechnung | Flutter |
+| `lib/action/staerker_werden_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
 | `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
 | `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
@@ -256,7 +258,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/tagesform_kreis.dart` | die **Tagesform als Blitz**, der sich mit jedem Häkchen auflädt; Tipp zeigt, was sie bringt | Flutter |
 | `lib/combat/move_icon.dart` | welches Bild zu einer Fähigkeit oder Waffe gehört | Flutter |
 | `lib/gear/gear_icon.dart` | welches Bild zu einem Ausrüstungsstück gehört | Flutter |
-| `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein, zuletzt „Weiter“ | Flutter |
+| `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein — **nach einer Niederlage statt dessen drei Tipps**, jeder ein Knopf in seinen Bereich —, zuletzt „Weiter“ | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile — **immer offen**, schlägt den Weg der Grundlagen vor | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
@@ -292,7 +294,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 911 Tests
+flutter test             # 926 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -305,7 +307,7 @@ dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je St
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 392 Tests
+dart test                              # 391 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -923,8 +925,12 @@ Betrag je Gegner** — derselbe Topf, anders ausgeschüttet. Die Reihe
 reicht der Welt den **Rest** des Topfs (`LadderProgress.potFor`), die
 Welt zahlt je Kill ihren Teil (`LootDropped`, 70 % aufs Fussvolk, der
 Wächter füllt auf), und `LadderProgress.bookRun` bucht am Ende — gekappt
-auf den Topf. Ein verlorener Lauf behält, was gefallen ist. **Mehr als
-der Topf zählt nie**: Wer daran rührt, lässt `loot_test.dart` laufen.
+auf den Topf. **Seit [ADR-0083](docs/decisions/0083-die-niederlage-nimmt.md)
+zahlt nur ein Sieg**, dann den ganzen Topf: Eine Niederlage nimmt im Bild
+zurück, was gefallen ist (`BeuteRegen.verliere`), und bucht nichts.
+Was alte Stände in verlorenen Läufen gesammelt haben (`partial`), zählt
+weiter und wächst nie mehr. **Mehr als der Topf zählt nie**: Wer daran
+rührt, lässt `loot_test.dart` laufen.
 
 **Der Kern-Loop verbindet alle acht Packages.** Lektion (`theory`) schaltet
 Vorlage frei (`habits`), Häkchen erzeugt Erfahrung (`progression`),

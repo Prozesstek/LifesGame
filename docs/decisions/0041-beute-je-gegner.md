@@ -1,7 +1,7 @@
 # ADR-0041: Erfahrung und Gold fallen je Gegner — derselbe Topf, anders ausgeschüttet
 
 **Datum:** 22.09.2026
-**Status:** Aktiv
+**Status:** Aktiv — in einem Punkt abgelöst durch ADR-0083: Eine Niederlage behält nichts mehr
 **Entschieden von:** Prozesstek
 
 ## Kontext

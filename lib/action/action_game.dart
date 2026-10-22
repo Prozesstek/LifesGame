@@ -326,6 +326,11 @@ class ActionGame extends Game {
           );
         case RunEnded():
           _endeGemeldet = true;
+          // **Verloren nimmt alles wieder** (ADR-0083): Was gefallen ist,
+          // verlässt den Helden, bevor das Blatt kommt.
+          if (!sim.isWon && beute.verliere(sim.heroView.position)) {
+            _klaenge.melde(SoundEffect.falsch);
+          }
         case HookThrown() ||
             LuckRolled() ||
             TrapSprung() ||
@@ -404,7 +409,10 @@ class ActionGame extends Game {
       // niemand. Gezählt mit der wirklichen Zeit und gedeckelt, damit ein
       // hängendes Stück das Ende nie aufhält.
       _endeWartet += wirklich;
-      if (beute.leer || _endeWartet >= endeWartetHoechstens) {
+      final hoechstens = beute.verloren
+          ? BeuteRegen.verlustDauer + BeuteRegen.verlorenLebt
+          : endeWartetHoechstens;
+      if (beute.leer || _endeWartet >= hoechstens) {
         _endeGemeldet = false;
         onRunEnded?.call();
       }
@@ -412,6 +420,7 @@ class ActionGame extends Game {
   }
 
   /// So lange wartet das Ergebnis höchstens auf die Beute in der Luft.
+  /// Nach einer Niederlage wartet es, bis alles genommen ist.
   static const double endeWartetHoechstens = 1.6;
   double _endeWartet = 0;
 
