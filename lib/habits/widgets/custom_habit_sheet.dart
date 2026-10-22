@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:habits/habits.dart';
 
+import '../../skills/gebiet_zeichen.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
 import '../../ui/druck.dart';
@@ -14,6 +15,7 @@ class CustomHabitDraft {
   const CustomHabitDraft({
     required this.name,
     required this.stat,
+    required this.area,
     required this.difficulty,
     required this.priority,
     this.goal,
@@ -22,6 +24,9 @@ class CustomHabitDraft {
 
   final String name;
   final HabitStat stat;
+
+  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085).
+  final SkillArea area;
   final HabitDifficulty difficulty;
   final HabitPriority priority;
   final HabitGoal? goal;
@@ -71,6 +76,7 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
   final _minutes = TextEditingController(text: '10');
 
   HabitStat _stat = HabitStat.staerke;
+  SkillArea _area = SkillArea.koerper;
   HabitDifficulty _difficulty = HabitDifficulty.mittel;
   HabitPriority _priority = HabitPriority.normal;
   _GoalChoice _goalChoice = _GoalChoice.keins;
@@ -113,6 +119,7 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
       CustomHabitDraft(
         name: _name.text,
         stat: _stat,
+        area: _area,
         difficulty: _difficulty,
         priority: _priority,
         goal: _goal,
@@ -150,8 +157,9 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Sie zählt wie jede andere: Häkchen, Streak, Charakterwert. '
-                'Wert, Schwierigkeit und Ziel stehen danach fest.',
+                'Sie zählt wie jede andere: Häkchen, Streak, Charakterwert, '
+                'Skill. Gebiet, Wert, Schwierigkeit und Ziel stehen danach '
+                'fest.',
                 style: TextStyle(
                   fontSize: 12,
                   height: 1.4,
@@ -179,6 +187,28 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
                       label: '${stat.label} · ${stat.combatLabel}',
                       selected: _stat == stat,
                       onTap: () => setState(() => _stat = stat),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // **Das Gebiet** (ADR-0085): welcher Skill mit ihr wächst.
+              // Unabhängig vom Wert — Liegestütze stärken den Angriff und
+              // gehören zum Körper, ein Anruf bei einem Freund stärkt die
+              // Disziplin und gehört zur Gesellschaft.
+              const _Label('Zu welchem Gebiet gehört es?'),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  for (final area in SkillArea.values)
+                    _Chip(
+                      key: ValueKey<String>('gebiet-${area.name}'),
+                      icon: gebietZeichen(area),
+                      label: area.label,
+                      selected: _area == area,
+                      onTap: () => setState(() => _area = area),
                     ),
                 ],
               ),
@@ -409,11 +439,14 @@ class _Chip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.icon,
+    super.key,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -426,13 +459,30 @@ class _Chip extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: selected ? Palette.surface : Palette.textDim,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (icon case final IconData zeichen) ...<Widget>[
+                  Icon(
+                    zeichen,
+                    size: 15,
+                    color: selected ? Palette.surface : Palette.textDim,
+                  ),
+                  const SizedBox(width: 5),
+                ],
+                // Darf umbrechen wie vorher ohne Zeichen: Ein langer
+                // Schwierigkeitsgrad ist breiter als eine Zeile.
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: selected ? Palette.surface : Palette.textDim,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

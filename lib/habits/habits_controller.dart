@@ -180,6 +180,7 @@ class HabitsController extends Notifier<HabitTracker> {
   CustomHabit? addCustom({
     required String name,
     required HabitStat stat,
+    required SkillArea area,
     required HabitDifficulty difficulty,
     HabitGoal? goal,
     HabitPriority priority = HabitPriority.normal,
@@ -194,6 +195,7 @@ class HabitsController extends Notifier<HabitTracker> {
       id: CustomHabit.nextId(state.customHabits.map((h) => h.id)),
       name: name.trim(),
       stat: stat,
+      area: area,
       difficulty: difficulty,
       goal: goal,
       priority: priority,
@@ -205,6 +207,12 @@ class HabitsController extends Notifier<HabitTracker> {
         ? angelegt.activate(habit.id, today: ref.read(todayProvider))
         : angelegt;
     return habit;
+  }
+
+  /// Gibt einer alten eigenen Gewohnheit ihr Gebiet — **einmal**
+  /// (ADR-0085). Die Regel steht in `HabitTracker.assignArea`.
+  void assignArea(String habitId, SkillArea area) {
+    state = state.assignArea(habitId, area);
   }
 
   /// Bessert Name, Begründung oder Priorität nach. Wert, Schwierigkeit

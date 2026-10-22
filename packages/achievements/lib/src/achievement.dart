@@ -14,7 +14,13 @@ enum AchievementArea {
   gewohnheiten('Gewohnheiten'),
   theorie('Theorie'),
   kampf('Kampf'),
-  laden('Laden');
+  laden('Laden'),
+
+  /// Die Skills je Gebiet (ADR-0085): Körper, Geist, Wissenschaft,
+  /// Gesellschaft. Ein eigener Reiter, weil ein Skill aus Gewohnheiten
+  /// **und** Theorie wächst und damit keinem der vier Kreise allein
+  /// gehört.
+  gebiete('Gebiete');
 
   const AchievementArea(this.label);
 

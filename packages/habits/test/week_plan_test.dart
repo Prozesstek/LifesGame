@@ -126,6 +126,11 @@ void main() {
     });
 
     test('nach einem verpassten Tag steht sie eine Stufe tiefer', () {
+      // Ein Jahr Kette fällt nach einem verpassten Tag auf 180, nicht
+      // auf 60 (ADR-0085) — und behält damit x2,4.
+      expect(HabitRewards.streakAfterMiss(400), 365);
+      expect(HabitRewards.streakAfterMiss(300), 180);
+      expect(HabitRewards.streakAfterMiss(120), 100);
       expect(HabitRewards.streakAfterMiss(75), 60);
       expect(HabitRewards.streakAfterMiss(60), 30);
       expect(HabitRewards.streakAfterMiss(45), 30);

@@ -27,6 +27,7 @@ import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../skills/widgets/gebiet_frage_karte.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
@@ -168,6 +169,15 @@ class HomeScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
+                              // **Einmal** (ADR-0085): Eigene Gewohnheiten
+                              // von vor den Skills fragen nach ihrem
+                              // Gebiet. Sonst steht hier nichts.
+                              if (tracker
+                                  .customWithoutArea
+                                  .isNotEmpty) ...<Widget>[
+                                const GebietFrageKarte(),
+                                const SizedBox(height: 10),
+                              ],
                               // Ohne Gewohnheit ist „Heute“ die erste
                               // Frage, keine leere Liste.
                               if (start.fragtNachGewohnheit)

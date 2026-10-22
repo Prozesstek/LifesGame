@@ -25,13 +25,14 @@ void main() {
       }
     });
 
-    test('22 Meilensteine und 8 Entdeckungen', () {
+    test('34 Meilensteine und 8 Entdeckungen', () {
       // Der zwanzigste ist „Zehn Truhen“ (ADR-0073), die Quelle des
       // Glückstranks; der zweiundzwanzigste die „Erste Seite“
-      // (ADR-0079), die Quelle von Funkenstoß.
-      expect(AchievementCatalog.milestoneCount, 22);
+      // (ADR-0079), die Quelle von Funkenstoß. Dazu je Gebiet drei
+      // Skill-Titel (ADR-0085).
+      expect(AchievementCatalog.milestoneCount, 34);
       expect(AchievementCatalog.discoveryCount, 8);
-      expect(AchievementCatalog.all, hasLength(30));
+      expect(AchievementCatalog.all, hasLength(42));
     });
 
     test('jeder Bereich ist besetzt', () {
@@ -110,15 +111,16 @@ void main() {
     // hier, dass der ADR nachzuziehen ist.
     // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr; seit
     // ADR-0074 mit „Sieben Tage in Form“ (mittel) noch einmal so viel;
-    // seit ADR-0079 mit der „Ersten Seite“ (klein) 30, 10 und 5 dazu.
-    test('über ein Spielerleben: 1860 Erfahrung, 620 Gold, 410 Ruhm', () {
-      expect(AchievementCatalog.lifetimeXp, 1860);
-      expect(AchievementCatalog.lifetimeGold, 620);
-      expect(AchievementCatalog.lifetimeFame, 410);
+    // seit ADR-0079 mit der „Ersten Seite“ (klein) 30, 10 und 5 dazu;
+    // seit ADR-0085 je Gebiet klein, mittel, gross: 1020, 340 und 160.
+    test('über ein Spielerleben: 2880 Erfahrung, 960 Gold, 570 Ruhm', () {
+      expect(AchievementCatalog.lifetimeXp, 2880);
+      expect(AchievementCatalog.lifetimeGold, 960);
+      expect(AchievementCatalog.lifetimeFame, 570);
     });
 
     test(
-        'der Ruhm teilt sich in 290 aus Meilensteinen und 120 aus Entdeckungen',
+        'der Ruhm teilt sich in 450 aus Meilensteinen und 120 aus Entdeckungen',
         () {
       var meilensteine = 0;
       var entdeckungen = 0;
@@ -129,7 +131,7 @@ void main() {
           entdeckungen += a.tier.fame;
         }
       }
-      expect(meilensteine, 290);
+      expect(meilensteine, 450);
       expect(entdeckungen, 120);
     });
 
@@ -154,12 +156,36 @@ void main() {
       }
     });
 
-    test('dreizehn Titel werden vergeben', () {
+    test('je Gebiet drei Titel, bei 10, 25 und 50 (ADR-0085)', () {
+      final gebiete = AchievementCatalog.inArea(AchievementArea.gebiete);
+
+      expect(gebiete, hasLength(12));
+      expect(gebiete.map((a) => a.target).toSet(), <int>{10, 25, 50});
+      for (final a in gebiete) {
+        expect(a.isMilestone, isTrue, reason: a.id);
+        expect(a.titleId, isNotNull, reason: a.id);
+      }
+
+      const fast = AchievementStats(skillKoerper: 24);
+      const genau = AchievementStats(skillKoerper: 25);
+      expect(AchievementCatalog.earnedTitleIdsBy(fast), contains('ruestig'));
+      expect(
+        AchievementCatalog.earnedTitleIdsBy(fast),
+        isNot(contains('gestaehlt')),
+      );
+      expect(AchievementCatalog.earnedTitleIdsBy(genau), contains('gestaehlt'));
+      expect(
+        AchievementCatalog.earnedTitleIdsBy(genau),
+        isNot(contains('wach')),
+      );
+    });
+
+    test('fünfundzwanzig Titel werden vergeben', () {
       final titel = <String>{
         for (final a in AchievementCatalog.all)
           if (a.titleId != null) a.titleId!,
       };
-      expect(titel, hasLength(13));
+      expect(titel, hasLength(25));
     });
 
     test('keine Fähigkeit hängt an zwei Errungenschaften', () {
@@ -177,13 +203,17 @@ void main() {
     // dritter. Seit ADR-0079 Funkenstoß aus der ersten Seite. Dass die
     // Ids drüben in der Grube ankommen, prüft
     // `test/abilities_seam_test.dart` in der App; hier ist es ein Wort.
-    test('sieben Fähigkeiten, jeder Bereich mindestens eine', () {
+    // Die Gebiete (ADR-0085) bringen Titel, keine Fähigkeit: Ein Skill
+    // wächst über Jahre, und eine Fähigkeit dort käme erst, wenn man sie
+    // nicht mehr braucht.
+    test('sieben Fähigkeiten, jeder Bereich ausser den Gebieten eine', () {
       final jeBereich = <AchievementArea, int>{};
       for (final a in AchievementCatalog.all) {
         if (a.moveId == null) continue;
         jeBereich[a.area] = (jeBereich[a.area] ?? 0) + 1;
       }
-      expect(jeBereich, hasLength(AchievementArea.values.length));
+      expect(jeBereich, hasLength(AchievementArea.values.length - 1));
+      expect(jeBereich[AchievementArea.gebiete], isNull);
       expect(jeBereich[AchievementArea.gewohnheiten], 3);
       expect(
         <String>{

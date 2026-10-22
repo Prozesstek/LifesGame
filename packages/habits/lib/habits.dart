@@ -13,6 +13,7 @@ export 'src/day.dart';
 export 'src/habit.dart';
 export 'src/plan.dart';
 export 'src/rewards.dart';
+export 'src/skill_area.dart';
 export 'src/stack.dart';
 export 'src/streak_freeze.dart';
 export 'src/streak_rule.dart';

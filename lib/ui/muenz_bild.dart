@@ -20,6 +20,12 @@ abstract final class MuenzBild {
   static const Color _funke = Palette.accentOnDark;
   static const Color _funkenKern = Color(0xFFFFE2B8);
 
+  /// **Der Funke eines Gebiets** (ADR-0085) ist grün: Er fliegt neben dem
+  /// Funken des Levels zum Balken des Gebiets, und man soll die zwei
+  /// Ströme auseinanderhalten können.
+  static const Color _funkeGebiet = Palette.successOnDark;
+  static const Color _gebietKern = Color(0xFFE6F6DC);
+
   /// Die Grösse, für die die Strichstärken gewählt sind — die Münze der
   /// Grube. Andere Grössen rechnen von hier aus.
   static const double _bezugMuenze = 4.5;
@@ -77,14 +83,17 @@ abstract final class MuenzBild {
     Offset? spur,
     double flackern = 1,
     double radius = _bezugFunke,
+    bool gebiet = false,
   }) {
     final s = radius / _bezugFunke;
+    final farbe = gebiet ? _funkeGebiet : _funke;
+    final kern = gebiet ? _gebietKern : _funkenKern;
     if (spur != null && (spur - mitte).distance > 0.5) {
       canvas.drawLine(
         spur,
         mitte,
         Paint()
-          ..color = _funke.withValues(alpha: 0.55)
+          ..color = farbe.withValues(alpha: 0.55)
           ..strokeWidth = 3 * s
           ..strokeCap = StrokeCap.round,
       );
@@ -92,9 +101,9 @@ abstract final class MuenzBild {
     canvas.drawCircle(
       mitte,
       6 * s * flackern,
-      Paint()..color = _funke.withValues(alpha: 0.3),
+      Paint()..color = farbe.withValues(alpha: 0.3),
     );
-    canvas.drawCircle(mitte, 3 * s, Paint()..color = _funke);
-    canvas.drawCircle(mitte, 1.5 * s, Paint()..color = _funkenKern);
+    canvas.drawCircle(mitte, 3 * s, Paint()..color = farbe);
+    canvas.drawCircle(mitte, 1.5 * s, Paint()..color = kern);
   }
 }

@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
+import '../home/widgets/status_leiste.dart';
+import '../progression/level_provider.dart';
+import '../skills/skills_provider.dart';
 import '../ui/palette.dart';
 import 'cue_text.dart';
 import 'habit_check_flow.dart';
@@ -73,6 +76,16 @@ class HabitsScreen extends ConsumerWidget {
                     // Woche in den Charakter, Tagesform in die Grube, die
                     // Aufgaben auf die Startseite, die Rückfrage in die
                     // Theorie. Die Kette steht an jeder Kachel.
+                    //
+                    // **Die Leiste von der Startseite** (ADR-0085): Level
+                    // und Gold, darunter der Balken des Gebiets. Ein
+                    // Häkchen wirft seine Funken zu beiden — vorher flog
+                    // hier nichts, weil es kein Ziel gab.
+                    StatusLeiste(
+                      xp: ref.watch(effectiveXpProvider),
+                      gold: ref.watch(goldProvider),
+                    ),
+                    const SizedBox(height: 14),
                     if (zuRetten != null) ...<Widget>[
                       StreakFreezeCard(
                         streakAtRisk: tracker.currentBestStreak(zuRetten),
@@ -190,6 +203,11 @@ class HabitsScreen extends ConsumerWidget {
       xpGain: tracker.xpForNextCheck(habit.id, today),
       goldGain: tracker.goldForNextCheck(habit.id, today),
       progress: tracker.progressOn(habit.id, today),
+      skill: switch (habit.area) {
+        final SkillArea area => ref.watch(skillsProvider).of(area),
+        null => null,
+      },
+      totalDays: tracker.checksFor(habit.id),
       onToggle: () => tapHabit(context, ref, habit),
       onAdvance: () => advanceHabit(context, ref, habit),
       onTimer: tracker.hasTimer(habit.id)
@@ -216,6 +234,7 @@ class HabitsScreen extends ConsumerWidget {
         .addCustom(
           name: draft.name,
           stat: draft.stat,
+          area: draft.area,
           difficulty: draft.difficulty,
           goal: draft.goal,
           priority: draft.priority,

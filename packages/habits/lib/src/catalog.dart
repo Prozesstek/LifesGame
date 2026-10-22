@@ -1,4 +1,5 @@
 import 'habit.dart';
+import 'skill_area.dart';
 
 /// Alle Gewohnheits-Vorlagen des Spiels.
 ///
@@ -14,6 +15,7 @@ abstract final class HabitCatalog {
       id: 'habit-drei-aufgaben',
       name: 'Drei Aufgaben für morgen festlegen',
       stat: HabitStat.disziplin,
+      area: SkillArea.geist,
       branchId: 'habits',
       why: 'Der Abend entscheidet, wie der Morgen läuft. Eine Entscheidung '
           'im Voraus kostet abends eine Minute und morgens keine.',
@@ -22,6 +24,7 @@ abstract final class HabitCatalog {
       id: 'habit-zwei-minuten-lesen',
       name: 'Zwei Minuten lesen',
       stat: HabitStat.klarheit,
+      area: SkillArea.geist,
       branchId: 'habits',
       why: 'So klein, dass kein Tag zu voll dafür ist. Die Länge ist nicht '
           'der Punkt — dass es überhaupt stattfindet, ist der Punkt.',
@@ -32,6 +35,7 @@ abstract final class HabitCatalog {
       id: 'habit-abendnotiz',
       name: 'Abendnotiz: ein Beleg für heute',
       stat: HabitStat.disziplin,
+      area: SkillArea.geist,
       branchId: 'habits',
       why: 'Ein Satz, der belegt, dass der Tag gezählt hat. Ohne Beleg '
           'erinnert man abends nur das, was fehlte.',
@@ -42,6 +46,7 @@ abstract final class HabitCatalog {
       id: 'habit-aufstehzeit',
       name: 'Feste Aufstehzeit — auch am Wochenende',
       stat: HabitStat.ausdauer,
+      area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'Die Aufstehzeit stellt die innere Uhr, nicht die Zubettgehzeit. '
           'Zwei Stunden Unterschied am Wochenende wirken wie ein Jetlag.',
@@ -50,6 +55,7 @@ abstract final class HabitCatalog {
       id: 'habit-zehn-minuten-gehen',
       name: 'Zehn Minuten am Stück gehen',
       stat: HabitStat.staerke,
+      area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'Die erste Bewegung des Tages ist die, die am seltensten '
           'ausfällt. Zehn Minuten sind kurz genug, um nicht zu verhandeln.',
@@ -58,6 +64,7 @@ abstract final class HabitCatalog {
       id: 'habit-wasser-vor-mahlzeit',
       name: 'Ein Glas Wasser vor jeder Mahlzeit',
       stat: HabitStat.ausdauer,
+      area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'An eine bestehende Handlung gehängt — die Mahlzeit ist der '
           'Auslöser, den man nicht vergisst.',
@@ -68,6 +75,7 @@ abstract final class HabitCatalog {
       id: 'habit-stunde-ohne-benachrichtigungen',
       name: 'Eine Stunde ohne Benachrichtigungen',
       stat: HabitStat.klarheit,
+      area: SkillArea.geist,
       branchId: 'geist',
       why: 'Nicht die Nachricht kostet die Aufmerksamkeit, sondern die '
           'Erwartung einer Nachricht.',
@@ -76,6 +84,7 @@ abstract final class HabitCatalog {
       id: 'habit-fuenf-minuten-still',
       name: 'Fünf Minuten still sitzen',
       stat: HabitStat.klarheit,
+      area: SkillArea.geist,
       branchId: 'geist',
       why: 'Übung darin, einen Impuls zu bemerken, ohne ihm zu folgen. '
           'Genau das braucht jede andere Gewohnheit auch.',
@@ -86,6 +95,7 @@ abstract final class HabitCatalog {
       id: 'habit-messgroesse-notieren',
       name: 'Eine Messgröße täglich notieren',
       stat: HabitStat.klarheit,
+      area: SkillArea.wissenschaft,
       branchId: 'wissenschaft',
       why: 'Ohne Zahl bleibt jeder Selbstversuch ein Gefühl. Eine einzige '
           'Größe reicht, solange sie täglich dieselbe ist.',
@@ -96,6 +106,7 @@ abstract final class HabitCatalog {
       id: 'habit-echte-frage',
       name: 'Einem Menschen täglich eine echte Frage stellen',
       stat: HabitStat.staerke,
+      area: SkillArea.gesellschaft,
       branchId: 'gesellschaft',
       why: 'Beziehungen entstehen aus Interesse, nicht aus Anwesenheit. '
           'Eine Frage pro Tag ist wenig genug, um sie zu stellen.',
@@ -104,6 +115,7 @@ abstract final class HabitCatalog {
       id: 'habit-vor-zusage-durchatmen',
       name: 'Vor jeder Zusage einmal durchatmen',
       stat: HabitStat.disziplin,
+      area: SkillArea.gesellschaft,
       branchId: 'gesellschaft',
       why: 'Der Atemzug schiebt eine Entscheidung zwischen Frage und '
           'Antwort. Ohne ihn sagt die Gewohnheit ja, nicht man selbst.',

@@ -7,6 +7,7 @@ import 'day.dart';
 import 'habit.dart';
 import 'plan.dart';
 import 'rewards.dart';
+import 'skill_area.dart';
 import 'stack.dart';
 import 'streak_freeze.dart';
 import 'streak_rule.dart';
@@ -560,6 +561,33 @@ class HabitTracker {
           () {
             geaendert = true;
             return habit.editable(name: name, why: why, priority: priority);
+          }()
+        else
+          habit,
+    ];
+    return geaendert ? _copyWith(custom: next) : this;
+  }
+
+  /// Eigene Gewohnheiten ohne Gebiet — angelegt vor ADR-0085. Die
+  /// Startseite fragt nach ihnen, eine nach der anderen, auch nach
+  /// gestoppten: Ihre Häkchen gehören trotzdem zu einem Skill.
+  List<CustomHabit> get customWithoutArea {
+    return List<CustomHabit>.unmodifiable(_custom.where((h) => h.area == null));
+  }
+
+  /// Gibt einer eigenen Gewohnheit ihr Gebiet — **genau einmal**.
+  ///
+  /// Hat sie schon eins, ändert sich nichts ([CustomHabit.withArea]). Ein
+  /// Wechsel verschöbe ihre ganze Historie in einen anderen Skill, und
+  /// der alte fiele; ein Titel, der an ihm hing, ginge verloren.
+  HabitTracker assignArea(String habitId, SkillArea area) {
+    var geaendert = false;
+    final next = <CustomHabit>[
+      for (final habit in _custom)
+        if (habit.id == habitId && habit.area == null)
+          () {
+            geaendert = true;
+            return habit.withArea(area);
           }()
         else
           habit,
@@ -1687,12 +1715,24 @@ class HabitTracker {
   int xpBetween(Day from, Day to) =>
       _xpWhere((day) => day >= from && day <= to);
 
-  /// Die eine Rechnung hinter [totalXp] und [xpBetween]: Die Kette läuft
-  /// immer über die ganze Historie, gezählt wird nur, was [counts] will.
-  int _xpWhere(bool Function(Day day) counts) {
+  /// Erfahrung aus den Häkchen der Gewohnheiten in [area] — der Anteil
+  /// der Gewohnheiten am **Skill** dieses Gebiets (ADR-0085).
+  ///
+  /// Dieselbe Rechnung wie [totalXp], samt Kette und Schwierigkeit. Was
+  /// keinem Gebiet gehört — eine eigene Gewohnheit, die noch nicht gefragt
+  /// ist, eine Vorlage, die es nicht mehr gibt —, zählt nur fürs Level.
+  int xpIn(SkillArea area) {
+    return _xpWhere((_) => true, of: (id) => definitionFor(id)?.area == area);
+  }
+
+  /// Die eine Rechnung hinter [totalXp], [xpBetween] und [xpIn]: Die
+  /// Kette läuft immer über die ganze Historie, gezählt wird nur, was
+  /// [counts] und [of] wollen.
+  int _xpWhere(bool Function(Day day) counts, {bool Function(String id)? of}) {
     var sum = 0;
     _walkAll((habitId, day, streak) {
       if (!counts(day)) return;
+      if (of != null && !of(habitId)) return;
       final difficulty =
           definitionFor(habitId)?.difficulty ?? HabitDifficulty.mittel;
       sum += HabitRewards.xpFor(streak, difficulty);

@@ -388,6 +388,7 @@ void main() {
           .addCustom(
             name: 'Fünf Gläser Wasser',
             stat: HabitStat.ausdauer,
+            area: SkillArea.koerper,
             difficulty: HabitDifficulty.schwer,
             goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
             priority: HabitPriority.hoch,

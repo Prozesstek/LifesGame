@@ -25,6 +25,7 @@ import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 import '../habits/widgets/week_card.dart';
 import '../habits/stat_icon.dart';
+import '../skills/widgets/skill_karte.dart';
 
 /// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
 /// Fähigkeiten haben eigene Bildschirme (ADR-0049, ADR-0057).
@@ -82,6 +83,10 @@ class CharacterScreen extends ConsumerWidget {
                   const _DevGrantsCard(),
                 ],
                 const SizedBox(height: 16),
+                // **Die Skills vor der Kette** (ADR-0085): Was bleibt,
+                // steht über dem, was fallen kann.
+                const SkillKarte(),
+                const SizedBox(height: 10),
                 ConsistencyCard(
                   currentStreak: habits.currentBestStreak(today),
                   longestStreak: habits.longestStreak,

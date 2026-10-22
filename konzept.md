@@ -299,6 +299,20 @@ Der Multiplikator ist bei **x2 gedeckelt** — die Empfehlung wurde
 Nutzer aufgeben statt neu anzufangen. **Gold folgt dem Streak bewusst
 nicht**, sonst wird eine lange Kette zur Abkürzung durch den Shop.
 
+> **Seit ADR-0085 (22.10.2026): x2,6, und jedes Gebiet hat einen Skill.**
+> Über 60 Tage wächst der Bonus langsam weiter (100 Tage x2,2, 180 x2,4,
+> 365 x2,6): Seit ADR-0064 fällt eine Kette nur eine Stufe, der Einwand
+> oben trifft nicht mehr in voller Stärke. Und was eine Kette eingebracht
+> hat, **bleibt im Skill ihres Gebiets** — Körper, Geist, Wissenschaft,
+> Gesellschaft, dieselben vier wie die Wurzeln des Baums. Ein Skill geht
+> von 1 bis 100 und wächst nur; in ihn zahlen Häkchen (mit Kette),
+> bestandene Seiten und richtige Rückfragen des Gebiets. Auf der Kachel
+> steht er vorne, die Kette darunter als Flamme mit ihrem Bonus. Der
+> Anlass: Wer 100 Ketten zu 25 Tagen hatte, fühlte sich schwächer als
+> jemand mit einer zu 30 — und wer nach 300 Tagen einen verpasste, sah
+> nur noch die Zahl fallen. Je Skill gibt es Titel bei 10, 25 und 50; im
+> Kampf wirkt er nicht.
+
 **Höchstens fünf Gewohnheiten gleichzeitig.** Ohne Grenze hakt man alle
 Vorlagen an und keine davon ab; außerdem hält die Grenze die Erfahrung pro
 Tag berechenbar, worauf die Levelkurve angewiesen ist. Vorlagen und eigene

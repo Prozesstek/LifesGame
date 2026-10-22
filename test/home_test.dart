@@ -457,11 +457,13 @@ void main() {
       const satz = '0 von 100 Erfahrung bis Level 2';
       expect(find.text(satz), findsNothing);
 
-      await tester.tap(find.byType(HolzBalken));
+      // Der erste ist das Level; darunter wartet seit ADR-0085 der
+      // Balken des Gebiets.
+      await tester.tap(find.byType(HolzBalken).first);
       await tester.pumpAndSettle();
       expect(find.text(satz), findsOneWidget);
 
-      await tester.tap(find.byType(HolzBalken));
+      await tester.tap(find.byType(HolzBalken).first);
       await tester.pumpAndSettle();
       expect(find.text(satz), findsNothing);
     });

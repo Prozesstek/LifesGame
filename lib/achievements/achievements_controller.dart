@@ -5,6 +5,7 @@ import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
+import '../theory/review_controller.dart';
 import '../theory/theory_controller.dart';
 import 'achievement_stats.dart';
 
@@ -24,6 +25,7 @@ final achievementStatsProvider = Provider<AchievementStats>((ref) {
     habits: ref.watch(habitTrackerProvider),
     theory: ref.watch(theoryProgressProvider),
     graph: ref.watch(theoryGraphProvider),
+    reviews: ref.watch(reviewLogProvider),
     passedPages: ref.watch(passedPagesProvider),
     ladder: ref.watch(ladderProvider),
     loadout: ref.watch(loadoutProvider),

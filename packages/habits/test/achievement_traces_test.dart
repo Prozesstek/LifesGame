@@ -109,6 +109,7 @@ void main() {
         id: id,
         name: 'Eigene $id',
         stat: HabitStat.staerke,
+        area: SkillArea.koerper,
         difficulty: grad,
       );
     }

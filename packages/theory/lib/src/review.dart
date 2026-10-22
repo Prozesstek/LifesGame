@@ -96,6 +96,15 @@ class ReviewLog {
 
   int get totalXp => correctCount * TheoryRewards.xpForReview;
 
+  /// Erfahrung aus richtigen Rückfragen zu den Seiten in [lessonIds] —
+  /// der Anteil der Rückfrage am **Skill** ihres Gebiets (ADR-0085).
+  int xpFor(Set<String> lessonIds) {
+    final richtig = _answers.values
+        .where((a) => a.correct && lessonIds.contains(a.lessonId))
+        .length;
+    return richtig * TheoryRewards.xpForReview;
+  }
+
   int get totalGold => correctCount * TheoryRewards.goldForReview;
 
   /// Die Antworten zu [lessonId], die jüngste zuerst.

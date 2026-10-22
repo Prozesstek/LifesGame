@@ -5,16 +5,21 @@ import 'package:habits/habits.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/stat_icon.dart';
 import '../../save/widgets/save_transfer_card.dart';
+import '../../skills/gebiet_zeichen.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 
 /// Ein Vorschlag für die erste Gewohnheit.
 class ErsterVorschlag {
-  const ErsterVorschlag(this.name, this.stat, {this.vorlageId});
+  const ErsterVorschlag(this.name, this.stat, this.area, {this.vorlageId});
 
   final String name;
   final HabitStat stat;
+
+  /// Das Gebiet ihres Skills (ADR-0085). Bei einer Vorlage dasselbe wie
+  /// im Katalog.
+  final SkillArea area;
 
   /// Gesetzt, wenn der Vorschlag eine Vorlage aus dem Katalog startet
   /// statt eine eigene Gewohnheit anzulegen.
@@ -45,13 +50,30 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
     ErsterVorschlag(
       HabitCatalog.starter.name,
       HabitCatalog.starter.stat,
+      HabitCatalog.starter.area,
       vorlageId: HabitCatalog.starterId,
     ),
-    const ErsterVorschlag('Spazieren gehen', HabitStat.ausdauer),
-    const ErsterVorschlag('Zehn Liegestütze', HabitStat.staerke),
-    const ErsterVorschlag('Bett machen', HabitStat.disziplin),
-    const ErsterVorschlag('Ein Glas Wasser', HabitStat.ausdauer),
-    const ErsterVorschlag('Fünf Minuten aufräumen', HabitStat.disziplin),
+    const ErsterVorschlag(
+      'Spazieren gehen',
+      HabitStat.ausdauer,
+      SkillArea.koerper,
+    ),
+    const ErsterVorschlag(
+      'Zehn Liegestütze',
+      HabitStat.staerke,
+      SkillArea.koerper,
+    ),
+    const ErsterVorschlag('Bett machen', HabitStat.disziplin, SkillArea.geist),
+    const ErsterVorschlag(
+      'Ein Glas Wasser',
+      HabitStat.ausdauer,
+      SkillArea.koerper,
+    ),
+    const ErsterVorschlag(
+      'Fünf Minuten aufräumen',
+      HabitStat.disziplin,
+      SkillArea.geist,
+    ),
   ];
 
   /// So lang wie im Formular einer eigenen Gewohnheit.
@@ -65,6 +87,7 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
 class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
   final TextEditingController _name = TextEditingController();
   HabitStat _stat = HabitStat.disziplin;
+  SkillArea _area = SkillArea.koerper;
 
   @override
   void initState() {
@@ -85,14 +108,19 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
       habits.activate(vorlage);
       return;
     }
-    _lege(vorschlag.name, vorschlag.stat);
+    _lege(vorschlag.name, vorschlag.stat, vorschlag.area);
   }
 
-  void _lege(String name, HabitStat stat) {
+  void _lege(String name, HabitStat stat, SkillArea area) {
     if (name.trim().isEmpty) return;
     final angelegt = ref
         .read(habitTrackerProvider.notifier)
-        .addCustom(name: name, stat: stat, difficulty: HabitDifficulty.mittel);
+        .addCustom(
+          name: name,
+          stat: stat,
+          area: area,
+          difficulty: HabitDifficulty.mittel,
+        );
     if (angelegt != null || !mounted) return;
 
     // Kann nur ein Stand treffen, der schon eigene Gewohnheiten hat und
@@ -145,7 +173,7 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
             controller: _name,
             maxLength: ErsteGewohnheitKarte.maxNameLength,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _lege(_name.text, _stat),
+            onSubmitted: (_) => _lege(_name.text, _stat, _area),
             decoration: const InputDecoration(
               hintText: 'Oder etwas Eigenes',
               border: OutlineInputBorder(),
@@ -157,6 +185,21 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
           // Feld steht. Vorher wären es fünf Zeichen ohne Bezug.
           if (bereit) ...<Widget>[
             const SizedBox(height: 8),
+            // Erst das Gebiet (ADR-0085), darunter der Wert: Wohin es
+            // gehört, weiß man schneller als, was es im Kampf stärkt.
+            Row(
+              children: <Widget>[
+                for (final area in SkillArea.values)
+                  _Wahl(
+                    key: ValueKey<String>('erste-gewohnheit-${area.name}'),
+                    icon: gebietZeichen(area),
+                    label: area.label,
+                    gewaehlt: area == _area,
+                    onTap: () => setState(() => _area = area),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
             Row(
               children: <Widget>[
                 for (final stat in HabitStat.values)
@@ -168,7 +211,7 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
                 const Spacer(),
                 FilledButton(
                   key: ErsteGewohnheitKarte.losKey,
-                  onPressed: () => _lege(_name.text, _stat),
+                  onPressed: () => _lege(_name.text, _stat, _area),
                   child: const Icon(
                     Icons.check_rounded,
                     size: 20,
@@ -210,16 +253,48 @@ class _StatWahl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _Wahl(
+      inkKey: ValueKey<String>('erste-gewohnheit-${stat.name}'),
+      label: '${stat.label}, ${stat.combatLabel}',
+      gewaehlt: gewaehlt,
+      onTap: onTap,
+      child: StatIcon(stat, size: 18),
+    );
+  }
+}
+
+/// Ein Kreis zum Antippen — für Werte und Gebiete derselbe.
+class _Wahl extends StatelessWidget {
+  const _Wahl({
+    required this.label,
+    required this.gewaehlt,
+    required this.onTap,
+    this.icon,
+    this.child,
+    this.inkKey,
+    super.key,
+  });
+
+  /// Nur für den Vorleser — zu sehen ist das Zeichen.
+  final String label;
+  final bool gewaehlt;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final Widget? child;
+  final Key? inkKey;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 6),
       child: Semantics(
         button: true,
         selected: gewaehlt,
-        label: '${stat.label}, ${stat.combatLabel}',
+        label: label,
         excludeSemantics: true,
         child: Druck(
           child: InkWell(
-            key: ValueKey<String>('erste-gewohnheit-${stat.name}'),
+            key: inkKey,
             onTap: onTap,
             customBorder: const CircleBorder(),
             child: Container(
@@ -233,7 +308,13 @@ class _StatWahl extends StatelessWidget {
                   width: gewaehlt ? 2 : 1,
                 ),
               ),
-              child: StatIcon(stat, size: 18),
+              child:
+                  child ??
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: gewaehlt ? Palette.accent : Palette.textDim,
+                  ),
             ),
           ),
         ),
