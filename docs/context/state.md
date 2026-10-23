@@ -27,7 +27,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 |---|---|---|
 | **Gewohnheiten** | **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085 |
 | **Startseite** | **vor dem Berg**, acht Kreise ohne Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
-| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
+| **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 991, dazu die acht Packages (theory 208, habits 366, gear
+**Tests:** App 997, dazu die acht Packages (theory 208, habits 366, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,48 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 23.10.2026, abends: die Seite ist ein Buch
+
+AktivesBrett: „wenn man sich eine Seite bei Theorie durchliest, kannst
+du so machen, dass die Seite aussieht wie eine Seite aus einem Buch und
+auch so eine Animation hat, wenn man auf die nächste Seite geht oder
+eben eine Seite zurück … und der Text erscheint ja so smooth und
+stückweise, das bitte beibehalten.“ In zwei Fragerunden entschieden,
+viermal wie empfohlen, einmal dagegen.
+
+| Was | Wie |
+|---|---|
+| **Umblättern** | das Blatt dreht sich in 3D am Rücken (linker Rand), die freie Kante kommt dem Auge entgegen, es dunkelt und wirft einen Schatten auf die Seite darunter |
+| **Steuerung** | der Finger zieht das Blatt mit — halb losgelassen fällt es zurück, ein schneller Wisch schlägt um; nach rechts legt sich die vorige Seite wieder darüber; „Weiter“ blättert per Animation |
+| **Buch** | **ein aufgeschlagenes Buch**: ein Ledereinband mit eingeprägter Linie, darin das Blatt, rechts und unten die Kanten der übrigen Seiten, links wölbt sich das Papier in den Rücken |
+| **Papier** | heller als das Pergament, cremefarben, mit Fasern und Flecken (`Palette.papier`) |
+| **Klang** | ein Rascheln mit leisem Klapp, gerechnet (`tool/lern_klaenge.py`), dazu ein leichtes Tippen |
+| **Zu den Fragen** | „Fragen beantworten“ schlägt das letzte Blatt auf ein leeres um, dann kommen die Fragen wie bisher |
+| **Der Text** | schreibt sich weiter Wort für Wort — **sobald das Blatt liegt**; zurückgeblättert steht er ganz da |
+
+**Ohne Rückfrage entschieden:** Das Blatt schlägt bis 90° um und steht
+dann auf der Kante, statt auf die linke Seite hinüberzufallen — am
+Handy gibt es links keine zweite Seite. Die Striche oben bleiben, eine
+Seitenzahl oder Initiale kam nicht dazu (nicht gewählt). Wer Bewegung im
+System abgeschaltet hat, blättert ohne Animation.
+
+**Erst Papier über den ganzen Bildschirm**, so gewählt — gegen Claudes
+Empfehlung, ein Blatt auf Leder. AktivesBrett danach am Bildschirm:
+„sieht halt noch nicht aus wie eine Buchseite“. In einer zweiten Runde
+gewählt: das aufgeschlagene Buch und helleres Papier mit Struktur;
+Buchschrift, Seitenzahl und Initiale nicht.
+
+Neu: `lib/theory/widgets/umblaettern.dart`, `assets/Sound/Blaettern.wav`,
+`test/buchseite_test.dart` (5). Der `PageView` der Häppchen ist weg. App
+997 (vorher 991). Ruhend, mitten im Umblättern und halb zurückgezogen
+in 390 × 844 gerendert und angesehen. **Nicht gehört, nicht am Handy.**
+
+### Offen
+
+- Wie das Rascheln klingt — und ob es nach zwanzig Seiten nervt.
+- Ob die Perspektive am Handy-Browser flüssig läuft.
+- Frederik hat es nicht gesehen.
 
 ## 23.10.2026: die Statistik (#139)
 
