@@ -1,6 +1,8 @@
 # Das Haustier — Fortschritt, der nicht kämpft
 
-> **Stand:** 22.10.2026 · Prototyp gebaut, **nur im Entwicklermodus**.
+> **Stand:** 23.10.2026 · **in jeder Fassung**, sobald es eine Gewohnheit
+> gibt ([ADR-0086](../decisions/0086-das-haustier-fuer-alle.md)). Bis zum
+> 22.10. nur im Entwicklermodus.
 > Der ADR kommt, wenn Frederik und AktivesBrett es gespielt haben.
 
 ## Anlass

@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 22.10.2026 · Frederik
+**Zuletzt aktualisiert:** 23.10.2026 · Frederik
 
 ---
 
@@ -34,9 +34,10 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
 | **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel — **in der Sammlung**, mit Ausrüstung, Fähigkeiten, Gegnern (in Stufen), Titeln und Seiten | ADR-0033, -0073, -0074, -0080 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
-| **Prototyp** | das Dorf **und das Haustier** (drei Eier, wächst an Tagen mit Häkchen), nur im Entwicklermodus | [`haustier.md`](../vorlagen/haustier.md) |
+| **Haustier** | drei Eier, wächst an Tagen mit Häkchen, Zubehör für Gold — **in jeder Fassung** | ADR-0086, [`haustier.md`](../vorlagen/haustier.md) |
+| **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 980, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 981, dazu die acht Packages (theory 208, habits 345, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -132,6 +133,31 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 23.10.2026: das Haustier für alle
+
+Frederik: „ich hätte gerne das haustier auf der normalen edition“.
+[ADR-0086](../decisions/0086-das-haustier-fuer-alle.md).
+
+| Was | Wie |
+|---|---|
+| **Startseite** | die Karte des Tiers über „Heute“ in jeder Fassung, auch im Store-Build |
+| **Wann** | erst, wenn es eine Gewohnheit gibt — vorher fragt die Startseite nach ihr, und der Mentor zeigt darauf |
+| **Vorspulen** | bleibt im Entwicklermodus |
+
+**Ohne Rückfrage entschieden:** „erst mit der ersten Gewohnheit“, damit
+die drei Eier nicht neben der ersten Frage des Mentors stehen.
+
+App 981 (vorher 980): ein Test, dass ein leerer Stand kein Ei zeigt.
+**Nicht gespielt, nicht am Handy, nicht gerendert.**
+
+### Offen
+
+- **AktivesBrett hat es nicht gesehen** — es geht jetzt mit in den
+  Tester-Build am 26.10.
+- Zubehör zieht im Store-Build echtes Gold ab; `runway_sim` zählt es
+  nicht.
+- Ob „Heute“ mit der Karte darüber zu tief rutscht.
 
 ## 22.10.2026, zuletzt: Level und Gold oben rechts, der Balken als Ring
 

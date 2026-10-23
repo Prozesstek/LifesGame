@@ -159,11 +159,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/sammlung/sammlung_screen.dart` | sechs Reiter mit Prozent — Ausrüstung, Fähigkeiten, Gegner, Titel, Seiten und die **Errungenschaften, die hier eingezogen sind**; ein Fragezeichen sagt auf Tipp, woher | Flutter |
 | `lib/sammlung/sammlung_knopf.dart` | der Weg hinein, oben rechts in Ausrüstung und Fähigkeiten | Flutter |
 | `lib/sammlung/figur_bild.dart` | eine Figur der Grube als stehendes Bild, auf sie zugeschnitten | Flutter |
-| `packages/haustier/` | **das Haustier — Prototyp** (22.10.2026, `docs/vorlagen/haustier.md`): drei Arten, Level und Stufen aus Tagen mit Häkchen, Laune, Zubehör und Preise, der gespeicherte Stand; reines Dart, 21 Tests | nur Dart-SDK |
+| `packages/haustier/` | **das Haustier** (`docs/vorlagen/haustier.md`, seit [ADR-0086](docs/decisions/0086-das-haustier-fuer-alle.md) in jeder Fassung): drei Arten, Level und Stufen aus Tagen mit Häkchen, Laune, Zubehör und Preise, der gespeicherte Stand; reines Dart, 21 Tests | nur Dart-SDK |
 | `lib/haustier/haustier_controller.dart` | Riverpod-Brücke Haustier ↔ UI, **enthält keine Regeln**; Tage, Stufe, Laune und Prägung abgeleitet; der Kauf bekommt das Gold von außen | Flutter |
 | `lib/haustier/widgets/haustier_bild.dart` | **wie das Tier aussieht** — gezeichnet, atmet, blinzelt, schläft, springt; **die eine Stelle**, die ein Grafikpaket ersetzt; in Tests still (`HaustierBild.lebt`) | Flutter |
 | `lib/haustier/widgets/haustier_schmuck.dart` | Hüte, Halsschmuck, Spielzeug und die Prägung — ausgelagert aus dem Bild | Flutter |
-| `lib/haustier/widgets/haustier_karte.dart` | das Tier über „Heute“ auf der Startseite, ohne Ei die Wahl zwischen dreien — **nur im Entwicklermodus** | Flutter |
+| `lib/haustier/widgets/haustier_karte.dart` | das Tier über „Heute“ auf der Startseite, ohne Ei die Wahl zwischen dreien — **erst, wenn es eine Gewohnheit gibt** (ADR-0086) | Flutter |
 | `lib/haustier/widgets/haustier_blatt.dart` | das Blatt: Name, Stufen, Zubehör kaufen und anlegen, im Entwicklermodus Tage vorspulen | Flutter |
 | `lib/skills/skills.dart` | **die Skills je Gebiet** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Häkchen, Seiten und Rückfragen eines Gebiets zusammengezählt, dazu das Gesamtlevel — **eine Stelle**, die Errungenschaften rechnen dasselbe | Flutter |
 | `lib/skills/skills_provider.dart` | `skillsProvider`, und welches Gebiet zuletzt abgehakt wurde (`zuletztGebietProvider`, nur Darstellung) | Flutter |
@@ -318,7 +318,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 980 Tests
+flutter test             # 981 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -347,7 +347,7 @@ cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog
-cd packages/haustier    ; dart test    # 21 Tests, Prototyp
+cd packages/haustier    ; dart test    # 21 Tests
 ```
 
 **Der Kampf ist seit [ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)

@@ -181,10 +181,11 @@ class HomeScreen extends ConsumerWidget {
                                 const GebietFrageKarte(),
                                 const SizedBox(height: 10),
                               ],
-                              // **Das Haustier** (Prototyp, 22.10.2026) —
-                              // über „Heute“, wo abgehakt wird. Nur im
-                              // Entwicklermodus, bis ihr es gespielt habt.
-                              if (devModeAvailable) ...<Widget>[
+                              // **Das Haustier** (ADR-0086) — über
+                              // „Heute“, wo abgehakt wird. Erst wenn es
+                              // eine Gewohnheit gibt: Vorher fragt die
+                              // Startseite nach ihr, und das Ei wartet.
+                              if (!start.fragtNachGewohnheit) ...<Widget>[
                                 const HaustierKarte(),
                                 const SizedBox(height: 10),
                               ],
