@@ -164,7 +164,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/haustier/haustier_controller.dart` | Riverpod-Brücke Haustier ↔ UI, **enthält keine Regeln**; Tage, Stufe, Laune und Prägung abgeleitet; der Kauf bekommt das Gold von außen | Flutter |
 | `lib/haustier/widgets/haustier_bild.dart` | **wie das Tier aussieht** — gezeichnet, atmet, blinzelt, schläft, springt; **die eine Stelle**, die ein Grafikpaket ersetzt; in Tests still (`HaustierBild.lebt`) | Flutter |
 | `lib/haustier/widgets/haustier_schmuck.dart` | Hüte, Halsschmuck, Spielzeug und die Prägung — ausgelagert aus dem Bild | Flutter |
-| `lib/haustier/widgets/haustier_karte.dart` | das Tier über „Heute“ auf der Startseite, ohne Ei die Wahl zwischen dreien — **erst, wenn es eine Gewohnheit gibt** (ADR-0086) | Flutter |
+| `lib/haustier/widgets/haustier_karte.dart` | das Tier über „Heute“ auf der Startseite, **nur mit seinem Level als Marke** — Name, Stufe und Balken stehen im Blatt; ohne Ei die Wahl zwischen dreien — **erst, wenn es eine Gewohnheit gibt** (ADR-0086) | Flutter |
 | `lib/haustier/widgets/haustier_blatt.dart` | das Blatt: Name, Stufen, Zubehör kaufen und anlegen, im Entwicklermodus Tage vorspulen | Flutter |
 | `lib/skills/skills.dart` | **die Skills je Gebiet** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Häkchen, Seiten und Rückfragen eines Gebiets zusammengezählt, dazu das Gesamtlevel — **eine Stelle**, die Errungenschaften rechnen dasselbe | Flutter |
 | `lib/skills/skills_provider.dart` | `skillsProvider`, und welches Gebiet zuletzt abgehakt wurde (`zuletztGebietProvider`, nur Darstellung) | Flutter |

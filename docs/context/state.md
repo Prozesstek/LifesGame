@@ -135,6 +135,22 @@ vom 02.10.
 
 ---
 
+## 23.10.2026, spät: das Haustier nur mit Level
+
+Frederik schickte eine Skizze (das Tier, unten rechts eine kleine
+Marke): „Bei Haustier nur Level drunter anzeigen“. Die Karte auf der
+Startseite zeigt jetzt nur noch das Tier, mittig, und sein Level als
+dunkle Marke unten rechts. **Name, Stufe und der Balken bis zum
+nächsten Level** stehen nur noch im Blatt, das ein Tipp öffnet; der
+Name bleibt für den Vorleser.
+
+**Ohne Rückfrage entschieden:** Die Marke ist dunkel mit Holzkante,
+nicht das Level-Abzeichen des Spielers — sonst stünden zwei gleiche
+Abzeichen mit verschiedenen Zahlen auf einer Seite.
+
+In 390 × 844 gerendert und angesehen. App 997, unverändert (ein Test
+prüft jetzt Marke statt Name). **Nicht am Handy.**
+
 ## 23.10.2026, abends: die Seite ist ein Buch
 
 AktivesBrett: „wenn man sich eine Seite bei Theorie durchliest, kannst

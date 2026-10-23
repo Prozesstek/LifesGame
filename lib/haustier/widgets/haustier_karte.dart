@@ -17,6 +17,10 @@ import 'haustier_blatt.dart';
 /// Ohne Ei steht hier die Wahl zwischen dreien. Ein Tipp auf das Tier
 /// öffnet sein Blatt.
 ///
+/// **Nur das Tier und sein Level** (Frederik, 23.10.2026, mit einer
+/// Skizze: „Bei Haustier nur Level drunter anzeigen“). Name, Stufe und
+/// der Balken bis zum nächsten Level stehen im Blatt.
+///
 /// Seit ADR-0086 **in jeder Fassung**, sobald es eine Gewohnheit gibt
 /// (gefragt auf der Startseite). Nur das Vorspulen im Blatt bleibt dem
 /// Entwicklermodus.
@@ -27,6 +31,9 @@ class HaustierKarte extends ConsumerWidget {
       ValueKey<String>('haustier-ei-${art.name}');
 
   static const Key tierKey = ValueKey<String>('haustier-tier');
+
+  /// Die Marke mit dem Level unter dem Tier.
+  static const Key levelKey = ValueKey<String>('haustier-level');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,74 +47,75 @@ class HaustierKarte extends ConsumerWidget {
     final heute = ref.watch(todayProvider);
     final tracker = ref.watch(habitTrackerProvider);
 
-    final ab = HaustierWachstum.tageFuer(level);
-    final bis = HaustierWachstum.tageFuer(level + 1);
-    final anteil = bis <= ab ? 1.0 : (tage - ab) / (bis - ab);
-
     return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
       child: Druck(
         child: InkWell(
           key: tierKey,
           onTap: () => zeigeHaustierBlatt(context),
           borderRadius: BorderRadius.circular(8),
-          child: Row(
-            children: <Widget>[
-              HaustierBild(
-                art: art,
-                stufe: stufe,
-                laune: ref.watch(haustierLauneProvider),
-                praegung: ref.watch(haustierPraegungProvider),
-                zubehoer: <ZubehoerPlatz, Zubehoer>{
-                  for (final platz in ZubehoerPlatz.values)
-                    if (stand.angelegtAuf(platz, stufe) case final Zubehoer z)
-                      platz: z,
-                },
-                groesse: 92,
-                // Jedes Häkchen von heute ist ein Sprung.
-                sprung: tracker.completedOn(heute),
+          child: Semantics(
+            label: '${stand.anzeigeName}, Level $level',
+            child: Center(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: <Widget>[
+                  HaustierBild(
+                    art: art,
+                    stufe: stufe,
+                    laune: ref.watch(haustierLauneProvider),
+                    praegung: ref.watch(haustierPraegungProvider),
+                    zubehoer: <ZubehoerPlatz, Zubehoer>{
+                      for (final platz in ZubehoerPlatz.values)
+                        if (stand.angelegtAuf(platz, stufe)
+                            case final Zubehoer z)
+                          platz: z,
+                    },
+                    groesse: 92,
+                    // Jedes Häkchen von heute ist ein Sprung.
+                    sprung: tracker.completedOn(heute),
+                  ),
+                  // Unten rechts neben dem Tier, wie auf der Skizze.
+                  Positioned(
+                    right: -18,
+                    bottom: 2,
+                    child: _LevelMarke(level: level),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      stand.anzeigeName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Palette.text,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${stufe.label} · Lv $level',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Tooltip(
-                      triggerMode: TooltipTriggerMode.tap,
-                      message:
-                          'Noch ${HaustierWachstum.tageBisNaechstes(tage)} '
-                          'Tage mit Häkchen bis Level ${level + 1}',
-                      child: HolzBalken(value: anteil, color: Palette.success),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Palette.muted),
-            ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Das Level des Tiers als kleine Marke — dunkel mit Holzkante, damit
+/// sie nicht mit dem Level-Abzeichen des Spielers verwechselt wird.
+class _LevelMarke extends StatelessWidget {
+  const _LevelMarke({required this.level});
+
+  final int level;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: HaustierKarte.levelKey,
+      constraints: const BoxConstraints(minWidth: 26),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: Palette.abzeichenGrund,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(color: Holz.kante, width: 1.5),
+      ),
+      child: Text(
+        '$level',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: Palette.textOnDark,
         ),
       ),
     );
