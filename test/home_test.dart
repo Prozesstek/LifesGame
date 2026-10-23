@@ -67,13 +67,14 @@ void main() {
 
       // Der Entwicklermodus ist seit Issue #35 kein Bereich mehr,
       // sondern ein kleiner Knopf daneben (ADR-0021: er gehört nicht zum
-      // Spiel). Die Kreise sind damit genau die Bereiche — sieben, seit
-      // Fähigkeiten und Ausrüstung eigene haben (ADR-0049, ADR-0057).
+      // Spiel). Die Kreise sind damit genau die Bereiche — acht, seit
+      // Fähigkeiten und Ausrüstung eigene haben (ADR-0049, ADR-0057) und
+      // die Statistik dazukam (ADR-0087).
       final kreise = tester
           .widgetList<HubCircle>(find.byType(HubCircle))
           .toList();
 
-      expect(kreise, hasLength(7));
+      expect(kreise, hasLength(8));
       expect(kreise.where((k) => k.isLocked), isEmpty);
     });
 

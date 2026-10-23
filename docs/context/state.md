@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 23.10.2026 · Frederik
+**Zuletzt aktualisiert:** 23.10.2026 · AktivesBrett
 
 ---
 
@@ -35,9 +35,10 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel — **in der Sammlung**, mit Ausrüstung, Fähigkeiten, Gegnern (in Stufen), Titeln und Seiten | ADR-0033, -0073, -0074, -0080 |
 | **Speicher** | lokal im Browser, **als Text sicherbar** | ADR-0010, -0054 |
 | **Haustier** | drei Eier, wächst an Tagen mit Häkchen, Zubehör für Gold — **in jeder Fassung** | ADR-0086, [`haustier.md`](../vorlagen/haustier.md) |
+| **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 981, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 991, dazu die acht Packages (theory 208, habits 366, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -133,6 +134,61 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 23.10.2026: die Statistik (#139)
+
+AktivesBrett: das Statistik-Ticket — Issue #139: „Claude mach einfach
+geilen scheiß, mit Monat Jahr und Wochenansicht mindestens und bau bitte
+noch ein paar coole Graphen ein und so.“ In vier Fragerunden entschieden:
+[ADR-0087](../decisions/0087-die-statistik.md).
+
+| Was | Wie |
+|---|---|
+| **Wo** | ein eigener Kreis, oben als vierter großer, **mit dem ersten Häkchen** |
+| **Zeiträume** | Woche, Monat, Jahr, Gesamt — mit Blättern zurück, nie über heute hinaus |
+| **Quote** | erledigt durch fällig nach dem Plan, der damals galt; Ruhetage grau, Streak-Eis blau, zählt nicht als erledigt |
+| **Vergleich** | ▲/▼ in Prozentpunkten gegen **die gleichen Tage davor**; schlechter gedämpft, nicht rot |
+| **Graphen** | Kalender-Raster (Jahr wie bei GitHub), Balken, Kurve der Quote mit der Kette, Wochentage mit dem stärksten in Gold, ein Ring je Gewohnheit |
+| **Je Gewohnheit** | ein Tipp auf den Ring öffnet dieselbe Statistik für sie; mit Ziel auch Summe und Schnitt |
+| **Rekorde** | längste Kette, perfekte Wochen, bester Monat, meiste Häkchen an einem Tag, Häkchen insgesamt |
+| **Jahresrückblick** | baut sich auf, vom 20.12. bis 7.1. angekündigt, sonst ein Knopf in der Jahresansicht |
+| **Bewegung** | beim Öffnen und Blättern wachsen die Balken, die Kurve zeichnet sich, die Kästchen füllen sich |
+
+**Gegen Claudes Empfehlung:** der Kreis oben (statt unten als fünfter
+kleiner), ab dem ersten Häkchen (statt nach sieben Tagen) und **fl_chart**
+(statt selbst zeichnen). Das Raster ist trotzdem gezeichnet: fl_chart hat
+keins.
+
+**Ohne Rückfrage entschieden:** Ein bester Monat braucht sieben fällige
+Tage, die Gewohnheit des Jahres vierzehn. Die vier Kreise oben werden am
+schmalen Handy kleiner, statt überzulaufen (beim Rendern gefunden: 2
+Punkte zu breit). Ein Tipp aufs Raster zeigt den Tag darunter, statt 365
+Tooltips zu bauen.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844 mit echter Schrift): Im
+Jahresraster standen die Monate als Kästchen — der Maler nahm nicht die
+Schrift der App (`gotchas.md`); an der Jahreskurve stand „JJ“, und
+„100 %“ brach um.
+
+**Eine Lücke, die bleibt:** Auf einem erledigten Tag steht bei Mengen das
+Ziel, nicht mehr — beim Abhaken fällt der Zähler weg. Wer 40 statt 20
+Minuten las, steht mit 20 da.
+
+Neu: `packages/habits/lib/src/statistik.dart`, `lib/statistik/` (sechs
+Dateien), `statistik_test.dart` (21), `test/statistik_screen_test.dart`
+(10), fl_chart 1.3.0. App 991 (vorher 981), habits 366 (vorher 345).
+Alle Zeiträume, eine Gewohnheit, die Ankündigung, der Jahresrückblick und
+die Startseite gerendert und angesehen. **Nicht gespielt, nicht am
+Handy.**
+
+### Offen
+
+- **Frederik hat ADR-0087 nicht gesehen** — es gibt jetzt acht Kreise.
+- AktivesBrett hat ADR-0084, -0085 und -0086 von Frederik nicht gesehen
+  (die Niederlage nimmt, Skills je Gebiet, das Haustier für alle).
+- Mengen über dem Ziel werden nicht gespeichert.
+- Wie schnell der Jahresrückblick bei Jahren voller Daten rechnet, ist
+  nicht gemessen.
 
 ## 23.10.2026: das Haustier für alle
 

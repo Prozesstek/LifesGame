@@ -55,6 +55,9 @@ class Day implements Comparable<Day> {
 
   Day get next => _shifted(1);
 
+  /// [days] Tage später, oder früher bei einer negativen Zahl.
+  Day plus(int days) => _shifted(days);
+
   Day _shifted(int days) {
     return Day.from(_utc.add(Duration(days: days)));
   }

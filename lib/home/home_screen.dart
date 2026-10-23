@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,6 +31,7 @@ import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
 import '../haustier/widgets/haustier_karte.dart';
 import '../skills/widgets/gebiet_frage_karte.dart';
+import '../statistik/statistik_screen.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
@@ -121,42 +124,72 @@ class HomeScreen extends ConsumerWidget {
                       // Ring um das Abzeichen ist der Erfahrungsbalken.
                       StatusLeiste(xp: xp, gold: gold),
                       const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          HubCircle(
-                            icon: Icons.check_circle_outline,
-                            label: 'Gewohnheiten',
-                            image: HubCircleImage.plain,
-                            progress: heute,
-                            onTap: () => _open(context, const HabitsScreen()),
-                          ),
-                          kreis(
-                            Bereich.theorie,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.account_tree_outlined,
-                              label: 'Theorie',
-                              image: HubCircleImage.plain,
-                              symbol: theorySymbol,
-                              leuchtet: leuchtet,
-                              onTap: () =>
-                                  _open(context, const SkillTreeScreen()),
-                            ),
-                          ),
-                          // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
-                          // Waffe allein schlagbar, und wer zuerst kämpft,
-                          // weiß danach, wofür er liest.
-                          kreis(
-                            Bereich.kampf,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.sports_martial_arts,
-                              label: 'Kampf',
-                              image: HubCircleImage.plain,
-                              leuchtet: leuchtet,
-                              onTap: () => _open(context, const LadderScreen()),
-                            ),
-                          ),
-                        ],
+                      // **Vier große Kreise** (ADR-0087): Jeder braucht seine
+                      // Größe und 16 Punkte für die Beschriftung. Am
+                      // schmalen Handy werden sie etwas kleiner, statt
+                      // überzulaufen.
+                      LayoutBuilder(
+                        builder: (context, grenzen) {
+                          final oben = math.min(
+                            HubCircle.diameter,
+                            (grenzen.maxWidth / 4 - 16).floorToDouble(),
+                          );
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              HubCircle(
+                                icon: Icons.check_circle_outline,
+                                label: 'Gewohnheiten',
+                                image: HubCircleImage.plain,
+                                size: oben,
+                                progress: heute,
+                                onTap: () =>
+                                    _open(context, const HabitsScreen()),
+                              ),
+                              kreis(
+                                Bereich.theorie,
+                                (leuchtet) => HubCircle(
+                                  icon: Icons.account_tree_outlined,
+                                  label: 'Theorie',
+                                  image: HubCircleImage.plain,
+                                  size: oben,
+                                  symbol: theorySymbol,
+                                  leuchtet: leuchtet,
+                                  onTap: () =>
+                                      _open(context, const SkillTreeScreen()),
+                                ),
+                              ),
+                              // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
+                              // Waffe allein schlagbar, und wer zuerst kämpft,
+                              // weiß danach, wofür er liest.
+                              kreis(
+                                Bereich.kampf,
+                                (leuchtet) => HubCircle(
+                                  icon: Icons.sports_martial_arts,
+                                  label: 'Kampf',
+                                  image: HubCircleImage.plain,
+                                  size: oben,
+                                  leuchtet: leuchtet,
+                                  onTap: () =>
+                                      _open(context, const LadderScreen()),
+                                ),
+                              ),
+                              // **Die Statistik** (ADR-0087) oben, neben dem,
+                              // was sie zählt — mit dem ersten Häkchen.
+                              kreis(
+                                Bereich.statistik,
+                                (_) => HubCircle(
+                                  icon: Icons.insights,
+                                  label: 'Statistik',
+                                  image: HubCircleImage.plain,
+                                  size: oben,
+                                  onTap: () =>
+                                      _open(context, const StatistikScreen()),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 14),
