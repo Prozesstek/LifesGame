@@ -21,6 +21,7 @@ import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
 import '../ui/druck.dart';
+import '../ui/holz.dart';
 import '../lagerfeuer/am_feuer_provider.dart';
 import '../lagerfeuer/lagerfeuer_screen.dart';
 import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
@@ -72,12 +73,21 @@ class HomeScreen extends ConsumerWidget {
   /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
   /// Ausrüstung, Charakter. Bei 72 Punkten bräuchten sie mit Namen 352
-  /// Punkte Breite, ein Handy hat nach dem Rand 335.
+  /// Punkte Breite, ein Handy hat nach Rand und Holzrahmen 331.
   static const double bottomCircleSize = 64;
 
-  /// Wie hoch die untere Reihe samt Namen und Rand steht — so viel lässt
-  /// der Kasten des Mentors frei (ADR-0079).
-  static const double untereReihe = bottomCircleSize + 40;
+  /// Wie hoch die untere Reihe samt Namen, Rand und Holzrahmen steht —
+  /// so viel lässt der Kasten des Mentors frei (ADR-0079).
+  static const double untereReihe =
+      bottomCircleSize + 40 + HolzGruppe.hoeheDazu;
+
+  /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
+  static const String hintergrund = 'assets/UI/Berg.jpg';
+
+  /// Wie stark das Leder über dem Berg liegt — 0 der Berg in voller
+  /// Farbe, 1 nur Leder. Eine Spur, damit Holz und Pergament davor
+  /// stehen und nicht darin verschwimmen.
+  static const double bergSchleier = 0.25;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -105,186 +115,212 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
       // Gewohnheiten-Bildschirm (`AufstiegHost.maybeOf`).
-      body: AufstiegHost(
-        child: MentorFlaeche(
-          ort: MentorOrt.start,
-          untenFrei: untereReihe,
-          child: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _maxWidth),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  child: Column(
-                    children: <Widget>[
-                      // **Level und Gold oben rechts** (22.10.2026), der
-                      // Ring um das Abzeichen ist der Erfahrungsbalken.
-                      StatusLeiste(xp: xp, gold: gold),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          HubCircle(
-                            icon: Icons.check_circle_outline,
-                            label: 'Gewohnheiten',
-                            image: HubCircleImage.plain,
-                            progress: heute,
-                            onTap: () => _open(context, const HabitsScreen()),
-                          ),
-                          kreis(
-                            Bereich.theorie,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.account_tree_outlined,
-                              label: 'Theorie',
-                              image: HubCircleImage.plain,
-                              symbol: theorySymbol,
-                              leuchtet: leuchtet,
-                              onTap: () =>
-                                  _open(context, const SkillTreeScreen()),
-                            ),
-                          ),
-                          // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
-                          // Waffe allein schlagbar, und wer zuerst kämpft,
-                          // weiß danach, wofür er liest.
-                          kreis(
-                            Bereich.kampf,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.sports_martial_arts,
-                              label: 'Kampf',
-                              image: HubCircleImage.plain,
-                              leuchtet: leuchtet,
-                              onTap: () => _open(context, const LadderScreen()),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // **Heute** (ADR-0053) bekommt, was übrig bleibt. Bis
-                      // zum 28.09. stand hier die Figur und gab an vollen
-                      // Tagen Platz ab; sie ist jetzt in der Ausrüstung.
-                      // Eine lange Liste rollt, statt überzulaufen.
-                      // Darunter das **Lagerfeuer** (ADR-0076) mit Truhe,
-                      // Tagesaufgaben und Rückfrage.
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Palette.background,
+          image: DecorationImage(
+            image: const AssetImage(hintergrund),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Palette.background.withValues(alpha: bergSchleier),
+              BlendMode.srcATop,
+            ),
+          ),
+        ),
+        child: AufstiegHost(
+          child: MentorFlaeche(
+            ort: MentorOrt.start,
+            untenFrei: untereReihe,
+            child: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                    child: Column(
+                      children: <Widget>[
+                        // **Level und Gold oben rechts** (22.10.2026), der
+                        // Ring um das Abzeichen ist der Erfahrungsbalken.
+                        StatusLeiste(xp: xp, gold: gold),
+                        const SizedBox(height: 4),
+                        // **Im Holzrahmen**, oben wie unten (23.10.2026):
+                        // So stehen die Kreise als eine Gruppe vor dem Berg.
+                        HolzGruppe(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
-                              // **Einmal** (ADR-0085): Eigene Gewohnheiten
-                              // von vor den Skills fragen nach ihrem
-                              // Gebiet. Sonst steht hier nichts.
-                              if (tracker
-                                  .customWithoutArea
-                                  .isNotEmpty) ...<Widget>[
-                                const GebietFrageKarte(),
-                                const SizedBox(height: 10),
-                              ],
-                              // **Das Haustier** (ADR-0086) — über
-                              // „Heute“, wo abgehakt wird. Erst wenn es
-                              // eine Gewohnheit gibt: Vorher fragt die
-                              // Startseite nach ihr, und das Ei wartet.
-                              if (!start.fragtNachGewohnheit) ...<Widget>[
-                                const HaustierKarte(),
-                                const SizedBox(height: 10),
-                              ],
-                              // Ohne Gewohnheit ist „Heute“ die erste
-                              // Frage, keine leere Liste.
-                              if (start.fragtNachGewohnheit)
-                                const Zeigefinger(
-                                  schritt: Schritt.gewohnheit,
-                                  child: ErsteGewohnheitKarte(),
-                                )
-                              else
-                                const Zeigefinger(
-                                  schritt: Schritt.abhaken,
-                                  child: TodayCard(),
-                                ),
-                              // **Das Lagerfeuer** (ADR-0076) direkt darunter:
-                              // Truhe und Tagesaufgaben standen hier bis zum
-                              // 18.10. als zwei Karten, jetzt warten sie dort,
-                              // zusammen mit der Rückfrage.
-                              if (start.zeigtTagesaufgaben) ...<Widget>[
-                                const SizedBox(height: 10),
-                                LagerfeuerKarte(
-                                  amFeuer: ref.watch(amFeuerProvider),
-                                  onOpen: () =>
-                                      _open(context, const LagerfeuerScreen()),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          kreis(
-                            Bereich.laden,
-                            (_) => HubCircle(
-                              icon: Icons.storefront_outlined,
-                              label: 'Laden',
-                              image: HubCircleImage.plain,
-                              size: bottomCircleSize,
-                              onTap: () => _open(context, const ShopScreen()),
-                            ),
-                          ),
-                          kreis(
-                            Bereich.faehigkeiten,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.auto_awesome,
-                              label: 'Fähigkeiten',
-                              image: HubCircleImage.plain,
-                              size: bottomCircleSize,
-                              symbol: abilitySymbol,
-                              leuchtet: leuchtet,
-                              onTap: () =>
-                                  _open(context, const AbilitiesScreen()),
-                            ),
-                          ),
-                          kreis(
-                            Bereich.ausruestung,
-                            (_) => HubCircle(
-                              icon: Icons.shield_outlined,
-                              label: 'Ausrüstung',
-                              image: HubCircleImage.plain,
-                              size: bottomCircleSize,
-                              symbol: gearSymbol,
-                              onTap: () =>
-                                  _open(context, const EquipmentScreen()),
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              // Nur im Debug-Build. Im Release ist der Zweig
-                              // samt Bildschirm gar nicht erst im Bündel
-                              // (ADR-0021), und an dieser Stelle steht dann
-                              // nichts.
-                              if (devModeAvailable) const _DevKnopf(),
+                              HubCircle(
+                                icon: Icons.check_circle_outline,
+                                label: 'Gewohnheiten',
+                                image: HubCircleImage.plain,
+                                progress: heute,
+                                onTap: () =>
+                                    _open(context, const HabitsScreen()),
+                              ),
                               kreis(
-                                Bereich.charakter,
-                                (_) => HubCircle(
-                                  icon: Icons.person_outline,
-                                  label: 'Charakter',
-                                  size: bottomCircleSize,
-                                  // Die einzige Flaeche, die ihr Zeichen
-                                  // selbst mitbringt.
-                                  image: HubCircleImage.character,
+                                Bereich.theorie,
+                                (leuchtet) => HubCircle(
+                                  icon: Icons.account_tree_outlined,
+                                  label: 'Theorie',
+                                  image: HubCircleImage.plain,
+                                  symbol: theorySymbol,
+                                  leuchtet: leuchtet,
                                   onTap: () =>
-                                      _open(context, const CharacterScreen()),
+                                      _open(context, const SkillTreeScreen()),
+                                ),
+                              ),
+                              // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
+                              // Waffe allein schlagbar, und wer zuerst kämpft,
+                              // weiß danach, wofür er liest.
+                              kreis(
+                                Bereich.kampf,
+                                (leuchtet) => HubCircle(
+                                  icon: Icons.sports_martial_arts,
+                                  label: 'Kampf',
+                                  image: HubCircleImage.plain,
+                                  leuchtet: leuchtet,
+                                  onTap: () =>
+                                      _open(context, const LadderScreen()),
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // **Heute** (ADR-0053) bekommt, was übrig bleibt. Bis
+                        // zum 28.09. stand hier die Figur und gab an vollen
+                        // Tagen Platz ab; sie ist jetzt in der Ausrüstung.
+                        // Eine lange Liste rollt, statt überzulaufen.
+                        // Darunter das **Lagerfeuer** (ADR-0076) mit Truhe,
+                        // Tagesaufgaben und Rückfrage.
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                // **Einmal** (ADR-0085): Eigene Gewohnheiten
+                                // von vor den Skills fragen nach ihrem
+                                // Gebiet. Sonst steht hier nichts.
+                                if (tracker
+                                    .customWithoutArea
+                                    .isNotEmpty) ...<Widget>[
+                                  const GebietFrageKarte(),
+                                  const SizedBox(height: 10),
+                                ],
+                                // **Das Haustier** (ADR-0086) — über
+                                // „Heute“, wo abgehakt wird. Erst wenn es
+                                // eine Gewohnheit gibt: Vorher fragt die
+                                // Startseite nach ihr, und das Ei wartet.
+                                if (!start.fragtNachGewohnheit) ...<Widget>[
+                                  const HaustierKarte(),
+                                  const SizedBox(height: 10),
+                                ],
+                                // Ohne Gewohnheit ist „Heute“ die erste
+                                // Frage, keine leere Liste.
+                                if (start.fragtNachGewohnheit)
+                                  const Zeigefinger(
+                                    schritt: Schritt.gewohnheit,
+                                    child: ErsteGewohnheitKarte(),
+                                  )
+                                else
+                                  const Zeigefinger(
+                                    schritt: Schritt.abhaken,
+                                    child: TodayCard(),
+                                  ),
+                                // **Das Lagerfeuer** (ADR-0076) direkt darunter:
+                                // Truhe und Tagesaufgaben standen hier bis zum
+                                // 18.10. als zwei Karten, jetzt warten sie dort,
+                                // zusammen mit der Rückfrage.
+                                if (start.zeigtTagesaufgaben) ...<Widget>[
+                                  const SizedBox(height: 10),
+                                  LagerfeuerKarte(
+                                    amFeuer: ref.watch(amFeuerProvider),
+                                    onOpen: () => _open(
+                                      context,
+                                      const LagerfeuerScreen(),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        HolzGruppe(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              kreis(
+                                Bereich.laden,
+                                (_) => HubCircle(
+                                  icon: Icons.storefront_outlined,
+                                  label: 'Laden',
+                                  image: HubCircleImage.plain,
+                                  size: bottomCircleSize,
+                                  onTap: () =>
+                                      _open(context, const ShopScreen()),
+                                ),
+                              ),
+                              kreis(
+                                Bereich.faehigkeiten,
+                                (leuchtet) => HubCircle(
+                                  icon: Icons.auto_awesome,
+                                  label: 'Fähigkeiten',
+                                  image: HubCircleImage.plain,
+                                  size: bottomCircleSize,
+                                  symbol: abilitySymbol,
+                                  leuchtet: leuchtet,
+                                  onTap: () =>
+                                      _open(context, const AbilitiesScreen()),
+                                ),
+                              ),
+                              kreis(
+                                Bereich.ausruestung,
+                                (_) => HubCircle(
+                                  icon: Icons.shield_outlined,
+                                  label: 'Ausrüstung',
+                                  image: HubCircleImage.plain,
+                                  size: bottomCircleSize,
+                                  symbol: gearSymbol,
+                                  onTap: () =>
+                                      _open(context, const EquipmentScreen()),
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  // Nur im Debug-Build. Im Release ist der Zweig
+                                  // samt Bildschirm gar nicht erst im Bündel
+                                  // (ADR-0021), und an dieser Stelle steht dann
+                                  // nichts.
+                                  if (devModeAvailable) const _DevKnopf(),
+                                  kreis(
+                                    Bereich.charakter,
+                                    (_) => HubCircle(
+                                      icon: Icons.person_outline,
+                                      label: 'Charakter',
+                                      size: bottomCircleSize,
+                                      // Die einzige Flaeche, die ihr Zeichen
+                                      // selbst mitbringt.
+                                      image: HubCircleImage.character,
+                                      onTap: () => _open(
+                                        context,
+                                        const CharacterScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

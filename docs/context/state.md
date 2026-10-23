@@ -134,6 +134,32 @@ vom 02.10.
 
 ---
 
+## 23.10.2026, danach: der Berg hinter der Startseite
+
+Frederik schickte ein Bild (ein verschneiter Berg, Pixelart): „können
+wir das als Hintergrund für den Startscreen nehmen, vielleicht mit
+bisschen weniger transparenz? Und außerdem fände ich so eine Art
+Holzrahmen um die Button gruppen oben und unten cool“.
+
+| Was | Wie |
+|---|---|
+| **Hintergrund** | `assets/UI/Berg.jpg`, aus Frederiks Bild: unten der dunkle Streifen abgeschnitten, auf 880 × 1017 verkleinert (4,7 MB → 170 KB); füllt den Bildschirm, mittig beschnitten |
+| **Schleier** | ein Viertel Leder darüber (`HomeScreen.bergSchleier`), damit Karten davor stehen |
+| **Holzrahmen** | `HolzGruppe` um die drei Kreise oben und die vier unten: der Rahmen der Karten, innen abgedunkeltes Holz statt Pergament |
+| **Rand** | die Startseite hat seitlich 12 statt 20 Punkte, sonst passten die vier unteren Kreise samt Rahmen nicht |
+
+**Ohne Rückfrage entschieden:** „weniger Transparenz“ gelesen als: der
+Berg kräftig, nur leicht abgedunkelt. Wer ihn heller oder dunkler will,
+dreht an `bergSchleier` (0 bis 1).
+
+In 390 × 844 gerendert und angesehen. App 981, unverändert. **Nicht am
+Handy.**
+
+### Offen
+
+- Die Herkunft des Bildes steht nur hier: Frederiks Datei vom Desktop.
+- Andere Bildschirme liegen weiter auf Leder.
+
 ## 23.10.2026: das Haustier für alle
 
 Frederik: „ich hätte gerne das haustier auf der normalen edition“.
