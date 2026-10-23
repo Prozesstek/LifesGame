@@ -124,6 +124,7 @@ class MentorFlaeche extends ConsumerWidget {
     required this.ort,
     required this.child,
     this.untenFrei = 0,
+    this.obenFrei = 0,
     super.key,
   });
 
@@ -134,6 +135,9 @@ class MentorFlaeche extends ConsumerWidget {
   /// untere Reihe der Kreise: Der Kasten steht darüber in der leeren
   /// Mitte und zeigt hinunter, statt einen Kreis zuzudecken.
   final double untenFrei;
+
+  /// Dasselbe oben: Auf der Startseite die obere Reihe der Kreise.
+  final double obenFrei;
 
   /// Wie breit der Kasten höchstens wird — so breit wie die Startseite.
   static const double maxBreite = 520;
@@ -159,7 +163,7 @@ class MentorFlaeche extends ConsumerWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 12,
-                12,
+                12 + (oben ? obenFrei : 0),
                 12,
                 12 + (oben ? 0 : untenFrei),
               ),

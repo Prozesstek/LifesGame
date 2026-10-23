@@ -15,10 +15,10 @@ import '../../ui/halten_und_ziehen.dart';
 /// Produkts, und der Startbildschirm ist die einzige Stelle, an der sie
 /// ohne Worte auskommt.
 ///
-/// **Der Kreis trägt Zeichen und Namen.** Der Entwurf zeigt nur einen
-/// Buchstaben je Kreis; ein „K" allein sagt aber weder „Kampf" noch
-/// „Kaufen". Name unter dem Kreis kostet zwölf Pixel und nimmt die Frage
-/// heraus.
+/// **Der Kreis trägt nur sein Zeichen** (23.10.2026, Frederik: „ich
+/// würde die texte unten den buttons entfernen“). Bis dahin stand der
+/// Name darunter. Er bleibt für den Vorleser ([label]) und als Schlüssel
+/// für Tests ([keyFor]) — die App geht ohne Lesen (ADR-0060).
 ///
 /// **Die Fläche ist seit den ersten Zeichnungen gemalt und nicht
 /// gerechnet.** `assets/UI/ButtonBG.png` liegt unter dem Zeichen; der
@@ -52,8 +52,8 @@ class HubCircle extends StatelessWidget {
   /// Wie gross dieser Kreis gezeichnet wird. Standard ist [diameter].
   ///
   /// **Kleiner nur, wenn vier in eine Reihe muessen** (ADR-0057). Vier
-  /// Kreise mit ihrem Namen darunter brauchen bei 72 Punkten 352 Punkte
-  /// Breite, ein Handy hat nach dem Rand 335. Zeichen und Symbol wachsen
+  /// Kreise mit ihrem Namen darunter brauchten bei 72 Punkten 352 Punkte
+  /// Breite, ein Handy hatte nach dem Rand 335. Zeichen und Symbol wachsen
   /// und schrumpfen mit, damit der kleine Kreis aussieht wie der grosse.
   final double size;
 
@@ -109,6 +109,9 @@ class HubCircle extends StatelessWidget {
   /// eine Tippfläche mindestens braucht.
   static const double diameter = 72;
 
+  /// Wie ein Test einen Kreis findet — sein Name steht nicht mehr da.
+  static Key keyFor(String label) => ValueKey<String>('kreis-$label');
+
   /// Wie weit der Fortschrittsring aussen um den Kreis liegt.
   static const double _ringAbstand = 5;
 
@@ -130,6 +133,7 @@ class HubCircle extends StatelessWidget {
     final farbe = isLocked ? Palette.muted : Palette.accent;
 
     return Semantics(
+      key: keyFor(label),
       button: true,
       enabled: !isLocked,
       label: label,
@@ -237,21 +241,6 @@ class HubCircle extends StatelessWidget {
                         ),
                       ),
                   ],
-                ),
-                const SizedBox(height: 6),
-                SizedBox(
-                  width: size + 16,
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isLocked ? Palette.muted : Palette.textOnDark,
-                    ),
-                  ),
                 ),
               ],
             ),

@@ -134,6 +134,26 @@ vom 02.10.
 
 ---
 
+## 23.10.2026, zuletzt: die Kreise ohne Namen
+
+Frederik: „ich würde die texte unten den buttons entfernen“. Die sieben
+Kreise der Startseite tragen nur noch ihr Zeichen (ADR-0060: die App
+geht ohne Lesen). Der Name bleibt für den Vorleser und als Schlüssel
+für Tests (`HubCircle.keyFor`); 16 Tests suchen den Kreis jetzt darüber
+statt über den Text.
+
+**Danach** (Frederik: „dass die Button mit den Holzrahmen unten und oben
+abschließen … Sie sollen sozusagen unten und oben einen rahmen bilden“):
+Die beiden Holzrahmen gehen jetzt über die ganze Breite und sitzen
+bündig am oberen und unteren Rand; hinter Statusleiste und Gestenleiste
+des Handys liegt nur Holz (`_Leiste` mit `SafeArea` innen). Level und
+Gold stehen darunter, rechts über „Heute“. Der Kasten des Mentors lässt
+jetzt auch oben Platz (`MentorFlaeche.obenFrei`).
+
+In 390 × 844 gerendert und angesehen, auch mit Statusleiste. App 981, unverändert. **Nicht am
+Handy.** Offen: ob Laden und Kampf ohne Namen zu erkennen sind — ein
+neuer Spieler sieht beide zum ersten Mal ohne Wort.
+
 ## 23.10.2026, danach: der Berg hinter der Startseite
 
 Frederik schickte ein Bild (ein verschneiter Berg, Pixelart): „können
