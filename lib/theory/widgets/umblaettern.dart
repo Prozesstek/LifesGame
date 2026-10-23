@@ -4,26 +4,30 @@ import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
 
-/// **Eine Seite wie aus einem Buch** — das Papier, auf dem eine Seite im
-/// Wissensbaum steht.
+/// **Ein Blatt Buchpapier** — worauf eine Seite im Wissensbaum steht.
 ///
-/// Links liegt der Schatten des Buchrückens (die Falz), rechts deuten
-/// ein paar Linien den Stapel der übrigen Blätter an, und zu den Rändern
-/// hin ist das Papier abgegriffen und dunkler. Die Farbe ist das
-/// Pergament der App, damit die Seite den Bildschirm füllt, wie bisher.
+/// Altes, cremefarbenes Papier ([Palette.papier]), heller als das
+/// Pergament der App, mit Fasern und ein paar Flecken. Links wölbt es
+/// sich in den Buchrücken (die Falz), zu den Rändern hin ist es
+/// abgegriffen. Den Einband und den Stapel darunter malt [Umblaettern].
+///
+/// Die Struktur ist **gesät**: Jedes Blatt hat dieselben Fasern, und
+/// sie stehen still, wenn es umgeschlagen wird.
 class BuchPapier extends StatelessWidget {
   const BuchPapier({this.child, super.key});
 
   final Widget? child;
 
-  /// So breit liegt der Schatten des Buchrückens am linken Rand. Text
-  /// rückt mindestens so weit ein.
+  /// So breit wölbt sich das Blatt in den Rücken. Text rückt mindestens
+  /// so weit ein.
   static const double falz = 22;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
+      // Die Fasern einmal malen, nicht bei jedem Bild des Umblätterns.
       painter: const _PapierMaler(),
+      isComplex: true,
       child: SizedBox.expand(child: child),
     );
   }
@@ -35,48 +39,177 @@ class _PapierMaler extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final flaeche = Offset.zero & size;
-    canvas.drawRect(flaeche, Paint()..color = Palette.surface);
+    canvas.drawRect(flaeche, Paint()..color = Palette.papier);
+
+    final zufall = math.Random(1987);
+
+    // Flecken: ein paar große, kaum sichtbare Wolken.
+    for (var i = 0; i < 5; i++) {
+      final mitte = Offset(
+        zufall.nextDouble() * size.width,
+        zufall.nextDouble() * size.height,
+      );
+      final radius = 30 + zufall.nextDouble() * 70;
+      canvas.drawCircle(
+        mitte,
+        radius,
+        Paint()
+          ..shader = RadialGradient(
+            colors: <Color>[
+              Palette.papierFaser.withValues(alpha: 0.16),
+              Palette.papierFaser.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromCircle(center: mitte, radius: radius)),
+      );
+    }
+
+    // Fasern: kurze, feine Striche in alle Richtungen.
+    final faser = Paint()
+      ..strokeWidth = 0.7
+      ..strokeCap = StrokeCap.round;
+    final anzahl = (size.width * size.height / 140).round();
+    for (var i = 0; i < anzahl; i++) {
+      final von = Offset(
+        zufall.nextDouble() * size.width,
+        zufall.nextDouble() * size.height,
+      );
+      final winkel = zufall.nextDouble() * math.pi;
+      final laenge = 1.5 + zufall.nextDouble() * 4;
+      faser.color = Palette.papierFaser.withValues(
+        alpha: 0.10 + zufall.nextDouble() * 0.16,
+      );
+      canvas.drawLine(
+        von,
+        von + Offset(math.cos(winkel), math.sin(winkel)) * laenge,
+        faser,
+      );
+    }
 
     // Abgegriffen: zu den Rändern hin dunkler.
     canvas.drawRect(
       flaeche,
       Paint()
         ..shader = RadialGradient(
-          radius: 1.1,
+          radius: 1.05,
           colors: <Color>[
-            Palette.surfaceSunken.withValues(alpha: 0),
-            Palette.surfaceSunken.withValues(alpha: 0.5),
+            Palette.papierFaser.withValues(alpha: 0),
+            Palette.papierFaser.withValues(alpha: 0.45),
           ],
-          stops: const <double>[0.55, 1],
+          stops: const <double>[0.6, 1],
         ).createShader(flaeche),
     );
 
-    // Der Stapel der übrigen Blätter am rechten Rand.
-    final linie = Paint()..strokeWidth = 1;
-    for (var i = 0; i < 4; i++) {
-      final x = size.width - 1.5 - i * 2.5;
-      linie.color = Palette.surfaceSunken.withValues(alpha: 0.9 - i * 0.2);
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linie);
-    }
-
-    // Die Falz: der Schatten, wo das Blatt im Rücken verschwindet.
-    final falz = Rect.fromLTWH(0, 0, BuchPapier.falz, size.height);
+    // Die Falz: Das Blatt wölbt sich in den Rücken — ganz innen
+    // dunkel, dann ein heller Rücken der Wölbung, dann flach.
+    final falz = Rect.fromLTWH(0, 0, BuchPapier.falz * 1.6, size.height);
     canvas.drawRect(
       falz,
       Paint()
         ..shader = LinearGradient(
           colors: <Color>[
-            Palette.background.withValues(alpha: 0.42),
-            Palette.background.withValues(alpha: 0.12),
-            Palette.background.withValues(alpha: 0),
+            Palette.einbandDunkel.withValues(alpha: 0.55),
+            Palette.einbandDunkel.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.18),
+            Palette.einbandDunkel.withValues(alpha: 0.06),
+            Palette.einbandDunkel.withValues(alpha: 0),
           ],
-          stops: const <double>[0, 0.35, 1],
+          stops: const <double>[0, 0.18, 0.38, 0.6, 1],
         ).createShader(falz),
+    );
+
+    // Die Schnittkante oben, rechts und unten.
+    canvas.drawRect(
+      flaeche.deflate(0.5),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Palette.papierFaser.withValues(alpha: 0.8),
     );
   }
 
   @override
   bool shouldRepaint(_PapierMaler oldDelegate) => false;
+}
+
+/// **Der Einband und der Stapel** unter dem obersten Blatt: Leder mit
+/// Narben und einer eingeprägten Linie, darauf die Kanten der übrigen
+/// Seiten rechts und unten, wie bei einem dicken, aufgeschlagenen Buch.
+class _EinbandMaler extends CustomPainter {
+  const _EinbandMaler();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final aussen = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(10),
+    );
+    canvas.drawRRect(
+      aussen,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.4, -0.6),
+          radius: 1.3,
+          colors: <Color>[Palette.einband, Palette.einbandDunkel],
+        ).createShader(Offset.zero & size),
+    );
+
+    // Narben im Leder.
+    final zufall = math.Random(73);
+    final narbe = Paint();
+    final anzahl = (size.width * size.height / 260).round();
+    for (var i = 0; i < anzahl; i++) {
+      narbe.color = (zufall.nextBool() ? Colors.black : Colors.white)
+          .withValues(alpha: 0.05 + zufall.nextDouble() * 0.06);
+      canvas.drawCircle(
+        Offset(
+          zufall.nextDouble() * size.width,
+          zufall.nextDouble() * size.height,
+        ),
+        0.6 + zufall.nextDouble() * 0.9,
+        narbe,
+      );
+    }
+
+    // Die eingeprägte Linie am Rand des Deckels.
+    canvas.drawRRect(
+      aussen.deflate(4),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Palette.goldOnDark.withValues(alpha: 0.35),
+    );
+
+    // Der Stapel: die Kanten der übrigen Seiten, rechts und unten
+    // versetzt, jede ein wenig dunkler.
+    final seite = Umblaettern.innen.deflateRect(Offset.zero & size);
+    for (var i = Umblaettern.stapel; i >= 1; i--) {
+      final kante = Rect.fromLTRB(
+        seite.left,
+        seite.top + i * 0.6,
+        seite.right + i * Umblaettern.stapelSchritt,
+        seite.bottom + i * Umblaettern.stapelSchritt,
+      );
+      canvas.drawRect(
+        kante,
+        Paint()
+          ..color = Color.lerp(
+            Palette.papier,
+            Palette.papierFaser,
+            0.25 + i / Umblaettern.stapel * 0.5,
+          )!,
+      );
+      canvas.drawRect(
+        kante,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.6
+          ..color = Palette.papierFaser,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_EinbandMaler oldDelegate) => false;
 }
 
 enum _Richtung { vor, zurueck }
@@ -131,6 +264,20 @@ class Umblaettern extends StatefulWidget {
 
   /// Ab dieser Geschwindigkeit schlägt ein Wisch um, egal wie weit.
   static const double schwung = 300;
+
+  /// Wie viele Seitenkanten unter dem obersten Blatt hervorschauen, und
+  /// wie weit jede versetzt ist.
+  static const int stapel = 5;
+  static const double stapelSchritt = 2;
+
+  /// Wo das Blatt im Einband liegt: rundum Leder, rechts und unten
+  /// dazu der Stapel.
+  static const EdgeInsets innen = EdgeInsets.fromLTRB(
+    10,
+    10,
+    10 + stapel * stapelSchritt,
+    10 + stapel * stapelSchritt,
+  );
 
   @override
   State<Umblaettern> createState() => UmblaetternState();
@@ -250,23 +397,33 @@ class UmblaetternState extends State<Umblaettern>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, grenzen) {
-        _breite = grenzen.maxWidth;
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onHorizontalDragUpdate: _ziehen,
-          onHorizontalDragEnd: (d) => _loslassen(d.primaryVelocity ?? 0),
-          onHorizontalDragCancel: () => _loslassen(0),
-          child: ClipRect(
-            child: AnimatedBuilder(
-              animation: _blatt,
-              builder: (context, _) =>
-                  Stack(fit: StackFit.expand, children: _lagen(context)),
+    // Einband und Stapel liegen still; nur die Blätter darauf bewegen
+    // sich. Was sich beim Umschlagen aus dem Buch hebt, schneidet der
+    // Rand des Einbands ab.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragUpdate: _ziehen,
+      onHorizontalDragEnd: (d) => _loslassen(d.primaryVelocity ?? 0),
+      onHorizontalDragCancel: () => _loslassen(0),
+      child: CustomPaint(
+        painter: const _EinbandMaler(),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: Umblaettern.innen,
+            child: LayoutBuilder(
+              builder: (context, grenzen) {
+                _breite = grenzen.maxWidth;
+                return AnimatedBuilder(
+                  animation: _blatt,
+                  builder: (context, _) =>
+                      Stack(fit: StackFit.expand, children: _lagen(context)),
+                );
+              },
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -313,7 +470,10 @@ class UmblaetternState extends State<Umblaettern>
       winkel: winkel,
       kante: kante,
       schatten: schatten,
-      child: BuchPapier(child: widget.seite(context, i, aktiv)),
+      // Jedes Blatt einmal gemalt, gedreht wird nur das Bild davon.
+      child: RepaintBoundary(
+        child: BuchPapier(child: widget.seite(context, i, aktiv)),
+      ),
     );
   }
 }

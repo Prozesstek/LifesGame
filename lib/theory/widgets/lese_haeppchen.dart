@@ -75,22 +75,26 @@ class _LeseHaeppchenState extends ConsumerState<LeseHaeppchen> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: _Striche(anzahl: _anzahl, hier: _hier),
         ),
+        // Das aufgeschlagene Buch liegt mit etwas Rand auf dem Pergament.
         Expanded(
-          child: Umblaettern(
-            key: _buch,
-            anzahl: _anzahl,
-            onRascheln: _rascheln,
-            onGeblaettert: (i) => setState(() {
-              _hier = i;
-              if (i > _weitester) _weitester = i;
-            }),
-            seite: (context, i, aktiv) => _Abschnitt(
-              zusammenfassung: i == 0 ? _lesson.summary : null,
-              abschnitt: i < _lesson.sections.length
-                  ? _lesson.sections[i]
-                  : null,
-              aktiv: aktiv,
-              gelesen: i < _weitester,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Umblaettern(
+              key: _buch,
+              anzahl: _anzahl,
+              onRascheln: _rascheln,
+              onGeblaettert: (i) => setState(() {
+                _hier = i;
+                if (i > _weitester) _weitester = i;
+              }),
+              seite: (context, i, aktiv) => _Abschnitt(
+                zusammenfassung: i == 0 ? _lesson.summary : null,
+                abschnitt: i < _lesson.sections.length
+                    ? _lesson.sections[i]
+                    : null,
+                aktiv: aktiv,
+                gelesen: i < _weitester,
+              ),
             ),
           ),
         ),
@@ -165,7 +169,7 @@ class _Abschnitt extends StatelessWidget {
     final teil = abschnitt;
     return ListView(
       // Links weicht der Text der Falz aus, rechts dem Stapel.
-      padding: const EdgeInsets.fromLTRB(BuchPapier.falz + 8, 18, 24, 20),
+      padding: const EdgeInsets.fromLTRB(BuchPapier.falz + 6, 18, 18, 20),
       children: <Widget>[
         if (oben != null) ...<Widget>[
           Text(

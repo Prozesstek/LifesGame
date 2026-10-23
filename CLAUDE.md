@@ -300,7 +300,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
 | `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, Striche oben, „Weiter“ | Flutter |
-| `lib/theory/widgets/umblaettern.dart` | **die Seite als Buch** (23.10.): Papier mit Falz und Stapel (`BuchPapier`), das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
+| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband mit dem Stapel der Seiten, das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
@@ -325,7 +325,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 996 Tests
+flutter test             # 997 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

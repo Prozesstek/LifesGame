@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 996, dazu die acht Packages (theory 208, habits 366, gear
+**Tests:** App 997, dazu die acht Packages (theory 208, habits 366, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -148,8 +148,8 @@ viermal wie empfohlen, einmal dagegen.
 |---|---|
 | **Umblättern** | das Blatt dreht sich in 3D am Rücken (linker Rand), die freie Kante kommt dem Auge entgegen, es dunkelt und wirft einen Schatten auf die Seite darunter |
 | **Steuerung** | der Finger zieht das Blatt mit — halb losgelassen fällt es zurück, ein schneller Wisch schlägt um; nach rechts legt sich die vorige Seite wieder darüber; „Weiter“ blättert per Animation |
-| **Papier** | Pergament mit dem Schatten der Falz links, dem Stapel der Blätter rechts und abgegriffenen Rändern |
-| **Untergrund** | das Papier füllt den Bildschirm — **gegen Claudes Empfehlung** (ein Blatt auf dunklem Leder) |
+| **Buch** | **ein aufgeschlagenes Buch**: ein Ledereinband mit eingeprägter Linie, darin das Blatt, rechts und unten die Kanten der übrigen Seiten, links wölbt sich das Papier in den Rücken |
+| **Papier** | heller als das Pergament, cremefarben, mit Fasern und Flecken (`Palette.papier`) |
 | **Klang** | ein Rascheln mit leisem Klapp, gerechnet (`tool/lern_klaenge.py`), dazu ein leichtes Tippen |
 | **Zu den Fragen** | „Fragen beantworten“ schlägt das letzte Blatt auf ein leeres um, dann kommen die Fragen wie bisher |
 | **Der Text** | schreibt sich weiter Wort für Wort — **sobald das Blatt liegt**; zurückgeblättert steht er ganz da |
@@ -160,9 +160,15 @@ Handy gibt es links keine zweite Seite. Die Striche oben bleiben, eine
 Seitenzahl oder Initiale kam nicht dazu (nicht gewählt). Wer Bewegung im
 System abgeschaltet hat, blättert ohne Animation.
 
+**Erst Papier über den ganzen Bildschirm**, so gewählt — gegen Claudes
+Empfehlung, ein Blatt auf Leder. AktivesBrett danach am Bildschirm:
+„sieht halt noch nicht aus wie eine Buchseite“. In einer zweiten Runde
+gewählt: das aufgeschlagene Buch und helleres Papier mit Struktur;
+Buchschrift, Seitenzahl und Initiale nicht.
+
 Neu: `lib/theory/widgets/umblaettern.dart`, `assets/Sound/Blaettern.wav`,
 `test/buchseite_test.dart` (5). Der `PageView` der Häppchen ist weg. App
-996 (vorher 991). Ruhend, mitten im Umblättern und halb zurückgezogen
+997 (vorher 991). Ruhend, mitten im Umblättern und halb zurückgezogen
 in 390 × 844 gerendert und angesehen. **Nicht gehört, nicht am Handy.**
 
 ### Offen

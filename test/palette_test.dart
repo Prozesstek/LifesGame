@@ -29,6 +29,14 @@ void main() {
   const fuerText = 4.5;
   const fuerFlaechen = 3.0;
 
+  test('auf dem Buchpapier ist die Schrift so lesbar wie auf Pergament', () {
+    // Die Seite im Wissensbaum (23.10.): dieselbe Tinte, hellerer Grund.
+    expect(kontrast(Palette.text, Palette.papier), greaterThanOrEqualTo(7));
+    for (final farbe in <Color>[Palette.textDim, Palette.accent]) {
+      expect(kontrast(farbe, Palette.papier), greaterThanOrEqualTo(fuerText));
+    }
+  });
+
   group('Auf Pergament', () {
     const grund = Palette.surface;
 
