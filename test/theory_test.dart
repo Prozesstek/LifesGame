@@ -32,6 +32,10 @@ class _Mitschrift implements SoundPlayer {
   void play(SoundEffect effect) => gespielt.add(effect);
 }
 
+/// Was die Antworten klangen — ohne das Rascheln beim Umblättern davor.
+Iterable<SoundEffect> _antworten(_Mitschrift mitschrift) =>
+    mitschrift.gespielt.where((k) => k != SoundEffect.blaettern);
+
 /// Ein Container, in dem der Spieler auf [level] steht.
 ///
 /// Das Level ergibt sich sonst aus der gesammelten Erfahrung; für die
@@ -981,7 +985,7 @@ void main() {
 
         // Danach darf eine Errungenschaft klingen — gefragt ist der Anfang.
         expect(
-          mitschrift.gespielt.take(_first.questionCount + 1),
+          _antworten(mitschrift).take(_first.questionCount + 1),
           <SoundEffect>[
             ...SoundEffect.tonleiter.take(_first.questionCount),
             SoundEffect.tagGeschafft,
@@ -1022,7 +1026,7 @@ void main() {
 
         expect(find.text('Bestanden'), findsOneWidget);
         expect(
-          mitschrift.gespielt.take(_first.questionCount + 2),
+          _antworten(mitschrift).take(_first.questionCount + 2),
           <SoundEffect>[
             SoundEffect.falsch,
             ...SoundEffect.tonleiter.take(_first.questionCount),

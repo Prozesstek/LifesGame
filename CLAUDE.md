@@ -245,7 +245,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
-| `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen | Python |
+| `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen — und das **Rascheln beim Umblättern** | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat — Erfahrung, Gold, Punkte, Fähigkeiten **und Kampfwerte** (im Kampfmassstab, als eigener Summand in `heroPowerProvider`) | Flutter |
 | `lib/dev/grube_werkbank.dart` | **die Werkbank in der Grube**, nur auf dem Dev-Stand: Funde jeder Seltenheit vor den Helden legen, Gegner jeder Art beschwören; der Lauf steht still, solange sie offen ist | Flutter |
@@ -293,7 +293,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
-| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Bildschirm, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/umblaettern.dart` | **die Seite als Buch** (23.10.): Papier mit Falz und Stapel (`BuchPapier`), das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
@@ -318,7 +319,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 981 Tests
+flutter test             # 986 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

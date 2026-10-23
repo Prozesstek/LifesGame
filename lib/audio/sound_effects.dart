@@ -47,6 +47,10 @@ enum SoundEffect {
   /// klettert stattdessen die [tonleiter] hinauf (`AntwortKlang`).
   falsch('Sound/Falsch.wav'),
 
+  /// Ein Blatt im Wissensbaum wird umgeschlagen — Papier raschelt und
+  /// klappt (`tool/lern_klaenge.py`).
+  blaettern('Sound/Blaettern.wav'),
+
   /// Eine Lektion ist bestanden.
   lektion('Sound/Win.mp3'),
 
