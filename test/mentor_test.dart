@@ -13,6 +13,7 @@ import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/mentor/mentor.dart';
 import 'package:lifes_game/mentor/mentor_kasten.dart';
 import 'package:lifes_game/mentor/zeigefinger.dart';
@@ -141,7 +142,7 @@ void main() {
       await starte(tester, stand: SaveData(habits: einHaekchen));
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.start));
 
-      await tester.tap(find.text('Theorie'));
+      await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
       await tester.pumpAndSettle();
 
       expect(find.byType(SkillTreeScreen), findsOneWidget);
@@ -175,11 +176,13 @@ void main() {
       await starte(tester, stand: ersteSeiteGelesen());
 
       final kasten = tester.getRect(find.byType(MentorKasten));
-      final kreis = tester.getRect(find.text('Fähigkeiten'));
+      final kreis = tester.getRect(find.byKey(HubCircle.keyFor('Fähigkeiten')));
       expect(kasten.bottom, lessThan(kreis.top));
       expect(
         kasten.top,
-        greaterThan(tester.getRect(find.text('Theorie')).bottom),
+        greaterThan(
+          tester.getRect(find.byKey(HubCircle.keyFor('Theorie'))).bottom,
+        ),
       );
     });
 
@@ -285,7 +288,7 @@ void main() {
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.start));
 
       // 3. Die erste Seite, über den Vorschlag im Baum.
-      await tester.tap(find.text('Theorie'));
+      await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(ContinueReadingTile));
       await tester.pumpAndSettle();
