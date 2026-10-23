@@ -471,22 +471,32 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 3));
     });
 
-    testWidgets('Level und Gold stehen oben rechts, über den Kreisen', (
-      tester,
-    ) async {
-      useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
-      await tester.pump();
+    testWidgets(
+      'die Kreise rahmen oben und unten, Level und Gold darunter rechts',
+      (tester) async {
+        useTallView(tester);
+        await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+        await tester.pump();
 
-      final ring = tester.getCenter(find.byKey(StatusLeiste.ringKey));
-      final breite = tester.getSize(find.byType(HomeScreen)).width;
-      final kreis = tester.getTopLeft(
-        find.byKey(HubCircle.keyFor('Gewohnheiten')).first,
-      );
+        final ring = tester.getCenter(find.byKey(StatusLeiste.ringKey));
+        final breite = tester.getSize(find.byType(HomeScreen)).width;
+        final kreis = tester.getTopLeft(
+          find.byKey(HubCircle.keyFor('Gewohnheiten')).first,
+        );
 
-      expect(ring.dx, greaterThan(breite / 2), reason: 'rechts');
-      expect(ring.dy, lessThan(kreis.dy), reason: 'über den Kreisen');
-    });
+        final hoehe = tester.getSize(find.byType(HomeScreen)).height;
+        final laden = tester.getBottomLeft(
+          find.byKey(HubCircle.keyFor('Laden')).first,
+        );
+
+        // Seit dem 23.10.: die Kreise bündig oben und unten, Level und Gold
+        // unter dem oberen Rahmen.
+        expect(ring.dx, greaterThan(breite / 2), reason: 'rechts');
+        expect(ring.dy, greaterThan(kreis.dy), reason: 'unter den Kreisen');
+        expect(kreis.dy, lessThan(40), reason: 'oben am Rand');
+        expect(hoehe - laden.dy, lessThan(40), reason: 'unten am Rand');
+      },
+    );
 
     testWidgets('die Figur steht nicht mehr auf der Startseite', (
       tester,
