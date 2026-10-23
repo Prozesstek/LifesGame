@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'druck.dart';
 import 'holz.dart';
 import 'palette.dart';
 
@@ -11,17 +12,28 @@ import 'palette.dart';
 /// einzelnen Dailies als Steckbrief“).
 ///
 /// Was darauf hängt, ist ein [Steckbrief] — die Tafel selbst trägt keine
-/// Schrift außer auf dem Schild.
+/// Schrift außer auf dem Schild. Zwei Tafeln gibt es: die Tagesaufgaben
+/// am Lagerfeuer (Steckbriefe nebeneinander) und „Heute“ auf der
+/// Startseite (Zettel untereinander, Frederik: „die Gewohnheiten aber
+/// eigentlich auch“).
 ///
 /// **Die Bretter sind gezeichnet**, nicht aus dem UI-Paket: Dort gibt es
 /// nur helles Holz. Gezeichnet wird auf dem Raster der Bildpunkte
 /// ([Holz.pixel]), damit die Tafel neben Rahmen und Planke nicht weich
 /// aussieht.
 class Anschlagtafel extends StatelessWidget {
-  const Anschlagtafel({required this.schild, required this.child, super.key});
+  const Anschlagtafel({
+    required this.schild,
+    required this.child,
+    this.onSchild,
+    super.key,
+  });
 
   /// Was auf dem Schild über der Tafel steht — hell auf Holz.
   final Widget schild;
+
+  /// Wohin ein Tipp aufs Schild führt; ohne ist es nur ein Schild.
+  final VoidCallback? onSchild;
 
   final Widget child;
 
@@ -65,7 +77,16 @@ class Anschlagtafel extends StatelessWidget {
           top: 0,
           left: 0,
           right: 0,
-          child: Center(child: _Schild(child: schild)),
+          child: Center(
+            child: Druck(
+              enabled: onSchild != null,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onSchild,
+                child: _Schild(child: schild),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -220,6 +241,9 @@ class Steckbrief extends StatefulWidget {
     this.neigung = 0,
     this.saat = 0,
     this.abgestempelt = false,
+    this.innen = const EdgeInsets.fromLTRB(8, 12, 8, 10),
+    this.stempelGroesse = 50,
+    this.stempelText,
     super.key,
   });
 
@@ -232,6 +256,16 @@ class Steckbrief extends StatefulWidget {
   final int saat;
 
   final bool abgestempelt;
+
+  /// Wie weit der Inhalt vom Rand bleibt — unten kommt die Risskante
+  /// dazu.
+  final EdgeInsets innen;
+
+  /// Ein Zettel ist niedriger als ein Steckbrief, sein Stempel kleiner.
+  final double stempelGroesse;
+
+  /// Was der Stempel dem Vorleser sagt. Ohne sagt es das Blatt selbst.
+  final String? stempelText;
 
   /// Woran Tests den Stempel finden.
   static const Key stempelKey = ValueKey<String>('steckbrief-stempel');
@@ -300,11 +334,8 @@ class _SteckbriefState extends State<Steckbrief>
             child: CustomPaint(
               painter: _Blatt(saat: widget.saat, farbe: papier),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  8,
-                  12,
-                  8,
-                  10 + Steckbrief.riss,
+                padding: widget.innen.copyWith(
+                  bottom: widget.innen.bottom + Steckbrief.riss,
                 ),
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -345,16 +376,21 @@ class _SteckbriefState extends State<Steckbrief>
           child: Transform.scale(scale: 1 + 0.9 * (1 - t), child: child),
         );
       },
-      child: const _Stempel(key: Steckbrief.stempelKey),
+      child: _Stempel(
+        key: Steckbrief.stempelKey,
+        seite: widget.stempelGroesse,
+        text: widget.stempelText,
+      ),
     );
   }
 }
 
 /// Ein Häkchen im Doppelring, in grüner Tinte, schräg aufgedrückt.
 class _Stempel extends StatelessWidget {
-  const _Stempel({super.key});
+  const _Stempel({required this.seite, this.text, super.key});
 
-  static const double _seite = 50;
+  final double seite;
+  final String? text;
 
   /// Wie weit er oben rechts über den Inhalt hinausragt.
   static const double ueberstand = 6;
@@ -365,12 +401,12 @@ class _Stempel extends StatelessWidget {
     return Transform.rotate(
       angle: -0.3,
       child: Container(
-        width: _seite,
-        height: _seite,
-        padding: const EdgeInsets.all(3),
+        width: seite,
+        height: seite,
+        padding: EdgeInsets.all(seite * 0.06),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: tinte, width: 3),
+          border: Border.all(color: tinte, width: seite * 0.06),
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -379,9 +415,9 @@ class _Stempel extends StatelessWidget {
           ),
           child: Icon(
             Icons.check_rounded,
-            size: 30,
+            size: seite * 0.6,
             color: tinte,
-            semanticLabel: 'Abgeholt',
+            semanticLabel: text,
           ),
         ),
       ),

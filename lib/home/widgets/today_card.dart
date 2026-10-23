@@ -12,9 +12,9 @@ import '../../habits/widgets/habit_check_tile.dart';
 import '../../habits/widgets/haekchen_kreis.dart';
 import '../../habits/widgets/habit_countdown.dart';
 import '../../skills/gebiet_zeichen.dart';
+import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
-import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/sprung.dart';
 
@@ -38,7 +38,13 @@ import '../../ui/sprung.dart';
 /// Ein Zeitziel öffnet dort seinen Timer (ADR-0067); die Restzeit steht
 /// rechts in der Zeile.
 /// Alles Weitere (Ziele Schritt für Schritt, Auslöser ändern, Vorlagen)
-/// bleibt dort; ein Tipp auf „Heute" führt hin.
+/// bleibt dort; ein Tipp aufs Schild führt hin.
+///
+/// **Eine Anschlagtafel, jede Gewohnheit ein Zettel** (23.10.2026,
+/// Frederik: „die Gewohnheiten aber eigentlich auch“ — nach den
+/// Tagesaufgaben am Lagerfeuer). Die Zettel hängen untereinander, damit
+/// Name und „Wann“ lesbar bleiben und Gekoppeltes unter seinem Anker
+/// steht. Erledigt liegt ein Stempel darauf.
 class TodayCard extends ConsumerWidget {
   const TodayCard({super.key});
 
@@ -62,18 +68,18 @@ class TodayCard extends ConsumerWidget {
         .where((eintrag) => tracker.isChecked(eintrag.habit.id, today))
         .length;
 
-    return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+    return Anschlagtafel(
+      onSchild: () => _oeffneGewohnheiten(context),
+      schild: _Kopf(
+        done: erledigt,
+        total: liste.length,
+        streak: tracker.currentDayStreak(today),
+        heuteGetan: tracker.hasCheckOn(today),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _Kopf(
-            done: erledigt,
-            total: liste.length,
-            streak: tracker.currentDayStreak(today),
-            heuteGetan: tracker.hasCheckOn(today),
-          ),
           if (tracker.activeIds.isEmpty)
             const _Hinweis(
               icon: Icons.add_circle_outline,
@@ -88,7 +94,7 @@ class TodayCard extends ConsumerWidget {
             )
           else
             for (final eintrag in liste)
-              _Zeile(
+              _Zettel(
                 key: ValueKey<String>(eintrag.habit.id),
                 habit: eintrag.habit,
                 done: tracker.isChecked(eintrag.habit.id, today),
@@ -114,7 +120,8 @@ void _oeffneGewohnheiten(BuildContext context) {
   ).push(MaterialPageRoute<void>(builder: (_) => const HabitsScreen()));
 }
 
-/// „Heute" und der Stand — führt zum Gewohnheiten-Bildschirm.
+/// Das Schild über der Tafel: „Heute“, die Tageskette und der Stand.
+/// Getippt wird das ganze Schild ([Anschlagtafel.onSchild]).
 class _Kopf extends StatelessWidget {
   const _Kopf({
     required this.done,
@@ -135,43 +142,20 @@ class _Kopf extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Druck(
-      child: InkWell(
-        onTap: () => _oeffneGewohnheiten(context),
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: <Widget>[
-              const Icon(
-                Icons.checklist_rounded,
-                size: 22,
-                color: Palette.text,
-                semanticLabel: 'Heute',
-              ),
-              // Immer im Baum, auch ohne Kette: Sonst entstünde sie mit
-              // dem ersten Häkchen neu und hätte kein Vorher, aus dem sie
-              // zünden könnte.
-              _Flamme(streak: streak, heuteGetan: heuteGetan),
-              const Spacer(),
-              if (total > 0)
-                Text(
-                  '$done / $total',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.textDim,
-                  ),
-                ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: Palette.muted,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        const Icon(Icons.checklist_rounded, size: 20, semanticLabel: 'Heute'),
+        // Immer im Baum, auch ohne Kette: Sonst entstünde sie mit dem
+        // ersten Häkchen neu und hätte kein Vorher, aus dem sie zünden
+        // könnte.
+        _Flamme(streak: streak, heuteGetan: heuteGetan),
+        if (total > 0) ...<Widget>[
+          const SizedBox(width: 10),
+          Text('$done / $total'),
+        ],
+        const Icon(Icons.chevron_right_rounded, size: 18),
+      ],
     );
   }
 }
@@ -228,7 +212,10 @@ class _FlammeState extends State<_Flamme> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final streak = widget.streak;
     if (streak <= 0) return const SizedBox.shrink();
-    final farbe = widget.heuteGetan ? Palette.accent : Palette.muted;
+    // Auf dem Schild, also auf Holz: hell, nicht in Tinte.
+    final farbe = widget.heuteGetan
+        ? Palette.goldOnDark
+        : Palette.textOnDark.withValues(alpha: 0.55);
     return Padding(
       padding: const EdgeInsets.only(left: 10),
       child: Semantics(
@@ -351,10 +338,11 @@ class _GlutMaler extends CustomPainter {
   bool shouldRepaint(_GlutMaler alt) => alt.t != t;
 }
 
-/// Eine Gewohnheit von heute: antippen hakt ab — oder nimmt das Häkchen
-/// zurück. Erledigt steht sie grau und durchgestrichen da, ohne Auslöser.
-class _Zeile extends StatelessWidget {
-  const _Zeile({
+/// Eine Gewohnheit von heute als Zettel an der Tafel: antippen hakt ab —
+/// oder nimmt das Häkchen zurück. Erledigt steht sie grau da, ohne
+/// Auslöser, und ein Stempel liegt darauf.
+class _Zettel extends StatelessWidget {
+  const _Zettel({
     required this.habit,
     required this.done,
     required this.cue,
@@ -396,115 +384,134 @@ class _Zeile extends StatelessWidget {
   /// Der laufende Timer ist bei null angekommen.
   final VoidCallback? onTimerDone;
 
+  /// Wie groß der Stempel auf einem Zettel ist, und wie viel Platz er
+  /// rechts braucht.
+  static const double _stempel = 36;
+  static const double _stempelPlatz = _stempel - 4;
+
+  /// Ein Zettel ist niedrig: wenig Rand, unten kommt die Risskante dazu.
+  static const EdgeInsets innen = EdgeInsets.fromLTRB(10, 9, 10, 3);
+
+  /// Wie schief ein Zettel hängt — **aus der Id, nicht aus dem Platz**:
+  /// Ein abgehakter wandert nach unten und soll dabei nicht umkippen.
+  static double neigungFuer(String id) => (id.hashCode % 5 - 2) * 0.005;
+
   @override
   Widget build(BuildContext context) {
     final text = done ? null : cue;
     final stufen = depth > _hoechstens ? _hoechstens : depth;
 
     return Padding(
-      padding: EdgeInsets.only(left: _schritt * stufen),
-      child: PlatzLaedtEin(
-        aktiv: cued,
-        radius: 6,
-        child: _zeile(text, done ? null : treat),
+      padding: EdgeInsets.only(left: _schritt * stufen, top: 2),
+      child: Semantics(
+        button: true,
+        label: done
+            ? '${habit.name} erledigt'
+            : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
+                  '${cued ? ', jetzt dran' : ''}'
+                  '${zuerst ? ', heute zuerst' : ''}',
+        child: Druck(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Steckbrief(
+              neigung: neigungFuer(habit.id),
+              saat: habit.id.hashCode,
+              abgestempelt: done,
+              innen: innen,
+              stempelGroesse: _stempel,
+              child: PlatzLaedtEin(
+                aktiv: cued,
+                radius: 6,
+                child: _zeile(text, done ? null : treat),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _zeile(String? text, String? danach) {
-    return Semantics(
-      button: true,
-      label: done
-          ? '${habit.name} erledigt'
-          : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
-                '${cued ? ', jetzt dran' : ''}'
-                '${zuerst ? ', heute zuerst' : ''}',
-      child: Druck(
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(6),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: <Widget>[
+          HaekchenKreis(isChecked: done, size: 22, offenFarbe: Palette.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                HaekchenKreis(
-                  isChecked: done,
-                  size: 22,
-                  offenFarbe: Palette.accent,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Flexible(
-                            child: Text(
-                              habit.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: done ? Palette.textDim : Palette.text,
-                                decoration: done
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                                decorationColor: Palette.textDim,
-                              ),
-                            ),
-                          ),
-                          if (zuerst) ...<Widget>[
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.local_fire_department,
-                              key: TodayCard.flammeKey,
-                              size: 15,
-                              color: Palette.tintLava,
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (text != null)
-                        Text(
-                          text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Palette.textDim,
-                          ),
+                Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        habit.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          // Grau, nicht durchgestrichen: Erledigt sagt der
+                          // Stempel.
+                          color: done ? Palette.textDim : Palette.text,
                         ),
-                      if (danach != null) TreatLine(text: danach, fontSize: 11),
+                      ),
+                    ),
+                    if (zuerst) ...<Widget>[
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.local_fire_department,
+                        key: TodayCard.flammeKey,
+                        size: 15,
+                        color: Palette.tintLava,
+                      ),
                     ],
-                  ),
+                  ],
                 ),
-                // **Wohin sie zählt** (ADR-0085): das Zeichen ihres
-                // Gebiets, grün wie sein Balken in der Leiste oben. Wer
-                // abhakt, sieht die grünen Funken genau dorthin fliegen.
-                if (habit.area case final SkillArea gebiet) ...<Widget>[
-                  const SizedBox(width: 8),
-                  Icon(
-                    gebietZeichen(gebiet),
-                    key: TodayCard.gebietKey(habit.id),
-                    size: 15,
-                    color: done ? Palette.textDim : Palette.success,
+                if (text != null)
+                  Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Palette.textDim,
+                    ),
                   ),
-                ],
-                if (timed && !done) ...<Widget>[
-                  const SizedBox(width: 8),
-                  HabitCountdown(
-                    habit: habit,
-                    onDone: onTimerDone,
-                    builder: (context, uhr) => _Restzeit(uhr: uhr),
-                  ),
-                ],
+                if (danach != null) TreatLine(text: danach, fontSize: 11),
               ],
             ),
           ),
-        ),
+          // **Wohin sie zählt** (ADR-0085): das Zeichen ihres
+          // Gebiets, grün wie sein Balken in der Leiste oben. Erledigt
+          // liegt dort der Stempel.
+          if ((habit.area, done) case (
+            final SkillArea gebiet,
+            false,
+          )) ...<Widget>[
+            const SizedBox(width: 8),
+            Icon(
+              gebietZeichen(gebiet),
+              key: TodayCard.gebietKey(habit.id),
+              size: 15,
+              color: Palette.success,
+            ),
+          ],
+          // Erledigt bleibt rechts Platz für den Stempel, sonst läge er
+          // auf einem langen Namen.
+          if (done) const SizedBox(width: _stempelPlatz),
+          if (timed && !done) ...<Widget>[
+            const SizedBox(width: 8),
+            HabitCountdown(
+              habit: habit,
+              onDone: onTimerDone,
+              builder: (context, uhr) => _Restzeit(uhr: uhr),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -544,7 +551,8 @@ class _Restzeit extends StatelessWidget {
   }
 }
 
-/// Eine Zeile, die nicht abhakt, sondern hinführt — nur ein Zeichen. Was es heißt, sagt [label] dem Vorleser.
+/// Ein Zettel, der nicht abhakt, sondern hinführt — nur ein Zeichen. Was
+/// es heißt, sagt [label] dem Vorleser.
 class _Hinweis extends StatelessWidget {
   const _Hinweis({
     required this.icon,
@@ -565,11 +573,11 @@ class _Hinweis extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: Druck(
-        child: InkWell(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => _oeffneGewohnheiten(context),
-          borderRadius: BorderRadius.circular(6),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Steckbrief(
+            innen: _Zettel.innen,
             child: Row(
               children: <Widget>[
                 Icon(icon, size: highlight ? 26 : 20, color: farbe),

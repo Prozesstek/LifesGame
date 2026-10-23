@@ -37,7 +37,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Haustier** | drei Eier, wächst an Tagen mit Häkchen, Zubehör für Gold — **in jeder Fassung** | ADR-0086, [`haustier.md`](../vorlagen/haustier.md) |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 982, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 983, dazu die acht Packages (theory 208, habits 345, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,7 +134,7 @@ vom 02.10.
 
 ---
 
-## 23.10.2026, ganz zuletzt: die Tagesaufgaben als Anschlagtafel
+## 23.10.2026, ganz zuletzt: Tagesaufgaben und „Heute“ als Anschlagtafel
 
 Frederik: „Dailies als Tafel mäßig. Also mit so einem dunklen
 Holzhintergrund und vielleicht den einzelnen Dailies als Steckbrief.
@@ -167,13 +167,37 @@ mitten im Stempeln):
 - **Der Titel „Lagerfeuer“ stand seit dem 18.10. in Tinte auf dem
   Nachthimmel** und war kaum zu lesen. Jetzt hell.
 
-App 982 (vorher 981). **Nicht am Handy.**
+**Danach** (Frederik: „die Gewohnheiten aber eigentlich auch“), in
+einer Fragerunde beide Male wie empfohlen: **„Heute“ auf der Startseite
+ist jetzt auch eine Tafel**, jede Gewohnheit ein **Zettel
+untereinander** — nicht als Steckbrief im Raster, damit „Wann“ lesbar
+bleibt und Gekoppeltes eingerückt unter seinem Anker steht. Das Schild
+trägt „Heute“, die Flamme der Tageskette und den Stand und führt wie
+vorher der Kopf zu den Gewohnheiten. Abgehakt bleibt der Kreis, dazu
+schlägt ein kleiner Stempel auf; Durchstreichen und das Zeichen des
+Gebiets fallen auf erledigten Zetteln weg. Der Gewohnheiten-Bildschirm
+bleibt, wie er ist — er wäre der nächste Block.
+
+**Beim Rendern gefunden — ein Fehler seit ADR-0079:** Der Ring des
+Mentors um „Heute“ fiel nach dem ersten Häkchen weg, und dabei baute
+sich die ganze Karte neu. Beim allerersten Häkchen überhaupt sprang
+deshalb der Kreis nicht auf und die Flamme zündete nicht; jetzt läge
+der Stempel sofort da. Der Ring blendet jetzt aus, statt wegzufallen
+(`ZeigeRing.sichtbar`); ein Test fällt ohne die Korrektur um.
+
+App 983 (vorher 981). Startseite mit vier Gewohnheiten, einer
+gekoppelten und zwei erledigten in 390 × 844 gerendert und angesehen.
+**Nicht am Handy.**
 
 ### Offen
 
+- **Der Gewohnheiten-Bildschirm** als Tafel — eigener Block, wenn die
+  Startseite gefällt.
 - Ein kleines Dach über der Tafel, wie am Gemeindehaus — wenn sie noch
   mehr nach Dorf aussehen soll.
 - Ob drei schmale Blätter am Handy lesbar sind (zwölf Punkte Schrift).
+- „Heute“ ist höher als vorher: Mit fünf Gewohnheiten rollt die
+  Startseite früher.
 
 ## 23.10.2026, zuletzt: die Kreise ohne Namen
 

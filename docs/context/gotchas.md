@@ -27,9 +27,18 @@ sah aus wie das Endbild.
 das Abholbare finden, sitzt am Knopf darin, nicht an der Hülle — ein
 wechselnder `Key` baut ebenfalls neu.
 
+**Am selben Tag ein zweites Mal, eine Ebene höher:** Der Ring des
+Mentors (`Zeigefinger`) stand nur um „Heute“, solange der Schritt
+„abhaken“ dran war, und gab sonst sein Ziel bloß zurück. Mit dem ersten
+Häkchen fiel er weg — und die ganze Karte baute sich neu. Beim
+allerersten Häkchen überhaupt sprang deshalb seit ADR-0079 der Kreis
+nicht auf, und die Flamme zündete nicht. Gemerkt hat es erst ein Test
+für den Stempel. Jetzt blendet der Ring aus (`ZeigeRing.sichtbar`).
+
 **Regel:** Wer ein Widget mit Zustand bedingt einhüllt, hüllt es immer
 ein und schaltet die Hülle ab. Eine Animation, die beim Wechsel
-laufen soll, bekommt einen Test, der ein Zwischenbild ansieht.
+laufen soll, bekommt einen Test, der ein Zwischenbild ansieht — **auf
+dem Bildschirm, auf dem sie läuft**, samt allem, was dort darum liegt.
 
 ## Ein linearer Würfel macht aus gleichen Abständen gleiche Würfe
 

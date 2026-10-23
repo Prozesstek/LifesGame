@@ -181,12 +181,12 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Bild (`Mentor.bild`, noch ein Platzhalter) | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten über einem Bildschirm (`MentorFlaeche`) — **nimmt keinen Tipp an** | Flutter |
-| `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen | Flutter |
+| `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen; **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **auch oben auf dem Gewohnheiten-Bildschirm** | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
-| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite: alle Gewohnheiten von heute, erledigte durchgestrichen, ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
+| `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
 | `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
 | `lib/lagerfeuer/am_feuer.dart` | **was am Feuer wartet** und ob es brennt (ab 18 Uhr oder Tag geschafft) — reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/lagerfeuer/am_feuer_provider.dart` | trägt das zusammen, **rechnet nichts** | Flutter |
@@ -261,7 +261,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
-| `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Abholen aufschlägt** | Flutter |
+| `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Hantel, Herz, Schild, Tropfen; **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)) | Flutter |
@@ -319,7 +319,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 982 Tests
+flutter test             # 983 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

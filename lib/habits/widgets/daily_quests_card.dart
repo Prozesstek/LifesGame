@@ -123,6 +123,7 @@ class _Aufgabe extends StatelessWidget {
       neigung: neigung,
       saat: saat,
       abgestempelt: claimed,
+      stempelText: 'Abgeholt',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
