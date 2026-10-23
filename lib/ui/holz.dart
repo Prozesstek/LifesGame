@@ -97,6 +97,13 @@ abstract final class Holz {
     );
   }
 
+  /// Der Rahmen als Fläche, für Eigenes wie die Anschlagtafel.
+  static DecorationImage rahmenBild({int zoom = 1}) =>
+      _gedehnt(rahmen, rahmenMitte, zoom: zoom);
+
+  /// Die Planke als Fläche — für ein Schild, das kein Knopf ist.
+  static DecorationImage plankeBild() => _gedehnt(planke, plankeMitte);
+
   /// Hintergrund eines Hauptknopfs — für `ButtonStyle.backgroundBuilder`.
   ///
   /// So bekommen **alle** `FilledButton`s die Planke über das Theme, statt

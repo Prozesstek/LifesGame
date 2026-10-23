@@ -12,6 +12,7 @@ import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/ui/anschlagtafel.dart';
 
 import 'test_view.dart';
 
@@ -209,5 +210,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HabitsScreen), findsOneWidget);
+  });
+
+  testWidgets('abgehakt schlägt ein Stempel auf den Zettel', (tester) async {
+    // Die Tafel (23.10.): Der Zettel wandert nach dem Häkchen nach unten
+    // und behält dabei seinen Zustand — sonst läge der Stempel sofort da.
+    await startseite(
+      tester,
+      const HabitTracker.empty().activate(starter.id).activate(zweite.id),
+    );
+    final stempel = inDerKarte(find.byKey(Steckbrief.stempelKey));
+    double deckung() => tester
+        .widget<Opacity>(
+          find.ancestor(of: stempel, matching: find.byType(Opacity)).first,
+        )
+        .opacity;
+    expect(stempel, findsNothing);
+
+    await tester.tap(inDerKarte(find.text(zweite.name)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(stempel, findsOneWidget);
+    expect(deckung(), lessThan(1));
+
+    await tester.pumpAndSettle();
+    expect(deckung(), 1);
   });
 }

@@ -14,6 +14,7 @@ import 'package:lifes_game/lagerfeuer/lagerfeuer_screen.dart';
 import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/ui/anschlagtafel.dart';
 
 import 'test_view.dart';
 
@@ -110,10 +111,11 @@ void main() {
 
     expect(c.read(earnedKeysProvider), vorher + DailyQuests.keysPerQuest);
     expect(c.read(claimableQuestsProvider), hasLength(abholbar - 1));
+    // Auf dem abgeholten Blatt liegt der Stempel, auf keinem anderen.
     expect(
       find.descendant(
         of: find.byType(DailyQuestsCard),
-        matching: find.byIcon(Icons.check_circle),
+        matching: find.byKey(Steckbrief.stempelKey),
       ),
       findsOneWidget,
     );
@@ -178,5 +180,35 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  testWidgets('der Stempel schlägt beim Abholen auf, beim Öffnen liegt er '
+      'schon', (tester) async {
+    // Fiel die Hülle des Knopfs beim Abholen weg, baute sich das Blatt
+    // neu, und der Stempel lag sofort da (23.10.).
+    double deckung() => tester
+        .widget<Opacity>(
+          find
+              .ancestor(
+                of: find.byKey(Steckbrief.stempelKey),
+                matching: find.byType(Opacity),
+              )
+              .first,
+        )
+        .opacity;
+
+    final c = container(beideErledigt());
+    await zeige(tester, c, const LagerfeuerScreen());
+    await tester.tap(find.byKey(DailyQuestsCard.abholenKey).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(deckung(), lessThan(1));
+    await tester.pumpAndSettle();
+    expect(deckung(), 1);
+
+    // Dieselbe Tafel neu geöffnet: kein zweites Aufschlagen.
+    await zeige(tester, c, const SizedBox());
+    await zeige(tester, c, const LagerfeuerScreen());
+    expect(deckung(), 1);
   });
 }
