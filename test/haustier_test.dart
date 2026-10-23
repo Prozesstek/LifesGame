@@ -202,7 +202,21 @@ void main() {
 
       expect(c.read(haustierProvider).art, HaustierArt.drache);
       expect(find.byKey(HaustierKarte.tierKey), findsOneWidget);
-      expect(find.text('Drache'), findsOneWidget);
+      // Auf der Karte nur Tier und Level (23.10.), der Name steht im
+      // Blatt — und für den Vorleser.
+      expect(find.text('Drache'), findsNothing);
+      final level = HaustierWachstum.levelFuer(c.read(haustierTageProvider));
+      expect(
+        find.descendant(
+          of: find.byKey(HaustierKarte.levelKey),
+          matching: find.text('$level'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('^Drache, Level $level')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('ohne Gewohnheit wartet das Ei: zuerst kommt die Frage', (
