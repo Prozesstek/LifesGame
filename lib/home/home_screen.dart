@@ -11,6 +11,7 @@ import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
+import '../statistik/statistik_screen.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
@@ -176,6 +177,17 @@ class HomeScreen extends ConsumerWidget {
                           image: HubCircleImage.plain,
                           leuchtet: leuchtet,
                           onTap: () => _open(context, const LadderScreen()),
+                        ),
+                      ),
+                      // **Die Statistik** (ADR-0087) oben, neben dem, was
+                      // sie zählt — mit dem ersten Häkchen.
+                      kreis(
+                        Bereich.statistik,
+                        (_) => HubCircle(
+                          icon: Icons.insights,
+                          label: 'Statistik',
+                          image: HubCircleImage.plain,
+                          onTap: () => _open(context, const StatistikScreen()),
                         ),
                       ),
                     ],

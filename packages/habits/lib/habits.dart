@@ -15,6 +15,7 @@ export 'src/plan.dart';
 export 'src/rewards.dart';
 export 'src/skill_area.dart';
 export 'src/stack.dart';
+export 'src/statistik.dart';
 export 'src/streak_freeze.dart';
 export 'src/streak_rule.dart';
 export 'src/timer.dart';

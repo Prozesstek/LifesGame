@@ -463,7 +463,13 @@ void main() {
     ) async {
       await starte(tester, SaveData(habits: einHaekchen));
 
-      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      // Mit dem ersten Häkchen auch die Statistik (ADR-0087): Ab dann
+      // gibt es einen Tag zu sehen.
+      expect(aufgedeckt(tester), <String>[
+        'Gewohnheiten',
+        'Theorie',
+        'Statistik',
+      ]);
       expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
       // Die Tagesaufgaben warten am Lagerfeuer (ADR-0076).
