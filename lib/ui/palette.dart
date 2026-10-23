@@ -144,6 +144,43 @@ abstract final class Palette {
   static const Color raumKrone = Color(0xFFA6740A);
 
   // ---------------------------------------------------------------
+  // Die Anschlagtafel der Tagesaufgaben (`lib/ui/anschlagtafel.dart`)
+  // ---------------------------------------------------------------
+  //
+  // **Dunkler als der Rahmen**, damit die Blätter darauf hell stehen.
+  // Schrift steht nur auf den Blättern (Pergament) und auf dem Schild
+  // (Planke, mit [textOnDark]) — nie auf den Brettern selbst.
+
+  /// Die Fugen zwischen den Brettern.
+  static const Color tafelFuge = Color(0xFF120A04);
+
+  /// Die Bretter, nebeneinander leicht verschieden.
+  static const List<Color> tafelBretter = <Color>[
+    Color(0xFF3A2413),
+    Color(0xFF32200F),
+    Color(0xFF3F2816),
+    Color(0xFF2E1C0D),
+  ];
+
+  /// Die Maserung, einen Ton dunkler als das Brett.
+  static const Color tafelMaserung = Color(0xFF26170A);
+
+  /// Der Lichtstreif an der linken Kante jedes Bretts.
+  static const Color tafelKante = Color(0xFF4E341C);
+
+  static const Color nagel = Color(0xFF6E6458);
+  static const Color nagelLicht = Color(0xFFB3A897);
+
+  /// Die Reißzwecke über einem Blatt. **Messing, nicht Rot**: Rot heißt
+  /// in der App Gegner oder Verlust.
+  static const Color messing = Color(0xFFC9A04A);
+  static const Color messingLicht = Color(0xFFF3DC95);
+  static const Color messingSchatten = Color(0xFF6E5420);
+
+  /// Der Schatten eines Blatts auf den Brettern.
+  static const Color blattSchatten = Color(0x8C000000);
+
+  // ---------------------------------------------------------------
   // Die Flächen der Fähigkeiten — nur auf dem dunklen Boden der Grube
   // ---------------------------------------------------------------
   //

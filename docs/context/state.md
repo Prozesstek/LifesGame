@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 997, dazu die acht Packages (theory 208, habits 366, gear
+**Tests:** App 999, dazu die acht Packages (theory 208, habits 366, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,71 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 23.10.2026, ganz zuletzt: Tagesaufgaben und „Heute“ als Anschlagtafel
+
+Frederik: „Dailies als Tafel mäßig. Also mit so einem dunklen
+Holzhintergrund und vielleicht den einzelnen Dailies als Steckbrief.
+Bisschen wie ein Ankündigungsboard in einer Gemeinde“. Gebaut ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Die Tafel** | dunkle, senkrechte Bretter mit Maserung und Nägeln im Holzrahmen der Karten — gezeichnet auf dem Raster der Bildpunkte, damit sie neben Rahmen und Planke nicht weich aussieht |
+| **Das Schild** | eine Planke oben auf dem Rahmen, darauf Fahne und „1 / 3“ |
+| **Steckbriefe** | je Aufgabe ein Blatt mit Messing-Reißzwecke, leicht schief, unten abgerissen: oben das Zeichen wie das Bild auf einem Steckbrief, darunter der Satz, Kästchen zum Ankreuzen, unter dem Strich die Belohnung |
+| **Abholen** | ein Tipp aufs ganze Blatt; die Belohnung wird dafür zum braunen Knopf |
+| **Abgeholt** | ein grüner Stempel mit Häkchen schlägt oben rechts aufs Bild, das Blatt wird dunkler; wer die Tafel öffnet, sieht ihn liegen |
+
+**Ohne Rückfrage entschieden:** drei Blätter nebeneinander, auch wenn
+heute nur zwei hängen (dann bleibt Platz); **Messing statt Rot** für
+die Reißzwecken, weil Rot Gegner heißt; die Bretter dunkler als der
+Rahmen, ihre Farben stehen in der Palette.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844, auch am Feuer und
+mitten im Stempeln):
+
+- **Der Stempel schlug nie auf**: Beim Abholen fiel die Hülle des
+  Knopfs weg, das Blatt baute sich neu und hatte den Stempel von
+  Anfang an (`gotchas.md`). Ein Test hält es fest und fällt ohne die
+  Korrektur um.
+- Die Maserung hing unten aus dem Rahmen.
+- „Hol nach, was gestern liegen blieb: …“ schnitt längere Namen ab;
+  ein Blatt darf jetzt sieben Zeilen haben.
+- **Der Titel „Lagerfeuer“ stand seit dem 18.10. in Tinte auf dem
+  Nachthimmel** und war kaum zu lesen. Jetzt hell.
+
+**Danach** (Frederik: „die Gewohnheiten aber eigentlich auch“), in
+einer Fragerunde beide Male wie empfohlen: **„Heute“ auf der Startseite
+ist jetzt auch eine Tafel**, jede Gewohnheit ein **Zettel
+untereinander** — nicht als Steckbrief im Raster, damit „Wann“ lesbar
+bleibt und Gekoppeltes eingerückt unter seinem Anker steht. Das Schild
+trägt „Heute“, die Flamme der Tageskette und den Stand und führt wie
+vorher der Kopf zu den Gewohnheiten. Abgehakt bleibt der Kreis, dazu
+schlägt ein kleiner Stempel auf; Durchstreichen und das Zeichen des
+Gebiets fallen auf erledigten Zetteln weg. Der Gewohnheiten-Bildschirm
+bleibt, wie er ist — er wäre der nächste Block.
+
+**Beim Rendern gefunden — ein Fehler seit ADR-0079:** Der Ring des
+Mentors um „Heute“ fiel nach dem ersten Häkchen weg, und dabei baute
+sich die ganze Karte neu. Beim allerersten Häkchen überhaupt sprang
+deshalb der Kreis nicht auf und die Flamme zündete nicht; jetzt läge
+der Stempel sofort da. Der Ring blendet jetzt aus, statt wegzufallen
+(`ZeigeRing.sichtbar`); ein Test fällt ohne die Korrektur um.
+
+App 999 (vorher 997). Startseite mit vier Gewohnheiten, einer
+gekoppelten und zwei erledigten in 390 × 844 gerendert und angesehen.
+**Nicht am Handy.**
+
+### Offen
+
+- **Der Gewohnheiten-Bildschirm** als Tafel — eigener Block, wenn die
+  Startseite gefällt.
+- Ein kleines Dach über der Tafel, wie am Gemeindehaus — wenn sie noch
+  mehr nach Dorf aussehen soll.
+- Ob drei schmale Blätter am Handy lesbar sind (zwölf Punkte Schrift).
+- „Heute“ ist höher als vorher: Mit fünf Gewohnheiten rollt die
+  Startseite früher.
 
 ## 23.10.2026, abends: die Seite ist ein Buch
 

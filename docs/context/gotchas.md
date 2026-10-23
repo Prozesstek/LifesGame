@@ -3,6 +3,43 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Eine Hülle, die wegfällt, baut das Kind neu — samt Zustand
+
+Ein Steckbrief der Tagesaufgaben ist nur dann ein Knopf, wenn es etwas
+abzuholen gibt. Der erste Entwurf schrieb das so:
+
+```dart
+if (!abholbar) return blatt;
+return Semantics(child: Druck(child: GestureDetector(child: blatt)));
+```
+
+Beim Abholen fällt die Hülle weg, und das Blatt steht an einer anderen
+Stelle im Baum. Flutter baut es dann **neu**, mit neuem `State` — und
+der neue `Steckbrief` beginnt mit dem Stempel schon auf 1. Der Stempel,
+der beim Abholen aufschlagen sollte, lag einfach da. Kein Fehler, keine
+Meldung, und alle Tests grün, weil keiner nach dem Aufschlagen fragte.
+
+Gesehen hat es die Vorschau: Das Zwischenbild 120 ms nach dem Abholen
+sah aus wie das Endbild.
+
+**Abhilfe:** Die Hülle bleibt immer stehen und wird nur abgeschaltet
+(`onTap: null`, `Druck(enabled: false)`). Der Schlüssel, an dem Tests
+das Abholbare finden, sitzt am Knopf darin, nicht an der Hülle — ein
+wechselnder `Key` baut ebenfalls neu.
+
+**Am selben Tag ein zweites Mal, eine Ebene höher:** Der Ring des
+Mentors (`Zeigefinger`) stand nur um „Heute“, solange der Schritt
+„abhaken“ dran war, und gab sonst sein Ziel bloß zurück. Mit dem ersten
+Häkchen fiel er weg — und die ganze Karte baute sich neu. Beim
+allerersten Häkchen überhaupt sprang deshalb seit ADR-0079 der Kreis
+nicht auf, und die Flamme zündete nicht. Gemerkt hat es erst ein Test
+für den Stempel. Jetzt blendet der Ring aus (`ZeigeRing.sichtbar`).
+
+**Regel:** Wer ein Widget mit Zustand bedingt einhüllt, hüllt es immer
+ein und schaltet die Hülle ab. Eine Animation, die beim Wechsel
+laufen soll, bekommt einen Test, der ein Zwischenbild ansieht — **auf
+dem Bildschirm, auf dem sie läuft**, samt allem, was dort darum liegt.
+
 ## Ein `TextPainter` im Maler kennt die Schrift der App nicht
 
 Das Jahresraster der Statistik (ADR-0087) malt die Monatsnamen mit einem
