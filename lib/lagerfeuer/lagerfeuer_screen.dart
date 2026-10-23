@@ -89,6 +89,9 @@ class LagerfeuerScreen extends ConsumerWidget {
         // Derselbe Himmel wie oben im Bild — der Balken ist ein Stück
         // Nacht, keine Leiste aus Leder darüber.
         backgroundColor: FeuerBild.nachtOben,
+        // Der Titel stand in Tinte auf dem Nachthimmel und war kaum zu
+        // sehen (gefunden am 23.10. beim Ansehen der Tafel).
+        foregroundColor: Palette.textOnDark,
         surfaceTintColor: Colors.transparent,
       ),
       body: AufstiegHost(

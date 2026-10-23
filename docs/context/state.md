@@ -37,7 +37,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Haustier** | drei Eier, wächst an Tagen mit Häkchen, Zubehör für Gold — **in jeder Fassung** | ADR-0086, [`haustier.md`](../vorlagen/haustier.md) |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 981, dazu die acht Packages (theory 208, habits 345, gear
+**Tests:** App 982, dazu die acht Packages (theory 208, habits 345, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -133,6 +133,47 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 23.10.2026, ganz zuletzt: die Tagesaufgaben als Anschlagtafel
+
+Frederik: „Dailies als Tafel mäßig. Also mit so einem dunklen
+Holzhintergrund und vielleicht den einzelnen Dailies als Steckbrief.
+Bisschen wie ein Ankündigungsboard in einer Gemeinde“. Gebaut ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Die Tafel** | dunkle, senkrechte Bretter mit Maserung und Nägeln im Holzrahmen der Karten — gezeichnet auf dem Raster der Bildpunkte, damit sie neben Rahmen und Planke nicht weich aussieht |
+| **Das Schild** | eine Planke oben auf dem Rahmen, darauf Fahne und „1 / 3“ |
+| **Steckbriefe** | je Aufgabe ein Blatt mit Messing-Reißzwecke, leicht schief, unten abgerissen: oben das Zeichen wie das Bild auf einem Steckbrief, darunter der Satz, Kästchen zum Ankreuzen, unter dem Strich die Belohnung |
+| **Abholen** | ein Tipp aufs ganze Blatt; die Belohnung wird dafür zum braunen Knopf |
+| **Abgeholt** | ein grüner Stempel mit Häkchen schlägt oben rechts aufs Bild, das Blatt wird dunkler; wer die Tafel öffnet, sieht ihn liegen |
+
+**Ohne Rückfrage entschieden:** drei Blätter nebeneinander, auch wenn
+heute nur zwei hängen (dann bleibt Platz); **Messing statt Rot** für
+die Reißzwecken, weil Rot Gegner heißt; die Bretter dunkler als der
+Rahmen, ihre Farben stehen in der Palette.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844, auch am Feuer und
+mitten im Stempeln):
+
+- **Der Stempel schlug nie auf**: Beim Abholen fiel die Hülle des
+  Knopfs weg, das Blatt baute sich neu und hatte den Stempel von
+  Anfang an (`gotchas.md`). Ein Test hält es fest und fällt ohne die
+  Korrektur um.
+- Die Maserung hing unten aus dem Rahmen.
+- „Hol nach, was gestern liegen blieb: …“ schnitt längere Namen ab;
+  ein Blatt darf jetzt sieben Zeilen haben.
+- **Der Titel „Lagerfeuer“ stand seit dem 18.10. in Tinte auf dem
+  Nachthimmel** und war kaum zu lesen. Jetzt hell.
+
+App 982 (vorher 981). **Nicht am Handy.**
+
+### Offen
+
+- Ein kleines Dach über der Tafel, wie am Gemeindehaus — wenn sie noch
+  mehr nach Dorf aussehen soll.
+- Ob drei schmale Blätter am Handy lesbar sind (zwölf Punkte Schrift).
 
 ## 23.10.2026, zuletzt: die Kreise ohne Namen
 

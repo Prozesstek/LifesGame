@@ -3,6 +3,34 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Eine Hülle, die wegfällt, baut das Kind neu — samt Zustand
+
+Ein Steckbrief der Tagesaufgaben ist nur dann ein Knopf, wenn es etwas
+abzuholen gibt. Der erste Entwurf schrieb das so:
+
+```dart
+if (!abholbar) return blatt;
+return Semantics(child: Druck(child: GestureDetector(child: blatt)));
+```
+
+Beim Abholen fällt die Hülle weg, und das Blatt steht an einer anderen
+Stelle im Baum. Flutter baut es dann **neu**, mit neuem `State` — und
+der neue `Steckbrief` beginnt mit dem Stempel schon auf 1. Der Stempel,
+der beim Abholen aufschlagen sollte, lag einfach da. Kein Fehler, keine
+Meldung, und alle Tests grün, weil keiner nach dem Aufschlagen fragte.
+
+Gesehen hat es die Vorschau: Das Zwischenbild 120 ms nach dem Abholen
+sah aus wie das Endbild.
+
+**Abhilfe:** Die Hülle bleibt immer stehen und wird nur abgeschaltet
+(`onTap: null`, `Druck(enabled: false)`). Der Schlüssel, an dem Tests
+das Abholbare finden, sitzt am Knopf darin, nicht an der Hülle — ein
+wechselnder `Key` baut ebenfalls neu.
+
+**Regel:** Wer ein Widget mit Zustand bedingt einhüllt, hüllt es immer
+ein und schaltet die Hülle ab. Eine Animation, die beim Wechsel
+laufen soll, bekommt einen Test, der ein Zwischenbild ansieht.
+
 ## Ein linearer Würfel macht aus gleichen Abständen gleiche Würfe
 
 Die Beute der Grube (ADR-0083) würfelt jeden Fund mit eigenem Würfel:
