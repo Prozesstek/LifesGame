@@ -26,7 +26,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085 |
-| **Startseite** | sieben Kreise, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079 |
+| **Startseite** | **vor dem Berg**, acht Kreise ohne Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
@@ -160,10 +160,12 @@ kleiner), ab dem ersten Häkchen (statt nach sieben Tagen) und **fl_chart**
 keins.
 
 **Ohne Rückfrage entschieden:** Ein bester Monat braucht sieben fällige
-Tage, die Gewohnheit des Jahres vierzehn. Die vier Kreise oben werden am
-schmalen Handy kleiner, statt überzulaufen (beim Rendern gefunden: 2
-Punkte zu breit). Ein Tipp aufs Raster zeigt den Tag darunter, statt 365
-Tooltips zu bauen.
+Tage, die Gewohnheit des Jahres vierzehn. Ein Tipp aufs Raster zeigt den
+Tag darunter, statt 365 Tooltips zu bauen.
+
+**Beim Mergen:** Auf `main` stehen die Kreise seit heute ohne Namen in
+zwei Holzrahmen vor dem Berg. Damit passen vier große oben ohne
+Verkleinerung; die Rechnung dafür ist wieder weg.
 
 **Beim Ansehen gefunden** (gerendert in 390 × 844 mit echter Schrift): Im
 Jahresraster standen die Monate als Kästchen — der Maler nahm nicht die
@@ -189,6 +191,52 @@ Handy.**
 - Mengen über dem Ziel werden nicht gespeichert.
 - Wie schnell der Jahresrückblick bei Jahren voller Daten rechnet, ist
   nicht gemessen.
+
+## 23.10.2026, zuletzt: die Kreise ohne Namen
+
+Frederik: „ich würde die texte unten den buttons entfernen“. Die sieben
+Kreise der Startseite tragen nur noch ihr Zeichen (ADR-0060: die App
+geht ohne Lesen). Der Name bleibt für den Vorleser und als Schlüssel
+für Tests (`HubCircle.keyFor`); 16 Tests suchen den Kreis jetzt darüber
+statt über den Text.
+
+**Danach** (Frederik: „dass die Button mit den Holzrahmen unten und oben
+abschließen … Sie sollen sozusagen unten und oben einen rahmen bilden“):
+Die beiden Holzrahmen gehen jetzt über die ganze Breite und sitzen
+bündig am oberen und unteren Rand; hinter Statusleiste und Gestenleiste
+des Handys liegt nur Holz (`_Leiste` mit `SafeArea` innen). Level und
+Gold stehen darunter, rechts über „Heute“. Der Kasten des Mentors lässt
+jetzt auch oben Platz (`MentorFlaeche.obenFrei`).
+
+In 390 × 844 gerendert und angesehen, auch mit Statusleiste. App 981, unverändert. **Nicht am
+Handy.** Offen: ob Laden und Kampf ohne Namen zu erkennen sind — ein
+neuer Spieler sieht beide zum ersten Mal ohne Wort.
+
+## 23.10.2026, danach: der Berg hinter der Startseite
+
+Frederik schickte ein Bild (ein verschneiter Berg, Pixelart): „können
+wir das als Hintergrund für den Startscreen nehmen, vielleicht mit
+bisschen weniger transparenz? Und außerdem fände ich so eine Art
+Holzrahmen um die Button gruppen oben und unten cool“.
+
+| Was | Wie |
+|---|---|
+| **Hintergrund** | `assets/UI/Berg.jpg`, aus Frederiks Bild: unten der dunkle Streifen abgeschnitten, auf 880 × 1017 verkleinert (4,7 MB → 170 KB); füllt den Bildschirm, mittig beschnitten |
+| **Schleier** | ein Viertel Leder darüber (`HomeScreen.bergSchleier`), damit Karten davor stehen |
+| **Holzrahmen** | `HolzGruppe` um die drei Kreise oben und die vier unten: der Rahmen der Karten, innen abgedunkeltes Holz statt Pergament |
+| **Rand** | die Startseite hat seitlich 12 statt 20 Punkte, sonst passten die vier unteren Kreise samt Rahmen nicht |
+
+**Ohne Rückfrage entschieden:** „weniger Transparenz“ gelesen als: der
+Berg kräftig, nur leicht abgedunkelt. Wer ihn heller oder dunkler will,
+dreht an `bergSchleier` (0 bis 1).
+
+In 390 × 844 gerendert und angesehen. App 981, unverändert. **Nicht am
+Handy.**
+
+### Offen
+
+- Die Herkunft des Bildes steht nur hier: Frederiks Datei vom Desktop.
+- Andere Bildschirme liegen weiter auf Leder.
 
 ## 23.10.2026: das Haustier für alle
 

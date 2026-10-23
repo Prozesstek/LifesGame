@@ -85,8 +85,9 @@ Jahres vierzehn — sonst gewönne der erste Tag mit 1 von 1.
 
 ## Konsequenzen
 
-- **Acht Kreise auf der Startseite**; die obere Reihe hat vier und wird
-  am schmalen Handy etwas kleiner (höchstens 72 Punkte).
+- **Acht Kreise auf der Startseite**, oben vier. Das passt, weil die
+  Kreise seit demselben Tag ohne Namen stehen; mit Namen wären vier
+  große am 390er Handy 2 Punkte zu breit gewesen.
 - **fl_chart 1.3.0** ist die erste Bibliothek für Graphen im Projekt. Sie
   verlangt Flutter 3.27.4 oder neuer; die CI läuft auf 3.44.9.
 - **Mengen sind auf erledigten Tagen das Ziel**, nicht mehr: Beim

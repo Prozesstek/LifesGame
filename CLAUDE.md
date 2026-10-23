@@ -178,7 +178,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm: **acht** Kreise — oben vier, die am schmalen Handy etwas kleiner werden —, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Bild (`Mentor.bild`, noch ein Platzhalter) | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten über einem Bildschirm (`MentorFlaeche`) — **nimmt keinen Tipp an** | Flutter |
@@ -257,7 +257,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/dev/grube_werkbank.dart` | **die Werkbank in der Grube**, nur auf dem Dev-Stand: Funde jeder Seltenheit vor den Helden legen, Gegner jeder Art beschwören; der Lauf steht still, solange sie offen ist | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
-| `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche | Flutter |
+| `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche, `HolzGruppe` um die Kreise der Startseite | Flutter |
 | `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`) | Flutter |
 | `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken, grüne Funken zum Gebiet** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |

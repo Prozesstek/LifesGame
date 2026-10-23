@@ -419,6 +419,51 @@ class HolzKarte extends StatelessWidget {
   }
 }
 
+/// Ein Holzrahmen um eine **Gruppe von Knöpfen** — die Kreise der
+/// Startseite (Wunsch vom 23.10.2026: „damit die zusammenhängender
+/// aussehen“).
+///
+/// Derselbe Rahmen wie bei [HolzKarte], innen aber **kein Pergament**:
+/// Die Mitte des Rahmens ist selbst Holz, und darüber liegt Leder, das
+/// es abdunkelt. Die Namen unter den Kreisen stehen in den Farben für
+/// dunklen Grund.
+class HolzGruppe extends StatelessWidget {
+  const HolzGruppe({
+    required this.child,
+    this.padding = const EdgeInsets.fromLTRB(4, 8, 4, 4),
+    super.key,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  /// Wie stark das Leder das Holz innen abdunkelt — 0 helles Holz, 1
+  /// ganz dunkel.
+  static const double deckung = 0.6;
+
+  /// Was der Rahmen samt Innenabstand oben und unten an Höhe dazugibt.
+  static const double hoeheDazu = 2 * Holz.kartenRand + 12;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: Holz._gedehnt(Holz.rahmen, Holz.rahmenMitte, zoom: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(Holz.kartenRand),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Palette.background.withValues(alpha: deckung),
+            border: Border.all(color: Holz.kante, width: 1.5),
+          ),
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+  }
+}
+
 /// Ein Dialog im hängenden Holzrahmen — für `showDialog`.
 ///
 /// Die Hülle, die das Ergebnisblatt schon trug, als eine Stelle: Der

@@ -492,7 +492,7 @@ void main() {
       // Keine Seite gelesen, keine Fähigkeit: nur der Waffenzug.
       expect(c.read(activeMovesProvider), hasLength(1));
 
-      await tester.tap(find.text('Kampf'));
+      await tester.tap(find.byKey(HubCircle.keyFor('Kampf')));
       await tester.pumpAndSettle();
       expect(find.byType(LadderScreen), findsOneWidget);
 
@@ -523,7 +523,10 @@ void main() {
     testWidgets('ein versteckter Kreis nimmt keinen Tipp an', (tester) async {
       await starte(tester);
 
-      await tester.tap(find.text('Laden'), warnIfMissed: false);
+      await tester.tap(
+        find.byKey(HubCircle.keyFor('Laden')),
+        warnIfMissed: false,
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(HomeScreen), findsOneWidget);
