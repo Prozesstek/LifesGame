@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 980 Tests
+flutter test                       # 981 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
@@ -90,9 +90,9 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/abilities` | woher eine Fähigkeit oder Ultimate kommt und wann sie offen ist | 43 |
 | `packages/identity` | 25 Titel — nur ihr Wortlaut, Name | 25 |
 | `packages/achievements` | 34 Meilensteine, 8 Entdeckungen, Ruhm | 25 |
-| `packages/haustier` | **Prototyp**: drei Eier, Wachsen an Tagen mit Häkchen, Laune, Zubehör | 21 |
+| `packages/haustier` | **das Haustier** (ADR-0086): drei Eier, Wachsen an Tagen mit Häkchen, Laune, Zubehör | 21 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Skills, Grube, Laden, Charakter, Sammlung | 980 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Skills, Grube, Laden, Charakter, Sammlung | 981 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

@@ -17,8 +17,9 @@ import 'haustier_blatt.dart';
 /// Ohne Ei steht hier die Wahl zwischen dreien. Ein Tipp auf das Tier
 /// öffnet sein Blatt.
 ///
-/// **Nur im Entwicklermodus** zu sehen (`devModeAvailable`, gefragt auf
-/// der Startseite): Es ist ein Prototyp, bis ihr beide es gespielt habt.
+/// Seit ADR-0086 **in jeder Fassung**, sobald es eine Gewohnheit gibt
+/// (gefragt auf der Startseite). Nur das Vorspulen im Blatt bleibt dem
+/// Entwicklermodus.
 class HaustierKarte extends ConsumerWidget {
   const HaustierKarte({super.key});
 

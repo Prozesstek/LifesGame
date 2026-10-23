@@ -18,7 +18,7 @@ import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
 
-/// Das Haustier (Prototyp, 22.10.2026): Es wächst an Tagen mit Häkchen,
+/// Das Haustier (ADR-0086): Es wächst an Tagen mit Häkchen,
 /// leidet nie, und sein Zubehör kostet echtes Gold.
 void main() {
   const start = Day(2026, 10, 1);
@@ -203,6 +203,19 @@ void main() {
       expect(c.read(haustierProvider).art, HaustierArt.drache);
       expect(find.byKey(HaustierKarte.tierKey), findsOneWidget);
       expect(find.text('Drache'), findsOneWidget);
+    });
+
+    testWidgets('ohne Gewohnheit wartet das Ei: zuerst kommt die Frage', (
+      tester,
+    ) async {
+      // Der echte erste Start (ADR-0086), nicht `allesOffen`.
+      useTallView(tester);
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: HomeScreen())),
+      );
+      await tester.pump();
+
+      expect(find.byType(HaustierKarte), findsNothing);
     });
 
     testWidgets('ein Tipp öffnet das Blatt mit dem Zubehör', (tester) async {
