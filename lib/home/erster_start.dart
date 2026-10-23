@@ -1,4 +1,4 @@
-/// Die sieben Bereiche der Startseite.
+/// Die acht Bereiche der Startseite.
 enum Bereich {
   gewohnheiten,
   kampf,
@@ -7,6 +7,9 @@ enum Bereich {
   laden,
   ausruestung,
   charakter,
+
+  /// Die Statistik der Gewohnheiten (ADR-0087) — mit dem ersten Häkchen.
+  statistik,
 }
 
 /// Was die Aufdeck-Regel wissen muss — Zahlen, keine Objekte.
@@ -125,6 +128,7 @@ class ErsterStart {
       Bereich.laden,
       Bereich.ausruestung,
       Bereich.charakter,
+      Bereich.statistik,
     },
     null,
     false,
@@ -179,7 +183,7 @@ class ErsterStart {
 
   bool zeigt(Bereich bereich) => sichtbar.contains(bereich);
 
-  /// Ob alle sieben Kreise stehen.
+  /// Ob alle acht Kreise stehen.
   bool get fertig => sichtbar.length == Bereich.values.length;
 
   /// Tagesaufgaben und Truhe kommen mit dem ersten Häkchen, wie die
@@ -226,6 +230,10 @@ class ErsterStart {
         Bereich.laden,
       if (s.jeBesessen > 0) Bereich.ausruestung,
       if (s.level >= levelFuerCharakter) Bereich.charakter,
+      // **Mit dem ersten Häkchen** (ADR-0087): Ab dann gibt es einen Tag
+      // zu sehen. Nicht über `abgehakt` — ein Sieg ohne Häkchen hätte
+      // nichts, was die Statistik zeigen könnte.
+      if (s.haekchen > 0) Bereich.statistik,
     };
 
     return ErsterStart._(

@@ -1698,6 +1698,40 @@ class HabitTracker {
     }
   }
 
+  /// Die längste Kette, die [habitId] je hatte — für die Rekorde der
+  /// Statistik (ADR-0087). Dieselbe Regel wie [longestStreak].
+  int longestStreakOf(String habitId) {
+    final tage = _checks[habitId];
+    if (tage == null || tage.isEmpty) return 0;
+    var best = 0;
+    StreakRule.walk(
+      from: tage.reduce((a, b) => a < b ? a : b),
+      to: tage.reduce((a, b) => a > b ? a : b),
+      stateOf: (cursor) => _habitDay(habitId, cursor),
+      onDone: (_, streak) {
+        if (streak > best) best = streak;
+      },
+    );
+    return best;
+  }
+
+  // --- Statistik (ADR-0087) ---
+
+  /// Jede Gewohnheit, die je ein Häkchen oder einen Plan hatte — auch
+  /// gestoppte. Die Statistik zählt sie mit.
+  Set<String> get trackedIds => <String>{..._checks.keys, ..._plans.keys};
+
+  /// Je Gewohnheit der Tag ihres ersten Häkchens.
+  Map<String, Day> get firstCheckDays => _firstChecks;
+
+  /// Ob [habitId] an [day] fällig war — nach dem Plan, der **damals**
+  /// galt, und erst seit es sie gibt. Dieselbe Regel wie die Tageskette.
+  /// [firstCheck] kommt aus [firstCheckDays], damit ein Gang über viele
+  /// Tage das erste Häkchen nicht jedes Mal neu sucht.
+  bool wasDueOn(String habitId, Day day, {required Day? firstCheck}) {
+    return _wasDueOn(habitId, firstCheck, day);
+  }
+
   // --- Ertrag ---
 
   /// Gesamte Erfahrung aus allen Häkchen, mit dem Multiplikator, der am

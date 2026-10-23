@@ -50,6 +50,24 @@ abstract final class Palette {
   static const Color surfaceSunken = Color(0xFFC69A5C);
 
   // ---------------------------------------------------------------
+  // Das Buch im Wissensbaum (23.10.2026)
+  // ---------------------------------------------------------------
+  //
+  // **Heller als das Pergament**, damit die Seite sich als Buch von der
+  // App abhebt: altes, cremefarbenes Papier in einem Ledereinband. Die
+  // Schrift darauf ist dieselbe wie auf Pergament.
+
+  /// Das Buchpapier.
+  static const Color papier = Color(0xFFF3E6C6);
+
+  /// Fasern, Flecken und Kanten im Papier, der Stapel der Seiten.
+  static const Color papierFaser = Color(0xFFC9AE7E);
+
+  /// Der Ledereinband — hell im Licht, dunkel am Rand.
+  static const Color einband = Color(0xFF6B3A1C);
+  static const Color einbandDunkel = Color(0xFF3B1D0B);
+
+  // ---------------------------------------------------------------
   // Schrift auf Pergament
   // ---------------------------------------------------------------
 

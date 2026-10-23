@@ -40,6 +40,29 @@ ein und schaltet die Hülle ab. Eine Animation, die beim Wechsel
 laufen soll, bekommt einen Test, der ein Zwischenbild ansieht — **auf
 dem Bildschirm, auf dem sie läuft**, samt allem, was dort darum liegt.
 
+## Ein `TextPainter` im Maler kennt die Schrift der App nicht
+
+Das Jahresraster der Statistik (ADR-0087) malt die Monatsnamen mit einem
+`TextPainter` in einem `CustomPainter`. Ein `TextStyle` ohne Schriftart
+nimmt dort **nicht** die Schrift des Themes — die kommt nur über
+`DefaultTextStyle` an `Text`-Widgets. Gerendert standen die Monate als
+schwarze Kästchen da (die Ersatzschrift der Tests); im Browser wäre es
+eine andere Schrift als im Rest der Seite.
+
+**Abhilfe:** den Stil im `build` aus `DefaultTextStyle.of(context)`
+holen und dem Maler mitgeben.
+
+## `scrollUntilVisible` hört auf, sobald das Ziel gebaut ist
+
+`tester.scrollUntilVisible(finder, …)` rollt, **bis der Finder etwas
+findet** — nicht, bis es auf dem Bildschirm steht. Eine `ListView` baut
+über ihren `cacheExtent` Kinder weit unterhalb des Bildes; dann rollt der
+Test gar nicht, und der folgende `tap` geht ins Leere („Offset … outside
+the bounds of the root“). Steht dazu ein zweites `Scrollable` im Bild
+(das Jahresraster rollt quer), wirft er „Too many elements“.
+
+**Abhilfe:** `tester.ensureVisible(finder)` und danach `pumpAndSettle`.
+
 ## Ein linearer Würfel macht aus gleichen Abständen gleiche Würfe
 
 Die Beute der Grube (ADR-0083) würfelt jeden Fund mit eigenem Würfel:

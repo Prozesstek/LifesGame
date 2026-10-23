@@ -9,6 +9,10 @@ Der darf nicht strafen. Zwei weiche, tiefe Schläge abwärts, wie ein
 „hm“ — man hört, dass es nicht saß, und nicht, dass man versagt hat.
 Dumpf statt glockig, damit er sich von der Leiter unterscheidet.
 
+**Das Umblättern** (`Blaettern`) raschelt: helles Rauschen, das in
+Körnern knistert, anschwillt und mit einem weichen Klapp ausläuft, wenn
+das Blatt liegt.
+
 **Platzhalter**, gerechnet wie die Klänge der Grube. Wer bessere hat,
 legt sie unter demselben Namen ab oder ändert die Zeile in
 `SoundEffect` (`lib/audio/sound_effects.dart`).
@@ -23,7 +27,9 @@ Braucht nur die Standardbibliothek und die Helfer aus
 
 import math
 
-from kampf_klaenge import ZIEL, _Ton, _klang, schreibe
+import random
+
+from kampf_klaenge import ZIEL, _Rauschen, _Ton, _klang, schreibe
 
 
 class _Holz:
@@ -61,8 +67,39 @@ def falsch():
     return _klang(dauer, stimme, 0.32)
 
 
+def blaettern():
+    """Ein Blatt wird umgeschlagen: Papier schleift gut eine Viertel-
+    sekunde, dann klappt es leise auf. Leiser als jede Antwort."""
+    dauer = 0.42
+    schleifen = _Rauschen(saat=71, weich=0.55)
+    klapp = _Rauschen(saat=72, weich=0.06)
+    koerner = random.Random(73)
+    knistern = [1.0]
+
+    def stimme(t, anteil):
+        # Alle paar Millisekunden ein neues Korn: Papier knistert, es
+        # rauscht nicht gleichmässig.
+        if koerner.random() < 0.004:
+            knistern[0] = koerner.uniform(0.35, 1.0)
+        # Anschwellen bis 0,16 s, dann auslaufen.
+        if t < 0.16:
+            huelle = (t / 0.16) ** 1.5
+        else:
+            huelle = math.exp(-(t - 0.16) / 0.07)
+        papier = huelle * knistern[0] * schleifen.naechstes()
+        # Der Klapp, wenn das Blatt liegt: tief und kurz.
+        dt = t - 0.26
+        unten = 0.0
+        if dt >= 0:
+            unten = 2.2 * math.exp(-dt / 0.035) * min(1.0, dt / 0.004)
+        return papier + unten * klapp.naechstes()
+
+    return _klang(dauer, stimme, 0.22)
+
+
 KLAENGE = {
     "Falsch": falsch,
+    "Blaettern": blaettern,
 }
 
 

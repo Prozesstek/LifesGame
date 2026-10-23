@@ -73,7 +73,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, reines Dart, 345 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, **Statistik**, reines Dart, 366 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -85,6 +85,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_quests.dart` | die **drei Tagesaufgaben**: aus dem Datum gewürfelt, Stand aus der Historie, ein Schlüssel je abgeholter ([ADR-0055](docs/decisions/0055-tageskette-aufgaben-und-wiederholen.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/week_summary.dart` | der **Wochenrückblick**: was eine Woche gebracht hat, aus der Historie | nur Dart-SDK |
+| `packages/habits/lib/src/statistik.dart` | **die Statistik** ([ADR-0087](docs/decisions/0087-die-statistik.md)): Woche, Monat, Jahr, Gesamt; Quote **erledigt durch fällig nach dem Plan, der damals galt**, Vergleich mit den gleichen Tagen davor, Abschnitte für Balken und Kurve, Wochentage, Mengen, Rekorde, Jahresrückblick (`StatRechnung`) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
 | `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 137 Tests | nur Dart-SDK |
@@ -177,7 +178,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **sieben** Kreise in zwei Holzrahmen, unten vier kleinere, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Bild (`Mentor.bild`, noch ein Platzhalter) | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten über einem Bildschirm (`MentorFlaeche`) — **nimmt keinen Tipp an** | Flutter |
@@ -208,6 +209,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
 | `lib/habits/widgets/habit_timer_sheet.dart` | das Blatt mit dem Ring: Start, Pause, „schon erledigt“ — meldet nur, **hakt nicht ab** | Flutter |
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
+| `lib/statistik/statistik_screen.dart` | **die Statistik** (ADR-0087): Woche, Monat, Jahr, Gesamt mit Blättern; Quote, Raster, Balken, Kurve, Wochentage, Ringe je Gewohnheit, Rekorde — gesamt oder für eine Gewohnheit | Flutter |
+| `lib/statistik/jahresrueckblick_screen.dart` | **der Jahresrückblick**, der sich aufbaut — vom 20.12. bis 7.1. angekündigt | Flutter |
+| `lib/statistik/statistik_text.dart` | wie die Statistik spricht und **welche Farben sie trägt** (`StatFarbe`: grün wie das Häkchen, Eis blau, Ruhetag grau) — eine Stelle | Flutter |
+| `lib/statistik/widgets/kalender_raster.dart` | das Raster: Woche, Kalenderblatt, Jahr wie bei GitHub (gemalt, quer zu rollen), Gesamt je Jahr | Flutter |
+| `lib/statistik/widgets/statistik_graphen.dart` | Balken, Kurve und Wochentage mit **fl_chart** — rechnen nichts | Flutter |
 | `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
@@ -245,7 +251,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
-| `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen | Python |
+| `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen — und das **Rascheln beim Umblättern** | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat — Erfahrung, Gold, Punkte, Fähigkeiten **und Kampfwerte** (im Kampfmassstab, als eigener Summand in `heroPowerProvider`) | Flutter |
 | `lib/dev/grube_werkbank.dart` | **die Werkbank in der Grube**, nur auf dem Dev-Stand: Funde jeder Seltenheit vor den Helden legen, Gegner jeder Art beschwören; der Lauf steht still, solange sie offen ist | Flutter |
@@ -294,7 +300,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
-| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Bildschirm, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, Striche oben, „Weiter“ | Flutter |
+| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband mit dem Stapel der Seiten, das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
@@ -319,7 +326,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 983 Tests
+flutter test             # 999 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -338,7 +345,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 345 Tests
+dart test                              # 366 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -878,7 +885,7 @@ Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 
 | Frage | Antwortet |
 |---|---|
-| Welcher Kreis steht da? | `ErsterStart.aus` — Theorie mit dem ersten Häkchen, Fähigkeiten mit der ersten Seite, Kampf mit der ersten angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2 |
+| Welcher Kreis steht da? | `ErsterStart.aus` — Theorie mit dem ersten Häkchen, Fähigkeiten mit der ersten Seite, Kampf mit der ersten angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2, **Statistik mit dem ersten Häkchen** (ADR-0087) |
 | Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; null nach dem ersten Sieg |
 | Was sagt er hier? | `Mentor.satz(schritt, ort)` — eine Tabelle; ein Bildschirm legt `MentorFlaeche` um sich und `Zeigefinger` um sein Ziel |
 | Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |

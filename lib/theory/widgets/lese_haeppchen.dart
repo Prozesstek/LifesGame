@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
+import '../../audio/sound_effects.dart';
 import '../../ui/palette.dart';
 import 'schreib_text.dart';
+import 'umblaettern.dart';
 
 /// **Die Seite in Häppchen** — ein Abschnitt je Bildschirm statt einer
 /// Wand aus drei.
@@ -14,20 +18,28 @@ import 'schreib_text.dart';
 ///
 /// Bis zum 18.10. stand alles untereinander, und wer auf dem Handy die
 /// Seite öffnete, sah zuerst, wie lang sie ist.
-class LeseHaeppchen extends StatefulWidget {
+///
+/// **Seit dem 23.10. ein Buch** (AktivesBrett: „so aussehen als würde
+/// man umblättern“): Jeder Abschnitt steht auf einem Blatt Papier mit
+/// Falz, und „Weiter“ oder ein Wisch schlägt es am Rücken um, mit einem
+/// Rascheln ([Umblaettern]). Auf dem letzten schlägt „Fragen
+/// beantworten“ das Blatt auf ein leeres um, dann kommen die Fragen.
+/// Der Text schreibt sich weiter Wort für Wort, sobald das Blatt liegt.
+class LeseHaeppchen extends ConsumerStatefulWidget {
   const LeseHaeppchen({required this.lesson, required this.onStart, super.key});
 
   final Lesson lesson;
   final VoidCallback onStart;
 
+  /// Wie schnell die Striche oben nachziehen.
   static const Duration schieben = Duration(milliseconds: 300);
 
   @override
-  State<LeseHaeppchen> createState() => _LeseHaeppchenState();
+  ConsumerState<LeseHaeppchen> createState() => _LeseHaeppchenState();
 }
 
-class _LeseHaeppchenState extends State<LeseHaeppchen> {
-  late final PageController _seiten;
+class _LeseHaeppchenState extends ConsumerState<LeseHaeppchen> {
+  final GlobalKey<UmblaetternState> _buch = GlobalKey<UmblaetternState>();
   int _hier = 0;
 
   /// Der weiteste Abschnitt, der schon zu sehen war. Was davor liegt, ist
@@ -41,27 +53,18 @@ class _LeseHaeppchenState extends State<LeseHaeppchen> {
 
   bool get _amEnde => _hier >= _anzahl - 1;
 
-  @override
-  void initState() {
-    super.initState();
-    _seiten = PageController();
-  }
-
-  @override
-  void dispose() {
-    _seiten.dispose();
-    super.dispose();
-  }
-
   void _weiter() {
-    if (_amEnde) {
+    final buch = _buch.currentState;
+    if (buch == null) {
       widget.onStart();
       return;
     }
-    _seiten.nextPage(
-      duration: LeseHaeppchen.schieben,
-      curve: Curves.easeOutCubic,
-    );
+    buch.vor(schluss: widget.onStart);
+  }
+
+  void _rascheln() {
+    ref.read(soundPlayerProvider).play(SoundEffect.blaettern);
+    HapticFeedback.selectionClick();
   }
 
   @override
@@ -72,21 +75,26 @@ class _LeseHaeppchenState extends State<LeseHaeppchen> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: _Striche(anzahl: _anzahl, hier: _hier),
         ),
+        // Das aufgeschlagene Buch liegt mit etwas Rand auf dem Pergament.
         Expanded(
-          child: PageView.builder(
-            controller: _seiten,
-            itemCount: _anzahl,
-            onPageChanged: (i) => setState(() {
-              _hier = i;
-              if (i > _weitester) _weitester = i;
-            }),
-            itemBuilder: (context, i) => _Abschnitt(
-              zusammenfassung: i == 0 ? _lesson.summary : null,
-              abschnitt: i < _lesson.sections.length
-                  ? _lesson.sections[i]
-                  : null,
-              aktiv: i == _hier,
-              gelesen: i < _weitester,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Umblaettern(
+              key: _buch,
+              anzahl: _anzahl,
+              onRascheln: _rascheln,
+              onGeblaettert: (i) => setState(() {
+                _hier = i;
+                if (i > _weitester) _weitester = i;
+              }),
+              seite: (context, i, aktiv) => _Abschnitt(
+                zusammenfassung: i == 0 ? _lesson.summary : null,
+                abschnitt: i < _lesson.sections.length
+                    ? _lesson.sections[i]
+                    : null,
+                aktiv: aktiv,
+                gelesen: i < _weitester,
+              ),
             ),
           ),
         ),
@@ -160,7 +168,8 @@ class _Abschnitt extends StatelessWidget {
     final oben = zusammenfassung;
     final teil = abschnitt;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      // Links weicht der Text der Falz aus, rechts dem Stapel.
+      padding: const EdgeInsets.fromLTRB(BuchPapier.falz + 6, 18, 18, 20),
       children: <Widget>[
         if (oben != null) ...<Widget>[
           Text(
