@@ -30,6 +30,7 @@ import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
 import '../haustier/widgets/haustier_karte.dart';
+import '../haustier/haustier_controller.dart';
 import '../skills/widgets/gebiet_frage_karte.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
@@ -109,6 +110,8 @@ class HomeScreen extends ConsumerWidget {
     );
 
     final start = ref.watch(ersterStartProvider);
+    final hatTier = ref.watch(haustierProvider).art != null;
+    final zeigtTier = hatTier && !start.fragtNachGewohnheit;
 
     // Ein Kreis an seinem Platz: versteckt, bis er dran ist.
     Widget kreis(Bereich bereich, Widget Function(bool leuchtet) bauen) {
@@ -208,7 +211,13 @@ class HomeScreen extends ConsumerWidget {
                               // der Ring um das Abzeichen ist der
                               // Erfahrungsbalken — seit dem 23.10. unter
                               // dem oberen Rahmen.
-                              StatusLeiste(xp: xp, gold: gold),
+                              // **Das Haustier links daneben** (24.10.2026),
+                              // ohne Rahmen — erst, wenn es geschlüpft ist.
+                              StatusLeiste(
+                                xp: xp,
+                                gold: gold,
+                                links: zeigtTier ? const HaustierKarte() : null,
+                              ),
                               const SizedBox(height: 8),
                               // **Heute** (ADR-0053) bekommt, was übrig
                               // bleibt. Eine lange Liste rollt, statt
@@ -230,12 +239,13 @@ class HomeScreen extends ConsumerWidget {
                                         const GebietFrageKarte(),
                                         const SizedBox(height: 10),
                                       ],
-                                      // **Das Haustier** (ADR-0086) — über
-                                      // „Heute“, wo abgehakt wird. Erst wenn es
-                                      // eine Gewohnheit gibt: Vorher fragt die
-                                      // Startseite nach ihr, und das Ei wartet.
-                                      if (!start
-                                          .fragtNachGewohnheit) ...<Widget>[
+                                      // **Die Wahl des Eis** (ADR-0086) — über
+                                      // „Heute“. Erst wenn es eine Gewohnheit
+                                      // gibt: Vorher fragt die Startseite nach
+                                      // ihr, und das Ei wartet. Ist es gewählt,
+                                      // steht das Tier oben in der Leiste.
+                                      if (!start.fragtNachGewohnheit &&
+                                          !hatTier) ...<Widget>[
                                         const HaustierKarte(),
                                         const SizedBox(height: 10),
                                       ],
