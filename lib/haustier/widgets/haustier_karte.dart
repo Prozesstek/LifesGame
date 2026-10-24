@@ -21,6 +21,10 @@ import 'haustier_blatt.dart';
 /// Skizze: „Bei Haustier nur Level drunter anzeigen“). Name, Stufe und
 /// der Balken bis zum nächsten Level stehen im Blatt.
 ///
+/// **Ohne Rahmen in der Leiste oben links** (Frederik, 24.10.2026),
+/// auf derselben Höhe wie Level und Gold. Nur die Wahl der Eier bleibt
+/// eine Karte über „Heute“: Drei Eier passen nicht in eine Zeile.
+///
 /// Seit ADR-0086 **in jeder Fassung**, sobald es eine Gewohnheit gibt
 /// (gefragt auf der Startseite). Nur das Vorspulen im Blatt bleibt dem
 /// Entwicklermodus.
@@ -35,6 +39,10 @@ class HaustierKarte extends ConsumerWidget {
   /// Die Marke mit dem Level unter dem Tier.
   static const Key levelKey = ValueKey<String>('haustier-level');
 
+  /// Wie gross das Tier in der Leiste steht — etwas grösser als der
+  /// Ring daneben (54), damit es nicht zum Zeichen schrumpft.
+  static const double groesse = 80;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stand = ref.watch(haustierProvider);
@@ -47,8 +55,9 @@ class HaustierKarte extends ConsumerWidget {
     final heute = ref.watch(todayProvider);
     final tracker = ref.watch(habitTrackerProvider);
 
-    return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+    // Rechts Platz für die Marke, die neben dem Tier hängt.
+    return Padding(
+      padding: const EdgeInsets.only(right: 18),
       child: Druck(
         child: InkWell(
           key: tierKey,
@@ -56,33 +65,30 @@ class HaustierKarte extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
           child: Semantics(
             label: '${stand.anzeigeName}, Level $level',
-            child: Center(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: <Widget>[
-                  HaustierBild(
-                    art: art,
-                    stufe: stufe,
-                    laune: ref.watch(haustierLauneProvider),
-                    praegung: ref.watch(haustierPraegungProvider),
-                    zubehoer: <ZubehoerPlatz, Zubehoer>{
-                      for (final platz in ZubehoerPlatz.values)
-                        if (stand.angelegtAuf(platz, stufe)
-                            case final Zubehoer z)
-                          platz: z,
-                    },
-                    groesse: 92,
-                    // Jedes Häkchen von heute ist ein Sprung.
-                    sprung: tracker.completedOn(heute),
-                  ),
-                  // Unten rechts neben dem Tier, wie auf der Skizze.
-                  Positioned(
-                    right: -18,
-                    bottom: 2,
-                    child: _LevelMarke(level: level),
-                  ),
-                ],
-              ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                HaustierBild(
+                  art: art,
+                  stufe: stufe,
+                  laune: ref.watch(haustierLauneProvider),
+                  praegung: ref.watch(haustierPraegungProvider),
+                  zubehoer: <ZubehoerPlatz, Zubehoer>{
+                    for (final platz in ZubehoerPlatz.values)
+                      if (stand.angelegtAuf(platz, stufe) case final Zubehoer z)
+                        platz: z,
+                  },
+                  groesse: groesse,
+                  // Jedes Häkchen von heute ist ein Sprung.
+                  sprung: tracker.completedOn(heute),
+                ),
+                // Unten rechts neben dem Tier, wie auf der Skizze.
+                Positioned(
+                  right: -18,
+                  bottom: 2,
+                  child: _LevelMarke(level: level),
+                ),
+              ],
             ),
           ),
         ),

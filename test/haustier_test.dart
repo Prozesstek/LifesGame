@@ -12,6 +12,7 @@ import 'package:lifes_game/haustier/widgets/haustier_karte.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/home/widgets/status_leiste.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -201,7 +202,15 @@ void main() {
       await tester.pump();
 
       expect(c.read(haustierProvider).art, HaustierArt.drache);
-      expect(find.byKey(HaustierKarte.tierKey), findsOneWidget);
+      // Ohne Rahmen oben in der Leiste, neben Level und Gold (24.10.).
+      expect(
+        find.descendant(
+          of: find.byType(StatusLeiste),
+          matching: find.byKey(HaustierKarte.tierKey),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(HaustierKarte.eiKey(HaustierArt.eule)), findsNothing);
       // Auf der Karte nur Tier und Level (23.10.), der Name steht im
       // Blatt — und für den Vorleser.
       expect(find.text('Drache'), findsNothing);

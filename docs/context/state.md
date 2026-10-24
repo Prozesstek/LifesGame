@@ -135,6 +135,22 @@ vom 02.10.
 
 ---
 
+## 24.10.2026, danach: das Haustier steht in der Leiste
+
+Frederik: „Ich würde gerne das Haustier ohne Rahmen in die gleiche
+Ebene wie das Level und Gold, aber auf die linke Seite machen.“ Das
+Tier steht jetzt oben links auf der Startseite, auf einer Höhe mit
+Level-Ring und Gold, ohne Holzrahmen; die Marke mit seinem Level hängt
+daneben, ein Tipp öffnet weiter sein Blatt. „Heute“ rückt dafür nach
+oben.
+
+**Ohne Rückfrage entschieden:** Die **Wahl der Eier bleibt eine Karte**
+über „Heute“ — drei Eier passen nicht in eine Zeile. Das Tier ist 80
+Punkte groß: Bei 64 war ein junges Tier kleiner als der Ring daneben.
+Der Gewohnheiten-Bildschirm zeigt die Leiste weiter ohne Tier.
+
+In 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
 ## 24.10.2026: die Kreise tragen wieder ihre Namen
 
 Frederik: „Uns ist aufgefallen, dass Nutzer der App die Intuitivität

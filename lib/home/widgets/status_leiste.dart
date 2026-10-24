@@ -30,10 +30,21 @@ import '../../ui/palette.dart';
 /// ankommt. Deshalb nimmt sie die Erfahrung und schlägt das Level selbst
 /// nach — wie `playerLevelProvider`, nur ohne das, was noch unterwegs ist.
 ///
+/// **Links steht auf der Startseite das Haustier** (24.10.2026), ohne
+/// Rahmen ([links]).
+///
 /// **Steht auf der Startseite und auf dem Gewohnheiten-Bildschirm**, beide
 /// Male auf dunklem Leder.
 class StatusLeiste extends StatelessWidget {
-  const StatusLeiste({required this.xp, required this.gold, super.key});
+  const StatusLeiste({
+    required this.xp,
+    required this.gold,
+    this.links,
+    super.key,
+  });
+
+  /// Was ganz links steht — auf der Startseite das Haustier.
+  final Widget? links;
 
   /// Die ganze Erfahrung, wie `effectiveXpProvider` sie nennt.
   final int xp;
@@ -60,6 +71,7 @@ class StatusLeiste extends StatelessWidget {
   Widget _leiste(PlayerLevel level, int gold) {
     return Row(
       children: <Widget>[
+        ?links,
         // Der Platz des Gebiets: leer, bis ein Häkchen fliegt.
         const Expanded(
           child: Padding(
