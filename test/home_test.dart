@@ -49,11 +49,21 @@ void main() {
         'Fähigkeiten',
         'Ausrüstung',
         'Charakter',
+        'Statistik',
       ]) {
         expect(
           find.byKey(HubCircle.keyFor(title)),
           findsOneWidget,
           reason: title,
+        );
+        // Ein Zeichen allein sagt nicht, wohin es führt (ADR-0060).
+        expect(
+          find.descendant(
+            of: find.byKey(HubCircle.keyFor(title)),
+            matching: find.text(title),
+          ),
+          findsOneWidget,
+          reason: '$title steht unter seinem Kreis',
         );
       }
     });

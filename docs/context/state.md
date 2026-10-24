@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 23.10.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 24.10.2026 · Frederik
 
 ---
 
@@ -26,7 +26,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085 |
-| **Startseite** | **vor dem Berg**, acht Kreise ohne Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
+| **Startseite** | **vor dem Berg**, acht Kreise mit Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
@@ -134,6 +134,40 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 24.10.2026: die Kreise tragen wieder ihre Namen
+
+Frederik: „Uns ist aufgefallen, dass Nutzer der App die Intuitivität
+beklagen.“ Zuerst nur Recherche, was Intuitivität im Game Design
+ausmacht. Danach: „Die Texte unter den Kreisen können wir erstmal
+wieder einführen.“
+
+Die acht Kreise der Startseite tragen wieder ihren Namen darunter, wie
+bis zum 23.10. Das entfernte ADR-0060 nicht: Dort sind die Namen der
+Bereiche ausdrücklich ausgenommen („ein Kreis ohne Namen … ist Lesen mit
+mehr Schritten“). Auch die Nielsen Norman Group sagt, ein Zeichen
+braucht einen sichtbaren Namen, weil kaum eines eine feste Bedeutung
+hat. Vier große Kreise mit Namen passen oben: Sie brauchen 352 Punkte,
+und im Rahmen über die ganze Breite bleiben 358. Der Kasten des Mentors
+lässt die 20 Punkte für die Namen frei. Ein Test prüft, dass jeder Kreis
+seinen Namen zeigt.
+
+### Offen: was die Intuitivität sonst kostet (Vermutungen, nicht gemessen)
+
+- **23 Tooltips öffnen sich nur auf Tipp**, und nichts zeigt an, dass
+  hinter einer Zahl ein Satz steht.
+- **„Stufe“ meint mindestens vier Dinge**: die Grube, einen Skill, das
+  Haustier und die Gegner der Sammlung. Dieselbe Grube heißt im Eingang
+  „Ebene“ und drinnen „Stufe“.
+- **Rund zehn Arten von Belohnung**, jede mit eigener Regel: Erfahrung,
+  Gold, Ruhm, Theoriepunkte, Schlüssel, Streak-Eis, vier Skills und die
+  Tagesform.
+- **Der Mentor schweigt nach dem ersten Sieg.** Lagerfeuer, Tagesgrube,
+  Sets, Sammlung, Ultimate und Haustier erscheinen ohne Einführung.
+- **Ob ein Neuer sagen kann, wie Häkchen in der Grube stärker machen**,
+  weiß niemand.
+- Vorschlag: fünf Neue beim ersten Spielen beobachten, laut denkend und
+  ohne Hilfe — mit den Testern ab 26.10.
 
 ## 23.10.2026, ganz zum Schluss: das Haustier nur mit Level
 

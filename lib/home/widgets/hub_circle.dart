@@ -15,10 +15,12 @@ import '../../ui/halten_und_ziehen.dart';
 /// Produkts, und der Startbildschirm ist die einzige Stelle, an der sie
 /// ohne Worte auskommt.
 ///
-/// **Der Kreis trägt nur sein Zeichen** (23.10.2026, Frederik: „ich
-/// würde die texte unten den buttons entfernen“). Bis dahin stand der
-/// Name darunter. Er bleibt für den Vorleser ([label]) und als Schlüssel
-/// für Tests ([keyFor]) — die App geht ohne Lesen (ADR-0060).
+/// **Der Kreis trägt Zeichen und Namen.** Ein Zeichen allein sagt nicht,
+/// wohin es führt: Ein Neuer sieht Laden und Kampf zum ersten Mal, und
+/// kaum ein Zeichen hat eine feste Bedeutung. ADR-0060 nimmt die Namen
+/// der Bereiche deshalb ausdrücklich aus. Vom 23. bis 24.10.2026 fehlten
+/// sie trotzdem; zurückgeholt, weil Nutzer die App als wenig intuitiv
+/// beschrieben.
 ///
 /// **Die Fläche ist seit den ersten Zeichnungen gemalt und nicht
 /// gerechnet.** `assets/UI/ButtonBG.png` liegt unter dem Zeichen; der
@@ -52,9 +54,10 @@ class HubCircle extends StatelessWidget {
   /// Wie gross dieser Kreis gezeichnet wird. Standard ist [diameter].
   ///
   /// **Kleiner nur, wenn vier in eine Reihe muessen** (ADR-0057). Vier
-  /// Kreise mit ihrem Namen darunter brauchten bei 72 Punkten 352 Punkte
-  /// Breite, ein Handy hatte nach dem Rand 335. Zeichen und Symbol wachsen
-  /// und schrumpfen mit, damit der kleine Kreis aussieht wie der grosse.
+  /// Kreise mit ihrem Namen darunter brauchen bei 72 Punkten 352 Punkte
+  /// Breite ([labelWidth]); im Holzrahmen über die ganze Breite bleiben
+  /// einem Handy 358. Zeichen und Symbol wachsen und schrumpfen mit,
+  /// damit der kleine Kreis aussieht wie der grosse.
   final double size;
 
   double get _scale => size / diameter;
@@ -109,8 +112,16 @@ class HubCircle extends StatelessWidget {
   /// eine Tippfläche mindestens braucht.
   static const double diameter = 72;
 
-  /// Wie ein Test einen Kreis findet — sein Name steht nicht mehr da.
+  /// Wie ein Test einen Kreis findet, auch wenn sein Name ein zweites
+  /// Mal auf dem Bildschirm steht.
   static Key keyFor(String label) => ValueKey<String>('kreis-$label');
+
+  /// Wie hoch der Name unter dem Kreis samt Abstand steht — so viel
+  /// rechnet die Startseite für eine Reihe dazu.
+  static const double labelHeight = 20;
+
+  /// Wie breit der Name unter einem Kreis werden darf.
+  static double labelWidth(double size) => size + 16;
 
   /// Wie weit der Fortschrittsring aussen um den Kreis liegt.
   static const double _ringAbstand = 5;
@@ -241,6 +252,24 @@ class HubCircle extends StatelessWidget {
                         ),
                       ),
                   ],
+                ),
+                const SizedBox(height: 6),
+                SizedBox(
+                  width: labelWidth(size),
+                  // Der Vorleser hat den Namen schon am Knopf.
+                  child: ExcludeSemantics(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isLocked ? Palette.muted : Palette.textOnDark,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
