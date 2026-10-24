@@ -77,15 +77,15 @@ class HomeScreen extends ConsumerWidget {
   /// Punkte Breite, ein Handy hat nach Rand und Holzrahmen 331.
   static const double bottomCircleSize = 64;
 
-  /// Wie hoch die untere Reihe samt Rand und Holzrahmen steht —
+  /// Wie hoch die untere Reihe samt Namen, Rand und Holzrahmen steht —
   /// so viel lässt der Kasten des Mentors frei (ADR-0079).
   static const double untereReihe =
-      bottomCircleSize + 20 + HolzGruppe.hoeheDazu;
+      bottomCircleSize + 20 + HubCircle.labelHeight + HolzGruppe.hoeheDazu;
 
   /// Dasselbe für die obere Reihe: Steht der Kasten oben, beginnt er
   /// unter dem Rahmen.
   static const double obereReihe =
-      HubCircle.diameter + 20 + HolzGruppe.hoeheDazu;
+      HubCircle.diameter + 20 + HubCircle.labelHeight + HolzGruppe.hoeheDazu;
 
   /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
   static const String hintergrund = 'assets/UI/Berg.jpg';
