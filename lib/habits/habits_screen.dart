@@ -12,11 +12,9 @@ import '../ui/palette.dart';
 import 'cue_text.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
-import 'stat_icon.dart';
 import 'widgets/cue_dialog.dart';
-import 'widgets/custom_habit_sheet.dart';
 import 'widgets/habit_check_tile.dart';
-import 'widgets/habit_template_tile.dart';
+import 'widgets/gewohnheit_anlegen.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/weekday_picker.dart';
 import '../ui/aufstieg.dart';
@@ -24,20 +22,25 @@ import '../ui/holz.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
 
-/// Der Tracker-Teil des Spiels: heute abhaken, Vorlagen wählen, eigene
-/// Gewohnheiten anlegen, sehen, was das mit dem Charakter macht.
+/// Der Tracker-Teil des Spiels: heute abhaken, sehen, was nicht heute
+/// dran ist, und über den grünen Plus-Knopf eine neue Gewohnheit
+/// anfangen (ADR-0089).
+///
+/// **Die Reiter „Eigene“ und „Vorerstellte“ sind weg**: Sie zeigten
+/// dasselbe wie die Vorlagen im Plus-Knopf. Hier steht nur noch, was
+/// läuft.
 class HabitsScreen extends ConsumerWidget {
   const HabitsScreen({super.key});
+
+  /// Woran Tests den Plus-Knopf finden.
+  static const Key plusKey = ValueKey<String>('neue-gewohnheit');
 
   static const double _maxWidth = 560;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tracker = ref.watch(habitTrackerProvider);
-    final unlocked = ref.watch(unlockedHabitsProvider);
     final today = ref.watch(todayProvider);
-    final slots = ref.watch(customSlotsProvider);
-    final slotsLeft = ref.watch(customSlotsLeftProvider);
 
     final active = tracker.stackOn(today);
     // Der Tag, den ein Streak-Eis gerade noch retten kann. Die Regel
@@ -49,15 +52,12 @@ class HabitsScreen extends ConsumerWidget {
     final nichtHeute = tracker.activeHabitsByPriority
         .where((h) => !tracker.isDueOn(h.id, today))
         .toList(growable: false);
-    final availableTemplates = unlocked
-        .where((t) => !tracker.isActive(t.id))
-        .toList(growable: false);
-    final ruhendeEigene = tracker.customHabits
-        .where((h) => !tracker.isActive(h.id))
-        .toList(growable: false);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Gewohnheiten')),
+      floatingActionButton: _PlusKnopf(
+        onTap: () => _neueGewohnheit(context, ref),
+      ),
 
       body: AufstiegHost(
         // Ein Kontext **unter** dem Host: Die Rückrufe der Kacheln lassen
@@ -142,41 +142,8 @@ class HabitsScreen extends ConsumerWidget {
                       ],
                     ],
                     // Die Truhe stand bis zum 18.10. hier; sie wartet jetzt
-                    // am Lagerfeuer (ADR-0076).
-                    const SizedBox(height: 18),
-                    // **Über den Reitern, nicht in einem**: Anlegen soll
-                    // man immer sehen, auch wenn „Vorerstellte“ offen ist.
-                    _NeueGewohnheitKnopf(
-                      slotsLeft: slotsLeft,
-                      listeVoll: tracker.isFull,
-                      onCreate: () => _createCustom(context, ref),
-                    ),
-                    const SizedBox(height: 12),
-                    _VorlagenReiter(
-                      startMitEigenen: tracker.customCount > 0,
-                      eigeneZaehler: '${tracker.customCount} / $slots',
-                      vorerstellteZaehler:
-                          '${tracker.activeIds.length} / '
-                          '${HabitRewards.maxActiveHabits}',
-                      eigene: <Widget>[
-                        for (final habit in ruhendeEigene)
-                          _RestingCustomTile(
-                            habit: habit,
-                            canActivate: tracker.canActivate(habit.id),
-                            onActivate: () => _activate(context, ref, habit),
-                          ),
-                      ],
-                      vorerstellte: <Widget>[
-                        for (final template in availableTemplates) ...<Widget>[
-                          HabitTemplateTile(
-                            template: template,
-                            canActivate: tracker.canActivate(template.id),
-                            onActivate: () => _activate(context, ref, template),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ],
-                    ),
+                    // am Lagerfeuer (ADR-0076). Anlegen und die Vorlagen
+                    // stehen seit ADR-0089 hinter dem Plus-Knopf.
                   ],
                 ),
               ),
@@ -224,59 +191,91 @@ class HabitsScreen extends ConsumerWidget {
     );
   }
 
-  /// Legt eine eigene Gewohnheit an — Formular auf, Ergebnis hinein.
-  Future<void> _createCustom(BuildContext context, WidgetRef ref) async {
-    final draft = await CustomHabitSheet.show(context);
-    if (draft == null || !context.mounted) return;
-
-    final habit = ref
-        .read(habitTrackerProvider.notifier)
-        .addCustom(
-          name: draft.name,
-          area: draft.area,
-          difficulty: draft.difficulty,
-          goal: draft.goal,
-          priority: draft.priority,
-          why: draft.why,
-        );
-
-    final tracker = ref.read(habitTrackerProvider);
-    final laeuft = habit != null && tracker.isActive(habit.id);
-    sayHabitFeedback(context, switch (habit) {
-      null =>
-        'Kein Platz frei — dafür braucht es eine weitere Vorlage '
-            'aus dem Skillbaum.',
-      _ when tracker.isActive(habit.id) =>
-        '„${habit.name}" steht ab heute auf der Liste.',
-      _ =>
-        '„${habit.name}" ist angelegt — die Tagesliste ist voll, '
-            'sie wartet unter „Eigene".',
-    });
-
-    if (laeuft) await _editCue(context, ref, habit);
-  }
-
-  /// Nimmt eine Gewohnheit auf die Tagesliste — und fragt gleich, wann
-  /// sie drankommt (ADR-0052).
+  /// **Der grüne Plus-Knopf** (ADR-0089): eine neue Gewohnheit, eine
+  /// Frage nach der anderen.
   ///
-  /// **Jetzt, nicht später:** Wer gerade entschieden hat, etwas täglich
-  /// zu tun, hat den Zeitpunkt im Kopf. Einen Tag später steht nur noch
-  /// die Zeile „Wann machst du das?" auf der Kachel. Wer schon einen
-  /// Auslöser hat (eine pausierte Gewohnheit), wird nicht noch einmal
-  /// gefragt.
-  Future<void> _activate(
-    BuildContext context,
-    WidgetRef ref,
-    Habit habit,
-  ) async {
-    ref.read(habitTrackerProvider.notifier).activate(habit.id);
+  /// Angelegt und gestartet wird erst hier, wenn alles beantwortet ist —
+  /// wer abbricht, hat nichts verändert. Bis dahin legte das Formular
+  /// an, und danach fragte ein Dialog nach dem Auslöser.
+  Future<void> _neueGewohnheit(BuildContext context, WidgetRef ref) async {
     final tracker = ref.read(habitTrackerProvider);
-    if (!tracker.isActive(habit.id) ||
-        tracker.cueFor(habit.id) != null ||
-        tracker.anchorFor(habit.id) != null) {
+    final wahl = await GewohnheitAnlegen.show(
+      context,
+      vorlagen: ref
+          .read(unlockedHabitsProvider)
+          .where((t) => !tracker.isActive(t.id))
+          .toList(growable: false),
+      ruhende: tracker.customHabits
+          .where((h) => !tracker.isActive(h.id))
+          .toList(growable: false),
+      eigeneFrei: ref.read(customSlotsLeftProvider),
+      listeVoll: tracker.isFull,
+      ankerFuer: (id) => id == null
+          ? tracker.activeHabitsByPriority
+          : tracker.anchorCandidatesFor(id),
+      hatAusloeser: (id) =>
+          tracker.cueFor(id) != null || tracker.anchorFor(id) != null,
+      tageFuer: tracker.weekdaysFor,
+    );
+    if (wahl == null || !context.mounted) return;
+
+    final controller = ref.read(habitTrackerProvider.notifier);
+    final Habit? habit = switch (wahl) {
+      EigeneAngelegt(
+        :final name,
+        :final area,
+        :final difficulty,
+        :final goal,
+      ) =>
+        controller.addCustom(
+          name: name,
+          area: area,
+          difficulty: difficulty,
+          goal: goal,
+        ),
+      VorlageGestartet(:final habitId) => () {
+        controller.activate(habitId);
+        return ref.read(habitTrackerProvider).definitionFor(habitId);
+      }(),
+    };
+    if (habit == null) {
+      sayHabitFeedback(
+        context,
+        'Kein Platz frei — dafür braucht es eine weitere Vorlage '
+        'aus dem Skillbaum.',
+      );
       return;
     }
-    await _editCue(context, ref, habit);
+
+    final laeuft = ref.read(habitTrackerProvider).isActive(habit.id);
+    if (laeuft) {
+      if (wahl.einrichtung case final einrichtung?) {
+        _richteEin(ref, habit.id, einrichtung);
+      }
+    }
+    sayHabitFeedback(
+      context,
+      laeuft
+          ? '„${habit.name}" steht ab heute auf der Liste.'
+          : '„${habit.name}" ist angelegt — die Tagesliste ist voll, '
+                'sie wartet bei den Vorlagen.',
+    );
+  }
+
+  /// Übernimmt, was am Ende gefragt wurde: Satz oder Anker, Belohnung,
+  /// Wochentage. Welcher den anderen ersetzt, entscheidet der Tracker.
+  void _richteEin(WidgetRef ref, String habitId, Einrichtung einrichtung) {
+    final controller = ref.read(habitTrackerProvider.notifier);
+    if (einrichtung.anchorId case final anker?) {
+      controller.setAnchor(habitId, anker);
+    } else {
+      controller
+        ..setAnchor(habitId, null)
+        ..setCue(habitId, einrichtung.cue);
+    }
+    controller
+      ..setTreat(habitId, einrichtung.treat)
+      ..setWeekdays(habitId, einrichtung.weekdays);
   }
 
   Future<void> _editCue(
@@ -333,262 +332,25 @@ class HabitsScreen extends ConsumerWidget {
   }
 }
 
-/// „Neue Gewohnheit“ über den Reitern — und der Grund, wenn es nicht
-/// geht.
-///
-/// **Bis zum 28.09. ein schwebender Knopf unten rechts** (Issue #35).
-/// Seit Eigene und Vorerstellte Reiter sind (Issue #88), steht er über
-/// ihnen, als Knopf in voller Breite. Ohne freien Platz bleibt er sichtbar, wird aber
-/// matt und erklärt beim Antippen, woran es liegt: Die Antwort („jede
-/// freigeschaltete Vorlage gibt einen Platz“) ist der Weg zurück in den
-/// Skillbaum.
-class _NeueGewohnheitKnopf extends StatelessWidget {
-  const _NeueGewohnheitKnopf({
-    required this.slotsLeft,
-    required this.listeVoll,
-    required this.onCreate,
-  });
+/// **Der grüne Plus-Knopf unten rechts** (ADR-0089) — der einzige Weg zu
+/// einer neuen Gewohnheit, eigen oder aus einer Vorlage. Er ist immer
+/// da; was gerade nicht geht, sagt das Blatt dahinter.
+class _PlusKnopf extends StatelessWidget {
+  const _PlusKnopf({required this.onTap});
 
-  final int slotsLeft;
-
-  /// Ob die Tagesliste voll ist. Anlegen geht trotzdem — die Gewohnheit
-  /// wartet dann unter „Eigene".
-  final bool listeVoll;
-
-  final VoidCallback onCreate;
-
-  bool get _offen => slotsLeft > 0;
-
-  @override
-  Widget build(BuildContext context) {
-    // Die Planke kommt aus dem Theme. Ohne freien Platz wird sie matt,
-    // bleibt aber tippbar — der Tipp sagt, warum.
-    return Tooltip(
-      message: _hinweis,
-      child: Opacity(
-        opacity: _offen ? 1 : 0.5,
-        child: FilledButton.icon(
-          onPressed: () => _offen ? onCreate() : _sageWarumNicht(context),
-          icon: const Icon(Icons.playlist_add),
-          // Kein Wort, nur wie viele Plätze frei sind; der Tooltip sagt
-          // den Rest.
-          label: Text(
-            '$slotsLeft',
-            semanticsLabel: 'Neue Gewohnheit, $slotsLeft frei',
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _sageWarumNicht(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text(_hinweis), duration: const Duration(seconds: 3)),
-      );
-  }
-
-  String get _hinweis {
-    if (!_offen) {
-      return 'Kein Platz frei. Jede freigeschaltete Vorlage gibt einen '
-          'Platz für eine eigene.';
-    }
-    final plaetze = slotsLeft == 1 ? 'ein Platz' : '$slotsLeft Plätze';
-    if (listeVoll) {
-      return 'Noch $plaetze — die Tagesliste ist voll, sie wartet dann '
-          'unter „Eigene".';
-    }
-    return 'Eigene Gewohnheit anlegen — noch $plaetze frei.';
-  }
-}
-
-/// „Eigene“ und „Vorerstellte“ als zwei Reiter unter der Tagesliste
-/// (Issue #88). Bis zum 28.09. standen beide als Abschnitte untereinander,
-/// und wer eine eigene anlegen wollte, suchte den Knopf unten rechts.
-///
-/// **Die Wahl gehört zur Ansicht**, nicht zum Spielstand. Wer noch keine
-/// eigene hat, sieht zuerst die vorerstellten — dort ist etwas zu
-/// starten; sonst die eigenen.
-class _VorlagenReiter extends StatefulWidget {
-  const _VorlagenReiter({
-    required this.startMitEigenen,
-    required this.eigene,
-    required this.vorerstellte,
-    required this.eigeneZaehler,
-    required this.vorerstellteZaehler,
-  });
-
-  final bool startMitEigenen;
-  final List<Widget> eigene;
-  final List<Widget> vorerstellte;
-  final String eigeneZaehler;
-  final String vorerstellteZaehler;
-
-  @override
-  State<_VorlagenReiter> createState() => _VorlagenReiterState();
-}
-
-class _VorlagenReiterState extends State<_VorlagenReiter> {
-  late bool _eigene = widget.startMitEigenen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _Reiter(
-                icon: Icons.person_rounded,
-                titel: 'Eigene',
-                zaehler: widget.eigeneZaehler,
-                aktiv: _eigene,
-                onTap: () => setState(() => _eigene = true),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _Reiter(
-                icon: Icons.auto_stories_rounded,
-                titel: 'Vorerstellte',
-                zaehler: widget.vorerstellteZaehler,
-                aktiv: !_eigene,
-                onTap: () => setState(() => _eigene = false),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...(_eigene ? widget.eigene : widget.vorerstellte),
-      ],
-    );
-  }
-}
-
-class _Reiter extends StatelessWidget {
-  const _Reiter({
-    required this.icon,
-    required this.titel,
-    required this.zaehler,
-    required this.aktiv,
-    required this.onTap,
-  });
-
-  final IconData icon;
-
-  /// Nur für den Vorleser — zu sehen ist das Zeichen.
-  final String titel;
-  final String zaehler;
-  final bool aktiv;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: aktiv,
-      label: titel,
-      child: Druck(
-        child: Material(
-          color: aktiv ? Palette.accentOnDark : Palette.surface,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(10),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(icon, size: 20, color: Palette.text),
-                  const SizedBox(width: 8),
-                  Text(
-                    zaehler,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Palette.textDim,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Eine eigene Gewohnheit, die gerade nicht auf der Tagesliste steht.
-class _RestingCustomTile extends StatelessWidget {
-  const _RestingCustomTile({
-    required this.habit,
-    required this.canActivate,
-    required this.onActivate,
-  });
-
-  final CustomHabit habit;
-  final bool canActivate;
-  final VoidCallback onActivate;
-
-  @override
-  Widget build(BuildContext context) {
-    return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  habit.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: <Widget>[
-                    StatIcon(habit.stat, size: 16),
-                    const SizedBox(width: 8),
-                    _Grad(habit.difficulty),
-                    if (habit.goal case final goal?) ...<Widget>[
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          goal.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Palette.accent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: canActivate ? onActivate : null,
-            icon: const Icon(Icons.add_circle_outline),
-            color: Palette.accent,
-            disabledColor: Palette.muted,
-            tooltip: canActivate
-                ? 'Täglich verfolgen'
-                : 'Erst eine andere Gewohnheit beenden',
-          ),
-        ],
+    return Druck(
+      child: FloatingActionButton(
+        key: HabitsScreen.plusKey,
+        onPressed: onTap,
+        backgroundColor: Palette.successOnDark,
+        foregroundColor: Palette.background,
+        shape: const CircleBorder(),
+        tooltip: 'Neue Gewohnheit',
+        child: const Icon(Icons.add_rounded, size: 34),
       ),
     );
   }
@@ -716,33 +478,6 @@ class _NichtHeuteTile extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Der Schwierigkeitsgrad als ein bis drei Punkte statt als Wort.
-class _Grad extends StatelessWidget {
-  const _Grad(this.grad);
-
-  final HabitDifficulty grad;
-
-  @override
-  Widget build(BuildContext context) {
-    final stufe = HabitDifficulty.values.indexOf(grad) + 1;
-    return Semantics(
-      label: grad.label,
-      excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          for (var i = 0; i < HabitDifficulty.values.length; i++)
-            Icon(
-              Icons.circle,
-              size: 7,
-              color: i < stufe ? Palette.accent : Palette.surfaceSunken,
-            ),
-        ],
       ),
     );
   }

@@ -14,6 +14,8 @@ import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/cue_dialog.dart';
+import 'package:lifes_game/habits/widgets/gewohnheit_anlegen.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
@@ -208,45 +210,76 @@ void main() {
       });
     }
 
-    testWidgets('das Formular für eine eigene Gewohnheit passt', (
-      tester,
-    ) async {
-      // Der längste neue Bildschirm: vier Wertekacheln, drei
-      // Schwierigkeiten mit Prozentangabe, drei Zielarten, drei
-      // Prioritäten und vier Eingabefelder. Die engste Stelle sind die
-      // Werte-Kacheln — „Lebenspunkte" neben „Ausdauer" in einem Chip.
+    testWidgets('die Fragen beim Anlegen passen, jede einzeln', (tester) async {
+      // ADR-0089: eine Frage je Blatt. Die vollste Fassung jedes Blatts:
+      // alle Vorlagen aufgeklappt, der längste Name, beide Felder einer
+      // Menge, der längste Auslöser und unter „Oder direkt nach“ vier
+      // lange Namen. Eine Gewohnheit ist pausiert, sonst wäre die Liste
+      // voll und Wann, Tage und Danach kämen nie.
       usePhoneView(tester);
-      await tester.pumpWidget(appMit(const HabitsScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.byIcon(Icons.playlist_add),
-        200,
-        scrollable: find.byType(Scrollable).first,
+      final voll = mitInhalt();
+      final stand = SaveData(
+        theory: voll.theory,
+        habits: voll.habits.deactivate('eigen-1', today: _heute.previous),
+        loadout: voll.loadout,
+        ladder: voll.ladder,
       );
-      // Der Knopf ist schmaler geworden (nur noch Zeichen und Zahl);
-      // ganz ins Bild holen, sonst trifft der Tipp unter den Rand.
-      await tester.ensureVisible(find.byIcon(Icons.playlist_add));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.playlist_add));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(stand),
+            todayProvider.overrideWithValue(_heute),
+          ],
+          child: const MaterialApp(home: HabitsScreen()),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      // Beide Zielarten aufklappen — sie bringen je zusätzliche Felder
-      // mit, und aufgeklappt ist das Blatt am höchsten.
-      for (final art in <String>['Menge', 'Zeit']) {
-        await tester.tap(find.text(art));
+      Future<void> tippe(Key key) async {
+        await tester.tap(find.byKey(key));
         await tester.pumpAndSettle();
       }
 
-      for (var i = 0; i < _scrollSchritte; i++) {
-        await tester.drag(
-          find.text('Eigene Gewohnheit'),
-          const Offset(0, -400),
-        );
-        await tester.pumpAndSettle();
-      }
+      await tippe(HabitsScreen.plusKey);
+      await tippe(GewohnheitAnlegen.vorlageKey);
+      // Bis zur letzten Vorlage rollen — jede Zeile muss passen.
+      final eintraege = find.byWidgetPredicate((w) {
+        final key = w.key;
+        return key is ValueKey<String> &&
+            key.value.startsWith('anlegen-vorlage-');
+      });
+      expect(eintraege, findsWidgets);
+      await tester.ensureVisible(eintraege.last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(GewohnheitAnlegen.eigeneKey));
+      await tester.pumpAndSettle();
+      await tippe(GewohnheitAnlegen.eigeneKey);
+      await tester.enterText(
+        find.byKey(GewohnheitAnlegen.nameKey),
+        'Fünf Gläser Wasser über den Tag verteilt trinken, jeden Tag',
+      );
+      await tester.pump();
+      await tippe(GewohnheitAnlegen.weiterKey);
+      await tippe(GewohnheitAnlegen.gebietKey(SkillArea.gesellschaft));
+      await tippe(GewohnheitAnlegen.gradKey(HabitDifficulty.schwer));
+      await tippe(GewohnheitAnlegen.zielKey(ZielArt.menge));
+      await tippe(GewohnheitAnlegen.weiterKey);
+      await tester.enterText(
+        find.byKey(cueFieldKey),
+        'Direkt nach dem Abendessen, bevor der Fernseher angeht, am Tisch',
+      );
+      await tester.pump();
+      await tippe(GewohnheitAnlegen.weiterKey);
+      await tippe(GewohnheitAnlegen.weiterKey);
+      await tester.enterText(
+        find.byKey(cueTreatFieldKey),
+        'Eine Folge schauen',
+      );
+      await tester.pump();
+      await tippe(GewohnheitAnlegen.weiterKey);
 
       expect(tester.takeException(), isNull);
+      expect(find.text('Neue Gewohnheit'), findsNothing, reason: 'fertig');
     });
 
     testWidgets('Skillbaum läuft auch eine Ebene tiefer nicht über', (

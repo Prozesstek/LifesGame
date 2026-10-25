@@ -25,7 +25,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
-| **Gewohnheiten** | **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085 |
+| **Gewohnheiten** | **neue über einen grünen Plus-Knopf, eine Frage nach der anderen**, **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085, -0089 |
 | **Startseite** | **vor dem Berg**, acht Kreise mit Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 999, dazu die acht Packages (theory 208, habits 374, gear
+**Tests:** App 1009, dazu die acht Packages (theory 208, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,52 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 25.10.2026, danach: eine Frage nach der anderen (Block B)
+
+Der zweite Teil von Frederiks Wunsch: „Neue Gewohnheiten werden über
+einen grünen kreisförmigen [Knopf] mit einem Plus unten rechts
+hinzugefügt … immer nur eine Frage auf einmal.“ In einer Fragerunde
+entschieden, dreimal wie empfohlen:
+[ADR-0089](../decisions/0089-eine-frage-nach-der-anderen.md).
+
+| Was | Wie |
+|---|---|
+| **Plus-Knopf** | grün, rund, unten rechts auf dem Gewohnheiten-Bildschirm — der einzige Weg zu einer neuen |
+| **Erstes Blatt** | „Eigene erstellen“ (mit freien Plätzen) oder „Vorlage“; Vorlage klappt auf: „Deine“ (pausierte eigene) und „Von der App“ |
+| **Eigene** | Name → Gebiet (mit dem Kampfwert, ADR-0088) → Schwierigkeit → Tagesziel → Wann → Tage → Danach |
+| **Vorlage** | nur Wann → Tage → Danach; eine pausierte mit Auslöser startet sofort |
+| **Bedienung** | eine Wahl führt mit einem Tipp weiter, ein Feld mit „Weiter“, freiwillige Fragen haben „Ohne“; oben Striche, zurück und schließen |
+| **Weg** | „Warum?“, „Wie wichtig?“, die Reiter Eigene / Vorerstellte, die Kopplung als eigene Frage |
+
+**Angelegt wird erst am Ende**; wer abbricht, hat nichts verändert. Bis
+dahin legte das Formular an, und den Dialog danach konnte man
+wegklicken.
+
+**Ohne Rückfrage entschieden:** Wann vor Tagen vor Danach; Vorgaben
+„jeden Tag“, „mittel“, „nur abhaken“; bei voller Liste endet eine eigene
+nach dem Tagesziel und wartet unter „Deine“; die erste Frage auf der
+Startseite bleibt, wie sie ist (ADR-0068). Der Dialog „Wann machst du
+das?“ bleibt fürs Ändern einer laufenden.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844, jedes Blatt): Auf
+„Wann machst du das?“ mit Vorschlägen und Kopplungen rutschte „Weiter“
+unter den Rand. Kopf und Knöpfe stehen jetzt fest, nur die Frage rollt;
+ein Test in `phone_layout_test.dart` geht jeden Schritt am Handy durch.
+
+Neu: `gewohnheit_anlegen.dart`, `anlegen_ergebnis.dart`,
+`anlegen_teile.dart`, `test/gewohnheit_anlegen_test.dart` (10).
+Gelöscht: `custom_habit_sheet.dart`, `habit_template_tile.dart`. App
+1009 (vorher 999). **Nicht am Handy.**
+
+### Offen
+
+- **Pausierte eigene sieht man nur noch im Ausklappmenü** — wer eine
+  sucht, muss wissen, dass sie dort liegt.
+- Ob „Eigene oder Vorlage“ als erster Schritt nötig ist, oder ob der
+  Name mit Vorlagen als Vorschlägen reicht (wie auf der Startseite).
+- Der Plus-Knopf hat auf dem dunklen Leder einen dunklen Schatten-Ring.
+- **AktivesBrett hat ADR-0089 nicht gesehen.**
 
 ## 25.10.2026: der Kampfwert folgt dem Gebiet
 

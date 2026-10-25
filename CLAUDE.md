@@ -202,7 +202,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/habits/habits_screen.dart` | oben die Leiste der Startseite, **„Heute“** darunter, darunter „Neue Gewohnheit“ und die Reiter Eigene / Vorerstellte ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)) | Flutter |
+| `lib/habits/habits_screen.dart` | oben die Leiste der Startseite, **„Heute“** darunter, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
 | `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **die Erfahrung fliegt zweimal**, zum Level und grün zum Gebiet ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)); **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
 | `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/habits/widgets/haekchen_kreis.dart` | der Kreis, der beim Abhaken **aufspringt** — Blitz, Ring, acht Striche; nur beim Setzen; **eine Stelle** für Kachel und „Heute“ | Flutter |
@@ -214,10 +214,12 @@ durch die Grube ersetzt und gelöscht.
 | `lib/statistik/statistik_text.dart` | wie die Statistik spricht und **welche Farben sie trägt** (`StatFarbe`: grün wie das Häkchen, Eis blau, Ruhetag grau) — eine Stelle | Flutter |
 | `lib/statistik/widgets/kalender_raster.dart` | das Raster: Woche, Kalenderblatt, Jahr wie bei GitHub (gemalt, quer zu rollen), Gesamt je Jahr | Flutter |
 | `lib/statistik/widgets/statistik_graphen.dart` | Balken, Kurve und Wochentage mit **fl_chart** — rechnen nichts | Flutter |
-| `lib/habits/widgets/custom_habit_sheet.dart` | das Formular für eine eigene Gewohnheit | Flutter |
+| `lib/habits/widgets/gewohnheit_anlegen.dart` | **eine neue Gewohnheit, eine Frage nach der anderen** (ADR-0089): Eigene oder Vorlage, Name, Gebiet, Schwierigkeit, Ziel, Wann (Satz **oder** Kopplung), Tage, Belohnung — bei Vorlagen nur die letzten drei; eine Wahl führt mit einem Tipp weiter; **kennt keine Provider** | Flutter |
+| `lib/habits/widgets/anlegen_ergebnis.dart` | was das Blatt zurückgibt: `EigeneAngelegt`, `VorlageGestartet`, `Einrichtung` | Flutter |
+| `lib/habits/widgets/anlegen_teile.dart` | seine Bausteine: Kopf mit Strichen, große Wahl, Feld, Vorschläge | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
-| `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
+| `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** zum **Ändern** einer laufenden Gewohnheit (beim Anlegen fragt seit ADR-0089 das Blatt) — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
@@ -326,7 +328,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 999 Tests
+flutter test             # 1009 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
