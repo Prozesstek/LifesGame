@@ -15,7 +15,7 @@ const Day _montag = Day(2026, 9, 21);
 const Day _mittwoch = Day(2026, 9, 23);
 const Day _sonntag = Day(2026, 9, 27);
 
-/// Eine Stärke-Gewohnheit, abgehakt an [tage].
+/// Eine Gewohnheit aus dem Körper (also Angriff), abgehakt an [tage].
 ProviderContainer _container(Day heute, List<Day> tage) {
   final c = ProviderContainer(
     overrides: [todayProvider.overrideWithValue(heute)],
@@ -32,7 +32,6 @@ ProviderContainer _container(Day heute, List<Day> tage) {
   final id = controller
       .addCustom(
         name: 'Liegestütze',
-        stat: HabitStat.staerke,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       )!
@@ -93,7 +92,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.bySemanticsLabel(RegExp('^Deine letzte Woche')), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('^Deine letzte Woche')),
+        findsOneWidget,
+      );
       await tester.tap(find.bySemanticsLabel(RegExp('^Deine letzte Woche')));
       await tester.pumpAndSettle();
 
@@ -108,7 +110,7 @@ void main() {
     ) async {
       usePhoneView(tester);
       // Vier Häkchen in der Vorwoche, drei in dieser: Das fünfte fällt am
-      // Montag und bringt einen Punkt Stärke.
+      // Montag und bringt einen Punkt Angriff.
       final vorwoche = <Day>[_montag.previous];
       var tag = _montag.previous;
       for (var i = 0; i < 3; i++) {
@@ -125,7 +127,7 @@ void main() {
       expect(find.text('3 von 7 Tagen'), findsOneWidget);
       expect(find.text('${woche.checks}'), findsOneWidget);
       expect(find.text('${woche.xp}'), findsOneWidget);
-      expect(find.text('+1 Stärke'), findsOneWidget);
+      expect(find.text('+1 Angriff'), findsOneWidget);
       expect(find.text('Ein solides Stück Weg.'), findsOneWidget);
       // Die Vorwoche hatte vier Tage, diese bis Mittwoch drei. Die Woche
       // läuft noch, also kein Urteil, nur der Stand.

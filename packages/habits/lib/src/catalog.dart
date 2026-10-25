@@ -14,7 +14,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-drei-aufgaben',
       name: 'Drei Aufgaben für morgen festlegen',
-      stat: HabitStat.disziplin,
       area: SkillArea.geist,
       branchId: 'habits',
       why: 'Der Abend entscheidet, wie der Morgen läuft. Eine Entscheidung '
@@ -23,7 +22,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-zwei-minuten-lesen',
       name: 'Zwei Minuten lesen',
-      stat: HabitStat.klarheit,
       area: SkillArea.geist,
       branchId: 'habits',
       why: 'So klein, dass kein Tag zu voll dafür ist. Die Länge ist nicht '
@@ -34,7 +32,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-abendnotiz',
       name: 'Abendnotiz: ein Beleg für heute',
-      stat: HabitStat.disziplin,
       area: SkillArea.geist,
       branchId: 'habits',
       why: 'Ein Satz, der belegt, dass der Tag gezählt hat. Ohne Beleg '
@@ -45,7 +42,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-aufstehzeit',
       name: 'Feste Aufstehzeit — auch am Wochenende',
-      stat: HabitStat.ausdauer,
       area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'Die Aufstehzeit stellt die innere Uhr, nicht die Zubettgehzeit. '
@@ -54,7 +50,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-zehn-minuten-gehen',
       name: 'Zehn Minuten am Stück gehen',
-      stat: HabitStat.staerke,
       area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'Die erste Bewegung des Tages ist die, die am seltensten '
@@ -63,7 +58,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-wasser-vor-mahlzeit',
       name: 'Ein Glas Wasser vor jeder Mahlzeit',
-      stat: HabitStat.ausdauer,
       area: SkillArea.koerper,
       branchId: 'koerper',
       why: 'An eine bestehende Handlung gehängt — die Mahlzeit ist der '
@@ -74,7 +68,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-stunde-ohne-benachrichtigungen',
       name: 'Eine Stunde ohne Benachrichtigungen',
-      stat: HabitStat.klarheit,
       area: SkillArea.geist,
       branchId: 'geist',
       why: 'Nicht die Nachricht kostet die Aufmerksamkeit, sondern die '
@@ -83,7 +76,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-fuenf-minuten-still',
       name: 'Fünf Minuten still sitzen',
-      stat: HabitStat.klarheit,
       area: SkillArea.geist,
       branchId: 'geist',
       why: 'Übung darin, einen Impuls zu bemerken, ohne ihm zu folgen. '
@@ -94,7 +86,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-messgroesse-notieren',
       name: 'Eine Messgröße täglich notieren',
-      stat: HabitStat.klarheit,
       area: SkillArea.wissenschaft,
       branchId: 'wissenschaft',
       why: 'Ohne Zahl bleibt jeder Selbstversuch ein Gefühl. Eine einzige '
@@ -105,7 +96,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-echte-frage',
       name: 'Einem Menschen täglich eine echte Frage stellen',
-      stat: HabitStat.staerke,
       area: SkillArea.gesellschaft,
       branchId: 'gesellschaft',
       why: 'Beziehungen entstehen aus Interesse, nicht aus Anwesenheit. '
@@ -114,7 +104,6 @@ abstract final class HabitCatalog {
     HabitTemplate(
       id: 'habit-vor-zusage-durchatmen',
       name: 'Vor jeder Zusage einmal durchatmen',
-      stat: HabitStat.disziplin,
       area: SkillArea.gesellschaft,
       branchId: 'gesellschaft',
       why: 'Der Atemzug schiebt eine Entscheidung zwischen Frage und '

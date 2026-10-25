@@ -535,7 +535,6 @@ void main() {
       for (var i = 0; i < slots; i++) {
         controller.addCustom(
           name: 'Eigene $i',
-          stat: HabitStat.staerke,
           area: SkillArea.koerper,
           difficulty: HabitDifficulty.mittel,
         );
@@ -570,7 +569,6 @@ void main() {
       final controller = container.read(habitTrackerProvider.notifier);
       final habit = controller.addCustom(
         name: 'Wasser trinken',
-        stat: HabitStat.ausdauer,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
         goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
@@ -580,9 +578,9 @@ void main() {
       controller.advance(habit.id, _heute);
       await tester.pump();
 
-      // Die Prosa ist weg: kein „+1 Ausdauer", kein „2 Tage am Stück".
+      // Die Prosa ist weg: kein „+1 Angriff", kein „2 Tage am Stück".
       expect(find.textContaining('am Stück'), findsNothing);
-      expect(find.textContaining('+1 Ausdauer'), findsNothing);
+      expect(find.textContaining('+1 Angriff'), findsNothing);
 
       // Die Zahlen sind geblieben -- die Kette als Marke, der Stand des
       // Tagesziels am Balken. Ohne sie waere aus einer Layout-Aenderung
@@ -610,7 +608,6 @@ void main() {
           .read(habitTrackerProvider.notifier)
           .addCustom(
             name: 'Frisch angelegt',
-            stat: HabitStat.staerke,
             area: SkillArea.koerper,
             difficulty: HabitDifficulty.mittel,
           );
@@ -638,7 +635,6 @@ void main() {
       for (var i = 0; i < slots + 3; i++) {
         controller.addCustom(
           name: 'Eigene $i',
-          stat: HabitStat.klarheit,
           area: SkillArea.koerper,
           difficulty: HabitDifficulty.mittel,
         );
@@ -713,12 +709,11 @@ void main() {
       _passRootBranch(container);
       await _pumpScreen(tester, container);
 
-      // Fünf Häkchen auf Stärke sind ein Punkt (`StatCurve`). Vier
+      // Fünf Häkchen auf Angriff sind ein Punkt (`StatCurve`). Vier
       // liegen hinter uns, das fünfte fällt jetzt.
       final controller = container.read(habitTrackerProvider.notifier);
       final habit = controller.addCustom(
         name: 'Liegestütze',
-        stat: HabitStat.staerke,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       );
@@ -745,11 +740,11 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(SnackBar),
-          matching: find.textContaining('+1 Stärke'),
+          matching: find.textContaining('+1 Angriff'),
         ),
         findsOneWidget,
       );
-      expect(find.text('+1 Stärke'), findsOneWidget, reason: 'aufsteigend');
+      expect(find.text('+1 Angriff'), findsOneWidget, reason: 'aufsteigend');
     });
   });
 

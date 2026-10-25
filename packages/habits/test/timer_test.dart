@@ -18,7 +18,6 @@ void main() {
   const lesen = CustomHabit(
     id: 'custom-1',
     name: 'Lesen',
-    stat: HabitStat.klarheit,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: null,
@@ -26,7 +25,6 @@ void main() {
   final zwanzig = CustomHabit(
     id: 'custom-1',
     name: 'Lesen',
-    stat: HabitStat.klarheit,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: HabitGoal.zeit(target: 20),
@@ -34,7 +32,6 @@ void main() {
   final dehnen = CustomHabit(
     id: 'custom-2',
     name: 'Dehnen',
-    stat: HabitStat.ausdauer,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: HabitGoal.zeit(target: 10),
@@ -42,7 +39,6 @@ void main() {
   final glaeser = CustomHabit(
     id: 'custom-3',
     name: 'Wasser',
-    stat: HabitStat.ausdauer,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: HabitGoal.menge(target: 5, unit: 'Gläser'),

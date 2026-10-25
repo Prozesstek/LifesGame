@@ -203,7 +203,6 @@ void main() {
     final eigen = CustomHabit(
       id: 'eigen-liegestuetze',
       name: 'Liegestütze',
-      stat: HabitStat.staerke,
       area: SkillArea.koerper,
       difficulty: HabitDifficulty.mittel,
       goal: HabitGoal.menge(target: 3, unit: 'Mal'),

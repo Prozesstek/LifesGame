@@ -38,7 +38,6 @@ ProviderContainer _container({required int haekchen}) {
   final id = controller
       .addCustom(
         name: 'Liegestütze',
-        stat: HabitStat.staerke,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       )!

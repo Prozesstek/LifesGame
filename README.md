@@ -85,7 +85,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube; das Bestiarium | 406 |
 | `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 208 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve, Skill-Kurve | 52 |
-| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Charakterwerte, die vier Gebiete | 345 |
+| `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Kampfwerte, die vier Gebiete | 374 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute, Vergleich und Schloss | 137 |
 | `packages/abilities` | woher eine Fähigkeit oder Ultimate kommt und wann sie offen ist | 43 |
 | `packages/identity` | 25 Titel — nur ihr Wortlaut, Name | 25 |

@@ -387,7 +387,6 @@ void main() {
           .read(habitTrackerProvider.notifier)
           .addCustom(
             name: 'Fünf Gläser Wasser',
-            stat: HabitStat.ausdauer,
             area: SkillArea.koerper,
             difficulty: HabitDifficulty.schwer,
             goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
@@ -410,7 +409,8 @@ void main() {
       final gelesen = tracker.customHabits.single;
       expect(gelesen.id, habit.id);
       expect(gelesen.name, 'Fünf Gläser Wasser');
-      expect(gelesen.stat, HabitStat.ausdauer);
+      expect(gelesen.area, SkillArea.koerper);
+      expect(gelesen.stat, HabitStat.staerke);
       expect(gelesen.difficulty, HabitDifficulty.schwer);
       expect(gelesen.priority, HabitPriority.hoch);
       expect(gelesen.why, 'Weil ich es sonst vergesse.');

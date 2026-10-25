@@ -4,16 +4,11 @@ import 'package:habits/habits.dart';
 /// Charakter, Eingang zur Grube. **Eine Stelle**, damit drei Bildschirme
 /// nicht drei Wortlaute erfinden. Gerechnet wird hier nichts: Die
 /// Faktoren kommen aus [DailyForm].
+///
+/// Wie ein Wert heißt, steht seit ADR-0088 an ihm selbst
+/// ([HabitStat.label]) — bis dahin übersetzte diese Klasse „Klarheit“ in
+/// „Mana“.
 abstract final class DailyFormText {
-  /// Der Wert in der Grube, den [stat] heute stärkt. Nicht
-  /// [HabitStat.combatLabel]: Klarheit füllt in der Grube das Mana.
-  static String pitNameOf(HabitStat stat) => switch (stat) {
-    HabitStat.staerke => 'Angriff',
-    HabitStat.ausdauer => 'Leben',
-    HabitStat.disziplin => 'Abwehr',
-    HabitStat.klarheit => 'Mana',
-  };
-
   /// „+20 %" aus einem Faktor von 1,2.
   static String percent(double factor) => '+${((factor - 1) * 100).round()} %';
 
@@ -24,7 +19,7 @@ abstract final class DailyFormText {
     return <String>[
       for (final stat in HabitStat.values)
         if (form.factorFor(stat) > 1)
-          '${pitNameOf(stat)} ${percent(form.factorFor(stat))}',
+          '${stat.label} ${percent(form.factorFor(stat))}',
     ].join(' · ');
   }
 
@@ -39,6 +34,6 @@ abstract final class DailyFormText {
           '${percent(1 + HabitRewards.formAllDone)} dazu';
     }
     if (nachher.factorFor(stat) <= vorher.factorFor(stat)) return '';
-    return '${pitNameOf(stat)} heute ${percent(nachher.factorFor(stat))}';
+    return '${stat.label} heute ${percent(nachher.factorFor(stat))}';
   }
 }

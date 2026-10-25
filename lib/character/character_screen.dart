@@ -25,6 +25,7 @@ import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 import '../habits/widgets/week_card.dart';
 import '../habits/stat_icon.dart';
+import '../skills/gebiet_zeichen.dart';
 import '../skills/widgets/skill_karte.dart';
 
 /// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
@@ -259,11 +260,12 @@ class _StatRow extends StatelessWidget {
 
     return Semantics(
       label:
-          '${stat.label} $total, davon $base aus Gewohnheiten und '
+          '${stat.label} $total, davon $base aus ${stat.gebiet.label} und '
           '$bonus aus Ausrüstung',
       child: HolzKarte(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        // Zeichen, Summe, und woher sie kommt: Häkchen und Ausrüstung.
+        // Zeichen, Summe, und woher sie kommt: das Gebiet, dessen Häkchen
+        // ihn steigern (ADR-0088), und die Ausrüstung.
         child: Row(
           children: <Widget>[
             StatIcon(stat, size: 24),
@@ -277,7 +279,7 @@ class _StatRow extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            _Herkunft(icon: Icons.check_circle_outline, wert: '$base'),
+            _Herkunft(icon: gebietZeichen(stat.gebiet), wert: '$base'),
             if (bonus > 0) ...<Widget>[
               const SizedBox(width: 10),
               _Herkunft(

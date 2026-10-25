@@ -73,14 +73,14 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Charakterwerte, **Statistik**, reines Dart, 366 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 374 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/stack.dart` | **Gewohnheiten koppeln**: wie die Tagesliste zu Stapeln geordnet wird, was „jetzt dran“ ist, und dass kein Kreis entsteht ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/timer.dart` | der **Timer** eines Zeitziels: ein Zeitpunkt, kein Zähler — gerechnet wird aus der Startzeit ([ADR-0067](docs/decisions/0067-zeitziele-als-timer.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_rule.dart` | **wie eine Kette läuft**: erledigt, getragen, verpasst — eine Stelle für Kette, Tageskette und Erfahrung | nur Dart-SDK |
-| `packages/habits/lib/src/skill_area.dart` | die **vier Gebiete** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Körper, Geist, Wissenschaft, Gesellschaft — gleich benannt wie die Wurzeln des Baums | nur Dart-SDK |
+| `packages/habits/lib/src/skill_area.dart` | die **vier Gebiete** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Körper, Geist, Wissenschaft, Gesellschaft — gleich benannt wie die Wurzeln des Baums; **und welchen Kampfwert jedes steigert** (`kampfwert`, [ADR-0088](docs/decisions/0088-der-kampfwert-folgt-dem-gebiet.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_form.dart` | die **Tagesform**: was heute abgehakt ist, macht heute stärker ([ADR-0043](docs/decisions/0043-tagesform.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_chest.dart` | die **Tagestruhe**: aus dem Datum gewürfelt, einmal je erledigtem Tag ([ADR-0044](docs/decisions/0044-tagestruhe.md)) | nur Dart-SDK |
 | `packages/habits/lib/src/daily_quests.dart` | die **drei Tagesaufgaben**: aus dem Datum gewürfelt, Stand aus der Historie, ein Schlüssel je abgeholter ([ADR-0055](docs/decisions/0055-tageskette-aufgaben-und-wiederholen.md)) | nur Dart-SDK |
@@ -345,7 +345,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 366 Tests
+dart test                              # 374 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -578,12 +578,22 @@ bis `stagePowerLast`), und alle Kampfzahlen stehen mal
 `ActionBalance.powerScale`. Zusammengesetzt wird nur in `PitPower.hero`;
 die Welt und jede Anzeige nehmen `ActionStats.combatAttack` und die
 anderen `combat…`. **Dazu die Tagesform** ([ADR-0043](docs/decisions/0043-tagesform.md)):
-Jedes heutige Häkchen vervielfacht heute den Wert seiner Gewohnheit
-(Stärke → Angriff, Ausdauer → Leben, Disziplin → Abwehr, Klarheit →
-Mana), alles erledigt heißt „In Form" und hebt alle vier. Die Regel steht
+Jedes heutige Häkchen vervielfacht heute den Wert seiner Gewohnheit,
+alles erledigt heißt „In Form" und hebt alle vier. Die Regel steht
 in `HabitTracker.formOn`, die Zahlen in `HabitRewards`, der Wortlaut in
 `lib/habits/daily_form_text.dart`. **Eine feste Zahl im Kampf ist ein Bug** — sie wäre
 zehnmal zu klein.
+
+**Welchen Wert eine Gewohnheit steigert, sagt ihr Gebiet**
+([ADR-0088](docs/decisions/0088-der-kampfwert-folgt-dem-gebiet.md)):
+Körper → Angriff, Geist → Mana, Wissenschaft → Abwehr, Gesellschaft →
+Leben. Die Zuordnung steht nur in `SkillArea.kampfwert`; `Habit.stat`
+rechnet daraus und wird nie gespeichert, ein Gebiet zählt damit auch
+für jedes alte Häkchen. Wählen lässt sich der Wert nicht mehr, und er
+hat keinen eigenen Namen neben dem im Kampf: Die Bezeichner `staerke`,
+`ausdauer`, `disziplin`, `klarheit` stehen nur noch im Spielstand.
+`CustomHabit.statOhneGebiet` trägt den alten Wert einer Gewohnheit, die
+noch kein Gebiet hat, bis die Startseite einmal gefragt hat.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
 Grube stehen in `packages/action_combat/lib/src/balance.dart`, die Zahlen

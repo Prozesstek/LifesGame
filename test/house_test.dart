@@ -41,7 +41,6 @@ void main() {
       const eigene = CustomHabit(
         id: 'a',
         name: 'a',
-        stat: HabitStat.staerke,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
         priority: HabitPriority.normal,
