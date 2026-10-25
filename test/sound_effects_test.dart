@@ -60,6 +60,12 @@ void main() {
         ]);
       }
 
+      // Gestartet wird über den Plus-Knopf (ADR-0089); hier geht es nur
+      // um den Klang, also direkt.
+      container
+          .read(habitTrackerProvider.notifier)
+          .activate(container.read(unlockedHabitsProvider).first.id);
+
       useTallView(tester);
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -68,11 +74,6 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pumpAndSettle();
-      // Die Frage nach dem Auslöser liegen lassen (ADR-0052).
-      await tester.tap(find.text('Später'));
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.radio_button_unchecked));
       await tester.pump();

@@ -8,7 +8,7 @@ import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/cue_dialog.dart';
 import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
 import 'package:lifes_game/habits/widgets/streak_freeze_card.dart';
-import 'package:lifes_game/habits/widgets/custom_habit_sheet.dart';
+import 'package:lifes_game/habits/widgets/gewohnheit_anlegen.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
@@ -38,18 +38,37 @@ void _passRootBranch(ProviderContainer container) {
   }
 }
 
-/// Startet die oberste Vorlage und lässt die Frage nach dem Auslöser
-/// liegen (ADR-0052) — „Später", wie jemand, der es eilig hat.
-Future<void> _vorlageStarten(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+/// Öffnet den Plus-Knopf und klappt die Vorlagen auf (ADR-0089).
+Future<void> _vorlagenAuf(WidgetTester tester) async {
+  await tester.tap(find.byKey(HabitsScreen.plusKey));
   await tester.pumpAndSettle();
-  await _spaeter(tester);
+  await tester.tap(find.byKey(GewohnheitAnlegen.vorlageKey));
+  await tester.pumpAndSettle();
 }
 
-/// Schließt die Frage „Wann machst du das?", falls sie offen ist.
-Future<void> _spaeter(WidgetTester tester) async {
-  if (find.text('Später').evaluate().isEmpty) return;
-  await tester.tap(find.text('Später'));
+/// Die Einträge der aufgeklappten Vorlagen.
+final Finder _eintraege = find.byWidgetPredicate((w) {
+  final key = w.key;
+  return key is ValueKey<String> && key.value.startsWith('anlegen-vorlage-');
+});
+
+/// Startet die oberste Vorlage über den Plus-Knopf und lässt Auslöser
+/// und Belohnung liegen — „Ohne", wie jemand, der es eilig hat.
+Future<void> _vorlageStarten(WidgetTester tester) async {
+  await _vorlagenAuf(tester);
+  await tester.tap(_eintraege.first);
+  await tester.pumpAndSettle();
+  await _ohneEinrichtung(tester);
+}
+
+/// Wann → „Ohne", Tage → „Weiter", Danach → „Ohne" — falls gefragt wird.
+Future<void> _ohneEinrichtung(WidgetTester tester) async {
+  if (find.byKey(GewohnheitAnlegen.ohneKey).evaluate().isEmpty) return;
+  await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));
   await tester.pumpAndSettle();
 }
 
@@ -78,8 +97,13 @@ void main() {
       final container = _container();
       await _pumpScreen(tester, container);
 
-      expect(find.text(HabitCatalog.starter.name), findsOneWidget);
-      expect(find.byIcon(Icons.playlist_add), findsOneWidget);
+      // Seit ADR-0089 hinter dem Plus-Knopf, nicht mehr in einem Reiter.
+      expect(find.text('Vorerstellte'), findsNothing);
+      await _vorlagenAuf(tester);
+      expect(
+        find.byKey(GewohnheitAnlegen.vorlageEintrag(HabitCatalog.starterId)),
+        findsOneWidget,
+      );
     });
 
     testWidgets('bestandene Lektionen bringen ihre Vorlagen mit', (
@@ -88,6 +112,7 @@ void main() {
       final container = _container();
       _passRootBranch(container);
       await _pumpScreen(tester, container);
+      await _vorlagenAuf(tester);
 
       final erwartet = habitsBranch.lessons
           .map((l) => l.unlocksHabit)
@@ -238,16 +263,18 @@ void main() {
         hasLength(HabitRewards.maxActiveHabits),
       );
 
-      // Die verbleibenden Knöpfe sind abgeschaltet, nicht verschwunden —
-      // die Grenze soll sichtbar sein.
-      final buttons = tester.widgetList<IconButton>(
-        find.ancestor(
-          of: find.byIcon(Icons.add_circle_outline),
-          matching: find.byType(IconButton),
-        ),
+      // Die übrigen Vorlagen stehen weiter da, matt — ein Tipp sagt,
+      // warum es nicht geht, und startet nichts.
+      await _vorlagenAuf(tester);
+      expect(_eintraege, findsWidgets);
+      await tester.tap(_eintraege.first);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Die Liste ist voll'), findsOneWidget);
+      expect(
+        container.read(habitTrackerProvider).activeIds,
+        hasLength(HabitRewards.maxActiveHabits),
       );
-      expect(buttons, isNotEmpty);
-      expect(buttons.every((b) => b.onPressed == null), isTrue);
     });
   });
 
@@ -260,28 +287,28 @@ void main() {
       final container = _container();
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await _vorlagenAuf(tester);
+      await tester.tap(_eintraege.first);
       await tester.pumpAndSettle();
 
-      expect(
-        find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.text('Wann machst du das?'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Später'), findsOneWidget);
+      expect(find.text('Wann machst du das?'), findsOneWidget);
+      expect(find.byKey(GewohnheitAnlegen.ohneKey), findsOneWidget);
     });
 
     testWidgets('ein Vorschlag landet auf der Kachel', (tester) async {
       final container = _container();
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await _vorlagenAuf(tester);
+      await tester.tap(_eintraege.first);
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(ActionChip, 'Nach dem Zähneputzen'));
       await tester.pump();
-      await tester.tap(find.widgetWithText(FilledButton, 'Festlegen'));
+      await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));
       await tester.pumpAndSettle();
 
       final starter = HabitCatalog.starterId;
@@ -298,7 +325,7 @@ void main() {
       );
     });
 
-    testWidgets('Später lässt die Frage auf der Kachel stehen', (tester) async {
+    testWidgets('„Ohne" lässt die Frage auf der Kachel stehen', (tester) async {
       final container = _container();
       await _pumpScreen(tester, container);
       await _vorlageStarten(tester);
@@ -372,34 +399,42 @@ void main() {
   /// geht über drei Schichten, und genau solche Wege sind es, die in
   /// `gotchas.md` stehen, weil beide Enden für sich geprüft waren.
   group('Eigene Gewohnheiten', () {
-    /// Füllt das Formular aus und legt an.
+    /// Geht den Ablauf einer eigenen durch und legt an (ADR-0089).
     Future<void> anlegen(
       WidgetTester tester, {
       String name = 'Zehn Liegestütze',
       String? menge,
     }) async {
-      await tester.tap(find.byIcon(Icons.playlist_add));
+      await tester.tap(find.byKey(HabitsScreen.plusKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(GewohnheitAnlegen.eigeneKey));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Was tust du?'),
-        name,
-      );
+      await tester.enterText(find.byKey(GewohnheitAnlegen.nameKey), name);
       await tester.pump();
-
-      if (menge != null) {
-        await tester.tap(find.text('Menge'));
-        await tester.pumpAndSettle();
-        await tester.enterText(
-          find.widgetWithText(TextField, 'Wie viele?'),
-          menge,
-        );
-        await tester.pump();
-      }
-
-      await tester.tap(find.widgetWithText(FilledButton, 'Anlegen'));
+      await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
       await tester.pumpAndSettle();
-      await _spaeter(tester);
+      await tester.tap(
+        find.byKey(GewohnheitAnlegen.gebietKey(SkillArea.koerper)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(GewohnheitAnlegen.gradKey(HabitDifficulty.mittel)),
+      );
+      await tester.pumpAndSettle();
+
+      if (menge == null) {
+        await tester.tap(find.byKey(GewohnheitAnlegen.zielKey(ZielArt.keins)));
+        await tester.pumpAndSettle();
+      } else {
+        await tester.tap(find.byKey(GewohnheitAnlegen.zielKey(ZielArt.menge)));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byKey(GewohnheitAnlegen.mengeKey), menge);
+        await tester.pump();
+        await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
+        await tester.pumpAndSettle();
+      }
+      await _ohneEinrichtung(tester);
     }
 
     testWidgets('ohne Lektion gibt es den Platz der Startvorlage', (
@@ -411,7 +446,7 @@ void main() {
       await _pumpScreen(tester, container);
 
       expect(container.read(customSlotsProvider), 1);
-      expect(find.byIcon(Icons.playlist_add), findsOneWidget);
+      expect(find.byKey(HabitsScreen.plusKey), findsOneWidget);
     });
 
     testWidgets('jede freigeschaltete Vorlage gibt einen Platz', (
@@ -481,8 +516,8 @@ void main() {
       final habit = container.read(habitTrackerProvider).customHabits.single;
       expect(habit.goal?.target, 3);
 
-      // Das Plus auf der Kachel — nicht der Knopf, der eine Vorlage
-      // startet: Die laufende Gewohnheit steht oben, die Vorlagen unten.
+      // Das Plus auf der Kachel — die Vorlagen stehen seit ADR-0089
+      // nicht mehr auf dem Bildschirm.
       expect(find.text('0 / 3 Mal'), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.add_circle_outline).first);
@@ -514,11 +549,13 @@ void main() {
       _passRootBranch(container);
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.playlist_add));
+      await tester.tap(find.byKey(HabitsScreen.plusKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(GewohnheitAnlegen.eigeneKey));
       await tester.pumpAndSettle();
 
       final knopf = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Anlegen'),
+        find.byKey(GewohnheitAnlegen.weiterKey),
       );
       expect(knopf.onPressed, isNull);
     });
@@ -543,18 +580,19 @@ void main() {
 
       expect(container.read(customSlotsLeftProvider), 0);
 
-      // Der Knopf verschwindet nicht, er sagt ab. Seit Issue #35 steht
-      // der Grund nicht mehr dauerhaft in der Liste, sondern kommt beim
-      // Antippen -- sonst fehlte er ganz, und die Frage „warum geht das
-      // nicht" bliebe offen.
-      expect(find.byIcon(Icons.playlist_add), findsOneWidget);
+      // Der Plus-Knopf bleibt, „Eigene erstellen" sagt ab. Der Grund
+      // kommt beim Antippen — sonst bliebe die Frage „warum geht das
+      // nicht" offen.
+      expect(find.byKey(HabitsScreen.plusKey), findsOneWidget);
+      await tester.tap(find.byKey(HabitsScreen.plusKey));
+      await tester.pumpAndSettle();
       expect(find.textContaining('Kein Platz frei'), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.playlist_add));
-      await tester.pump();
+      await tester.tap(find.byKey(GewohnheitAnlegen.eigeneKey));
+      await tester.pumpAndSettle();
 
       expect(find.textContaining('Kein Platz frei'), findsOneWidget);
-      expect(find.byType(CustomHabitSheet), findsNothing);
+      expect(find.byKey(GewohnheitAnlegen.nameKey), findsNothing);
     });
 
     testWidgets('die Untertexte sind weg, die Zahlen nicht (Issue #35)', (
@@ -655,7 +693,7 @@ void main() {
       _passRootBranch(container);
       await _pumpScreen(tester, container);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
+      await _vorlageStarten(tester);
       await tester.pump();
 
       // Die Erfahrung steht zweimal da: fürs Level und für das Gebiet
