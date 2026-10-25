@@ -31,7 +31,7 @@ void main() {
     print(
       '  ${stat.label.padRight(10)} '
       '${rule.base} bis ${rule.base + rule.maxBonus} '
-      '(${stat.combatLabel}) — $bisMax Häkchen bis zum Maximum',
+      '(aus ${stat.gebiet.label}) — $bisMax Häkchen bis zum Maximum',
     );
   }
 }

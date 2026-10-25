@@ -23,8 +23,7 @@ void main() {
     return CustomHabit(
       id: id,
       name: name,
-      stat: stat,
-      area: SkillArea.koerper,
+      area: stat.gebiet,
       difficulty: difficulty,
       goal: goal,
       priority: priority,

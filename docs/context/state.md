@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 24.10.2026 · Frederik
+**Zuletzt aktualisiert:** 25.10.2026 · Frederik
 
 ---
 
@@ -29,7 +29,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Startseite** | **vor dem Berg**, acht Kreise mit Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
-| **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren | ADR-0042 |
+| **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren, **das Gebiet bestimmt den Kampfwert** | ADR-0042, -0088 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
 | **Errungenschaften** | 22 Meilensteine, 8 Entdeckungen, 13 Titel — **in der Sammlung**, mit Ausrüstung, Fähigkeiten, Gegnern (in Stufen), Titeln und Seiten | ADR-0033, -0073, -0074, -0080 |
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 999, dazu die acht Packages (theory 208, habits 366, gear
+**Tests:** App 999, dazu die acht Packages (theory 208, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,56 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 25.10.2026: der Kampfwert folgt dem Gebiet
+
+Frederik will das Anlegen einer Gewohnheit umbauen (grüner Plus-Knopf,
+eine Frage nach der anderen) und fragte: „Können wir irgendwelche von
+diesen Fragen noch wegmachen, weil sie sich doppeln?“ Auf „Wert“ und
+„Gebiet“, die wie eine Frage klingen: „Können wir nicht sagen abhängig
+von Gebiet wird ein anderer Kampfwert erhöht?“
+[ADR-0088](../decisions/0088-der-kampfwert-folgt-dem-gebiet.md).
+Das ist **Block A**; der Plus-Knopf und die Fragen kommen als Block B.
+
+| Gebiet | steigert |
+|---|---|
+| Körper | Angriff |
+| Geist | Mana |
+| Wissenschaft | Abwehr |
+| Gesellschaft | Leben |
+
+**Für alle Gewohnheiten und rückwirkend** — so gewählt, gegen Claudes
+Empfehlung (ab einem Stichtag, Bisheriges bleibt). Die Werte heißen auf
+den Bildschirmen nur noch Angriff, Leben, Abwehr und Mana; Stärke,
+Ausdauer, Disziplin und Klarheit stehen nur noch im Spielstand.
+
+| Wo | Was |
+|---|---|
+| Startseite, erste Frage | nur noch das Gebiet, daneben das Zeichen des Werts, der daraus folgt |
+| Frage nach dem Gebiet alter Gewohnheiten | „Körper · Angriff“ und so weiter; sie verschiebt jetzt Skill **und** Wert |
+| Formular einer eigenen | „Worauf zahlt es ein?“ ist weg |
+| Charakter | bei jedem Wert das Zeichen seines Gebiets statt des Häkchens |
+| Aufsteigende Zahl, Tagesform, Wochenrückblick | „+1 Angriff“ statt „+1 Stärke“ |
+
+**Gemessen** (`pit_sim`, Bot mit den ersten fünf Vorlagen — drei aus
+Geist, zwei aus Körper): An Tag 14 stärker (Stufe 7 zu 42 % statt 8 %),
+ab Tag 30 **etwa eine Stufe schwächer** (Tag 30: Stufe 9 statt 10, Level
+50: 38 statt 39). Ihm fehlen Leben und Abwehr. Nicht nachgestellt.
+
+Neu: `SkillArea.kampfwert`, `HabitStat.gebiet`,
+`CustomHabit.statOhneGebiet`; weg: `HabitStat.combatLabel`,
+`DailyFormText.pitNameOf`, der Wert an den Vorlagen. habits 374 (vorher
+366), App 999 (unverändert). Startseite und Charakter in 390 × 844
+gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- **Bestehende Stände verlieren Werte**: Wer keine Gewohnheit in
+  Gesellschaft hat, verliert seinen Lebensbonus, ohne Wissenschaft den
+  Abwehrbonus. Das trifft auch eure Stände.
+- **Abwehr kommt nur aus Wissenschaft**, und dort gibt es eine Vorlage.
+- Die Ausrüstung sagt weiter „Lebenspunkte“, „Verteidigung“, „Energie“.
+- **AktivesBrett hat ADR-0088 nicht gesehen.**
 
 ## 24.10.2026, danach: das Haustier steht in der Leiste
 

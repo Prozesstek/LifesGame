@@ -5,10 +5,10 @@ import '../ui/palette.dart';
 
 /// Welches Zeichen zu welchem Wert gehört — **eine Tabelle**.
 ///
-/// Seit die App ohne Lesen auskommen soll, steht „Stärke · Angriff“ nicht
-/// mehr als Wort da. Dasselbe Zeichen gilt für den Alltagswert und seine
-/// Wirkung im Kampf: Hantel für Stärke und Angriff, Herz für Ausdauer und
-/// Leben, Schild für Disziplin und Abwehr, Tropfen für Klarheit und Mana.
+/// Seit die App ohne Lesen auskommen soll, steht der Wert nicht mehr als
+/// Wort da: Hantel für Angriff, Herz für Leben, Schild für Abwehr,
+/// Tropfen für Mana. Einen eigenen Alltagsnamen daneben gibt es seit
+/// ADR-0088 nicht mehr.
 abstract final class StatIcons {
   static IconData of(HabitStat stat) => switch (stat) {
     HabitStat.staerke => Icons.fitness_center_rounded,
@@ -41,7 +41,7 @@ class StatIcon extends StatelessWidget {
       StatIcons.of(stat),
       size: size,
       color: color ?? StatIcons.colorOf(stat),
-      semanticLabel: '${stat.label}, ${stat.combatLabel}',
+      semanticLabel: stat.label,
     );
   }
 }

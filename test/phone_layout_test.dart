@@ -69,7 +69,6 @@ void main() {
           CustomHabit(
             id: 'eigen-1',
             name: 'Fünf Gläser Wasser über den Tag verteilt trinken',
-            stat: HabitStat.ausdauer,
             area: SkillArea.koerper,
             difficulty: HabitDifficulty.schwer,
             goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
@@ -81,7 +80,6 @@ void main() {
           const CustomHabit(
             id: 'eigen-2',
             name: 'Zwanzig Minuten Krafttraining am Abend',
-            stat: HabitStat.staerke,
             area: SkillArea.koerper,
             difficulty: HabitDifficulty.leicht,
             priority: HabitPriority.niedrig,

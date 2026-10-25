@@ -14,7 +14,6 @@ import '../../ui/druck.dart';
 class CustomHabitDraft {
   const CustomHabitDraft({
     required this.name,
-    required this.stat,
     required this.area,
     required this.difficulty,
     required this.priority,
@@ -23,9 +22,9 @@ class CustomHabitDraft {
   });
 
   final String name;
-  final HabitStat stat;
 
-  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085).
+  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085) — und das
+  /// ihren Kampfwert bestimmt (ADR-0088).
   final SkillArea area;
   final HabitDifficulty difficulty;
   final HabitPriority priority;
@@ -75,7 +74,6 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
   final _unit = TextEditingController(text: 'Mal');
   final _minutes = TextEditingController(text: '10');
 
-  HabitStat _stat = HabitStat.staerke;
   SkillArea _area = SkillArea.koerper;
   HabitDifficulty _difficulty = HabitDifficulty.mittel;
   HabitPriority _priority = HabitPriority.normal;
@@ -118,7 +116,6 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
     Navigator.of(context).pop(
       CustomHabitDraft(
         name: _name.text,
-        stat: _stat,
         area: _area,
         difficulty: _difficulty,
         priority: _priority,
@@ -157,9 +154,8 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Sie zählt wie jede andere: Häkchen, Streak, Charakterwert, '
-                'Skill. Gebiet, Wert, Schwierigkeit und Ziel stehen danach '
-                'fest.',
+                'Sie zählt wie jede andere: Häkchen, Streak, Kampfwert, '
+                'Skill. Gebiet, Schwierigkeit und Ziel stehen danach fest.',
                 style: TextStyle(
                   fontSize: 12,
                   height: 1.4,
@@ -176,26 +172,8 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
               ),
               const SizedBox(height: 14),
 
-              const _Label('Worauf zahlt es ein?'),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  for (final stat in HabitStat.values)
-                    _Chip(
-                      label: '${stat.label} · ${stat.combatLabel}',
-                      selected: _stat == stat,
-                      onTap: () => setState(() => _stat = stat),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // **Das Gebiet** (ADR-0085): welcher Skill mit ihr wächst.
-              // Unabhängig vom Wert — Liegestütze stärken den Angriff und
-              // gehören zum Körper, ein Anruf bei einem Freund stärkt die
-              // Disziplin und gehört zur Gesellschaft.
+              // **Das Gebiet** (ADR-0085): welcher Skill mit ihr wächst —
+              // und seit ADR-0088 auch, welchen Kampfwert sie steigert.
               const _Label('Zu welchem Gebiet gehört es?'),
               const SizedBox(height: 8),
               Wrap(
@@ -206,7 +184,7 @@ class _CustomHabitSheetState extends State<CustomHabitSheet> {
                     _Chip(
                       key: ValueKey<String>('gebiet-${area.name}'),
                       icon: gebietZeichen(area),
-                      label: area.label,
+                      label: '${area.label} · ${area.kampfwert.label}',
                       selected: _area == area,
                       onTap: () => setState(() => _area = area),
                     ),

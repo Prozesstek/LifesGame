@@ -200,7 +200,7 @@ void main() {
     const alt = CustomHabit(
       id: 'eigen-1',
       name: 'Freund anrufen',
-      stat: HabitStat.disziplin,
+      statOhneGebiet: HabitStat.disziplin,
       area: null,
       difficulty: HabitDifficulty.mittel,
     );

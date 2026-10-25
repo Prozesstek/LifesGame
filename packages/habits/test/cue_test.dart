@@ -54,7 +54,6 @@ void main() {
       const eigene = CustomHabit(
         id: 'eigen-1',
         name: 'Zehn Liegestütze',
-        stat: HabitStat.staerke,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
       );

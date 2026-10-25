@@ -14,7 +14,7 @@ void main() {
     return CustomHabit(
       id: id,
       name: 'Freund anrufen',
-      stat: HabitStat.disziplin,
+      statOhneGebiet: HabitStat.disziplin,
       area: area,
       difficulty: HabitDifficulty.mittel,
     );
@@ -145,6 +145,84 @@ void main() {
         ..['area'] = 'gibt-es-nicht-und-soll-es-nie-geben';
 
       expect(CustomHabit.fromJson(json)?.area, isNull);
+    });
+  });
+
+  // ADR-0088: Das Gebiet bestimmt den Kampfwert, man wählt ihn nicht.
+  group('Der Kampfwert kommt aus dem Gebiet', () {
+    test('jedes Gebiet steigert einen anderen Wert', () {
+      expect(
+        <SkillArea, HabitStat>{
+          for (final area in SkillArea.values) area: area.kampfwert,
+        },
+        <SkillArea, HabitStat>{
+          SkillArea.koerper: HabitStat.staerke,
+          SkillArea.geist: HabitStat.klarheit,
+          SkillArea.wissenschaft: HabitStat.disziplin,
+          SkillArea.gesellschaft: HabitStat.ausdauer,
+        },
+      );
+      for (final stat in HabitStat.values) {
+        expect(stat.gebiet.kampfwert, stat, reason: stat.label);
+      }
+    });
+
+    test('heißt, was er in der Grube tut', () {
+      expect(HabitStat.values.map((s) => s.label), <String>[
+        'Angriff',
+        'Leben',
+        'Abwehr',
+        'Mana',
+      ]);
+    });
+
+    test('jede Vorlage steigert den Wert ihres Gebiets', () {
+      for (final vorlage in HabitCatalog.all) {
+        expect(vorlage.stat, vorlage.area.kampfwert, reason: vorlage.name);
+      }
+    });
+
+    test('eine eigene mit Gebiet ignoriert den alten Wert', () {
+      final eigen = eigene('eigen-1', SkillArea.gesellschaft);
+
+      expect(eigen.statOhneGebiet, HabitStat.disziplin);
+      expect(eigen.stat, HabitStat.ausdauer);
+    });
+
+    test('ohne Gebiet zählt der alte Wert, bis sie eins hat', () {
+      var t = abgehakt(
+        const HabitTracker.empty().addCustom(eigene('eigen-1', null), slots: 5),
+        'eigen-1',
+        12,
+      );
+      expect(t.stats.checksFor(HabitStat.disziplin), 12);
+
+      // Rückwirkend: Die zwölf Häkchen wandern mit in den neuen Wert.
+      t = t.assignArea('eigen-1', SkillArea.geist);
+      expect(t.stats.checksFor(HabitStat.disziplin), 0);
+      expect(t.stats.checksFor(HabitStat.klarheit), 12);
+    });
+
+    test('ein neuer Stand ohne „stat“ lädt über das Gebiet', () {
+      final json = eigene('eigen-1', SkillArea.wissenschaft).toJson()
+        ..remove('stat');
+      final gelesen = CustomHabit.fromJson(json);
+
+      expect(gelesen?.stat, HabitStat.disziplin);
+    });
+
+    test('ohne Gebiet und ohne Wert wird sie verworfen', () {
+      final json = eigene('eigen-1', SkillArea.koerper).toJson()
+        ..remove('stat')
+        ..remove('area');
+
+      expect(CustomHabit.fromJson(json), isNull);
+    });
+
+    test('gespeichert steht der Wert, der gilt', () {
+      final json = eigene('eigen-1', SkillArea.gesellschaft).toJson();
+
+      expect(json['stat'], HabitStat.ausdauer.name);
     });
   });
 }

@@ -1,31 +1,40 @@
 import 'skill_area.dart';
 
-/// Der Charakterwert, auf den eine Gewohnheit einzahlt.
+/// Der Kampfwert, auf den eine Gewohnheit einzahlt.
 ///
 /// Vier Werte, weil der Kampf genau vier kennt. Jede Gewohnheit speist
 /// **einen** davon — nicht zwei, nicht anteilig. Sonst ist beim Abhaken
 /// nicht mehr zu sehen, wofür man es tut.
+///
+/// **Welcher, entscheidet ihr Gebiet** (`SkillArea.kampfwert`,
+/// ADR-0088). Bis dahin wählte man ihn selbst, und er hatte einen
+/// eigenen Namen neben dem im Kampf (Stärke → Angriff). Jetzt heißt er,
+/// was er tut; die Bezeichner bleiben, weil sie im Spielstand stehen.
 enum HabitStat {
-  /// Körperliche Anstrengung und Mut → Angriff.
-  staerke('Stärke', 'Angriff'),
+  /// Aus dem Gebiet Körper.
+  staerke('Angriff'),
 
-  /// Versorgung und Erholung → Lebenspunkte.
-  ausdauer('Ausdauer', 'Lebenspunkte'),
+  /// Aus dem Gebiet Gesellschaft.
+  ausdauer('Leben'),
 
-  /// Selbststeuerung und Planung → Verteidigung.
-  disziplin('Disziplin', 'Verteidigung'),
+  /// Aus dem Gebiet Wissenschaft.
+  disziplin('Abwehr'),
 
-  /// Aufmerksamkeit → Energie im Kampf.
-  klarheit('Klarheit', 'Energie');
+  /// Aus dem Gebiet Geist — füllt in der Grube das Mana.
+  klarheit('Mana');
 
-  const HabitStat(this.label, this.combatLabel);
+  const HabitStat(this.label);
 
-  /// Name des Werts, wie ihn der Spieler sieht.
+  /// Name des Werts, wie ihn der Spieler sieht — derselbe wie in der
+  /// Grube.
   final String label;
 
-  /// Was der Wert im Kampf bewirkt — die Übersetzung gehört sichtbar in
-  /// die Oberfläche, sonst bleibt der Kern-Loop unsichtbar.
-  final String combatLabel;
+  /// Das Gebiet, aus dem dieser Wert kommt — die Umkehrung von
+  /// `SkillArea.kampfwert`, damit eine Anzeige sagen kann, woher er
+  /// wächst.
+  SkillArea get gebiet {
+    return SkillArea.values.firstWhere((area) => area.kampfwert == this);
+  }
 
   /// Liest den gespeicherten Namen. Null bei allem, was nicht passt —
   /// nachsichtig wie alles, was aus einem Spielstand kommt.
@@ -218,10 +227,14 @@ sealed class Habit {
   /// Der Wortlaut, den der Spieler abhakt.
   String get name;
 
-  /// Der Charakterwert, auf den sie einzahlt.
+  /// Der Kampfwert, auf den sie einzahlt — **der ihres Gebiets**
+  /// (ADR-0088). Gerechnet, nie gespeichert: Kampfwerte, Tagesform und
+  /// Wochenrückblick fragen hier, und ein Gebiet zählt damit auch für
+  /// jedes Häkchen der Vergangenheit.
   HabitStat get stat;
 
-  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085).
+  /// Das Gebiet, dessen Skill sie wachsen lässt (ADR-0085) und das ihren
+  /// Kampfwert bestimmt (ADR-0088).
   ///
   /// Null nur bei einer eigenen Gewohnheit, die vor den Skills angelegt
   /// wurde und noch nicht gefragt ist — ihre Häkchen zählen dann für das
@@ -263,7 +276,6 @@ class HabitTemplate extends Habit {
   const HabitTemplate({
     required this.id,
     required this.name,
-    required this.stat,
     required this.area,
     required this.branchId,
     required this.why,
@@ -279,7 +291,7 @@ class HabitTemplate extends Habit {
   final String name;
 
   @override
-  final HabitStat stat;
+  HabitStat get stat => area.kampfwert;
 
   /// Das Gebiet ihrer Lektion — dieselbe Wurzel, unter der die Lektion
   /// im Baum hängt. Geprüft in `test/skills_test.dart`.
@@ -315,10 +327,10 @@ class HabitTemplate extends Habit {
 
 /// Eine Gewohnheit, die der Spieler selbst angelegt hat.
 ///
-/// **Nicht änderbar, was eine Zahl erzeugt.** Wert, Schwierigkeit und Ziel
-/// stehen mit dem Anlegen fest; Name, Begründung und Priorität lassen sich
-/// nachbessern ([editable]). Der Grund ist die Ableitung: Erfahrung und
-/// Charakterwerte werden aus der Historie *gerechnet*, nicht mitgezählt
+/// **Nicht änderbar, was eine Zahl erzeugt.** Gebiet, Schwierigkeit und
+/// Ziel stehen mit dem Anlegen fest; Name, Begründung und Priorität lassen
+/// sich nachbessern ([editable]). Der Grund ist die Ableitung: Erfahrung
+/// und Kampfwerte werden aus der Historie *gerechnet*, nicht mitgezählt
 /// (ADR-0008). Wer die Schwierigkeit nachträglich hochsetzt, schriebe
 /// damit jedes Häkchen der Vergangenheit um.
 ///
@@ -330,13 +342,16 @@ class CustomHabit extends Habit {
   const CustomHabit({
     required this.id,
     required this.name,
-    required this.stat,
     required this.area,
     required this.difficulty,
+    this.statOhneGebiet,
     this.goal,
     this.priority = HabitPriority.normal,
     this.why = '',
-  });
+  }) : assert(
+          area != null || statOhneGebiet != null,
+          'Ohne Gebiet braucht sie den Wert, den sie früher gewählt hatte.',
+        );
 
   @override
   final String id;
@@ -344,8 +359,13 @@ class CustomHabit extends Habit {
   @override
   final String name;
 
+  /// Der Wert, den sie trug, bevor das Gebiet ihn bestimmte (ADR-0088).
+  /// Zählt nur, solange sie kein Gebiet hat — also nur in Ständen von vor
+  /// ADR-0085, bis die Startseite einmal gefragt hat.
+  final HabitStat? statOhneGebiet;
+
   @override
-  final HabitStat stat;
+  HabitStat get stat => area?.kampfwert ?? statOhneGebiet ?? HabitStat.staerke;
 
   /// Pflicht beim Anlegen, nicht null in neuen Ständen. `required`, obwohl
   /// es null sein darf: Ein Standardwert hier wäre der Fehler aus
@@ -392,12 +412,12 @@ class CustomHabit extends Habit {
 
   /// Eine Kopie mit geänderten **folgenlosen** Feldern.
   ///
-  /// Wert, Schwierigkeit und Ziel fehlen hier mit Absicht — siehe oben.
+  /// Gebiet, Schwierigkeit und Ziel fehlen hier mit Absicht — siehe oben.
   CustomHabit editable({String? name, String? why, HabitPriority? priority}) {
     return CustomHabit(
       id: id,
       name: name ?? this.name,
-      stat: stat,
+      statOhneGebiet: statOhneGebiet,
       area: area,
       difficulty: difficulty,
       goal: goal,
@@ -413,7 +433,7 @@ class CustomHabit extends Habit {
     return CustomHabit(
       id: id,
       name: name,
-      stat: stat,
+      statOhneGebiet: statOhneGebiet,
       area: value,
       difficulty: difficulty,
       goal: goal,
@@ -426,6 +446,9 @@ class CustomHabit extends Habit {
     return <String, Object?>{
       'id': id,
       'name': name,
+      // Der Wert, der gerade gilt. Mit Gebiet wird er beim Laden nicht
+      // gelesen; er steht da, damit ein älterer Stand der App den
+      // Eintrag nicht verwirft.
       'stat': stat.name,
       if (area != null) 'area': area!.name,
       'difficulty': difficulty.name,
@@ -435,9 +458,10 @@ class CustomHabit extends Habit {
     };
   }
 
-  /// Liest eine gespeicherte Gewohnheit. Null, wenn Id, Name oder Wert
-  /// fehlen — ohne die drei wäre sie nicht anzeigbar. Alles Übrige fällt
-  /// auf einen Standard zurück, statt den Eintrag zu verwerfen.
+  /// Liest eine gespeicherte Gewohnheit. Null, wenn Id oder Name fehlen
+  /// oder weder Gebiet noch Wert dastehen — ohne sie wäre sie nicht
+  /// anzeigbar. Alles Übrige fällt auf einen Standard zurück, statt den
+  /// Eintrag zu verwerfen.
   static CustomHabit? fromJson(Object? json) {
     if (json is! Map) return null;
     final id = json['id'];
@@ -445,10 +469,11 @@ class CustomHabit extends Habit {
     final stat = json['stat'];
     if (id is! String || id.isEmpty) return null;
     if (name is! String || name.trim().isEmpty) return null;
-    if (stat is! String) return null;
 
-    final wert = HabitStat.tryParse(stat);
-    if (wert == null) return null;
+    // Fehlt in Ständen von vor ADR-0085; die Startseite fragt dann.
+    final gebiet = SkillArea.tryParse(json['area']);
+    final wert = stat is String ? HabitStat.tryParse(stat) : null;
+    if (gebiet == null && wert == null) return null;
 
     final schwierigkeit = json['difficulty'];
     final prioritaet = json['priority'];
@@ -457,9 +482,8 @@ class CustomHabit extends Habit {
     return CustomHabit(
       id: id,
       name: name.trim(),
-      stat: wert,
-      // Fehlt in Ständen von vor ADR-0085; die Startseite fragt dann.
-      area: SkillArea.tryParse(json['area']),
+      statOhneGebiet: wert,
+      area: gebiet,
       difficulty: schwierigkeit is String
           ? HabitDifficulty.tryParse(schwierigkeit) ?? HabitDifficulty.mittel
           : HabitDifficulty.mittel,

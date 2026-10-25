@@ -393,7 +393,8 @@ void main() {
 
       final eigene = c.read(habitTrackerProvider).customHabits;
       expect(eigene.single.name, 'Spazieren gehen');
-      expect(eigene.single.stat, HabitStat.ausdauer);
+      expect(eigene.single.area, SkillArea.koerper);
+      expect(eigene.single.stat, HabitStat.staerke);
       expect(c.read(habitTrackerProvider).activeIds, <String>[
         eigene.single.id,
       ]);
@@ -421,12 +422,12 @@ void main() {
       expect(tracker.customHabits, isEmpty);
     });
 
-    testWidgets('etwas Eigenes: schreiben, Wert wählen, anlegen', (
+    testWidgets('etwas Eigenes: schreiben, Gebiet wählen, anlegen', (
       tester,
     ) async {
       final c = await starte(tester);
 
-      // Die Wahl des Werts steht erst da, wenn etwas im Feld steht.
+      // Die Wahl des Gebiets steht erst da, wenn etwas im Feld steht.
       expect(find.byKey(ErsteGewohnheitKarte.losKey), findsNothing);
 
       await tester.enterText(
@@ -435,7 +436,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(
-        find.byKey(const ValueKey<String>('erste-gewohnheit-klarheit')),
+        find.byKey(const ValueKey<String>('erste-gewohnheit-geist')),
       );
       await tester.pump();
       await tester.tap(find.byKey(ErsteGewohnheitKarte.losKey));
@@ -443,6 +444,7 @@ void main() {
 
       final eigene = c.read(habitTrackerProvider).customHabits.single;
       expect(eigene.name, 'Gitarre üben');
+      expect(eigene.area, SkillArea.geist);
       expect(eigene.stat, HabitStat.klarheit);
       expect(find.byType(ErsteGewohnheitKarte), findsNothing);
     });

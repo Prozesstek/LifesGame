@@ -180,7 +180,6 @@ int _daysToLevel(int target, {HabitDifficulty? difficulty}) {
       final habit = CustomHabit(
         id: 'eigen-$i',
         name: 'Eigene $i',
-        stat: HabitStat.values[i % HabitStat.values.length],
         area: SkillArea.koerper,
         difficulty: difficulty,
       );

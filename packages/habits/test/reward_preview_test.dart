@@ -74,14 +74,12 @@ void main() {
       const schwer = CustomHabit(
         id: 'custom-1',
         name: 'Kaltduschen',
-        stat: HabitStat.disziplin,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.schwer,
       );
       const leicht = CustomHabit(
         id: 'custom-2',
         name: 'Fenster auf',
-        stat: HabitStat.disziplin,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.leicht,
       );

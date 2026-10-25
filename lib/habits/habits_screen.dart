@@ -233,7 +233,6 @@ class HabitsScreen extends ConsumerWidget {
         .read(habitTrackerProvider.notifier)
         .addCustom(
           name: draft.name,
-          stat: draft.stat,
           area: draft.area,
           difficulty: draft.difficulty,
           goal: draft.goal,

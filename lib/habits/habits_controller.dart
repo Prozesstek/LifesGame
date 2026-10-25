@@ -177,9 +177,10 @@ class HabitsController extends Notifier<HabitTracker> {
   ///
   /// Die Id wird hier vergeben, nicht im Formular: Sie muss neben
   /// **allen** bestehenden eindeutig sein, und die kennt nur der Stand.
+  ///
+  /// Einen Kampfwert nimmt sie nicht: Den bestimmt das Gebiet (ADR-0088).
   CustomHabit? addCustom({
     required String name,
-    required HabitStat stat,
     required SkillArea area,
     required HabitDifficulty difficulty,
     HabitGoal? goal,
@@ -194,7 +195,6 @@ class HabitsController extends Notifier<HabitTracker> {
     final habit = CustomHabit(
       id: CustomHabit.nextId(state.customHabits.map((h) => h.id)),
       name: name.trim(),
-      stat: stat,
       area: area,
       difficulty: difficulty,
       goal: goal,

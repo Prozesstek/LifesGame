@@ -25,7 +25,6 @@ void main() {
   final lesen = CustomHabit(
     id: 'custom-1',
     name: 'Lesen',
-    stat: HabitStat.klarheit,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: HabitGoal.zeit(target: 20),
@@ -33,7 +32,6 @@ void main() {
   final wasser = CustomHabit(
     id: 'custom-2',
     name: 'Wasser',
-    stat: HabitStat.ausdauer,
     area: SkillArea.koerper,
     difficulty: HabitDifficulty.mittel,
     goal: HabitGoal.menge(target: 5, unit: 'Gläser'),
@@ -208,7 +206,6 @@ void main() {
       final lang = CustomHabit(
         id: 'custom-1',
         name: 'Jeden Abend in Ruhe ein Kapitel im Sachbuch lesen',
-        stat: HabitStat.klarheit,
         area: SkillArea.koerper,
         difficulty: HabitDifficulty.mittel,
         goal: HabitGoal.zeit(target: 120),

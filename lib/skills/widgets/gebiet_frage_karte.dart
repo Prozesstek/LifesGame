@@ -47,9 +47,11 @@ class GebietFrageKarte extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
+          // Seit ADR-0088 bestimmt das Gebiet auch den Kampfwert — für
+          // jedes Häkchen, auch die alten.
           const Text(
-            'Dort wächst ihr Skill, mit allem, was du schon getan hast. '
-            'Danach steht es fest.',
+            'Dort wächst ihr Skill und ihr Kampfwert, mit allem, was du '
+            'schon getan hast. Danach steht es fest.',
             style: TextStyle(
               fontSize: 12,
               height: 1.35,
@@ -68,7 +70,7 @@ class GebietFrageKarte extends ConsumerWidget {
                     avatar: Icon(gebietZeichen(area), size: 16),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     label: Text(
-                      area.label,
+                      '${area.label} · ${area.kampfwert.label}',
                       style: const TextStyle(fontSize: 13),
                     ),
                     onPressed: () => ref
