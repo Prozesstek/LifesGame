@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 25.10.2026 · Frederik
+**Zuletzt aktualisiert:** 26.10.2026 · AktivesBrett
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1009, dazu die acht Packages (theory 208, habits 374, gear
+**Tests:** App 1011, dazu die acht Packages (theory 208, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,33 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 26.10.2026: Schwerter auf „Hinab“, im Blatt nur das angetippte Exemplar
+
+AktivesBrett schickte ein Schwert-Icon: „das packst du da hin, wo man
+beim Kampfmenü ganz unten drauf klickt … zur Zeit sind da nur zwei
+Pfeile“. Und: „in dem Item-Menü, wenn man auf ein Item klickt … die
+anderen Items raus“. In zwei Fragerunden entschieden, alle sechs Fragen
+wie empfohlen.
+
+| Was | Wie |
+|---|---|
+| **Die Schwerter** | zwei gekreuzte Schwerter statt der zwei Pfeile, auf „Hinab“ im Eingang **und** in der Tagesgrube; hell wie die Schrift auf dem Holzknopf |
+| **Nachgezeichnet** | die Vorlage hat keine bekannte Herkunft; das Zeichen ist aus Linien gerechnet (`SchwerterZeichen`) und gehört dem Projekt |
+| **Das Blatt eines Stücks** | zeigt nur noch das Exemplar, das angetippt wurde — im Rucksack, auf dem Platz, im Siegerblatt; die anderen desselben Stücks nicht mehr. Aus der Sammlung: nur die Werte |
+| **Die Anzahl** | „2 Mal im Besitz.“ bleibt als Info |
+| **Verkauft** | geht das Blatt zu, sobald auch eine Feier dazu vorbei ist |
+| **Die Knöpfe** | danach, auf AktivesBretts Wunsch: Ablegen, Verkaufen und Sperren sind Holzplanken wie Anlegen, nicht mehr bloßer Text |
+
+**Beim Bauen gefunden:** Verkaufen im Blatt lief über den Kontext des
+Exemplars. Ist es verkauft, verschwindet es samt Kontext — die Feier des
+Verkaufs fand ihren Bildschirm dann nicht mehr. Das war schon vorher
+so, jetzt läuft der Verkauf über das Blatt.
+
+Neu: `lib/combat/widgets/schwerter_zeichen.dart`,
+`test/schwerter_zeichen_test.dart`. App 1011 (vorher 1009). Die
+Schwerter groß neben der Vorlage und im Eingang gerendert und angesehen.
+**Nicht am Handy.**
 
 ## 25.10.2026, danach: eine Frage nach der anderen (Block B)
 

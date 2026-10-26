@@ -226,7 +226,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88) | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen** | Flutter |
-| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **jedes eigene Exemplar**, anlegen, ablegen, verkaufen, **sperren** | Flutter |
+| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **nur das angetippte Exemplar** (26.10.) — anlegen, ablegen, verkaufen, **sperren** — alle vier als Holzplanke; verkauft, geht es zu | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
 | `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
@@ -279,7 +279,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/gold_icon.dart` | die Goldmünze, überall dieselbe | Flutter |
 | `lib/ui/phone_frame.dart` | zeigt die App im Browser in Handygröße — **und auf Tablets**, wo Android das Hochformat seit targetSdk 36 nicht mehr einhält | Flutter |
 | `lib/combat/ladder_controller.dart` | Riverpod-Brücke Reihe ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter **„Ebene 18“** — nur die nächste, kein Fahrstuhl mehr —, Belohnung als Zeichen, „Hinab" | Flutter |
+| `lib/combat/ladder_screen.dart` | der Eingang zur Grube: oben die **Tagesgrube**, darunter **„Ebene 18“** — nur die nächste, kein Fahrstuhl mehr —, Belohnung als Zeichen, „Hinab“ mit **zwei gekreuzten Schwertern** | Flutter |
+| `lib/combat/widgets/schwerter_zeichen.dart` | **die gekreuzten Schwerter** auf „Hinab“ im Eingang und in der Tagesgrube — nachgezeichnet, aus Linien gerechnet, in der Farbe der Zeichen um sie herum | Flutter |
 | `lib/combat/widgets/eingangs_glut.dart` | **der Schlund im Eingang**: glüht in der Farbe dessen, was unten fällt — Feuer, ab 10 episch, ab 20 legendär, über 30 blutrot (`GlutStufe`); atmet in Tests nicht (`test/flutter_test_config.dart`) | Flutter |
 | `lib/combat/daily_pit_controller.dart` | Riverpod-Brücke Tagesgrube ↔ UI, **enthält keine Regeln**; `dailyConditionProvider` sagt, in welcher Verfassung es heute hinabginge | Flutter |
 | `lib/combat/widgets/tagesgrube_karte.dart` | die Tagesgrube im Eingang: Satz des Tages, Verfassung, „Hinab“ — **trägt den Versuch ein, bevor der Lauf beginnt**; danach Ergebnis und Teilen | Flutter |
@@ -328,7 +329,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1009 Tests
+flutter test             # 1011 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
