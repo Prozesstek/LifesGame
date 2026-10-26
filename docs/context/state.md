@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1030, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1032, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -205,7 +205,7 @@ Außerhalb des Baums die seines Zuhauses, der Wurzel seines ersten
 Elternteils (`TheoryGraph.rootIdsOf`, neu).
 
 Neu: `lib/skills/gebiet_farbe.dart`, `lib/theory/widgets/seiten_farbe.dart`,
-`test/gebiet_farbe_test.dart` (10). App 1019 (vorher 1009), theory 210
+`test/gebiet_farbe_test.dart` (10). App 1019 (vorher 1009; mit #162 zusammen 1021), theory 210
 (vorher 208). Alle vier Gebiete, die Legende und eine Seite aus Geist in
 390 × 844 gerendert und angesehen. **Nicht am Handy** — auch die
 anderen Blöcke nicht.
@@ -249,6 +249,33 @@ dieser Reihenfolge gemergt.
 - In der Grube trägt nichts die Farbe eines Gebiets, auch nicht die
   Leiste der Fähigkeiten, deren Mana aus Geist kommt.
 - **AktivesBrett hat ADR-0090 nicht gesehen.**
+
+## 26.10.2026: Schwerter auf „Hinab“, im Blatt nur das angetippte Exemplar
+
+AktivesBrett schickte ein Schwert-Icon: „das packst du da hin, wo man
+beim Kampfmenü ganz unten drauf klickt … zur Zeit sind da nur zwei
+Pfeile“. Und: „in dem Item-Menü, wenn man auf ein Item klickt … die
+anderen Items raus“. In zwei Fragerunden entschieden, alle sechs Fragen
+wie empfohlen.
+
+| Was | Wie |
+|---|---|
+| **Die Schwerter** | zwei gekreuzte Schwerter statt der zwei Pfeile, auf „Hinab“ im Eingang **und** in der Tagesgrube; hell wie die Schrift auf dem Holzknopf |
+| **Nachgezeichnet** | die Vorlage hat keine bekannte Herkunft; das Zeichen ist aus Linien gerechnet (`SchwerterZeichen`) und gehört dem Projekt |
+| **Das Blatt eines Stücks** | zeigt nur noch das Exemplar, das angetippt wurde — im Rucksack, auf dem Platz, im Siegerblatt; die anderen desselben Stücks nicht mehr. Aus der Sammlung: nur die Werte |
+| **Die Anzahl** | „2 Mal im Besitz.“ bleibt als Info |
+| **Verkauft** | geht das Blatt zu, sobald auch eine Feier dazu vorbei ist |
+| **Die Knöpfe** | danach, auf AktivesBretts Wunsch: Ablegen, Verkaufen und Sperren sind Holzplanken wie Anlegen, nicht mehr bloßer Text |
+
+**Beim Bauen gefunden:** Verkaufen im Blatt lief über den Kontext des
+Exemplars. Ist es verkauft, verschwindet es samt Kontext — die Feier des
+Verkaufs fand ihren Bildschirm dann nicht mehr. Das war schon vorher
+so, jetzt läuft der Verkauf über das Blatt.
+
+Neu: `lib/combat/widgets/schwerter_zeichen.dart`,
+`test/schwerter_zeichen_test.dart`. App 1011 (vorher 1009). Die
+Schwerter groß neben der Vorlage und im Eingang gerendert und angesehen.
+**Nicht am Handy.**
 
 ## 25.10.2026, danach: eine Frage nach der anderen (Block B)
 
