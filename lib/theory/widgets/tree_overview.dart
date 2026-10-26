@@ -146,10 +146,15 @@ class ContinueReadingTile extends StatelessWidget {
     required this.farbe,
     required this.onTap,
     this.cost,
+    this.grund,
     super.key,
   });
 
   final TheoryNode node;
+
+  /// Warum diese Seite vorgeschlagen wird — es steht als Zeichen vorn
+  /// (`VorschlagZeichen`). Ohne Grund das Buch.
+  final TheoryVorschlagGrund? grund;
 
   /// Die Farbe des Gebiets der Seite, auf Leder — nicht unbedingt des
   /// Gebiets, das gerade offen ist: Der Vorschlag kann woanders liegen.
@@ -163,13 +168,16 @@ class ContinueReadingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preis = cost;
+    final warum = grund;
+    final vorn = warum == null ? '' : '${VorschlagZeichen.wortOf(warum)}. ';
+    final was = preis == null
+        ? 'Weiterlesen: ${node.name}'
+        : 'Öffnen und lesen: ${node.name}, kostet $preis '
+              '${preis == 1 ? 'Punkt' : 'Punkte'}';
 
     return Semantics(
       button: true,
-      label: preis == null
-          ? 'Weiterlesen: ${node.name}'
-          : 'Öffnen und lesen: ${node.name}, kostet $preis '
-                '${preis == 1 ? 'Punkt' : 'Punkte'}',
+      label: vorn + was,
       child: Druck(
         child: Material(
           color: farbe.withValues(alpha: 0.16),
@@ -181,7 +189,13 @@ class ContinueReadingTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: <Widget>[
-                  Icon(Icons.menu_book_rounded, size: 18, color: farbe),
+                  Icon(
+                    warum == null
+                        ? Icons.menu_book_rounded
+                        : VorschlagZeichen.of(warum),
+                    size: 18,
+                    color: farbe,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
@@ -212,6 +226,26 @@ class ContinueReadingTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Welches Zeichen zu welchem Grund eines Vorschlags gehört — **eine
+/// Tabelle**. Das Wort steht nur für den Vorleser (ADR-0060).
+abstract final class VorschlagZeichen {
+  static IconData of(TheoryVorschlagGrund grund) => switch (grund) {
+    TheoryVorschlagGrund.offen => Icons.menu_book_rounded,
+    TheoryVorschlagGrund.grundlagen => Icons.school_rounded,
+    TheoryVorschlagGrund.weiter => Icons.subdirectory_arrow_right_rounded,
+    TheoryVorschlagGrund.gewohnheiten => Icons.task_alt_rounded,
+    TheoryVorschlagGrund.neuesGebiet => Icons.explore_rounded,
+  };
+
+  static String wortOf(TheoryVorschlagGrund grund) => switch (grund) {
+    TheoryVorschlagGrund.offen => 'Schon offen',
+    TheoryVorschlagGrund.grundlagen => 'Die Grundlagen',
+    TheoryVorschlagGrund.weiter => 'Weiter, wo du warst',
+    TheoryVorschlagGrund.gewohnheiten => 'Passt zu deinen Gewohnheiten',
+    TheoryVorschlagGrund.neuesGebiet => 'Ein neues Gebiet',
+  };
 }
 
 /// Der Preis eines Knotens: das Zeichen der Punkte und die Zahl — wie im

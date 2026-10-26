@@ -290,7 +290,8 @@ void main() {
       // 3. Die erste Seite, über den Vorschlag im Baum.
       await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(ContinueReadingTile));
+      // Der erste Vorschlag ist der des Mentors.
+      await tester.tap(find.byType(ContinueReadingTile).first);
       await tester.pumpAndSettle();
       expect(find.byType(LessonScreen), findsOneWidget);
 

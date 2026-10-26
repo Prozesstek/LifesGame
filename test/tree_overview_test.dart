@@ -105,7 +105,8 @@ void main() {
         .openNode('koerper', availablePoints: 5);
     await baum(tester, c);
 
-    final kachel = find.byType(ContinueReadingTile);
+    // Der erste Vorschlag; darunter dürfen weitere stehen.
+    final kachel = find.byType(ContinueReadingTile).first;
     expect(kachel, findsOneWidget);
 
     await tester.tap(kachel);
@@ -129,7 +130,7 @@ void main() {
     await baum(tester, container());
 
     final vorschlag = tester.widget<ContinueReadingTile>(
-      find.byType(ContinueReadingTile),
+      find.byType(ContinueReadingTile).first,
     );
     expect(vorschlag.node.id, theoryBasicsPath.first);
     expect(vorschlag.cost, 1);
@@ -144,7 +145,7 @@ void main() {
     await baum(tester, c);
 
     final vorschlag = tester.widget<ContinueReadingTile>(
-      find.byType(ContinueReadingTile),
+      find.byType(ContinueReadingTile).first,
     );
     expect(vorschlag.node.id, 'koerper');
     expect(vorschlag.cost, isNull);

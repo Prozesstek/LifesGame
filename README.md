@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 1028 Tests
+flutter test                       # 1030 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
@@ -54,7 +54,7 @@ cd packages/gear
 dart test                          # 137 Tests, prüft Preise, Sets, Würfel, Laden und Beute
 
 cd packages/theory
-dart test                          # 210 Tests, prüft auch den Inhalt
+dart test                          # 218 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 25 Tests, nur noch der Wortlaut
@@ -83,7 +83,7 @@ Danach `flutter doctor` bis alles grün ist.
 | Pfad | Inhalt | Tests |
 |---|---|---|
 | `packages/action_combat` | die Grube: 100 Stufen, 11 Gegnerarten in gewürfelter Besetzung, 4 Wächter, 29 Fähigkeiten und 2 Ultimates, 8 Waffen, Sets und legendäre Kräfte; die Tagesgrube; das Bestiarium | 406 |
-| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 210 |
+| `packages/theory` | Skillbaum-Graph: 63 Seiten, 189 Fragen, Lernfortschritt | 218 |
 | `packages/progression` | Levelkurve, Fähigkeitsslots samt Ultimate-Platz, Theoriepunkte, Machtkurve, Skill-Kurve | 52 |
 | `packages/habits` | 11 Vorlagen, eigene Gewohnheiten, Streaks, Kampfwerte, die vier Gebiete | 374 |
 | `packages/gear` | 48 Ausrüstungsstücke auf 6 Plätzen, drei Sets, Exemplare mit gewürfelten Werten, Tagesladen, Beute, Vergleich und Schloss | 137 |
@@ -92,7 +92,7 @@ Danach `flutter doctor` bis alles grün ist.
 | `packages/achievements` | 34 Meilensteine, 8 Entdeckungen, Ruhm | 25 |
 | `packages/haustier` | **das Haustier** (ADR-0086): drei Eier, Wachsen an Tagen mit Häkchen, Laune, Zubehör | 21 |
 | `tool/pit_sim.dart` | die maßgebliche Balance-Simulation | — |
-| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Skills, Grube, Laden, Charakter, Sammlung | 1028 |
+| `lib/` | Flutter-App: Start, Skillbaum, Tracker, Skills, Grube, Laden, Charakter, Sammlung | 1030 |
 
 **Die Kernregel:** Spielzahlen liegen in den Packages, nie in `lib/`. Die
 Controller reichen durch und rechnen nicht. Wird in `lib/` eine Spielzahl

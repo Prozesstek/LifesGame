@@ -182,6 +182,17 @@ class TheoryProgress {
 
   Set<String> get openedNodeIds => Set<String>.unmodifiable(_openedNodeIds);
 
+  /// Die bestandenen Seiten **in der Reihenfolge, in der sie zuerst
+  /// versucht wurden** — die letzte ist die, an der jemand zuletzt Neues
+  /// gelesen hat (`vorschlaege`).
+  ///
+  /// Eine Uhrzeit steht nirgends; die Reihenfolge der Einträge überlebt
+  /// aber das Speichern, und ein zweiter Versuch rückt eine Seite nicht
+  /// nach hinten.
+  List<String> get passedInOrder => List<String>.unmodifiable(
+        _records.entries.where((e) => e.value.isPassed).map((e) => e.key),
+      );
+
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'records': <String, Object?>{

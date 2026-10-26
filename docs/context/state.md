@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1028, dazu die acht Packages (theory 210, habits 374, gear
+**Tests:** App 1030, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,41 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 26.10.2026, danach: Vorschläge für das nächste Kapitel
+
+Frederik: „Wenn ein Skillpunkt offen ist: Vorschläge für nächstes
+Kapitel. So muss der Spieler selber nicht selber entscheiden, kann es
+aber, wenn er will.“ In einer Fragerunde, viermal wie empfohlen:
+[ADR-0091](../decisions/0091-vorschlaege-fuers-naechste-kapitel.md).
+
+**Die Lücke vorher:** Ein Vorschlag, und wer die Grundlagen durch hatte,
+bekam gar keinen mehr.
+
+| Was | Wie |
+|---|---|
+| **Bis zu drei** | jeder mit seinem Grund als Zeichen: schon offen (Buch), Grundlagen (Hut), weiter, wo du warst (Pfeil), passt zu deinen Gewohnheiten (Häkchen), neues Gebiet (Kompass) |
+| **Der erste** | ist der alte Vorschlag; auf ihn zeigt der Mentor |
+| **Wo** | oben im Baum statt der einen Kachel, und in der Feier eines Aufstiegs unter dem neuen Punkt |
+| **Ein Tipp** | öffnet und liest; der Preis steht dran |
+
+**Ohne Rückfrage entschieden:** „Zuletzt gelesen“ ist die Seite, die
+zuletzt **zum ersten Mal** versucht und bestanden wurde — eine Uhrzeit
+steht nirgends. Die Gewohnheiten zählen mit der Erfahrung ihrer Häkchen
+je Gebiet. Jede Kachel trägt die Farbe ihres Gebiets (ADR-0090).
+
+Neu: `packages/theory/lib/src/vorschlag.dart`,
+`lib/theory/vorschlag_flow.dart`, `vorschlag_test.dart` (8),
+`test/vorschlaege_test.dart` (2). App 1030 (vorher 1028), theory 218
+(vorher 210). Fünf Tests gingen von einer Kachel aus und nehmen jetzt
+die erste. Baum und Aufstieg in 390 × 844 gerendert und angesehen.
+**Baut auf #165 auf. Nicht am Handy.**
+
+### Offen
+
+- Ob drei Kacheln oben den Baum zu weit nach unten drücken — am Handy
+  ansehen.
+- **AktivesBrett hat ADR-0091 nicht gesehen.**
 
 ## 26.10.2026: jedes Gebiet eine Farbe
 
