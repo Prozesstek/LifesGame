@@ -16,6 +16,7 @@ import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
+import 'vorschlag_flow.dart';
 import 'widgets/node_action_panel.dart';
 import 'widgets/points_chip.dart';
 import 'widgets/tree_overview.dart';
@@ -148,9 +149,11 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                           ],
                           areaIndex: _current,
                           onSelectArea: _goToArea,
-                          // Erst im Gebiet, das gerade offen ist, dann
-                          // irgendwo, zuletzt der Weg der Grundlagen.
-                          next: ref.watch(suggestedStepProvider(_areaId)),
+                          // Bis zu drei, der erste wie bisher: erst im
+                          // Gebiet, das gerade offen ist, dann irgendwo,
+                          // dann der Weg der Grundlagen — danach, was zum
+                          // Gelesenen und zu den Gewohnheiten passt.
+                          vorschlaege: ref.watch(vorschlaegeProvider(_areaId)),
                           onRead: _go,
                         ),
                         Expanded(
@@ -223,18 +226,12 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
   }
 
   /// Geht einen vorgeschlagenen Schritt: öffnen, falls nötig, dann lesen.
-  Future<void> _go(TheoryStep schritt) async {
-    if (schritt.needsOpening) {
-      final offen = ref
-          .read(theoryProgressProvider.notifier)
-          .openNode(
-            schritt.node.id,
-            availablePoints: ref.read(availableTheoryPointsProvider),
-          );
-      if (!offen) return;
-    }
-    await _act(schritt.node, NodeAction.read);
-  }
+  Future<void> _go(TheoryStep schritt) => lieseVorschlag(
+    context,
+    ref,
+    schritt,
+    bevorzugt: SkillArea.tryParse(_areaId),
+  );
 
   Future<void> _act(TheoryNode node, NodeAction action) async {
     switch (action) {
@@ -281,7 +278,7 @@ class _Header extends StatelessWidget {
     required this.areas,
     required this.areaIndex,
     required this.onSelectArea,
-    required this.next,
+    required this.vorschlaege,
     required this.onRead,
   });
 
@@ -294,7 +291,10 @@ class _Header extends StatelessWidget {
   final List<(TheoryNode, ({int passed, int total}))> areas;
   final int areaIndex;
   final ValueChanged<int> onSelectArea;
-  final TheoryStep? next;
+
+  /// Was als Nächstes dran sein könnte — der Spieler muss nicht wählen,
+  /// darf aber: Der erste ist der Vorschlag, die anderen sind die Wahl.
+  final List<TheoryVorschlag> vorschlaege;
   final ValueChanged<TheoryStep> onRead;
 
   @override
@@ -302,7 +302,6 @@ class _Header extends StatelessWidget {
     final stand = areaIndex < areas.length
         ? areas[areaIndex].$2
         : (passed: 0, total: 0);
-    final naechste = next;
     final gebiet = SkillArea.tryParse(area?.id);
     final farbe = GebietFarbe.vonWurzel(area?.id ?? '', dunkel: true);
 
@@ -368,26 +367,27 @@ class _Header extends StatelessWidget {
               onSelect: onSelectArea,
             ),
           ),
-          if (naechste != null) ...<Widget>[
-            const SizedBox(height: 8),
+          for (final (i, v) in vorschlaege.indexed) ...<Widget>[
+            SizedBox(height: i == 0 ? 8 : 5),
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              // Hierhin zeigt der Mentor, solange die erste Seite fehlt
-              // (ADR-0079): Der Vorschlag ist der kürzeste Weg zu ihr.
-              child: Zeigefinger(
-                schritt: Schritt.ersteSeite,
+              // Auf den ersten zeigt der Mentor, solange die erste Seite
+              // fehlt (ADR-0079): Er ist der kürzeste Weg zu ihr.
+              child: _mitFinger(
+                erster: i == 0,
                 child: ContinueReadingTile(
-                  node: naechste.node,
+                  node: v.node,
+                  grund: v.grund,
                   farbe: switch (gebietVon(
                     graph,
-                    naechste.node.id,
+                    v.node.id,
                     bevorzugt: gebiet,
                   )) {
                     final SkillArea g => GebietFarbe.leder(g),
                     null => farbe,
                   },
-                  cost: naechste.needsOpening ? naechste.node.cost : null,
-                  onTap: () => onRead(naechste),
+                  cost: v.step.needsOpening ? v.node.cost : null,
+                  onTap: () => onRead(v.step),
                 ),
               ),
             ),
@@ -396,6 +396,14 @@ class _Header extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Der erste Vorschlag liegt im Ring des Mentors, die anderen nicht. Der
+/// Platz in der Liste wechselt nie, also baut sich nichts neu
+/// (`gotchas.md`).
+Widget _mitFinger({required bool erster, required Widget child}) {
+  if (!erster) return child;
+  return Zeigefinger(schritt: Schritt.ersteSeite, child: child);
 }
 
 /// Das Fragezeichen, das die Legende öffnet (ADR-0056).

@@ -52,7 +52,8 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 210 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 218 Tests | nur Dart-SDK |
+| `packages/theory/lib/src/vorschlag.dart` | **Vorschläge für das nächste Kapitel** ([ADR-0091](docs/decisions/0091-vorschlaege-fuers-naechste-kapitel.md)): bis zu drei, jeder mit Grund — offen, Grundlagen, weiter, wo du warst, passt zu deinen Gewohnheiten, neues Gebiet; der erste ist `suggestedStep` | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
@@ -312,6 +313,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
+| `lib/theory/vorschlag_flow.dart` | **was ein Tipp auf einen Vorschlag tut**: öffnen, falls nötig, dann lesen — eine Stelle für Baum und Aufstieg | Flutter |
 | `lib/theory/review_flow.dart` | was eine Antwort auf die Rückfrage auslöst | Flutter |
 
 **Schichtregel:** Kampfregeln, Gegnerwerte, Fähigkeiten- und Waffenwirkung
@@ -332,7 +334,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1030 Tests
+flutter test             # 1032 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -355,7 +357,7 @@ dart test                              # 374 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 210 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 218 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 52 Tests
 cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
@@ -644,7 +646,7 @@ Punkten ein ganzes Gebiet am Stück.
 
 | Frage | Antwortet |
 |---|---|
-| Was schlägt der Baum als Nächstes vor? | `TheoryProgress.suggestedStep` — erst lesen, was offen ist, sonst der nächste Schritt auf dem Weg der Grundlagen |
+| Was schlägt der Baum als Nächstes vor? | `TheoryVorschlaege.vorschlaege` — bis zu drei mit Grund, oben im Baum und beim Aufstieg ([ADR-0091](docs/decisions/0091-vorschlaege-fuers-naechste-kapitel.md)); der erste ist `TheoryProgress.suggestedStep`: erst lesen, was offen ist, sonst der nächste Schritt auf dem Weg der Grundlagen |
 | Welche Seite kommt nach dieser? | `TheoryProgress.nextAfter` — die nächste im Buch, offen oder bezahlbar; ein Durchgang, einmal herum |
 | Wie viele Seiten sind bestanden? | `passedPagesProvider` — **nur der Graph**; die flachen Zweige dazuzuzählen zählt doppelt |
 

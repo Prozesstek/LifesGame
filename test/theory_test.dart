@@ -129,12 +129,14 @@ void main() {
       await _pumpTree(tester, container);
 
       final vorschlag = tester.widget<ContinueReadingTile>(
-        find.byType(ContinueReadingTile),
+        find.byType(ContinueReadingTile).first,
       );
       expect(vorschlag.node.id, theoryBasicsPath.first);
       expect(vorschlag.cost, 1);
       expect(
-        find.bySemanticsLabel(RegExp('Öffnen und lesen: .*kostet 1 Punkt')),
+        find.bySemanticsLabel(
+          RegExp(r'^Die Grundlagen\. Öffnen und lesen: .*kostet 1 Punkt'),
+        ),
         findsOneWidget,
       );
     });
@@ -148,7 +150,7 @@ void main() {
       final vorher = container.read(availableTheoryPointsProvider);
 
       await _pumpTree(tester, container);
-      await tester.tap(find.byType(ContinueReadingTile));
+      await tester.tap(find.byType(ContinueReadingTile).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(LessonScreen), findsOneWidget);
@@ -656,13 +658,18 @@ void main() {
 
       await pumpTree(tester, container);
 
+      // Der Name kann schon vorher dastehen — als Vorschlag. Gezählt
+      // wird, dass er mit dem Wechsel dazukommt: als Überschrift.
       final zweitesGebiet = theoryGraph.nodeById(theoryRootIds[1])!;
-      expect(find.text(zweitesGebiet.name), findsNothing);
+      final vorher = find.text(zweitesGebiet.name).evaluate().length;
 
       await tester.tap(find.byIcon(Icons.chevron_right_rounded));
       await tester.pumpAndSettle();
 
-      expect(find.text(zweitesGebiet.name), findsWidgets);
+      expect(
+        find.text(zweitesGebiet.name).evaluate().length,
+        greaterThan(vorher),
+      );
     });
 
     testWidgets('am Rand der Reihe führt der Pfeil nirgendwohin', (

@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 import 'package:theory/theory.dart';
 
 import 'package:progression/progression.dart';
 
+import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../dev/dev_controller.dart';
 import '../save/save_providers.dart';
@@ -153,6 +155,29 @@ final suggestedStepProvider = Provider.family<TheoryStep?, String>((
         path: theoryBasicsPath,
         availablePoints: ref.watch(availableTheoryPointsProvider),
         under: under,
+      );
+});
+
+/// **Bis zu drei Vorschläge für das nächste Kapitel**, jeder mit Grund —
+/// im Gebiet [under] zuerst, oder ohne Gebiet für die Feier eines
+/// Aufstiegs. **Rechnet nichts**: Die Regel steht in
+/// `TheoryVorschlaege.vorschlaege`; hier kommt nur dazu, was die
+/// Gewohnheiten je Gebiet an Erfahrung gebracht haben.
+final vorschlaegeProvider = Provider.family<List<TheoryVorschlag>, String?>((
+  ref,
+  under,
+) {
+  final tracker = ref.watch(habitTrackerProvider);
+  return ref
+      .watch(theoryProgressProvider)
+      .vorschlaege(
+        ref.watch(theoryGraphProvider),
+        path: theoryBasicsPath,
+        availablePoints: ref.watch(availableTheoryPointsProvider),
+        under: under,
+        gewicht: <String, int>{
+          for (final area in SkillArea.values) area.name: tracker.xpIn(area),
+        },
       );
 });
 

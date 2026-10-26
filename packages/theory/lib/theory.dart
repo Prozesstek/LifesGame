@@ -30,3 +30,4 @@ export 'src/review.dart';
 export 'src/rewards.dart';
 export 'src/shuffled_lesson.dart';
 export 'src/skill_tree.dart';
+export 'src/vorschlag.dart';

@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:progression/progression.dart';
+import 'package:theory/theory.dart';
 
 import '../audio/sound_effects.dart';
+import '../skills/gebiet_farbe.dart';
+import '../theory/theory_controller.dart';
+import '../theory/vorschlag_flow.dart';
+import '../theory/widgets/tree_overview.dart';
+import '../ui/druck.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'level_provider.dart';
@@ -33,17 +39,57 @@ Future<void> showLevelUp(
 
   unawaited(HapticFeedback.heavyImpact());
   ref.read(soundPlayerProvider).play(SoundEffect.errungenschaft);
-  await showDialog<void>(
+  // **Bringt das Level einen Punkt, steht darunter, wofür** (26.10.2026):
+  // dieselben Vorschläge wie oben im Baum, ohne Gebiet vorneweg.
+  final graph = ref.read(theoryGraphProvider);
+  final vorschlaege = auf.theoryPoints > 0
+      ? <(TheoryVorschlag, Color)>[
+          for (final v in ref.read(vorschlaegeProvider(null)))
+            (
+              v,
+              switch (gebietVon(graph, v.node.id)) {
+                final g? => GebietFarbe.pergament(g),
+                null => Palette.accent,
+              },
+            ),
+        ]
+      : const <(TheoryVorschlag, Color)>[];
+  final gewaehlt = await showDialog<TheoryStep>(
     context: context,
-    builder: (_) => HolzDialog(child: LevelUpSheet(levelUp: auf)),
+    builder: (dialog) => HolzDialog(
+      child: LevelUpSheet(
+        levelUp: auf,
+        vorschlaege: vorschlaege,
+        onVorschlag: (step) => Navigator.of(dialog).pop(step),
+      ),
+    ),
   );
+  if (gewaehlt != null && context.mounted) {
+    await lieseVorschlag(context, ref, gewaehlt);
+  }
 }
 
 /// Das Blatt selbst: die Zahl springt hoch, darunter, was sie bringt.
 class LevelUpSheet extends StatelessWidget {
-  const LevelUpSheet({required this.levelUp, super.key});
+  const LevelUpSheet({
+    required this.levelUp,
+    this.vorschlaege = const <(TheoryVorschlag, Color)>[],
+    this.onVorschlag,
+    super.key,
+  });
 
   final LevelUp levelUp;
+
+  /// Wohin der neue Punkt gehen könnte, je mit der Farbe seines Gebiets.
+  /// Leer, wenn der Aufstieg keinen Punkt bringt.
+  final List<(TheoryVorschlag, Color)> vorschlaege;
+
+  /// Ein Tipp auf einen Vorschlag — öffnet und liest ihn.
+  final ValueChanged<TheoryStep>? onVorschlag;
+
+  /// Woran Tests einen Vorschlag finden.
+  static Key vorschlagKey(String nodeId) =>
+      ValueKey<String>('aufstieg-vorschlag-$nodeId');
 
   /// „4 %" aus einem Faktor von 1,04.
   static String prozent(double faktor) => '${((faktor - 1) * 100).round()} %';
@@ -104,6 +150,16 @@ class LevelUpSheet extends StatelessWidget {
           const SizedBox(height: 14),
           for (var i = 0; i < zeilen.length; i++)
             _Zeile(icon: zeilen[i].$1, text: zeilen[i].$2, nummer: i),
+          if (vorschlaege.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 10),
+            for (final (v, farbe) in vorschlaege)
+              _Vorschlag(
+                key: vorschlagKey(v.node.id),
+                vorschlag: v,
+                farbe: farbe,
+                onTap: onVorschlag == null ? null : () => onVorschlag!(v.step),
+              ),
+          ],
         ],
       ),
       actions: <Widget>[
@@ -152,6 +208,80 @@ class _Zeile extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Ein Vorschlag im Blatt des Aufstiegs: Zeichen des Grundes, Name,
+/// Preis — wie oben im Baum, nur auf Pergament.
+class _Vorschlag extends StatelessWidget {
+  const _Vorschlag({
+    required this.vorschlag,
+    required this.farbe,
+    required this.onTap,
+    super.key,
+  });
+
+  final TheoryVorschlag vorschlag;
+  final Color farbe;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final preis = vorschlag.step.needsOpening ? vorschlag.node.cost : null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Semantics(
+        button: true,
+        label:
+            '${VorschlagZeichen.wortOf(vorschlag.grund)}: '
+            '${vorschlag.node.name}',
+        excludeSemantics: true,
+        child: Druck(
+          child: Material(
+            color: farbe.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      VorschlagZeichen.of(vorschlag.grund),
+                      size: 18,
+                      color: farbe,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        vorschlag.node.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Palette.text,
+                        ),
+                      ),
+                    ),
+                    if (preis != null) ...<Widget>[
+                      const SizedBox(width: 6),
+                      PunktPreis(cost: preis, color: Palette.gold),
+                    ],
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_rounded, size: 18, color: farbe),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
