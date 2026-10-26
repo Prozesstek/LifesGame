@@ -1,5 +1,12 @@
-/// Das Blatt, das ein Ausrüstungsstück vollständig erklärt, samt allen
-/// eigenen Exemplaren (ADR-0057).
+/// Das Blatt, das ein Ausrüstungsstück vollständig erklärt, samt dem
+/// Exemplar, das angetippt wurde (ADR-0057).
+///
+/// **Nur dieses eine** (AktivesBrett, 26.10.): Bis dahin standen darunter
+/// alle eigenen Exemplare desselben Stücks, jedes mit Anlegen, Verkaufen
+/// und Schloss. Wer im Rucksack eins antippt, meint dieses; die anderen
+/// liegen daneben als eigene Kachel. Wie viele es gibt, sagt weiter die
+/// Zeile zur Herkunft. Ohne Exemplar (aus der Sammlung) bleiben die
+/// Werte allein.
 ///
 /// **Es kommt auch bei Stücken, die man nicht hat.** Dieselbe Hausregel
 /// wie bei den Fähigkeiten (ADR-0049): Ein graues Stück, das beim
@@ -27,21 +34,30 @@ import '../weapon_ability_line.dart';
 import 'copy_stats.dart';
 import 'rarity_badge.dart';
 
-/// Zeigt das Blatt zu [item].
-Future<void> showGearSheet(BuildContext context, GearItem item) {
+/// Zeigt das Blatt zu [item] — mit [exemplar], wenn ein bestimmtes
+/// angetippt wurde.
+Future<void> showGearSheet(
+  BuildContext context,
+  GearItem item, {
+  GearCopy? exemplar,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     elevation: 0,
     isScrollControlled: true,
-    builder: (_) => GearSheet(item: item),
+    builder: (_) => GearSheet(item: item, exemplar: exemplar),
   );
 }
 
 class GearSheet extends ConsumerWidget {
-  const GearSheet({required this.item, super.key});
+  const GearSheet({required this.item, this.exemplar, super.key});
 
   final GearItem item;
+
+  /// Das angetippte Exemplar. Nur dieses steht im Blatt, und nur solange
+  /// es noch da ist.
+  final GearCopy? exemplar;
 
   static const double _bildSeite = 52;
 
@@ -55,6 +71,10 @@ class GearSheet extends ConsumerWidget {
       for (final copy in loadout.copiesIn(item.slot))
         if (copy.itemId == item.id) copy,
     ];
+    final dieses = <GearCopy>[
+      for (final copy in eigene)
+        if (copy.uid == exemplar?.uid) copy,
+    ].firstOrNull;
     final offen = GearGates.isOpen(item.rarity, highestRung: rung);
     final imLaden = heute.any((c) => c.itemId == item.id);
     final set = GearSets.byId(item.setId);
@@ -64,7 +84,7 @@ class GearSheet extends ConsumerWidget {
     return HolzBlatt(
       child: SafeArea(
         child: ConstrainedBox(
-          // Ein Blatt mit fünf Exemplaren wird lang. Höher als vier
+          // Ein Stück mit Set und Fähigkeit wird lang. Höher als vier
           // Fünftel des Bildschirms wäre es nicht mehr als Blatt zu
           // erkennen, dann scrollt es lieber.
           constraints: BoxConstraints(
@@ -172,28 +192,24 @@ class GearSheet extends ConsumerWidget {
                 sprosse: GearGates.rungFor(item.rarity),
                 imLaden: imLaden,
               ),
-              if (eigene.isNotEmpty) ...<Widget>[
+              if (dieses != null) ...<Widget>[
                 const SizedBox(height: 16),
-                Text(
-                  eigene.length == 1
-                      ? 'Dein Exemplar'
-                      : 'Deine ${eigene.length} Exemplare',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Palette.text,
+                _Exemplar(
+                  copy: dieses,
+                  worn: getragen,
+                  istAngelegt: loadout.isEquipped(dieses.uid),
+                  slot: item.slot,
+                  // **Über das Blatt, nicht über das Exemplar**: Verkauft,
+                  // verschwindet das Exemplar samt seinem Kontext, und mit
+                  // ihm Feier und Schließen. Das Blatt bleibt, bis die Feier
+                  // vorbei ist, und geht dann zu.
+                  onVerkaufen: () => sellWithConfirm(
+                    context,
+                    ref,
+                    dieses,
+                    danach: () => Navigator.of(context).maybePop(),
                   ),
                 ),
-                const SizedBox(height: 8),
-                for (final copy in eigene) ...<Widget>[
-                  _Exemplar(
-                    copy: copy,
-                    worn: getragen,
-                    istAngelegt: loadout.isEquipped(copy.uid),
-                    slot: item.slot,
-                  ),
-                  const SizedBox(height: 8),
-                ],
               ],
             ],
           ),
@@ -353,10 +369,12 @@ class _Exemplar extends ConsumerWidget {
     required this.worn,
     required this.istAngelegt,
     required this.slot,
+    required this.onVerkaufen,
   });
 
   final GearCopy copy;
   final GearSlot slot;
+  final VoidCallback onVerkaufen;
 
   static const double _knopfBreite = 104;
   final GearCopy? worn;
@@ -427,7 +445,7 @@ class _Exemplar extends ConsumerWidget {
                 // also steht der Knopf erst wieder da, wenn es frei ist.
                 if (!gesperrt)
                   TextButton(
-                    onPressed: () => sellWithConfirm(context, ref, copy),
+                    onPressed: onVerkaufen,
                     child: const Text('Verkaufen'),
                   ),
                 TextButton.icon(
