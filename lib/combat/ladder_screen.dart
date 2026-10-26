@@ -15,6 +15,7 @@ import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'ladder_controller.dart';
 import 'widgets/eingangs_glut.dart';
+import 'widgets/schwerter_zeichen.dart';
 import 'widgets/tagesform_kreis.dart';
 import 'widgets/tagesgrube_karte.dart';
 
@@ -36,7 +37,8 @@ class LadderScreen extends ConsumerWidget {
 
   static const double _maxWidth = 560;
 
-  /// Woran man „Hinab“ findet — der Knopf trägt nur noch einen Pfeil.
+  /// Woran man „Hinab“ findet — der Knopf trägt nur noch zwei gekreuzte
+  /// Schwerter (`SchwerterZeichen`).
   static const Key hinabKey = ValueKey<String>('grube-hinab');
 
   /// Woran man die Ebene findet, in die es geht.
@@ -99,9 +101,8 @@ class LadderScreen extends ConsumerWidget {
                             ),
                           ),
                           key: LadderScreen.hinabKey,
-                          child: const Icon(
-                            Icons.keyboard_double_arrow_down_rounded,
-                            size: 26,
+                          child: const SchwerterZeichen(
+                            size: 30,
                             semanticLabel: 'Hinab',
                           ),
                         ),

@@ -14,6 +14,7 @@ import '../daily_pit_controller.dart';
 import '../move_icon.dart';
 import '../tagesgrube_text.dart';
 import 'raumzeile.dart';
+import 'schwerter_zeichen.dart';
 import 'teilen_knopf.dart';
 
 /// **Die Tagesgrube im Eingang der Grube** (ADR-0072): dieselbe Grube für
@@ -270,9 +271,8 @@ class _Davor extends StatelessWidget {
             minimumSize: const Size(56, 44),
             padding: const EdgeInsets.symmetric(horizontal: 14),
           ),
-          child: const Icon(
-            Icons.keyboard_double_arrow_down_rounded,
-            size: 24,
+          child: const SchwerterZeichen(
+            size: 26,
             semanticLabel: 'In die Tagesgrube',
           ),
         ),

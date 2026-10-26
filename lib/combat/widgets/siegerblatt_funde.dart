@@ -138,7 +138,7 @@ class _SiegerblattFundeState extends ConsumerState<SiegerblattFunde>
     final item = copy.item;
     if (item == null) return;
     if (!_waehlen) {
-      showGearSheet(context, item);
+      showGearSheet(context, item, exemplar: copy);
       return;
     }
     if (!VerkaufAuswahl.waehlbar(loadout, copy)) return;
