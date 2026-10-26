@@ -376,7 +376,17 @@ class _Exemplar extends ConsumerWidget {
   final GearSlot slot;
   final VoidCallback onVerkaufen;
 
-  static const double _knopfBreite = 104;
+  /// So breit steht die Spalte der Knöpfe — genug für „Verkaufen“ und
+  /// „Gesperrt“ samt Schloss auf einer Planke.
+  static const double _knopfBreite = 124;
+
+  /// **Alle vier Knöpfe sind Planken** (AktivesBrett, 26.10.): Bis dahin
+  /// war nur „Anlegen“ aus Holz, die übrigen standen als bloßer Text
+  /// darunter. Schmaler eingerückt als sonst, damit das Wort auf die
+  /// Planke passt.
+  static final ButtonStyle _planke = FilledButton.styleFrom(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+  );
   final GearCopy? worn;
   final bool istAngelegt;
 
@@ -429,26 +439,32 @@ class _Exemplar extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 if (istAngelegt)
-                  OutlinedButton(
+                  FilledButton(
+                    style: _planke,
                     onPressed: () =>
                         ref.read(loadoutProvider.notifier).unequip(slot),
                     child: const Text('Ablegen'),
                   )
                 else
                   FilledButton(
+                    style: _planke,
                     onPressed: () =>
                         ref.read(loadoutProvider.notifier).equip(copy.uid),
                     child: const Text('Anlegen'),
                   ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 // **Gesperrtes lässt sich nicht verkaufen** (Issue #137),
                 // also steht der Knopf erst wieder da, wenn es frei ist.
-                if (!gesperrt)
-                  TextButton(
+                if (!gesperrt) ...<Widget>[
+                  FilledButton(
+                    style: _planke,
                     onPressed: onVerkaufen,
                     child: const Text('Verkaufen'),
                   ),
-                TextButton.icon(
+                  const SizedBox(height: 6),
+                ],
+                FilledButton.icon(
+                  style: _planke,
                   key: ValueKey<String>('schloss-${copy.uid}'),
                   onPressed: () =>
                       ref.read(loadoutProvider.notifier).toggleLock(copy.uid),

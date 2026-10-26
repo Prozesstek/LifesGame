@@ -478,7 +478,7 @@ void main() {
       );
       expect(container.read(loadoutProvider).isLocked('test-b'), isTrue);
       // Im Blatt steht nur das gesperrte Exemplar, und ohne „Verkaufen“.
-      expect(find.widgetWithText(TextButton, 'Verkaufen'), findsNothing);
+      expect(find.text('Verkaufen'), findsNothing);
 
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
@@ -624,12 +624,13 @@ void main() {
 
       await tester.tap(kachelVon('test-b'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
       await tester.pumpAndSettle();
 
-      // Die Rückfrage steht, noch ist nichts weg.
+      // Die Rückfrage steht, noch ist nichts weg. Ihr „Verkaufen“ liegt
+      // über dem des Blatts.
       expect(find.text('${doppelt().name} verkaufen?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen').last);
       await tester.pump();
       await tester.pump();
 

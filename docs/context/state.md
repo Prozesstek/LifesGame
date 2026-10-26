@@ -150,6 +150,7 @@ wie empfohlen.
 | **Das Blatt eines Stücks** | zeigt nur noch das Exemplar, das angetippt wurde — im Rucksack, auf dem Platz, im Siegerblatt; die anderen desselben Stücks nicht mehr. Aus der Sammlung: nur die Werte |
 | **Die Anzahl** | „2 Mal im Besitz.“ bleibt als Info |
 | **Verkauft** | geht das Blatt zu, sobald auch eine Feier dazu vorbei ist |
+| **Die Knöpfe** | danach, auf AktivesBretts Wunsch: Ablegen, Verkaufen und Sperren sind Holzplanken wie Anlegen, nicht mehr bloßer Text |
 
 **Beim Bauen gefunden:** Verkaufen im Blatt lief über den Kontext des
 Exemplars. Ist es verkauft, verschwindet es samt Kontext — die Feier des

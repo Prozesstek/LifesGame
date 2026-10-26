@@ -420,7 +420,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Inventar'), findsNothing);
-      expect(find.widgetWithText(TextButton, 'Verkaufen'), findsNothing);
+      expect(find.text('Verkaufen'), findsNothing);
     });
 
     testWidgets('alles Schlechtere verkaufen räumt den Ausschuss', (

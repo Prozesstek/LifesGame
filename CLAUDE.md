@@ -226,7 +226,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88) | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen** | Flutter |
-| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **nur das angetippte Exemplar** (26.10.) — anlegen, ablegen, verkaufen, **sperren**; verkauft, geht es zu | Flutter |
+| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **nur das angetippte Exemplar** (26.10.) — anlegen, ablegen, verkaufen, **sperren** — alle vier als Holzplanke; verkauft, geht es zu | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
 | `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
