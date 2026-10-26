@@ -6,6 +6,7 @@ import '../../habits/habits_controller.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../gebiet_farbe.dart';
 import '../gebiet_zeichen.dart';
 
 /// **Die einmalige Frage** (ADR-0085): Zu welchem Gebiet gehört eine
@@ -67,7 +68,11 @@ class GebietFrageKarte extends ConsumerWidget {
                 Druck(
                   child: ActionChip(
                     key: knopf(area),
-                    avatar: Icon(gebietZeichen(area), size: 16),
+                    avatar: Icon(
+                      gebietZeichen(area),
+                      size: 16,
+                      color: GebietFarbe.pergament(area),
+                    ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     label: Text(
                       '${area.label} · ${area.kampfwert.label}',

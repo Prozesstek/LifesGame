@@ -173,6 +173,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
 | `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
 | `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke — **eine Stelle** für Kachel und Kopf des Baums | Flutter |
+| `lib/skills/widgets/gebiet_streifen.dart` | **der Streifen am linken Rand** einer Gewohnheit in der Farbe ihres Gebiets (ADR-0090) — Kachel; der Zettel auf „Heute“ malt ihn über `Steckbrief.streifen` | Flutter |
 | `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** unter dem Level: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
 | `lib/skills/widgets/gebiet_frage_karte.dart` | die **einmalige Frage** nach dem Gebiet einer alten eigenen Gewohnheit, über „Heute“ | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
@@ -330,7 +331,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1019 Tests
+flutter test             # 1023 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

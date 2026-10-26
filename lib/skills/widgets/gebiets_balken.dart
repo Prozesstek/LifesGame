@@ -8,12 +8,13 @@ import '../../ui/aufstieg.dart';
 import '../../ui/beute_flug.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../gebiet_farbe.dart';
 import '../gebiet_zeichen.dart';
 import '../skills_provider.dart';
 
 /// **Der zweite Balken** (ADR-0085): unter dem Level-Balken, solange die
-/// grünen Funken eines Häkchens fliegen — Zeichen, Name, Balken und
-/// Stufe des Gebiets.
+/// Funken eines Häkchens zu ihm fliegen — Zeichen, Name, Balken und
+/// Stufe des Gebiets, in seiner Farbe (ADR-0090).
 ///
 /// Er sagt, was ein Häkchen sonst verschwiege: **Dieselbe Erfahrung zählt
 /// zweimal**, fürs Level und für den Skill. Die Funken teilen sich am
@@ -122,7 +123,10 @@ class _GebietsBalkenState extends ConsumerState<GebietsBalken>
   }
 
   Widget _zeile(SkillArea? area, SkillLevel skill) {
-    final farbe = widget.aufDunkel ? Palette.successOnDark : Palette.success;
+    // Ohne Gebiet ist er unsichtbar; die Farbe ist dann gleich.
+    final farbe = area == null
+        ? (widget.aufDunkel ? Palette.textOnDarkDim : Palette.textDim)
+        : GebietFarbe.auf(area, dunkel: widget.aufDunkel);
     return Semantics(
       label: area == null ? null : '${area.label}, Stufe ${skill.level}',
       excludeSemantics: true,

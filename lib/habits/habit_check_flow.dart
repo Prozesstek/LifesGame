@@ -24,6 +24,7 @@ import '../character/show_ability_unlock.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
 import '../progression/show_level_up.dart';
+import '../skills/gebiet_farbe.dart';
 import '../skills/gebiet_zeichen.dart';
 import '../skills/skills_provider.dart';
 import '../ui/aufstieg.dart';
@@ -149,13 +150,7 @@ void _mitFeier(
   final feiern = _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
   // Der Balken unter dem Level weiss so, welches Gebiet er zeigt.
   if (area != null) ref.read(zuletztGebietProvider.notifier).setze(area);
-  if (!_fliegen(
-    context,
-    result,
-    klang,
-    zumGebiet: area != null,
-    danach: feiern,
-  )) {
+  if (!_fliegen(context, result, klang, gebiet: area, danach: feiern)) {
     WidgetsBinding.instance.addPostFrameCallback((_) => feiern());
   }
   sayHabitFeedback(
@@ -180,8 +175,9 @@ void _mitFeier(
 /// Münzen, und die Zahlen dort steigen, wenn sie ankommen. Nur, wo es
 /// eine Leiste gibt; sonst steigen nur die Zahlen auf.
 ///
-/// **Die Erfahrung fliegt zweimal** ([zumGebiet], ADR-0085): einmal zum
-/// Level, einmal grün zum Balken des Gebiets darunter. Derselbe Betrag,
+/// **Die Erfahrung fliegt zweimal** ([gebiet], ADR-0085): einmal zum
+/// Level, einmal in der Farbe des Gebiets zu seinem Balken darunter
+/// (ADR-0090). Derselbe Betrag,
 /// zwei Ziele — so sieht man, dass ein Häkchen für beides zählt.
 ///
 /// Der Klang ist schon geholt: Bis das letzte Stück ankommt, ist ein
@@ -191,13 +187,14 @@ bool _fliegen(
   BuildContext context,
   CheckResult result,
   SoundPlayer klang, {
-  required bool zumGebiet,
+  required SkillArea? gebiet,
   required VoidCallback danach,
 }) {
   return AufstiegHost.maybeOf(context)?.fliege(
         gold: result.goldGained,
         xp: result.xpGained,
-        gebiet: zumGebiet ? result.xpGained : 0,
+        gebiet: gebiet == null ? 0 : result.xpGained,
+        gebietFarbe: gebiet == null ? null : GebietFarbe.leder(gebiet),
         beiAnkunft: (ziel) => klang.play(switch (ziel) {
           FlugZiel.gold => SoundEffect.muenze,
           FlugZiel.erfahrung || FlugZiel.gebiet => SoundEffect.funke,
@@ -422,24 +419,29 @@ void _steigen(
     if (area != null)
       AufstiegZeile(
         '+${result.xpGained} EP ${area.label}',
-        color: Palette.successOnDark,
+        color: GebietFarbe.leder(area),
         icon: gebietZeichen(area),
       ),
     if (area != null && skillAuf)
       AufstiegZeile(
         '${area.label} $skillNachher!',
-        color: Palette.successOnDark,
+        color: GebietFarbe.leder(area),
         icon: Icons.arrow_upward_rounded,
       ),
     if (punkt > 0)
       AufstiegZeile(
         '+$punkt ${habit.stat.label}',
-        color: Palette.successOnDark,
+        // Der Wert gehört zu einem Gebiet (ADR-0088) und trägt dessen Farbe.
+        color: GebietFarbe.leder(habit.stat.gebiet),
       ),
     if (form.isNotEmpty)
       AufstiegZeile(
         form.startsWith('In Form') ? 'In Form!' : form,
-        color: Palette.accentOnDark,
+        // „In Form“ hebt alle vier; ein einzelner Wert trägt die Farbe
+        // seines Gebiets.
+        color: form.startsWith('In Form')
+            ? Palette.accentOnDark
+            : GebietFarbe.leder(habit.stat.gebiet),
       ),
     ?keyGainLine(ref, schluesselVorher),
   ]);

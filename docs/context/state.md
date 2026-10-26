@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1019, dazu die acht Packages (theory 210, habits 374, gear
+**Tests:** App 1023, dazu die acht Packages (theory 210, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -135,7 +135,7 @@ vom 02.10.
 
 ---
 
-## 26.10.2026: jedes Gebiet eine Farbe (Block 1: Baum und Lesen)
+## 26.10.2026: jedes Gebiet eine Farbe
 
 Frederik: „Hinter jedem Theorie-Gebiet eine Farbe — auch bei Charakter
 und Gewohnheiten verwenden, also wirklich alles, was irgendwie mit den
@@ -151,7 +151,9 @@ Fragerunde entschieden, viermal wie empfohlen:
 | Gesellschaft | Rosa, wie das Herz | `#8E2559` | `#EE8DBE` |
 
 **Kein Rot, Grün oder Gold** — die heißen schon Gegner, erledigt und
-Gold. Gebaut wird in drei Blöcken; dies ist der erste.
+Gold. Gebaut in drei Blöcken mit je einem PR.
+
+### Block 1: Baum und Lesen
 
 | Was | Wie |
 |---|---|
@@ -170,12 +172,25 @@ Elternteils (`TheoryGraph.rootIdsOf`, neu).
 Neu: `lib/skills/gebiet_farbe.dart`, `lib/theory/widgets/seiten_farbe.dart`,
 `test/gebiet_farbe_test.dart` (10). App 1019 (vorher 1009), theory 210
 (vorher 208). Alle vier Gebiete, die Legende und eine Seite aus Geist in
-390 × 844 gerendert und angesehen. **Nicht am Handy.**
+390 × 844 gerendert und angesehen. **Nicht am Handy** — auch die
+anderen Blöcke nicht.
+
+### Block 2: Gewohnheiten, Häkchen und Startseite
+
+| Was | Wie |
+|---|---|
+| **Kachel und Zettel** | ein Streifen am linken Rand in der Farbe des Gebiets, erledigt blass; Zeichen, Skill und „+15“ fürs Gebiet ebenso. **Das Häkchen bleibt grün** |
+| **Das Häkchen** | die Funken zum Gebiet, „+15 EP Geist“, der Aufstieg des Skills, der Punkt eines Werts und die Tagesform eines Werts steigen in der Farbe auf; „In Form“ bleibt im Akzent |
+| **Der Balken des Gebiets** | neben dem Level-Ring in seiner Farbe statt Grün |
+| **Die Wahl** | beim Anlegen, auf der Startseite und bei der Frage nach dem Gebiet alter Gewohnheiten trägt jedes Zeichen seine Farbe |
+
+Neu: `lib/skills/widgets/gebiet_streifen.dart`, `Steckbrief.streifen`.
+App 1023 (vorher 1019). Startseite, ein Häkchen mitten im Flug, die
+Gewohnheiten und die Wahl beim Anlegen in 390 × 844 gerendert und
+angesehen.
 
 ### Offen
 
-- **Block 2**: Gewohnheiten (Streifen und Zeichen), Häkchen, Balken des
-  Gebiets, Startseite, Anlegen.
 - **Block 3**: Charakter, Kampfwerte, Errungenschaften, Haustier,
   Statistik.
 - Körper liegt nah am Akzent; im Baum steht der nicht mehr daneben.

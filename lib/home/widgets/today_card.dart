@@ -11,6 +11,7 @@ import '../../habits/habits_screen.dart';
 import '../../habits/widgets/habit_check_tile.dart';
 import '../../habits/widgets/haekchen_kreis.dart';
 import '../../habits/widgets/habit_countdown.dart';
+import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
 import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
@@ -420,6 +421,14 @@ class _Zettel extends StatelessWidget {
               abgestempelt: done,
               innen: innen,
               stempelGroesse: _stempel,
+              // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
+              // auf der Kachel; erledigt blass.
+              streifen: switch (habit.area) {
+                final SkillArea gebiet => GebietFarbe.pergament(
+                  gebiet,
+                ).withValues(alpha: done ? 0.4 : 1),
+                null => null,
+              },
               child: PlatzLaedtEin(
                 aktiv: cued,
                 radius: 6,
@@ -486,8 +495,8 @@ class _Zettel extends StatelessWidget {
             ),
           ),
           // **Wohin sie zählt** (ADR-0085): das Zeichen ihres
-          // Gebiets, grün wie sein Balken in der Leiste oben. Erledigt
-          // liegt dort der Stempel.
+          // Gebiets, in seiner Farbe wie sein Balken in der Leiste oben
+          // (ADR-0090). Erledigt liegt dort der Stempel.
           if ((habit.area, done) case (
             final SkillArea gebiet,
             false,
@@ -497,7 +506,7 @@ class _Zettel extends StatelessWidget {
               gebietZeichen(gebiet),
               key: TodayCard.gebietKey(habit.id),
               size: 15,
-              color: Palette.success,
+              color: GebietFarbe.pergament(gebiet),
             ),
           ],
           // Erledigt bleibt rechts Platz für den Stempel, sonst läge er
