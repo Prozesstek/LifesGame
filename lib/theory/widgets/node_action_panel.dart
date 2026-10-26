@@ -31,6 +31,7 @@ class NodeActionPanel extends StatelessWidget {
     required this.node,
     required this.state,
     required this.availablePoints,
+    required this.farbe,
     required this.onAction,
     super.key,
   });
@@ -38,6 +39,10 @@ class NodeActionPanel extends StatelessWidget {
   final TheoryNode node;
   final NodeState state;
   final int availablePoints;
+
+  /// Die Farbe des Gebiets, auf Pergament — das Häkchen einer
+  /// bestandenen Seite, wie am Knoten darunter.
+  final Color farbe;
   final ValueChanged<NodeAction> onAction;
 
   @override
@@ -122,7 +127,7 @@ class NodeActionPanel extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Icon(Icons.check_circle, size: 15, color: Palette.success),
+              Icon(Icons.check_circle, size: 15, color: farbe),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(

@@ -105,6 +105,36 @@ class TheoryGraph {
     return List<TheoryNode>.unmodifiable(ergebnis);
   }
 
+  /// Die Wurzeln, unter denen [id] steht — die Gegenrichtung zu
+  /// [descendantsOf]. Eine Wurzel steht unter sich selbst.
+  ///
+  /// **Die erste ist sein Zuhause**: die Wurzel, zu der man kommt, wenn
+  /// man immer dem ersten Eltern folgt. Danach die übrigen, ohne
+  /// Wiederholung. *Stress* hängt zuerst an Körper, dann an Geist — und
+  /// trägt außerhalb des Baums deshalb die Farbe von Körper.
+  ///
+  /// Leer bei einer Id, die es nicht gibt.
+  List<String> rootIdsOf(String id) {
+    final gesehen = <String>{};
+    final wurzeln = <String>[];
+
+    void aufsteigen(String von) {
+      if (!gesehen.add(von)) return;
+      final node = nodeById(von);
+      if (node == null) return;
+      if (node.isRoot) {
+        wurzeln.add(node.id);
+        return;
+      }
+      for (final elternId in node.parentIds) {
+        aufsteigen(elternId);
+      }
+    }
+
+    aufsteigen(id);
+    return List<String>.unmodifiable(wurzeln);
+  }
+
   /// Ob [id] mit den bereits geöffneten Knoten geöffnet werden darf.
   ///
   /// Prüft **nicht**, ob genug Theoriepunkte da sind — das ist die Frage

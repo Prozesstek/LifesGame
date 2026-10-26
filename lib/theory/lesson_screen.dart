@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 import '../progression/show_level_up.dart';
 import 'package:theory/theory.dart';
 
@@ -11,6 +12,7 @@ import '../audio/sound_effects.dart';
 import '../character/abilities_controller.dart';
 import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
+import '../skills/gebiet_farbe.dart';
 import '../ui/aufstieg.dart';
 import '../ui/palette.dart';
 import 'antwort_klang.dart';
@@ -20,6 +22,7 @@ import 'widgets/lese_haeppchen.dart';
 import 'widgets/lesson_result_view.dart';
 import 'widgets/question_card.dart';
 import 'widgets/runden_balken.dart';
+import 'widgets/seiten_farbe.dart';
 import '../gear/gear_controller.dart';
 
 /// Was der Bildschirm gerade zeigt.
@@ -41,9 +44,17 @@ enum _Stage { raten, reading, quiz, repeat, result }
 /// Balken mit jeder, die sitzt. Am Ende zählen Erfahrung und Gold hoch,
 /// drei von drei werfen Konfetti. **Keine Zahl ändert sich.**
 class LessonScreen extends ConsumerStatefulWidget {
-  const LessonScreen({required this.lesson, super.key});
+  const LessonScreen({required this.lesson, this.gebiet, super.key});
 
   final Lesson lesson;
+
+  /// In welchem Gebiet die Seite gelesen wird — ihre Farbe (26.10.2026).
+  ///
+  /// Der Baum reicht das Gebiet, aus dem man kommt: *Stress* unter Geist
+  /// ist blau. **Ohne Angabe das Zuhause der Seite**, die Wurzel ihres
+  /// ersten Elternteils (`gebietDerSeite`) — das unterscheidet sich nur
+  /// bei einer Seite mit zwei Eltern.
+  final SkillArea? gebiet;
 
   @override
   ConsumerState<LessonScreen> createState() => _LessonScreenState();
@@ -107,6 +118,10 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   int? _geschaetzt;
 
   Lesson get _lesson => widget.lesson;
+
+  SkillArea? get _gebiet =>
+      widget.gebiet ??
+      gebietDerSeite(ref.read(theoryGraphProvider), _lesson.id);
 
   Question get _question => _questionAt(_index);
 
@@ -337,32 +352,35 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _feiern();
       },
-      child: Scaffold(
-        // **Die einzige Seite, die ganz Pergament ist.** Überall sonst
-        // liegen Pergamentflächen auf Leder; hier ist der Bildschirm
-        // selbst die Seite, die gelesen wird — ein Fließtext über die
-        // volle Höhe braucht keinen Rahmen, der ihn zur Karte macht.
-        backgroundColor: Palette.surface,
-        appBar: AppBar(
-          title: Text(_lesson.title),
+      child: SeitenFarbe(
+        gebiet: _gebiet,
+        child: Scaffold(
+          // **Die einzige Seite, die ganz Pergament ist.** Überall sonst
+          // liegen Pergamentflächen auf Leder; hier ist der Bildschirm
+          // selbst die Seite, die gelesen wird — ein Fließtext über die
+          // volle Höhe braucht keinen Rahmen, der ihn zur Karte macht.
           backgroundColor: Palette.surface,
-          bottom: fragt ? _balken() : null,
-        ),
-        body: AufstiegHost(
-          key: _host,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _maxWidth),
-              child: switch (_stage) {
-                _Stage.raten => _buildRaetsel(),
-                _Stage.reading => LeseHaeppchen(
-                  lesson: _lesson,
-                  onStart: _startQuiz,
-                ),
-                _Stage.quiz => _buildQuiz(),
-                _Stage.repeat => _buildRepeat(),
-                _Stage.result => _buildResult(),
-              },
+          appBar: AppBar(
+            title: Text(_lesson.title),
+            backgroundColor: Palette.surface,
+            bottom: fragt ? _balken() : null,
+          ),
+          body: AufstiegHost(
+            key: _host,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxWidth),
+                child: switch (_stage) {
+                  _Stage.raten => _buildRaetsel(),
+                  _Stage.reading => LeseHaeppchen(
+                    lesson: _lesson,
+                    onStart: _startQuiz,
+                  ),
+                  _Stage.quiz => _buildQuiz(),
+                  _Stage.repeat => _buildRepeat(),
+                  _Stage.result => _buildResult(),
+                },
+              ),
             ),
           ),
         ),
@@ -500,7 +518,15 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => LessonScreen(lesson: schritt.node.lesson),
+        builder: (_) => LessonScreen(
+          lesson: schritt.node.lesson,
+          // Im selben Gebiet weiter, wenn die nächste Seite dort steht.
+          gebiet: gebietVon(
+            ref.read(theoryGraphProvider),
+            schritt.node.id,
+            bevorzugt: _gebiet,
+          ),
+        ),
       ),
     );
   }

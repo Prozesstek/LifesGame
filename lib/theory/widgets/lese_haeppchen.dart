@@ -6,6 +6,7 @@ import 'package:theory/theory.dart';
 import '../../audio/sound_effects.dart';
 import '../../ui/palette.dart';
 import 'schreib_text.dart';
+import 'seiten_farbe.dart';
 import 'umblaettern.dart';
 
 /// **Die Seite in Häppchen** — ein Abschnitt je Bildschirm statt einer
@@ -138,7 +139,9 @@ class _Striche extends StatelessWidget {
                 duration: LeseHaeppchen.schieben,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: i <= hier ? Palette.accent : Palette.surfaceSunken,
+                  color: i <= hier
+                      ? SeitenFarbe.of(context)
+                      : Palette.surfaceSunken,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),

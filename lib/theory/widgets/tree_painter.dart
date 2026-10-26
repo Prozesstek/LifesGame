@@ -25,14 +25,19 @@ class TreePainter extends CustomPainter {
     required this.graph,
     required this.layout,
     required this.openIds,
+    required this.farbe,
   });
 
   final TheoryGraph graph;
   final TreeLayout layout;
 
-  /// Offene Knoten werden hell verbunden, gesperrte stumpf. Damit sieht
-  /// man den zurückgelegten Weg, ohne einen Knoten anzutippen.
+  /// Offene Knoten werden in der Farbe des Gebiets verbunden, gesperrte
+  /// stumpf. Damit sieht man den zurückgelegten Weg, ohne einen Knoten
+  /// anzutippen.
   final Set<String> openIds;
+
+  /// Die Farbe des Gebiets, auf Leder.
+  final Color farbe;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -48,7 +53,7 @@ class TreePainter extends CustomPainter {
 
       final paint = Paint()
         ..color = erreicht
-            ? Palette.accentOnDark.withValues(alpha: geteilt ? 0.5 : 0.75)
+            ? farbe.withValues(alpha: geteilt ? 0.5 : 0.75)
             : Palette.textOnDarkDim.withValues(alpha: geteilt ? 0.3 : 0.45)
         ..strokeWidth = erreicht ? 2.2 : 1.5
         ..style = PaintingStyle.stroke;
@@ -102,6 +107,7 @@ class TreePainter extends CustomPainter {
   bool shouldRepaint(TreePainter old) {
     return old.layout.focusId != layout.focusId ||
         old.openIds.length != openIds.length ||
+        old.farbe != farbe ||
         old.layout != layout ||
         old.graph != graph;
   }

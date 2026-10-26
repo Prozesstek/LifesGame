@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 208 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 210 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
 | `packages/theory/lib/src/content/theory_graph_content.dart` | **der Baum selbst**: vier Wurzeln, Zwischenebenen, Themen, wer an wem hängt — die **angekündigten** Überschriften (`theoryPlaceholders`) und der **Weg der Grundlagen** (`theoryBasicsPath`) | nur Dart-SDK |
@@ -169,6 +169,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/skills/skills.dart` | **die Skills je Gebiet** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Häkchen, Seiten und Rückfragen eines Gebiets zusammengezählt, dazu das Gesamtlevel — **eine Stelle**, die Errungenschaften rechnen dasselbe | Flutter |
 | `lib/skills/skills_provider.dart` | `skillsProvider`, und welches Gebiet zuletzt abgehakt wurde (`zuletztGebietProvider`, nur Darstellung) | Flutter |
 | `lib/skills/gebiet_zeichen.dart` | das Zeichen eines Gebiets — **das seiner Wurzel im Baum**, keine eigene Tabelle | Flutter |
+| `lib/skills/gebiet_farbe.dart` | **die Farbe eines Gebiets** ([ADR-0090](docs/decisions/0090-jedes-gebiet-eine-farbe.md)): Körper Glut, Geist Blau, Wissenschaft Violett, Gesellschaft Rosa, je für Pergament und Leder — **eine Tabelle** (`GebietFarbe`); dazu, zu welchem Gebiet ein Knoten gehört (`gebietVon`: wo man ihn sieht, sonst sein Zuhause) | Flutter |
 | `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
 | `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
 | `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke — **eine Stelle** für Kachel und Kopf des Baums | Flutter |
@@ -305,6 +306,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
 | `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, Striche oben, „Weiter“ | Flutter |
 | `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband mit dem Stapel der Seiten, das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
+| `lib/theory/widgets/seiten_farbe.dart` | **die Farbe der Seite** — die ihres Gebiets, von oben gereicht: betonte Wörter, Merksatz, Striche, Balken; ob eine Antwort sitzt, bleibt grün und rot | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
 | `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
@@ -329,7 +331,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1011 Tests
+flutter test             # 1021 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -352,7 +354,7 @@ dart test                              # 374 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 208 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 210 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 52 Tests
 cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests

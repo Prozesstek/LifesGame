@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 26.10.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 26.10.2026 · Frederik
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1011, dazu die acht Packages (theory 208, habits 374, gear
+**Tests:** App 1021, dazu die acht Packages (theory 210, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,52 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 26.10.2026: jedes Gebiet eine Farbe (Block 1: Baum und Lesen)
+
+Frederik: „Hinter jedem Theorie-Gebiet eine Farbe — auch bei Charakter
+und Gewohnheiten verwenden, also wirklich alles, was irgendwie mit den
+Gebieten zu tun hat, wird mit der gleichen Farbe eingefärbt.“ In einer
+Fragerunde entschieden, viermal wie empfohlen:
+[ADR-0090](../decisions/0090-jedes-gebiet-eine-farbe.md).
+
+| Gebiet | Farbe | auf Pergament | auf Leder |
+|---|---|---|---|
+| Körper | Glut | `#93360B` | `#FF8A3D` |
+| Geist | Blau, wie Mana | `#234F8C` | `#7FA8D9` |
+| Wissenschaft | Violett | `#5E2E94` | `#B78EEB` |
+| Gesellschaft | Rosa, wie das Herz | `#8E2559` | `#EE8DBE` |
+
+**Kein Rot, Grün oder Gold** — die heißen schon Gegner, erledigt und
+Gold. Gebaut wird in drei Blöcken; dies ist der erste.
+
+| Was | Wie |
+|---|---|
+| **Knoten** | bestanden gefüllt in der Farbe des Gebiets, offen mit einem Rand darin; kaufbar bleibt gold, Gesperrtes grau, „alles darunter“ gold |
+| **Ring, Linien, Zeichen am Knoten** | in der Farbe des Gebiets statt Grün und Akzent |
+| **Kopf** | Stand und Skill-Abzeichen in der Farbe; die vier Kacheln darunter jede in ihrer eigenen |
+| **„Weiterlesen“** | in der Farbe des Gebiets der vorgeschlagenen Seite — sie kann woanders liegen |
+| **Die Seite** | betonte Wörter, Merksatz, die Striche beim Lesen und der Balken bei den Fragen; ob eine Antwort sitzt, bleibt grün und rot |
+| **Rückfrage des Tages** | Buch und Rand in der Farbe ihrer Seite |
+
+**Ein Knoten trägt die Farbe des Gebiets, in dem man ihn sieht**:
+*Stress* ist unter Geist blau, unter Schlaf & Regeneration glut.
+Außerhalb des Baums die seines Zuhauses, der Wurzel seines ersten
+Elternteils (`TheoryGraph.rootIdsOf`, neu).
+
+Neu: `lib/skills/gebiet_farbe.dart`, `lib/theory/widgets/seiten_farbe.dart`,
+`test/gebiet_farbe_test.dart` (10). App 1019 (vorher 1009; mit #162 zusammen 1021), theory 210
+(vorher 208). Alle vier Gebiete, die Legende und eine Seite aus Geist in
+390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- **Block 2**: Gewohnheiten (Streifen und Zeichen), Häkchen, Balken des
+  Gebiets, Startseite, Anlegen.
+- **Block 3**: Charakter, Kampfwerte, Errungenschaften, Haustier,
+  Statistik.
+- Körper liegt nah am Akzent; im Baum steht der nicht mehr daneben.
+- **AktivesBrett hat ADR-0090 nicht gesehen.**
 
 ## 26.10.2026: Schwerter auf „Hinab“, im Blatt nur das angetippte Exemplar
 

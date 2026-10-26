@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
+import '../../skills/gebiet_farbe.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -9,7 +10,7 @@ import 'node_icon.dart';
 import 'node_state.dart';
 
 /// Der Überblick über dem Baum (ADR-0056): vier Gebiete mit ihrem Stand,
-/// antippen springt hin.
+/// antippen springt hin. Jede Kachel in der Farbe ihres Gebiets.
 ///
 /// **Ersetzt die vier Punkte.** Die sagten, auf welcher Seite man ist,
 /// aber nicht, wie weit man dort ist — dafür musste man jedes Gebiet
@@ -64,7 +65,8 @@ class _AreaTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final anteil = stand.total == 0 ? 0.0 : stand.passed / stand.total;
     final fertig = stand.total > 0 && stand.passed >= stand.total;
-    final farbe = selected ? Palette.accentOnDark : Palette.textOnDarkDim;
+    final gebiet = GebietFarbe.vonWurzel(node.id, dunkel: true);
+    final farbe = selected ? gebiet : Palette.textOnDarkDim;
 
     return Semantics(
       button: true,
@@ -79,9 +81,7 @@ class _AreaTile extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: selected
-                    ? Palette.accentOnDark
-                    : Palette.textOnDarkDim.withValues(alpha: 0.3),
+                color: selected ? gebiet : gebiet.withValues(alpha: 0.35),
                 width: selected ? 1.6 : 1,
               ),
             ),
@@ -90,7 +90,7 @@ class _AreaTile extends StatelessWidget {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Icon(iconForNode(node.iconId), size: 14, color: farbe),
+                    Icon(iconForNode(node.iconId), size: 14, color: gebiet),
                     const SizedBox(width: 4),
                     Flexible(
                       child: FittedBox(
@@ -119,7 +119,7 @@ class _AreaTile extends StatelessWidget {
                       alpha: 0.25,
                     ),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      fertig ? Palette.goldOnDark : Palette.successOnDark,
+                      fertig ? Palette.goldOnDark : gebiet,
                     ),
                   ),
                 ),
@@ -143,12 +143,18 @@ class _AreaTile extends StatelessWidget {
 class ContinueReadingTile extends StatelessWidget {
   const ContinueReadingTile({
     required this.node,
+    required this.farbe,
     required this.onTap,
     this.cost,
     super.key,
   });
 
   final TheoryNode node;
+
+  /// Die Farbe des Gebiets der Seite, auf Leder — nicht unbedingt des
+  /// Gebiets, das gerade offen ist: Der Vorschlag kann woanders liegen.
+  final Color farbe;
+
   final VoidCallback onTap;
 
   /// Was der Tipp kostet, oder null, wenn der Knoten schon offen ist.
@@ -166,7 +172,7 @@ class ContinueReadingTile extends StatelessWidget {
                 '${preis == 1 ? 'Punkt' : 'Punkte'}',
       child: Druck(
         child: Material(
-          color: Palette.accentOnDark.withValues(alpha: 0.16),
+          color: farbe.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(8),
           child: InkWell(
             onTap: onTap,
@@ -175,11 +181,7 @@ class ContinueReadingTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: <Widget>[
-                  const Icon(
-                    Icons.menu_book_rounded,
-                    size: 18,
-                    color: Palette.accentOnDark,
-                  ),
+                  Icon(Icons.menu_book_rounded, size: 18, color: farbe),
                   const SizedBox(width: 8),
                   Expanded(
                     // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
@@ -201,11 +203,7 @@ class ContinueReadingTile extends StatelessWidget {
                   ],
                   // Nicht der Pfeil des Gebietswechsels: Dieser führt in
                   // eine Seite, jener zum nächsten Gebiet.
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: Palette.accentOnDark,
-                  ),
+                  Icon(Icons.arrow_forward_rounded, size: 18, color: farbe),
                 ],
               ),
             ),
@@ -252,18 +250,21 @@ class PunktPreis extends StatelessWidget {
 /// Die Legende: was die Zeichen an den Knoten bedeuten (ADR-0056).
 ///
 /// Zeigt **dieselben** Zeichen wie der Baum ([NodeStateBadge]) — eine
-/// zweite Zeichnung davon liefe irgendwann auseinander.
-Future<void> showTreeLegend(BuildContext context) {
+/// zweite Zeichnung davon liefe irgendwann auseinander —, in der Farbe
+/// des Gebiets, aus dem sie geöffnet wurde.
+Future<void> showTreeLegend(BuildContext context, {required Color farbe}) {
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     elevation: 0,
-    builder: (_) => const HolzBlatt(child: _Legende()),
+    builder: (_) => HolzBlatt(child: _Legende(farbe: farbe)),
   );
 }
 
 class _Legende extends StatelessWidget {
-  const _Legende();
+  const _Legende({required this.farbe});
+
+  final Color farbe;
 
   static const List<(NodeState, bool, String)>
   _eintraege = <(NodeState, bool, String)>[
@@ -312,6 +313,7 @@ class _Legende extends StatelessWidget {
                         state: state,
                         fertig: fertig,
                         cost: 1,
+                        farbe: farbe,
                       ),
                     ),
                   ),

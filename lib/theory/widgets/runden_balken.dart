@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
+import 'seiten_farbe.dart';
 
 /// **Wie weit die Seite ist** — ein dicker Balken oben, der mit jeder
-/// richtigen Antwort ein Stück vorspringt.
+/// richtigen Antwort ein Stück vorspringt, in der Farbe der Seite
+/// ([SeitenFarbe]).
 ///
 /// Gezählt wird, was **sitzt**, nicht was beantwortet ist: Eine falsche
 /// Antwort lässt ihn stehen, und erst die zweite Runde füllt ihn voll
@@ -32,7 +34,11 @@ class RundenBalken extends StatelessWidget {
         curve: Curves.easeOutBack,
         builder: (context, wert, _) => CustomPaint(
           size: const Size(double.infinity, hoehe),
-          painter: _BalkenMaler(wert),
+          painter: _BalkenMaler(
+            wert,
+            farbe: SeitenFarbe.of(context),
+            hell: SeitenFarbe.hellOf(context),
+          ),
         ),
       ),
     );
@@ -40,10 +46,15 @@ class RundenBalken extends StatelessWidget {
 }
 
 class _BalkenMaler extends CustomPainter {
-  const _BalkenMaler(this.wert);
+  const _BalkenMaler(this.wert, {required this.farbe, required this.hell});
 
   /// Wie voll, 0 bis 1 — die Kurve darf kurz darüber hinaus.
   final double wert;
+
+  final Color farbe;
+
+  /// Der helle Ton für den Glanz oben.
+  final Color hell;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -59,7 +70,7 @@ class _BalkenMaler extends CustomPainter {
     final voll = Rect.fromLTWH(0, 0, breite, size.height);
     canvas.drawRRect(
       RRect.fromRectAndRadius(voll, rund),
-      Paint()..color = Palette.success,
+      Paint()..color = farbe,
     );
     // Der Glanz oben: ein heller Streifen, eingerückt wie bei Duolingo.
     final glanz = Rect.fromLTWH(
@@ -70,10 +81,11 @@ class _BalkenMaler extends CustomPainter {
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(glanz, Radius.circular(glanz.height / 2)),
-      Paint()..color = Palette.successOnDark.withValues(alpha: 0.7),
+      Paint()..color = hell.withValues(alpha: 0.7),
     );
   }
 
   @override
-  bool shouldRepaint(_BalkenMaler alt) => alt.wert != wert;
+  bool shouldRepaint(_BalkenMaler alt) =>
+      alt.wert != wert || alt.farbe != farbe || alt.hell != hell;
 }

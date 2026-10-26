@@ -23,6 +23,7 @@ class NodeBubble extends StatelessWidget {
   const NodeBubble({
     required this.node,
     required this.state,
+    required this.farbe,
     required this.onTap,
     this.radius = TreeLayout.nodeRadius,
     this.width = labelWidth,
@@ -34,6 +35,7 @@ class NodeBubble extends StatelessWidget {
   const NodeBubble.focus({
     required this.node,
     required this.state,
+    required this.farbe,
     required this.onTap,
     this.below,
     super.key,
@@ -42,12 +44,21 @@ class NodeBubble extends StatelessWidget {
 
   final TheoryNode node;
   final NodeState state;
+
+  /// Die Farbe des Gebiets, auf Leder (26.10.2026). Sie trägt, was
+  /// erreicht ist — bestanden gefüllt, offen als Rand. **Kaufbar bleibt
+  /// gold, Gesperrtes grau**: Das sind Zustände, keine Gebiete.
+  ///
+  /// Pflicht und ohne Standardwert, damit kein Knoten aus Versehen in
+  /// der alten Farbe stehen bleibt (`gotchas.md`).
+  final Color farbe;
+
   final VoidCallback onTap;
 
   /// Wie viel unter diesem Knoten geschafft ist (ADR-0056) — oder null
   /// bzw. `total == 0` bei einem Thema ohne Unterpunkte.
   ///
-  /// **Grün heißt „diese Seite gelesen“, der Ring sagt, was darunter
+  /// **Gefüllt heißt „diese Seite gelesen“, der Ring sagt, was darunter
   /// liegt.** Vorher leuchtete eine Zwischenebene grün, sobald ihre
   /// Einführung bestanden war — und sah fertig aus, obwohl vier von fünf
   /// Themen fehlten.
@@ -113,6 +124,7 @@ class NodeBubble extends StatelessWidget {
                               painter: _RingPainter(
                                 anteil: _anteil,
                                 fertig: _allesDarunter,
+                                farbe: farbe,
                               ),
                             ),
                           ),
@@ -124,6 +136,7 @@ class NodeBubble extends StatelessWidget {
                           state: state,
                           fertig: _allesDarunter,
                           cost: node.cost,
+                          farbe: farbe,
                         ),
                       ),
                     ],
@@ -199,8 +212,7 @@ class NodeBubble extends StatelessWidget {
 
   Color _color() {
     return switch (state) {
-      NodeState.passed => Palette.successOnDark,
-      NodeState.open => Palette.accentOnDark,
+      NodeState.passed || NodeState.open => farbe,
       NodeState.affordable => Palette.goldOnDark,
       NodeState.tooExpensive || NodeState.unreachable => Palette.textOnDarkDim,
     };
@@ -280,12 +292,18 @@ class PlaceholderBubble extends StatelessWidget {
 }
 
 /// Der Ring um einen Knoten mit Unterpunkten: wie viel darunter
-/// geschafft ist. Gold, sobald alles geschafft ist.
+/// geschafft ist, in der Farbe des Gebiets. Gold, sobald alles geschafft
+/// ist.
 class _RingPainter extends CustomPainter {
-  const _RingPainter({required this.anteil, required this.fertig});
+  const _RingPainter({
+    required this.anteil,
+    required this.fertig,
+    required this.farbe,
+  });
 
   final double anteil;
   final bool fertig;
+  final Color farbe;
 
   static const double _dicke = 3.5;
 
@@ -308,13 +326,13 @@ class _RingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = _dicke
       ..strokeCap = StrokeCap.round
-      ..color = fertig ? Palette.goldOnDark : Palette.successOnDark;
+      ..color = fertig ? Palette.goldOnDark : farbe;
     canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * anteil, false, bogen);
   }
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.anteil != anteil || old.fertig != fertig;
+      old.anteil != anteil || old.fertig != fertig || old.farbe != farbe;
 }
 
 /// Das kleine Zeichen unten rechts am Kreis: was man mit dem Knoten tun
@@ -325,6 +343,7 @@ class NodeStateBadge extends StatelessWidget {
     required this.state,
     required this.fertig,
     required this.cost,
+    required this.farbe,
     super.key,
   });
 
@@ -332,17 +351,20 @@ class NodeStateBadge extends StatelessWidget {
   final bool fertig;
   final int cost;
 
+  /// Die Farbe des Gebiets, auf Leder — für bestanden und offen.
+  final Color farbe;
+
   static const double groesse = 18;
 
   @override
   Widget build(BuildContext context) {
     final (Color grund, Widget inhalt) = switch (state) {
       NodeState.passed => (
-        fertig ? Palette.goldOnDark : Palette.successOnDark,
+        fertig ? Palette.goldOnDark : farbe,
         const Icon(Icons.check_rounded, size: 13, color: Palette.background),
       ),
       NodeState.open => (
-        Palette.accentOnDark,
+        farbe,
         const Icon(
           Icons.menu_book_rounded,
           size: 11,
