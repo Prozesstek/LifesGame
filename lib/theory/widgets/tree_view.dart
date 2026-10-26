@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
+import '../../skills/gebiet_farbe.dart';
 import '../../ui/palette.dart';
 import 'node_action_panel.dart';
 import 'node_bubble.dart';
@@ -76,6 +77,12 @@ class TreeView extends StatelessWidget {
   String get _focusId => path.last;
   String? get _parentId => path.length > 1 ? path[path.length - 2] : null;
 
+  /// Die Farbe des Gebiets dieser Seite: Der Weg beginnt an seiner
+  /// Wurzel. Ein Knoten mit zwei Eltern steht hier in der Farbe des
+  /// Gebiets, in dem man ihn sieht.
+  Color _farbe({required bool dunkel}) =>
+      GebietFarbe.vonWurzel(path.first, dunkel: dunkel);
+
   @override
   Widget build(BuildContext context) {
     final focus = graph.nodeById(_focusId);
@@ -110,7 +117,12 @@ class TreeView extends StatelessWidget {
             },
           ),
         ),
-        if (parent != null) _ParentStrip(node: parent, onTap: onLeave),
+        if (parent != null)
+          _ParentStrip(
+            node: parent,
+            farbe: _farbe(dunkel: false),
+            onTap: onLeave,
+          ),
       ],
     );
   }
@@ -119,12 +131,18 @@ class TreeView extends StatelessWidget {
     final offen = progress.openIdsIn(graph);
     final focusState = nodeStateFor(focus, graph, progress, availablePoints);
     final focusY = layout[_focusId]!.dy;
+    final farbe = _farbe(dunkel: true);
 
     return Stack(
       children: <Widget>[
         Positioned.fill(
           child: CustomPaint(
-            painter: TreePainter(graph: graph, layout: layout, openIds: offen),
+            painter: TreePainter(
+              graph: graph,
+              layout: layout,
+              openIds: offen,
+              farbe: farbe,
+            ),
           ),
         ),
         for (final id in layout.rows.expand((r) => r))
@@ -135,6 +153,7 @@ class TreeView extends StatelessWidget {
               child: NodeBubble(
                 node: kind,
                 state: nodeStateFor(kind, graph, progress, availablePoints),
+                farbe: farbe,
                 below: progress.progressBelow(
                   kind.id,
                   graph,
@@ -173,6 +192,7 @@ class TreeView extends StatelessWidget {
                 node: focus,
                 state: focusState,
                 availablePoints: availablePoints,
+                farbe: _farbe(dunkel: false),
                 onAction: (action) => onAction(focus, action),
               ),
             ),
@@ -183,6 +203,7 @@ class TreeView extends StatelessWidget {
           child: NodeBubble.focus(
             node: focus,
             state: focusState,
+            farbe: farbe,
             // Eine Wurzel zählt ihre eigene Seite mit — sie gehört zum
             // Gebiet, und oben im Balken steht dieselbe Zahl (ADR-0056).
             below: progress.progressBelow(
@@ -288,9 +309,17 @@ class _AreaArrow extends StatelessWidget {
 /// Blase, weil er kein Ziel ist, sondern ein Weg — sähe er aus wie ein
 /// Knoten, wäre unklar, warum ein Druck darauf etwas anderes tut.
 class _ParentStrip extends StatelessWidget {
-  const _ParentStrip({required this.node, required this.onTap});
+  const _ParentStrip({
+    required this.node,
+    required this.farbe,
+    required this.onTap,
+  });
 
   final TheoryNode node;
+
+  /// Die Farbe des Gebiets, auf Pergament — für das Zeichen.
+  final Color farbe;
+
   final VoidCallback onTap;
 
   @override
@@ -310,11 +339,7 @@ class _ParentStrip extends StatelessWidget {
                   color: Palette.muted,
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  iconForNode(node.iconId),
-                  size: 18,
-                  color: Palette.textDim,
-                ),
+                Icon(iconForNode(node.iconId), size: 18, color: farbe),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

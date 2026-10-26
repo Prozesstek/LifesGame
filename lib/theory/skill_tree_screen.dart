@@ -7,6 +7,7 @@ import '../home/erster_start.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../skills/gebiet_farbe.dart';
 import '../skills/skills.dart';
 import '../skills/skills_provider.dart';
 import '../skills/widgets/skill_abzeichen.dart';
@@ -129,6 +130,7 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                     child: Column(
                       children: <Widget>[
                         _Header(
+                          graph: graph,
                           area: graph.nodeById(_areaId),
                           skills: ref.watch(skillsProvider),
                           areas: <(TheoryNode, ({int passed, int total}))>[
@@ -237,9 +239,16 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
   Future<void> _act(TheoryNode node, NodeAction action) async {
     switch (action) {
       case NodeAction.read:
+        // In der Farbe des Gebiets, aus dem man kommt — ein Vorschlag aus
+        // einem anderen trägt dessen Farbe.
+        final gebiet = gebietVon(
+          ref.read(theoryGraphProvider),
+          node.id,
+          bevorzugt: SkillArea.tryParse(_areaId),
+        );
         await Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => LessonScreen(lesson: node.lesson),
+            builder: (_) => LessonScreen(lesson: node.lesson, gebiet: gebiet),
           ),
         );
       case NodeAction.open:
@@ -266,6 +275,7 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
 /// Zahl, die beim Wischen mitwandert, ohne sich zu ändern.
 class _Header extends StatelessWidget {
   const _Header({
+    required this.graph,
     required this.area,
     required this.skills,
     required this.areas,
@@ -275,6 +285,7 @@ class _Header extends StatelessWidget {
     required this.onRead,
   });
 
+  final TheoryGraph graph;
   final TheoryNode? area;
 
   /// Der Skill des Gebiets steht neben seinem Namen (ADR-0085): Was man
@@ -293,6 +304,7 @@ class _Header extends StatelessWidget {
         : (passed: 0, total: 0);
     final naechste = next;
     final gebiet = SkillArea.tryParse(area?.id);
+    final farbe = GebietFarbe.vonWurzel(area?.id ?? '', dunkel: true);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 8, 10),
@@ -334,8 +346,8 @@ class _Header extends StatelessWidget {
                   '${stand.passed} / ${stand.total}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Palette.accentOnDark,
+                  style: TextStyle(
+                    color: farbe,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
@@ -344,7 +356,7 @@ class _Header extends StatelessWidget {
               // „gesamt 17 von 59“ steht nicht mehr da: Die vier Balken
               // darunter sagen es schon, je Gebiet.
               const Spacer(),
-              const _LegendKnopf(),
+              _LegendKnopf(farbe: farbe),
             ],
           ),
           const SizedBox(height: 6),
@@ -366,6 +378,14 @@ class _Header extends StatelessWidget {
                 schritt: Schritt.ersteSeite,
                 child: ContinueReadingTile(
                   node: naechste.node,
+                  farbe: switch (gebietVon(
+                    graph,
+                    naechste.node.id,
+                    bevorzugt: gebiet,
+                  )) {
+                    final SkillArea g => GebietFarbe.leder(g),
+                    null => farbe,
+                  },
                   cost: naechste.needsOpening ? naechste.node.cost : null,
                   onTap: () => onRead(naechste),
                 ),
@@ -383,7 +403,10 @@ class _Header extends StatelessWidget {
 /// **Kein `IconButton`**: Das Theme macht jeden daraus eine Holzplanke,
 /// und ein Klotz neben einer Zahl liest sich als Hauptknopf.
 class _LegendKnopf extends StatelessWidget {
-  const _LegendKnopf();
+  const _LegendKnopf({required this.farbe});
+
+  /// Die Farbe des Gebiets, aus dem die Legende geöffnet wird.
+  final Color farbe;
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +414,7 @@ class _LegendKnopf extends StatelessWidget {
       message: 'Was die Zeichen bedeuten',
       child: Druck(
         child: InkWell(
-          onTap: () => showTreeLegend(context),
+          onTap: () => showTreeLegend(context, farbe: farbe),
           customBorder: const CircleBorder(),
           child: const Padding(
             padding: EdgeInsets.all(6),

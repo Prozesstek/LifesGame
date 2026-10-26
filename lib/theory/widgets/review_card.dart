@@ -13,6 +13,7 @@ import '../../ui/palette.dart';
 class ReviewCard extends StatelessWidget {
   const ReviewCard({
     required this.question,
+    required this.farbe,
     required this.answer,
     required this.day,
     required this.daysUntilNext,
@@ -21,6 +22,10 @@ class ReviewCard extends StatelessWidget {
   });
 
   final ReviewQuestion question;
+
+  /// Die Farbe des Gebiets der Seite, auf Pergament — Rand und Buch,
+  /// solange offen.
+  final Color farbe;
 
   /// Die Antwort von heute, oder null, solange offen.
   final ReviewAnswer? answer;
@@ -44,14 +49,14 @@ class ReviewCard extends StatelessWidget {
       edgeColor: switch (beantwortet?.correct) {
         true => Palette.success,
         false => Holz.kante,
-        null => Palette.accent,
+        null => farbe,
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.menu_book, size: 20, color: Palette.accent),
+              Icon(Icons.menu_book, size: 20, color: farbe),
               const SizedBox(width: 8),
               // Beide Texte schrumpfbar (`gotchas.md`): Der Titel einer
               // Lektion kann lang sein, und die Karte ist schmal.

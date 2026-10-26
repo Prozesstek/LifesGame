@@ -132,6 +132,29 @@ void main() {
       expect(ids.length, 3);
     });
 
+    test('findet die Wurzeln eines Knotens, sein Zuhause zuerst', () {
+      // Die Farbe einer Seite außerhalb des Baums hängt daran: Sie ist
+      // die ihres ersten Elternteils, bis hinab zur Wurzel.
+      expect(graph.rootIdsOf('ernaehrung'), <String>[
+        'koerper',
+        'wissenschaft',
+      ]);
+      expect(graph.rootIdsOf('schlaf'), <String>['koerper']);
+      expect(graph.rootIdsOf('koerper'), <String>['koerper']);
+      expect(graph.rootIdsOf('gibtesnicht'), isEmpty);
+    });
+
+    test('nennt eine Wurzel nur einmal, auch über zwei Wege', () {
+      final beide = TheoryGraph(<TheoryNode>[
+        _node('wurzel'),
+        _node('links', parents: <String>['wurzel']),
+        _node('rechts', parents: <String>['wurzel']),
+        _node('unten', parents: <String>['links', 'rechts']),
+      ]);
+
+      expect(beide.rootIdsOf('unten'), <String>['wurzel']);
+    });
+
     test('unbekannte Id gibt nichts zurück', () {
       expect(graph.descendantsOf('gibtesnicht'), isEmpty);
       expect(graph.descendantsOf('gibtesnicht', includeSelf: true), isEmpty);

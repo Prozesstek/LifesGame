@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
 import '../../ui/palette.dart';
+import 'seiten_farbe.dart';
 
 /// **Ein Abschnitt schreibt sich**: die Überschrift fällt herein, dann
 /// erscheint der Text Wort für Wort.
@@ -210,7 +211,7 @@ class _SchreibTextState extends State<SchreibText>
     required bool merksatz,
     required double sicht,
   }) {
-    final farbe = betont ? Palette.accent : Palette.text;
+    final farbe = betont ? SeitenFarbe.of(context) : Palette.text;
     return TextStyle(
       fontSize: merksatz ? 20 : (gross ? 18 : 16),
       height: merksatz ? 1.35 : 1.55,
@@ -243,7 +244,7 @@ const Set<String> _abkuerzungen = <String>{
 };
 
 /// Die Fläche eines Merksatzes: springt auf, sobald sein erstes Wort
-/// kommt, mit einem Balken in der Farbe der Seite.
+/// kommt, mit einem Balken in der Farbe der Seite ([SeitenFarbe]).
 class _MerksatzFlaeche extends StatelessWidget {
   const _MerksatzFlaeche({required this.sichtbar, required this.child});
 
@@ -260,9 +261,11 @@ class _MerksatzFlaeche extends StatelessWidget {
         opacity: sichtbar ? 1 : 0,
         duration: const Duration(milliseconds: 200),
         child: DecoratedBox(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Palette.surfaceRaised,
-            border: Border(left: BorderSide(color: Palette.accent, width: 5)),
+            border: Border(
+              left: BorderSide(color: SeitenFarbe.of(context), width: 5),
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),

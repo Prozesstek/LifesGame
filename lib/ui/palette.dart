@@ -121,9 +121,37 @@ abstract final class Palette {
   static const Color successOnDark = Color(0xFF7FBE6A);
   static const Color goldOnDark = Color(0xFFE0B65B);
 
-  /// Mana in der Grube (ADR-0039). Ein gedecktes Blau, das einzige im
-  /// Spiel — Mana ist die einzige Grösse, die es nur auf Leder gibt.
+  /// Mana in der Grube (ADR-0039). Ein gedecktes Blau — seit dem
+  /// 26.10.2026 auch das von Geist auf Leder, weil Geist das Mana
+  /// steigert (ADR-0088).
   static const Color manaOnDark = Color(0xFF7FA8D9);
+
+  // ---------------------------------------------------------------
+  // Die vier Gebiete (26.10.2026) — je eine Farbe, auf beiden Gründen
+  // ---------------------------------------------------------------
+  //
+  // **Kein Rot, kein Grün, kein Gold**: Die heißen schon Gegner,
+  // erledigt und Gold. Ein Häkchen aus Gesellschaft sähe in Grün aus wie
+  // „erledigt“, eine Seite aus Körper in Rot wie ein Verlust. Geist trägt
+  // das Blau des Manas, weil Geist das Mana steigert (ADR-0088).
+  //
+  // Wer welche trägt, steht in `lib/skills/gebiet_farbe.dart`.
+
+  /// Körper: Glut.
+  static const Color gebietKoerper = Color(0xFF93360B);
+  static const Color gebietKoerperOnDark = Color(0xFFFF8A3D);
+
+  /// Geist: Blau, auf Leder dasselbe wie [manaOnDark].
+  static const Color gebietGeist = Color(0xFF234F8C);
+  static const Color gebietGeistOnDark = manaOnDark;
+
+  /// Wissenschaft: Violett.
+  static const Color gebietWissenschaft = Color(0xFF5E2E94);
+  static const Color gebietWissenschaftOnDark = Color(0xFFB78EEB);
+
+  /// Gesellschaft: Rosa, wie das Herz für Leben.
+  static const Color gebietGesellschaft = Color(0xFF8E2559);
+  static const Color gebietGesellschaftOnDark = Color(0xFFEE8DBE);
 
   // ---------------------------------------------------------------
   // Die Raumzeile der Tagesgrube (ADR-0072) — nur auf Pergament

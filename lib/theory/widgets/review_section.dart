@@ -4,10 +4,12 @@ import 'package:theory/theory.dart';
 
 import '../../combat/ladder_controller.dart';
 import '../../habits/habits_controller.dart';
+import '../../skills/gebiet_farbe.dart';
 import '../../ui/druck.dart';
 import '../../ui/palette.dart';
 import '../review_controller.dart';
 import '../review_flow.dart';
+import '../theory_controller.dart';
 import 'review_card.dart';
 import '../../ui/gold_icon.dart';
 
@@ -35,10 +37,18 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
     if (frage == null) return const SizedBox.shrink();
     final antwort = ref.watch(todaysReviewAnswerProvider);
     final today = ref.watch(todayProvider);
+    // Die Rückfrage stammt von einer Seite und trägt deren Farbe.
+    final gebiet = gebietDerSeite(
+      ref.watch(theoryGraphProvider),
+      frage.lesson.id,
+    );
 
     if (!_aufgeklappt) {
       return _Zeile(
         richtig: antwort?.correct,
+        offenFarbe: gebiet == null
+            ? Palette.accentOnDark
+            : GebietFarbe.leder(gebiet),
         tage: antwort == null ? null : daysUntilReview(ref, frage, today),
         onTap: () => setState(() => _aufgeklappt = true),
       );
@@ -52,6 +62,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
           : () => setState(() => _aufgeklappt = false),
       child: ReviewCard(
         question: frage,
+        farbe: gebiet == null ? Palette.accent : GebietFarbe.pergament(gebiet),
         answer: antwort,
         day: dayNumberOf(today),
         daysUntilNext: daysUntilReview(ref, frage, today),
@@ -66,12 +77,16 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
 class _Zeile extends StatelessWidget {
   const _Zeile({
     required this.richtig,
+    required this.offenFarbe,
     required this.tage,
     required this.onTap,
   });
 
   /// Null, solange offen.
   final bool? richtig;
+
+  /// Die Farbe des Gebiets der Seite, solange offen.
+  final Color offenFarbe;
   final int? tage;
   final VoidCallback onTap;
 
@@ -90,7 +105,7 @@ class _Zeile extends StatelessWidget {
       true => 'Rückfrage des Tages: richtig$wann',
       false => 'Rückfrage des Tages: daneben$wann',
     };
-    final farbe = offen ? Palette.accentOnDark : Palette.textOnDarkDim;
+    final farbe = offen ? offenFarbe : Palette.textOnDarkDim;
     final stil = TextStyle(
       fontSize: 12,
       fontWeight: offen ? FontWeight.bold : FontWeight.normal,
