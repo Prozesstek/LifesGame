@@ -25,6 +25,7 @@ import '../habits/daily_form_text.dart';
 import '../ui/holz.dart';
 import '../habits/widgets/week_card.dart';
 import '../habits/stat_icon.dart';
+import '../skills/gebiet_farbe.dart';
 import '../skills/gebiet_zeichen.dart';
 import '../skills/widgets/skill_karte.dart';
 
@@ -279,7 +280,11 @@ class _StatRow extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            _Herkunft(icon: gebietZeichen(stat.gebiet), wert: '$base'),
+            _Herkunft(
+              icon: gebietZeichen(stat.gebiet),
+              wert: '$base',
+              farbe: GebietFarbe.pergament(stat.gebiet),
+            ),
             if (bonus > 0) ...<Widget>[
               const SizedBox(width: 10),
               _Herkunft(

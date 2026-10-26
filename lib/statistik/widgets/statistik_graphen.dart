@@ -104,6 +104,7 @@ class StatBalken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ton = StatTon.of(context);
     final menge = einheit != null;
     final hoechster = abschnitte.fold<int>(
       1,
@@ -146,7 +147,7 @@ class StatBalken extends StatelessWidget {
                 BarChartRodData(
                   toY: (menge ? a.menge : a.quote.erledigt) * wachsen,
                   width: breite,
-                  color: StatFarbe.erledigt,
+                  color: ton,
                   borderRadius: BorderRadius.circular(breite / 3),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: !menge && !a.zukunft,
@@ -179,6 +180,7 @@ class StatKurve extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ton = StatTon.of(context);
     final laengste = abschnitte.fold<int>(1, (m, a) => math.max(m, a.kette));
     final bis = (abschnitte.length * wachsen).ceil();
     final quote = <FlSpot>[
@@ -258,12 +260,12 @@ class StatKurve extends StatelessWidget {
             spots: quote,
             isCurved: true,
             preventCurveOverShooting: true,
-            color: StatFarbe.erledigt,
+            color: ton,
             barWidth: 3,
             dotData: FlDotData(show: abschnitte.length <= 31),
             belowBarData: BarAreaData(
               show: true,
-              color: StatFarbe.erledigt.withValues(alpha: 0.15),
+              color: ton.withValues(alpha: 0.15),
             ),
           ),
           LineChartBarData(
@@ -296,6 +298,7 @@ class StatWochentage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ton = StatTon.of(context);
     return BarChart(
       duration: Duration.zero,
       BarChartData(
@@ -349,7 +352,7 @@ class StatWochentage extends StatelessWidget {
                 BarChartRodData(
                   toY: (je[w]?.prozent ?? 0) * wachsen,
                   width: 18,
-                  color: w == staerkster ? Palette.gold : StatFarbe.erledigt,
+                  color: w == staerkster ? Palette.gold : ton,
                   borderRadius: BorderRadius.circular(6),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,

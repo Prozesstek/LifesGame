@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 import 'package:haustier/haustier.dart';
 
+import '../../skills/gebiet_farbe.dart';
+
 /// **Was ein Haustier trägt und woran man sein Gebiet erkennt** — Hüte,
 /// Halsschmuck, Spielzeug und die Prägung (22.10.2026, Platzhalter).
 ///
@@ -13,16 +15,11 @@ import 'package:haustier/haustier.dart';
 /// Die Kontur jeder Form.
 const Color tierKontur = Color(0xFF2B1A10);
 
-/// Die Farbe der Prägung — dieselben vier Gebiete wie die Skills
-/// (ADR-0085).
-Color praegungsFarbe(SkillArea area) {
-  return switch (area) {
-    SkillArea.koerper => const Color(0xFFC0392B),
-    SkillArea.geist => const Color(0xFF8E5BD0),
-    SkillArea.wissenschaft => const Color(0xFF3A7BD5),
-    SkillArea.gesellschaft => const Color(0xFF3E9A55),
-  };
-}
+/// Die Farbe der Prägung: die ihres Gebiets, **aus der einen Tabelle**
+/// (ADR-0090). Bis dahin stand hier eine eigene — Rot, Violett, Blau,
+/// Grün —, und Körper sah am Tier anders aus als im Baum. Der helle Ton,
+/// weil sie auf einem Tier sitzt, nicht auf Pergament.
+Color praegungsFarbe(SkillArea area) => GebietFarbe.leder(area);
 
 /// Womit gezeichnet wird: Füllung, Kontur, eine Form mit beidem.
 class Stift {

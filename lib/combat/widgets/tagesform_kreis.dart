@@ -77,10 +77,11 @@ class TagesformKreis extends ConsumerWidget {
                     if (form.factorFor(stat) > 1)
                       Padding(
                         padding: const EdgeInsets.only(left: 6),
+                        // In der Farbe seines Gebiets (ADR-0090).
                         child: StatIcon(
                           stat,
                           size: 18,
-                          color: Palette.goldOnDark,
+                          color: StatIcons.colorOnDarkOf(stat),
                         ),
                       ),
               ],

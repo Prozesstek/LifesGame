@@ -1,8 +1,10 @@
 import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 import 'package:identity/identity.dart';
 
+import '../skills/gebiet_farbe.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'achievements_controller.dart';
@@ -215,11 +217,16 @@ class _Eintrag extends StatelessWidget {
     final verdient = achievement.isEarnedBy(stats);
     // Eine unverdiente Entdeckung verrät weder Namen noch Bedingung.
     final versteckt = !verdient && achievement.isDiscovery;
+    // Ein Titel der Gebiete trägt die Farbe seines Gebiets (ADR-0090).
+    final farbe = switch (SkillArea.tryParse(achievement.skillAreaId)) {
+      final SkillArea gebiet => GebietFarbe.pergament(gebiet),
+      null => Palette.accent,
+    };
 
     return HolzKarte(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       color: verdient ? Palette.surfaceRaised : Palette.surface,
-      edgeColor: verdient ? Palette.accent : Holz.kante,
+      edgeColor: verdient ? farbe : Holz.kante,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -232,7 +239,7 @@ class _Eintrag extends StatelessWidget {
                     ? Icons.help_outline
                     : Icons.lock_outline,
                 size: 20,
-                color: verdient ? Palette.accent : Palette.muted,
+                color: verdient ? farbe : Palette.muted,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -262,7 +269,7 @@ class _Eintrag extends StatelessWidget {
           // sie offen sind.
           if (!verdient && achievement.isMilestone) ...<Widget>[
             const SizedBox(height: 8),
-            _Fortschritt(achievement: achievement, stats: stats),
+            _Fortschritt(achievement: achievement, stats: stats, farbe: farbe),
           ],
           if (verdient) ...<Widget>[
             const SizedBox(height: 8),
@@ -275,10 +282,15 @@ class _Eintrag extends StatelessWidget {
 }
 
 class _Fortschritt extends StatelessWidget {
-  const _Fortschritt({required this.achievement, required this.stats});
+  const _Fortschritt({
+    required this.achievement,
+    required this.stats,
+    required this.farbe,
+  });
 
   final Achievement achievement;
   final AchievementStats stats;
+  final Color farbe;
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +302,7 @@ class _Fortschritt extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          child: HolzBalken(value: anteil, color: Palette.accent),
+          child: HolzBalken(value: anteil, color: farbe),
         ),
         const SizedBox(width: 10),
         Text(

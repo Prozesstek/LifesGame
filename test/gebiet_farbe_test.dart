@@ -1,10 +1,14 @@
 import 'dart:math' as math;
 
+import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/habits/habits_controller.dart';
+import 'package:lifes_game/habits/stat_icon.dart';
 import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
+import 'package:lifes_game/haustier/widgets/haustier_schmuck.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
@@ -15,6 +19,8 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/skills/gebiet_farbe.dart';
 import 'package:lifes_game/skills/gebiet_zeichen.dart';
 import 'package:lifes_game/skills/widgets/gebiet_streifen.dart';
+import 'package:lifes_game/statistik/statistik_screen.dart';
+import 'package:lifes_game/statistik/statistik_text.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/widgets/node_bubble.dart';
@@ -268,6 +274,76 @@ void main() {
       for (final stueck in flug.stuecke) {
         expect(stueck.farbe, GebietFarbe.leder(SkillArea.wissenschaft));
       }
+    });
+  });
+
+  group('Charakter, Errungenschaften, Haustier, Statistik', () {
+    test('jeder Kampfwert trägt die Farbe seines Gebiets', () {
+      // Seit ADR-0088 gehört jeder Wert zu genau einem Gebiet.
+      for (final stat in HabitStat.values) {
+        expect(StatIcons.colorOf(stat), GebietFarbe.pergament(stat.gebiet));
+        expect(StatIcons.colorOnDarkOf(stat), GebietFarbe.leder(stat.gebiet));
+      }
+    });
+
+    test('jeder Titel der Gebiete nennt ein Gebiet, das es gibt', () {
+      // Die Naht zu `package:achievements`: Dort steht nur die Id.
+      final gebiete = AchievementCatalog.inArea(AchievementArea.gebiete);
+      expect(gebiete, isNotEmpty);
+      for (final a in gebiete) {
+        expect(SkillArea.tryParse(a.skillAreaId), isNotNull, reason: a.id);
+      }
+    });
+
+    test('die Prägung des Haustiers nimmt dieselbe Tabelle', () {
+      for (final area in SkillArea.values) {
+        expect(praegungsFarbe(area), GebietFarbe.leder(area));
+      }
+    });
+
+    Future<Color> statTon(WidgetTester tester, String? habitId) async {
+      useTallView(tester);
+      const heute = Day(2026, 10, 26);
+      const eigen = CustomHabit(
+        id: 'eigen-geist',
+        name: 'Meditieren',
+        area: SkillArea.geist,
+        difficulty: HabitDifficulty.mittel,
+      );
+      final tracker = const HabitTracker.empty()
+          .addCustom(eigen, slots: 5)
+          .activate(eigen.id, today: heute.previous)
+          .check(eigen.id, heute)
+          .tracker;
+      final c = ProviderContainer(
+        overrides: [
+          todayProvider.overrideWithValue(heute),
+          savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: MaterialApp(home: StatistikScreen(habitId: habitId)),
+        ),
+      );
+      await tester.pump();
+      return StatTon.of(tester.element(find.byType(AppBar)));
+    }
+
+    testWidgets(
+      'die Statistik einer Gewohnheit trägt die Farbe ihres Gebiets',
+      (tester) async {
+        expect(
+          await statTon(tester, 'eigen-geist'),
+          GebietFarbe.pergament(SkillArea.geist),
+        );
+      },
+    );
+
+    testWidgets('über alle bleibt „erledigt“ grün', (tester) async {
+      expect(await statTon(tester, null), StatFarbe.erledigt);
     });
   });
 

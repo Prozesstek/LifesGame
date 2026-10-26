@@ -65,6 +65,7 @@ class Achievement {
     this.target = 1,
     this.titleId,
     this.moveId,
+    this.skillAreaId,
   });
 
   /// Stabiler Bezeichner. Steht in keinem Spielstand — was verdient ist,
@@ -103,6 +104,14 @@ class Achievement {
   /// Naht zu `package:combat` über `package:abilities`. Vier
   /// Meilensteine tragen eine, einer je Bereich (ADR-0033, Punkt 7).
   final String? moveId;
+
+  /// Das Gebiet eines Titels der Gebiete (ADR-0085) — die Id seiner
+  /// Wurzel, wie `SkillArea.name` in `package:habits` — oder null.
+  ///
+  /// Eine Naht wie [titleId]: Das Package kennt die Gebiete nicht, die
+  /// App macht daraus die Farbe (ADR-0090), und `test/gebiet_farbe_test`
+  /// prüft dort, dass jede Id ein Gebiet ist.
+  final String? skillAreaId;
 
   bool get isMilestone => kind == AchievementKind.milestone;
 

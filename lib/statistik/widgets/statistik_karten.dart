@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
 import '../../habits/stat_icon.dart';
+import '../../skills/gebiet_farbe.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -136,10 +137,10 @@ class QuoteKarte extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const StatZeichen(
+              StatZeichen(
                 icon: Icons.check_circle,
                 erklaerung: 'Erledigt von fällig',
-                farbe: StatFarbe.erledigt,
+                farbe: StatTon.of(context),
                 groesse: 26,
               ),
               const SizedBox(width: 8),
@@ -301,7 +302,7 @@ class TagZeile extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        const Icon(Icons.check, size: 14, color: StatFarbe.erledigt),
+        Icon(Icons.check, size: 14, color: StatTon.of(context)),
         Text(
           quote.faellig == 0 ? '–' : '${quote.erledigt}/${quote.faellig}',
           style: const TextStyle(
@@ -353,7 +354,7 @@ class RekordeKarte extends StatelessWidget {
           if (monat != null)
             _Rekord(
               icon: Icons.calendar_month,
-              farbe: StatFarbe.erledigt,
+              farbe: StatTon.of(context),
               wert: StatText.prozent(monat.quote),
               unter: StatText.monat(monat.monat),
               erklaerung: 'Bester Monat',
@@ -368,7 +369,7 @@ class RekordeKarte extends StatelessWidget {
             ),
           _Rekord(
             icon: Icons.check,
-            farbe: StatFarbe.erledigt,
+            farbe: StatTon.of(context),
             wert: StatText.zahl(rekorde.haekchenGesamt),
             erklaerung: 'Häkchen insgesamt',
           ),
@@ -470,7 +471,14 @@ class GewohnheitRing extends StatelessWidget {
                       CircularProgressIndicator(
                         value: anteil * wachsen,
                         strokeWidth: 5,
-                        color: StatFarbe.erledigt,
+                        // Jeder Ring in der Farbe seines Gebiets
+                        // (ADR-0090); ohne Gebiet grün.
+                        color: switch (habit.area) {
+                          final SkillArea gebiet => GebietFarbe.pergament(
+                            gebiet,
+                          ),
+                          null => StatFarbe.erledigt,
+                        },
                         backgroundColor: StatFarbe.leer,
                       ),
                       Center(
