@@ -244,10 +244,18 @@ class Steckbrief extends StatefulWidget {
     this.innen = const EdgeInsets.fromLTRB(8, 12, 8, 10),
     this.stempelGroesse = 50,
     this.stempelText,
+    this.streifen,
     super.key,
   });
 
   final Widget child;
+
+  /// Ein Streifen am linken Rand, bis an den Riss: die Farbe des Gebiets
+  /// einer Gewohnheit auf „Heute“ (ADR-0090). Ohne keiner.
+  final Color? streifen;
+
+  /// Wie breit er ist — derselbe wie auf der Kachel (`GebietStreifen`).
+  static const double streifenBreite = 5;
 
   /// Wie schief das Blatt hängt, im Bogenmaß.
   final double neigung;
@@ -332,7 +340,11 @@ class _SteckbriefState extends State<Steckbrief>
           Padding(
             padding: const EdgeInsets.only(top: Steckbrief.zwecke / 2),
             child: CustomPaint(
-              painter: _Blatt(saat: widget.saat, farbe: papier),
+              painter: _Blatt(
+                saat: widget.saat,
+                farbe: papier,
+                streifen: widget.streifen,
+              ),
               child: Padding(
                 padding: widget.innen.copyWith(
                   bottom: widget.innen.bottom + Steckbrief.riss,
@@ -474,10 +486,11 @@ class _ZweckeMaler extends CustomPainter {
 /// Das Papier: Schatten auf den Brettern, Fläche, ein gedruckter Rand
 /// und eine Unterkante, an der es abgerissen ist.
 class _Blatt extends CustomPainter {
-  const _Blatt({required this.saat, required this.farbe});
+  const _Blatt({required this.saat, required this.farbe, this.streifen});
 
   final int saat;
   final Color farbe;
+  final Color? streifen;
 
   /// Wie weit ein Zahn der Risskante reicht.
   static const double _zahn = 5;
@@ -505,17 +518,30 @@ class _Blatt extends CustomPainter {
         umriss.shift(const Offset(2, 3)),
         Paint()..color = Palette.blattSchatten,
       )
-      ..drawPath(umriss, Paint()..color = farbe)
-      // Der gedruckte Rand eines Aushangs — er endet vor dem Riss.
-      ..drawRect(
-        Rect.fromLTRB(4, 4, size.width - 4, size.height - Steckbrief.riss - 4),
-        Paint()
-          ..color = Palette.textDim.withValues(alpha: 0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1,
+      ..drawPath(umriss, Paint()..color = farbe);
+    if (streifen case final Color s) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          0,
+          0,
+          Steckbrief.streifenBreite,
+          size.height - Steckbrief.riss,
+        ),
+        Paint()..color = s,
       );
+    }
+    canvas
+    // Der gedruckte Rand eines Aushangs — er endet vor dem Riss.
+    .drawRect(
+      Rect.fromLTRB(4, 4, size.width - 4, size.height - Steckbrief.riss - 4),
+      Paint()
+        ..color = Palette.textDim.withValues(alpha: 0.45)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
   }
 
   @override
-  bool shouldRepaint(_Blatt alt) => alt.saat != saat || alt.farbe != farbe;
+  bool shouldRepaint(_Blatt alt) =>
+      alt.saat != saat || alt.farbe != farbe || alt.streifen != streifen;
 }

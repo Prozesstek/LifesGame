@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 import 'package:progression/progression.dart';
 
+import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
+import '../../skills/widgets/gebiet_streifen.dart';
 import '../../skills/widgets/skill_abzeichen.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
@@ -146,118 +148,127 @@ class HabitCheckTile extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onToggle,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-              child: Row(
-                children: <Widget>[
-                  _CheckMark(
-                    isChecked: isChecked,
-                    cued: cued,
-                    label: habit.name,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          habit.name,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: isChecked ? Palette.textDim : Palette.text,
-                            decoration: isChecked
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                            decorationColor: Palette.muted,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        RewardLine(
-                          xp: xpGain,
-                          gold: goldGain,
-                          area: habit.area,
-                          alreadyEarned: isChecked,
-                        ),
-                        if (zeigtBalken) ...<Widget>[
-                          const SizedBox(height: 7),
-                          if (timer == null)
-                            _GoalBar(
-                              anteil: goal.target <= 0
-                                  ? 0
-                                  : progress / goal.target,
-                              label: goal.progressLabel(progress),
-                            )
-                          else
-                            HabitCountdown(
-                              habit: habit,
-                              onDone: onTimerDone,
-                              builder: (context, uhr) => _GoalBar(
-                                anteil: uhr.fraction,
-                                // Läuft er oder steht er mitten in
-                                // einer Minute, zählt die Restzeit;
-                                // sonst steht da, was verbucht ist.
-                                label: uhr.isRunning
-                                    ? uhr.label
-                                    : goal.progressLabel(progress),
-                                semanticLabel: uhr.isRunning
-                                    ? uhr.semanticLabel
-                                    : null,
-                                laeuft: uhr.isRunning,
-                              ),
-                            ),
-                        ],
-                        if (!isChecked && onEditCue != null) ...<Widget>[
-                          const SizedBox(height: 4),
-                          _CueLine(
-                            cue: cue,
-                            days: days,
-                            treat: treat,
-                            onTap: onEditCue!,
-                          ),
-                        ],
-                      ],
+            child: GebietStreifen(
+              area: habit.area,
+              blass: isChecked,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  14 - GebietStreifen.breite,
+                  12,
+                  8,
+                  12,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    _CheckMark(
+                      isChecked: isChecked,
+                      cued: cued,
+                      label: habit.name,
                     ),
-                  ),
-                  // **Der Skill vorne, die Kette als Bonus** (ADR-0085).
-                  if (skill != null || streak > 0) ...<Widget>[
-                    const SizedBox(width: 8),
-                    _FortschrittsMarke(
-                      habit: habit,
-                      skill: skill,
-                      totalDays: totalDays,
-                      streak: streak,
-                      nextMultiplier: nextMultiplier,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            habit.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: isChecked ? Palette.textDim : Palette.text,
+                              decoration: isChecked
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              decorationColor: Palette.muted,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          RewardLine(
+                            xp: xpGain,
+                            gold: goldGain,
+                            area: habit.area,
+                            alreadyEarned: isChecked,
+                          ),
+                          if (zeigtBalken) ...<Widget>[
+                            const SizedBox(height: 7),
+                            if (timer == null)
+                              _GoalBar(
+                                anteil: goal.target <= 0
+                                    ? 0
+                                    : progress / goal.target,
+                                label: goal.progressLabel(progress),
+                              )
+                            else
+                              HabitCountdown(
+                                habit: habit,
+                                onDone: onTimerDone,
+                                builder: (context, uhr) => _GoalBar(
+                                  anteil: uhr.fraction,
+                                  // Läuft er oder steht er mitten in
+                                  // einer Minute, zählt die Restzeit;
+                                  // sonst steht da, was verbucht ist.
+                                  label: uhr.isRunning
+                                      ? uhr.label
+                                      : goal.progressLabel(progress),
+                                  semanticLabel: uhr.isRunning
+                                      ? uhr.semanticLabel
+                                      : null,
+                                  laeuft: uhr.isRunning,
+                                ),
+                              ),
+                          ],
+                          if (!isChecked && onEditCue != null) ...<Widget>[
+                            const SizedBox(height: 4),
+                            _CueLine(
+                              cue: cue,
+                              days: days,
+                              treat: treat,
+                              onTap: onEditCue!,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    // **Der Skill vorne, die Kette als Bonus** (ADR-0085).
+                    if (skill != null || streak > 0) ...<Widget>[
+                      const SizedBox(width: 8),
+                      _FortschrittsMarke(
+                        habit: habit,
+                        skill: skill,
+                        totalDays: totalDays,
+                        streak: streak,
+                        nextMultiplier: nextMultiplier,
+                      ),
+                    ],
+                    if (timer != null && !isChecked)
+                      DruckSperre(
+                        child: IconButton(
+                          key: timerKey(habit.id),
+                          onPressed: timer,
+                          icon: const Icon(Icons.timer_outlined, size: 22),
+                          color: Palette.accent,
+                          tooltip: 'Timer',
+                        ),
+                      ),
+                    if (zeigtPlus)
+                      DruckSperre(
+                        child: IconButton(
+                          onPressed: onAdvance,
+                          icon: const Icon(Icons.add_circle_outline, size: 22),
+                          color: Palette.accent,
+                          tooltip: _plusTooltip(goal),
+                        ),
+                      ),
+                    DruckSperre(
+                      child: IconButton(
+                        onPressed: onStop,
+                        icon: const Icon(Icons.close, size: 18),
+                        color: Palette.muted,
+                        tooltip: 'Nicht mehr verfolgen',
+                      ),
                     ),
                   ],
-                  if (timer != null && !isChecked)
-                    DruckSperre(
-                      child: IconButton(
-                        key: timerKey(habit.id),
-                        onPressed: timer,
-                        icon: const Icon(Icons.timer_outlined, size: 22),
-                        color: Palette.accent,
-                        tooltip: 'Timer',
-                      ),
-                    ),
-                  if (zeigtPlus)
-                    DruckSperre(
-                      child: IconButton(
-                        onPressed: onAdvance,
-                        icon: const Icon(Icons.add_circle_outline, size: 22),
-                        color: Palette.accent,
-                        tooltip: _plusTooltip(goal),
-                      ),
-                    ),
-                  DruckSperre(
-                    child: IconButton(
-                      onPressed: onStop,
-                      icon: const Icon(Icons.close, size: 18),
-                      color: Palette.muted,
-                      tooltip: 'Nicht mehr verfolgen',
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -448,8 +459,8 @@ class RewardLine extends StatelessWidget {
   final int gold;
 
   /// Das Gebiet, in das dieselbe Erfahrung **noch einmal** geht
-  /// (ADR-0085). Steht als eigener Posten mit seinem Zeichen da, grün wie
-  /// sein Balken — ohne Gebiet fehlt er.
+  /// (ADR-0085). Steht als eigener Posten mit seinem Zeichen da, in der
+  /// Farbe des Gebiets wie sein Balken (ADR-0090) — ohne Gebiet fehlt er.
   final SkillArea? area;
 
   /// Ob es schon geholt ist. Dann tragen die Zahlen die Farbe des Erfolgs
@@ -485,13 +496,20 @@ class RewardLine extends StatelessWidget {
             Icon(Icons.auto_awesome, size: 13, color: farbe),
             const SizedBox(width: 3),
             Text('+$xp', style: stil),
-            // Dieselbe Erfahrung noch einmal, grün und mit dem Zeichen
-            // des Gebiets: Sie zählt auch für den Skill.
+            // Dieselbe Erfahrung noch einmal, in der Farbe und mit dem
+            // Zeichen des Gebiets: Sie zählt auch für den Skill.
             if (gebiet != null) ...<Widget>[
               const SizedBox(width: 8),
-              Icon(gebietZeichen(gebiet), size: 13, color: Palette.success),
+              Icon(
+                gebietZeichen(gebiet),
+                size: 13,
+                color: GebietFarbe.pergament(gebiet),
+              ),
               const SizedBox(width: 3),
-              Text('+$xp', style: stil.copyWith(color: Palette.success)),
+              Text(
+                '+$xp',
+                style: stil.copyWith(color: GebietFarbe.pergament(gebiet)),
+              ),
             ],
             const SizedBox(width: 8),
             const GoldIcon(size: 13),

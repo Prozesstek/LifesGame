@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../../habits/habits_controller.dart';
 import '../../habits/stat_icon.dart';
 import '../../save/widgets/save_transfer_card.dart';
+import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
@@ -170,6 +171,7 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
                   _Wahl(
                     key: ValueKey<String>('erste-gewohnheit-${area.name}'),
                     icon: gebietZeichen(area),
+                    farbe: GebietFarbe.pergament(area),
                     label: '${area.label}, stärkt ${area.kampfwert.label}',
                     gewaehlt: area == _area,
                     onTap: () => setState(() => _area = area),
@@ -214,6 +216,7 @@ class _Wahl extends StatelessWidget {
     required this.gewaehlt,
     required this.onTap,
     required this.icon,
+    required this.farbe,
     super.key,
   });
 
@@ -222,6 +225,10 @@ class _Wahl extends StatelessWidget {
   final bool gewaehlt;
   final VoidCallback onTap;
   final IconData icon;
+
+  /// Die Farbe des Gebiets (ADR-0090): das Zeichen immer, der Rand, wenn
+  /// gewählt.
+  final Color farbe;
 
   @override
   Widget build(BuildContext context) {
@@ -243,15 +250,11 @@ class _Wahl extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: gewaehlt ? Palette.surfaceRaised : null,
                 border: Border.all(
-                  color: gewaehlt ? Palette.accent : Palette.muted,
+                  color: gewaehlt ? farbe : Palette.muted,
                   width: gewaehlt ? 2 : 1,
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: gewaehlt ? Palette.accent : Palette.textDim,
-              ),
+              child: Icon(icon, size: 18, color: farbe),
             ),
           ),
         ),

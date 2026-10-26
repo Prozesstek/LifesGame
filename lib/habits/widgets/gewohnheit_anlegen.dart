@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
+import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
@@ -592,6 +593,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
           gewaehlt: _gebiet == area,
           senkrecht: true,
           icon: gebietZeichen(area),
+          farbe: GebietFarbe.pergament(area),
           titel: area.label,
           // Was es im Kampf stärkt, folgt aus dem Gebiet (ADR-0088).
           unten: Row(

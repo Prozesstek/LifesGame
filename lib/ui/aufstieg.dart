@@ -111,8 +111,8 @@ class AufstiegHostState extends State<AufstiegHost>
   int get konfettiInDerLuft => _konfetti.length;
 
   /// Lässt [gold] als Münzen und [xp] als Funken vom letzten Finger zu
-  /// ihren Zielen fliegen, [gebiet] als grüne Funken zum Balken des
-  /// Gebiets (ADR-0085). **Ohne Ziel fliegt nichts** — wo keine Leiste
+  /// ihren Zielen fliegen, [gebiet] als Funken in der [gebietFarbe] zum
+  /// Balken des Gebiets (ADR-0085, ADR-0090). **Ohne Ziel fliegt nichts** — wo keine Leiste
   /// ist, steigen nur die Zahlen auf.
   ///
   /// [beiAnkunft] klingt, wenn etwas ankommt, höchstens alle
@@ -125,6 +125,7 @@ class AufstiegHostState extends State<AufstiegHost>
     required int gold,
     required int xp,
     int gebiet = 0,
+    Color? gebietFarbe,
     void Function(FlugZiel ziel)? beiAnkunft,
     VoidCallback? wennGelandet,
   }) {
@@ -145,6 +146,7 @@ class AufstiegHostState extends State<AufstiegHost>
         ziel: ziel,
         nach: nach,
         betrag: betrag,
+        farbe: ziel == FlugZiel.gebiet ? gebietFarbe : null,
       );
       if (dauer > landung) landung = dauer;
     }

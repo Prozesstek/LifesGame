@@ -4,12 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
+import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/progression/level_provider.dart';
+import 'package:lifes_game/save/save_data.dart';
+import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/skills/gebiet_farbe.dart';
+import 'package:lifes_game/skills/gebiet_zeichen.dart';
+import 'package:lifes_game/skills/widgets/gebiet_streifen.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/widgets/node_bubble.dart';
 import 'package:lifes_game/theory/widgets/seiten_farbe.dart';
+import 'package:lifes_game/ui/anschlagtafel.dart';
+import 'package:lifes_game/ui/beute_flug.dart';
 import 'package:lifes_game/ui/palette.dart';
 import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
@@ -163,6 +174,100 @@ void main() {
         farbeVon(tester, 'koerper-stress'),
         GebietFarbe.leder(SkillArea.geist),
       );
+    });
+  });
+
+  group('Bei den Gewohnheiten', () {
+    Color? farbeVonZeichen(WidgetTester tester, Finder finder) =>
+        tester.widget<Icon>(finder).color;
+
+    testWidgets('die Erfahrung fürs Gebiet trägt seine Farbe', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: RewardLine(xp: 36, gold: 5, area: SkillArea.geist),
+          ),
+        ),
+      );
+
+      expect(
+        farbeVonZeichen(tester, find.byIcon(gebietZeichen(SkillArea.geist))),
+        GebietFarbe.pergament(SkillArea.geist),
+      );
+    });
+
+    testWidgets('ohne Gebiet ist der Streifen durchsichtig, nicht weg', (
+      tester,
+    ) async {
+      // Gleich breit, damit ihr Name nicht weiter links steht.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: GebietStreifen(area: null, child: SizedBox(height: 20)),
+        ),
+      );
+      final box = tester.widget<Container>(find.byType(Container));
+      final rand = (box.decoration! as BoxDecoration).border! as Border;
+      expect(rand.left.width, GebietStreifen.breite);
+      expect(rand.left.color, Colors.transparent);
+    });
+
+    testWidgets('„Heute“ zeigt Streifen und Zeichen in der Farbe des Gebiets', (
+      tester,
+    ) async {
+      useTallView(tester);
+      const start = Day(2026, 1, 1);
+      final vorlage = HabitCatalog.all.firstWhere(
+        (v) => v.area == SkillArea.koerper,
+      );
+      final c = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(
+            SaveData(
+              habits: const HabitTracker.empty().activate(
+                vorlage.id,
+                today: start,
+              ),
+            ),
+          ),
+          ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pump();
+
+      const koerper = SkillArea.koerper;
+      expect(
+        farbeVonZeichen(tester, find.byKey(TodayCard.gebietKey(vorlage.id))),
+        GebietFarbe.pergament(koerper),
+      );
+      final zettel = tester
+          .widgetList<Steckbrief>(find.byType(Steckbrief))
+          .where((s) => s.streifen != null);
+      expect(zettel.map((s) => s.streifen), <Color>[
+        GebietFarbe.pergament(koerper),
+      ]);
+    });
+
+    test('die Funken zum Gebiet fliegen in seiner Farbe', () {
+      final flug = BeuteFlug()
+        ..wirf(
+          von: Offset.zero,
+          ziel: FlugZiel.gebiet,
+          nach: const Offset(100, 0),
+          betrag: 30,
+          farbe: GebietFarbe.leder(SkillArea.wissenschaft),
+        );
+
+      expect(flug.stuecke, isNotEmpty);
+      for (final stueck in flug.stuecke) {
+        expect(stueck.farbe, GebietFarbe.leder(SkillArea.wissenschaft));
+      }
     });
   });
 

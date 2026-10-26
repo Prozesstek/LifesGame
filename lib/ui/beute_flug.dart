@@ -70,11 +70,14 @@ class BeuteFlug {
 
   /// [betrag] fliegt von [von] nach [nach]. Gibt zurück, nach wie vielen
   /// Sekunden das letzte Stück ankommt — 0, wenn nichts fliegt.
+  ///
+  /// [farbe] trägt ein Funke zum Gebiet: die seines Gebiets (ADR-0090).
   double wirf({
     required Offset von,
     required FlugZiel ziel,
     required Offset nach,
     required int betrag,
+    Color? farbe,
   }) {
     final anzahl = stueckeFuer(betrag, ziel);
     if (anzahl == 0) return 0;
@@ -106,6 +109,7 @@ class BeuteFlug {
           // geht an die ersten.
           wert: betrag ~/ anzahl + (i < betrag % anzahl ? 1 : 0),
           phase: _zufall.nextDouble() * 2 * math.pi,
+          farbe: farbe,
         ),
       );
     }
@@ -149,6 +153,7 @@ class FlugStueck {
     required this.startet,
     required this.wert,
     required this.phase,
+    this.farbe,
   });
 
   final FlugZiel ziel;
@@ -169,6 +174,9 @@ class FlugStueck {
 
   /// Wo es sich gerade dreht, damit nicht alle im Gleichtakt blinken.
   final double phase;
+
+  /// Die Farbe eines Funkens zum Gebiet; sonst null.
+  final Color? farbe;
 
   double alter = 0;
 
@@ -234,7 +242,7 @@ class BeuteFlugMaler extends CustomPainter {
             spur: stueck.vorher,
             radius: funkenRadius,
             flackern: 0.8 + 0.2 * math.sin(stueck.alter * 30 + stueck.phase),
-            gebiet: stueck.ziel == FlugZiel.gebiet,
+            farbe: stueck.ziel == FlugZiel.gebiet ? stueck.farbe : null,
           );
       }
     }

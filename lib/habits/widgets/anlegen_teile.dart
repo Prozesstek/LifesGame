@@ -85,6 +85,7 @@ class AnlegenWahl extends StatelessWidget {
     this.gewaehlt = false,
     this.aus = false,
     this.senkrecht = false,
+    this.farbe,
     super.key,
   });
 
@@ -100,6 +101,11 @@ class AnlegenWahl extends StatelessWidget {
 
   /// Zeichen über dem Namen statt daneben — für das Raster der Gebiete.
   final bool senkrecht;
+
+  /// Die Farbe einer Wahl, die eine hat — ein Gebiet (ADR-0090): Das
+  /// Zeichen trägt sie immer, der Rand, wenn sie gewählt ist. Ohne der
+  /// Akzent.
+  final Color? farbe;
   final VoidCallback onTap;
 
   @override
@@ -121,7 +127,7 @@ class AnlegenWahl extends StatelessWidget {
     final zeichen = Icon(
       icon,
       size: senkrecht ? 30 : 26,
-      color: gewaehlt ? Palette.accent : Palette.textDim,
+      color: farbe ?? (gewaehlt ? Palette.accent : Palette.textDim),
     );
 
     return Opacity(
@@ -135,7 +141,9 @@ class AnlegenWahl extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: gewaehlt ? Palette.accent : Palette.surfaceSunken,
+                color: gewaehlt
+                    ? (farbe ?? Palette.accent)
+                    : Palette.surfaceSunken,
                 width: gewaehlt ? 2 : 1,
               ),
             ),
