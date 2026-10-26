@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
 import '../habits/habits_controller.dart';
+import '../skills/gebiet_farbe.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'jahresrueckblick_screen.dart';
@@ -53,55 +54,64 @@ class _StatistikScreenState extends ConsumerState<StatistikScreen> {
     final fenster = _fenster ?? rechnung.fenster(_zeitraum);
     final habit = id == null ? null : tracker.definitionFor(id);
     final rueckblick = id == null ? StatRechnung.rueckblickJahr(heute) : null;
+    // Die Statistik einer Gewohnheit in der Farbe ihres Gebiets
+    // (ADR-0090); über alle bleibt „erledigt“ grün.
+    final ton = switch (habit?.area) {
+      final SkillArea gebiet => GebietFarbe.pergament(gebiet),
+      null => StatFarbe.erledigt,
+    };
 
-    return Scaffold(
-      appBar: AppBar(title: Text(habit?.name ?? 'Statistik')),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-              children: <Widget>[
-                if (rueckblick != null &&
-                    rechnung.anfang.year <= rueckblick) ...<Widget>[
-                  _Ankuendigung(jahr: rueckblick),
-                  const SizedBox(height: 12),
-                ],
-                _ZeitraumWahl(
-                  gewaehlt: _zeitraum,
-                  onWahl: (z) => setState(() {
-                    _zeitraum = z;
-                    _fenster = null;
-                    _gewaehlt = null;
-                  }),
-                ),
-                const SizedBox(height: 6),
-                _Blaettern(
-                  fenster: fenster,
-                  davor: fenster.blaetterbar && fenster.von > rechnung.anfang,
-                  danach: fenster.blaetterbar && fenster.bis < heute,
-                  onWechsel: (neu) => setState(() {
-                    _fenster = neu;
-                    _gewaehlt = null;
-                  }),
-                ),
-                const SizedBox(height: 8),
-                Aufbau(
-                  schluessel: fenster,
-                  builder: (context, wert) => _Inhalt(
-                    rechnung: rechnung,
+    return StatTon(
+      erledigt: ton,
+      child: Scaffold(
+        appBar: AppBar(title: Text(habit?.name ?? 'Statistik')),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxWidth),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                children: <Widget>[
+                  if (rueckblick != null &&
+                      rechnung.anfang.year <= rueckblick) ...<Widget>[
+                    _Ankuendigung(jahr: rueckblick),
+                    const SizedBox(height: 12),
+                  ],
+                  _ZeitraumWahl(
+                    gewaehlt: _zeitraum,
+                    onWahl: (z) => setState(() {
+                      _zeitraum = z;
+                      _fenster = null;
+                      _gewaehlt = null;
+                    }),
+                  ),
+                  const SizedBox(height: 6),
+                  _Blaettern(
                     fenster: fenster,
-                    habit: habit,
-                    gewaehlt: _gewaehlt,
-                    wachsen: wert,
-                    onTag: (tag) => setState(
-                      () => _gewaehlt = _gewaehlt == tag ? null : tag,
+                    davor: fenster.blaetterbar && fenster.von > rechnung.anfang,
+                    danach: fenster.blaetterbar && fenster.bis < heute,
+                    onWechsel: (neu) => setState(() {
+                      _fenster = neu;
+                      _gewaehlt = null;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  Aufbau(
+                    schluessel: fenster,
+                    builder: (context, wert) => _Inhalt(
+                      rechnung: rechnung,
+                      fenster: fenster,
+                      habit: habit,
+                      gewaehlt: _gewaehlt,
+                      wachsen: wert,
+                      onTag: (tag) => setState(
+                        () => _gewaehlt = _gewaehlt == tag ? null : tag,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -326,7 +336,8 @@ class _ZeitraumWahl extends StatelessWidget {
       showSelectedIcon: false,
       style: SegmentedButton.styleFrom(
         backgroundColor: Palette.surface,
-        selectedBackgroundColor: Palette.success,
+        // Im Ton dieser Statistik: grün über alle, sonst das Gebiet.
+        selectedBackgroundColor: StatTon.of(context),
         selectedForegroundColor: Palette.surface,
         foregroundColor: Palette.text,
         visualDensity: VisualDensity.compact,

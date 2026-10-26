@@ -91,6 +91,10 @@ abstract final class StatText {
 
 /// Die Farben der Statistik: **Grün wie das Häkchen**, je kräftiger, je
 /// mehr erledigt; Eis blau, Ruhetage grau. Eine Bedeutung, eine Farbe.
+///
+/// **Die Statistik einer Gewohnheit trägt statt des Grüns die Farbe ihres
+/// Gebiets** (ADR-0090); [StatTon] reicht sie von oben. Über alle
+/// Gewohnheiten bleibt es Grün — dort heißt es erledigt, nicht Gebiet.
 abstract final class StatFarbe {
   static const Color erledigt = Palette.success;
   static const Color leer = Palette.surfaceSunken;
@@ -100,18 +104,36 @@ abstract final class StatFarbe {
 
   /// Die Farbe eines Tages im Raster, oder null für einen Tag, der noch
   /// kommt — der hat nur einen Rand.
-  static Color? tag(StatTag tag) {
+  ///
+  /// [erledigt] ist der Ton dieser Statistik (`StatTon.of`).
+  static Color? tag(StatTag tag, {required Color erledigt}) {
     if (tag.zukunft) return null;
     if (tag.eis) return eis;
     if (tag.ruhetag) return ruhetag;
-    return quote(tag.quote);
+    return quote(tag.quote, erledigt: erledigt);
   }
 
-  /// Von blass bis kräftig grün nach der Quote; ohne Fälliges grau.
-  static Color quote(StatQuote quote) {
+  /// Von blass bis kräftig nach der Quote; ohne Fälliges grau.
+  static Color quote(StatQuote quote, {required Color erledigt}) {
     final anteil = quote.anteil;
     if (anteil == null) return ruhetag;
     if (anteil == 0) return leer;
     return Color.lerp(leer, erledigt, 0.3 + 0.7 * anteil)!;
   }
+}
+
+/// **Der Ton von „erledigt“ in dieser Statistik** (ADR-0090): Die einer
+/// Gewohnheit setzt die Farbe ihres Gebiets darüber; ohne bleibt es
+/// [StatFarbe.erledigt], das Grün.
+class StatTon extends InheritedWidget {
+  const StatTon({required this.erledigt, required super.child, super.key});
+
+  final Color erledigt;
+
+  static Color of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<StatTon>()?.erledigt ??
+      StatFarbe.erledigt;
+
+  @override
+  bool updateShouldNotify(StatTon oldWidget) => oldWidget.erledigt != erledigt;
 }

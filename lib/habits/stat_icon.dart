@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
 
-import '../ui/palette.dart';
+import '../skills/gebiet_farbe.dart';
 
 /// Welches Zeichen zu welchem Wert gehört — **eine Tabelle**.
 ///
@@ -9,6 +9,11 @@ import '../ui/palette.dart';
 /// Wort da: Hantel für Angriff, Herz für Leben, Schild für Abwehr,
 /// Tropfen für Mana. Einen eigenen Alltagsnamen daneben gibt es seit
 /// ADR-0088 nicht mehr.
+///
+/// **Die Farbe ist die seines Gebiets** (ADR-0090): Ein Wert gehört seit
+/// ADR-0088 zu genau einem, und so sieht man es ihm an. In der Grube
+/// gilt das nicht — dort bleiben die Balken für Leben und Mana, wie sie
+/// sind.
 abstract final class StatIcons {
   static IconData of(HabitStat stat) => switch (stat) {
     HabitStat.staerke => Icons.fitness_center_rounded,
@@ -17,12 +22,11 @@ abstract final class StatIcons {
     HabitStat.klarheit => Icons.water_drop_rounded,
   };
 
-  static Color colorOf(HabitStat stat) => switch (stat) {
-    HabitStat.staerke => Palette.accent,
-    HabitStat.ausdauer => Palette.enemy,
-    HabitStat.disziplin => Palette.gold,
-    HabitStat.klarheit => Palette.textDim,
-  };
+  /// Auf Pergament.
+  static Color colorOf(HabitStat stat) => GebietFarbe.pergament(stat.gebiet);
+
+  /// Auf Leder.
+  static Color colorOnDarkOf(HabitStat stat) => GebietFarbe.leder(stat.gebiet);
 }
 
 /// Ein Wert als Zeichen; der Name steht nur für den Vorleser da.

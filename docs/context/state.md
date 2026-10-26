@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1023, dazu die acht Packages (theory 210, habits 374, gear
+**Tests:** App 1028, dazu die acht Packages (theory 210, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -189,11 +189,30 @@ App 1023 (vorher 1019). Startseite, ein Häkchen mitten im Flug, die
 Gewohnheiten und die Wahl beim Anlegen in 390 × 844 gerendert und
 angesehen.
 
+### Block 3: Charakter, Kampfwerte, Errungenschaften, Haustier, Statistik
+
+| Was | Wie |
+|---|---|
+| **Kampfwerte** | Hantel, Herz, Schild und Tropfen in der Farbe ihres Gebiets (`StatIcons.colorOf`), auch in der Tagesform; **die Grube bleibt, wie sie ist** |
+| **Charakter** | die vier Skills mit Zeichen und Balken in ihrer Farbe; bei jedem Wert das Zeichen seines Gebiets darin |
+| **Errungenschaften** | die zwölf Titel der Gebiete: Rand, Pokal und Balken in der Farbe; dafür nennt jeder sein Gebiet (`Achievement.skillAreaId`) |
+| **Haustier** | die Prägung nimmt die eine Tabelle; seine eigenen vier Farben sind weg |
+| **Statistik** | über alle bleibt sie grün; die einer Gewohnheit trägt die Farbe ihres Gebiets (`StatTon`), auch der gewählte Zeitraum; jeder Ring in der Übersicht in seiner |
+
+App 1028 (vorher 1023), achievements 25 (unverändert, ein Test prüft
+mehr). Charakter, Errungenschaften, Statistik über alle und für eine
+Gewohnheit und vier Prägungen in 390 × 844 gerendert und angesehen.
+
+**Die drei PRs** (#163, #164, #165) bauen aufeinander auf und werden in
+dieser Reihenfolge gemergt.
+
 ### Offen
 
-- **Block 3**: Charakter, Kampfwerte, Errungenschaften, Haustier,
-  Statistik.
 - Körper liegt nah am Akzent; im Baum steht der nicht mehr daneben.
+- **In der Statistik von Geist** sind erledigte Tage blau und Tage mit
+  Streak-Eis hellblau — nicht mit einem Eis-Tag angesehen.
+- In der Grube trägt nichts die Farbe eines Gebiets, auch nicht die
+  Leiste der Fähigkeiten, deren Mana aus Geist kommt.
 - **AktivesBrett hat ADR-0090 nicht gesehen.**
 
 ## 25.10.2026, danach: eine Frage nach der anderen (Block B)

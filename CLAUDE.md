@@ -107,7 +107,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die **fünfundzwanzig** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
 | `packages/achievements/` | Errungenschaften, reines Dart, 25 Tests | nur Dart-SDK |
-| `packages/achievements/lib/src/catalog.dart` | die **34 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)) | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **34 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 406 Tests | nur Dart-SDK |
@@ -163,7 +163,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/haustier/` | **das Haustier** (`docs/vorlagen/haustier.md`, seit [ADR-0086](docs/decisions/0086-das-haustier-fuer-alle.md) in jeder Fassung): drei Arten, Level und Stufen aus Tagen mit Häkchen, Laune, Zubehör und Preise, der gespeicherte Stand; reines Dart, 21 Tests | nur Dart-SDK |
 | `lib/haustier/haustier_controller.dart` | Riverpod-Brücke Haustier ↔ UI, **enthält keine Regeln**; Tage, Stufe, Laune und Prägung abgeleitet; der Kauf bekommt das Gold von außen | Flutter |
 | `lib/haustier/widgets/haustier_bild.dart` | **wie das Tier aussieht** — gezeichnet, atmet, blinzelt, schläft, springt; **die eine Stelle**, die ein Grafikpaket ersetzt; in Tests still (`HaustierBild.lebt`) | Flutter |
-| `lib/haustier/widgets/haustier_schmuck.dart` | Hüte, Halsschmuck, Spielzeug und die Prägung — ausgelagert aus dem Bild | Flutter |
+| `lib/haustier/widgets/haustier_schmuck.dart` | Hüte, Halsschmuck, Spielzeug und die Prägung — ausgelagert aus dem Bild; die Prägung in der Farbe ihres Gebiets aus `GebietFarbe` | Flutter |
 | `lib/haustier/widgets/haustier_karte.dart` | das Tier **ohne Rahmen oben links in der Leiste**, auf einer Höhe mit Level und Gold, **nur mit seinem Level als Marke** — Name, Stufe und Balken stehen im Blatt; ohne Ei die Wahl zwischen dreien als Karte über „Heute“ — **erst, wenn es eine Gewohnheit gibt** (ADR-0086) | Flutter |
 | `lib/haustier/widgets/haustier_blatt.dart` | das Blatt: Name, Stufen, Zubehör kaufen und anlegen, im Entwicklermodus Tage vorspulen | Flutter |
 | `lib/skills/skills.dart` | **die Skills je Gebiet** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): Häkchen, Seiten und Rückfragen eines Gebiets zusammengezählt, dazu das Gesamtlevel — **eine Stelle**, die Errungenschaften rechnen dasselbe | Flutter |
@@ -213,7 +213,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/week_review_screen.dart` | der Wochenrückblick, der sich aufbaut — sonntags und montags gross angekündigt | Flutter |
 | `lib/statistik/statistik_screen.dart` | **die Statistik** (ADR-0087): Woche, Monat, Jahr, Gesamt mit Blättern; Quote, Raster, Balken, Kurve, Wochentage, Ringe je Gewohnheit, Rekorde — gesamt oder für eine Gewohnheit | Flutter |
 | `lib/statistik/jahresrueckblick_screen.dart` | **der Jahresrückblick**, der sich aufbaut — vom 20.12. bis 7.1. angekündigt | Flutter |
-| `lib/statistik/statistik_text.dart` | wie die Statistik spricht und **welche Farben sie trägt** (`StatFarbe`: grün wie das Häkchen, Eis blau, Ruhetag grau) — eine Stelle | Flutter |
+| `lib/statistik/statistik_text.dart` | wie die Statistik spricht und **welche Farben sie trägt** (`StatFarbe`: grün wie das Häkchen, Eis blau, Ruhetag grau) — eine Stelle; **die Statistik einer Gewohnheit trägt statt des Grüns die Farbe ihres Gebiets** (`StatTon`, ADR-0090) | Flutter |
 | `lib/statistik/widgets/kalender_raster.dart` | das Raster: Woche, Kalenderblatt, Jahr wie bei GitHub (gemalt, quer zu rollen), Gesamt je Jahr | Flutter |
 | `lib/statistik/widgets/statistik_graphen.dart` | Balken, Kurve und Wochentage mit **fl_chart** — rechnen nichts | Flutter |
 | `lib/habits/widgets/gewohnheit_anlegen.dart` | **eine neue Gewohnheit, eine Frage nach der anderen** (ADR-0089): Eigene oder Vorlage, Name, Gebiet, Schwierigkeit, Ziel, Wann (Satz **oder** Kopplung), Tage, Belohnung — bei Vorlagen nur die letzten drei; eine Wahl führt mit einem Tipp weiter; **kennt keine Provider** | Flutter |
@@ -274,7 +274,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
-| `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Hantel, Herz, Schild, Tropfen; **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)) | Flutter |
+| `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Hantel, Herz, Schild, Tropfen; **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)), **in der Farbe seines Gebiets** (ADR-0090) | Flutter |
 | `lib/ui/ruhm_zahl.dart` | Ruhm als Zeichen mit Zahl, überall dasselbe | Flutter |
 | `lib/ui/on_dark.dart` | klammert ein, was auf Leder statt Pergament steht | Flutter |
 | `lib/ui/pixel_art.dart` | eine Zeichnung fester Größe — **und ob hart oder weich skaliert wird** | Flutter |
@@ -331,7 +331,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1023 Tests
+flutter test             # 1028 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

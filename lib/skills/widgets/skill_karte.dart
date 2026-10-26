@@ -10,6 +10,7 @@ import '../../combat/widgets/teilen_knopf.dart';
 import '../../habits/habits_controller.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../gebiet_farbe.dart';
 import '../gebiet_zeichen.dart';
 import '../skill_text.dart';
 import '../skills_provider.dart';
@@ -113,6 +114,7 @@ class _GebietZeile extends StatelessWidget {
         ? '${area.label}: höchste Stufe'
         : '${area.label}: noch ${skill.xpToNextLevel} Erfahrung bis '
               'Stufe ${skill.level + 1}';
+    final farbe = GebietFarbe.pergament(area);
 
     return Tooltip(
       triggerMode: TooltipTriggerMode.tap,
@@ -122,7 +124,7 @@ class _GebietZeile extends StatelessWidget {
         excludeSemantics: true,
         child: Row(
           children: <Widget>[
-            Icon(gebietZeichen(area), size: 18, color: Palette.accent),
+            Icon(gebietZeichen(area), size: 18, color: farbe),
             const SizedBox(width: 8),
             SizedBox(
               width: 104,
@@ -144,9 +146,7 @@ class _GebietZeile extends StatelessWidget {
                   value: skill.ratio,
                   minHeight: 6,
                   backgroundColor: Palette.muted.withValues(alpha: 0.25),
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Palette.accent,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(farbe),
                 ),
               ),
             ),

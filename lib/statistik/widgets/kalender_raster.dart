@@ -43,9 +43,10 @@ class KalenderRaster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final erledigt = StatTon.of(context);
     return switch (fenster.zeitraum) {
-      StatZeitraum.woche => _woche(),
-      StatZeitraum.monat => _monat(),
+      StatZeitraum.woche => _woche(erledigt),
+      StatZeitraum.monat => _monat(erledigt),
       StatZeitraum.jahr => _Jahresraster(
         tage: rechnung.tage(fenster),
         fenster: fenster,
@@ -54,14 +55,14 @@ class KalenderRaster extends StatelessWidget {
         fortschritt: fortschritt,
         onTag: onTag,
       ),
-      StatZeitraum.gesamt => _gesamt(),
+      StatZeitraum.gesamt => _gesamt(erledigt),
     };
   }
 
   double _sichtbar(int index, int anzahl) =>
       (fortschritt * anzahl - index).clamp(0.0, 1.0);
 
-  Widget _woche() {
+  Widget _woche(Color erledigt) {
     final tage = rechnung.tage(fenster);
     return Row(
       children: <Widget>[
@@ -75,7 +76,7 @@ class KalenderRaster extends StatelessWidget {
                     aspectRatio: 1,
                     child: _Zelle(
                       key: zelleKey(tag.tag),
-                      farbe: StatFarbe.tag(tag),
+                      farbe: StatFarbe.tag(tag, erledigt: erledigt),
                       gewaehlt: tag.tag == gewaehlt,
                       sichtbar: _sichtbar(i, tage.length),
                       onTap: () => onTag(tag.tag),
@@ -97,7 +98,7 @@ class KalenderRaster extends StatelessWidget {
     );
   }
 
-  Widget _monat() {
+  Widget _monat(Color erledigt) {
     final tage = rechnung.tage(fenster);
     final leer = fenster.von.weekday - 1;
     final zeilen = ((leer + tage.length) / 7).ceil();
@@ -124,14 +125,14 @@ class KalenderRaster extends StatelessWidget {
           Row(
             children: <Widget>[
               for (var s = 0; s < 7; s++)
-                Expanded(child: _monatsZelle(z * 7 + s - leer, tage)),
+                Expanded(child: _monatsZelle(z * 7 + s - leer, tage, erledigt)),
             ],
           ),
       ],
     );
   }
 
-  Widget _monatsZelle(int index, List<StatTag> tage) {
+  Widget _monatsZelle(int index, List<StatTag> tage, Color erledigt) {
     if (index < 0 || index >= tage.length) {
       return const AspectRatio(aspectRatio: 1, child: SizedBox.shrink());
     }
@@ -142,7 +143,7 @@ class KalenderRaster extends StatelessWidget {
         aspectRatio: 1,
         child: _Zelle(
           key: zelleKey(tag.tag),
-          farbe: StatFarbe.tag(tag),
+          farbe: StatFarbe.tag(tag, erledigt: erledigt),
           gewaehlt: tag.tag == gewaehlt,
           sichtbar: _sichtbar(index, tage.length),
           onTap: () => onTag(tag.tag),
@@ -152,7 +153,7 @@ class KalenderRaster extends StatelessWidget {
     );
   }
 
-  Widget _gesamt() {
+  Widget _gesamt(Color erledigt) {
     final jahre = <int>[
       for (var j = fenster.von.year; j <= fenster.bis.year; j++) j,
     ];
@@ -212,7 +213,7 @@ class KalenderRaster extends StatelessWidget {
                         key: zelleKey(monat.von),
                         farbe: monat.zukunft
                             ? null
-                            : StatFarbe.quote(monat.quote),
+                            : StatFarbe.quote(monat.quote, erledigt: erledigt),
                         gewaehlt: monat.von == gewaehlt,
                         sichtbar: _sichtbar(zeile * 12 + m, anzahl),
                         onTap: () => onTag(monat.von),
@@ -368,6 +369,7 @@ class _JahresrasterState extends State<_Jahresraster> {
                   erster: _erster,
                   gewaehlt: widget.gewaehlt,
                   fortschritt: widget.fortschritt,
+                  erledigt: StatTon.of(context),
                 ),
               ),
             ),
@@ -394,6 +396,7 @@ class _JahresMaler extends CustomPainter {
     required this.erster,
     required this.gewaehlt,
     required this.fortschritt,
+    required this.erledigt,
   });
 
   final TextStyle schrift;
@@ -401,6 +404,7 @@ class _JahresMaler extends CustomPainter {
   final Day erster;
   final Day? gewaehlt;
   final double fortschritt;
+  final Color erledigt;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -425,7 +429,7 @@ class _JahresMaler extends CustomPainter {
         ort & const Size.square(_Jahresraster.zelle),
         const Radius.circular(3),
       );
-      final farbe = StatFarbe.tag(tag);
+      final farbe = StatFarbe.tag(tag, erledigt: erledigt);
       if (farbe == null) {
         canvas.drawRRect(feld, rand);
       } else {
@@ -454,5 +458,6 @@ class _JahresMaler extends CustomPainter {
   bool shouldRepaint(_JahresMaler alt) =>
       alt.fortschritt != fortschritt ||
       alt.gewaehlt != gewaehlt ||
+      alt.erledigt != erledigt ||
       alt.tage != tage;
 }

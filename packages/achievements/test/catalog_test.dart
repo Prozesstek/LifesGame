@@ -166,6 +166,27 @@ void main() {
         expect(a.titleId, isNotNull, reason: a.id);
       }
 
+      // Jeder kennt sein Gebiet, drei je Gebiet — die App färbt danach
+      // (ADR-0090). Außerhalb der Gebiete hat keine eins.
+      final jeGebiet = <String, int>{};
+      for (final a in gebiete) {
+        final id = a.skillAreaId;
+        expect(id, isNotNull, reason: a.id);
+        jeGebiet[id!] = (jeGebiet[id] ?? 0) + 1;
+        // Die Messung und das Gebiet sagen dasselbe.
+        expect(a.requirement, startsWith(_gross(id)), reason: a.id);
+      }
+      expect(jeGebiet, <String, int>{
+        'koerper': 3,
+        'geist': 3,
+        'wissenschaft': 3,
+        'gesellschaft': 3,
+      });
+      for (final a in AchievementCatalog.all) {
+        if (a.area == AchievementArea.gebiete) continue;
+        expect(a.skillAreaId, isNull, reason: a.id);
+      }
+
       const fast = AchievementStats(skillKoerper: 24);
       const genau = AchievementStats(skillKoerper: 25);
       expect(AchievementCatalog.earnedTitleIdsBy(fast), contains('ruestig'));
@@ -303,3 +324,13 @@ void main() {
     });
   });
 }
+
+/// Wie ein Gebiet im Klartext heißt — nur für die Probe oben.
+String _gross(String id) =>
+    const <String, String>{
+      'koerper': 'Körper',
+      'geist': 'Geist',
+      'wissenschaft': 'Wissenschaft',
+      'gesellschaft': 'Gesellschaft',
+    }[id] ??
+    id;
