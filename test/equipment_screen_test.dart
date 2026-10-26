@@ -119,16 +119,6 @@ void main() {
   Finder kachelVon(String uid) =>
       find.byWidgetPredicate((w) => w is ExemplarKachel && w.copy.uid == uid);
 
-  Future<void> oeffne(WidgetTester tester, GearItem item) async {
-    await tester.scrollUntilVisible(
-      find.text(item.name).last,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text(item.name).last);
-    await tester.pumpAndSettle();
-  }
-
   group('Die sechs Plätze', () {
     testWidgets('alle sechs sind sichtbar, auch die leeren', (tester) async {
       useTallView(tester);
@@ -487,9 +477,8 @@ void main() {
         tester.element(find.byType(EquipmentScreen)),
       );
       expect(container.read(loadoutProvider).isLocked('test-b'), isTrue);
-      // Im Blatt steht das gesperrte Exemplar ohne „Verkaufen“, das
-      // angelegte daneben behält seins.
-      expect(find.widgetWithText(TextButton, 'Verkaufen'), findsOneWidget);
+      // Im Blatt steht nur das gesperrte Exemplar, und ohne „Verkaufen“.
+      expect(find.text('Verkaufen'), findsNothing);
 
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
@@ -596,18 +585,24 @@ void main() {
       );
     });
 
-    testWidgets('jedes Exemplar steht einzeln da und lässt sich anlegen', (
-      tester,
-    ) async {
+    testWidgets('nur das angetippte Exemplar steht da und lässt sich '
+        'anlegen', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitZweiExemplaren()));
 
-      await oeffne(tester, doppelt());
+      // Das erste liegt schon (gekauft wird angelegt), das zweite im
+      // Rucksack.
+      await tester.tap(kachelVon('test-b'));
+      await tester.pumpAndSettle();
 
-      expect(find.text('Deine 2 Exemplare'), findsOneWidget);
-      // Das erste liegt schon (gekauft wird angelegt), das zweite nicht.
-      expect(find.text('Angelegt'), findsOneWidget);
+      // Das angelegte steht nicht mit im Blatt (26.10.), die Zahl schon.
+      expect(find.text('Angelegt'), findsNothing);
       expect(find.text('Anlegen'), findsOneWidget);
+      expect(find.text('2 Mal im Besitz.'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('schloss-test-a')),
+        findsNothing,
+      );
 
       await tester.tap(find.text('Anlegen'));
       await tester.pumpAndSettle();
@@ -627,13 +622,15 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitZweiExemplaren()));
 
-      await oeffne(tester, doppelt());
-      await tester.tap(find.widgetWithText(TextButton, 'Verkaufen').last);
+      await tester.tap(kachelVon('test-b'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
       await tester.pumpAndSettle();
 
-      // Die Rückfrage steht, noch ist nichts weg.
+      // Die Rückfrage steht, noch ist nichts weg. Ihr „Verkaufen“ liegt
+      // über dem des Blatts.
       expect(find.text('${doppelt().name} verkaufen?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Verkaufen').last);
       await tester.pump();
       await tester.pump();
 
@@ -645,6 +642,26 @@ void main() {
           .ownedCopies
           .where((c) => c.itemId == doppelt().id);
       expect(uebrig, hasLength(1));
+
+      // Verkauft, ist das Blatt leer — es geht zu, sobald die Feier des
+      // ersten Verkaufs vorbei ist.
+      await tester.pumpAndSettle();
+      await feiernSchliessen(tester);
+      expect(find.byType(GearSheet), findsNothing);
+    });
+
+    testWidgets('der belegte Platz zeigt sein angelegtes Exemplar', (
+      tester,
+    ) async {
+      useTallView(tester);
+      await tester.pumpWidget(appMit(mitZweiExemplaren()));
+
+      await tester.tap(aufDenPlaetzen(doppelt().name).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Angelegt'), findsOneWidget);
+      expect(find.text('Ablegen'), findsOneWidget);
+      expect(find.text('Anlegen'), findsNothing);
     });
   });
 

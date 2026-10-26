@@ -139,9 +139,10 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
   /// Ein belegter Platz zeigt das Blatt seines Stücks. Ein leerer sagt,
   /// wie er sich füllt, statt ein Auswahlblatt zu öffnen.
   void _tippePlatz(GearSlot slot, Loadout loadout) {
-    final item = loadout.equippedCopyIn(slot)?.item;
+    final getragen = loadout.equippedCopyIn(slot);
+    final item = getragen?.item;
     if (item != null) {
-      showGearSheet(context, item);
+      showGearSheet(context, item, exemplar: getragen);
       return;
     }
     _sage(
@@ -410,7 +411,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                   ausgewaehlt: _waehlen ? auswahl.contains(copy.uid) : null,
                   onTap: _waehlen
                       ? () => _hake(copy, loadout)
-                      : () => showGearSheet(context, item),
+                      : () => showGearSheet(context, item, exemplar: copy),
                 ),
               ),
         ],

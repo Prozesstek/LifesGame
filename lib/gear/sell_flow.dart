@@ -23,11 +23,16 @@ import 'verkauf_auswahl.dart';
 /// Verkauft ein Exemplar. Gibt zurück, ob verkauft wurde. Zurück kommt
 /// ein Viertel des Preises, und der Wurf ist danach weg — deshalb die
 /// Rückfrage.
+///
+/// [danach] kommt nach einem Verkauf, **wenn auch die Feiern vorbei
+/// sind** — das Blatt eines Stücks schließt sich damit. Gleich nach dem
+/// Verkauf geschlossen, fände die Feier ihren Bildschirm nicht mehr.
 Future<bool> sellWithConfirm(
   BuildContext context,
   WidgetRef ref,
-  GearCopy copy,
-) async {
+  GearCopy copy, {
+  VoidCallback? danach,
+}) async {
   final item = copy.item;
   if (item == null) return false;
   final erloes = Loadout.refundFor(item);
@@ -37,6 +42,7 @@ Future<bool> sellWithConfirm(
     ref,
     titel: '${item.name} verkaufen?',
     text: 'Das bringt $erloes Gold. Dieser Wurf ist danach weg.',
+    danach: danach,
     verkaufe: () {
       final erhalten = ref.read(loadoutProvider.notifier).sell(copy.uid);
       return (
@@ -119,6 +125,7 @@ Future<bool> _nachRueckfrage(
   required String titel,
   required String text,
   required ({bool ok, String meldung}) Function() verkaufe,
+  VoidCallback? danach,
 }) async {
   final bestaetigt = await showDialog<bool>(
     context: context,
@@ -173,6 +180,7 @@ Future<bool> _nachRueckfrage(
         await showAchievementUnlocks(context, ref, before: vorherErrungen);
         if (!context.mounted) return;
         await showLevelUp(context, ref, before: vorherLevel);
+        if (context.mounted) danach?.call();
       }());
     });
   });
