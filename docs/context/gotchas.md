@@ -3,6 +3,29 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## `pump(dauer)` beendet eine Animation nicht
+
+Die große Flamme (`TagesFlammeFeier`) blendet nach einem Tipp in 220 ms
+aus und meldet sich dann ab. Der Test pumpte genau so lange:
+
+```dart
+await tester.pump();                    // der Ticker startet
+await tester.pump(TagesFlammeFeier.weg); // 220 ms später
+await tester.pump();
+expect(feier, findsNothing);             // steht noch da
+```
+
+Der Wert stand auf 1.0, fertig war die Animation trotzdem nicht.
+`AnimationController` hält eine Dauer erst für vorbei, wenn **mehr** Zeit
+vergangen ist (`timeInSeconds > _durationInSeconds`,
+`animation_controller.dart`). Ein Bild ohne weitere Zeit ändert daran
+nichts, also kam `AnimationStatus.completed` nie, und kein
+Status-Lauscher lief. Im Spiel fällt das nie auf — dort folgt ein Bild
+dem nächsten.
+
+**Regel:** Wer im Test auf das Ende einer Animation wartet, pumpt einen
+Hauch über ihre Dauer — oder `pumpAndSettle`.
+
 ## Eine Hülle, die wegfällt, baut das Kind neu — samt Zustand
 
 Ein Steckbrief der Tagesaufgaben ist nur dann ein Knopf, wenn es etwas

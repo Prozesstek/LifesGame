@@ -208,6 +208,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/habits_screen.dart` | oben die Leiste der Startseite, **„Heute“** darunter, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
 | `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **die Erfahrung fliegt zweimal**, zum Level und grün zum Gebiet ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)); **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
 | `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/habits/tages_flamme.dart` | **die große Flamme in der Mitte**: ob ein Häkchen das erste des Tages ist, die Tageskette vorher und nachher, die Woche Mo bis So (brennt, Eis, leer, heute, kommt) — reine Rechnung, erzeugt keine Zahl | Flutter |
+| `lib/habits/widgets/tages_flamme_feier.dart` | zeigt sie: grau glimmen, zünden, die Zahl rollt einen Tag höher, der Kreis von heute fängt Feuer; **endet von selbst** nach 2,6 s, ein Tipp blendet aus und hakt nichts ab; Errungenschaft und Aufstieg warten auf sie | Flutter |
 | `lib/habits/widgets/haekchen_kreis.dart` | der Kreis, der beim Abhaken **aufspringt** — Blitz, Ring, acht Striche; nur beim Setzen; **eine Stelle** für Kachel und „Heute“ | Flutter |
 | `lib/habits/widgets/habit_countdown.dart` | zeigt den Timer und tickt, solange er läuft — **eine Stelle** für Blatt, Kachel und „Heute“ (`HabitClock`) | Flutter |
 | `lib/habits/widgets/habit_timer_sheet.dart` | das Blatt mit dem Ring: Start, Pause, „schon erledigt“ — meldet nur, **hakt nicht ab** | Flutter |
@@ -255,7 +257,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/item_icons.py` | **zeichnet** die zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre sechs Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek) | Python |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
-| `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme — mit den Helfern aus `kampf_klaenge.py` | Python |
+| `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme, die Glocken, wenn die große Flamme einen Tag höher tickt (`KetteSteigt`) — mit den Helfern aus `kampf_klaenge.py` | Python |
 | `tool/lern_klaenge.py` | **rechnet** den Klang einer **falschen Antwort** — zwei weiche Schläge abwärts, die nicht strafen — und das **Rascheln beim Umblättern** | Python |
 | `lib/dev/dev_screen.dart` | Entwicklermodus, **nur im Debug-Build** | Flutter |
 | `lib/dev/debug_grants.dart` | was der Dev-Modus verschenkt hat — Erfahrung, Gold, Punkte, Fähigkeiten **und Kampfwerte** (im Kampfmassstab, als eigener Summand in `heroPowerProvider`) | Flutter |
@@ -263,7 +265,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
 | `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche, `HolzGruppe` um die Kreise der Startseite | Flutter |
-| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`) | Flutter |
+| `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`); **was in der Mitte steht** (`zeigeInDerMitte`), liegt über den Zahlen und unter den Münzen | Flutter |
 | `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken, grüne Funken zum Gebiet** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
 | `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
@@ -334,7 +336,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1032 Tests
+flutter test             # 1039 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

@@ -21,6 +21,7 @@ Braucht nur die Standardbibliothek und die Helfer aus
 """
 
 import math
+import random
 
 from kampf_klaenge import ZIEL, _Rauschen, _Ton, _gleiten, _huelle, _klang, schreibe
 
@@ -107,10 +108,42 @@ def kette():
     return _klang(dauer, stimme, 0.32)
 
 
+def kette_steigt():
+    """Die große Flamme in der Mitte: Die Zahl der Tageskette springt
+    einen Tag höher. Vier Glocken die Leiter hinauf, die letzte klingt
+    nach, darüber ein Knistern wie Funken. Heller als ein Häkchen,
+    kürzer als der Akkord eines geschafften Tages."""
+    schritt = 0.06
+    lauf = [
+        _Glocke(h, abklingen=a)
+        for h, a in ((784.0, 0.12), (1046.5, 0.12), (1318.5, 0.14), (1568.0, 0.55))
+    ]
+    knistern = _Rauschen(13, 0.6)
+    # Neun Knackser, immer weiter auseinander — gesät, nicht gewürfelt.
+    zufall = random.Random(29)
+    knackser = [
+        0.04 + 0.06 * i * (1 + 0.15 * i) + zufall.uniform(0, 0.03) for i in range(9)
+    ]
+    dauer = schritt * 3 + 0.8
+
+    def stimme(t, anteil):
+        summe = sum(
+            (0.5 if i < 3 else 0.85) * g.wert(t - i * schritt)
+            for i, g in enumerate(lauf)
+        )
+        # Jeder Knackser ist ein Hauch Rauschen, nach ein paar
+        # Millisekunden vorbei.
+        knack = sum(math.exp(-(t - k) * 140) for k in knackser if t >= k)
+        return summe + 0.4 * knistern.naechstes() * knack
+
+    return _klang(dauer, stimme, 0.45)
+
+
 KLAENGE = {
     **{f"Ton{stufe}": (lambda s=stufe: ton(s)) for stufe in range(1, 6)},
     "TagGeschafft": tag_geschafft,
     "Kette": kette,
+    "KetteSteigt": kette_steigt,
 }
 
 

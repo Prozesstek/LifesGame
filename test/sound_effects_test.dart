@@ -85,7 +85,8 @@ void main() {
       expect(mitschrift.gespielt, contains(SoundEffect.kette));
 
       // Das erste Häkchen überhaupt ist „Erster Schritt" — die Feier
-      // kommt einen Bildaufbau später und bringt ihren eigenen Klang.
+      // kommt, wenn die große Flamme aus ist (`schonErledigt` wartet sie
+      // ab), und bringt ihren eigenen Klang.
       await tester.pump();
       expect(mitschrift.gespielt, contains(SoundEffect.errungenschaft));
 
