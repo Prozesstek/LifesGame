@@ -14,7 +14,9 @@ import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../progression/level_provider.dart';
 import '../save/widgets/save_transfer_card.dart';
+import '../ui/bereich_zeichen.dart';
 import '../ui/palette.dart';
+import '../ui/pixel_art.dart';
 import 'abilities_screen.dart';
 import 'identity_controller.dart';
 import 'widgets/consistency_card.dart';
@@ -121,18 +123,21 @@ class CharacterScreen extends ConsumerWidget {
                 Row(
                   children: <Widget>[
                     _Weg(
+                      symbol: BereichZeichen.ausruestung,
                       icon: Icons.shield_outlined,
                       label: 'Zur Ausrüstung',
                       ziel: () => const EquipmentScreen(),
                     ),
                     const SizedBox(width: 10),
                     _Weg(
+                      symbol: BereichZeichen.laden,
                       icon: Icons.storefront_outlined,
                       label: 'Zum Laden',
                       ziel: () => const ShopScreen(),
                     ),
                     const SizedBox(width: 10),
                     _Weg(
+                      symbol: BereichZeichen.faehigkeiten,
                       icon: Icons.auto_awesome,
                       label: 'Zu den Fähigkeiten',
                       ziel: () => const AbilitiesScreen(),
@@ -327,8 +332,17 @@ class _Herkunft extends StatelessWidget {
 
 /// Ein Weg zu einem anderen Bereich — ein Zeichen auf einer Planke.
 class _Weg extends StatelessWidget {
-  const _Weg({required this.icon, required this.label, required this.ziel});
+  const _Weg({
+    required this.symbol,
+    required this.icon,
+    required this.label,
+    required this.ziel,
+  });
 
+  /// Dasselbe Zeichen wie der Kreis auf der Startseite (`BereichZeichen`).
+  final String symbol;
+
+  /// Nur, wenn die Zeichnung fehlt.
   final IconData icon;
 
   /// Nur für den Vorleser.
@@ -342,7 +356,10 @@ class _Weg extends StatelessWidget {
         onPressed: () => Navigator.of(
           context,
         ).push(MaterialPageRoute<void>(builder: (_) => ziel())),
-        child: Icon(icon, semanticLabel: label),
+        child: Semantics(
+          label: label,
+          child: PixelArt(assetPath: symbol, side: 30, fallback: Icon(icon)),
+        ),
       ),
     );
   }

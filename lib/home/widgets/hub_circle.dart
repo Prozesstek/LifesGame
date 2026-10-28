@@ -23,9 +23,9 @@ import '../../ui/halten_und_ziehen.dart';
 /// beschrieben.
 ///
 /// **Die Fläche ist seit den ersten Zeichnungen gemalt und nicht
-/// gerechnet.** `assets/UI/ButtonBG.png` liegt unter dem Zeichen; der
-/// Charakterkreis hat mit `CharacterButton.png` eine eigene Fassung, in
-/// der die Figur schon drin steckt. Fehlt eine Datei, bleibt der
+/// gerechnet.** `assets/UI/ButtonBG.png` liegt unter dem Zeichen, und
+/// seit dem 28.10.2026 ist auch das Zeichen gezeichnet ([symbol]). Fehlt
+/// eine Datei, bleibt der
 /// gezeichnete Kreis von vorher — der Startbildschirm sieht dann
 /// schlichter aus und nicht kaputt.
 class HubCircle extends StatelessWidget {
@@ -81,9 +81,8 @@ class HubCircle extends StatelessWidget {
 
   /// Die gezeichnete Fläche, oder `null` für die schlichte.
   ///
-  /// **Trägt sie das Zeichen schon selbst**, wie `CharacterButton.png`,
-  /// dann setzt [imageCarriesIcon] das [icon] aus. Zwei Figuren
-  /// übereinander wären eine zu viel.
+  /// **Trägt sie das Zeichen schon selbst** ([HubCircleImage.carriesIcon]),
+  /// fällt das [icon] aus. Zwei Figuren übereinander wären eine zu viel.
   final HubCircleImage? image;
 
   /// Der Name des Bereichs — steht unter dem Kreis.
@@ -416,10 +415,11 @@ class _Marke extends StatelessWidget {
 /// oder einen leeren Kreis. Als ein Wert kann das nicht auseinanderlaufen.
 enum HubCircleImage {
   /// Die leere Fläche. Das Zeichen des Bereichs liegt darauf.
-  plain('assets/UI/ButtonBG.png', carriesIcon: false),
+  plain('assets/UI/ButtonBG.png', carriesIcon: false);
 
-  /// Die Charakter-Fassung — die Figur ist schon eingezeichnet.
-  character('assets/UI/CharacterButton.png', carriesIcon: true);
+  // Bis zum 28.10.2026 gab es die Charakter-Fassung
+  // (`assets/UI/CharacterButton.png`) mit eingezeichneter Figur. Seitdem
+  // trägt auch der Charakter ein Zeichen, den Helm (`HomeScreen`).
 
   const HubCircleImage(this.assetPath, {required this.carriesIcon});
 

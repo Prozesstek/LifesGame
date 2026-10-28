@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../action/staerker_werden.dart';
-import '../../home/home_screen.dart';
+import '../../ui/bereich_zeichen.dart';
 import '../../ui/druck.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
@@ -344,26 +344,24 @@ class _TippKnopf extends StatelessWidget {
     );
     return switch (tipp.weg) {
       StaerkerWeg.faehigkeiten => bild(
-        HomeScreen.abilitySymbol,
+        BereichZeichen.faehigkeiten,
         Icons.auto_awesome,
       ),
       StaerkerWeg.ausruestung => bild(
-        HomeScreen.gearSymbol,
+        BereichZeichen.ausruestung,
         Icons.shield_outlined,
       ),
       StaerkerWeg.baum => bild(
-        HomeScreen.theorySymbol,
+        BereichZeichen.theorie,
         Icons.account_tree_outlined,
       ),
-      StaerkerWeg.gewohnheiten => const Icon(
+      StaerkerWeg.gewohnheiten => bild(
+        BereichZeichen.gewohnheiten,
         Icons.check_circle_outline,
-        size: groesse,
-        color: Palette.success,
       ),
-      StaerkerWeg.laden => const Icon(
+      StaerkerWeg.laden => bild(
+        BereichZeichen.laden,
         Icons.storefront_outlined,
-        size: groesse,
-        color: Palette.gold,
       ),
     };
   }

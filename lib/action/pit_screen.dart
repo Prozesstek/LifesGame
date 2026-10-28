@@ -22,8 +22,8 @@ import '../gear/set_effects.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_screen.dart';
 import '../home/erster_start_provider.dart';
-import '../home/home_screen.dart' show HomeScreen;
 import '../theory/skill_tree_screen.dart';
+import '../ui/bereich_zeichen.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
@@ -444,7 +444,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
                             side: const BorderSide(color: Palette.goldOnDark),
                           ),
                           icon: const PixelArt(
-                            assetPath: HomeScreen.theorySymbol,
+                            assetPath: BereichZeichen.theorie,
                             side: 22,
                             fallback: Icon(Icons.menu_book_outlined, size: 20),
                           ),

@@ -358,7 +358,7 @@ void main() {
       // Als Zeichen, nicht als Wort.
       for (final stat in HabitStat.values) {
         expect(
-          find.byIcon(StatIcons.of(stat)),
+          find.byWidgetPredicate((w) => w is StatIcon && w.stat == stat),
           findsWidgets,
           reason: stat.label,
         );
