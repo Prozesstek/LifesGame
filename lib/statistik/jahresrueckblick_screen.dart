@@ -349,11 +349,7 @@ class _Gewohnheit extends StatelessWidget {
           StatZeichen(icon: icon, erklaerung: erklaerung, farbe: Palette.gold),
           const SizedBox(width: 8),
           if (h != null) ...<Widget>[
-            Icon(
-              StatIcons.of(h.stat),
-              size: 16,
-              color: StatIcons.colorOf(h.stat),
-            ),
+            StatIcon(h.stat, size: 16),
             const SizedBox(width: 6),
           ],
           Expanded(

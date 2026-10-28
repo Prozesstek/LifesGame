@@ -481,13 +481,7 @@ class GewohnheitRing extends StatelessWidget {
                         },
                         backgroundColor: StatFarbe.leer,
                       ),
-                      Center(
-                        child: Icon(
-                          StatIcons.of(habit.stat),
-                          size: 16,
-                          color: StatIcons.colorOf(habit.stat),
-                        ),
-                      ),
+                      Center(child: StatIcon(habit.stat, size: 16)),
                     ],
                   ),
                 ),

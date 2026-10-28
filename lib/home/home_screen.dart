@@ -14,6 +14,7 @@ import '../progression/level_provider.dart';
 import '../statistik/statistik_screen.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
+import '../ui/bereich_zeichen.dart';
 import '../ui/palette.dart';
 import 'erster_start.dart';
 import 'erster_start_provider.dart';
@@ -55,22 +56,6 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const double _maxWidth = 560;
-
-  /// Das Buch auf dem Theorie-Kreis — Frederiks Zeichnung, 64 × 64.
-  static const String theorySymbol = 'assets/UI/Buch.png';
-
-  /// Der Stern auf dem Fähigkeiten-Kreis (ADR-0049).
-  ///
-  /// **Eine vorhandene Zeichnung statt eines Systemzeichens**, wie das
-  /// Buch auf der Theorie. Sternenfall ist die einzige legendäre
-  /// Fähigkeit und die einzige, deren Bild mittig und ringsum gleich ist
-  /// — auf einem runden Knopf sitzt das, ohne zu kippen.
-  static const String abilitySymbol = 'assets/Faehigkeiten/Sternenfall.png';
-
-  /// Der Harnisch auf dem Ausrüstungs-Kreis (ADR-0057), aus demselben
-  /// Grund wie der Stern: eine vorhandene Zeichnung, mittig und
-  /// symmetrisch, die auf den ersten Blick „Ausrüstung“ sagt.
-  static const String gearSymbol = 'assets/Ruestung/Plattenharnisch.png';
 
   /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
@@ -155,6 +140,7 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.check_circle_outline,
                         label: 'Gewohnheiten',
                         image: HubCircleImage.plain,
+                        symbol: BereichZeichen.gewohnheiten,
                         progress: heute,
                         onTap: () => _open(context, const HabitsScreen()),
                       ),
@@ -164,7 +150,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.account_tree_outlined,
                           label: 'Theorie',
                           image: HubCircleImage.plain,
-                          symbol: theorySymbol,
+                          symbol: BereichZeichen.theorie,
                           leuchtet: leuchtet,
                           onTap: () => _open(context, const SkillTreeScreen()),
                         ),
@@ -178,6 +164,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.sports_martial_arts,
                           label: 'Kampf',
                           image: HubCircleImage.plain,
+                          symbol: BereichZeichen.kampf,
                           leuchtet: leuchtet,
                           onTap: () => _open(context, const LadderScreen()),
                         ),
@@ -190,6 +177,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.insights,
                           label: 'Statistik',
                           image: HubCircleImage.plain,
+                          symbol: BereichZeichen.statistik,
                           onTap: () => _open(context, const StatistikScreen()),
                         ),
                       ),
@@ -298,6 +286,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.storefront_outlined,
                           label: 'Laden',
                           image: HubCircleImage.plain,
+                          symbol: BereichZeichen.laden,
                           size: bottomCircleSize,
                           onTap: () => _open(context, const ShopScreen()),
                         ),
@@ -309,7 +298,7 @@ class HomeScreen extends ConsumerWidget {
                           label: 'Fähigkeiten',
                           image: HubCircleImage.plain,
                           size: bottomCircleSize,
-                          symbol: abilitySymbol,
+                          symbol: BereichZeichen.faehigkeiten,
                           leuchtet: leuchtet,
                           onTap: () => _open(context, const AbilitiesScreen()),
                         ),
@@ -321,7 +310,7 @@ class HomeScreen extends ConsumerWidget {
                           label: 'Ausrüstung',
                           image: HubCircleImage.plain,
                           size: bottomCircleSize,
-                          symbol: gearSymbol,
+                          symbol: BereichZeichen.ausruestung,
                           onTap: () => _open(context, const EquipmentScreen()),
                         ),
                       ),
@@ -340,9 +329,8 @@ class HomeScreen extends ConsumerWidget {
                               icon: Icons.person_outline,
                               label: 'Charakter',
                               size: bottomCircleSize,
-                              // Die einzige Flaeche, die ihr Zeichen
-                              // selbst mitbringt.
-                              image: HubCircleImage.character,
+                              image: HubCircleImage.plain,
+                              symbol: BereichZeichen.charakter,
                               onTap: () =>
                                   _open(context, const CharacterScreen()),
                             ),

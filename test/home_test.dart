@@ -11,6 +11,7 @@ import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/ui/bereich_zeichen.dart';
 import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/home/widgets/status_leiste.dart';
 import 'package:lifes_game/ui/level_abzeichen.dart';
@@ -266,26 +267,26 @@ void main() {
       expect(find.byType(AbilitiesScreen), findsOneWidget);
     });
 
-    testWidgets('der Kreis trägt den Stern, und er ist abgelegt', (
+    testWidgets('der Kreis trägt die Rune, und sie ist abgelegt', (
       tester,
     ) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      final stern = find.byWidgetPredicate(
-        (w) => w is PixelArt && w.assetPath == HomeScreen.abilitySymbol,
+      final rune = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == BereichZeichen.faehigkeiten,
       );
       expect(
         tester
             .widget<HubCircle>(
-              find.ancestor(of: stern, matching: find.byType(HubCircle)),
+              find.ancestor(of: rune, matching: find.byType(HubCircle)),
             )
             .label,
         'Fähigkeiten',
       );
 
-      final daten = await rootBundle.load(HomeScreen.abilitySymbol);
+      final daten = await rootBundle.load(BereichZeichen.faehigkeiten);
       expect(daten.lengthInBytes, greaterThan(100));
     });
 
@@ -307,26 +308,26 @@ void main() {
       expect(find.byType(EquipmentScreen), findsOneWidget);
     });
 
-    testWidgets('der Kreis trägt den Harnisch, und er ist abgelegt', (
+    testWidgets('der Kreis trägt den Rucksack, und er ist abgelegt', (
       tester,
     ) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      final harnisch = find.byWidgetPredicate(
-        (w) => w is PixelArt && w.assetPath == HomeScreen.gearSymbol,
+      final rucksack = find.byWidgetPredicate(
+        (w) => w is PixelArt && w.assetPath == BereichZeichen.ausruestung,
       );
       expect(
         tester
             .widget<HubCircle>(
-              find.ancestor(of: harnisch, matching: find.byType(HubCircle)),
+              find.ancestor(of: rucksack, matching: find.byType(HubCircle)),
             )
             .label,
         'Ausrüstung',
       );
 
-      final daten = await rootBundle.load(HomeScreen.gearSymbol);
+      final daten = await rootBundle.load(BereichZeichen.ausruestung);
       expect(daten.lengthInBytes, greaterThan(100));
     });
 
@@ -406,7 +407,7 @@ void main() {
       await tester.pump();
 
       final buch = find.byWidgetPredicate(
-        (w) => w is PixelArt && w.assetPath == HomeScreen.theorySymbol,
+        (w) => w is PixelArt && w.assetPath == BereichZeichen.theorie,
       );
       expect(
         find.ancestor(of: buch, matching: find.byType(HubCircle)),
@@ -421,7 +422,7 @@ void main() {
         'Theorie',
       );
 
-      final daten = await rootBundle.load(HomeScreen.theorySymbol);
+      final daten = await rootBundle.load(BereichZeichen.theorie);
       expect(daten.lengthInBytes, greaterThan(1000));
     });
 
@@ -431,16 +432,42 @@ void main() {
       expect(daten.lengthInBytes, greaterThan(1000));
     });
 
-    testWidgets('nur der Charakterkreis bringt sein Zeichen selbst mit', (
+    testWidgets('keine Fläche bringt ihr Zeichen selbst mit', (tester) async {
+      // Waere das bei `plain` gesetzt, stuenden alle Kreise leer da — die
+      // Flaeche allein sagt nicht, wohin sie fuehrt. Seit dem 28.10.
+      // traegt auch der Charakter ein eigenes Zeichen, den Helm.
+      expect(HubCircleImage.values.where((bild) => bild.carriesIcon), isEmpty);
+    });
+
+    testWidgets('jeder Kreis trägt ein gezeichnetes Zeichen, und es liegt da', (
       tester,
     ) async {
-      // Waere das bei `plain` ebenfalls gesetzt, stuenden vier Kreise
-      // leer da — die Flaeche allein sagt nicht, wohin sie fuehrt.
-      final selbsttragend = HubCircleImage.values
-          .where((bild) => bild.carriesIcon)
-          .toList();
+      // 28.10.2026: was ein Spieler aus RPGs kennt, im Pixelstil statt
+      // als Systemzeichen (`tool/kreis_zeichen.py`).
+      useTallView(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
+      await tester.pump();
 
-      expect(selbsttragend, <HubCircleImage>[HubCircleImage.character]);
+      final kreise = tester.widgetList<HubCircle>(find.byType(HubCircle));
+      expect(kreise, hasLength(8));
+      for (final kreis in kreise) {
+        final pfad = kreis.symbol;
+        expect(pfad, isNotNull, reason: kreis.label);
+        final daten = await rootBundle.load(pfad!);
+        expect(daten.lengthInBytes, greaterThan(500), reason: kreis.label);
+      }
+      expect(
+        kreise.map((k) => k.symbol).toSet(),
+        hasLength(8),
+        reason: 'keine zwei Kreise mit demselben Zeichen',
+      );
     });
 
     testWidgets('der Charakter startet auf Level 1 ohne Gold', (tester) async {

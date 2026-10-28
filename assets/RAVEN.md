@@ -109,6 +109,12 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Items/Truhe.png` (Tagestruhe, ADR-0044) | fc6 |
 | `Items/Schluessel.png` (Schlüssel zur Beute, ADR-0048) | fc77 |
 
+**Die Zeichen der Kreise** (`UI/Kreis_*.png`, 28.10.2026) legt
+`tool/kreis_zeichen.py` an: Gewohnheiten fc305 mit gezeichnetem Haken,
+Kampf fc721, Laden fc158 mit der Münze fc131, Fähigkeiten fc326 mit
+blau umgefärbter Kerbe, Charakter fc1911. Rucksack (Ausrüstung) und
+Balken (Statistik) sind gezeichnet — Raven hat keinen Rucksack.
+
 **Nicht aus dem Paket** sind die zwölf Bilder zu AktivesBretts
 Fähigkeiten (ADR-0074): Zinseszins, Schattenschritt, Kampfrausch,
 Kriegsschrei, Spiegelbild, Parade, Ruhepuls, Kettenblitz, Rammbock,

@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1039, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1040, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,53 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 28.10.2026, danach: Zeichen, die Spieler aus anderen Spielen kennen
+
+Frederik: „UI: passendere Icons wählen (vielleicht gucken was der
+Spieler aus anderen Spielen gelernt hat)“. Claude schlug eine Tabelle
+vor, Frederik: „ja leg los find ich alles gut“.
+
+| Kreis | vorher | jetzt |
+|---|---|---|
+| Gewohnheiten | Haken im Kreis (Systemzeichen) | **Schriftrolle mit Haken** — die Quest |
+| Kampf | Karate-Figur | **gekreuzte Schwerter**, wie auf „Hinab“ |
+| Statistik | Liniendiagramm | **drei Balken, die steigen** |
+| Laden | Ladenfront mit Markise | **Münzbeutel** |
+| Fähigkeiten | Sternenfall | **Runenstein, der blau leuchtet** |
+| Ausrüstung | Plattenharnisch | **Rucksack** — das Inventar |
+| Charakter | Profil-Männchen (`CharacterButton.png`) | **Helm** — der Charakterbogen |
+| Theorie | Frederiks Buch | bleibt |
+
+Alles im Pixelstil statt als Systemzeichen: fünf aus Raven, Rucksack
+und Balken gezeichnet (`tool/kreis_zeichen.py`, Raven hat keinen
+Rucksack). **Angriff ist jetzt ein Schwert statt einer Hantel** —
+gezeichnet, ein Schwert gibt es unter den Systemzeichen nicht
+(`StatIcon`).
+
+**Ein Bereich, ein Zeichen**: Dieselben Bilder stehen jetzt auch auf den
+Tipps nach einer Niederlage und auf den drei Planken im Charakter
+(`lib/ui/bereich_zeichen.dart`, eine Tabelle). Bis dahin standen dort
+Schild, Ladenfront und Glitzer.
+
+**Eine Korrektur an Claudes Vorschlag:** Er nannte Schild und Glitzer
+auf der Startseite doppelt belegt. Dort lagen aber schon Harnisch und
+Sternenfall — die Systemzeichen waren nur der Ersatz. Doppelt waren sie
+auf den Planken im Charakter und bei den Tipps.
+
+Neu: sieben Bilder `assets/UI/Kreis_*.png`, `lib/ui/bereich_zeichen.dart`,
+`tool/kreis_zeichen.py`, ein Test, dass jeder Kreis ein eigenes
+gezeichnetes Zeichen trägt. App 1040 (vorher 1039). Startseite und
+Charakter in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+`CharacterButton.png` liegt noch im Repo, gebraucht wird es nicht mehr.
+
+### Offen
+
+- Der vorgeschlagene Test: drei Tester sehen die Kreise **ohne Namen**
+  und sagen, was dahinter ist.
+- Der Rucksack ist gezeichnet und wirkt neben den Raven-Bildern
+  schlichter.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 28.10.2026: die Flamme tickt groß in der Mitte
 
