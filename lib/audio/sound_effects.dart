@@ -32,6 +32,11 @@ enum SoundEffect {
   /// über dem Ton des Häkchens, deshalb ein Fauchen und kein Ton.
   kette('Sound/Kette.wav'),
 
+  /// Die große Flamme in der Mitte: Die Zahl der Tageskette springt einen
+  /// Tag höher (`TagesFlammeFeier`). Vier Glocken hinauf, darüber ein
+  /// Knistern.
+  ketteSteigt('Sound/KetteSteigt.wav'),
+
   /// Ein Häkchen hat einen ganzen Charakterpunkt gebracht. Seltener als
   /// ein Häkchen, deshalb ein grösserer Klang. **Vorerst dieselbe Datei
   /// wie die Lektion** — es gibt keine weitere; tauschen ist diese Zeile.

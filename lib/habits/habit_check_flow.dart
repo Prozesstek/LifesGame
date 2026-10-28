@@ -33,8 +33,10 @@ import '../ui/palette.dart';
 import 'daily_form_text.dart';
 import 'haekchen_moment.dart';
 import 'habits_controller.dart';
+import 'tages_flamme.dart';
 import 'widgets/daily_chest_card.dart';
 import 'widgets/habit_timer_sheet.dart';
+import 'widgets/tages_flamme_feier.dart';
 
 /// Hakt [habit] ab oder nimmt das Häkchen zurück.
 void toggleHabit(BuildContext context, WidgetRef ref, Habit habit) {
@@ -144,10 +146,27 @@ void _mitFeier(
   // Die Flamme der Tageskette zündet (`TodayCard`) — ein Fauchen über
   // dem Ton, nicht statt seiner.
   if (moment.ersterDesTages) klang.play(SoundEffect.kette);
+  // **Und groß in der Mitte** (28.10.): Die Zahl tickt einen Tag höher.
+  final flamme = switch (TagesFlamme.aus(
+    vorher: trackerVorher,
+    nachher: ref.read(habitTrackerProvider),
+    heute: ref.read(todayProvider),
+  )) {
+    final TagesFlamme f => _zeigeFlamme(context, f, klang),
+    null => null,
+  };
   // **Erst landet, was fliegt, dann wird gefeiert** — wie in der Grube,
   // wo das Ergebnis wartet, bis der Brunnen eingesammelt ist. Sonst
-  // deckte der Aufstieg den Balken zu, der ihn gerade füllt.
-  final feiern = _celebrate(context, ref, vorher, vorherErrungen, vorherLevel);
+  // deckte der Aufstieg den Balken zu, der ihn gerade füllt. Und erst,
+  // wenn die Flamme ausgeblendet ist.
+  final feiern = _celebrate(
+    context,
+    ref,
+    vorher,
+    vorherErrungen,
+    vorherLevel,
+    davor: flamme,
+  );
   // Der Balken unter dem Level weiss so, welches Gebiet er zeigt.
   if (area != null) ref.read(zuletztGebietProvider.notifier).setze(area);
   if (!_fliegen(context, result, klang, gebiet: area, danach: feiern)) {
@@ -202,6 +221,26 @@ bool _fliegen(
         wennGelandet: danach,
       ) ??
       false;
+}
+
+/// **Die große Flamme in der Mitte** (`TagesFlammeFeier`): Wenn die Zahl
+/// umspringt, klingt es und stößt kräftig. Endet, wenn sie ausgeblendet
+/// ist — oder sofort, wo es keinen Host gibt.
+Future<void>? _zeigeFlamme(
+  BuildContext context,
+  TagesFlamme flamme,
+  SoundPlayer klang,
+) {
+  return AufstiegHost.maybeOf(context)?.zeigeInDerMitte(
+    (fertig) => TagesFlammeFeier(
+      flamme: flamme,
+      onFertig: fertig,
+      onZahl: () {
+        klang.play(SoundEffect.ketteSteigt);
+        unawaited(HapticFeedback.heavyImpact());
+      },
+    ),
+  );
 }
 
 /// Holt eine erledigte Tagesaufgabe ab (ADR-0055): Klang, Stoß, und
@@ -274,17 +313,21 @@ void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
 ///
 /// Gibt die Feier zurück, statt sie zu starten: Wann sie kommt, sagt der
 /// Aufrufer — sobald die Münzen gelandet sind, sonst einen Bildaufbau
-/// später.
+/// später. Steht [davor] noch, wartet sie darauf: Ein Dialog über der
+/// großen Flamme deckte ihren Moment zu.
 VoidCallback _celebrate(
   BuildContext context,
   WidgetRef ref,
   List<Ability> vorher,
   Set<String> vorherErrungen,
-  int vorherLevel,
-) {
+  int vorherLevel, {
+  Future<void>? davor,
+}) {
   return () {
     if (!context.mounted) return;
     unawaited(() async {
+      if (davor != null) await davor;
+      if (!context.mounted) return;
       await showAchievementUnlocks(context, ref, before: vorherErrungen);
       if (!context.mounted) return;
       await showLevelUp(context, ref, before: vorherLevel);

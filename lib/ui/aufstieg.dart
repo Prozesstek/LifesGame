@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -39,6 +41,9 @@ class AufstiegZeile {
 /// wenn der Tag geschafft ist ([konfetti]). Beides liegt hier, weil
 /// beides vom Finger ausgeht — und weil ein Host das Bild über allem
 /// anderen hat.
+///
+/// **Und was in der Mitte steht** (28.10.): die große Flamme des ersten
+/// Häkchens am Tag ([zeigeInDerMitte]).
 ///
 /// Jede Animation endet von selbst; ein Test mit `pumpAndSettle` wartet
 /// sie einfach ab.
@@ -82,6 +87,10 @@ class AufstiegHostState extends State<AufstiegHost>
       };
   final Map<FlugZiel, double> _letzterKlang = <FlugZiel, double>{};
   void Function(FlugZiel ziel)? _beiAnkunft;
+
+  // --- Was in der Mitte steht ---
+
+  final List<_Auftritt> _auftritte = <_Auftritt>[];
 
   /// Was geschehen soll, wenn ein Wurf gelandet ist, und wann — in der
   /// Zeit des Hosts ([_zeit]), nicht der Uhr: Läuft der Host nicht,
@@ -171,6 +180,26 @@ class AufstiegHostState extends State<AufstiegHost>
     _laufe();
   }
 
+  /// **Etwas über dem ganzen Bildschirm, bis es fertig ist** — die große
+  /// Flamme der Tageskette (`TagesFlammeFeier`). Münzen, Konfetti und
+  /// aufsteigende Zahlen fliegen darüber.
+  ///
+  /// [bauen] bekommt, was es ruft, wenn es fertig ist; die Zukunft endet
+  /// dann — oder wenn der Host vorher verschwindet. Wer danach feiern
+  /// will, wartet auf sie, sonst läge ein Dialog über der Flamme.
+  Future<void> zeigeInDerMitte(Widget Function(VoidCallback fertig) bauen) {
+    final auftritt = _Auftritt(id: _naechste++);
+    void fertig() {
+      if (auftritt.ende.isCompleted) return;
+      auftritt.ende.complete();
+      if (mounted) setState(() => _auftritte.remove(auftritt));
+    }
+
+    auftritt.kind = bauen(fertig);
+    setState(() => _auftritte.add(auftritt));
+    return auftritt.ende.future;
+  }
+
   Offset? _mitteVon(FlugZiel ziel, RenderBox host) {
     final ort = _ziele[ziel]?.currentContext?.findRenderObject();
     if (ort is! RenderBox || !ort.attached || !ort.hasSize) return null;
@@ -229,6 +258,10 @@ class AufstiegHostState extends State<AufstiegHost>
 
   @override
   void dispose() {
+    // Wer auf einen Auftritt wartet, wartet nicht ewig.
+    for (final auftritt in _auftritte) {
+      if (!auftritt.ende.isCompleted) auftritt.ende.complete();
+    }
     _uhrOderNichts?.dispose();
     _bild.dispose();
     for (final notifier in _unterwegs.values) {
@@ -262,14 +295,6 @@ class AufstiegHostState extends State<AufstiegHost>
       child: Stack(
         children: <Widget>[
           widget.child,
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: KonfettiMaler(_konfetti, repaint: _bild),
-                foregroundPainter: BeuteFlugMaler(_flug, repaint: _bild),
-              ),
-            ),
-          ),
           for (final stoss in _stoesse)
             Positioned(
               key: ValueKey<int>(stoss.id),
@@ -280,10 +305,35 @@ class AufstiegHostState extends State<AufstiegHost>
                 child: _Steigen(stoss: stoss, onEnde: () => _fertig(stoss.id)),
               ),
             ),
+          // Die Zahlen steigen **unter** dem, was in der Mitte steht: Sonst
+          // lägen sie auf der Zahl der großen Flamme — „Heute“ liegt mitten
+          // auf der Startseite. Münzen und Konfetti fliegen darüber.
+          for (final auftritt in _auftritte)
+            Positioned.fill(
+              key: ValueKey<int>(auftritt.id),
+              child: auftritt.kind,
+            ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: KonfettiMaler(_konfetti, repaint: _bild),
+                foregroundPainter: BeuteFlugMaler(_flug, repaint: _bild),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+/// Was gerade in der Mitte steht ([AufstiegHostState.zeigeInDerMitte]).
+class _Auftritt {
+  _Auftritt({required this.id});
+
+  final int id;
+  final Completer<void> ende = Completer<void>();
+  Widget kind = const SizedBox.shrink();
 }
 
 class _Stoss {
