@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
+import '../../ui/bereich_zeichen.dart';
 import '../../ui/pixel_art.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
@@ -60,14 +61,29 @@ class HubCircle extends StatelessWidget {
   /// damit der kleine Kreis aussieht wie der grosse.
   final double size;
 
-  double get _scale => size / diameter;
-
   /// Eine **gezeichnete** Figur auf der Knopffläche statt des [icon] —
   /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
   final String? symbol;
 
-  /// Kantenlänge einer gezeichneten Figur auf der Fläche.
-  static const double symbolSide = 46;
+  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt —
+  /// 46 von 72 Punkten, wie seit dem Buch.
+  static const double symbolAnteil = 46 / 72;
+
+  /// Wie weit eine Figur von der Mitte reichen darf, in halben
+  /// Kreisbreiten. Die Pergamentfläche von `ButtonBG.png` endet bei
+  /// 0,875; der Rest ist Luft bis zum Rand.
+  static const double symbolInnen = 0.78;
+
+  /// Wie groß das Systemzeichen im Verhältnis zum Kreis steht.
+  static const double _iconAnteil = 30 / 72;
+
+  /// Kantenlänge der gezeichneten Figur [pfad] in einem Kreis der Größe
+  /// [size]: so groß wie [symbolAnteil] erlaubt, aber nie über den Rand
+  /// der Fläche hinaus (`BereichZeichen.reichweite`).
+  static double symbolSideFor(String pfad, double size) {
+    final passt = symbolInnen / BereichZeichen.reichweite(pfad);
+    return size * math.min(symbolAnteil, passt);
+  }
 
   /// Der Tagesfortschritt als Ring um den Kreis — oder `null` für keinen.
   ///
@@ -199,7 +215,7 @@ class HubCircle extends StatelessWidget {
                                 _symbolOder(
                                   Icon(
                                     icon,
-                                    size: 30 * _scale,
+                                    size: size * _iconAnteil,
                                     color: Palette.text,
                                   ),
                                 ),
@@ -286,7 +302,7 @@ class HubCircle extends StatelessWidget {
     if (pfad == null) return ersatz;
     return PixelArt(
       assetPath: pfad,
-      side: symbolSide * _scale,
+      side: symbolSideFor(pfad, size),
       fallback: ersatz,
     );
   }
@@ -458,7 +474,7 @@ class _SchlichterKreis extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: farbe, width: 2),
       ),
-      child: Icon(icon, size: 30 * size / HubCircle.diameter, color: farbe),
+      child: Icon(icon, size: size * HubCircle._iconAnteil, color: farbe),
     );
   }
 }

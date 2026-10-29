@@ -39,4 +39,37 @@ abstract final class BereichZeichen {
 
   /// Das Buch auf dem Theorie-Kreis — Frederiks Zeichnung, 64 × 64.
   static const String theorie = 'assets/UI/Buch.png';
+
+  /// Alle Zeichen der Kreise.
+  static const List<String> alle = <String>[
+    gewohnheiten,
+    theorie,
+    kampf,
+    statistik,
+    laden,
+    faehigkeiten,
+    ausruestung,
+    charakter,
+  ];
+
+  /// **Wie weit ein Zeichen von seiner Mitte reicht** — der äußerste
+  /// gezeichnete Bildpunkt, gemessen in halben Bildbreiten: 1 berührt
+  /// die Mitte jeder Kante, √2 reicht bis in die Ecken (29.10.2026).
+  ///
+  /// Danach wird ein Zeichen im Kreis verkleinert, damit es **innerhalb
+  /// bleibt** (`HubCircle`): Die Schwerter reichen bis in die Ecken und
+  /// stachen über den Rand. Gemessen und aufgerundet;
+  /// `test/bereich_zeichen_test.dart` misst nach, ob keine Zahl zu klein
+  /// ist. Ein unbekanntes Bild gilt als bis in die Ecken gefüllt.
+  static double reichweite(String pfad) => switch (pfad) {
+    gewohnheiten => 1.18,
+    theorie => 0.99,
+    kampf => 1.42,
+    statistik => 1.11,
+    laden => 1.26,
+    faehigkeiten => 1.18,
+    ausruestung => 0.96,
+    charakter => 0.84,
+    _ => 1.42,
+  };
 }

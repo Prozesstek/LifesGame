@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1050, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1053, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,26 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 29.10.2026, ganz zuletzt: jedes Zeichen bleibt in seinem Kreis
+
+Frederik: „Die Logos sollen aber innerhalb des Kreises bleiben damit das
+Ordentlich aussieht.“
+
+**Ein Fehler aus #171:** Die Kreise wurden kleiner, die Zeichen nicht im
+selben Maß — sie nahmen 82 statt 64 % des Kreises ein. Und die
+Schwerter stachen schon vorher über den Rand, weil sie bis in die Ecken
+ihres Bildes reichen.
+
+Jetzt ist ein Zeichen so groß wie bisher (46 von 72), **aber nie über
+die Pergamentfläche hinaus**: Wie weit jedes von seiner Mitte reicht,
+steht in `BereichZeichen.reichweite`, und `HubCircle.symbolSideFor`
+verkleinert danach. Kleiner werden dadurch nur die Schwerter und ein
+wenig der Münzbeutel. Ein Test misst die Bilder nach, ob keine Zahl zu
+klein ist (`test/bereich_zeichen_test.dart`, 3).
+
+App 1053 (vorher 1050). In 390 × 844 gerendert und angesehen. **Nicht
+am Handy.**
 
 ## 29.10.2026, zuletzt: die Holzleisten der Startseite ein Fünftel niedriger
 
