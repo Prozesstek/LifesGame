@@ -23,6 +23,7 @@ import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
+import '../lagerfeuer/morgen_zuerst_frage.dart';
 import '../progression/show_level_up.dart';
 import '../skills/gebiet_farbe.dart';
 import '../skills/gebiet_zeichen.dart';
@@ -166,6 +167,7 @@ void _mitFeier(
     vorherErrungen,
     vorherLevel,
     davor: flamme,
+    morgenZuerst: moment.tagGeschafft,
   );
   // Der Balken unter dem Level weiss so, welches Gebiet er zeigt.
   if (area != null) ref.read(zuletztGebietProvider.notifier).setze(area);
@@ -315,6 +317,9 @@ void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
 /// Aufrufer — sobald die Münzen gelandet sind, sonst einen Bildaufbau
 /// später. Steht [davor] noch, wartet sie darauf: Ein Dialog über der
 /// großen Flamme deckte ihren Moment zu.
+///
+/// Mit [morgenZuerst] — der Tag ist gerade geschafft — fragt zum Schluss
+/// das Feuer, was morgen zuerst drankommt (`frageMorgenZuerst`).
 VoidCallback _celebrate(
   BuildContext context,
   WidgetRef ref,
@@ -322,6 +327,7 @@ VoidCallback _celebrate(
   Set<String> vorherErrungen,
   int vorherLevel, {
   Future<void>? davor,
+  bool morgenZuerst = false,
 }) {
   return () {
     if (!context.mounted) return;
@@ -333,6 +339,8 @@ VoidCallback _celebrate(
       await showLevelUp(context, ref, before: vorherLevel);
       if (!context.mounted) return;
       await showAbilityUnlocks(context, ref, before: vorher);
+      if (!morgenZuerst || !context.mounted) return;
+      await frageMorgenZuerst(context, ref);
     }());
   };
 }

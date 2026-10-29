@@ -15,6 +15,7 @@ import '../ui/aufstieg.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import 'am_feuer_provider.dart';
+import 'morgen_zuerst_frage.dart';
 import 'widgets/feuer_bild.dart';
 import 'widgets/morgen_zuerst.dart';
 
@@ -46,12 +47,7 @@ class LagerfeuerScreen extends ConsumerWidget {
         ref.watch(ersterStartProvider).zeigtTagesaufgaben &&
         aufgaben.isNotEmpty;
 
-    // Die Reihenfolge ohne Vorsatz, damit die Knöpfe beim Wählen stehen
-    // bleiben (`MorgenZuerst`).
-    final morgenFaellig = <Habit>[
-      for (final habit in tracker.activeHabitsByPriority)
-        if (tracker.isDueOn(habit.id, morgen)) habit,
-    ];
+    final faellig = morgenFaellig(tracker, morgen);
 
     final teile = <Widget>[
       if (ref.watch(todaysReviewProvider) != null) const ReviewSection(),
@@ -76,7 +72,7 @@ class LagerfeuerScreen extends ConsumerWidget {
           lastWeek: lastWeek,
         ),
       MorgenZuerst(
-        habits: morgenFaellig,
+        habits: faellig,
         gewaehlt: tracker.firstUpOn(morgen),
         onWaehle: (id) =>
             ref.read(habitTrackerProvider.notifier).setFirstUp(morgen, id),
