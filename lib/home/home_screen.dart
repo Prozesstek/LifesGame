@@ -59,19 +59,25 @@ class HomeScreen extends ConsumerWidget {
 
   /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
-  /// Ausrüstung, Charakter. Bei 72 Punkten bräuchten sie mit Namen 352
-  /// Punkte Breite, ein Handy hat nach Rand und Holzrahmen 331.
-  static const double bottomCircleSize = 64;
+  /// Ausrüstung, Charakter. Seit dem 29.10.2026 50 statt 64, damit die
+  /// Holzleiste ein Fünftel niedriger wird.
+  static const double bottomCircleSize = 50;
 
   /// Wie hoch die untere Reihe samt Namen, Rand und Holzrahmen steht —
   /// so viel lässt der Kasten des Mentors frei (ADR-0079).
   static const double untereReihe =
-      bottomCircleSize + 20 + HubCircle.labelHeight + HolzGruppe.hoeheDazu;
+      bottomCircleSize + 12 + HubCircle.labelHeight + _leisteDazu;
 
   /// Dasselbe für die obere Reihe: Steht der Kasten oben, beginnt er
   /// unter dem Rahmen.
   static const double obereReihe =
-      HubCircle.diameter + 20 + HubCircle.labelHeight + HolzGruppe.hoeheDazu;
+      HubCircle.diameter + 12 + HubCircle.labelHeight + _leisteDazu;
+
+  /// Der Innenabstand der Leisten — knapper als der von [HolzGruppe].
+  static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 5, 4, 2);
+
+  /// Was Holz und Innenabstand einer Leiste an Höhe dazugeben.
+  static const double _leisteDazu = 2 * Holz.kartenRand + 3 + 5 + 2;
 
   /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
   static const String hintergrund = 'assets/UI/Berg.jpg';
@@ -365,6 +371,7 @@ class _Leiste extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HolzGruppe(
+      padding: HomeScreen._leisteInnen,
       child: SafeArea(
         top: oben,
         bottom: !oben,

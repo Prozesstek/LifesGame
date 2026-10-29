@@ -349,7 +349,10 @@ void main() {
         'Ausrüstung',
         'Charakter',
       ]);
-      expect(4 * (HomeScreen.bottomCircleSize + 16), lessThanOrEqualTo(335));
+      expect(
+        4 * HubCircle.labelWidth(HomeScreen.bottomCircleSize),
+        lessThanOrEqualTo(335),
+      );
     });
 
     testWidgets('Charakter führt zum Charakterbildschirm', (tester) async {

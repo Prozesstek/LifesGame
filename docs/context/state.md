@@ -135,6 +135,31 @@ vom 02.10.
 
 ---
 
+## 29.10.2026, zuletzt: die Holzleisten der Startseite ein Fünftel niedriger
+
+Frederik: „Mach es 20% kleiner“ — die beiden Holzleisten mit den Kreisen.
+
+| Was | vorher | jetzt |
+|---|---|---|
+| Kreise oben | 72 | **56** |
+| Kreise unten | 64 | **50** |
+| Leiste oben (gerendert, 390 × 844) | 138 | **112** (−19 %) |
+| Leiste unten im Store-Build | etwa 130 | etwa **106** |
+
+Dazu knappere Abstände (Kreis, Name, Innenrand der Leiste). **Das Holz
+selbst bleibt 12 Punkte breit**: Es liegt schon 1:1 auf seinen
+Bildpunkten, schmaler fielen Pixel weg.
+
+**Ohne Rückfrage entschieden:** Der Name darf jetzt 30 statt 16 Punkte
+breiter sein als sein Kreis — unter 56 Punkten stand sonst
+„Gewohnheit…“. Im Debug-Build ist die untere Leiste höher (144), weil
+der Knopf des Entwicklermodus über „Charakter“ sitzt. Im Browser bei
+einfacher Dichte werden die Kreise weich gezeichnet (56 < 64), am Handy
+nicht.
+
+In 390 × 844 gerendert und angesehen. App 1050, unverändert. **Nicht am
+Handy.**
+
 ## 29.10.2026, danach: die Tagesaufgaben kommen kurz von unten
 
 Frederik: „wenn man was abschließt was mit den täglichen Aufgaben zu tun

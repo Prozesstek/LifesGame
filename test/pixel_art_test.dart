@@ -18,10 +18,11 @@ void main() {
       expect(PixelArt.qualityFor(88, 3), FilterQuality.none);
     });
 
-    test('der Knopfkreis auch im Browser ohne Vergrößerung', () {
-      // 72 Punkte bei einfacher Dichte sind 72 echte Pixel für 64
-      // gezeichnete — knapp, aber keiner fällt weg.
-      expect(PixelArt.qualityFor(HubCircle.diameter, 1), FilterQuality.none);
+    test('der Knopfkreis bleibt am Handy hart', () {
+      // 56 Punkte bei doppelter Dichte sind 112 echte Pixel für 64
+      // gezeichnete. Im Browser bei einfacher Dichte wird er weich.
+      expect(PixelArt.qualityFor(HubCircle.diameter, 2), FilterQuality.none);
+      expect(PixelArt.qualityFor(HubCircle.diameter, 1), FilterQuality.medium);
     });
 
     test('die Goldmünze wird weich gezeichnet', () {
