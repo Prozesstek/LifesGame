@@ -9,6 +9,7 @@ import 'package:theory/theory.dart';
 import '../audio/sound_effects.dart';
 import '../combat/ladder_controller.dart';
 import '../gear/gear_controller.dart';
+import '../habits/daily_quests_provider.dart';
 import '../habits/habit_check_flow.dart';
 import '../habits/habits_controller.dart';
 import '../progression/show_level_up.dart';
@@ -32,6 +33,7 @@ void answerReview(
 ) {
   final vorherLevel = levelBefore(ref);
   final schluesselVorher = ref.read(availableKeysProvider);
+  final aufgabenVorher = ref.read(dailyQuestsProvider);
   final richtig = ref
       .read(reviewLogProvider.notifier)
       .answer(ref.read(todayProvider), frage, wahl);
@@ -47,6 +49,7 @@ void answerReview(
       ),
       ?keyGainLine(ref, schluesselVorher),
     ]);
+    zeigeAufgabenFortschritt(context, ref, aufgabenVorher);
   } else {
     unawaited(HapticFeedback.heavyImpact());
     // Derselbe Klang wie eine falsche Antwort auf einer Seite.

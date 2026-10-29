@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1045, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1050, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,41 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 29.10.2026, danach: die Tagesaufgaben kommen kurz von unten
+
+Frederik: „wenn man was abschließt was mit den täglichen Aufgaben zu tun
+hat, [sollen] die kurz von unten reingeslidet kommen, sich füllen und
+dann wieder verschwinden“. Gebaut ohne Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Wann** | nach einem Häkchen und einer richtigen Rückfrage, wenn eine Tagesaufgabe dadurch vorankommt |
+| **Was** | ein dunkler Streifen mit Goldrand über der Leiste unten: je Aufgabe Zeichen, Satz, „1 / 2“ und ein Balken |
+| **Ablauf** | fährt herein (0,4 s), der Balken füllt sich vom alten zum neuen Stand (0,7 s), steht (1,1 s), fährt hinaus — gut 2,5 s |
+| **Geschafft** | Balken und Zeichen werden grün mit Haken; abgeholt wird weiter am Lagerfeuer |
+
+**Ohne Rückfrage entschieden:**
+
+- **Nur, was sich bewegt hat**, nicht alle drei: Ein zurückgenommenes
+  Häkchen zeigt nichts, und Abgeholtes auch nicht.
+- **Erst, wenn die Startseite die Aufgaben zeigt**
+  (`ErsterStart.zeigtTagesaufgaben`) — sonst kämen sie, bevor es sie gibt.
+- **Nimmt keinen Tipp an** und liegt über der Leiste, in der das Häkchen
+  seinen Ertrag nennt.
+- Das Zeichen einer Aufgabe steht jetzt an einer Stelle
+  (`DailyQuestsCard.zeichenOf`).
+
+Neu: `lib/habits/widgets/aufgaben_streifen.dart`,
+`test/aufgaben_streifen_test.dart` (5). App 1050 (vorher 1045). Mitten
+im Füllen und voll in 390 × 844 gerendert und angesehen. **Nicht am
+Handy.**
+
+### Offen
+
+- Ob der Streifen neben Zahlen, Münzen und Flamme zu viel auf einmal ist.
+- Ein Ton dazu fehlt.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 29.10.2026: „Morgen zuerst“ gleich nach dem geschafften Tag
 
