@@ -41,6 +41,16 @@ class DailyQuestsCard extends StatelessWidget {
 
   static const double _luecke = 8;
 
+  /// Das Zeichen einer Aufgabe — **eine Tabelle** für Steckbrief und
+  /// den Streifen, der nach einem Fortschritt von unten kommt.
+  static IconData zeichenOf(QuestKind kind) => switch (kind) {
+    QuestKind.zweiHaekchen => Icons.check_circle_outline,
+    QuestKind.dreiHaekchen => Icons.check_circle_outline,
+    QuestKind.alles => Icons.done_all_rounded,
+    QuestKind.liegengeblieben => Icons.history_rounded,
+    QuestKind.rueckfrage => Icons.quiz_outlined,
+  };
+
   @override
   Widget build(BuildContext context) {
     final fertig = quests.where(isClaimed).length;
@@ -190,20 +200,12 @@ class _Bild extends StatelessWidget {
         border: Border.all(color: Palette.textDim, width: 1.5),
       ),
       child: Icon(
-        _zeichen(kind),
+        DailyQuestsCard.zeichenOf(kind),
         size: 22,
         color: claimed ? Palette.textDim : Palette.accent,
       ),
     );
   }
-
-  static IconData _zeichen(QuestKind kind) => switch (kind) {
-    QuestKind.zweiHaekchen => Icons.check_circle_outline,
-    QuestKind.dreiHaekchen => Icons.check_circle_outline,
-    QuestKind.alles => Icons.done_all_rounded,
-    QuestKind.liegengeblieben => Icons.history_rounded,
-    QuestKind.rueckfrage => Icons.quiz_outlined,
-  };
 }
 
 /// Der Stand als Kästchen zum Ankreuzen — eins je Schritt.

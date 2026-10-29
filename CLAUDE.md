@@ -226,6 +226,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/anlegen_teile.dart` | seine Bausteine: Kopf mit Strichen, große Wahl, Feld, Vorschläge | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
+| `lib/habits/widgets/aufgaben_streifen.dart` | **die Tagesaufgaben kommen kurz von unten**: was ein Häkchen oder eine Rückfrage voranbringt, fährt herein, füllt seinen Balken und fährt hinaus — nimmt keinen Tipp an; ausgelöst über `zeigeAufgabenFortschritt` in `habit_check_flow.dart` | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** zum **Ändern** einer laufenden Gewohnheit (beim Anlegen fragt seit ADR-0089 das Blatt) — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
@@ -339,7 +340,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1045 Tests
+flutter test             # 1050 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

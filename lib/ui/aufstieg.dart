@@ -181,7 +181,8 @@ class AufstiegHostState extends State<AufstiegHost>
   }
 
   /// **Etwas über dem ganzen Bildschirm, bis es fertig ist** — die große
-  /// Flamme der Tageskette (`TagesFlammeFeier`). Münzen, Konfetti und
+  /// Flamme der Tageskette (`TagesFlammeFeier`), der Streifen der
+  /// Tagesaufgaben unten (`AufgabenStreifen`). Münzen, Konfetti und
   /// aufsteigende Zahlen fliegen darüber.
   ///
   /// [bauen] bekommt, was es ruft, wenn es fertig ist; die Zukunft endet

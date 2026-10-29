@@ -23,6 +23,7 @@ import '../character/abilities_controller.dart';
 import '../character/show_ability_unlock.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
+import '../home/erster_start_provider.dart';
 import '../lagerfeuer/morgen_zuerst_frage.dart';
 import '../progression/show_level_up.dart';
 import '../skills/gebiet_farbe.dart';
@@ -32,9 +33,11 @@ import '../ui/aufstieg.dart';
 import '../ui/beute_flug.dart';
 import '../ui/palette.dart';
 import 'daily_form_text.dart';
+import 'daily_quests_provider.dart';
 import 'haekchen_moment.dart';
 import 'habits_controller.dart';
 import 'tages_flamme.dart';
+import 'widgets/aufgaben_streifen.dart';
 import 'widgets/daily_chest_card.dart';
 import 'widgets/habit_timer_sheet.dart';
 import 'widgets/tages_flamme_feier.dart';
@@ -116,6 +119,7 @@ void _mitFeier(
   final formVorher = ref.read(dailyFormProvider);
   final schluesselVorher = ref.read(availableKeysProvider);
   final trackerVorher = ref.read(habitTrackerProvider);
+  final aufgabenVorher = ref.read(dailyQuestsProvider);
   final area = habit.area;
   final skillVorher = area == null
       ? null
@@ -190,6 +194,36 @@ void _mitFeier(
     skillVorher,
   );
   if (moment.tagGeschafft) AufstiegHost.maybeOf(context)?.konfetti();
+  zeigeAufgabenFortschritt(context, ref, aufgabenVorher);
+}
+
+/// **Die Tagesaufgaben kommen kurz von unten** (`AufgabenStreifen`):
+/// was seit [vorher] vorangekommen ist, füllt seinen Balken und fährt
+/// wieder hinaus. Eine Stelle für Häkchen und Rückfrage.
+///
+/// Nichts, solange die Startseite die Aufgaben noch nicht zeigt
+/// (`ErsterStart.zeigtTagesaufgaben`), und nichts für Abgeholtes.
+void zeigeAufgabenFortschritt(
+  BuildContext context,
+  WidgetRef ref,
+  List<DailyQuest> vorher,
+) {
+  if (!ref.read(ersterStartProvider).zeigtTagesaufgaben) return;
+  final tracker = ref.read(habitTrackerProvider);
+  final heute = ref.read(todayProvider);
+  final schritte = <AufgabenSchritt>[
+    for (final s in AufgabenSchritt.zwischen(
+      vorher,
+      ref.read(dailyQuestsProvider),
+    ))
+      if (!tracker.isQuestClaimed(heute, s.quest.id)) s,
+  ];
+  if (schritte.isEmpty) return;
+  unawaited(
+    AufstiegHost.maybeOf(context)?.zeigeInDerMitte(
+      (fertig) => AufgabenStreifen(schritte: schritte, onFertig: fertig),
+    ),
+  );
 }
 
 /// **Erfahrung und Gold fliegen zur Leiste oben** — als Funken und
