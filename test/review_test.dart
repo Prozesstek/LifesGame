@@ -50,12 +50,6 @@ Future<void> _pump(WidgetTester tester, ProviderContainer c) async {
   await tester.pump();
 }
 
-/// Klappt die Rückfrage auf — sie beginnt als eine Zeile.
-Future<void> _klappeAuf(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.quiz_outlined));
-  await tester.pumpAndSettle();
-}
-
 /// Tippt die Antwort mit [index] (in der Lektion) an.
 Future<void> _antworte(WidgetTester tester, ReviewQuestion frage, int index) {
   return tester.tap(find.text(frage.question.options[index]));
@@ -78,9 +72,7 @@ void main() {
     final gold = c.read(goldProvider);
     final einkommen = c.read(incomeWithoutAchievementsProvider);
 
-    expect(find.byType(ReviewCard), findsNothing, reason: 'erst eine Zeile');
-    await _klappeAuf(tester);
-    expect(find.byType(ReviewCard), findsOneWidget);
+    expect(find.byType(ReviewCard), findsOneWidget, reason: 'gleich offen');
     expect(find.text(frage.question.prompt), findsOneWidget);
 
     await _antworte(tester, frage, frage.question.correctIndex);
@@ -102,7 +94,6 @@ void main() {
     final frage = c.read(todaysReviewProvider)!;
     final xp = c.read(totalXpProvider);
 
-    await _klappeAuf(tester);
     await _antworte(tester, frage, (frage.question.correctIndex + 1) % 4);
     await tester.pumpAndSettle();
 
@@ -117,7 +108,6 @@ void main() {
       final c = _container();
       await _pump(tester, c);
       final frage = c.read(todaysReviewProvider)!;
-      await _klappeAuf(tester);
       await _antworte(tester, frage, frage.question.correctIndex);
       await tester.pumpAndSettle();
       expect(find.byType(ReviewCard), findsOneWidget, reason: 'Auflösung');
@@ -139,6 +129,19 @@ void main() {
       expect(find.byType(ReviewCard), findsOneWidget);
     },
   );
+
+  testWidgets('offen lässt sie sich mit dem Pfeil zuklappen', (tester) async {
+    final c = _container();
+    await _pump(tester, c);
+    expect(find.byType(ReviewCard), findsOneWidget);
+
+    await tester.tap(find.byKey(ReviewCard.zuklappenKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ReviewCard), findsNothing);
+    expect(find.byIcon(Icons.quiz_outlined), findsOneWidget, reason: 'Zeile');
+    expect(c.read(todaysReviewAnswerProvider), isNull, reason: 'nicht gezählt');
+  });
 
   test('der Spielstand trägt die Antworten durch JSON', () {
     const tag = 20000;

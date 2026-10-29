@@ -15,12 +15,13 @@ import '../../ui/gold_icon.dart';
 
 /// Die Rückfrage des Tages oben in der Theorie (Issue #88).
 ///
-/// **Sie beginnt als eine Zeile**, offen oder beantwortet. Aufgeklappt
-/// nähme die Karte mit Frage und vier Antworten auf dem Handy rund ein
-/// Drittel der Höhe, und der Baum darunter wäre kaum noch zu bedienen
-/// (`phone_layout_test.dart`). Ein Tipp klappt sie auf; nach der Antwort
-/// bleibt die Auflösung stehen, bis man sie zutippt oder geht. Ohne
-/// fällige Frage steht hier nichts.
+/// **Offen steht sie aufgeklappt da** (Frederik, 29.10.): Wer die
+/// Theorie betritt, sieht die Frage gleich. Nach der Antwort bleibt die
+/// Auflösung stehen, bis man sie zutippt oder geht. Der Pfeil oben rechts
+/// klappt sie auch unbeantwortet zu — auf dem Handy nimmt sie offen rund
+/// ein Drittel der Höhe, und der Baum darunter wird eng. Beantwortet beginnt
+/// sie als eine Zeile, die ein Tipp aufklappt. Ohne fällige Frage steht
+/// hier nichts.
 class ReviewSection extends ConsumerStatefulWidget {
   const ReviewSection({super.key});
 
@@ -29,7 +30,16 @@ class ReviewSection extends ConsumerStatefulWidget {
 }
 
 class _ReviewSectionState extends ConsumerState<ReviewSection> {
-  bool _aufgeklappt = false;
+  /// Offen, solange heute nicht geantwortet ist — wer die Theorie
+  /// betritt, sieht die Frage gleich. Gelesen wird nur beim Betreten:
+  /// Nach der Antwort bleibt die Auflösung stehen.
+  late bool _aufgeklappt;
+
+  @override
+  void initState() {
+    super.initState();
+    _aufgeklappt = ref.read(todaysReviewAnswerProvider) == null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +77,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
         day: dayNumberOf(today),
         daysUntilNext: daysUntilReview(ref, frage, today),
         onAnswer: (wahl) => answerReview(context, ref, frage, wahl),
+        onZuklappen: () => setState(() => _aufgeklappt = false),
       ),
     );
   }
