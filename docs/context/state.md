@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 28.10.2026 · Frederik
+**Zuletzt aktualisiert:** 29.10.2026 · Frederik
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1040, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1045, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,39 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 29.10.2026: „Morgen zuerst“ gleich nach dem geschafften Tag
+
+Frederik: „morgen zuerst als abfrage wenn alle gewohnheiten erfüllt
+sind. Also das wenn man die letzte Gewohnheit abhakt das gefeiert wird
+und dann gefragt wird was du den nächsten Tag als erstes machst sowie
+beim Feuer.“ Gebaut ohne Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Wann** | nach dem Häkchen, das den Tag schafft — erst Konfetti, Flamme, Errungenschaft, Aufstieg und Fähigkeit, dann die Frage |
+| **Wie** | ein Holzdialog mit dem brennenden Feuer, darunter dieselben Knöpfe wie am Lagerfeuer (`MorgenZuerst`) |
+| **Ein Tipp** | wählt; die Flamme erscheint am Knopf, nach knapp einer halben Sekunde geht der Dialog zu |
+| **Später** | ein Kreuz oben rechts schließt, ohne zu wählen; das Feuer fragt am Abend weiter |
+
+**Ohne Rückfrage entschieden:**
+
+- **Nur, wenn morgen mindestens zwei fällig sind**: Bei einer gibt es
+  nichts zu wählen — und sonst stünde die Frage schon beim allerersten
+  Häkchen eines Neuen mitten im Weg des Mentors.
+- **Nicht, wenn schon gewählt ist**: Wer am Feuer gewählt hat, wird
+  nicht zweimal gefragt.
+- Die Liste „morgen fällig“ steht jetzt an einer Stelle
+  (`morgenFaellig`), für Feuer und Dialog.
+
+Neu: `lib/lagerfeuer/morgen_zuerst_frage.dart`,
+`test/morgen_zuerst_frage_test.dart` (5). App 1045 (vorher 1040). Der
+Dialog in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- Ob nach Konfetti und Flamme noch ein Dialog zu viel ist.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 28.10.2026, danach: Zeichen, die Spieler aus anderen Spielen kennen
 
