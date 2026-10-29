@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1053, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1054, dazu die acht Packages (theory 218, habits 374, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,25 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 29.10.2026, zum Schluss: die Rückfrage steht offen da
+
+Frederik: „dann soll die rückfrage automatisch aufgehen wenn man auf
+theorie drückt. Außer sie ist natürlich gemacht“.
+
+Wer die Theorie betritt, solange die Rückfrage des Tages offen ist,
+sieht sie aufgeklappt mit Frage und Antworten. Beantwortet beginnt sie
+wie bisher als eine Zeile.
+
+**Ohne Rückfrage entschieden:** Oben rechts in der Karte steht ein
+Pfeil, der sie auch **unbeantwortet** zuklappt. Offen nimmt sie am
+Handy gut 300 Punkte, und der Baum darunter wird eng — eine Ebene
+tiefer deckte die Kopfzeile den Knoten zu (`phone_layout_test.dart`).
+Bis dahin ließ sie sich unbeantwortet nicht schließen, damit ein Tipp
+daneben die Frage nicht wegnimmt; der Pfeil ist ein eigenes Ziel.
+
+App 1054 (vorher 1053). In 390 × 844 gerendert und angesehen. **Nicht
+am Handy.**
 
 ## 29.10.2026, ganz zuletzt: jedes Zeichen bleibt in seinem Kreis
 

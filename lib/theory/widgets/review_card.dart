@@ -18,6 +18,7 @@ class ReviewCard extends StatelessWidget {
     required this.day,
     required this.daysUntilNext,
     required this.onAnswer,
+    this.onZuklappen,
     super.key,
   });
 
@@ -38,6 +39,13 @@ class ReviewCard extends StatelessWidget {
 
   /// Mit dem Index der Antwort **in der Lektion**, nicht auf dem Schirm.
   final ValueChanged<int> onAnswer;
+
+  /// Klappt die Karte zu einer Zeile, ohne zu antworten — ein Pfeil oben
+  /// rechts. Null: kein Pfeil.
+  final VoidCallback? onZuklappen;
+
+  /// Findet den Pfeil in Tests.
+  static const Key zuklappenKey = Key('rueckfrage-zuklappen');
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +91,27 @@ class ReviewCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 11, color: Palette.muted),
                 ),
               ),
+              if (onZuklappen case final VoidCallback zu)
+                Semantics(
+                  button: true,
+                  label: 'Rückfrage zuklappen',
+                  excludeSemantics: true,
+                  child: Druck(
+                    child: InkWell(
+                      key: zuklappenKey,
+                      onTap: zu,
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Icon(
+                          Icons.expand_less,
+                          size: 20,
+                          color: Palette.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 8),

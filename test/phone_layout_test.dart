@@ -20,6 +20,7 @@ import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
+import 'package:lifes_game/theory/widgets/review_card.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
@@ -291,6 +292,10 @@ void main() {
       // Stelle ist der Handlungsknopf zwischen beiden (ADR-0026).
       usePhoneView(tester);
       await tester.pumpWidget(appMit(const SkillTreeScreen()));
+      await tester.pumpAndSettle();
+      // Die Rückfrage steht offen da und lässt dem Baum wenig Höhe —
+      // wer tiefer will, klappt sie zu.
+      await tester.tap(find.byKey(ReviewCard.zuklappenKey));
       await tester.pumpAndSettle();
 
       final kind = theoryGraph.childrenOf(theoryRootIds.first).first;
