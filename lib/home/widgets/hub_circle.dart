@@ -106,10 +106,11 @@ class HubCircle extends StatelessWidget {
   /// Der Punkt am Kreis, der dran ist — damit Tests ihn finden.
   static const Key leuchtKey = ValueKey<String>('hub-leuchtet');
 
-  /// Kantenlänge des Kreises. Drei davon plus Abstand passen bei 390
-  /// Pixeln Breite nebeneinander, und 72 liegt über den 48 Pixeln, die
-  /// eine Tippfläche mindestens braucht.
-  static const double diameter = 72;
+  /// Kantenlänge des Kreises. Vier davon plus Abstand passen bei 390
+  /// Pixeln Breite nebeneinander, und 56 liegt über den 48 Pixeln, die
+  /// eine Tippfläche mindestens braucht. Bis zum 29.10.2026 waren es 72;
+  /// die Holzleisten sollten ein Fünftel niedriger werden.
+  static const double diameter = 56;
 
   /// Wie ein Test einen Kreis findet, auch wenn sein Name ein zweites
   /// Mal auf dem Bildschirm steht.
@@ -119,8 +120,9 @@ class HubCircle extends StatelessWidget {
   /// rechnet die Startseite für eine Reihe dazu.
   static const double labelHeight = 20;
 
-  /// Wie breit der Name unter einem Kreis werden darf.
-  static double labelWidth(double size) => size + 16;
+  /// Wie breit der Name unter einem Kreis werden darf — breiter als
+  /// der Kreis, sonst passt „Gewohnheiten“ unter 56 Punkte nicht.
+  static double labelWidth(double size) => size + 30;
 
   /// Wie weit der Fortschrittsring aussen um den Kreis liegt.
   static const double _ringAbstand = 5;
@@ -152,7 +154,7 @@ class HubCircle extends StatelessWidget {
           onTap: () => isLocked ? _sageWarum(context) : onTap(),
           borderRadius: BorderRadius.circular(size),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -252,7 +254,7 @@ class HubCircle extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 5),
                 SizedBox(
                   width: labelWidth(size),
                   // Der Vorleser hat den Namen schon am Knopf.
