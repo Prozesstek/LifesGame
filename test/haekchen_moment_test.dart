@@ -439,11 +439,12 @@ void main() {
     });
   });
 
-  testWidgets('auf dem Gewohnheiten-Bildschirm fliegt es zur Leiste oben', (
+  testWidgets('auf dem Gewohnheiten-Bildschirm fliegt es nach oben', (
     tester,
   ) async {
     // Bis ADR-0085 gab es dort keine Leiste, und nur die Zahlen stiegen
-    // auf. Seitdem steht sie oben, mit dem Balken des Gebiets darunter.
+    // auf. Seit ADR-0092 stehen Level und Gold in der Titelzeile, und die
+    // Funken des Gebiets fliegen in seine Kachel.
     useTallView(tester);
     final container = ProviderContainer(
       overrides: [

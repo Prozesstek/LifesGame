@@ -81,6 +81,10 @@ class AufstiegHostState extends State<AufstiegHost>
   final BeuteFlug _flug = BeuteFlug();
   final List<Konfetti> _konfetti = <Konfetti>[];
   final Map<FlugZiel, GlobalKey> _ziele = <FlugZiel, GlobalKey>{};
+
+  /// Ziele, von denen es mehrere gleicher Art gibt ([FlugZielMarke.fuer]).
+  final Map<(FlugZiel, Object), GlobalKey> _genaueZiele =
+      <(FlugZiel, Object), GlobalKey>{};
   final Map<FlugZiel, ValueNotifier<int>> _unterwegs =
       <FlugZiel, ValueNotifier<int>>{
         for (final ziel in FlugZiel.values) ziel: ValueNotifier<int>(0),
@@ -105,11 +109,21 @@ class AufstiegHostState extends State<AufstiegHost>
   double _zeit = 0;
 
   /// Ein Ziel meldet sich an ([FlugZielMarke]).
-  void meldeZiel(FlugZiel ziel, GlobalKey ort) => _ziele[ziel] = ort;
+  void meldeZiel(FlugZiel ziel, GlobalKey ort, {Object? fuer}) {
+    if (fuer == null) {
+      _ziele[ziel] = ort;
+    } else {
+      _genaueZiele[(ziel, fuer)] = ort;
+    }
+  }
 
   /// Und ab — aber nur, wenn es noch dasselbe ist.
-  void vergissZiel(FlugZiel ziel, GlobalKey ort) {
-    if (identical(_ziele[ziel], ort)) _ziele.remove(ziel);
+  void vergissZiel(FlugZiel ziel, GlobalKey ort, {Object? fuer}) {
+    if (fuer == null) {
+      if (identical(_ziele[ziel], ort)) _ziele.remove(ziel);
+    } else if (identical(_genaueZiele[(ziel, fuer)], ort)) {
+      _genaueZiele.remove((ziel, fuer));
+    }
   }
 
   /// Wie viel zu [ziel] noch unterwegs ist. Die Leiste zieht es ab.
@@ -121,8 +135,9 @@ class AufstiegHostState extends State<AufstiegHost>
 
   /// Lässt [gold] als Münzen und [xp] als Funken vom letzten Finger zu
   /// ihren Zielen fliegen, [gebiet] als Funken in der [gebietFarbe] zum
-  /// Balken des Gebiets (ADR-0085, ADR-0090). **Ohne Ziel fliegt nichts** — wo keine Leiste
-  /// ist, steigen nur die Zahlen auf.
+  /// Balken des Gebiets (ADR-0085, ADR-0090) — oder zur Kachel [gebietFuer],
+  /// wo es eine gibt (ADR-0092). **Ohne Ziel fliegt nichts** — wo keine
+  /// Leiste ist, steigen nur die Zahlen auf.
   ///
   /// [beiAnkunft] klingt, wenn etwas ankommt, höchstens alle
   /// [AufstiegHost.klangAbstand] Sekunden je Ziel. [wennGelandet] kommt,
@@ -135,6 +150,7 @@ class AufstiegHostState extends State<AufstiegHost>
     required int xp,
     int gebiet = 0,
     Color? gebietFarbe,
+    Object? gebietFuer,
     void Function(FlugZiel ziel)? beiAnkunft,
     VoidCallback? wennGelandet,
   }) {
@@ -148,7 +164,11 @@ class AufstiegHostState extends State<AufstiegHost>
       (FlugZiel.erfahrung, xp),
       (FlugZiel.gebiet, gebiet),
     ]) {
-      final nach = _mitteVon(ziel, box);
+      final nach = _mitteVon(
+        ziel,
+        box,
+        fuer: ziel == FlugZiel.gebiet ? gebietFuer : null,
+      );
       if (nach == null || betrag <= 0) continue;
       final dauer = _flug.wirf(
         von: von,
@@ -201,8 +221,10 @@ class AufstiegHostState extends State<AufstiegHost>
     return auftritt.ende.future;
   }
 
-  Offset? _mitteVon(FlugZiel ziel, RenderBox host) {
-    final ort = _ziele[ziel]?.currentContext?.findRenderObject();
+  Offset? _mitteVon(FlugZiel ziel, RenderBox host, {Object? fuer}) {
+    final schluessel =
+        (fuer == null ? null : _genaueZiele[(ziel, fuer)]) ?? _ziele[ziel];
+    final ort = schluessel?.currentContext?.findRenderObject();
     if (ort is! RenderBox || !ort.attached || !ort.hasSize) return null;
     return host.globalToLocal(ort.localToGlobal(ort.size.center(Offset.zero)));
   }

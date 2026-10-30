@@ -262,11 +262,21 @@ class FlugZielMarke extends StatefulWidget {
     required this.ziel,
     required this.child,
     this.staerke = 0.3,
+    this.fuer,
+    this.pulst = true,
     super.key,
   });
 
   final FlugZiel ziel;
   final Widget child;
+
+  /// Wofür genau dieses Ziel steht, wenn es mehrere gleicher Art gibt —
+  /// die vier Kacheln der Gebiete. Null für das eine.
+  final Object? fuer;
+
+  /// Ob es beim Ankommen aufspringt. Kommt bei einer Nachbarkachel etwas
+  /// an, bleibt diese stehen.
+  final bool pulst;
 
   /// Wie weit es beim Ankommen aufspringt, als Anteil seiner Grösse. Ein
   /// breiter Balken braucht weniger als eine Zahl.
@@ -302,7 +312,7 @@ class _FlugZielMarkeState extends State<FlugZielMarke>
     _abmelden();
     _host = host;
     if (host == null) return;
-    host.meldeZiel(widget.ziel, _ort);
+    host.meldeZiel(widget.ziel, _ort, fuer: widget.fuer);
     final unterwegs = host.unterwegs(widget.ziel)..addListener(_geaendert);
     _unterwegs = unterwegs;
     _zuletzt = unterwegs.value;
@@ -311,14 +321,14 @@ class _FlugZielMarkeState extends State<FlugZielMarke>
   /// Weniger unterwegs heisst: Es ist etwas angekommen.
   void _geaendert() {
     final jetzt = _unterwegs?.value ?? 0;
-    if (jetzt < _zuletzt) _puls.forward(from: 0);
+    if (jetzt < _zuletzt && widget.pulst) _puls.forward(from: 0);
     _zuletzt = jetzt;
   }
 
   void _abmelden() {
     _unterwegs?.removeListener(_geaendert);
     _unterwegs = null;
-    _host?.vergissZiel(widget.ziel, _ort);
+    _host?.vergissZiel(widget.ziel, _ort, fuer: widget.fuer);
   }
 
   @override

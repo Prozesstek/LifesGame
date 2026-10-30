@@ -173,9 +173,10 @@ durch die Grube ersetzt und gelöscht.
 | `lib/skills/gebiet_farbe.dart` | **die Farbe eines Gebiets** ([ADR-0090](docs/decisions/0090-jedes-gebiet-eine-farbe.md)): Körper Glut, Geist Blau, Wissenschaft Violett, Gesellschaft Rosa, je für Pergament und Leder — **eine Tabelle** (`GebietFarbe`); dazu, zu welchem Gebiet ein Knoten gehört (`gebietVon`: wo man ihn sieht, sonst sein Zuhause) | Flutter |
 | `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
 | `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
-| `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke — **eine Stelle** für Kachel und Kopf des Baums | Flutter |
+| `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke, im Kopf des Baums | Flutter |
+| `lib/skills/widgets/gebiets_kacheln.dart` | **die vier Gebiete oben auf dem Gewohnheiten-Bildschirm** ([ADR-0092](docs/decisions/0092-gewohnheiten-aufgeraeumt.md)): Zeichen, Stufe, Name, Balken in ihrer Farbe; die Funken eines Häkchens fliegen in die Kachel seines Gebiets | Flutter |
 | `lib/skills/widgets/gebiet_streifen.dart` | **der Streifen am linken Rand** einer Gewohnheit in der Farbe ihres Gebiets (ADR-0090) — Kachel; der Zettel auf „Heute“ malt ihn über `Steckbrief.streifen` | Flutter |
-| `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** unter dem Level: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
+| `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** auf der Startseite: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
 | `lib/skills/widgets/gebiet_frage_karte.dart` | die **einmalige Frage** nach dem Gebiet einer alten eigenen Gewohnheit, über „Heute“ | Flutter |
 | `tool/runway_sim.dart` | **wann geht was aus?** 60 Tage eines fleissigen Spielers: Level, Baum, Stufen, Gold gegen den Laden | nur Dart-SDK |
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
@@ -189,7 +190,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/mentor/zeigefinger.dart` | der Ring um das, worauf er zeigt (`Zeigefinger`, `ZeigeRing`) — pulsiert fünfmal und bleibt stehen; **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
-| `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **auch oben auf dem Gewohnheiten-Bildschirm** | Flutter |
+| `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
 | `lib/lagerfeuer/lagerfeuer_screen.dart` | **das Lagerfeuer** ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)): Rückfrage, Truhe, Tagesaufgaben, sonntags der Wochenrückblick, „Morgen zuerst“ und der Satz, der wegschickt — **Truhe und Aufgaben gibt es nur hier** | Flutter |
@@ -207,7 +208,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/habits/habits_screen.dart` | oben die Leiste der Startseite, **„Heute“** darunter, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
+| `lib/habits/habits_screen.dart` | oben **die vier Gebiete**, Level und Gold in der Titelzeile (ADR-0092), **„Heute“** darunter — auf der Kachel Erfahrung, Gold, Kette in Tagen, ein Tagesziel als kleiner Stand, Auslöser und Kreuz —, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
 | `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **die Erfahrung fliegt zweimal**, zum Level und grün zum Gebiet ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)); **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
 | `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/habits/tages_flamme.dart` | **die große Flamme in der Mitte**: ob ein Häkchen das erste des Tages ist, die Tageskette vorher und nachher, die Woche Mo bis So (brennt, Eis, leer, heute, kommt) — reine Rechnung, erzeugt keine Zahl | Flutter |
@@ -340,7 +341,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1054 Tests
+flutter test             # 1058 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -748,7 +749,7 @@ darunter. Über 60 Tage steigt der Kettenbonus langsam weiter (100 Tage
 | Was zahlt in einen Skill ein? | `Skills.aus` — `HabitTracker.xpIn`, `TheoryProgress.xpInArea`, `ReviewLog.xpFor`; Grube, Errungenschaften und Truhe nicht |
 | Wie schnell steigt er? | `SkillCurve` — eine Gewohnheit täglich: 10 nach 50 Tagen, 50 nach 425, 100 nach 1307 |
 | Was bringt er? | je Gebiet drei Titel bei 10, 25 und 50 (`AchievementArea.gebiete`); im Kampf nichts |
-| Wo sieht man ihn? | Kachel (`SkillAbzeichen`, `RewardLine`), Leiste (`GebietsBalken`), Charakter (`SkillKarte`), Kopf des Baums, „Heute“ |
+| Wo sieht man ihn? | oben auf dem Gewohnheiten-Bildschirm (`GebietsKacheln`, ADR-0092), Leiste der Startseite (`GebietsBalken`), Charakter (`SkillKarte`), Kopf des Baums, „Heute“ |
 
 **Ein Skill darf nur wachsen** — sonst nähme er einen Titel zurück.
 Deshalb lässt sich das Gebiet einer eigenen Gewohnheit nur setzen, wenn

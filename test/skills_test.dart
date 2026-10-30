@@ -11,7 +11,6 @@ import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
-import 'package:lifes_game/skills/gebiet_zeichen.dart';
 import 'package:lifes_game/skills/skill_text.dart';
 import 'package:lifes_game/skills/skills.dart';
 import 'package:lifes_game/skills/skills_provider.dart';
@@ -264,33 +263,19 @@ void main() {
   });
 
   group('Ausgeschildert', () {
-    testWidgets('die Kachel zeigt die Erfahrung zweimal: Level und Gebiet', (
+    testWidgets('die Kachel nennt nur Erfahrung und Gold (ADR-0092)', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: RewardLine(xp: 36, gold: 5, area: SkillArea.koerper),
-          ),
-        ),
-      );
-
-      expect(find.text('+36'), findsNWidgets(2));
-      expect(find.byIcon(gebietZeichen(SkillArea.koerper)), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(
-          RegExp('^Bringt 36 Erfahrung fürs Level, 36 für Körper und 5 Gold'),
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('ohne Gebiet steht die Erfahrung einmal da', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: RewardLine(xp: 36, gold: 5))),
       );
 
       expect(find.text('+36'), findsOneWidget);
+      expect(find.text('+5'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('^Bringt 36 Erfahrung und 5 Gold')),
+        findsOneWidget,
+      );
     });
   });
 }

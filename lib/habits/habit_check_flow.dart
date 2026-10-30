@@ -250,6 +250,7 @@ bool _fliegen(
         xp: result.xpGained,
         gebiet: gebiet == null ? 0 : result.xpGained,
         gebietFarbe: gebiet == null ? null : GebietFarbe.leder(gebiet),
+        gebietFuer: gebiet,
         beiAnkunft: (ziel) => klang.play(switch (ziel) {
           FlugZiel.gold => SoundEffect.muenze,
           FlugZiel.erfahrung || FlugZiel.gebiet => SoundEffect.funke,

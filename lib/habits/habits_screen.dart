@@ -7,7 +7,7 @@ import 'package:habits/habits.dart';
 
 import '../home/widgets/status_leiste.dart';
 import '../progression/level_provider.dart';
-import '../skills/skills_provider.dart';
+import '../skills/widgets/gebiets_kacheln.dart';
 import '../ui/palette.dart';
 import 'cue_text.dart';
 import 'habit_check_flow.dart';
@@ -53,98 +53,122 @@ class HabitsScreen extends ConsumerWidget {
         .where((h) => !tracker.isDueOn(h.id, today))
         .toList(growable: false);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Gewohnheiten')),
-      floatingActionButton: _PlusKnopf(
-        onTap: () => _neueGewohnheit(context, ref),
-      ),
-
-      body: AufstiegHost(
+    // **Der Host liegt um den ganzen Bildschirm** (ADR-0092): Level und Gold
+    // stehen in der Titelzeile, und was dorthin fliegen soll, muss sie
+    // finden. Das `Material` gibt den aufsteigenden Zahlen ihre Schrift,
+    // sonst stünden sie unterstrichen da.
+    return Material(
+      type: MaterialType.transparency,
+      child: AufstiegHost(
         // Ein Kontext **unter** dem Host: Die Rückrufe der Kacheln lassen
         // darüber Zahlen aufsteigen (`AufstiegHost.maybeOf`).
         child: Builder(
-          builder: (context) => SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _maxWidth),
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-                  children: <Widget>[
-                    // **„Heute“ steht oben** (Issue #88). Werte, Kette,
-                    // Tagesform, Aufgaben, Rückfrage und Woche standen bis
-                    // zum 28.09. darüber und sind umgezogen: Werte und
-                    // Woche in den Charakter, Tagesform in die Grube, die
-                    // Aufgaben auf die Startseite, die Rückfrage in die
-                    // Theorie. Die Kette steht an jeder Kachel.
-                    //
-                    // **Die Leiste von der Startseite** (ADR-0085): Level
-                    // und Gold, darunter der Balken des Gebiets. Ein
-                    // Häkchen wirft seine Funken zu beiden — vorher flog
-                    // hier nichts, weil es kein Ziel gab.
-                    StatusLeiste(
-                      xp: ref.watch(effectiveXpProvider),
-                      gold: ref.watch(goldProvider),
-                    ),
-                    const SizedBox(height: 14),
-                    if (zuRetten != null) ...<Widget>[
-                      StreakFreezeCard(
-                        streakAtRisk: tracker.currentBestStreak(zuRetten),
-                        freezesLeft: tracker.freezesLeft,
-                        onUse: () => _useFreeze(context, ref, zuRetten),
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Gewohnheiten'),
+              actions: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 14),
+                  child: StatusLeiste(
+                    xp: ref.watch(effectiveXpProvider),
+                    gold: ref.watch(goldProvider),
+                    klein: true,
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: _PlusKnopf(
+              onTap: () => _neueGewohnheit(context, ref),
+            ),
+            body: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxWidth),
+                  child: Column(
+                    children: <Widget>[
+                      // **Die vier Gebiete stehen fest über der Liste**:
+                      // Die Funken eines Häkchens fliegen hinein, also
+                      // dürfen sie nicht mit weggerollt sein.
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+                        child: GebietsKacheln(),
                       ),
-                      const SizedBox(height: 16),
-                    ],
-                    _SectionHeader(
-                      trailing:
-                          '${tracker.completedOn(today)} / ${active.length}',
-                    ),
-                    const SizedBox(height: 10),
-                    // Offene oben, erledigte unten (`dailyListOn`).
-                    // Der Schlüssel hält den Sprung des Häkchens
-                    // an der Gewohnheit, wenn die Kachel die Reihe
-                    // wechselt.
-                    // Gekoppeltes steht eingerückt unter seinem Anker
-                    // und leuchtet auf, sobald der abgehakt ist
-                    // (ADR-0065). Die Ordnung kommt aus `stackOn`.
-                    for (final eintrag in active) ...<Widget>[
-                      _ImStapel(
-                        key: ValueKey<String>(eintrag.habit.id),
-                        depth: eintrag.depth,
-                        cued: eintrag.isCued,
-                        child: _kachel(context, ref, tracker, today, eintrag),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    if (nichtHeute.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 8),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.event_busy_rounded,
-                          size: 20,
-                          color: Palette.textOnDarkDim,
-                          semanticLabel: 'Heute nicht fällig',
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+                          children: <Widget>[
+                            if (zuRetten != null) ...<Widget>[
+                              StreakFreezeCard(
+                                streakAtRisk: tracker.currentBestStreak(
+                                  zuRetten,
+                                ),
+                                freezesLeft: tracker.freezesLeft,
+                                onUse: () => _useFreeze(context, ref, zuRetten),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            // Offene oben, erledigte unten (`dailyListOn`).
+                            // Der Schlüssel hält den Sprung des Häkchens
+                            // an der Gewohnheit, wenn die Kachel die Reihe
+                            // wechselt.
+                            // Gekoppeltes steht eingerückt unter seinem Anker
+                            // und leuchtet auf, sobald der abgehakt ist
+                            // (ADR-0065). Die Ordnung kommt aus `stackOn`.
+                            for (final eintrag in active) ...<Widget>[
+                              _ImStapel(
+                                key: ValueKey<String>(eintrag.habit.id),
+                                depth: eintrag.depth,
+                                cued: eintrag.isCued,
+                                child: _kachel(
+                                  context,
+                                  ref,
+                                  tracker,
+                                  today,
+                                  eintrag,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            if (nichtHeute.isNotEmpty) ...<Widget>[
+                              const SizedBox(height: 8),
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Icon(
+                                  Icons.event_busy_rounded,
+                                  size: 20,
+                                  color: Palette.textOnDarkDim,
+                                  semanticLabel: 'Heute nicht fällig',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              for (final habit in nichtHeute) ...<Widget>[
+                                _NichtHeuteTile(
+                                  key: ValueKey<String>(
+                                    'nicht-heute-${habit.id}',
+                                  ),
+                                  habit: habit,
+                                  weekdays: tracker.weekdaysFor(habit.id),
+                                  streak: tracker.currentStreak(
+                                    habit.id,
+                                    today,
+                                  ),
+                                  onEdit: () => _editCue(context, ref, habit),
+                                  onStop: () => ref
+                                      .read(habitTrackerProvider.notifier)
+                                      .deactivate(habit.id),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ],
+                            // Die Truhe stand bis zum 18.10. hier; sie wartet
+                            // jetzt am Lagerfeuer (ADR-0076). Anlegen und die
+                            // Vorlagen stehen seit ADR-0089 hinter dem
+                            // Plus-Knopf.
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      for (final habit in nichtHeute) ...<Widget>[
-                        _NichtHeuteTile(
-                          key: ValueKey<String>('nicht-heute-${habit.id}'),
-                          habit: habit,
-                          weekdays: tracker.weekdaysFor(habit.id),
-                          streak: tracker.currentStreak(habit.id, today),
-                          onEdit: () => _editCue(context, ref, habit),
-                          onStop: () => ref
-                              .read(habitTrackerProvider.notifier)
-                              .deactivate(habit.id),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
                     ],
-                    // Die Truhe stand bis zum 18.10. hier; sie wartet jetzt
-                    // am Lagerfeuer (ADR-0076). Anlegen und die Vorlagen
-                    // stehen seit ADR-0089 hinter dem Plus-Knopf.
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -166,15 +190,9 @@ class HabitsScreen extends ConsumerWidget {
       habit: habit,
       isChecked: tracker.isChecked(habit.id, today),
       streak: tracker.currentStreak(habit.id, today),
-      nextMultiplier: tracker.nextMultiplier(habit.id, today),
       xpGain: tracker.xpForNextCheck(habit.id, today),
       goldGain: tracker.goldForNextCheck(habit.id, today),
       progress: tracker.progressOn(habit.id, today),
-      skill: switch (habit.area) {
-        final SkillArea area => ref.watch(skillsProvider).of(area),
-        null => null,
-      },
-      totalDays: tracker.checksFor(habit.id),
       onToggle: () => tapHabit(context, ref, habit),
       onAdvance: () => advanceHabit(context, ref, habit),
       onTimer: tracker.hasTimer(habit.id)
@@ -479,40 +497,6 @@ class _NichtHeuteTile extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// „Heute“ als Zeichen, daneben der Stand.
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.trailing});
-
-  final String trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        const Icon(
-          Icons.checklist_rounded,
-          size: 22,
-          color: Palette.textOnDark,
-          semanticLabel: 'Heute',
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            trailing,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Palette.textOnDarkDim,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

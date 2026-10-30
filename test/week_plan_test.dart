@@ -196,10 +196,6 @@ void main() {
         find.descendant(of: ruhend, matching: find.text('Do')),
         findsOneWidget,
       );
-      // Der Stand oben zählt nur, was heute dran ist — nicht beide.
-      // („0 / 1" steht auch am Reiter der eigenen, deshalb die Gegenprobe.)
-      expect(find.text('0 / 2'), findsNothing);
-      expect(find.text('0 / 1'), findsWidgets);
     });
 
     testWidgets('lässt sich von dort stoppen', (tester) async {

@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/stat_icon.dart';
-import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
 import 'package:lifes_game/haustier/widgets/haustier_schmuck.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
@@ -19,6 +18,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/skills/gebiet_farbe.dart';
 import 'package:lifes_game/skills/gebiet_zeichen.dart';
 import 'package:lifes_game/skills/widgets/gebiet_streifen.dart';
+import 'package:lifes_game/skills/widgets/gebiets_kacheln.dart';
 import 'package:lifes_game/statistik/statistik_screen.dart';
 import 'package:lifes_game/statistik/statistik_text.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
@@ -187,19 +187,21 @@ void main() {
     Color? farbeVonZeichen(WidgetTester tester, Finder finder) =>
         tester.widget<Icon>(finder).color;
 
-    testWidgets('die Erfahrung fürs Gebiet trägt seine Farbe', (tester) async {
+    testWidgets('jede Kachel oben trägt die Farbe ihres Gebiets', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: RewardLine(xp: 36, gold: 5, area: SkillArea.geist),
-          ),
+        const ProviderScope(
+          child: MaterialApp(home: Scaffold(body: GebietsKacheln())),
         ),
       );
 
-      expect(
-        farbeVonZeichen(tester, find.byIcon(gebietZeichen(SkillArea.geist))),
-        GebietFarbe.pergament(SkillArea.geist),
-      );
+      for (final area in SkillArea.values) {
+        expect(
+          farbeVonZeichen(tester, find.byIcon(gebietZeichen(area))),
+          GebietFarbe.leder(area),
+        );
+      }
     });
 
     testWidgets('ohne Gebiet ist der Streifen durchsichtig, nicht weg', (
