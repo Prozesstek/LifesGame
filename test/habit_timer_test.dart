@@ -103,7 +103,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HabitTimerSheet), findsOneWidget);
-      expect(find.text('20:00'), findsOneWidget);
+      expect(find.text('20:00'), findsNWidgets(2), reason: 'Blatt und Kachel');
       expect(c.read(habitTrackerProvider).isChecked(lesen.id, heute), isFalse);
       expect(c.read(habitTrackerProvider).timer, isNull);
     });
@@ -152,7 +152,7 @@ void main() {
 
       // Eine Stunde später steht dieselbe Zeit da.
       await warte(tester, uhr, const Duration(hours: 1));
-      expect(find.text('07:20'), findsOneWidget);
+      expect(find.text('07:20'), findsNWidgets(2), reason: 'Blatt und Kachel');
       expect(tracker.isChecked(lesen.id, heute), isFalse);
     });
 

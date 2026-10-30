@@ -33,18 +33,27 @@ import '../../ui/palette.dart';
 /// **Links steht auf der Startseite das Haustier** (24.10.2026), ohne
 /// Rahmen ([links]).
 ///
-/// **Steht auf der Startseite und auf dem Gewohnheiten-Bildschirm**, beide
-/// Male auf dunklem Leder.
+/// **Steht auf der Startseite, auf dunklem Leder, und in der Titelzeile des
+/// Gewohnheiten-Bildschirms** (ADR-0092).
+/// Dort ist sie [klein], auf Pergament und ohne den Balken des Gebiets: Die
+/// Funken fliegen dort in die Kacheln der Gebiete.
 class StatusLeiste extends StatelessWidget {
   const StatusLeiste({
     required this.xp,
     required this.gold,
     this.links,
+    this.klein = false,
     super.key,
   });
 
   /// Was ganz links steht — auf der Startseite das Haustier.
   final Widget? links;
+
+  /// Für die Titelzeile: kleiner Ring, nur so breit wie nötig.
+  final bool klein;
+
+  /// Wie groß der Ring in der Titelzeile ist.
+  static const double kleinerRing = 42;
 
   /// Die ganze Erfahrung, wie `effectiveXpProvider` sie nennt.
   final int xp;
@@ -70,15 +79,17 @@ class StatusLeiste extends StatelessWidget {
 
   Widget _leiste(PlayerLevel level, int gold) {
     return Row(
+      mainAxisSize: klein ? MainAxisSize.min : MainAxisSize.max,
       children: <Widget>[
         ?links,
         // Der Platz des Gebiets: leer, bis ein Häkchen fliegt.
-        const Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: GebietsBalken(aufDunkel: true),
+        if (!klein)
+          const Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: GebietsBalken(aufDunkel: true),
+            ),
           ),
-        ),
         Tooltip(
           triggerMode: TooltipTriggerMode.tap,
           message: level.isMaxLevel
@@ -93,6 +104,7 @@ class StatusLeiste extends StatelessWidget {
                 key: ringKey,
                 level: level.level,
                 anteil: level.ratio,
+                groesse: klein ? kleinerRing : 54,
               ),
             ),
           ),
@@ -110,10 +122,11 @@ class StatusLeiste extends StatelessWidget {
               Text(
                 '$gold',
                 maxLines: 1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Palette.goldOnDark,
+                  // Die Titelzeile ist Pergament, nicht Leder.
+                  color: klein ? Palette.gold : Palette.goldOnDark,
                 ),
               ),
             ],

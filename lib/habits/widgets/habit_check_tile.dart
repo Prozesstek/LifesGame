@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habits/habits.dart';
-import 'package:progression/progression.dart';
 
-import '../../skills/gebiet_farbe.dart';
-import '../../skills/gebiet_zeichen.dart';
 import '../../skills/widgets/gebiet_streifen.dart';
-import '../../skills/widgets/skill_abzeichen.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/holz.dart';
@@ -38,20 +34,21 @@ import 'habit_countdown.dart';
 /// Die Zahlen kommen fertig herein und werden hier nicht gerechnet —
 /// `HabitTracker.xpForNextCheck` ist die eine Stelle, die weiß, was ein
 /// Häkchen wert ist.
+///
+/// **Nur noch Erfahrung, Gold und die Kette in Tagen** (ADR-0092). Der
+/// Skill steht oben in den Kacheln der Gebiete, Bonus und nächste Stufe
+/// der Kette sind weg.
 class HabitCheckTile extends StatelessWidget {
   const HabitCheckTile({
     required this.habit,
     required this.isChecked,
     required this.streak,
-    required this.nextMultiplier,
     required this.xpGain,
     required this.goldGain,
     required this.progress,
     required this.onToggle,
     required this.onAdvance,
     required this.onStop,
-    required this.skill,
-    required this.totalDays,
     this.onTimer,
     this.onTimerDone,
     this.cue,
@@ -68,9 +65,6 @@ class HabitCheckTile extends StatelessWidget {
   /// Länge der Kette, die heute zählt.
   final int streak;
 
-  /// Der Multiplikator, den das nächste Häkchen brächte.
-  final double nextMultiplier;
-
   /// Erfahrung für das nächste Häkchen — oder die, die das heutige schon
   /// gebracht hat.
   final int xpGain;
@@ -80,14 +74,6 @@ class HabitCheckTile extends StatelessWidget {
 
   /// Wie weit das Tagesziel gefüllt ist.
   final int progress;
-
-  /// Der Skill ihres Gebiets (ADR-0085) — null, solange eine alte eigene
-  /// Gewohnheit noch kein Gebiet hat.
-  final SkillLevel? skill;
-
-  /// An wie vielen Tagen sie insgesamt abgehakt wurde — die Zahl, die
-  /// beim Fallen einer Kette stehen bleibt.
-  final int totalDays;
 
   final VoidCallback onToggle;
 
@@ -133,7 +119,6 @@ class HabitCheckTile extends StatelessWidget {
     final goal = _goal;
     final timer = goal?.kind == HabitGoalKind.zeit ? onTimer : null;
     final zeigtPlus = goal != null && !isChecked && timer == null;
-    final zeigtBalken = goal != null && !isChecked;
 
     return Druck(
       child: HolzKarte(
@@ -186,37 +171,8 @@ class HabitCheckTile extends StatelessWidget {
                           RewardLine(
                             xp: xpGain,
                             gold: goldGain,
-                            area: habit.area,
                             alreadyEarned: isChecked,
                           ),
-                          if (zeigtBalken) ...<Widget>[
-                            const SizedBox(height: 7),
-                            if (timer == null)
-                              _GoalBar(
-                                anteil: goal.target <= 0
-                                    ? 0
-                                    : progress / goal.target,
-                                label: goal.progressLabel(progress),
-                              )
-                            else
-                              HabitCountdown(
-                                habit: habit,
-                                onDone: onTimerDone,
-                                builder: (context, uhr) => _GoalBar(
-                                  anteil: uhr.fraction,
-                                  // Läuft er oder steht er mitten in
-                                  // einer Minute, zählt die Restzeit;
-                                  // sonst steht da, was verbucht ist.
-                                  label: uhr.isRunning
-                                      ? uhr.label
-                                      : goal.progressLabel(progress),
-                                  semanticLabel: uhr.isRunning
-                                      ? uhr.semanticLabel
-                                      : null,
-                                  laeuft: uhr.isRunning,
-                                ),
-                              ),
-                          ],
                           if (!isChecked && onEditCue != null) ...<Widget>[
                             const SizedBox(height: 4),
                             _CueLine(
@@ -229,18 +185,24 @@ class HabitCheckTile extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // **Der Skill vorne, die Kette als Bonus** (ADR-0085).
-                    if (skill != null || streak > 0) ...<Widget>[
+                    if (streak > 0) ...<Widget>[
                       const SizedBox(width: 8),
-                      _FortschrittsMarke(
-                        habit: habit,
-                        skill: skill,
-                        totalDays: totalDays,
-                        streak: streak,
-                        nextMultiplier: nextMultiplier,
-                      ),
+                      _StreakMarke(streak: streak),
                     ],
-                    if (timer != null && !isChecked)
+                    // **Ein Tagesziel behält seinen kleinen Stand**: Sonst
+                    // ließe sich eine Menge nicht mehr Schritt für Schritt
+                    // füllen, und ein laufender Timer wäre nicht zu sehen.
+                    if (timer != null && !isChecked) ...<Widget>[
+                      const SizedBox(width: 8),
+                      HabitCountdown(
+                        habit: habit,
+                        onDone: onTimerDone,
+                        builder: (context, uhr) => _ZielStand(
+                          text: uhr.label,
+                          semanticLabel: uhr.semanticLabel,
+                          laeuft: uhr.isRunning,
+                        ),
+                      ),
                       DruckSperre(
                         child: IconButton(
                           key: timerKey(habit.id),
@@ -250,7 +212,13 @@ class HabitCheckTile extends StatelessWidget {
                           tooltip: 'Timer',
                         ),
                       ),
-                    if (zeigtPlus)
+                    ],
+                    if (zeigtPlus) ...<Widget>[
+                      const SizedBox(width: 8),
+                      _ZielStand(
+                        text: '$progress/${goal.target}',
+                        semanticLabel: goal.progressLabel(progress),
+                      ),
                       DruckSperre(
                         child: IconButton(
                           onPressed: onAdvance,
@@ -259,6 +227,7 @@ class HabitCheckTile extends StatelessWidget {
                           tooltip: _plusTooltip(goal),
                         ),
                       ),
+                    ],
                     DruckSperre(
                       child: IconButton(
                         onPressed: onStop,
@@ -450,18 +419,12 @@ class RewardLine extends StatelessWidget {
   const RewardLine({
     required this.xp,
     required this.gold,
-    this.area,
     this.alreadyEarned = false,
     super.key,
   });
 
   final int xp;
   final int gold;
-
-  /// Das Gebiet, in das dieselbe Erfahrung **noch einmal** geht
-  /// (ADR-0085). Steht als eigener Posten mit seinem Zeichen da, in der
-  /// Farbe des Gebiets wie sein Balken (ADR-0090) — ohne Gebiet fehlt er.
-  final SkillArea? area;
 
   /// Ob es schon geholt ist. Dann tragen die Zahlen die Farbe des Erfolgs
   /// statt die des Angebots.
@@ -476,15 +439,13 @@ class RewardLine extends StatelessWidget {
       color: farbe,
     );
 
-    final gebiet = area;
-    final fuerGebiet = gebiet == null ? '' : ', $xp für ${gebiet.label}';
     return Semantics(
       label: alreadyEarned
-          ? 'Heute geholt: $xp Erfahrung fürs Level$fuerGebiet und $gold Gold'
-          : 'Bringt $xp Erfahrung fürs Level$fuerGebiet und $gold Gold',
+          ? 'Heute geholt: $xp Erfahrung und $gold Gold'
+          : 'Bringt $xp Erfahrung und $gold Gold',
       // **Die ganze Zeile schrumpft, keine Zahl wird abgeschnitten.** Auf
-      // der vollsten Kachel — Timer **und** Kreuz daneben, dazu die Marke
-      // des Skills — bleiben für diese Spalte keine 120 Pixel. Mit einem
+      // der vollsten Kachel — Timer **und** Kreuz daneben, dazu die Kette
+      // — bleiben für diese Spalte keine 120 Pixel. Mit einem
       // `Flexible` je Zahl stand dort „+…“ zweimal (ADR-0085, beim
       // Ansehen gefunden); eine Zahl mit Auslassungspunkten ist keine.
       child: FittedBox(
@@ -496,21 +457,6 @@ class RewardLine extends StatelessWidget {
             Icon(Icons.auto_awesome, size: 13, color: farbe),
             const SizedBox(width: 3),
             Text('+$xp', style: stil),
-            // Dieselbe Erfahrung noch einmal, in der Farbe und mit dem
-            // Zeichen des Gebiets: Sie zählt auch für den Skill.
-            if (gebiet != null) ...<Widget>[
-              const SizedBox(width: 8),
-              Icon(
-                gebietZeichen(gebiet),
-                size: 13,
-                color: GebietFarbe.pergament(gebiet),
-              ),
-              const SizedBox(width: 3),
-              Text(
-                '+$xp',
-                style: stil.copyWith(color: GebietFarbe.pergament(gebiet)),
-              ),
-            ],
             const SizedBox(width: 8),
             const GoldIcon(size: 13),
             const SizedBox(width: 3),
@@ -522,194 +468,71 @@ class RewardLine extends StatelessWidget {
   }
 }
 
-/// Rechts auf der Kachel: **oben der Skill**, darunter die Kette als
-/// Flamme mit ihrem Bonus (ADR-0085).
+/// Die Kette in Tagen, mit ihrer Flamme (ADR-0092).
 ///
-/// Bis dahin stand hier nur die Kette, in Tagen. Wer nach 300 Tagen einen
-/// verpasste, sah sie auf 180 fallen und hatte das Gefühl, alles sei weg
-/// — obwohl es nur der Bonus war. Der Skill fällt nie; deshalb steht er
-/// vorne, und die Kette sagt nur noch, was sie gerade bringt.
-///
-/// Ein Tipp zeigt alles in Worten: Skill, Tage gesamt, Kette.
-class _FortschrittsMarke extends StatelessWidget {
-  const _FortschrittsMarke({
-    required this.habit,
-    required this.skill,
-    required this.totalDays,
-    required this.streak,
-    required this.nextMultiplier,
-  });
+/// Sie ist der Grund, morgen wiederzukommen. Ohne laufende Kette erscheint
+/// sie gar nicht — „noch keine Streak" ist eine Null, die niemand lesen
+/// muss.
+class _StreakMarke extends StatelessWidget {
+  const _StreakMarke({required this.streak});
 
-  final Habit habit;
-  final SkillLevel? skill;
-  final int totalDays;
   final int streak;
-  final double nextMultiplier;
 
   @override
   Widget build(BuildContext context) {
-    final area = habit.area;
-    final stufe = skill;
-    final zeilen = <String>[
-      if (area != null && stufe != null) '${area.label} ${stufe.level}',
-      if (area != null) 'Jedes Häkchen zählt fürs Level und für ${area.label}.',
-      '${totalDays == 1 ? '1 Tag' : '$totalDays Tage'} gesamt',
-      if (streak > 0)
-        '${streak == 1 ? '1 Tag' : '$streak Tage'} am Stück, '
-            '${_StreakBadge._faktor(nextMultiplier)}',
-    ];
-
-    return Tooltip(
-      triggerMode: TooltipTriggerMode.tap,
-      message: zeilen.join('\n'),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          if (area != null && stufe != null)
-            SkillAbzeichen(area: area, skill: stufe),
-          if (streak > 0) ...<Widget>[
-            if (stufe != null) const SizedBox(height: 4),
-            _StreakBadge(streak: streak, nextMultiplier: nextMultiplier),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Die Kette als Flamme mit ihrem Bonus.
-///
-/// Sie ist der Grund, morgen wiederzukommen. Ohne laufende Kette
-/// erscheint sie gar nicht — „noch keine Streak" ist eine Null, die
-/// niemand lesen muss. **Seit ADR-0085 steht der Bonus da, nicht die
-/// Tage**: Die Tage stehen im Tipp, und was bleibt, zeigt der Skill.
-class _StreakBadge extends StatelessWidget {
-  const _StreakBadge({required this.streak, required this.nextMultiplier});
-
-  final int streak;
-  final double nextMultiplier;
-
-  @override
-  Widget build(BuildContext context) {
-    // **Die nächste Stufe steht darunter** (Issue #88). Bis zum 28.09.
-    // zeigte das eine eigene Karte als Leiter über der Liste; hier steht
-    // nur, was als Nächstes kommt, und nur an der Kette, die es betrifft.
-    final naechste = HabitRewards.nextMilestoneAfter(streak);
-    final noch = naechste == null ? 0 : naechste.days - streak;
-
     return Semantics(
       label: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-      child: Column(
+      excludeSemantics: true,
+      child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Icon(
-                Icons.local_fire_department,
-                size: 14,
-                color: Palette.gold,
-              ),
-              const SizedBox(width: 3),
-              Text(
-                _faktor(nextMultiplier),
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Palette.gold,
-                ),
-              ),
-            ],
+          const Icon(
+            Icons.local_fire_department,
+            size: 16,
+            color: Palette.gold,
           ),
-          // Die nächste Stufe ohne Worte: Uhr, Tage, Faktor.
-          if (naechste != null)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const Icon(
-                  Icons.update_rounded,
-                  size: 10,
-                  color: Palette.textDim,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '$noch',
-                  style: const TextStyle(fontSize: 9, color: Palette.textDim),
-                ),
-                const Icon(
-                  Icons.arrow_right_alt_rounded,
-                  size: 11,
-                  color: Palette.textDim,
-                ),
-                Text(
-                  _faktor(naechste.multiplier),
-                  style: const TextStyle(fontSize: 9, color: Palette.textDim),
-                ),
-              ],
+          const SizedBox(width: 2),
+          Text(
+            '$streak',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Palette.gold,
             ),
+          ),
         ],
       ),
     );
   }
-
-  static String _faktor(double wert) {
-    return 'x${wert.toStringAsFixed(1).replaceAll('.', ',')}';
-  }
 }
 
-/// Ein schmaler Balken für den angefangenen Tag, mit seiner Zahl daneben.
-///
-/// Die Zahl stand bis Issue #35 in der Zeile darüber. Sie ist mit an den
-/// Balken gewandert statt zu verschwinden: Ein Balken allein sagt „etwa
-/// die Hälfte", und wer fünf Gläser zählt, will wissen, ob er beim
-/// dritten oder vierten steht.
-class _GoalBar extends StatelessWidget {
-  const _GoalBar({
-    required this.anteil,
-    required this.label,
-    this.semanticLabel,
+/// Wie weit ein Tagesziel ist, klein neben seinem Knopf: „3/5“ oder die
+/// Restzeit.
+class _ZielStand extends StatelessWidget {
+  const _ZielStand({
+    required this.text,
+    required this.semanticLabel,
     this.laeuft = false,
   });
 
-  /// Wie voll der Balken ist, null bis eins.
-  final double anteil;
-  final String label;
-  final String? semanticLabel;
+  final String text;
+  final String semanticLabel;
 
   /// Ob gerade ein Timer läuft — dann steht die Zahl kräftig da.
   final bool laeuft;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: anteil.clamp(0.0, 1.0),
-              minHeight: 4,
-              backgroundColor: Palette.surfaceRaised,
-              valueColor: const AlwaysStoppedAnimation<Color>(Palette.accent),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            label,
-            semanticsLabel: semanticLabel,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: laeuft ? FontWeight.bold : FontWeight.normal,
-              color: laeuft ? Palette.accent : Palette.textDim,
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      text,
+      maxLines: 1,
+      semanticsLabel: semanticLabel,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: laeuft ? FontWeight.bold : FontWeight.w600,
+        color: laeuft ? Palette.accent : Palette.textDim,
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+      ),
     );
   }
 }

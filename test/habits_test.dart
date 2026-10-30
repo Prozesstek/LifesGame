@@ -518,7 +518,7 @@ void main() {
 
       // Das Plus auf der Kachel — die Vorlagen stehen seit ADR-0089
       // nicht mehr auf dem Bildschirm.
-      expect(find.text('0 / 3 Mal'), findsOneWidget);
+      expect(find.text('0/3'), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.add_circle_outline).first);
       await tester.pump();
@@ -621,8 +621,8 @@ void main() {
       expect(find.textContaining('+1 Angriff'), findsNothing);
 
       // Die Zahlen sind geblieben -- die Kette als Marke, der Stand des
-      // Tagesziels am Balken. Ohne sie waere aus einer Layout-Aenderung
-      // eine Produktaenderung geworden.
+      // Tagesziels neben seinem Knopf (ADR-0092). Ohne sie waere aus einer
+      // Layout-Aenderung eine Produktaenderung geworden.
       expect(find.text('Wasser trinken'), findsOneWidget);
       // Nur die Marke auf der Kachel — die Flamme steht seit Issue #46
       // auch über der Beständigkeits-Leiter.
@@ -634,7 +634,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('2'), findsWidgets);
-      expect(find.textContaining('Gläser'), findsOneWidget);
+      expect(find.text('1/5'), findsOneWidget);
     });
 
     testWidgets('ohne Kette steht keine Marke da', (tester) async {
@@ -696,9 +696,7 @@ void main() {
       await _vorlageStarten(tester);
       await tester.pump();
 
-      // Die Erfahrung steht zweimal da: fürs Level und für das Gebiet
-      // (ADR-0085).
-      expect(find.text('+${HabitRewards.xpPerCheck}'), findsNWidgets(2));
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
       expect(find.text('+${HabitRewards.goldPerCheck}'), findsOneWidget);
     });
 
@@ -716,7 +714,7 @@ void main() {
       // Die Zahlen stehen jetzt ohne „Heute" davor, in der Farbe des
       // Erfolgs.
       expect(find.bySemanticsLabel(RegExp('Heute geholt')), findsOneWidget);
-      expect(find.text('+${HabitRewards.xpPerCheck}'), findsNWidgets(2));
+      expect(find.text('+${HabitRewards.xpPerCheck}'), findsOneWidget);
     });
 
     testWidgets('mit laufender Kette steht dort mehr', (tester) async {
@@ -734,10 +732,8 @@ void main() {
 
       expect(
         find.text('+${HabitRewards.xpFor(3)}'),
-        findsNWidgets(2),
-        reason:
-            'die Kachel muss den Multiplikator in Erfahrung umrechnen — '
-            'fürs Level und fürs Gebiet',
+        findsOneWidget,
+        reason: 'die Kachel muss den Multiplikator in Erfahrung umrechnen',
       );
       expect(HabitRewards.xpFor(3), greaterThan(HabitRewards.xpPerCheck));
     });
@@ -787,9 +783,10 @@ void main() {
   });
 
   group('Was Beständigkeit bringt (Issue #46, #88)', () {
-    testWidgets('die Kachel nennt die nächste Stufe der Kette', (tester) async {
-      // Seit dem 28.09. keine Leiter mehr über der Liste: Was als
-      // Nächstes kommt, steht an der Kette, die es betrifft.
+    testWidgets('die Kachel nennt die Kette in Tagen, sonst nichts', (
+      tester,
+    ) async {
+      // ADR-0092: kein Bonus und keine nächste Stufe mehr an der Kachel.
       final container = _container();
       _passRootBranch(container);
       await _pumpScreen(tester, container);
@@ -800,14 +797,15 @@ void main() {
       controller.toggle(vorlage.id, _heute.previous);
       await tester.pump();
 
-      final naechste = HabitRewards.nextMilestoneAfter(1)!;
-      final noch = naechste.days - 1;
-      final faktor = naechste.multiplier
-          .toStringAsFixed(1)
-          .replaceAll('.', ',');
-      expect(find.text('$noch'), findsWidgets);
-      expect(find.text('x$faktor'), findsOneWidget);
-      expect(find.byIcon(Icons.update_rounded), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(HabitCheckTile),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining(RegExp(r'^x\d')), findsNothing);
+      expect(find.byIcon(Icons.update_rounded), findsNothing);
     });
 
     testWidgets('die Leiter und die Werte stehen nicht mehr da', (

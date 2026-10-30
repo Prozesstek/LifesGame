@@ -17,8 +17,389 @@
 > Vierter Umzug am 19.10.2026: die Einträge vom 04. bis 11.10.
 >
 > Fünfter Umzug am 28.10.2026: die Einträge vom 13. bis 20.10.
+>
+> Sechster Umzug am 30.10.2026: die Einträge vom 21. und 22.10.
 
 ---
+
+## 22.10.2026, zuletzt: Level und Gold oben rechts, der Balken als Ring
+
+Frederik: „ich hätte glaube gerne das Level und Gold beim Startbildschirm
+oben rechts und vielleicht der Levelbalken als Kreis darum.“ Gebaut ohne
+Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Oben rechts** | das Level-Abzeichen in einem Ring, der sich mit der Erfahrung bis zum nächsten Level füllt, daneben das Gold — über den Kreisen |
+| **Der Ring** | die Funken eines Häkchens fliegen hinein; ein Tipp sagt, wie viel noch fehlt |
+| **Das Gebiet** | der grüne Balken blendet beim Häkchen links neben dem Ring ein (ADR-0085) |
+| **Weg** | die Leiste als Karte zwischen den Kreisen und „Heute“; „Heute“ und das Haustier rücken nach oben |
+| **Gewohnheiten** | oben dieselbe Zeile, damit beide Bildschirme gleich aussehen |
+
+Startseite und Gewohnheiten in 390 × 844 gerendert, auch mitten im Flug.
+Ein Test hält fest, dass der Ring rechts und über den Kreisen steht. App
+980 (vorher 979). **Baut auf #149 (Haustier) auf. Nicht am Handy.**
+
+## 22.10.2026, spät: ein Haustier — Prototyp im Entwicklermodus
+
+Frederik: „Nicht jede Spielergruppe will sich über den Kampf vergleichen.
+Wir brauchen andere Möglichkeiten Fortschritt zu zeigen wie z.B.
+Haustiere … oder zum Beispiel ein eigenes Haus oder Dorf was ausgebaut
+werden kann.“ In zwei Fragerunden entschieden, siebenmal wie empfohlen,
+einmal dagegen (drei Eier statt eines Drachen). Das Konzept steht in
+[`docs/vorlagen/haustier.md`](../vorlagen/haustier.md); **der ADR kommt,
+wenn ihr beide es gespielt habt.**
+
+| Was | Wie |
+|---|---|
+| **Drei Eier** | Drache, Eule, Katze — gewählt wird einmal, über „Heute“ auf der Startseite |
+| **Wachsen** | an Tagen mit Häkchen, nie zurück: Level 2 nach 1 Tag, 10 nach 45, 27 nach 351; sechs Stufen vom Ei bis „Uralt“ |
+| **Laune** | schläft nachts, wartet ohne Häkchen, munter mit einem, spielt „In Form“, ruht am Ruhetag — **es leidet nie** |
+| **Sprung** | mit jedem Häkchen von heute |
+| **Prägung** | ab „Ausgewachsen“ das stärkste Gebiet: Stirnband, Punkt, Brille oder Herz (ADR-0085) |
+| **Zubehör** | zehn Stücke auf drei Plätzen, sieben für Gold (25 bis 120), drei an Stufen verdient |
+| **Gold** | Zubehör ist der zweite Abfluss: Leiste und Laden der Ausrüstung ziehen es ab |
+
+**Nur im Entwicklermodus** (`devModeAvailable`): im Debug-Build und in
+der Entwicklerfassung unter `/LifesGame/dev/`. Der Store-Build kennt es
+nicht. Im Blatt lassen sich dort Tage vorspulen, um spätere Stufen
+anzusehen; gespeichert wird davon nichts.
+
+**Das Bild ist gezeichnet** (Formen, nicht Pixel), damit es atmen,
+blinzeln, schlafen und springen kann. **Beim Ansehen gefunden:** Die
+Prägung am Kopf lag hinter dem Kopf, und die „Z“ des Schlafs erschienen
+als Kästchen — jetzt Linien.
+
+Neu: `packages/haustier` (21 Tests), `lib/haustier/` (vier Dateien),
+`test/haustier_test.dart` (12). App 979 (vorher 967). Alle Arten und
+Stufen, die Startseite und das Blatt in 390 × 844 gerendert und
+angesehen. **Nicht gespielt, nicht am Handy.**
+
+### Offen
+
+- **Spielen**, dann der ADR — und ob es in den Store-Build geht.
+- **AktivesBrett hat es nicht gesehen.**
+- Zubehör konkurriert mit Ausrüstung um Gold; `runway_sim` zählt es
+  nicht.
+- Ein Grafikpaket mit drei Tieren in sechs Stufen — oder gezeichnet
+  bleiben.
+- Das Haus als sein Zuhause ist der nächste Schritt.
+
+## 22.10.2026, abends: Skills je Gebiet — was bleibt, wenn die Kette fällt
+
+Frederik: „Jemand der 30 Tage eine Streak aufrecht erhält hat ein
+höheres Gefühl als jemand der 100 mal 25 Tage Streaks hatte … So hat
+Sport seinen eigenen Skill in welche Theorie einzahlen als auch die
+Gewohnheiten die dazu passen. Dadurch kann sich mehr mit anderen
+verglichen werden und wir verlieren keine Spieler nachdem sie eine 300
+Tage Streak verloren haben.“ In zwei Fragerunden entschieden, siebenmal
+wie empfohlen, einmal dagegen:
+[ADR-0085](../decisions/0085-skills-je-gebiet.md).
+
+**Der Befund vorher:** Eine verlorene 300-Tage-Kette kostete schon keine
+Erfahrung (300 → 60, ×2 blieb), weh tat nur die Zahl auf der Kachel. Ab
+Tag 60 brachte eine längere Kette nichts mehr, und bei Level 50 ist nach
+188 bis 240 Tagen Schluss.
+
+| Was | Wie |
+|---|---|
+| **Vier Skills** | Körper, Geist, Wissenschaft, Gesellschaft — die Wurzeln des Baums; 1 bis 100, wachsen nur |
+| **Was einzahlt** | Häkchen (mit Kette und Grad), bestandene Seiten des Gebiets, richtige Rückfragen; das Level bekommt alles weiter |
+| **Die Kette** | wächst über 60 Tage weiter: 100 Tage ×2,2, 180 ×2,4, 365 ×2,6 |
+| **Titel** | je Gebiet drei, bei 10, 25 und 50 — zwölf neue, im Reiter „Gebiete“ der Errungenschaften |
+| **Vorne steht der Skill** | auf der Kachel Zeichen und Stufe, darunter die Flamme mit dem Bonus; die Tage am Stück im Tipp, dazu die Tage gesamt |
+| **Charakter** | Gesamtlevel, die vier Skills, ein Teilen-Knopf — über der Kette |
+| **Baum** | der Skill des Gebiets neben seinem Namen |
+| **Alte eigene Gewohnheiten** | fragen **einmal** nach ihrem Gebiet, auf der Startseite über „Heute“ — **gegen Claudes Empfehlung** (aus dem Wert ableiten) |
+
+**Danach, auf Frederiks Wunsch** („eine Animation und besser
+ausgeschildert, dass … XP zu dem Charakter Level und Level des Gebietes
+dazu kommt“): Die Funken eines Häkchens teilen sich, ein Strom fliegt zum
+Level, ein grüner zum **Balken des Gebiets**, der dafür unter dem
+Level-Balken einblendet und danach verblasst. Unter „+33 EP +5 G“ steigt
+grün „+33 EP Körper“ auf, die Kachel nennt die Erfahrung zweimal, und
+„Heute“ trägt rechts das Zeichen des Gebiets. **Der Gewohnheiten-
+Bildschirm hat jetzt oben die Leiste** — die Lücke vom 18.10. ist zu.
+
+**Gemessen** (eine Gewohnheit täglich, ohne Seiten): Skill 10 nach 50
+Tagen, 25 nach 159, 50 nach 425, 100 nach 1307. Durch die neuen
+Kettenstufen kommt **Level 50 früher**: fünf Vorlagen nach 223 Tagen
+statt 240, fünf „schwere“ nach 179 statt 188. Bis Tag 60 ändert sich
+nichts. Die Errungenschaften zahlen über ein Spielerleben 2880 Erfahrung
+und 960 Gold statt 1860 und 620 — über Jahre verteilt.
+
+**Ohne Rückfrage entschieden** (die ganze Liste im ADR): die zwölf
+Titelnamen; ein eigener Reiter „Gebiete“; eine Seite in zwei Gebieten
+zählt für beide Skills; das Gebiet einer eigenen Gewohnheit steht ab dem
+Anlegen fest; Grün als Farbe der Gebiete.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844, auch mitten im
+Flug): Auf der Kachel mit Timer standen beide Erfahrungszahlen als
+„+…“; die Zeile schrumpft jetzt als Ganzes.
+
+Neu: `skill_area.dart`, `skill_curve.dart`, `lib/skills/` (acht
+Dateien), `skill_area_test.dart`, `skill_curve_test.dart`,
+`area_xp_test.dart`, `test/skills_test.dart`. App 967 (vorher 951),
+habits 345 (333), theory 208 (204), progression 52 (44), achievements
+25 (24). **Nicht gespielt, nicht am Handy, nicht gehört.**
+
+### Offen
+
+- **Die Namen der zwölf Titel** sind Claudes Vorschlag — gegenlesen.
+- **AktivesBrett hat ADR-0085 nicht gesehen**: Die Kachel zeigt jetzt
+  den Skill statt der Tage, und der Kettenbonus geht bis ×2,6.
+- Ob der Balken des Gebiets am Handy lesbar ist — Name und Stufe stehen
+  in zehn Punkten.
+- Ob Skill 10 nach 50 Tagen zu langsam ist; mit Seiten geht es schneller.
+- Vergleichen geht nur über den kopierten Text. Eine Rangliste braucht
+  einen Server.
+
+## 22.10.2026: die Niederlage nimmt — und zeigt drei Wege
+
+Frederik: „wenn man einen Lauf verliert [soll] man kein Gold und kein XP
+und keine Items bekommen. Stattdessen … eine Animation wie diese Sachen
+einem wieder weggenommen werden und vielleicht 3 Tipps wie man seinen
+Charakter stärker machen kann.“ In zwei Fragerunden entschieden: [ADR-0084](../decisions/0084-die-niederlage-nimmt.md).
+
+| Was | Wie |
+|---|---|
+| **Nur ein Sieg zahlt** | dann den ganzen Topf; eine Niederlage bucht nur, dass verloren wurde. Bis dahin behielt sie, was gefallen war (ADR-0041) |
+| **Items** | was in der Grube eingesammelt wurde (ADR-0083, seit dem 21.10.), fliegt mit weg und kommt nicht in den Rucksack; **gegen AktivesBretts Entscheidung** dort („man behält sie“), auf Frederiks Wunsch |
+| **Schlüssel** | öffnen den Extra-Wurf **nur noch nach einem Sieg** (ADR-0083: nach jedem Lauf) |
+| **In der Grube** | die Kasse zählt herunter und glüht rot, der Balken läuft zurück, ein Aufstieg im Lauf fällt ab, Münzen und Funken springen vom Helden weg und verlöschen; dazu der Ton einer falschen Antwort. Erst dann kommt das Blatt |
+| **Drei Tipps** | aus dem Stand: leerer Fähigkeitsplatz, Besseres im Rucksack, freie Punkte, Häkchen bis In Form, Besseres im Laden; sonst allgemeine Sätze. Jeder ein Knopf in seinen Bereich, an die Stelle der Grube |
+
+**Ohne Rückfrage entschieden:**
+
+- **Alte Teilbeute bleibt**: Was ein Stand in verlorenen Läufen schon
+  gesammelt hat, ist längst Erfahrung; es zu streichen ließe ein Level
+  fallen. Es wächst nur nicht mehr.
+- **Die Tagesgrube bleibt, wie sie ist**: Sie zahlt nur Ruhm, antreten
+  zählt.
+- **Was sofort und umsonst hilft, steht vorn** (Platz, Rucksack), dann
+  was kostet (Punkte, Häkchen, Gold). Nie zwei Tipps in denselben
+  Bereich.
+- **Das Buch nach dem ersten Lauf bleibt** neben „Nochmal“.
+
+**Beim Mergen gefunden:** Während des Baus kam AktivesBretts Beute in
+der Grube nach `main` (#145), mit eigenem ADR-0083 — daher ist dieser
+ADR-0084. Frederik hat danach entschieden: Auch die Funde gehen, der
+Schlüssel nur nach einem Sieg. ADR-0083 trägt den Vermerk.
+
+**Beim Ansehen gefunden** (gerendert in 390 × 844): Der Balken wurde
+beim Zurücklaufen weiß statt rot; jetzt glüht auch die Füllung rot.
+
+Neu: `staerker_werden.dart`, `staerker_werden_provider.dart`,
+`test/staerker_werden_test.dart`. App 951 (vorher 934), action_combat
+406 (vorher 407: zwei Tests zur Teilbeute wurden einer). Blatt und Grube
+mitten im Nehmen gerendert und angesehen, die Grube mit Würfeln. **Nicht
+gespielt, nicht am Handy, nicht gehört.**
+
+### Offen
+
+- **Verlieren ist jetzt teurer**: Wer eine Stufe oft versucht, bekam
+  den Topf bisher über alle Läufe verteilt. `runway_sim` rechnet nur
+  mit Siegen und merkt davon nichts.
+- Ob 1,4 Sekunden Nehmen plus Ausklingen zu lang sind, wenn man nur
+  „Nochmal“ drücken will.
+- **AktivesBrett hat ADR-0084 nicht gesehen** — und dass seine
+  Entscheidung „eingesammelt bleibt“ damit gekippt ist.
+
+## 21.10.2026, nachts: der Entwicklermodus bekommt Kampfwerte, Ebenen und eine Werkbank
+
+AktivesBrett: „dass man sich Stats geben kann … und dass man zu einem
+bestimmten Level vorspringen kann und dass man in dem Level Items und
+Gegner beschwören kann … ich möchte testen, wie Legendarys aussehen,
+ohne die ganze Zeit Gegner töten zu müssen, und schauen, wie viel
+Schaden ich an bestimmten Gegnern mache.“
+
+| Was | Wie |
+|---|---|
+| **Kampfwerte** | Knöpfe für Angriff, Leben, Abwehr und Mana im Dev-Bildschirm; im Kampfmassstab wie der Wurf eines Stücks, danach mal Level, Seltenheit und Tagesform. Oben steht, was der Held im Kampf hat |
+| **Ebene wählen** | Feld „Ebene“ mit **Hinab** (ein Lauf dort, die Reihe bleibt, Beute fällt) und **Dorthin** (die Reihe so gesetzt, dass die Ebene die nächste ist) |
+| **Werkbank in der Grube** | ein Kolben oben rechts hält den Lauf an und öffnet ein Blatt: ein Fund jeder Seltenheit vor den Helden, ein Gegner jeder Art zwei, drei Felder in Blickrichtung |
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Werkbank gibt es nur auf dem Dev-Stand** (ADR-0021): Was sie
+  legt, landet beim Einsammeln im Rucksack, und erfundene Beute gehört
+  nicht in den echten Stand. Wer sie nicht sieht, schaltet im
+  Entwicklermodus auf den Dev-Stand um.
+- **Der Wächter lässt sich nicht beschwören** — sein Verhalten hängt
+  daran, dass es genau einen gibt und er in seinem Raum steht.
+- **Ein beschworener Gegner ist ein ganz normaler**: Werte der Stufe,
+  zählt für die Sammlung, lässt Beute fallen.
+- **„Dorthin“ zahlt, was darunter liegt**, weil die Reihe ihre
+  Belohnung aus der höchsten Stufe ableitet; zurückspringen nimmt es
+  wieder weg. Nur im Dev-Stand gedacht, gesperrt ist es nicht.
+- **Ein gewünschter Fund würfelt trotzdem** Platz und Werte — nur die
+  Seltenheit steht fest (`GearLoot.cascade(rarity:)`).
+
+Neu: `packages/action_combat/lib/src/entwickler.dart`,
+`lib/dev/grube_werkbank.dart`, `entwickler_test.dart` (6),
+`test/grube_werkbank_test.dart` (2). App 934 (vorher 929),
+action_combat 407 (vorher 401), gear 137 (vorher 136). **Nicht im
+Browser angesehen, nicht gespielt.**
+
+## 21.10.2026, ganz zuletzt: die Würfel hingen zusammen, die Säule ist ein Strahl
+
+AktivesBrett: „in einem Level habe ich 3 Legendarys bekommen und in den
+nächsten 5 nicht mal ein Lilanes. Irgendwas scheint da nicht richtig zu
+sein“ — und die Säule über Legendärem soll „viel größer, heller und
+dünner“ sein.
+
+**Es war ein Fehler.** Jeder Fund hatte seinen eigenen Würfel mit einem
+Startwert im gleichen Abstand zum vorigen, und der Würfel ist linear:
+Die Funde eines Laufs fielen gemeinsam (`gotchas.md`). Gemessen über
+4000 Läufe mit sechs Funden auf Ebene 22:
+
+| Legendäre je Lauf | erwartet | vorher | jetzt |
+|---|---|---|---|
+| keins | 74 % | 90 % | 74 % |
+| eins | 23 % | 1 % | 23 % |
+| zwei | 3 % | 1 % | 3 % |
+| drei | 0,2 % | 8 % | 0,1 % |
+
+Die Gewichte selbst stimmten und bleiben: auf Ebene 20 bis 30 je Fund
+5 % legendär und 15 % episch, auf 10 bis 19 7 % episch, darunter weder
+noch; der Wächter würfelt eine Stufe höher. **Der Laden hatte dasselbe**,
+schwächer: Tage mit nur zwei Seltenheiten kamen doppelt so oft. Behoben
+ist es im Würfel selbst (`GearDice` mischt den Startwert), deshalb
+**sieht der Laden heute andere Angebote** als vor dem Update.
+
+**Die Säule** ist jetzt 420 Punkte hoch statt 140, ein weißgoldener
+Kern von gut zwei Punkten in einem schmalen goldenen Schein, voll bis
+über die Hälfte. Gerendert und angesehen.
+
+gear 136 (vorher 133): der Würfel rechnet im Browser wie in der VM
+(auch mit `dart test -p chrome` geprüft), Funde eines Laufs und Angebote
+eines Tages hängen nicht zusammen. **Nicht gemessen:** Tagestruhe,
+Tagesaufgaben und Tagesgrube säen ihre Würfel auf dieselbe Art.
+
+## 21.10.2026, zuletzt: Lebensraub am ganzen Schlag, Funde ein Feld groß
+
+AktivesBrett nach dem Spielen: „beim Life steal ist es wichtig, das ich
+auch wirklich so viel schaden mache wie ich kann und nicht nur wie die
+Gegner Leben haben“ — mit dem Vampirset heilte man sich teils nicht
+genug. Und die Funde am Boden sollen größer sein.
+
+| Was | Wie |
+|---|---|
+| **Lebensraub** | rechnet am **ungekappten** Schlag: 2000 auf einen Gegner mit 200 raubt aus 2000. Beim Blutpakt auch der Schaden aus dem Raub |
+| **Funde am Boden** | der Umriss 32 Punkte, ein Feld und die Hälfte der 64er-Zeichnung; der Rahmen 36 mit zwei Punkten Luft (vorher 14 und 18) |
+
+In einer Frage entschieden: ein Feld groß statt 64 Punkte, und weiter
+der Umriss in der Farbe der Seltenheit statt der echten Zeichnung.
+
+**Gemessen** (`pit_sim ausruestung 40`, Stufe 13, Sichel): ein Teil
+45 % (vorher 43 %), zwei Teile 63 % (63 %), **alle vier 55 %
+(vorher 28 %)**. Der Blutpakt ist damit nicht mehr schwächer als zwei
+Teile ohne Preis — knapp darunter. Die übrigen Kräfte unverändert.
+
+action_combat 401 (vorher 400): ein Test, dass ein angeschlagener
+Gegner denselben Raub bringt. Ein alter Test ging davon aus, dass der
+Raub allein nie mehr als drei Prozent heilt; er vergleicht jetzt mit
+demselben Lauf ohne Kill-Heilung. Die Funde in Stufen gerendert und
+angesehen. **Nicht gespielt.**
+
+## 21.10.2026, danach: das Siegerblatt und Verkaufen mit Häkchen (Block 2 von #136)
+
+AktivesBrett: „ok mach block 2“. Gebaut nach der Skizze im Ticket und
+den Antworten aus den Fragerunden zu
+[ADR-0083](../decisions/0083-beute-in-der-grube.md).
+
+| Was | Wie |
+|---|---|
+| **Die Funde drehen sich um** | erst liegt jeder da wie am Boden — der Umriss seines Platzes in der Farbe der Seltenheit —, dann dreht sich eine Kachel nach der anderen, **das Seltenste zuletzt**, mit Klang; Legendäres mit seinem eigenen und einem goldenen Schein |
+| **Pfeil gegen das Getragene** | grün hoch, rot runter, braun gleich — wie im Rucksack |
+| **Antippen** | öffnet das Blatt des Stücks: anlegen, sperren, alle Werte |
+| **Häkchen** | ein Knopf schaltet auf Auswahl; ein Tipp setzt ein Häkchen, „Verkaufen“ zeigt Anzahl und Gold der Auswahl, mit Rückfrage. **Dasselbe im Rucksack** der Ausrüstung |
+| **Am Boden** | statt eines Zeichens der Umriss eines Schwerts, Stiefels, Rings … in der Farbe der Seltenheit |
+
+**Ohne Rückfrage entschieden:**
+
+- **Der beste Fund springt nur noch beim ersten Sieg überhaupt auf.**
+  Das Siegerblatt zeigt jeden Fund mit Pfeil, ein Dialog danach sagte
+  dasselbe noch einmal; beim ersten Sieg erklärt er, was eine Truhe ist.
+- **Kein Häkchen auf Angelegtem und Gesperrtem**, dort steht auch kein
+  Kreis. Verkauftes verschwindet aus dem Siegerblatt.
+- **Der Umriss ist ein gewöhnliches Stück des Platzes**, ganz in der
+  Farbe der Seltenheit gefüllt (`GearIcons.gruppeFor`) — man sieht
+  „ein Schuh“, nicht welcher.
+- **Beim Ziehen im Rucksack** gilt: Solange die Auswahl an ist, zieht
+  man nichts auf einen Platz.
+
+Neu: `lib/gear/verkauf_auswahl.dart` (die Regel, reine Rechnung),
+`lib/gear/widgets/verkauf_leiste.dart`,
+`lib/combat/widgets/siegerblatt_funde.dart`,
+`test/verkauf_mit_haekchen_test.dart` (10). App 929 (vorher 919). Das
+Siegerblatt in 390 × 844 gerendert und angesehen, mitten im Aufdecken
+und mit Auswahl; dabei gefunden: Angelegtes trug einen leeren Kreis,
+und ein Laufmännchen stand für Schuhe. **Nicht gespielt, nicht am
+Handy.**
+
+### Offen
+
+- Ob das Aufdecken (gut eine Sekunde Vorlauf, dann ein Drittel Sekunde
+  je Kachel) bei sechs Funden zu lang ist.
+- Der Rucksack hat keine Grenze; ob Verkaufen mit Häkchen reicht,
+  zeigt das Spielen.
+- Frederik hat ADR-0083 nicht gesehen.
+
+## 21.10.2026: Beute in der Grube — die Kaskade (Block 1 von #136)
+
+AktivesBrett: „ich möchte das Ticket 136 Loot System angehen“. Das
+Ticket: Items fallen in der Grube, nicht nur am Ende; Legendäres sticht
+hervor; am Boden nur die Gruppe mit dem Rand der Seltenheit, am Ende
+das Stück; ein „Cascading Drop System“. Dazu eine Skizze des
+Siegerblatts und ein Bild aus Summoners War (Verkaufen mit Häkchen). In
+vier Fragerunden entschieden:
+[ADR-0083](../decisions/0083-beute-in-der-grube.md). Gebaut in zwei
+Blöcken; dies ist der erste.
+
+| Was | Wie |
+|---|---|
+| **Die Kaskade** | Würfel in Stufen: *ob* (13 % je Gegner, 30 % bei zähen, der Wächter immer), welcher Platz, welche Seltenheit (Wächter eine Stufe höher), welches Stück |
+| **Am Boden** | das Zeichen des Platzes im Rand der Seltenheit; Episches im violetten Schein, **Legendäres unter einer goldenen Lichtsäule** mit eigenem Klang |
+| **Einsammeln** | hinlaufen; was am Ende liegt, ist weg; **eingesammelt bleibt auch nach einer Niederlage**; die Wächterbeute kommt von selbst |
+| **Nach dem Lauf** | die Funde im Ergebnisblatt als Kacheln; nach einem Sieg springt der beste auf; dann fragt der **Schlüssel**: ein Extra-Wurf |
+| **Tagesgrube** | wirft nichts |
+
+**Gemessen** (`dart run tool/pit_sim.dart beute 40`, Tag 30): In
+gewonnenen Läufen fallen auf Ebene 1 und 5 im Schnitt 4,3 Stücke, auf
+Ebene 10 5,3 — das Ziel waren 4 bis 6. Der Bot läuft keinem Fund nach
+und holt gut die Hälfte.
+
+**Ohne Rückfrage entschieden:**
+
+- **Die Grube kennt keine Ausrüstung**: Sie meldet nur die Nummer des
+  Fundes, die App würfelt den Rest (`PitBeute`). Die Uid trägt den
+  Startwert des Laufs, sonst wäre der zweite Lauf auf derselben Ebene
+  am selben Tag schon „besessen“.
+- **Ein eigener Würfel für die Beute**, damit sie keinen kritischen
+  Treffer verschiebt (Test).
+- **Gewürfelt wird beim Fallen**, damit Rand und Lichtsäule stimmen.
+- **Der Schlüssel fragt nach jedem Lauf**, auch nach einer Niederlage.
+- **Bis zum neuen Siegerblatt** springt nach einem Sieg der beste Fund
+  auf (wie vorher die Wächterbeute) — dort legt man an.
+
+Neu: `item_drops.dart`, `beute_in_der_grube_test.dart` (8),
+`GearLoot.cascade` mit fünf Tests, `lib/action/pit_beute.dart`,
+`beute_am_boden.dart`, `test/pit_beute_test.dart` (7), zwei Klänge
+(`Fund`, `Legendaer`). `takeLoot` ist weg (`takeRunLoot`,
+`takeKeyLoot`). App 919 (vorher 911), action_combat 400 (vorher 392),
+gear 133 (vorher 128). **Nicht gespielt, nicht am Handy, nicht im
+Browser angesehen.**
+
+### Offen
+
+- ~~**Block 2**~~ (gebaut, Eintrag darüber): das Siegerblatt nach der Skizze — Kacheln drehen sich um,
+  das Seltenste zuletzt, Pfeil gegen das Getragene, Antippen öffnet das
+  Blatt, **Häkchen und „Verkaufen“ mit dem Gold der Auswahl**; dazu das
+  Verkaufen mit Häkchen im Rucksack.
+- Ob vier bis sechs Stücke je Lauf den Rucksack zu schnell füllen.
+- Werte, die mit der Tiefe wachsen (#115), sind nicht gebaut.
+- Frederik hat ADR-0083 nicht gesehen.
 
 ## 20.10.2026, nachts: Sammlung im Laden, Fähigkeiten ohne Überschriften
 
