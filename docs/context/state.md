@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 30.10.2026 · Frederik
+**Zuletzt aktualisiert:** 31.10.2026 · Frederik
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1058, dazu die acht Packages (theory 218, habits 374, gear
+**Tests:** App 1061, dazu die acht Packages (theory 218, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,34 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 31.10.2026: drei eigene Gewohnheiten nach dem Mentor
+
+Frederik: „dann würde ich gerne, dass man nach dem Tutorial die Möglichkeit
+hat 3 Gewohnheiten schon zu haben“.
+[ADR-0093](../decisions/0093-drei-gewohnheiten-nach-dem-mentor.md).
+
+Der erste Sieg in der Grube bringt zwei Plätze für eigene Gewohnheiten, mit
+dem Platz der Startvorlage also drei. Jede weitere Vorlage bringt wie bisher
+einen dazu. Der Mentor sagt es in seinem letzten Satz im Beute-Dialog.
+
+**Ohne Rückfrage entschieden:** „nach dem Tutorial“ ist der erste Sieg, dann
+schweigt der Mentor; die Plätze werden dazugezählt statt als Mindestzahl,
+damit die ersten Vorlagen aus dem Baum weiter einen bringen; es werden keine
+Gewohnheiten vorgegeben. Stände mit einem Sieg bekommen sie rückwirkend.
+
+**Beim Prüfen gefunden, an Frederiks Stand nicht bestätigt:** Die Feier sagt
+„+1 Theoriepunkt“, auch wenn ein alter Stand noch Schulden aus ADR-0078 hat
+und nichts frei wird (`show_level_up.dart`). Nicht geändert.
+
+App 1061 (vorher 1058), habits 375 (vorher 374). Der Beute-Dialog in 390 × 844
+gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- Wie viel schneller drei Gewohnheiten früh das Level treiben, ist nicht
+  gemessen: `runway_sim` spielt nur Vorlagen.
+- **AktivesBrett hat ADR-0093 nicht gesehen.**
 
 ## 30.10.2026: der Gewohnheiten-Bildschirm aufgeräumt
 

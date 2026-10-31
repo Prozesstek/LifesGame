@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
 import 'package:lifes_game/habits/widgets/cue_dialog.dart';
@@ -447,6 +448,42 @@ void main() {
 
       expect(container.read(customSlotsProvider), 1);
       expect(find.byKey(HabitsScreen.plusKey), findsOneWidget);
+    });
+
+    test('der erste Sieg gibt zwei Plätze dazu, also drei (ADR-0093)', () {
+      final container = _container();
+      expect(container.read(customSlotsProvider), 1);
+
+      container.read(ladderProvider.notifier).defeat(1);
+
+      expect(container.read(customSlotsProvider), 3);
+      expect(container.read(customSlotsLeftProvider), 3);
+    });
+
+    test('eine Niederlage gibt keinen Platz, der Mentor ist nicht fertig', () {
+      final container = _container();
+
+      container.read(ladderProvider.notifier).recordDefeat(1);
+
+      expect(container.read(customSlotsProvider), 1);
+    });
+
+    test('nach dem ersten Sieg lassen sich drei wirklich anlegen', () {
+      final container = _container();
+      container.read(ladderProvider.notifier).defeat(1);
+      final controller = container.read(habitTrackerProvider.notifier);
+
+      CustomHabit? anlegen(int i) => controller.addCustom(
+        name: 'Eigene $i',
+        area: SkillArea.koerper,
+        difficulty: HabitDifficulty.mittel,
+      );
+
+      expect(anlegen(1), isNotNull);
+      expect(anlegen(2), isNotNull);
+      expect(anlegen(3), isNotNull);
+      expect(anlegen(4), isNull);
+      expect(container.read(customSlotsLeftProvider), 0);
     });
 
     testWidgets('jede freigeschaltete Vorlage gibt einen Platz', (

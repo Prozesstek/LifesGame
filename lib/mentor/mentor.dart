@@ -44,9 +44,12 @@ abstract final class Mentor {
 
   /// Was er im Beute-Dialog des ersten Siegs sagt. Den ersten
   /// Gegenstand legt das Spiel von selbst an (`Loadout._add`); der Satz
-  /// steht deshalb dort und nicht als eigener Schritt.
+  /// steht deshalb dort und nicht als eigener Schritt. Danach schweigt er
+  /// — also sagt er hier auch, was der Sieg an Plätzen gebracht hat
+  /// (ADR-0093).
   static const String ersteBeute =
-      'Deine erste Beute! Leg sie an — Ausrüstung macht dich stärker.';
+      'Deine erste Beute! Leg sie an — Ausrüstung macht dich stärker. '
+      'Und du hast jetzt Platz für zwei weitere Gewohnheiten.';
 
   /// Was er bei [schritt] an [ort] sagt — null, wenn er dort schweigt.
   static MentorSatz? satz(Schritt? schritt, MentorOrt ort) {
