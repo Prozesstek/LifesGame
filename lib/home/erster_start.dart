@@ -191,6 +191,14 @@ class ErsterStart {
   /// Gewohnheit gibt.
   bool get zeigtTagesaufgaben => zeigt(Bereich.theorie);
 
+  /// Ob der Weg des Mentors gegangen ist: **der erste Sieg, sonst nichts**.
+  /// Genau dann ist [schritt] null.
+  ///
+  /// Steht einzeln da, weil die Plätze für Gewohnheiten daran hängen
+  /// (ADR-0093): `ersterStartProvider` liest den Tracker, und der Tracker
+  /// darf sich nicht über eine Ecke selbst lesen (`gotchas.md`).
+  static bool mentorFertig(int stufenGeschafft) => stufenGeschafft > 0;
+
   static ErsterStart aus(ErsterStartStand s) {
     // **Ein Schritt ist erledigt, wenn er getan ist oder ein späterer,
     // der ihn braucht.** So bleibt die Reihe geschlossen, auch wenn ein
@@ -198,7 +206,7 @@ class ErsterStart {
     // Das Häkchen folgt bewusst **nicht** aus der Seite: Wer zuerst
     // liest, steht noch auf Level 1, und der zweite Platz geht erst mit
     // dem Aufstieg auf, den das Häkchen bringt.
-    final gewonnen = s.stufenGeschafft > 0;
+    final gewonnen = mentorFertig(s.stufenGeschafft);
     final angelegt = gewonnen || s.angelegt > 0;
     final gelesen = angelegt || s.seiten > 0;
     final abgehakt = gewonnen || s.haekchen > 0;

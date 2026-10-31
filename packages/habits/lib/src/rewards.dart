@@ -138,12 +138,26 @@ abstract final class HabitRewards {
   /// will, holt sich die Plätze dafür aus dem Baum. Wären sie von Anfang
   /// an frei, verlöre der Baum seine Rolle für die Gewohnheiten ganz.
   ///
-  /// Die Umrechnung ist heute eins zu eins und steht trotzdem als eigene
+  /// **Dazu [tutorialSlots], sobald der Mentor fertig ist** (ADR-0093):
+  /// [tutorialDone] sagt die App, dieses Package kennt den Mentor nicht.
+  ///
+  /// Die Umrechnung ist sonst eins zu eins und steht trotzdem als eigene
   /// Funktion da: Sie ist der Hebel, an dem nachjustiert wird, wenn der
   /// 30-Tage-Lauf zeigt, dass es zu viele oder zu wenige sind.
-  static int customSlotsFor(int unlockedTemplates) {
-    return unlockedTemplates < 0 ? 0 : unlockedTemplates;
+  static int customSlotsFor(
+    int unlockedTemplates, {
+    required bool tutorialDone,
+  }) {
+    final ausVorlagen = unlockedTemplates < 0 ? 0 : unlockedTemplates;
+    return tutorialDone ? ausVorlagen + tutorialSlots : ausVorlagen;
   }
+
+  /// Die Plätze, die das Ende des Mentors bringt (ADR-0093).
+  ///
+  /// **Zwei, weil die Startvorlage immer einen mitbringt**: Das macht drei
+  /// nach dem ersten Sieg. Dazugezählt statt als Mindestzahl, damit auch
+  /// die ersten Vorlagen aus dem Baum weiter einen Platz bringen.
+  static const int tutorialSlots = 2;
 
   /// Erfahrung für ein Häkchen, das eine Streak von [streak] Tagen
   /// abschließt. [streak] zählt dieses Häkchen mit: Der erste Tag ist 1.

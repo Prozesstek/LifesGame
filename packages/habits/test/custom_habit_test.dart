@@ -83,9 +83,16 @@ void main() {
 
   group('Plätze', () {
     test('ein Platz je freigeschalteter Vorlage', () {
-      expect(HabitRewards.customSlotsFor(0), 0);
-      expect(HabitRewards.customSlotsFor(3), 3);
-      expect(HabitRewards.customSlotsFor(-1), 0);
+      expect(HabitRewards.customSlotsFor(0, tutorialDone: false), 0);
+      expect(HabitRewards.customSlotsFor(3, tutorialDone: false), 3);
+      expect(HabitRewards.customSlotsFor(-1, tutorialDone: false), 0);
+    });
+
+    test('nach dem Mentor kommen zwei dazu, jede Vorlage zählt weiter', () {
+      // Die Startvorlage ist immer offen: Das sind die drei (ADR-0093).
+      expect(HabitRewards.customSlotsFor(1, tutorialDone: true), 3);
+      expect(HabitRewards.customSlotsFor(4, tutorialDone: true), 6);
+      expect(HabitRewards.customSlotsFor(-1, tutorialDone: true), 2);
     });
 
     test('ohne Platz kommt nichts dazu', () {

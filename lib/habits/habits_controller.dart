@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 import 'package:theory/theory.dart';
 
+import '../combat/ladder_controller.dart';
+import '../home/erster_start.dart';
 import '../save/save_providers.dart';
 import '../theory/theory_controller.dart';
 
@@ -187,9 +189,7 @@ class HabitsController extends Notifier<HabitTracker> {
     HabitPriority priority = HabitPriority.normal,
     String why = '',
   }) {
-    final slots = HabitRewards.customSlotsFor(
-      ref.read(unlockedHabitsProvider).length,
-    );
+    final slots = ref.read(customSlotsProvider);
     if (!state.canAddCustom(slots)) return null;
 
     final habit = CustomHabit(
@@ -260,11 +260,18 @@ final unlockedHabitsProvider = Provider<List<HabitTemplate>>((ref) {
 /// **Ein Platz je freigeschalteter Vorlage** (ADR-0028). Damit hängen
 /// eigene Gewohnheiten am Baum, ohne aus ihm zu stammen: Der Weg „erst
 /// verstehen, dann verfolgen" bleibt der Motor, aber was am Ende auf der
-/// Liste steht, entscheidet der Spieler.
+/// Liste steht, entscheidet der Spieler. **Nach dem ersten Sieg kommen
+/// zwei dazu** (ADR-0093): Dann schweigt der Mentor.
 ///
-/// Die Zahl selbst steht in `package:habits`, nicht hier.
+/// Die Zahl selbst steht in `package:habits`, nicht hier. **Darf nicht vom
+/// Tracker abhängen**: `addCustom` liest diesen Provider (`gotchas.md`).
 final customSlotsProvider = Provider<int>((ref) {
-  return HabitRewards.customSlotsFor(ref.watch(unlockedHabitsProvider).length);
+  return HabitRewards.customSlotsFor(
+    ref.watch(unlockedHabitsProvider).length,
+    tutorialDone: ErsterStart.mentorFertig(
+      ref.watch(ladderProvider).highestDefeated,
+    ),
+  );
 });
 
 /// Wie viele Plätze davon noch frei sind.
