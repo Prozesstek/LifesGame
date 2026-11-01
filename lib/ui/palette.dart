@@ -112,6 +112,15 @@ abstract final class Palette {
   /// ihre eigene mit.
   static const Color gold = Color(0xFF6A4C06);
 
+  /// Erfahrung, die eine Gewohnheit bringt: grün und kräftiger als
+  /// [success]. **Nur für große, fette Zahlen** — für kleine Schrift reicht
+  /// der Kontrast nicht.
+  static const Color ertragXp = Color(0xFF2A7A1C);
+
+  /// Gold, das eine Gewohnheit bringt: so gelb, wie es auf Pergament geht.
+  /// **Nur für große, fette Zahlen**, wie [ertragXp].
+  static const Color ertragGold = Color(0xFF8F6200);
+
   // ---------------------------------------------------------------
   // Dieselben Bedeutungen auf Leder
   // ---------------------------------------------------------------

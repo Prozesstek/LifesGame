@@ -11,16 +11,13 @@ import 'habit_countdown.dart';
 
 /// Eine laufende Gewohnheit: abhaken, Streak sehen, ein Tagesziel füllen.
 ///
-/// **Zwei Griffe, damit keiner mehrdeutig wird.** Die Kachel selbst hakt
-/// ganz ab oder nimmt zurück — dieselbe Geste wie vor ADR-0028, und die
-/// einzige für alles ohne Ziel. Das Plus daneben füllt ein Ziel um einen
-/// Schritt. Wer fünf Gläser trinkt, tippt fünfmal auf das Plus; wer schon
-/// weiß, dass der Tag steht, tippt einmal auf die Kachel.
+/// **Ein Griff.** Die Kachel selbst hakt ganz ab oder nimmt zurück, auch
+/// bei einer Menge: Dort steht nur, wie viel es sein soll („5 Gläser“).
 ///
-/// **Ein Zeitziel läuft als Timer** (ADR-0067). Statt des Plus steht dort
-/// der Knopf zum Timer, und solange er läuft, zeigt der Balken die
-/// Restzeit. Was der Tipp auf die Kachel dann tut, entscheidet
-/// `tapHabit`, nicht die Kachel.
+/// **Ein Zeitziel läuft als Timer** (ADR-0067). Einen eigenen Knopf dafür
+/// gibt es nicht: Der Tipp auf die Kachel öffnet ihn, das entscheidet
+/// `tapHabit`. Unter dem Namen steht „0 von 2 Minuten“, solange er läuft die
+/// Restzeit.
 ///
 /// **Ohne Untertexte seit Issue #35 — mit Zahlen seit Issue #46.** Unter
 /// dem Namen stand bis #35 eine Zeile Prosa („+1 Stärke · 3 Tage am
@@ -49,11 +46,9 @@ class HabitCheckTile extends StatelessWidget {
     required this.streak,
     required this.xpGain,
     required this.goldGain,
-    required this.progress,
     required this.onToggle,
-    required this.onAdvance,
     required this.onStop,
-    this.onTimer,
+    this.hatTimer = false,
     this.onTimerDone,
     this.cue,
     this.anker,
@@ -77,18 +72,12 @@ class HabitCheckTile extends StatelessWidget {
   /// Gold, ebenso.
   final int goldGain;
 
-  /// Wie weit das Tagesziel gefüllt ist.
-  final int progress;
-
   final VoidCallback onToggle;
-
-  /// Ein Schritt auf das Tagesziel.
-  final VoidCallback onAdvance;
 
   final VoidCallback onStop;
 
-  /// Öffnet den Timer — nur bei einem Zeitziel gesetzt.
-  final VoidCallback? onTimer;
+  /// Ob ein Tipp den Timer öffnet — dann steht sein Stand auf der Kachel.
+  final bool hatTimer;
 
   /// Der laufende Timer ist bei null angekommen.
   final VoidCallback? onTimerDone;
@@ -129,8 +118,9 @@ class HabitCheckTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final goal = _goal;
-    final timer = goal?.kind == HabitGoalKind.zeit ? onTimer : null;
-    final zeigtPlus = goal != null && !isChecked && timer == null;
+    final hatZeitziel = goal?.kind == HabitGoalKind.zeit && hatTimer;
+    final timer = hatZeitziel && !isChecked;
+    final zeigtMenge = goal != null && !isChecked && !hatZeitziel;
 
     return Druck(
       child: HolzKarte(
@@ -185,12 +175,28 @@ class HabitCheckTile extends StatelessWidget {
                                 decorationColor: Palette.muted,
                               ),
                             ),
-                            const SizedBox(height: 5),
-                            RewardLine(
-                              xp: xpGain,
-                              gold: goldGain,
-                              alreadyEarned: isChecked,
-                            ),
+                            if (timer) ...<Widget>[
+                              const SizedBox(height: 4),
+                              HabitCountdown(
+                                key: timerKey(habit.id),
+                                habit: habit,
+                                onDone: onTimerDone,
+                                builder: (context, uhr) => _ZielStand(
+                                  text: uhr.isRunning ? uhr.label : uhr.stand,
+                                  semanticLabel: uhr.isRunning
+                                      ? uhr.semanticLabel
+                                      : uhr.stand,
+                                  laeuft: uhr.isRunning,
+                                ),
+                              ),
+                            ],
+                            if (zeigtMenge) ...<Widget>[
+                              const SizedBox(height: 4),
+                              _ZielStand(
+                                text: goal.label,
+                                semanticLabel: goal.label,
+                              ),
+                            ],
                             if (!isChecked &&
                                 onEditCue != null &&
                                 _hatZeile) ...<Widget>[
@@ -209,48 +215,12 @@ class HabitCheckTile extends StatelessWidget {
                         const SizedBox(width: 8),
                         _StreakMarke(streak: streak),
                       ],
-                      // **Ein Tagesziel behält seinen kleinen Stand**: Sonst
-                      // ließe sich eine Menge nicht mehr Schritt für Schritt
-                      // füllen, und ein laufender Timer wäre nicht zu sehen.
-                      if (timer != null && !isChecked) ...<Widget>[
-                        const SizedBox(width: 8),
-                        HabitCountdown(
-                          habit: habit,
-                          onDone: onTimerDone,
-                          builder: (context, uhr) => _ZielStand(
-                            text: uhr.label,
-                            semanticLabel: uhr.semanticLabel,
-                            laeuft: uhr.isRunning,
-                          ),
-                        ),
-                        DruckSperre(
-                          child: IconButton(
-                            key: timerKey(habit.id),
-                            onPressed: timer,
-                            icon: const Icon(Icons.timer_outlined, size: 22),
-                            color: Palette.accent,
-                            tooltip: 'Timer',
-                          ),
-                        ),
-                      ],
-                      if (zeigtPlus) ...<Widget>[
-                        const SizedBox(width: 8),
-                        _ZielStand(
-                          text: '$progress/${goal.target}',
-                          semanticLabel: goal.progressLabel(progress),
-                        ),
-                        DruckSperre(
-                          child: IconButton(
-                            onPressed: onAdvance,
-                            icon: const Icon(
-                              Icons.add_circle_outline,
-                              size: 22,
-                            ),
-                            color: Palette.accent,
-                            tooltip: _plusTooltip(goal),
-                          ),
-                        ),
-                      ],
+                      const SizedBox(width: 12),
+                      RewardLine(
+                        xp: xpGain,
+                        gold: goldGain,
+                        alreadyEarned: isChecked,
+                      ),
                     ],
                   ),
                 ),
@@ -262,13 +232,9 @@ class HabitCheckTile extends StatelessWidget {
     );
   }
 
-  /// Der Knopf zum Timer von [habitId] — ohne Wort, also mit Schlüssel.
+  /// Der Stand des Timers von [habitId] auf der Kachel.
   static Key timerKey(String habitId) {
     return ValueKey<String>('timer-oeffnen-$habitId');
-  }
-
-  static String _plusTooltip(HabitGoal goal) {
-    return goal.step == 1 ? 'Eins mehr' : '${goal.step} ${goal.unit} mehr';
   }
 }
 
@@ -277,7 +243,7 @@ class HabitCheckTile extends StatelessWidget {
 ///
 /// Kein Knopf aus dem Theme, der trüge die Holzfläche. Das [child] hält mit
 /// [randRechts] rechts einen Streifen frei, damit weder ein Name noch der
-/// Knopf des Timers unter dem Kreuz liegt.
+/// Ertrag unter dem Kreuz liegt.
 class MitEntfernenKreuz extends StatelessWidget {
   const MitEntfernenKreuz({
     required this.onStop,
@@ -464,7 +430,8 @@ class _CheckMark extends StatelessWidget {
   }
 }
 
-/// Was ein Häkchen einbringt — oder eingebracht hat.
+/// Was ein Häkchen einbringt — oder eingebracht hat: **groß, rechts auf der
+/// Kachel, Erfahrung grün über Gold gelb**.
 ///
 /// **Sie steht auf jeder Kachel, nicht nur nach dem Tippen.** Eine
 /// Rückmeldung, die erst nach der Tat kommt, kann nicht zur Tat bewegen;
@@ -477,47 +444,56 @@ class RewardLine extends StatelessWidget {
     super.key,
   });
 
+  /// So groß, dass die helleren Farben aus [Palette] lesbar bleiben.
+  static const double schrift = 17;
+
   final int xp;
   final int gold;
 
-  /// Ob es schon geholt ist. Dann tragen die Zahlen die Farbe des Erfolgs
-  /// statt die des Angebots.
+  /// Ob es schon geholt ist. Dann stehen die Zahlen gedämpft da: Das
+  /// Angebot ist eingelöst.
   final bool alreadyEarned;
 
   @override
   Widget build(BuildContext context) {
-    final farbe = alreadyEarned ? Palette.success : Palette.accent;
-    final stil = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      color: farbe,
-    );
+    final xpFarbe = alreadyEarned ? Palette.success : Palette.ertragXp;
+    final goldFarbe = alreadyEarned ? Palette.gold : Palette.ertragGold;
 
     return Semantics(
       label: alreadyEarned
           ? 'Heute geholt: $xp Erfahrung und $gold Gold'
           : 'Bringt $xp Erfahrung und $gold Gold',
-      // **Die ganze Zeile schrumpft, keine Zahl wird abgeschnitten.** Auf
-      // der vollsten Kachel — Timer **und** Kreuz daneben, dazu die Kette
-      // — bleiben für diese Spalte keine 120 Pixel. Mit einem
-      // `Flexible` je Zahl stand dort „+…“ zweimal (ADR-0085, beim
-      // Ansehen gefunden); eine Zahl mit Auslassungspunkten ist keine.
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(Icons.auto_awesome, size: 13, color: farbe),
-            const SizedBox(width: 3),
-            Text('+$xp', style: stil),
-            const SizedBox(width: 8),
-            const GoldIcon(size: 13),
-            const SizedBox(width: 3),
-            Text('+$gold', style: stil),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.auto_awesome, size: schrift, color: xpFarbe),
+              const SizedBox(width: 4),
+              Text('+$xp', style: _stil(xpFarbe)),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const GoldIcon(size: schrift),
+              const SizedBox(width: 4),
+              Text('+$gold', style: _stil(goldFarbe)),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  static TextStyle _stil(Color farbe) {
+    return TextStyle(
+      fontSize: schrift,
+      fontWeight: FontWeight.w800,
+      color: farbe,
     );
   }
 }
@@ -560,7 +536,7 @@ class _StreakMarke extends StatelessWidget {
   }
 }
 
-/// Wie weit ein Tagesziel ist, klein neben seinem Knopf: „3/5“ oder die
+/// Das Tagesziel unter dem Namen: „5 Gläser“, „0 von 2 Minuten“ oder die
 /// Restzeit.
 class _ZielStand extends StatelessWidget {
   const _ZielStand({
@@ -580,9 +556,10 @@ class _ZielStand extends StatelessWidget {
     return Text(
       text,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       semanticsLabel: semanticLabel,
       style: TextStyle(
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: laeuft ? FontWeight.bold : FontWeight.w600,
         color: laeuft ? Palette.accent : Palette.textDim,
         fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],

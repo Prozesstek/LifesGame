@@ -565,7 +565,7 @@ void main() {
       expect(container.read(characterStatsProvider).checksFor(habit.stat), 1);
     });
 
-    testWidgets('ein Tagesziel füllt sich schrittweise', (tester) async {
+    testWidgets('ein Tipp hakt ein Tagesziel ganz ab', (tester) async {
       final container = _container();
       _passRootBranch(container);
       await _pumpScreen(tester, container);
@@ -574,27 +574,10 @@ void main() {
       final habit = container.read(habitTrackerProvider).customHabits.single;
       expect(habit.goal?.target, 3);
 
-      // Das Plus auf der Kachel — die Vorlagen stehen seit ADR-0089
-      // nicht mehr auf dem Bildschirm.
-      expect(find.text('0/3'), findsOneWidget);
+      expect(find.byIcon(Icons.add_circle_outline), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
-
-      expect(
-        container.read(habitTrackerProvider).progressOn(habit.id, _heute),
-        1,
-      );
-      expect(
-        container.read(habitTrackerProvider).isChecked(habit.id, _heute),
-        isFalse,
-        reason: 'halb getan ist nicht getan',
-      );
-
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pump();
+      await tester.tap(find.text('Wasser trinken'));
+      await tester.pumpAndSettle();
 
       expect(
         container.read(habitTrackerProvider).isChecked(habit.id, _heute),
@@ -678,8 +661,8 @@ void main() {
       expect(find.textContaining('am Stück'), findsNothing);
       expect(find.textContaining('+1 Angriff'), findsNothing);
 
-      // Die Zahlen sind geblieben -- die Kette als Marke, der Stand des
-      // Tagesziels neben seinem Knopf (ADR-0092). Ohne sie waere aus einer
+      // Die Zahlen sind geblieben -- die Kette als Marke, das Tagesziel
+      // unter dem Namen. Ohne sie waere aus einer
       // Layout-Aenderung eine Produktaenderung geworden.
       expect(find.text('Wasser trinken'), findsOneWidget);
       // Nur die Marke auf der Kachel — die Flamme steht seit Issue #46
@@ -692,7 +675,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('2'), findsWidgets);
-      expect(find.text('1/5'), findsOneWidget);
+      expect(find.text('5 Gläser'), findsOneWidget);
     });
 
     testWidgets('ohne Kette steht keine Marke da', (tester) async {

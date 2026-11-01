@@ -112,7 +112,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ein Mengenziel behält seinen Stand und sein Plus', (
+  testWidgets('ein Mengenziel nennt sein Ziel und hat keinen Knopf', (
     tester,
   ) async {
     await bildschirm(
@@ -127,18 +127,8 @@ void main() {
       ]),
     );
 
-    expect(find.text('0/5'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.add_circle_outline));
-    await tester.pumpAndSettle();
-    expect(find.text('1/5'), findsOneWidget);
-    // Die Einheit sagt die Meldung unten, nicht die Kachel.
-    expect(
-      find.descendant(
-        of: find.byType(HabitCheckTile),
-        matching: find.textContaining('Gläser'),
-      ),
-      findsNothing,
-    );
+    expect(find.text('5 Gläser'), findsOneWidget);
+    expect(find.byIcon(Icons.add_circle_outline), findsNothing);
   });
 
   testWidgets('das Kreuz bleibt auf der offenen Kachel, der Wecker nicht', (

@@ -192,12 +192,8 @@ class HabitsScreen extends ConsumerWidget {
       streak: tracker.currentStreak(habit.id, today),
       xpGain: tracker.xpForNextCheck(habit.id, today),
       goldGain: tracker.goldForNextCheck(habit.id, today),
-      progress: tracker.progressOn(habit.id, today),
       onToggle: () => tapHabit(context, ref, habit),
-      onAdvance: () => advanceHabit(context, ref, habit),
-      onTimer: tracker.hasTimer(habit.id)
-          ? () => openHabitTimer(context, ref, habit)
-          : null,
+      hatTimer: tracker.hasTimer(habit.id),
       onTimerDone: () => finishHabitTimer(context, ref, habit),
       onStop: () =>
           ref.read(habitTrackerProvider.notifier).deactivate(habit.id),

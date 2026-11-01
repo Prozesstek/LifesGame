@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1064, dazu die acht Packages (theory 218, habits 375, gear
+**Tests:** App 1066, dazu die acht Packages (theory 218, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,45 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 01.11.2026, zuletzt: der Ertrag steht rechts, Timer-Knopf und Plus sind weg
+
+Frederik, mit Skizze auf dem Screenshot: der Zeit-Knopf kann weg, „weil das
+funktioniert ja eigentlich eben, wenn man die Gewohnheit abhaken will“; die
+Belohnung „auf die rechte Seite komplett und vielleicht auch ein bisschen größer
+und halt auch in verschiedenen Farben“; die Zeit „nach links unten“ als
+„0 von 2 Minuten“. Und: „das Plus auch nicht als Button sondern nur das man die
+Aufgabe komplett abhaken kann“.
+
+| Was | Wie |
+|---|---|
+| **Timer-Knopf** | weg; ein Tipp auf die Kachel öffnet den Timer (`tapHabit`, wie bisher) |
+| **Ertrag** | rechts, untereinander, 17 statt 12 Punkte: Erfahrung grün, Gold gelb (`Palette.ertragXp`, `ertragGold`) |
+| **Zeit** | unter dem Namen: „0 von 2 Minuten“ |
+| **Plus-Knopf** | weg; auch eine Menge hakt ein Tipp auf die Kachel **ganz** ab, unter dem Namen steht nur ihr Ziel („5 Gläser“) |
+
+**Ohne Rückfrage entschieden:**
+
+- **Solange der Timer läuft, steht dort die Restzeit** („01:23“), sonst sähe man
+  ihn nicht ticken. Pausiert zählen ganze Minuten („12 von 20 Minuten“).
+- **Das Gelb ist ein dunkles Goldgelb**: Helles Gelb ist auf Pergament nicht zu
+  lesen. Beide neuen Farben schaffen 3:1, nicht die 4,5 für Text, und sind nur
+  für große Zahlen gedacht. Erledigt stehen die Zahlen dunkler.
+- **Bei einer Menge steht das Ziel, kein Zwischenstand** („5 Gläser“ statt
+  „0/5“): Ohne Plus käme die Zahl nie über null. `HabitTracker.advance` bleibt
+  im Package, es hat auf dem Bildschirm nur keinen Knopf mehr.
+- Die Flamme bleibt rechts, links neben dem Ertrag.
+- **„Heute“ auf der Startseite bleibt, wie es ist.**
+
+App 1066 (vorher 1064). In 390 × 844 gerendert und angesehen, mit Zeit, Menge,
+Kopplung und erledigt. **Nicht am Handy.**
+
+### Offen
+
+- Ob das Goldgelb Frederik gelb genug ist.
+- **Eine Menge lässt sich nicht mehr über den Tag füllen.** Wer fünf Gläser
+  trinkt, hakt einmal ab. Beim Anlegen wird trotzdem weiter nach der Menge gefragt.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 01.11.2026, danach: das Kreuz ist rot und steht in der Ecke
 
