@@ -133,8 +133,8 @@ void main() {
 
     // **Ein Stapel** (ADR-0065): Die dritte hängt an der vierten, und die
     // ist heute schon abgehakt — damit ist die eingerückte Kachel gebaut,
-    // die gerade aufleuchtet, samt der Zeile „Nach: …" mit dem Namen
-    // einer anderen Gewohnheit darin.
+    // die gerade aufleuchtet, und auf der Startseite die Zeile „Nach: …"
+    // mit dem Namen einer anderen Gewohnheit darin.
     tracker = tracker
         .setAnchor(HabitCatalog.all[2].id, HabitCatalog.all[3].id)
         .check(HabitCatalog.all[3].id, _heute)

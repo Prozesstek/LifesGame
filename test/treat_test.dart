@@ -56,11 +56,8 @@ void main() {
   );
 
   Future<void> oeffneDialog(WidgetTester tester, HabitTemplate h) async {
-    await tester.tap(
-      find.descendant(
-        of: kachel(h),
-        matching: find.byIcon(Icons.add_alarm_outlined),
-      ),
+    await tester.longPress(
+      find.descendant(of: kachel(h), matching: find.text(h.name)),
     );
     await tester.pumpAndSettle();
   }

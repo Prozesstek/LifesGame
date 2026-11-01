@@ -54,12 +54,7 @@ void main() {
       const HabitTracker.empty().activate(starter.id, today: mittwoch);
 
   Future<void> oeffneDialog(WidgetTester tester) async {
-    await tester.tap(
-      find.descendant(
-        of: find.byType(HabitCheckTile),
-        matching: find.byIcon(Icons.add_alarm_outlined),
-      ),
-    );
+    await tester.longPress(find.byType(HabitCheckTile));
     await tester.pumpAndSettle();
   }
 

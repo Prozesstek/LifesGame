@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 31.10.2026 · Frederik
+**Zuletzt aktualisiert:** 01.11.2026 · Frederik
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1061, dazu die acht Packages (theory 218, habits 375, gear
+**Tests:** App 1062, dazu die acht Packages (theory 218, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,37 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 01.11.2026: Kopplung durch Einrücken, der Wecker ist weg
+
+Frederik, mit Markierungen im Screenshot: „das kleine Icon Zeit entfernen und
+wenn Gewohnheiten aneinander gekoppelt sind das eher durch das Einrücken als
+durch extra Text anzeigen“.
+
+Auf dem Gewohnheiten-Bildschirm sind der Wecker und die Zeile „Nach: …“ weg;
+was gekoppelt ist, sieht man nur noch an der Einrückung.
+
+**Ohne Rückfrage entschieden:**
+
+- **Der Wecker verschwindet auf allen Kacheln**, nicht nur bei Zeitzielen: Er
+  war kein Zeichen für die Zeit, sondern der Knopf zu „Wann machst du das?“.
+- **Halten öffnet jetzt diesen Dialog**, sonst gäbe es ohne Wecker keinen Weg
+  mehr zu Auslöser, Tagen, Kopplung und Belohnung. Das geht auch auf erledigten
+  Kacheln. Ein Tipp auf eine vorhandene Zeile öffnet ihn weiter.
+- Ein eingetippter Satz, die Wochentage und die Belohnung bleiben stehen,
+  **der Satz ohne das Ketten-Zeichen** davor.
+- Der Vorleser hört weiter, woran eine Gewohnheit hängt („…, nach …“).
+- **Die Startseite bleibt, wie sie ist**, dort steht weiter „Nach: …“.
+
+App 1062 (vorher 1061). In 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- **Dass man halten kann, zeigt nichts an** — Frederik wollte sich für Auslöser
+  und Kreuz ohnehin noch etwas überlegen (ADR-0092).
+- Hängt eine Gewohnheit an einer, die heute nicht fällig ist, steht sie nicht
+  eingerückt, und von der Kopplung ist an dem Tag nichts mehr zu sehen.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 31.10.2026: drei eigene Gewohnheiten nach dem Mentor
 

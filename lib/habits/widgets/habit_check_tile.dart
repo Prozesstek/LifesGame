@@ -38,6 +38,10 @@ import 'habit_countdown.dart';
 /// **Nur noch Erfahrung, Gold und die Kette in Tagen** (ADR-0092). Der
 /// Skill steht oben in den Kacheln der Gebiete, Bonus und nächste Stufe
 /// der Kette sind weg.
+///
+/// **Halten richtet sie ein**: Auslöser, Tage, Kopplung und Belohnung. Der
+/// Wecker dafür ist weg, und **eine Kopplung sieht man an der Einrückung**
+/// (`_ImStapel`), nicht an einer Zeile „Nach: …“.
 class HabitCheckTile extends StatelessWidget {
   const HabitCheckTile({
     required this.habit,
@@ -52,6 +56,7 @@ class HabitCheckTile extends StatelessWidget {
     this.onTimer,
     this.onTimerDone,
     this.cue,
+    this.anker,
     this.treat,
     this.days,
     this.cued = false,
@@ -96,6 +101,10 @@ class HabitCheckTile extends StatelessWidget {
   /// fällt er weg — dort hat er seine Arbeit getan.
   final String? cue;
 
+  /// Der Name der Gewohnheit, an der sie hängt (ADR-0065) — **nur für den
+  /// Vorleser**: Im Bild sagt es die Einrückung, und die sieht er nicht.
+  final String? anker;
+
   /// Was es danach gibt — „Kaffee" (ADR-0066). Steht unter dem Auslöser,
   /// solange die Kachel offen ist: Die Vorfreude gehört **vor** das
   /// Häkchen.
@@ -109,10 +118,13 @@ class HabitCheckTile extends StatelessWidget {
   /// (ADR-0065). Dann trägt der Kreis links die Akzentfarbe.
   final bool cued;
 
-  /// Öffnet die Frage nach dem Auslöser. Null blendet die Zeile aus.
+  /// Öffnet die Frage nach dem Auslöser: beim Halten der Kachel und beim
+  /// Tipp auf ihre Zeile.
   final VoidCallback? onEditCue;
 
   HabitGoal? get _goal => habit.goal;
+
+  bool get _hatZeile => cue != null || days != null || treat != null;
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +145,7 @@ class HabitCheckTile extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onToggle,
+            onLongPress: onEditCue,
             child: GebietStreifen(
               area: habit.area,
               blass: isChecked,
@@ -149,6 +162,7 @@ class HabitCheckTile extends StatelessWidget {
                       isChecked: isChecked,
                       cued: cued,
                       label: habit.name,
+                      anker: anker,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -173,7 +187,9 @@ class HabitCheckTile extends StatelessWidget {
                             gold: goldGain,
                             alreadyEarned: isChecked,
                           ),
-                          if (!isChecked && onEditCue != null) ...<Widget>[
+                          if (!isChecked &&
+                              onEditCue != null &&
+                              _hatZeile) ...<Widget>[
                             const SizedBox(height: 4),
                             _CueLine(
                               cue: cue,
@@ -256,7 +272,8 @@ class HabitCheckTile extends StatelessWidget {
   }
 }
 
-/// Die Zeile mit dem Auslöser — oder, ohne ihn, die Frage danach.
+/// Die Zeile mit Tagen, Auslöser und Belohnung — nur, wenn es davon etwas
+/// gibt.
 ///
 /// Eine eigene Tippfläche in der Kachel: Wer sie antippt, will den Satz
 /// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
@@ -278,71 +295,49 @@ class _CueLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = cue;
     final tage = days;
-    final farbe = text == null ? Palette.muted : Palette.textDim;
     final danach = treat;
 
     return Druck(
       child: InkWell(
         onTap: onTap,
+        onLongPress: onTap,
         borderRadius: BorderRadius.circular(6),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
-          child: danach == null
-              ? _wann(text, tage, farbe)
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _wann(text, tage, farbe),
-                    const SizedBox(height: 2),
-                    TreatLine(text: danach),
-                  ],
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (tage != null || text != null) _wann(text, tage),
+              if (danach != null) ...<Widget>[
+                if (tage != null || text != null) const SizedBox(height: 2),
+                TreatLine(text: danach),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _wann(String? text, String? tage, Color farbe) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        // Ohne Auslöser steht nur der Wecker da — die Frage dazu
-        // stellt der Dialog, nicht die Kachel.
-        Icon(
-          text == null ? Icons.add_alarm_outlined : Icons.link_rounded,
-          size: text == null ? 18 : 14,
-          color: farbe,
-          semanticLabel: text == null ? 'Wann machst du das?' : null,
-        ),
-        // Tage und Auslöser als **ein** Text über zwei Zeilen: Neben
-        // Kette und Knöpfen bleiben der Spalte rund 130 Punkte, und
-        // zwei Texte nebeneinander kürzten den Auslöser auf drei
-        // Wörter.
-        if (tage != null || text != null) ...<Widget>[
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  if (tage != null)
-                    TextSpan(
-                      text: text == null ? tage : '$tage  ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Palette.textDim,
-                      ),
-                    ),
-                  if (text != null) TextSpan(text: text),
-                ],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, color: farbe),
+  /// Tage und Auslöser als **ein** Text über zwei Zeilen: Neben Kette und
+  /// Knöpfen bleiben der Spalte rund 130 Punkte, und zwei Texte
+  /// nebeneinander kürzten den Auslöser auf drei Wörter.
+  Widget _wann(String? text, String? tage) {
+    return Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
+          if (tage != null)
+            TextSpan(
+              text: text == null ? tage : '$tage  ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
+          if (text != null) TextSpan(text: text),
         ],
-      ],
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontSize: 12, color: Palette.textDim),
     );
   }
 }
@@ -390,17 +385,23 @@ class _CheckMark extends StatelessWidget {
     required this.isChecked,
     required this.cued,
     required this.label,
+    required this.anker,
   });
 
   final bool isChecked;
   final bool cued;
   final String label;
+  final String? anker;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       checked: isChecked,
-      label: cued ? '$label, jetzt dran' : label,
+      label: <String>[
+        label,
+        if (cued) 'jetzt dran',
+        if (anker case final name?) 'nach $name',
+      ].join(', '),
       child: HaekchenKreis(
         isChecked: isChecked,
         size: 26,

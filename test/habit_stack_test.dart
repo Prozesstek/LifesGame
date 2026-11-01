@@ -59,11 +59,8 @@ void main() {
   );
 
   Future<void> oeffneDialog(WidgetTester tester, HabitTemplate habit) async {
-    await tester.tap(
-      find.descendant(
-        of: kachel(habit),
-        matching: find.byIcon(Icons.add_alarm_outlined),
-      ),
+    await tester.longPress(
+      find.descendant(of: kachel(habit), matching: find.text(habit.name)),
     );
     await tester.pumpAndSettle();
   }
@@ -79,9 +76,8 @@ void main() {
       expect(find.byKey(cueAnchorKey(folge.id)), findsNothing);
     });
 
-    testWidgets('eine gewählte landet als Anker im Stand und auf der Kachel', (
-      tester,
-    ) async {
+    testWidgets('eine gewählte landet als Anker im Stand und rückt die Kachel '
+        'ein, ohne Text', (tester) async {
       final c = container(laufen());
       await zeige(tester, c, const HabitsScreen());
       await oeffneDialog(tester, folge);
@@ -95,10 +91,14 @@ void main() {
       expect(tracker.anchorFor(folge.id), anker.id);
       expect(tracker.cueFor(folge.id), isNull);
       expect(
-        find.descendant(
-          of: kachel(folge),
-          matching: find.text('Nach: ${anker.name}'),
-        ),
+        tester.getTopLeft(kachel(folge)).dx,
+        greaterThan(tester.getTopLeft(kachel(anker)).dx),
+      );
+      expect(find.textContaining('Nach:'), findsNothing);
+      expect(find.byIcon(Icons.link_rounded), findsNothing);
+      // Der Vorleser sieht nicht, was eingerückt ist.
+      expect(
+        find.bySemanticsLabel(RegExp('${folge.name}, nach ${anker.name}')),
         findsOneWidget,
       );
     });
@@ -134,8 +134,7 @@ void main() {
     testWidgets('„Entfernen“ löst die Kopplung', (tester) async {
       final c = container(laufen().setAnchor(folge.id, anker.id));
       await zeige(tester, c, const HabitsScreen());
-      await tester.tap(find.text('Nach: ${anker.name}'));
-      await tester.pumpAndSettle();
+      await oeffneDialog(tester, folge);
 
       await tester.tap(find.text('Entfernen'));
       await tester.pumpAndSettle();

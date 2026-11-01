@@ -140,7 +140,7 @@ void main() {
     );
   });
 
-  testWidgets('Auslöser und Kreuz bleiben auf der offenen Kachel', (
+  testWidgets('das Kreuz bleibt auf der offenen Kachel, der Wecker nicht', (
     tester,
   ) async {
     await bildschirm(tester, zwei);
@@ -149,7 +149,7 @@ void main() {
       of: find.byType(HabitCheckTile),
       matching: find.byIcon(icon),
     );
-    expect(aufDerKachel(Icons.add_alarm_outlined), findsNWidgets(2));
+    expect(aufDerKachel(Icons.add_alarm_outlined), findsNothing);
     expect(aufDerKachel(Icons.close), findsNWidgets(2));
   });
 }
