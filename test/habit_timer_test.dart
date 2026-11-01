@@ -80,18 +80,40 @@ void main() {
   }
 
   group('Die Kachel', () {
-    testWidgets('ein Zeitziel trägt den Timer-Knopf statt des Plus', (
+    testWidgets(
+      'ein Zeitziel trägt seinen Stand statt des Plus, keinen Knopf',
+      (tester) async {
+        final uhr = _Uhr();
+        final c = container(mit(<CustomHabit>[lesen, wasser]), uhr);
+        await zeige(tester, c, const HabitsScreen());
+
+        expect(find.byKey(HabitCheckTile.timerKey(lesen.id)), findsOneWidget);
+        expect(find.byKey(HabitCheckTile.timerKey(wasser.id)), findsNothing);
+        expect(find.text('0 von 20 Minuten'), findsOneWidget);
+        expect(find.byIcon(Icons.timer_outlined), findsNothing);
+        // Auch die Menge hat keinen Knopf mehr.
+        expect(find.byTooltip('Eins mehr'), findsNothing);
+        expect(find.byIcon(Icons.add_circle_outline), findsNothing);
+      },
+    );
+
+    testWidgets('links der Stand unter dem Namen, rechts der Ertrag', (
       tester,
     ) async {
       final uhr = _Uhr();
-      final c = container(mit(<CustomHabit>[lesen, wasser]), uhr);
+      final c = container(mit(<CustomHabit>[lesen]), uhr);
       await zeige(tester, c, const HabitsScreen());
 
-      expect(find.byKey(HabitCheckTile.timerKey(lesen.id)), findsOneWidget);
-      expect(find.byKey(HabitCheckTile.timerKey(wasser.id)), findsNothing);
-      // Das Plus gehört weiter der Menge, und nur ihr.
-      expect(find.byTooltip('Eins mehr'), findsOneWidget);
-      expect(find.byTooltip('5 Minuten mehr'), findsNothing);
+      final name = tester.getTopLeft(find.text(lesen.name));
+      final stand = tester.getTopLeft(find.text('0 von 20 Minuten'));
+      final ertrag = tester.getCenter(find.byType(RewardLine));
+
+      expect(stand.dx, name.dx);
+      expect(stand.dy, greaterThan(name.dy));
+      expect(
+        ertrag.dx,
+        greaterThan(tester.getCenter(find.byType(HabitCheckTile)).dx),
+      );
     });
 
     testWidgets('ein Tipp öffnet den Timer und hakt nicht ab', (tester) async {
@@ -103,7 +125,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HabitTimerSheet), findsOneWidget);
-      expect(find.text('20:00'), findsNWidgets(2), reason: 'Blatt und Kachel');
+      expect(find.text('20:00'), findsOneWidget, reason: 'im Blatt');
+      expect(find.text('0 von 20 Minuten'), findsOneWidget, reason: 'Kachel');
       expect(c.read(habitTrackerProvider).isChecked(lesen.id, heute), isFalse);
       expect(c.read(habitTrackerProvider).timer, isNull);
     });
@@ -152,7 +175,8 @@ void main() {
 
       // Eine Stunde später steht dieselbe Zeit da.
       await warte(tester, uhr, const Duration(hours: 1));
-      expect(find.text('07:20'), findsNWidgets(2), reason: 'Blatt und Kachel');
+      expect(find.text('07:20'), findsOneWidget, reason: 'im Blatt');
+      expect(find.text('12 von 20 Minuten'), findsOneWidget, reason: 'Kachel');
       expect(tracker.isChecked(lesen.id, heute), isFalse);
     });
 

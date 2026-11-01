@@ -100,18 +100,16 @@ void finishHabitTimer(BuildContext context, WidgetRef ref, Habit habit) {
 }
 
 /// Führt [tat] aus und macht daraus ein Häkchen, das sich anfühlt wie
-/// eins — **die eine Stelle** für Tipp, Plus und Timer.
+/// eins — **die eine Stelle** für Tipp und Timer.
 ///
 /// [tat] gibt null zurück, wenn nichts verdient wurde (zurückgenommen,
-/// Timer noch nicht fertig). Ein Schritt, der das Ziel noch nicht
-/// erreicht, geht an [halb].
+/// Timer noch nicht fertig).
 void _mitFeier(
   BuildContext context,
   WidgetRef ref,
   Habit habit,
-  CheckResult? Function(HabitsController tracker) tat, {
-  void Function(CheckResult result)? halb,
-}) {
+  CheckResult? Function(HabitsController tracker) tat,
+) {
   final vorher = ref.read(unlockedAbilitiesProvider);
   final vorherErrungen = achievementsBefore(ref);
   final vorherLevel = levelBefore(ref);
@@ -126,11 +124,7 @@ void _mitFeier(
       : ref.read(skillsProvider).of(area).level;
 
   final result = tat(ref.read(habitTrackerProvider.notifier));
-  if (result == null) return;
-  if (!result.isComplete) {
-    halb?.call(result);
-    return;
-  }
+  if (result == null || !result.isComplete) return;
 
   final moment = HaekchenMoment.aus(
     vorher: trackerVorher,
@@ -317,27 +311,6 @@ void openDailyChest(BuildContext context, WidgetRef ref) {
             : SoundEffect.errungenschaft,
       );
   unawaited(showChestReveal(context, inhalt));
-}
-
-/// Ein Schritt auf ein Tagesziel.
-void advanceHabit(BuildContext context, WidgetRef ref, Habit habit) {
-  final today = ref.read(todayProvider);
-  _mitFeier(
-    context,
-    ref,
-    habit,
-    (tracker) => tracker.advance(habit.id, today),
-    halb: (result) {
-      unawaited(HapticFeedback.selectionClick());
-      final goal = habit.goal;
-      sayHabitFeedback(
-        context,
-        goal == null
-            ? '${result.progress} / ${result.required}'
-            : goal.progressLabel(result.progress),
-      );
-    },
-  );
 }
 
 /// Vier Fähigkeiten hängen an Streak-Marken (ADR-0022). Genau hier

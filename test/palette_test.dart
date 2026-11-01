@@ -40,6 +40,12 @@ void main() {
   group('Auf Pergament', () {
     const grund = Palette.surface;
 
+    test('der Ertrag ist als große Zahl lesbar und unterscheidbar', () {
+      expect(kontrast(Palette.ertragXp, grund), greaterThanOrEqualTo(3));
+      expect(kontrast(Palette.ertragGold, grund), greaterThanOrEqualTo(3));
+      expect(Palette.ertragXp, isNot(Palette.ertragGold));
+    });
+
     test('Schrift ist gut lesbar', () {
       expect(kontrast(Palette.text, grund), greaterThanOrEqualTo(7));
       expect(kontrast(Palette.textDim, grund), greaterThanOrEqualTo(fuerText));

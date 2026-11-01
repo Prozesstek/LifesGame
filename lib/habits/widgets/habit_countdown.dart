@@ -38,6 +38,13 @@ class HabitClock {
     return '$minuten:$sekunden';
   }
 
+  /// Wie weit es ist, in ganzen Minuten: „0 von 2 Minuten“.
+  String get stand {
+    final ganz = totalSeconds ~/ 60;
+    final gelaufen = (doneSeconds ~/ 60).clamp(0, ganz);
+    return '$gelaufen von $ganz ${ganz == 1 ? 'Minute' : 'Minuten'}';
+  }
+
   /// Dasselbe für den Vorleser.
   String get semanticLabel {
     final rest = remainingSeconds < 0 ? 0 : remainingSeconds;
