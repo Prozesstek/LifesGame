@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1062, dazu die acht Packages (theory 218, habits 375, gear
+**Tests:** App 1064, dazu die acht Packages (theory 218, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,26 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 01.11.2026, danach: das Kreuz ist rot und steht in der Ecke
+
+Frederik, mit Skizze: „den entfernen button von gewohnheiten oben links ohne
+hintergrund button nur als rotes x“. Das Kreuz auf dem Gewohnheiten-Bildschirm
+hat keinen Holzknopf mehr, ist rot und sitzt in der Ecke der Kachel
+(`MitEntfernenKreuz`).
+
+**Ohne Rückfrage entschieden:** **Oben rechts**, wie in der Skizze, obwohl der
+Satz „oben links“ sagt: Links steht das Häkchen. Das gilt auch für die Kacheln,
+die heute nicht dran sind. Rechts bleibt ein schmaler Streifen frei, damit kein
+Name und kein Timer-Knopf unter dem Kreuz liegt; Namen haben dadurch etwas mehr
+Platz als vorher.
+
+App 1064 (vorher 1062). In 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- **Das Kreuz stoppt weiter ohne Rückfrage**, und Rot ist bisher dem Gegner
+  vorbehalten. Ob es sich neben dem Häkchen zu leicht trifft, zeigt nur das Handy.
 
 ## 01.11.2026: Kopplung durch Einrücken, der Wecker ist weg
 

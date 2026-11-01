@@ -435,64 +435,64 @@ class _NichtHeuteTile extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onEdit,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          habit.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Palette.textDim,
+            child: MitEntfernenKreuz(
+              onStop: onStop,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  14,
+                  10,
+                  MitEntfernenKreuz.randRechts,
+                  10,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            habit.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Palette.textDim,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          Wochentage.zeile(weekdays) ?? '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Palette.textDim,
+                          const SizedBox(height: 3),
+                          Text(
+                            Wochentage.zeile(weekdays) ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Palette.textDim,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (streak > 0) ...<Widget>[
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.local_fire_department,
-                      size: 14,
-                      color: Palette.gold,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      '$streak',
-                      semanticsLabel: '$streak am Stück',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.gold,
+                        ],
                       ),
                     ),
+                    if (streak > 0) ...<Widget>[
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.local_fire_department,
+                        size: 14,
+                        color: Palette.gold,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        '$streak',
+                        semanticsLabel: '$streak am Stück',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.gold,
+                        ),
+                      ),
+                    ],
                   ],
-                  DruckSperre(
-                    child: IconButton(
-                      onPressed: onStop,
-                      icon: const Icon(Icons.close, size: 18),
-                      color: Palette.muted,
-                      tooltip: 'Nicht mehr verfolgen',
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

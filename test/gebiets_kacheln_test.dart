@@ -11,6 +11,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/skills/widgets/gebiets_balken.dart';
 import 'package:lifes_game/skills/widgets/gebiets_kacheln.dart';
 import 'package:lifes_game/ui/beute_flug.dart';
+import 'package:lifes_game/ui/palette.dart';
 
 import 'test_view.dart';
 
@@ -151,5 +152,27 @@ void main() {
     );
     expect(aufDerKachel(Icons.add_alarm_outlined), findsNothing);
     expect(aufDerKachel(Icons.close), findsNWidgets(2));
+  });
+
+  testWidgets('das Kreuz ist rot, ohne Knopf, oben rechts in der Kachel', (
+    tester,
+  ) async {
+    await bildschirm(tester, zwei);
+
+    final kachel = find.byType(HabitCheckTile).first;
+    final kreuz = find.descendant(
+      of: kachel,
+      matching: find.byIcon(Icons.close),
+    );
+    expect(tester.widget<Icon>(kreuz).color, Palette.enemy);
+    expect(
+      find.ancestor(of: kreuz, matching: find.byType(IconButton)),
+      findsNothing,
+    );
+
+    final flaeche = tester.getRect(kachel);
+    final mitte = tester.getCenter(kreuz);
+    expect(mitte.dx, greaterThan(flaeche.center.dx));
+    expect(mitte.dy, lessThan(flaeche.center.dy));
   });
 }
