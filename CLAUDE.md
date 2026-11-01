@@ -208,7 +208,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/day_watcher.dart` | hält „heute" über Mitternacht aktuell — **muss** in `main.dart` hängen | Flutter |
 | `lib/progression/level_provider.dart` | Level und Gold aus allen Quellen, **rechnet nicht** | Flutter |
 | `lib/habits/habits_controller.dart` | Riverpod-Brücke Tracker ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/habits/habits_screen.dart` | oben **die vier Gebiete**, Level und Gold in der Titelzeile (ADR-0092), **„Heute“** darunter — auf der Kachel Erfahrung, Gold, Kette in Tagen, ein Tagesziel als kleiner Stand, Auslöser und Kreuz —, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
+| `lib/habits/habits_screen.dart` | oben **die vier Gebiete**, Level und Gold in der Titelzeile (ADR-0092), **„Heute“** darunter — auf der Kachel Erfahrung, Gold, Kette in Tagen, ein Tagesziel als kleiner Stand und Kreuz, **Gekoppeltes nur eingerückt, Halten richtet ein** —, darunter was heute nicht dran ist ([ADR-0059](docs/decisions/0059-gewohnheiten-nur-noch-heute.md)); **unten rechts der grüne Plus-Knopf** — angelegt, gestartet und eingerichtet wird hier, wenn das Blatt fertig ist (`_neueGewohnheit`, [ADR-0089](docs/decisions/0089-eine-frage-nach-der-anderen.md)) | Flutter |
 | `lib/habits/habit_check_flow.dart` | **was ein Häkchen auslöst** — Klang, Feiern, aufsteigende Zahlen, fliegende Münzen; **die Erfahrung fliegt zweimal**, zum Level und grün zum Gebiet ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)); **eine Stelle** für Startseite und Gewohnheiten; gefeiert wird, **wenn die Münzen gelandet sind** | Flutter |
 | `lib/habits/haekchen_moment.dart` | **was ein Häkchen gerade bedeutet**: das wievielte des Tages, ob es die Flamme zündet, ob der Tag geschafft ist — und welcher Ton der **Tonleiter des Tages** dran ist; reine Rechnung, erzeugt keine Zahl | Flutter |
 | `lib/habits/tages_flamme.dart` | **die große Flamme in der Mitte**: ob ein Häkchen das erste des Tages ist, die Tageskette vorher und nachher, die Woche Mo bis So (brennt, Eis, leer, heute, kommt) — reine Rechnung, erzeugt keine Zahl | Flutter |
@@ -229,7 +229,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
 | `lib/habits/widgets/aufgaben_streifen.dart` | **die Tagesaufgaben kommen kurz von unten**: was ein Häkchen oder eine Rückfrage voranbringt, fährt herein, füllt seinen Balken und fährt hinaus — nimmt keinen Tipp an; ausgelöst über `zeigeAufgabenFortschritt` in `habit_check_flow.dart` | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** zum **Ändern** einer laufenden Gewohnheit (beim Anlegen fragt seit ADR-0089 das Blatt) — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
-| `lib/habits/cue_text.dart` | wie der Auslöser auf dem Bildschirm steht — Satz oder „Nach: …“; **eine Stelle** für Kachel und Startseite | Flutter |
+| `lib/habits/cue_text.dart` | wie der Auslöser **auf der Startseite** steht — Satz oder „Nach: …“; die Kachel der Gewohnheiten zeigt nur den Satz | Flutter |
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
@@ -341,7 +341,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1061 Tests
+flutter test             # 1062 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

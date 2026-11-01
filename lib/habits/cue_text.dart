@@ -1,7 +1,7 @@
 import 'package:habits/habits.dart';
 
-/// Wie der Auslöser einer Gewohnheit auf dem Bildschirm steht — **eine
-/// Stelle** für die Kachel und die Startseite.
+/// Wie der Auslöser einer Gewohnheit auf der Startseite steht. Die Kachel
+/// auf dem Gewohnheiten-Bildschirm zeigt eine Kopplung über die Einrückung.
 ///
 /// Ein Anker (ADR-0065) steht als „Nach: Zähne putzen“, ein Satz
 /// (ADR-0052) so, wie er eingegeben wurde. Beides zugleich gibt es nicht;

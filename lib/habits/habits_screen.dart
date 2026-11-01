@@ -9,7 +9,6 @@ import '../home/widgets/status_leiste.dart';
 import '../progression/level_provider.dart';
 import '../skills/widgets/gebiets_kacheln.dart';
 import '../ui/palette.dart';
-import 'cue_text.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
 import 'widgets/cue_dialog.dart';
@@ -186,6 +185,7 @@ class HabitsScreen extends ConsumerWidget {
     StackedHabit eintrag,
   ) {
     final habit = eintrag.habit;
+    final ankerId = tracker.anchorFor(habit.id);
     return HabitCheckTile(
       habit: habit,
       isChecked: tracker.isChecked(habit.id, today),
@@ -201,7 +201,8 @@ class HabitsScreen extends ConsumerWidget {
       onTimerDone: () => finishHabitTimer(context, ref, habit),
       onStop: () =>
           ref.read(habitTrackerProvider.notifier).deactivate(habit.id),
-      cue: CueText.lineFor(tracker, habit.id),
+      cue: tracker.cueFor(habit.id),
+      anker: ankerId == null ? null : tracker.definitionFor(ankerId)?.name,
       treat: tracker.treatFor(habit.id),
       days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
       cued: eintrag.isCued,

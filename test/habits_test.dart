@@ -326,7 +326,9 @@ void main() {
       );
     });
 
-    testWidgets('„Ohne" lässt die Frage auf der Kachel stehen', (tester) async {
+    testWidgets('„Ohne" lässt die Kachel ohne Zeile und ohne Wecker', (
+      tester,
+    ) async {
       final container = _container();
       await _pumpScreen(tester, container);
       await _vorlageStarten(tester);
@@ -340,21 +342,16 @@ void main() {
           of: find.byType(HabitCheckTile),
           matching: find.byIcon(Icons.add_alarm_outlined),
         ),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
-    testWidgets('die Zeile ändert den Satz, statt abzuhaken', (tester) async {
+    testWidgets('Halten ändert den Satz, statt abzuhaken', (tester) async {
       final container = _container();
       await _pumpScreen(tester, container);
       await _vorlageStarten(tester);
 
-      await tester.tap(
-        find.descendant(
-          of: find.byType(HabitCheckTile),
-          matching: find.byIcon(Icons.add_alarm_outlined),
-        ),
-      );
+      await tester.longPress(find.byType(HabitCheckTile));
       await tester.pumpAndSettle();
 
       expect(
@@ -370,6 +367,30 @@ void main() {
       expect(
         container.read(habitTrackerProvider).cueFor(HabitCatalog.starterId),
         'Nach dem Kaffee',
+      );
+    });
+
+    testWidgets('ein Tipp auf den Satz öffnet die Frage, statt abzuhaken', (
+      tester,
+    ) async {
+      final container = _container();
+      container
+          .read(habitTrackerProvider.notifier)
+          .activate(HabitCatalog.starterId);
+      container
+          .read(habitTrackerProvider.notifier)
+          .setCue(HabitCatalog.starterId, 'Nach dem Kaffee');
+      await _pumpScreen(tester, container);
+
+      await tester.tap(find.text('Nach dem Kaffee'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(cueFieldKey), findsOneWidget);
+      expect(
+        container
+            .read(habitTrackerProvider)
+            .isChecked(HabitCatalog.starterId, _heute),
+        isFalse,
       );
     });
 
