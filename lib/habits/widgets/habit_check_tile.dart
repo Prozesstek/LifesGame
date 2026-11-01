@@ -149,110 +149,110 @@ class HabitCheckTile extends StatelessWidget {
             child: GebietStreifen(
               area: habit.area,
               blass: isChecked,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  14 - GebietStreifen.breite,
-                  12,
-                  8,
-                  12,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    _CheckMark(
-                      isChecked: isChecked,
-                      cued: cued,
-                      label: habit.name,
-                      anker: anker,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            habit.name,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: isChecked ? Palette.textDim : Palette.text,
-                              decoration: isChecked
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                              decorationColor: Palette.muted,
+              child: MitEntfernenKreuz(
+                onStop: onStop,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    14 - GebietStreifen.breite,
+                    12,
+                    MitEntfernenKreuz.randRechts,
+                    12,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      _CheckMark(
+                        isChecked: isChecked,
+                        cued: cued,
+                        label: habit.name,
+                        anker: anker,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              habit.name,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: isChecked
+                                    ? Palette.textDim
+                                    : Palette.text,
+                                decoration: isChecked
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                decorationColor: Palette.muted,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          RewardLine(
-                            xp: xpGain,
-                            gold: goldGain,
-                            alreadyEarned: isChecked,
-                          ),
-                          if (!isChecked &&
-                              onEditCue != null &&
-                              _hatZeile) ...<Widget>[
-                            const SizedBox(height: 4),
-                            _CueLine(
-                              cue: cue,
-                              days: days,
-                              treat: treat,
-                              onTap: onEditCue!,
+                            const SizedBox(height: 5),
+                            RewardLine(
+                              xp: xpGain,
+                              gold: goldGain,
+                              alreadyEarned: isChecked,
                             ),
+                            if (!isChecked &&
+                                onEditCue != null &&
+                                _hatZeile) ...<Widget>[
+                              const SizedBox(height: 4),
+                              _CueLine(
+                                cue: cue,
+                                days: days,
+                                treat: treat,
+                                onTap: onEditCue!,
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ),
-                    if (streak > 0) ...<Widget>[
-                      const SizedBox(width: 8),
-                      _StreakMarke(streak: streak),
-                    ],
-                    // **Ein Tagesziel behält seinen kleinen Stand**: Sonst
-                    // ließe sich eine Menge nicht mehr Schritt für Schritt
-                    // füllen, und ein laufender Timer wäre nicht zu sehen.
-                    if (timer != null && !isChecked) ...<Widget>[
-                      const SizedBox(width: 8),
-                      HabitCountdown(
-                        habit: habit,
-                        onDone: onTimerDone,
-                        builder: (context, uhr) => _ZielStand(
-                          text: uhr.label,
-                          semanticLabel: uhr.semanticLabel,
-                          laeuft: uhr.isRunning,
                         ),
                       ),
-                      DruckSperre(
-                        child: IconButton(
-                          key: timerKey(habit.id),
-                          onPressed: timer,
-                          icon: const Icon(Icons.timer_outlined, size: 22),
-                          color: Palette.accent,
-                          tooltip: 'Timer',
+                      if (streak > 0) ...<Widget>[
+                        const SizedBox(width: 8),
+                        _StreakMarke(streak: streak),
+                      ],
+                      // **Ein Tagesziel behält seinen kleinen Stand**: Sonst
+                      // ließe sich eine Menge nicht mehr Schritt für Schritt
+                      // füllen, und ein laufender Timer wäre nicht zu sehen.
+                      if (timer != null && !isChecked) ...<Widget>[
+                        const SizedBox(width: 8),
+                        HabitCountdown(
+                          habit: habit,
+                          onDone: onTimerDone,
+                          builder: (context, uhr) => _ZielStand(
+                            text: uhr.label,
+                            semanticLabel: uhr.semanticLabel,
+                            laeuft: uhr.isRunning,
+                          ),
                         ),
-                      ),
-                    ],
-                    if (zeigtPlus) ...<Widget>[
-                      const SizedBox(width: 8),
-                      _ZielStand(
-                        text: '$progress/${goal.target}',
-                        semanticLabel: goal.progressLabel(progress),
-                      ),
-                      DruckSperre(
-                        child: IconButton(
-                          onPressed: onAdvance,
-                          icon: const Icon(Icons.add_circle_outline, size: 22),
-                          color: Palette.accent,
-                          tooltip: _plusTooltip(goal),
+                        DruckSperre(
+                          child: IconButton(
+                            key: timerKey(habit.id),
+                            onPressed: timer,
+                            icon: const Icon(Icons.timer_outlined, size: 22),
+                            color: Palette.accent,
+                            tooltip: 'Timer',
+                          ),
                         ),
-                      ),
+                      ],
+                      if (zeigtPlus) ...<Widget>[
+                        const SizedBox(width: 8),
+                        _ZielStand(
+                          text: '$progress/${goal.target}',
+                          semanticLabel: goal.progressLabel(progress),
+                        ),
+                        DruckSperre(
+                          child: IconButton(
+                            onPressed: onAdvance,
+                            icon: const Icon(
+                              Icons.add_circle_outline,
+                              size: 22,
+                            ),
+                            color: Palette.accent,
+                            tooltip: _plusTooltip(goal),
+                          ),
+                        ),
+                      ],
                     ],
-                    DruckSperre(
-                      child: IconButton(
-                        onPressed: onStop,
-                        icon: const Icon(Icons.close, size: 18),
-                        color: Palette.muted,
-                        tooltip: 'Nicht mehr verfolgen',
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -269,6 +269,59 @@ class HabitCheckTile extends StatelessWidget {
 
   static String _plusTooltip(HabitGoal goal) {
     return goal.step == 1 ? 'Eins mehr' : '${goal.step} ${goal.unit} mehr';
+  }
+}
+
+/// **Das rote Kreuz oben rechts** über [child]: stoppt eine Gewohnheit —
+/// eine Stelle für alle Kacheln dieses Bildschirms.
+///
+/// Kein Knopf aus dem Theme, der trüge die Holzfläche. Das [child] hält mit
+/// [randRechts] rechts einen Streifen frei, damit weder ein Name noch der
+/// Knopf des Timers unter dem Kreuz liegt.
+class MitEntfernenKreuz extends StatelessWidget {
+  const MitEntfernenKreuz({
+    required this.onStop,
+    required this.child,
+    super.key,
+  });
+
+  /// Wie viel Platz das [child] rechts freilässt.
+  static const double randRechts = 26;
+
+  static const double _flaeche = 32;
+
+  final VoidCallback onStop;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      // Sonst schrumpfte die Kachel auf ihren Inhalt (`gotchas.md`).
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        child,
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Semantics(
+            button: true,
+            child: Tooltip(
+              message: 'Nicht mehr verfolgen',
+              child: Druck(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onStop,
+                  child: const SizedBox.square(
+                    dimension: _flaeche,
+                    child: Icon(Icons.close, size: 20, color: Palette.enemy),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

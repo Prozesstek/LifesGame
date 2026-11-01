@@ -143,6 +143,22 @@ void main() {
     });
   });
 
+  testWidgets('das Kreuz stoppt die Gewohnheit und hakt nichts ab', (
+    tester,
+  ) async {
+    final c = container(laufen());
+    await zeige(tester, c, const HabitsScreen());
+
+    await tester.tap(
+      find.descendant(of: kachel(folge), matching: find.byIcon(Icons.close)),
+    );
+    await tester.pumpAndSettle();
+
+    final tracker = c.read(habitTrackerProvider);
+    expect(tracker.isActive(folge.id), isFalse);
+    expect(tracker.isChecked(folge.id, heute), isFalse);
+  });
+
   group('Der Stapel', () {
     HabitTracker gekoppelt() => laufen().setAnchor(folge.id, anker.id);
 
