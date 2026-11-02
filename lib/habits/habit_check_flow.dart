@@ -289,7 +289,7 @@ void claimDailyQuest(BuildContext context, WidgetRef ref, DailyQuest quest) {
   AufstiegHost.maybeOf(context)?.zeige(<AufstiegZeile>[
     keyGainLine(ref, schluesselVorher) ??
         const AufstiegZeile(
-          'Aufgabe erledigt — Schlüssel voll',
+          'Daily erledigt — Schlüssel voll',
           color: Palette.goldOnDark,
         ),
   ]);

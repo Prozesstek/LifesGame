@@ -42,7 +42,7 @@ void main() {
 
       expect(
         Sammlung.woherStueck(episch),
-        contains('ab Ebene ${GearGates.epicRung}'),
+        contains('ab Etage ${GearGates.epicRung}'),
       );
       expect(
         Sammlung.woherStueck(setTeil),

@@ -27,7 +27,7 @@ class DailyFormCard extends StatelessWidget {
     final titel = form.isInForm ? 'In Form' : 'Tagesform';
     final zeile = summe ?? 'Noch nichts — jedes Häkchen gibt heute $einer';
     final darunter = form.isInForm
-        ? 'Alles erledigt. So gehst du heute in die Grube.'
+        ? 'Alles erledigt. So gehst du heute in den Dungeon.'
         : open == 1
         ? 'Noch eine bis „In Form" — $alle auf alles und die Tagestruhe.'
         : 'Noch $open bis „In Form" — $alle auf alles und die Tagestruhe.';

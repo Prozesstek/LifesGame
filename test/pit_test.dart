@@ -118,7 +118,7 @@ void main() {
 
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
       expect(grube.stage.number, 1);
-      expect(find.text('Die Grube · Stufe 1'), findsOneWidget);
+      expect(find.text('Dungeon · Etage 1'), findsOneWidget);
     });
   });
 

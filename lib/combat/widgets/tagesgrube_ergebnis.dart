@@ -36,10 +36,10 @@ class TagesgrubeErgebnis extends StatelessWidget {
   Widget build(BuildContext context) {
     final farbe = run.won ? Palette.success : Palette.enemy;
     final fussnote = run.won
-        ? 'Die Tagesgrube bringt Ruhm, keine Erfahrung und kein Gold. '
-              'Morgen wartet eine neue.'
-        : 'Ein Versuch am Tag. Das kostet nichts — morgen wartet eine '
-              'neue Grube.';
+        ? 'Der Tagesdungeon bringt Ruhm, keine Erfahrung und kein Gold. '
+              'Morgen wartet ein neuer.'
+        : 'Ein Versuch am Tag. Das kostet nichts — morgen wartet ein '
+              'neuer Dungeon.';
 
     return HolzDialog(
       child: AlertDialog(
@@ -65,7 +65,7 @@ class TagesgrubeErgebnis extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Tagesgrube #$number',
+              'Tagesdungeon #$number',
               style: const TextStyle(fontSize: 15, color: Palette.textDim),
             ),
             const SizedBox(height: 14),

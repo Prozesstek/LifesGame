@@ -142,7 +142,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       PurchaseBlock.bereitsGekauft => 'Heute schon gekauft.',
       PurchaseBlock.unbekannt => 'Dieses Stück gibt es nicht mehr.',
       PurchaseBlock.gesperrt =>
-        'Erst Stufe ${GearGates.rungFor(item.rarity)} der Grube schaffen.',
+        'Erst Etage ${GearGates.rungFor(item.rarity)} im Dungeon schaffen.',
     };
     _say(context, message);
 

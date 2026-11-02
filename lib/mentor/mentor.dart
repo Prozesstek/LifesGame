@@ -80,15 +80,15 @@ abstract final class Mentor {
       ),
       (Schritt.faehigkeitAnlegen, MentorOrt.faehigkeiten) => const MentorSatz(
         'Tipp auf deine neue Fähigkeit und leg sie auf den freien Platz — '
-        'dann nimmst du sie mit in die Grube.',
+        'dann nimmst du sie mit in den Dungeon.',
         KastenLage.unten,
       ),
       (Schritt.grube, MentorOrt.start) => const MentorSatz(
-        'Zeit für die Grube. Zeig, was du gelernt hast!',
+        'Zeit für den Dungeon. Zeig, was du gelernt hast!',
         KastenLage.unten,
       ),
       (Schritt.grube, MentorOrt.eingang) => const MentorSatz(
-        'Unten warten Gegner und ein Wächter. Besiegst du ihn, gehört '
+        'Unten warten Gegner und ein Boss. Besiegst du ihn, gehört '
         'seine Beute dir.',
         KastenLage.oben,
       ),

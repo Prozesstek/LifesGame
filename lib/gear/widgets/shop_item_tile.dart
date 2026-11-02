@@ -164,7 +164,7 @@ class ShopItemTile extends StatelessWidget {
           if (block == PurchaseBlock.gesperrt) ...<Widget>[
             const SizedBox(height: 6),
             Semantics(
-              label: 'Verdient ab Stufe $requiredRung der Grube.',
+              label: 'Verdient ab Etage $requiredRung im Dungeon.',
               excludeSemantics: true,
               child: Row(
                 children: <Widget>[

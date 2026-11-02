@@ -257,7 +257,7 @@ class HabitsScreen extends ConsumerWidget {
       sayHabitFeedback(
         context,
         'Kein Platz frei — dafür braucht es eine weitere Vorlage '
-        'aus dem Skillbaum.',
+        'aus dem Talentbaum.',
       );
       return;
     }

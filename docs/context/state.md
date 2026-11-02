@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 01.11.2026 · Frederik
+**Zuletzt aktualisiert:** 02.11.2026 · Frederik
 
 ---
 
@@ -134,6 +134,37 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.11.2026: Dungeon, Etage, Boss, Talentpunkte, Dailies
+
+Frederik: „ich würde gerne manche Bereiche umbennenn sowie der Spieler sie aus
+anderen Spielen kennt“. Aus Claudes Liste gewählt: die fünf obersten, „mit
+Talentpunkten statt Skillpunkten“.
+[ADR-0094](../decisions/0094-namen-aus-anderen-spielen.md).
+
+| vorher | jetzt |
+|---|---|
+| Grube / Tagesgrube | **Dungeon / Tagesdungeon** |
+| Ebene, Stufe, Sprosse | **Etage** |
+| Wächter | **Boss** |
+| Theoriepunkte, Skillbaum | **Talentpunkte, Talentbaum** |
+| Tagesaufgaben | **Dailies** |
+
+**Nur der Text auf dem Bildschirm.** Code, Spielstand und ADRs sagen weiter
+„Grube“.
+
+**Ohne Rückfrage entschieden:** „Tagesdungeon“ statt „Tagesgrube“, und
+„Sprosse“ in den Errungenschaften wird auch „Etage“ („Zehn Etagen“).
+Gefunden beim Suchen: ein viertes Wort für dieselbe Sache.
+
+App 1066, unverändert; zehn Tests suchten nach den alten Wörtern. **Nicht
+gerendert, nicht am Handy.**
+
+### Offen
+
+- Der Kreis heißt „Kampf“, der Bildschirm dahinter „Dungeon“. Passt das, oder
+  soll auch der Kreis „Dungeon“ heißen?
+- **AktivesBrett hat ADR-0094 nicht gesehen.**
 
 ## 01.11.2026, zuletzt: der Ertrag steht rechts, Timer-Knopf und Plus sind weg
 

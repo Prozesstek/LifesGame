@@ -52,7 +52,7 @@ abstract final class TagesgrubeText {
       if (dayStreak > 0) '🔥 $dayStreak ${dayStreak == 1 ? 'Tag' : 'Tage'}',
     ];
     return <String>[
-      'Lifes Game · Tagesgrube #$number',
+      'Lifes Game · Tagesdungeon #$number',
       _ergebnis(run),
       if (darunter.isNotEmpty) darunter.join(' · '),
       adresse,

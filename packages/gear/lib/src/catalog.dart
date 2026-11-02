@@ -9,7 +9,7 @@ import 'prices.dart';
 /// mit neun Stücken war nach zwei Wochen alles gesehen.
 ///
 /// **Die drei übrigen hängen an der Gegnerreihe** (ADR-0034): zwei
-/// epische ab Sprosse zehn, ein legendäres ab Sprosse zwanzig. Sie tragen
+/// epische ab Etage zehn, ein legendäres ab Etage zwanzig. Sie tragen
 /// keine Set-Marke — ein Set soll in dreißig Tagen erreichbar bleiben — und
 /// sind nur mäßig teurer als Selten: Die Sperre ist die Hürde, nicht der
 /// Preis.
@@ -112,7 +112,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(attack: 5),
       why: 'Der härteste Einzelschlag im Spiel — und der langsamste Weg zu '
           'Energie. Wer ihn trägt, spielt fast nur diesen einen Zug. Ab '
-          'Sprosse zehn der Gegnerreihe.',
+          'Etage zehn im Dungeon.',
     ),
     GearItem(
       id: 'gear-langbogen',
@@ -135,7 +135,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(attack: 6, maxEnergy: 1),
       why: 'Der einzige Waffenzug mit einer Perfect-Wirkung: Ein perfekter '
           'Treffer entzündet den Gegner, ohne Energie zu kosten. Verdient '
-          'ab dem Bergwächter, Sprosse zwanzig.',
+          'ab Etage zwanzig im Dungeon.',
     ),
 
     // ---------------------------------------------------------------
@@ -206,7 +206,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(maxHp: 50, defense: 4, maxEnergy: 1),
       why: 'Der erste Panzer, der auch Energie gibt. Wer bisher zwischen '
           'Aushalten und Zuschlagen wählen musste, bekommt hier ein Stück '
-          'von beidem. Ab Sprosse zehn.',
+          'von beidem. Ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-runenharnisch',
@@ -227,7 +227,7 @@ abstract final class GearCatalog {
       power: 'legendaer-steinerne-haut',
       price: GearPrices.ruestungLegendary,
       bonus: GearBonus(maxHp: 64, defense: 5, maxEnergy: 1),
-      why: 'Der Panzer für die letzten zehn Sprossen. Vierundsechzig '
+      why: 'Der Panzer für die letzten zehn Etagen. Vierundsechzig '
           'Lebenspunkte sind mehr, als ein frischer Charakter am ersten Tag '
           'überhaupt hat. Verdient ab dem Bergwächter.',
     ),
@@ -299,8 +299,8 @@ abstract final class GearCatalog {
       price: GearPrices.helmEpic1,
       bonus: GearBonus(attack: 1, maxHp: 30, defense: 2),
       why: 'Der erste Helm mit Angriff. Ein Punkt klingt nach wenig — aber '
-          'er wirkt auf jeden Zug, den man in den nächsten zwanzig Sprossen '
-          'drückt. Ab Sprosse zehn.',
+          'er wirkt auf jeden Zug, den man in den nächsten zwanzig Etagen '
+          'drückt. Ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-runenkrone',
@@ -393,7 +393,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(maxHp: 8, defense: 3, maxEnergy: 1),
       why: 'Die Verteidigung der schweren Schienen, dazu ein Punkt Energie. '
           'Der billigste Weg, einen dritten Platz auf Energie zu legen. Ab '
-          'Sprosse zehn.',
+          'Etage zehn.',
     ),
     GearItem(
       id: 'gear-drachenschuppenstiefel',
@@ -403,7 +403,7 @@ abstract final class GearCatalog {
       price: GearPrices.schuheEpic2,
       bonus: GearBonus(maxHp: 14, defense: 4),
       why: 'Vier Punkte Verteidigung auf dem Platz, der sonst höchstens '
-          'drei trägt. Gegen die harten Gegner ab Sprosse zwanzig zählt '
+          'drei trägt. Gegen die harten Gegner ab Etage zwanzig zählt '
           'jeder davon doppelt.',
     ),
     GearItem(
@@ -485,7 +485,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(attack: 1, maxHp: 10, maxEnergy: 3),
       why: 'Der Aderring mit einem Punkt Angriff und etwas mehr Leben. Für '
           'alle, denen die drei Energie schon reichen und die den Rest des '
-          'Platzes nicht verschenken wollen. Ab Sprosse zehn.',
+          'Platzes nicht verschenken wollen. Ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-ring-der-glut',
@@ -573,7 +573,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(attack: 2, maxHp: 14, maxEnergy: 2),
       why: 'Das Runenamulett mit acht Lebenspunkten mehr. Für die, denen '
           'der Kampf endet, bevor die zwei Energie sich auszahlen. Ab '
-          'Sprosse zehn.',
+          'Etage zehn.',
     ),
     GearItem(
       id: 'gear-drachenzahn',
@@ -629,7 +629,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(attack: 5, maxHp: 14),
       why: 'Schnelle Hiebe im Bogen, jeder schwach, aber jeder raubt Leben '
           '— und wer viele auf einmal trifft, raubt viel. Teil des '
-          'Vampirsets, ab Sprosse zehn.',
+          'Vampirsets, ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-flickenmantel',
@@ -641,7 +641,7 @@ abstract final class GearCatalog {
       bonus: GearBonus(maxHp: 42, defense: 3),
       why: 'Weniger Panzer als der Harnisch, dafür ein Schild, der sich '
           'nach drei Sekunden ohne Treffer von selbst aufbaut. Belohnt '
-          'jeden, der aus den Ringen des Wächters läuft.',
+          'jeden, der aus den Ringen des Bosses läuft.',
     ),
     GearItem(
       id: 'gear-nachtmantel',
@@ -653,7 +653,7 @@ abstract final class GearCatalog {
       price: GearPrices.nachtmantel,
       bonus: GearBonus(maxHp: 58, defense: 5),
       why: 'Die schwerste epische Rüstung, und sie raubt Leben. Teil des '
-          'Vampirsets, ab Sprosse zehn.',
+          'Vampirsets, ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-falkenhaube',
@@ -676,7 +676,7 @@ abstract final class GearCatalog {
       price: GearPrices.fledermaushaube,
       bonus: GearBonus(attack: 1, maxHp: 30, defense: 2, maxEnergy: 1),
       why: 'Ein wenig von allem, und ein wenig Lebensraub. Teil des '
-          'Vampirsets, ab Sprosse zehn.',
+          'Vampirsets, ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-hasenlaeufer',
@@ -699,7 +699,7 @@ abstract final class GearCatalog {
       price: GearPrices.schattenstiefel,
       bonus: GearBonus(maxHp: 16, defense: 4),
       why: 'Die festesten epischen Schuhe, und sie rauben Leben. Teil des '
-          'Vampirsets, ab Sprosse zehn.',
+          'Vampirsets, ab Etage zehn.',
     ),
     GearItem(
       id: 'gear-seelenring',

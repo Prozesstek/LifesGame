@@ -380,7 +380,7 @@ class _DevGrantsCard extends ConsumerWidget {
     final zeilen = <String, int>{
       'Erfahrung': grants.bonusXp,
       'Gold': grants.bonusGold,
-      'Theoriepunkte': grants.bonusTheoryPoints,
+      'Talentpunkte': grants.bonusTheoryPoints,
       'Fähigkeitspunkte': grants.bonusAbilityPoints,
       'Fähigkeiten': grants.unlockedAbilityIds.length,
     }..removeWhere((_, wert) => wert == 0);

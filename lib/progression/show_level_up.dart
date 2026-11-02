@@ -103,8 +103,8 @@ class LevelUpSheet extends StatelessWidget {
         (
           Icons.menu_book,
           auf.theoryPoints == 1
-              ? '+1 Theoriepunkt für den Skillbaum'
-              : '+${auf.theoryPoints} Theoriepunkte für den Skillbaum',
+              ? '+1 Talentpunkt für den Talentbaum'
+              : '+${auf.theoryPoints} Talentpunkte für den Talentbaum',
         ),
       for (final slot in auf.newSlots)
         (Icons.add_box_outlined, 'Fähigkeitsplatz $slot ist offen'),

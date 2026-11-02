@@ -74,7 +74,7 @@ void main() {
     test('ein Sieg in Form: Raumzeile, Zeit, Blitz und Kette', () {
       expect(
         TagesgrubeText.teilen(number: 12, run: sieg, dayStreak: 12),
-        'Lifes Game · Tagesgrube #12\n'
+        'Lifes Game · Tagesdungeon #12\n'
         '🟩🟩🟨🟥👑 1:04\n'
         '⚡ In Form · 🔥 12 Tage\n'
         'prozesstek.de/LifesGame',
@@ -97,7 +97,7 @@ void main() {
 
       expect(
         TagesgrubeText.teilen(number: 12, run: lauf, dayStreak: 12),
-        'Lifes Game · Tagesgrube #12\n'
+        'Lifes Game · Tagesdungeon #12\n'
         '🟩🟨💀⬛⬛\n'
         '🌙 Ruhetag · 🔥 12 Tage\n'
         'prozesstek.de/LifesGame',
@@ -114,7 +114,7 @@ void main() {
       final text = TagesgrubeText.teilen(number: 3, run: lauf, dayStreak: 0);
 
       expect(text.split('\n'), <String>[
-        'Lifes Game · Tagesgrube #3',
+        'Lifes Game · Tagesdungeon #3',
         '🟥⏳⬛',
         'prozesstek.de/LifesGame',
       ]);
@@ -346,7 +346,7 @@ void main() {
     ) async {
       await eingang(tester, SaveData(ladder: warUnten));
 
-      expect(find.text('Tagesgrube #2'), findsOneWidget);
+      expect(find.text('Tagesdungeon #2'), findsOneWidget);
       expect(find.byKey(TagesgrubeKarte.hinabKey), findsOneWidget);
       // Montag: der Bogen und die drei ersten aus dem Baum.
       for (final name in <String>['Funkenstoß', 'Steinhaut', 'Blütentau']) {
@@ -450,7 +450,7 @@ void main() {
       expect(sim.slots.map((a) => a.id), satz.abilityIds);
       expect(sim.stage, PitStage(satz.stage));
       expect(sim.rewardPot, (xp: 0, gold: 0));
-      expect(find.text('Tagesgrube #2'), findsOneWidget);
+      expect(find.text('Tagesdungeon #2'), findsOneWidget);
     });
 
     testWidgets('„Zurück“ mitten im Lauf fragt, und „Weiterkämpfen“ bleibt', (
@@ -519,7 +519,7 @@ void main() {
 
       await tester.tap(find.byKey(TagesgrubeErgebnis.teilenKey));
       await tester.pump();
-      expect(zwischenablage, startsWith('Lifes Game · Tagesgrube #2\n'));
+      expect(zwischenablage, startsWith('Lifes Game · Tagesdungeon #2\n'));
       expect(zwischenablage, endsWith(TagesgrubeText.adresse));
       expect(find.text('Kopiert'), findsOneWidget);
 
@@ -565,7 +565,7 @@ void main() {
 
       expect(
         zwischenablage,
-        'Lifes Game · Tagesgrube #2\n'
+        'Lifes Game · Tagesdungeon #2\n'
         '🟩🟩🟨🟥👑 1:04\n'
         '⚡ In Form · 🔥 1 Tag\n'
         'prozesstek.de/LifesGame',
@@ -610,7 +610,7 @@ void main() {
       );
 
       expect(find.text('Sieg'), findsOneWidget);
-      expect(find.text('Tagesgrube #12'), findsOneWidget);
+      expect(find.text('Tagesdungeon #12'), findsOneWidget);
       expect(find.text('1:04'), findsOneWidget);
       expect(find.text('12'), findsOneWidget, reason: 'die Tageskette');
       expect(tester.widget<RuhmZahl>(find.byType(RuhmZahl)).fame, 5);
@@ -624,7 +624,7 @@ void main() {
       expect(
         Raumzeile.label(sieg.rooms),
         'kaum getroffen, kaum getroffen, getroffen, schwer getroffen, '
-        'Wächter besiegt',
+        'Boss besiegt',
       );
       expect(Raumzeile.label(const <RoomMark>[]), 'Kein Raum erreicht');
     });

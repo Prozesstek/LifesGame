@@ -59,11 +59,7 @@ class DailyQuestsCard extends StatelessWidget {
       schild: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const Icon(
-            Icons.flag_rounded,
-            size: 20,
-            semanticLabel: 'Tagesaufgaben',
-          ),
+          const Icon(Icons.flag_rounded, size: 20, semanticLabel: 'Dailies'),
           const SizedBox(width: 8),
           Text('$fertig / ${quests.length}'),
         ],

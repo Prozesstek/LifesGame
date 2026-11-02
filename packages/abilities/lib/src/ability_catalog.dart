@@ -242,7 +242,7 @@ abstract final class AbilityCatalog {
     Ability(
       moveId: 'heavy_attack',
       source: FromAchievement('zehn-sprossen'),
-      requirement: 'Errungenschaft „Zehn Sprossen"',
+      requirement: 'Errungenschaft „Zehn Etagen"',
       rarity: Rarity.rare,
     ),
 

@@ -51,11 +51,11 @@ void main() {
     String satz(StaerkerStand s) => StaerkerWerden.tipps(s).first.satz;
     expect(
       satz(const StaerkerStand(freiePunkte: 1)),
-      'Ein Theoriepunkt ist frei.',
+      'Ein Talentpunkt ist frei.',
     );
     expect(
       satz(const StaerkerStand(freiePunkte: 4)),
-      '4 Theoriepunkte sind frei.',
+      '4 Talentpunkte sind frei.',
     );
     expect(
       satz(const StaerkerStand(offeneHaekchen: 3)),
@@ -65,7 +65,7 @@ void main() {
 
   test('aufgefüllt wird ohne Doppel', () {
     final tipps = StaerkerWerden.tipps(const StaerkerStand(freiePunkte: 2));
-    expect(tipps.first.satz, '2 Theoriepunkte sind frei.');
+    expect(tipps.first.satz, '2 Talentpunkte sind frei.');
     expect(tipps.where((t) => t.weg == StaerkerWeg.baum), hasLength(1));
     expect(tipps, hasLength(3));
   });
