@@ -68,10 +68,11 @@ void main() {
         for (final ort in MentorOrt.values) {
           final text = Mentor.satz(schritt, ort)?.text;
           if (text == null) continue;
-          expect(text.length, lessThan(130), reason: text);
+          // Seit ADR-0095 ein paar Wörter: Licht und Punkt zeigen den Weg.
+          expect(text.split(' ').length, lessThanOrEqualTo(8), reason: text);
         }
       }
-      expect(Mentor.ersteBeute.length, lessThan(130));
+      expect(Mentor.ersteBeute.split(' ').length, lessThanOrEqualTo(12));
     });
 
     test('am Eingang steht er oben, weil „Hinab“ unten liegt', () {

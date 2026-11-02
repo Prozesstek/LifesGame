@@ -6,6 +6,7 @@ import '../ui/holz.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'mentor.dart';
+import 'scheinwerfer.dart';
 
 /// Der Mentor mit seinem Satz: Bild links, Text rechts, auf Pergament im
 /// Holzrahmen.
@@ -145,38 +146,41 @@ class MentorFlaeche extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final satz = Mentor.satz(ref.watch(ersterStartProvider).schritt, ort);
-    if (satz == null) return child;
-
-    final oben = satz.lage == KastenLage.oben;
-    return Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        child,
-        Positioned(
-          left: 0,
-          right: 0,
-          top: oben ? 0 : null,
-          bottom: oben ? null : 0,
-          child: SafeArea(
-            top: oben,
-            bottom: !oben,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                12,
-                12 + (oben ? obenFrei : 0),
-                12,
-                12 + (oben ? 0 : untenFrei),
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: maxBreite),
-                  child: IgnorePointer(child: MentorKasten(text: satz.text)),
+    final oben = satz?.lage == KastenLage.oben;
+    // **Der Scheinwerfer steht immer**, auch wenn der Mentor schweigt:
+    // Fiele er weg, stünde [child] an einer anderen Stelle im Baum und
+    // baute sich neu (`gotchas.md`). Ohne angemeldetes Ziel ist er
+    // unsichtbar.
+    return Scheinwerfer(
+      oben: satz == null
+          ? null
+          : Positioned(
+              left: 0,
+              right: 0,
+              top: oben ? 0 : null,
+              bottom: oben ? null : 0,
+              child: SafeArea(
+                top: oben,
+                bottom: !oben,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    12,
+                    12 + (oben ? obenFrei : 0),
+                    12,
+                    12 + (oben ? 0 : untenFrei),
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: maxBreite),
+                      child: IgnorePointer(
+                        child: MentorKasten(text: satz.text),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+      child: child,
     );
   }
 }

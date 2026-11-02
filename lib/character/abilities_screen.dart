@@ -9,8 +9,10 @@ import '../action/hero_power.dart';
 import '../action/pit_text.dart';
 import '../gear/widgets/rarity_badge.dart';
 import '../home/erster_start.dart';
+import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
+import '../mentor/scheinwerfer.dart';
 import '../mentor/zeigefinger.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
@@ -110,28 +112,36 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    AbilitySlotsRow(
-                      einladen: offen.any((id) => !chosen.contains(id)),
-                      level: level.level,
-                      weaponMove: weaponMove,
-                      chosen: chosen,
-                      gezogen: _gezogen,
-                      gewaehlt: _waehlt,
-                      // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
-                      // die belegten plus der nächste leere.
-                      // Eine Ultimate liegt nie auf einem der drei Plätze.
-                      nimmtAn: (slot) =>
-                          !zieheUltimate &&
-                          slot >= 2 &&
-                          slot - 2 < _belegung(chosen, level.level).length,
-                      onAblegen: _lege,
-                      onTapSlot: (slot) => _tippePlatz(
-                        context,
-                        ref,
-                        slot: slot,
+                    // Wohin die neue Fähigkeit soll, liegt mit im Licht
+                    // des Mentors (ADR-0095) — ohne eigenen Punkt.
+                    ScheinwerferZiel(
+                      aktiv:
+                          ref.watch(ersterStartProvider).schritt ==
+                          Schritt.faehigkeitAnlegen,
+                      radius: 12,
+                      child: AbilitySlotsRow(
+                        einladen: offen.any((id) => !chosen.contains(id)),
+                        level: level.level,
                         weaponMove: weaponMove,
-                        attack: attack,
-                        offen: offen,
+                        chosen: chosen,
+                        gezogen: _gezogen,
+                        gewaehlt: _waehlt,
+                        // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
+                        // die belegten plus der nächste leere.
+                        // Eine Ultimate liegt nie auf einem der drei Plätze.
+                        nimmtAn: (slot) =>
+                            !zieheUltimate &&
+                            slot >= 2 &&
+                            slot - 2 < _belegung(chosen, level.level).length,
+                        onAblegen: _lege,
+                        onTapSlot: (slot) => _tippePlatz(
+                          context,
+                          ref,
+                          slot: slot,
+                          weaponMove: weaponMove,
+                          attack: attack,
+                          offen: offen,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),

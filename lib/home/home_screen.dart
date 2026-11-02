@@ -29,6 +29,7 @@ import '../lagerfeuer/lagerfeuer_screen.dart';
 import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
+import '../mentor/scheinwerfer.dart';
 import '../mentor/zeigefinger.dart';
 import '../haustier/widgets/haustier_karte.dart';
 import '../haustier/haustier_controller.dart';
@@ -73,6 +74,17 @@ class HomeScreen extends ConsumerWidget {
   static const double obereReihe =
       HubCircle.diameter + 12 + HubCircle.labelHeight + _leisteDazu;
 
+  /// Die Bereiche der unteren Leiste.
+  static const List<Bereich> untereBereiche = <Bereich>[
+    Bereich.laden,
+    Bereich.faehigkeiten,
+    Bereich.ausruestung,
+    Bereich.charakter,
+  ];
+
+  /// Wie rund das Licht um einen Kreis samt Namen liegt.
+  static const double lichtRadius = 26;
+
   /// Der Innenabstand der Leisten — knapper als der von [HolzGruppe].
   static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 5, 4, 2);
 
@@ -104,13 +116,23 @@ class HomeScreen extends ConsumerWidget {
     final hatTier = ref.watch(haustierProvider).art != null;
     final zeigtTier = hatTier && !start.fragtNachGewohnheit;
 
-    // Ein Kreis an seinem Platz: versteckt, bis er dran ist.
+    // Ein Kreis an seinem Platz: versteckt, bis er dran ist. Ist er der
+    // nächste, liegt er im Licht des Mentors (ADR-0095).
     Widget kreis(Bereich bereich, Widget Function(bool leuchtet) bauen) {
+      final leuchtet = start.leuchtet == bereich;
       return Aufgedeckt(
         sichtbar: start.zeigt(bereich),
-        child: bauen(start.leuchtet == bereich),
+        child: ScheinwerferZiel(
+          aktiv: leuchtet,
+          radius: lichtRadius,
+          child: bauen(leuchtet),
+        ),
       );
     }
+
+    // **Die untere Leiste kommt erst mit ihrem ersten Kreis** (ADR-0095):
+    // Bis dahin stünde dort leeres Holz.
+    final untenDa = untereBereiche.any(start.zeigt);
 
     return Scaffold(
       // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
@@ -131,7 +153,7 @@ class HomeScreen extends ConsumerWidget {
           child: MentorFlaeche(
             ort: MentorOrt.start,
             obenFrei: obereReihe,
-            untenFrei: untereReihe,
+            untenFrei: untenDa ? untereReihe : 0,
             // **Die Kreise rahmen den Bildschirm** (23.10.2026): oben und
             // unten je ein Holzrahmen, bündig am Rand; dazwischen Level,
             // Gold und „Heute“ vor dem Berg.
@@ -280,70 +302,85 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                _Leiste(
-                  oben: false,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      kreis(
-                        Bereich.laden,
-                        (_) => HubCircle(
-                          icon: Icons.storefront_outlined,
-                          label: 'Laden',
-                          image: HubCircleImage.plain,
-                          symbol: BereichZeichen.laden,
-                          size: bottomCircleSize,
-                          onTap: () => _open(context, const ShopScreen()),
-                        ),
-                      ),
-                      kreis(
-                        Bereich.faehigkeiten,
-                        (leuchtet) => HubCircle(
-                          icon: Icons.auto_awesome,
-                          label: 'Fähigkeiten',
-                          image: HubCircleImage.plain,
-                          size: bottomCircleSize,
-                          symbol: BereichZeichen.faehigkeiten,
-                          leuchtet: leuchtet,
-                          onTap: () => _open(context, const AbilitiesScreen()),
-                        ),
-                      ),
-                      kreis(
-                        Bereich.ausruestung,
-                        (_) => HubCircle(
-                          icon: Icons.shield_outlined,
-                          label: 'Ausrüstung',
-                          image: HubCircleImage.plain,
-                          size: bottomCircleSize,
-                          symbol: BereichZeichen.ausruestung,
-                          onTap: () => _open(context, const EquipmentScreen()),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          // Nur im Debug-Build. Im Release ist der Zweig
-                          // samt Bildschirm gar nicht erst im Bündel
-                          // (ADR-0021), und an dieser Stelle steht dann
-                          // nichts.
-                          if (devModeAvailable) const _DevKnopf(),
-                          kreis(
-                            Bereich.charakter,
-                            (_) => HubCircle(
-                              icon: Icons.person_outline,
-                              label: 'Charakter',
-                              size: bottomCircleSize,
-                              image: HubCircleImage.plain,
-                              symbol: BereichZeichen.charakter,
-                              onTap: () =>
-                                  _open(context, const CharacterScreen()),
-                            ),
+                // Im Debug-Build hängt der Knopf des Entwicklermodus in der
+                // Leiste; solange sie fehlt, steht er hier.
+                if (!untenDa && devModeAvailable)
+                  const SafeArea(
+                    top: false,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _DevKnopf(),
+                    ),
+                  ),
+                EinblendLeiste(
+                  sichtbar: untenDa,
+                  child: _Leiste(
+                    oben: false,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        kreis(
+                          Bereich.laden,
+                          (_) => HubCircle(
+                            icon: Icons.storefront_outlined,
+                            label: 'Laden',
+                            image: HubCircleImage.plain,
+                            symbol: BereichZeichen.laden,
+                            size: bottomCircleSize,
+                            onTap: () => _open(context, const ShopScreen()),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        kreis(
+                          Bereich.faehigkeiten,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.auto_awesome,
+                            label: 'Fähigkeiten',
+                            image: HubCircleImage.plain,
+                            size: bottomCircleSize,
+                            symbol: BereichZeichen.faehigkeiten,
+                            leuchtet: leuchtet,
+                            onTap: () =>
+                                _open(context, const AbilitiesScreen()),
+                          ),
+                        ),
+                        kreis(
+                          Bereich.ausruestung,
+                          (_) => HubCircle(
+                            icon: Icons.shield_outlined,
+                            label: 'Ausrüstung',
+                            image: HubCircleImage.plain,
+                            size: bottomCircleSize,
+                            symbol: BereichZeichen.ausruestung,
+                            onTap: () =>
+                                _open(context, const EquipmentScreen()),
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            // Nur im Debug-Build. Im Release ist der Zweig
+                            // samt Bildschirm gar nicht erst im Bündel
+                            // (ADR-0021), und an dieser Stelle steht dann
+                            // nichts.
+                            if (devModeAvailable) const _DevKnopf(),
+                            kreis(
+                              Bereich.charakter,
+                              (_) => HubCircle(
+                                icon: Icons.person_outline,
+                                label: 'Charakter',
+                                size: bottomCircleSize,
+                                image: HubCircleImage.plain,
+                                symbol: BereichZeichen.charakter,
+                                onTap: () =>
+                                    _open(context, const CharacterScreen()),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -414,6 +451,54 @@ class Aufgedeckt extends StatelessWidget {
             duration: dauer,
             curve: Curves.easeOutBack,
             child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Eine Leiste, die **von unten hereinfährt**, sobald sie [sichtbar] wird
+/// (ADR-0095). Bis dahin nimmt sie keinen Platz, keinen Tipp und steht
+/// für den Vorleser nicht da. Das Kind bleibt immer im Baum, damit seine
+/// Kreise beim Einblenden nicht neu gebaut werden (`gotchas.md`).
+class EinblendLeiste extends StatelessWidget {
+  const EinblendLeiste({
+    required this.sichtbar,
+    required this.child,
+    super.key,
+  });
+
+  final bool sichtbar;
+  final Widget child;
+
+  static const Duration dauer = Duration(milliseconds: 520);
+
+  static const Key leisteKey = ValueKey<String>('untere-leiste');
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !sichtbar,
+      child: ExcludeSemantics(
+        excluding: !sichtbar,
+        child: ClipRect(
+          child: AnimatedAlign(
+            key: leisteKey,
+            alignment: Alignment.topCenter,
+            heightFactor: sichtbar ? 1 : 0,
+            duration: dauer,
+            curve: Curves.easeOutCubic,
+            child: AnimatedSlide(
+              offset: sichtbar ? Offset.zero : const Offset(0, 1),
+              duration: dauer,
+              curve: Curves.easeOutBack,
+              child: AnimatedOpacity(
+                opacity: sichtbar ? 1 : 0,
+                duration: dauer,
+                child: child,
+              ),
+            ),
           ),
         ),
       ),

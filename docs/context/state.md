@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1066, dazu die acht Packages (theory 218, habits 375, gear
+**Tests:** App 1072, dazu die acht Packages (theory 218, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,37 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 02.11.2026, danach: das Tutorial zeigt, statt zu erklären
+
+Frederik: „Tutorial weiterausarbeiten (weniger anzeigen, mehr Visualisieren wo
+was hingeht) … ein gelber Punkt … Spotlight Effekt“. In einer Fragerunde
+entschieden, viermal wie empfohlen:
+[ADR-0095](../decisions/0095-tutorial-zeigt-statt-erklaert.md).
+
+| Was | Wie |
+|---|---|
+| **Scheinwerfer** | dunkler Schleier, nur das Ziel liegt im Licht; **sperrt nichts** |
+| **Gelber Punkt** | pulsiert oben rechts am Ziel, an allen vier Orten; der Goldring ist weg |
+| **Mentor** | ein paar Wörter: „Geschafft? Hak es ab!“, „Lies deine erste Seite.“, „Ab in den Dungeon!“ |
+| **Untere Leiste** | fehlt, bis ihr erster Kreis kommt, dann fährt sie von unten herein |
+
+**Ohne Rückfrage entschieden:** Bei den Fähigkeiten liegt auch die Reihe der
+Plätze im Licht, ohne eigenen Punkt — der Mentor sagt „auf den freien Platz“,
+und der lag sonst im Dunkeln. Gesehen beim Rendern. Die Kopfzeile eines
+Bildschirms bleibt hell. Im Debug-Build steht der Knopf des Entwicklermodus
+allein unten rechts, solange die Leiste fehlt.
+
+Neu: `lib/mentor/scheinwerfer.dart`, `test/scheinwerfer_test.dart` (6). App
+1072 (vorher 1066). Startseite in vier Schritten, Baum, Fähigkeiten und
+Eingang in 390 × 844 gerendert und angesehen. **Baut auf #179 auf. Nicht am
+Handy.**
+
+### Offen
+
+- Ob der Schleier zu dunkel ist (62 %) — eine Zahl, `Scheinwerfer.dunkel`.
+- Ob die Leiste beim Hereinfahren „Heute“ zu sehr nach oben schiebt.
+- **AktivesBrett hat ADR-0095 nicht gesehen.**
 
 ## 02.11.2026: Dungeon, Etage, Boss, Talentpunkte, Dailies
 

@@ -33,7 +33,9 @@ class MentorSatz {
 /// Bildschirme fragen nur, ob er an ihrem Ort etwas zu sagen hat
 /// ([satz]); was als Nächstes dran ist, rechnet [ErsterStart] aus dem
 /// Stand. Seine Sätze sind die Ausnahme von ADR-0060: Er erklärt, und
-/// er verschwindet, sobald der Weg gegangen ist.
+/// er verschwindet, sobald der Weg gegangen ist. **Seit ADR-0095 nur
+/// noch ein paar Wörter** — wohin es geht, zeigen Licht und gelber
+/// Punkt.
 abstract final class Mentor {
   /// Sein Bild, 64 × 64 wie alles Gezeichnete (`PixelArt`).
   ///
@@ -48,48 +50,42 @@ abstract final class Mentor {
   /// — also sagt er hier auch, was der Sieg an Plätzen gebracht hat
   /// (ADR-0093).
   static const String ersteBeute =
-      'Deine erste Beute! Leg sie an — Ausrüstung macht dich stärker. '
-      'Und du hast jetzt Platz für zwei weitere Gewohnheiten.';
+      'Deine erste Beute! Leg sie an. Und: zwei neue Plätze für '
+      'Gewohnheiten.';
 
   /// Was er bei [schritt] an [ort] sagt — null, wenn er dort schweigt.
   static MentorSatz? satz(Schritt? schritt, MentorOrt ort) {
     return switch ((schritt, ort)) {
       (Schritt.gewohnheit, MentorOrt.start) => const MentorSatz(
-        'Willkommen! Ich zeig dir, wie das hier läuft. Fang klein an: '
-        'Was willst du jeden Tag tun?',
+        'Willkommen! Was willst du jeden Tag tun?',
         KastenLage.unten,
       ),
       (Schritt.abhaken, MentorOrt.start) => const MentorSatz(
-        'Hast du es heute getan? Dann hak es ab — jedes Häkchen bringt '
-        'Erfahrung und Gold.',
+        'Geschafft? Hak es ab!',
         KastenLage.unten,
       ),
       (Schritt.ersteSeite, MentorOrt.start) => const MentorSatz(
-        'Wissen macht dich stärker. Öffne die Theorie und lies deine '
-        'erste Seite.',
+        'Lies deine erste Seite.',
         KastenLage.unten,
       ),
       (Schritt.ersteSeite, MentorOrt.baum) => const MentorSatz(
-        'Eine Seite kostet einen Punkt, und jeder Aufstieg bringt einen '
-        'neuen. Fang hier oben an.',
+        'Hier geht es los. Eine Seite, ein Punkt.',
         KastenLage.unten,
       ),
       (Schritt.faehigkeitAnlegen, MentorOrt.start) => const MentorSatz(
-        'Deine erste Seite hat dir eine Fähigkeit gebracht. Leg sie an!',
+        'Neue Fähigkeit! Leg sie an.',
         KastenLage.unten,
       ),
       (Schritt.faehigkeitAnlegen, MentorOrt.faehigkeiten) => const MentorSatz(
-        'Tipp auf deine neue Fähigkeit und leg sie auf den freien Platz — '
-        'dann nimmst du sie mit in den Dungeon.',
+        'Leg sie auf den freien Platz.',
         KastenLage.unten,
       ),
       (Schritt.grube, MentorOrt.start) => const MentorSatz(
-        'Zeit für den Dungeon. Zeig, was du gelernt hast!',
+        'Ab in den Dungeon!',
         KastenLage.unten,
       ),
       (Schritt.grube, MentorOrt.eingang) => const MentorSatz(
-        'Unten warten Gegner und ein Boss. Besiegst du ihn, gehört '
-        'seine Beute dir.',
+        'Besieg den Boss, nimm seine Beute.',
         KastenLage.oben,
       ),
       _ => null,
