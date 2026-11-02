@@ -7,6 +7,7 @@ import '../../ui/bereich_zeichen.dart';
 import '../../ui/pixel_art.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
+import '../../mentor/scheinwerfer.dart';
 
 /// Ein Bereich des Spiels als runder Knopf.
 ///
@@ -235,21 +236,10 @@ class HubCircle extends StatelessWidget {
                     ],
                     if (leuchtet)
                       Positioned(
-                        right: -3,
-                        top: -3,
-                        child: Container(
-                          key: leuchtKey,
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Palette.accentOnDark,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Palette.background,
-                              width: 3,
-                            ),
-                          ),
-                        ),
+                        right: -5,
+                        top: -5,
+                        // **Der gelbe Punkt** (ADR-0095): Hier geht es hin.
+                        child: const ZielPunkt(key: leuchtKey, groesse: 18),
                       ),
                     if (isLocked)
                       Positioned(

@@ -121,6 +121,15 @@ abstract final class Palette {
   /// **Nur für große, fette Zahlen**, wie [ertragXp].
   static const Color ertragGold = Color(0xFF8F6200);
 
+  /// **Der gelbe Punkt des Mentors** (ADR-0095): Hier geht es hin. So
+  /// hell, dass er auf Holz, Leder und Pergament auffällt; er trägt
+  /// immer einen dunklen Rand.
+  static const Color hinweis = Color(0xFFFFD02E);
+
+  /// Der Schleier, wenn der Mentor auf etwas zeigt — fast schwarz, mit
+  /// einem Hauch Leder.
+  static const Color scheinwerfer = Color(0xFF0E0906);
+
   // ---------------------------------------------------------------
   // Dieselben Bedeutungen auf Leder
   // ---------------------------------------------------------------
