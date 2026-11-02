@@ -580,7 +580,7 @@ void main() {
       await blattVon(tester, legendaer);
 
       expect(
-        find.textContaining('Verdient ab Stufe ${GearGates.legendaryRung}'),
+        find.textContaining('Verdient ab Etage ${GearGates.legendaryRung}'),
         findsOneWidget,
       );
     });

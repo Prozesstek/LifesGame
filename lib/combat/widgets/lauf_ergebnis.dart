@@ -93,14 +93,14 @@ class _LaufErgebnisState extends State<LaufErgebnis>
 
   String get _fussnote {
     if (!widget.won) {
-      return 'Ohne den Wächter bleibt nichts: Was gefallen ist, ist wieder '
+      return 'Ohne den Boss bleibt nichts: Was gefallen ist, ist wieder '
           'weg. Werte wachsen über Häkchen und Lektionen, nicht über Siege.';
     }
     return _hatBeute
-        ? 'Einmal je Stufe — wer sie noch einmal räumt, bekommt nichts '
+        ? 'Einmal je Etage — wer sie noch einmal räumt, bekommt nichts '
               'mehr. Der größere Teil deiner Werte kommt aus Gewohnheiten '
               'und Theorie.'
-        : 'Diese Stufe hattest du schon. Erfahrung und Gold gibt es nur '
+        : 'Diese Etage hattest du schon. Erfahrung und Gold gibt es nur '
               'beim ersten Mal.';
   }
 
@@ -222,14 +222,14 @@ class _Fakten extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Ebene $stage, $seconds Sekunden'
+          'Etage $stage, $seconds Sekunden'
           '${timedOut ? ', Zeit abgelaufen' : ''}'
           '${newBest ? ', neue Bestzeit' : ''}',
       excludeSemantics: true,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text('Ebene: $stage', style: _ruhig),
+          Text('Etage: $stage', style: _ruhig),
           const SizedBox(width: 18),
           Icon(
             timedOut ? Icons.timer_off_outlined : Icons.timer_outlined,

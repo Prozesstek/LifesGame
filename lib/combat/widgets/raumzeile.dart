@@ -30,7 +30,7 @@ class Raumzeile extends StatelessWidget {
       RoomMark.blutig => 'schwer getroffen',
       RoomMark.gefallen => 'gefallen',
       RoomMark.zeitAus => 'Zeit abgelaufen',
-      RoomMark.krone => 'Wächter besiegt',
+      RoomMark.krone => 'Boss besiegt',
       RoomMark.offen => 'nicht erreicht',
     };
   }

@@ -325,8 +325,8 @@ class _Herkunft extends StatelessWidget {
       _ when !offen => (
         Icons.lock_outline,
         Palette.gold,
-        'Verdient ab Stufe $sprosse der Grube. Danach im Tagesladen und '
-            'als Beute des Wächters.',
+        'Verdient ab Etage $sprosse im Dungeon. Danach im Tagesladen und '
+            'als Beute des Bosses.',
       ),
       _ when imLaden => (
         Icons.storefront_outlined,
@@ -337,7 +337,7 @@ class _Herkunft extends StatelessWidget {
         Icons.help_outline,
         Palette.gold,
         'Noch nicht im Besitz. Kommt aus dem Tagesladen und als Beute des '
-            'Wächters.',
+            'Bosses.',
       ),
     };
 

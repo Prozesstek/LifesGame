@@ -83,7 +83,7 @@ void main() {
     // Startseite sagt das Feuer, dass etwas wartet.
     await zeige(tester, container(beideErledigt()), const LagerfeuerScreen());
     expect(find.byType(DailyQuestsCard), findsOneWidget);
-    expect(find.bySemanticsLabel('Tagesaufgaben'), findsOneWidget);
+    expect(find.bySemanticsLabel('Dailies'), findsOneWidget);
 
     await zeige(tester, container(beideErledigt()), const HomeScreen());
     expect(find.byType(DailyQuestsCard), findsNothing);

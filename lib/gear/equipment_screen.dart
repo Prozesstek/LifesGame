@@ -148,7 +148,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     _sage(
       loadout.copiesIn(slot).isEmpty
           ? 'Für diesen Platz hast du noch nichts. Stücke kommen aus dem '
-                'Laden und als Beute des Wächters.'
+                'Laden und als Beute des Bosses.'
           : 'Halte unten ein Stück gedrückt und zieh es hierher.',
     );
   }

@@ -19,7 +19,7 @@ abstract final class GegnerText {
     EnemyKind.kreischer => 'Kreischpilz',
     EnemyKind.heiler => 'Sporenpilz',
     EnemyKind.strahler => 'Wächterauge',
-    EnemyKind.endgegner => 'Der Wächter',
+    EnemyKind.endgegner => 'Der Boss',
     EnemyKind.keiner => 'Der Held',
   };
 }

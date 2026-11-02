@@ -115,7 +115,7 @@ class DevScreen extends ConsumerWidget {
                   '„Nur Zuschläge zurücksetzen“ nimmt sie wieder weg.',
                 ),
 
-                const _SectionTitle('Grube'),
+                const _SectionTitle('Dungeon'),
                 _EbenenWahl(
                   onHinab: (ebene) => Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -150,7 +150,7 @@ class DevScreen extends ConsumerWidget {
                 ),
                 _AbilityPicker(onPick: _grants(ref).grantAbility),
 
-                const _SectionTitle('Tagesgrube'),
+                const _SectionTitle('Tagesdungeon'),
                 _ButtonRow(
                   entries: <String, VoidCallback>{
                     'Versuch von heute freigeben': () => ref
@@ -379,7 +379,7 @@ class _CurrentValues extends ConsumerWidget {
       'davon geschenkt (vor Level)':
           '+${geschenkt.attack} · +${geschenkt.maxHp} · '
           '+${geschenkt.defense} · Mana +${geschenkt.mana}',
-      'Nächste Ebene der Grube':
+      'Nächste Etage im Dungeon':
           '${ref.watch(ladderProvider).highestDefeated + 1}',
       'Level': '${level.level}',
       'Erfahrung':
@@ -388,7 +388,7 @@ class _CurrentValues extends ConsumerWidget {
       'Gold':
           '${ref.watch(goldProvider)}'
           ' (davon ${ref.watch(grantedGoldProvider)} geschenkt)',
-      'Theoriepunkte frei': '${ref.watch(availableTheoryPointsProvider)}',
+      'Talentpunkte frei': '${ref.watch(availableTheoryPointsProvider)}',
       'Fähigkeitspunkte': '${ref.watch(grantedAbilityPointsProvider)}',
       'Stücke im Besitz':
           '${ref.watch(loadoutProvider).everOwnedCount} / ${GearCatalog.all.length}',
@@ -604,7 +604,7 @@ class _EbenenWahlState extends State<_EbenenWahl> {
             ],
             decoration: const InputDecoration(
               isDense: true,
-              labelText: 'Ebene (1–${PitStage.count})',
+              labelText: 'Etage (1–${PitStage.count})',
               border: OutlineInputBorder(),
             ),
           ),

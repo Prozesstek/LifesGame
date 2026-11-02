@@ -266,7 +266,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     if (bester != null) {
       await _zeigeFund(
         bester,
-        headline: 'Erster Sieg auf Ebene $stufe',
+        headline: 'Erster Sieg auf Etage $stufe',
         usedKey: false,
         mentor: true,
       );
@@ -394,7 +394,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
     return Scaffold(
       backgroundColor: Palette.background,
       appBar: AppBar(
-        title: Text('Die Grube · Stufe ${widget.stage.number}'),
+        title: Text('Dungeon · Etage ${widget.stage.number}'),
         backgroundColor: Palette.backgroundRaised,
         foregroundColor: Palette.textOnDark,
         actions: <Widget>[

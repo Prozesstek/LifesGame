@@ -143,7 +143,7 @@ class _Titel extends StatelessWidget {
       triggerMode: TooltipTriggerMode.tap,
       showDuration: const Duration(seconds: 6),
       message:
-          'Dieselbe Grube für alle, ein Versuch am Tag. Jeder geht mit '
+          'Derselbe Dungeon für alle, ein Versuch am Tag. Jeder geht mit '
           'demselben Helden hinab — stärker macht nur, ob du heute in Form '
           'bist. Sie bringt Ruhm.',
       child: Row(
@@ -153,7 +153,7 @@ class _Titel extends StatelessWidget {
           const SizedBox(width: 6),
           Flexible(
             child: Text(
-              'Tagesgrube #$number',
+              'Tagesdungeon #$number',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -273,7 +273,7 @@ class _Davor extends StatelessWidget {
           ),
           child: const SchwerterZeichen(
             size: 26,
-            semanticLabel: 'In die Tagesgrube',
+            semanticLabel: 'In den Tagesdungeon',
           ),
         ),
       ],
@@ -359,7 +359,7 @@ class _Danach extends StatelessWidget {
                     triggerMode: TooltipTriggerMode.tap,
                     message:
                         'Abgebrochen: Der Versuch von heute ist gebraucht. '
-                        'Morgen wartet eine neue Grube.',
+                        'Morgen wartet ein neuer Dungeon.',
                     child: Icon(
                       Icons.directions_run_rounded,
                       size: 26,

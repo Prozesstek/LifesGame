@@ -63,7 +63,7 @@ void main() {
     expect(find.text('Aufgestiegen!'), findsOneWidget);
     expect(find.text('Level 2'), findsOneWidget);
     expect(find.text('Im Kampf 4 % stärker'), findsOneWidget);
-    expect(find.text('+1 Theoriepunkt für den Skillbaum'), findsOneWidget);
+    expect(find.text('+1 Talentpunkt für den Talentbaum'), findsOneWidget);
     expect(find.text('Fähigkeitsplatz 2 ist offen'), findsOneWidget);
   });
 

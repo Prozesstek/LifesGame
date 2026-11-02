@@ -76,7 +76,7 @@ abstract final class LevelBuilder {
     feld[start.y][start.x] = '@';
 
     return Level.parse(
-      'Die Grube · Stufe ${stage.number}',
+      'Dungeon · Etage ${stage.number}',
       _crop(feld, pfad),
       boss: boss ?? bossFor(seed),
       rooms: _areas(pfad),

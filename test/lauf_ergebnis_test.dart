@@ -71,7 +71,7 @@ void main() {
 
       expect(find.text('Sieg'), findsOneWidget);
       expect(farbeVon(tester, 'Sieg'), Palette.success);
-      expect(find.text('Ebene: 12'), findsOneWidget);
+      expect(find.text('Etage: 12'), findsOneWidget);
       expect(find.text('84 s'), findsOneWidget);
       expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
       await tester.pumpAndSettle();
@@ -129,7 +129,7 @@ void main() {
       expect(find.text('Niederlage'), findsOneWidget);
       expect(find.text('Sieg'), findsNothing);
       expect(farbeVon(tester, 'Niederlage'), Palette.enemy);
-      expect(find.text('Ebene: 12'), findsOneWidget);
+      expect(find.text('Etage: 12'), findsOneWidget);
       expect(find.textContaining('+'), findsNothing);
       expect(find.byKey(LaufErgebnis.weiterKey), findsOneWidget);
     });
@@ -163,7 +163,7 @@ void main() {
         expect(find.byKey(LaufErgebnis.tippKey(tipp.weg)), findsOneWidget);
       }
       expect(find.textContaining('+'), findsNothing);
-      expect(find.byTooltip(RegExp('Ohne den Wächter')), findsOneWidget);
+      expect(find.byTooltip(RegExp('Ohne den Boss')), findsOneWidget);
     });
 
     testWidgets('ein Tipp schliesst das Blatt und sagt, wohin', (tester) async {

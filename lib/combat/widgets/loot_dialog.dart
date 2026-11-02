@@ -31,7 +31,7 @@ Future<bool> askToOpenLoot(
         backgroundColor: Palette.surface,
         title: const Text('Ein Schlüssel'),
         content: Text(
-          'Er öffnet einen Extra-Wurf: ein gewürfeltes Stück von Ebene '
+          'Er öffnet einen Extra-Wurf: ein gewürfeltes Stück von Etage '
           '$stage. Du hast $keys Schlüssel.',
         ),
         actions: <Widget>[

@@ -93,7 +93,7 @@ List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
       (
         label: 'Lädt sich',
         value:
-            'mit jedem Kill um ein Achtel, auch am Wächter; '
+            'mit jedem Kill um ein Achtel, auch am Boss; '
             'jeder Lauf beginnt leer',
       )
     else ...<PitStat>[
@@ -337,7 +337,7 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
           label: 'Frisst',
           value:
               'unter ${(devourBelow * 100).round()} % Leben, '
-              'nie den Wächter',
+              'nie den Boss',
         ));
       }
     case Rock(:final seconds):

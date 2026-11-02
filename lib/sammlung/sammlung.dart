@@ -103,8 +103,8 @@ abstract final class Sammlung {
   /// welchem Set es gehört.
   static String woherStueck(GearItem item) {
     final ab = switch (item.rarity) {
-      GearRarity.epic => ', ab Ebene ${GearGates.epicRung}',
-      GearRarity.legendary => ', ab Ebene ${GearGates.legendaryRung}',
+      GearRarity.epic => ', ab Etage ${GearGates.epicRung}',
+      GearRarity.legendary => ', ab Etage ${GearGates.legendaryRung}',
       _ => '',
     };
     final set = GearSets.byId(item.setId);
@@ -136,7 +136,7 @@ abstract final class Sammlung {
         SammelEintrag(
           id: art.name,
           name: GegnerText.nameOf(art),
-          woher: 'Lebt unten in der Grube.',
+          woher: 'Lebt unten im Dungeon.',
           stufe: b.stufeVon(art),
           stufen: Bestiarium.stufenGegner.length,
           anzahl: b.besiegt(art),
@@ -145,7 +145,7 @@ abstract final class Sammlung {
         SammelEintrag(
           id: 'waechter-${waechter.name}',
           name: BossText.nameOf(waechter),
-          woher: 'Wartet am Ende einer Grube.',
+          woher: 'Wartet am Ende eines Dungeons.',
           stufe: b.stufeVonWaechter(waechter),
           stufen: Bestiarium.stufenWaechter.length,
           anzahl: b.besiegtWaechter(waechter),

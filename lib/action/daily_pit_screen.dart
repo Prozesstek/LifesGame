@@ -145,7 +145,7 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
       child: Scaffold(
         backgroundColor: Palette.background,
         appBar: AppBar(
-          title: Text('Tagesgrube #${DailyPit.numberFor(widget.day)}'),
+          title: Text('Tagesdungeon #${DailyPit.numberFor(widget.day)}'),
           backgroundColor: Palette.backgroundRaised,
           foregroundColor: Palette.textOnDark,
         ),

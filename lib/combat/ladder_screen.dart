@@ -50,7 +50,7 @@ class LadderScreen extends ConsumerWidget {
     final stufe = stand.nextRung;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Die Grube')),
+      appBar: AppBar(title: const Text('Dungeon')),
       body: MentorFlaeche(
         ort: MentorOrt.eingang,
         child: SafeArea(
@@ -135,7 +135,7 @@ class _Ebene extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         const Text(
-          'Ebene',
+          'Etage',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -145,7 +145,7 @@ class _Ebene extends StatelessWidget {
         ),
         Text(
           '$stufe',
-          semanticsLabel: 'Ebene $stufe',
+          semanticsLabel: 'Etage $stufe',
           style: TextStyle(
             fontSize: 64,
             height: 1.1,
@@ -228,7 +228,7 @@ class _Schluessel extends ConsumerWidget {
     return Tooltip(
       triggerMode: TooltipTriggerMode.tap,
       message:
-          'Schlüssel öffnen die Beute des Wächters, höchstens '
+          'Schlüssel öffnen die Beute des Bosses, höchstens '
           '${GearKeys.cap}. Jedes Häkchen, jede Seite und jede Rückfrage '
           'bringt einen.',
       child: Semantics(

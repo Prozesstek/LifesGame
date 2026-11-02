@@ -107,8 +107,8 @@ abstract final class StaerkerWerden {
       yield StaerkerTipp(
         StaerkerWeg.baum,
         s.freiePunkte == 1
-            ? 'Ein Theoriepunkt ist frei.'
-            : '${s.freiePunkte} Theoriepunkte sind frei.',
+            ? 'Ein Talentpunkt ist frei.'
+            : '${s.freiePunkte} Talentpunkte sind frei.',
       );
     }
     if (!s.inForm && s.offeneHaekchen > 0) {
