@@ -133,12 +133,72 @@ class _PapierMaler extends CustomPainter {
 
 /// **Der Einband und der Stapel** unter dem obersten Blatt: Leder mit
 /// Narben und einer eingeprägten Linie, darauf die Kanten der übrigen
-/// Seiten rechts und unten, wie bei einem dicken, aufgeschlagenen Buch.
+/// Seiten.
+///
+/// **Am Rand sieht man, wo man ist** (03.11.2026): rechts die Kanten
+/// dessen, was noch kommt, links hinter dem Rücken die des Gelesenen.
 class _EinbandMaler extends CustomPainter {
-  const _EinbandMaler();
+  const _EinbandMaler({required this.links, required this.rechts});
+
+  /// Wie viele Kanten links und rechts hervorschauen.
+  final int links;
+  final int rechts;
 
   @override
   void paint(Canvas canvas, Size size) {
+    malEinband(canvas, size);
+
+    final seite = Umblaettern.innen.deflateRect(Offset.zero & size);
+    final s = Umblaettern.stapelSchritt;
+    for (var i = rechts; i >= 1; i--) {
+      _kante(
+        canvas,
+        Rect.fromLTRB(
+          seite.left,
+          seite.top + i * 0.7,
+          seite.right + i * s,
+          seite.bottom + i * 0.7,
+        ),
+        i / Umblaettern.stapel,
+      );
+    }
+    for (var i = links; i >= 1; i--) {
+      _kante(
+        canvas,
+        Rect.fromLTRB(
+          seite.left - i * s,
+          seite.top + i * 0.7,
+          seite.right,
+          seite.bottom + i * 0.7,
+        ),
+        i / Umblaettern.stapel,
+      );
+    }
+  }
+
+  /// Eine Seitenkante, je tiefer, desto dunkler.
+  void _kante(Canvas canvas, Rect kante, double tiefe) {
+    canvas.drawRect(
+      kante,
+      Paint()
+        ..color = Color.lerp(
+          Palette.papier,
+          Palette.papierFaser,
+          0.25 + tiefe * 0.5,
+        )!,
+    );
+    canvas.drawRect(
+      kante,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.6
+        ..color = Palette.papierFaser,
+    );
+  }
+
+  /// Leder mit Narben und eingeprägter Linie — auch der Deckel des
+  /// geschlossenen Buchs ([BuchDeckel]).
+  static void malEinband(Canvas canvas, Size size) {
     final aussen = RRect.fromRectAndRadius(
       Offset.zero & size,
       const Radius.circular(10),
@@ -178,38 +238,84 @@ class _EinbandMaler extends CustomPainter {
         ..strokeWidth = 1
         ..color = Palette.goldOnDark.withValues(alpha: 0.35),
     );
+  }
 
-    // Der Stapel: die Kanten der übrigen Seiten, rechts und unten
-    // versetzt, jede ein wenig dunkler.
-    final seite = Umblaettern.innen.deflateRect(Offset.zero & size);
-    for (var i = Umblaettern.stapel; i >= 1; i--) {
-      final kante = Rect.fromLTRB(
-        seite.left,
-        seite.top + i * 0.6,
-        seite.right + i * Umblaettern.stapelSchritt,
-        seite.bottom + i * Umblaettern.stapelSchritt,
-      );
-      canvas.drawRect(
-        kante,
-        Paint()
-          ..color = Color.lerp(
-            Palette.papier,
-            Palette.papierFaser,
-            0.25 + i / Umblaettern.stapel * 0.5,
-          )!,
-      );
-      canvas.drawRect(
-        kante,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.6
-          ..color = Palette.papierFaser,
+  @override
+  bool shouldRepaint(_EinbandMaler alt) =>
+      alt.links != links || alt.rechts != rechts;
+}
+
+/// **Der Deckel des geschlossenen Buchs**: dasselbe Leder wie der
+/// Einband, darauf in Gold, was auf dem Rücken stünde.
+class BuchDeckel extends StatelessWidget {
+  const BuchDeckel({required this.titel, this.zeichen, super.key});
+
+  final String titel;
+  final IconData? zeichen;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = zeichen;
+    return CustomPaint(
+      painter: const _DeckelMaler(),
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (icon != null) ...<Widget>[
+              Icon(icon, size: 56, color: Palette.goldOnDark),
+              const SizedBox(height: 20),
+            ],
+            Text(
+              titel,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 24,
+                height: 1.25,
+                fontWeight: FontWeight.bold,
+                color: Palette.goldOnDark,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeckelMaler extends CustomPainter {
+  const _DeckelMaler();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _EinbandMaler.malEinband(canvas, size);
+    // Der Rücken links: ein dunkler Streifen mit zwei Bünden.
+    final ruecken = Rect.fromLTWH(0, 0, 18, size.height);
+    canvas.drawRect(
+      ruecken,
+      Paint()
+        ..shader = LinearGradient(
+          colors: <Color>[
+            Colors.black.withValues(alpha: 0.45),
+            Colors.black.withValues(alpha: 0),
+          ],
+        ).createShader(ruecken),
+    );
+    final bund = Paint()
+      ..color = Palette.goldOnDark.withValues(alpha: 0.3)
+      ..strokeWidth = 1.5;
+    for (final y in <double>[0.2, 0.8]) {
+      canvas.drawLine(
+        Offset(4, size.height * y),
+        Offset(16, size.height * y),
+        bund,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_EinbandMaler oldDelegate) => false;
+  bool shouldRepaint(_DeckelMaler oldDelegate) => false;
 }
 
 enum _Richtung { vor, zurueck }
@@ -220,8 +326,9 @@ enum _Richtung { vor, zurueck }
 ///
 /// Der Finger zieht das Blatt mit — halb umgeschlagen losgelassen fällt
 /// es zurück oder schlägt ganz um, je nachdem, wie weit es war und wie
-/// schnell der Wisch. [UmblaetternState.vor] schlägt per Animation um,
-/// über die letzte Seite hinaus auf ein leeres Blatt.
+/// schnell der Wisch. **Ein Eselsohr unten** zeigt, wohin es geht, und
+/// schlägt auf Tipp um: rechts vor, links zurück. Über die letzte Seite
+/// hinaus kommt [onSchluss] — dort schließt sich das Buch.
 ///
 /// **Gezeichnet als Drehung in 3D** um die linke Kante, mit Tiefe: Die
 /// freie Kante kommt dem Auge entgegen, das Blatt dunkelt, je steiler
@@ -237,6 +344,7 @@ class Umblaettern extends StatefulWidget {
     required this.seite,
     this.onGeblaettert,
     this.onRascheln,
+    this.onSchluss,
     super.key,
   });
 
@@ -252,6 +360,10 @@ class Umblaettern extends StatefulWidget {
   /// Ein Blatt beginnt sich zu bewegen — Zeit für den Klang.
   final VoidCallback? onRascheln;
 
+  /// Auf der letzten Seite weiter: Wisch oder Eselsohr. Ohne ihn hat die
+  /// letzte Seite kein Eselsohr nach rechts.
+  final VoidCallback? onSchluss;
+
   /// So lange braucht ein ganzes Umblättern.
   static const Duration dauer = Duration(milliseconds: 560);
 
@@ -265,19 +377,26 @@ class Umblaettern extends StatefulWidget {
   /// Ab dieser Geschwindigkeit schlägt ein Wisch um, egal wie weit.
   static const double schwung = 300;
 
-  /// Wie viele Seitenkanten unter dem obersten Blatt hervorschauen, und
-  /// wie weit jede versetzt ist.
-  static const int stapel = 5;
+  /// Wie viele Seitenkanten höchstens je Seite hervorschauen, wie weit
+  /// jede versetzt ist, und wie viele Kanten eine Seite des Buchs zählt.
+  static const int stapel = 6;
   static const double stapelSchritt = 2;
+  static const int kantenJeSeite = 2;
 
-  /// Wo das Blatt im Einband liegt: rundum Leder, rechts und unten
-  /// dazu der Stapel.
+  /// Wo das Blatt im Einband liegt: rundum Leder, links und rechts Platz
+  /// für die Kanten des Stapels.
   static const EdgeInsets innen = EdgeInsets.fromLTRB(
-    10,
+    10 + stapel * stapelSchritt,
     10,
     10 + stapel * stapelSchritt,
-    10 + stapel * stapelSchritt,
+    14,
   );
+
+  /// Wie groß ein Eselsohr ist.
+  static const double ohr = 34;
+
+  static const Key ohrVorKey = ValueKey<String>('eselsohr-vor');
+  static const Key ohrZurueckKey = ValueKey<String>('eselsohr-zurueck');
 
   @override
   State<Umblaettern> createState() => UmblaetternState();
@@ -289,17 +408,17 @@ class UmblaetternState extends State<Umblaettern>
   late final AnimationController _blatt;
   int _hier = 0;
   _Richtung? _richtung;
-
-  /// Das letzte Blatt schlägt auf ein leeres um, danach [_danach].
-  bool _zumSchluss = false;
-  bool _ende = false;
-  VoidCallback? _danach;
   double _breite = 1;
+
+  /// Ob ein Zug über die letzte Seite hinaus schon gemeldet ist.
+  bool _schlussGemeldet = false;
 
   /// Die Seite, die oben liegt.
   int get hier => _hier;
 
   bool get _ruhig => MediaQuery.disableAnimationsOf(context);
+
+  bool get _amEnde => _hier >= widget.anzahl - 1;
 
   @override
   void initState() {
@@ -313,19 +432,26 @@ class UmblaetternState extends State<Umblaettern>
     super.dispose();
   }
 
-  /// Zur nächsten Seite. Auf der letzten schlägt das Blatt auf ein
-  /// leeres um, und dann kommt [schluss] — ohne ihn passiert dort nichts.
-  void vor({VoidCallback? schluss}) {
-    if (_richtung != null || _ende) return;
-    if (_hier >= widget.anzahl - 1) {
-      if (schluss == null) return;
-      _zumSchluss = true;
-      _danach = schluss;
+  /// Zur nächsten Seite; auf der letzten kommt [Umblaettern.onSchluss].
+  void vor() {
+    if (_richtung != null) return;
+    if (_amEnde) {
+      widget.onSchluss?.call();
+      return;
     }
     setState(() => _richtung = _Richtung.vor);
     _blatt.value = 0;
     widget.onRascheln?.call();
     _laufen(1, Curves.easeInOut);
+  }
+
+  /// Zur vorigen Seite.
+  void zurueck() {
+    if (_richtung != null || _hier == 0) return;
+    setState(() => _richtung = _Richtung.zurueck);
+    _blatt.value = 1;
+    widget.onRascheln?.call();
+    _laufen(0, Curves.easeInOut);
   }
 
   Future<void> _laufen(double ziel, Curve kurve) async {
@@ -343,37 +469,34 @@ class UmblaetternState extends State<Umblaettern>
     final richtung = _richtung;
     final stand = _blatt.value;
     final vorher = _hier;
-    var schluss = false;
     setState(() {
       if (richtung == _Richtung.vor && stand >= 1) {
-        if (_zumSchluss) {
-          _ende = true;
-          schluss = true;
-        } else {
-          _hier++;
-        }
+        _hier++;
       } else if (richtung == _Richtung.zurueck && stand <= 0) {
         _hier--;
       }
       _richtung = null;
-      _zumSchluss = false;
       _blatt.value = 0;
     });
     if (_hier != vorher) widget.onGeblaettert?.call(_hier);
-    if (schluss) _danach?.call();
   }
 
   void _ziehen(DragUpdateDetails d) {
-    if (_blatt.isAnimating || _ende) return;
+    if (_blatt.isAnimating) return;
     final dx = d.primaryDelta ?? 0;
     if (_richtung == null) {
-      if (dx < 0 && _hier < widget.anzahl - 1) {
+      if (dx < 0 && !_amEnde) {
         setState(() => _richtung = _Richtung.vor);
         _blatt.value = 0;
       } else if (dx > 0 && _hier > 0) {
         setState(() => _richtung = _Richtung.zurueck);
         _blatt.value = 1;
       } else {
+        // Über die letzte Seite hinaus: einmal je Zug.
+        if (dx < 0 && _amEnde && !_schlussGemeldet) {
+          _schlussGemeldet = true;
+          widget.onSchluss?.call();
+        }
         return;
       }
       widget.onRascheln?.call();
@@ -386,6 +509,7 @@ class UmblaetternState extends State<Umblaettern>
   }
 
   void _loslassen(double tempo) {
+    _schlussGemeldet = false;
     if (_richtung == null || _blatt.isAnimating) return;
     final ziel = tempo < -Umblaettern.schwung
         ? 1.0
@@ -395,18 +519,26 @@ class UmblaetternState extends State<Umblaettern>
     _laufen(ziel, Curves.easeOut);
   }
 
+  /// Wie viele Kanten für [seiten] Seiten hervorschauen.
+  int _kanten(int seiten) =>
+      math.min(seiten * Umblaettern.kantenJeSeite, Umblaettern.stapel);
+
   @override
   Widget build(BuildContext context) {
     // Einband und Stapel liegen still; nur die Blätter darauf bewegen
     // sich. Was sich beim Umschlagen aus dem Buch hebt, schneidet der
     // Rand des Einbands ab.
+    final vorDa = !_amEnde || widget.onSchluss != null;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragUpdate: _ziehen,
       onHorizontalDragEnd: (d) => _loslassen(d.primaryVelocity ?? 0),
       onHorizontalDragCancel: () => _loslassen(0),
       child: CustomPaint(
-        painter: const _EinbandMaler(),
+        painter: _EinbandMaler(
+          links: _kanten(_hier),
+          rechts: _kanten(widget.anzahl - 1 - _hier),
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Padding(
@@ -416,8 +548,35 @@ class UmblaetternState extends State<Umblaettern>
                 _breite = grenzen.maxWidth;
                 return AnimatedBuilder(
                   animation: _blatt,
-                  builder: (context, _) =>
-                      Stack(fit: StackFit.expand, children: _lagen(context)),
+                  builder: (context, _) => Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      ..._lagen(context),
+                      // Die Eselsohren nur, wenn das Blatt ruht.
+                      if (_richtung == null && vorDa)
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: _Eselsohr(
+                            key: Umblaettern.ohrVorKey,
+                            rechts: true,
+                            label: _amEnde ? 'Buch schließen' : 'Umblättern',
+                            onTap: vor,
+                          ),
+                        ),
+                      if (_richtung == null && _hier > 0)
+                        Positioned(
+                          left: 0,
+                          bottom: 0,
+                          child: _Eselsohr(
+                            key: Umblaettern.ohrZurueckKey,
+                            rechts: false,
+                            label: 'Zurückblättern',
+                            onTap: zurueck,
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -428,7 +587,6 @@ class UmblaetternState extends State<Umblaettern>
   }
 
   List<Widget> _lagen(BuildContext context) {
-    if (_ende) return const <Widget>[BuchPapier()];
     final richtung = _richtung;
     if (richtung == null) return <Widget>[_lage(context, _hier, aktiv: true)];
 
@@ -444,15 +602,12 @@ class UmblaetternState extends State<Umblaettern>
     final kante = _breite * math.cos(winkel) / w;
 
     return <Widget>[
-      if (unten < widget.anzahl)
-        _lage(
-          context,
-          unten,
-          kante: kante,
-          schatten: 0.4 * math.sin(stand * math.pi),
-        )
-      else
-        const BuchPapier(key: ValueKey<String>('schluss')),
+      _lage(
+        context,
+        unten,
+        kante: kante,
+        schatten: 0.4 * math.sin(stand * math.pi),
+      ),
       _lage(context, oben, winkel: winkel),
     ];
   }
@@ -476,6 +631,103 @@ class UmblaetternState extends State<Umblaettern>
       ),
     );
   }
+}
+
+/// **Das Eselsohr**: eine umgeknickte Ecke unten, in der Richtung, in die
+/// es weitergeht. Ein Tipp darauf blättert.
+class _Eselsohr extends StatelessWidget {
+  const _Eselsohr({
+    required this.rechts,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
+
+  final bool rechts;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        // Größer als das Ohr selbst, damit der Daumen es trifft.
+        child: SizedBox.square(
+          dimension: Umblaettern.ohr + 18,
+          child: Align(
+            alignment: rechts ? Alignment.bottomRight : Alignment.bottomLeft,
+            child: CustomPaint(
+              size: const Size.square(Umblaettern.ohr),
+              painter: _OhrMaler(rechts: rechts),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OhrMaler extends CustomPainter {
+  const _OhrMaler({required this.rechts});
+
+  final bool rechts;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    // Die Ecke, die fehlt: dort sieht man den Einband.
+    final ecke = rechts
+        ? (Path()
+            ..moveTo(w, 0)
+            ..lineTo(w, h)
+            ..lineTo(0, h)
+            ..close())
+        : (Path()
+            ..moveTo(0, 0)
+            ..lineTo(w, h)
+            ..lineTo(0, h)
+            ..close());
+    canvas.drawPath(ecke, Paint()..color = Palette.einbandDunkel);
+    // Der umgeknickte Teil: die Rückseite des Papiers, etwas dunkler,
+    // mit Schatten darunter.
+    final knick = rechts
+        ? (Path()
+            ..moveTo(w, 0)
+            ..lineTo(0, h)
+            ..lineTo(0, 0)
+            ..close())
+        : (Path()
+            ..moveTo(0, 0)
+            ..lineTo(w, 0)
+            ..lineTo(w, h)
+            ..close());
+    canvas.drawShadow(knick, Colors.black, 3, false);
+    canvas.drawPath(
+      knick,
+      Paint()
+        ..shader = LinearGradient(
+          begin: rechts ? Alignment.topLeft : Alignment.topRight,
+          end: rechts ? Alignment.bottomRight : Alignment.bottomLeft,
+          colors: const <Color>[Palette.papier, Palette.papierFaser],
+        ).createShader(Offset.zero & size),
+    );
+    canvas.drawPath(
+      knick,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8
+        ..color = Palette.papierFaser,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_OhrMaler alt) => alt.rechts != rechts;
 }
 
 /// Ein Blatt im Stapel — flach oder gedreht. **Immer derselbe Aufbau**,

@@ -33,7 +33,7 @@ cd LifesGame
 # Die ganze App (Flutter-SDK noetig, Dart 3.12.2 oder neuer):
 flutter pub get
 flutter run -d chrome              # oder einfach start-app.bat doppelklicken
-flutter test                       # 1077 Tests
+flutter test                       # 1081 Tests
 flutter analyze                    # muss sauber sein
 
 # Balance der Grube nachrechnen (Stufe für Stufe gegen echten Werte-Pfad):
