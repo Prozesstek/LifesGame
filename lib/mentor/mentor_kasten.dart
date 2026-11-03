@@ -113,32 +113,27 @@ class _Platzhalter extends StatelessWidget {
   }
 }
 
-/// Legt den Kasten des Mentors über einen Bildschirm, wenn er an [ort]
-/// etwas zu sagen hat — sonst steht nur [child] da.
+/// Der Kasten des Mentors an [ort] — **in der Zeile, nicht darüber**
+/// (Issue #183): Er steht oben über dem, worum es geht, und schiebt es
+/// nach unten, statt etwas zuzudecken. Man liest von oben nach unten.
 ///
-/// **Der Kasten nimmt keinen Tipp an.** Er deckt höchstens einen Streifen
-/// zu, und was darunter liegt, bleibt erreichbar: Der Mentor zeigt, er
-/// sperrt nicht (ADR-0079, „Zeigefinger“). Wohin er zeigt, markiert
-/// `Zeigefinger` am Ziel.
-class MentorFlaeche extends ConsumerWidget {
-  const MentorFlaeche({
-    required this.ort,
-    required this.child,
-    this.untenFrei = 0,
-    this.obenFrei = 0,
-    super.key,
-  });
+/// Schweigt der Mentor, ist die Zeile leer; sie steht trotzdem immer im
+/// Baum, damit nichts darunter an eine andere Stelle rutscht und sich
+/// neu baut (`gotchas.md`).
+///
+/// **Er liegt im Licht** des Scheinwerfers, sonst läge er unter dem
+/// Schleier. **Er nimmt keinen Tipp an**: Der Mentor zeigt, er sperrt
+/// nicht (ADR-0079).
+class MentorZeile extends ConsumerWidget {
+  const MentorZeile({required this.ort, this.rand = 12, super.key});
 
   final MentorOrt ort;
-  final Widget child;
 
-  /// Wie viel Platz der Kasten unten frei lässt. Auf der Startseite die
-  /// untere Reihe der Kreise: Der Kasten steht darüber in der leeren
-  /// Mitte und zeigt hinunter, statt einen Kreis zuzudecken.
-  final double untenFrei;
+  /// Wie viel Platz er zur Seite und nach oben lässt.
+  final double rand;
 
-  /// Dasselbe oben: Auf der Startseite die obere Reihe der Kreise.
-  final double obenFrei;
+  /// Wie viel Luft zu dem bleibt, was unter ihm steht.
+  static const double abstand = 10;
 
   /// Wie breit der Kasten höchstens wird — so breit wie die Startseite.
   static const double maxBreite = 520;
@@ -146,41 +141,61 @@ class MentorFlaeche extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final satz = Mentor.satz(ref.watch(ersterStartProvider).schritt, ort);
-    final oben = satz?.lage == KastenLage.oben;
-    // **Der Scheinwerfer steht immer**, auch wenn der Mentor schweigt:
-    // Fiele er weg, stünde [child] an einer anderen Stelle im Baum und
-    // baute sich neu (`gotchas.md`). Ohne angemeldetes Ziel ist er
-    // unsichtbar.
-    return Scheinwerfer(
-      oben: satz == null
-          ? null
-          : Positioned(
-              left: 0,
-              right: 0,
-              top: oben ? 0 : null,
-              bottom: oben ? null : 0,
-              child: SafeArea(
-                top: oben,
-                bottom: !oben,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    12,
-                    12 + (oben ? obenFrei : 0),
-                    12,
-                    12 + (oben ? 0 : untenFrei),
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: maxBreite),
-                      child: IgnorePointer(
-                        child: MentorKasten(text: satz.text),
-                      ),
-                    ),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: satz == null
+          ? const SizedBox(width: double.infinity)
+          : Padding(
+              padding: EdgeInsets.fromLTRB(rand, rand, rand, abstand),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: maxBreite),
+                  child: ScheinwerferZiel(
+                    radius: 12,
+                    begleiter: true,
+                    child: IgnorePointer(child: MentorKasten(text: satz.text)),
                   ),
                 ),
               ),
             ),
-      child: child,
+    );
+  }
+}
+
+/// Legt einen Bildschirm unter den Scheinwerfer und stellt den Mentor
+/// oben darüber, wenn er an [ort] etwas zu sagen hat (Issue #183).
+///
+/// Mit [mitKasten] `false` steht nur der Scheinwerfer: Die Startseite
+/// stellt die [MentorZeile] selbst unter Level und Gold.
+class MentorFlaeche extends StatelessWidget {
+  const MentorFlaeche({
+    required this.ort,
+    required this.child,
+    this.mitKasten = true,
+    super.key,
+  });
+
+  final MentorOrt ort;
+  final Widget child;
+  final bool mitKasten;
+
+  @override
+  Widget build(BuildContext context) {
+    // **Der Scheinwerfer steht immer**, auch wenn der Mentor schweigt:
+    // Fiele er weg, stünde [child] an einer anderen Stelle im Baum und
+    // baute sich neu (`gotchas.md`). Ohne angemeldetes Ziel ist er
+    // unsichtbar.
+    if (!mitKasten) return Scheinwerfer(child: child);
+    return Scheinwerfer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          MentorZeile(ort: ort),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 }

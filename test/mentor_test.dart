@@ -15,6 +15,7 @@ import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/erste_gewohnheit.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
+import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/mentor/mentor.dart';
 import 'package:lifes_game/mentor/mentor_kasten.dart';
 import 'package:lifes_game/mentor/zeigefinger.dart';
@@ -69,19 +70,14 @@ void main() {
       for (final schritt in Schritt.values) {
         for (final ort in MentorOrt.values) {
           final text = Mentor.satz(schritt, ort)?.text;
-          if (text == null) continue;
+          // Die Gebiete sind die Ausnahme: Sie erklärt er (Issue #183).
+          if (text == null || text == Mentor.gebiete) continue;
           // Seit ADR-0095 ein paar Wörter: Licht und Punkt zeigen den Weg.
           expect(text.split(' ').length, lessThanOrEqualTo(8), reason: text);
         }
       }
       expect(Mentor.ersteBeute.split(' ').length, lessThanOrEqualTo(12));
-    });
-
-    test('am Eingang steht er oben, weil „Hinab“ unten liegt', () {
-      expect(
-        Mentor.satz(Schritt.grube, MentorOrt.eingang)!.lage,
-        KastenLage.oben,
-      );
+      expect(Mentor.gebiete.split(' ').length, lessThanOrEqualTo(12));
     });
   });
 
@@ -161,21 +157,26 @@ void main() {
       );
     });
 
-    testWidgets('die erste Frage: drei Vorschläge und das Eigene, je eine '
-        'Zeile', (tester) async {
+    testWidgets('die erste Frage: der Mentor, zwei Vorschläge und das Eigene, '
+        'je eine Zeile', (tester) async {
       await starte(tester);
 
-      expect(ErsteGewohnheitKarte.vorschlaege, hasLength(3));
+      expect(ErsteGewohnheitKarte.vorschlaege, hasLength(2));
       final zeilen = <Rect>[
+        // Erst der Mentor, dann die Zeilen (Issue #183).
+        tester.getRect(find.byType(MentorKasten)),
         for (final v in ErsteGewohnheitKarte.vorschlaege)
           tester.getRect(find.text(v.name)),
-        tester.getRect(find.byKey(ErsteGewohnheitKarte.feldKey)),
+        tester.getRect(find.byKey(ErsteGewohnheitKarte.eigenesKey)),
       ];
       for (var i = 1; i < zeilen.length; i++) {
         expect(zeilen[i].top, greaterThan(zeilen[i - 1].bottom), reason: '$i');
       }
-      // Mittig: Die Frage steht nicht oben am Rand.
-      final karte = tester.getRect(find.byType(ErsteGewohnheitKarte));
+      // Mittig: Die Frage steht nicht oben am Rand — Mentor und Karte
+      // rücken zusammen in die Mitte.
+      final karte = tester
+          .getRect(find.byType(ErsteGewohnheitKarte))
+          .expandToInclude(tester.getRect(find.byType(MentorKasten)));
       final mitte =
           tester.view.physicalSize.height / tester.view.devicePixelRatio / 2;
       expect((karte.center.dy - mitte).abs(), lessThan(120));
@@ -284,12 +285,36 @@ void main() {
       );
     });
 
-    testWidgets('nach dem ersten Sieg schweigt er', (tester) async {
+    testWidgets('nach dem ersten Sieg erklärt er die Gebiete, ganz oben '
+        '(Issue #183)', (tester) async {
       final stand = ersteSeiteGelesen();
       await starte(
         tester,
         stand: SaveData(
           habits: stand.habits,
+          theory: stand.theory,
+          abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
+          ladder: const LadderProgress.empty().defeat(1),
+        ),
+      );
+
+      expect(sagt(tester), Mentor.gebiete);
+      // Er steht über „Heute“, nicht darunter.
+      expect(
+        tester.getRect(find.byType(MentorKasten)).bottom,
+        lessThan(tester.getRect(find.byType(TodayCard)).top),
+      );
+    });
+
+    testWidgets('mit der zweiten Gewohnheit schweigt er', (tester) async {
+      final stand = ersteSeiteGelesen();
+      final zweite = HabitCatalog.all
+          .firstWhere((v) => v.id != HabitCatalog.starterId)
+          .id;
+      await starte(
+        tester,
+        stand: SaveData(
+          habits: stand.habits.activate(zweite),
           theory: stand.theory,
           abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
           ladder: const LadderProgress.empty().defeat(1),

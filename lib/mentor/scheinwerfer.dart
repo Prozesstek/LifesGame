@@ -11,12 +11,9 @@ import '../ui/palette.dart';
 /// **Der Schleier nimmt keinen Tipp an.** Auch was im Dunkeln liegt,
 /// bleibt erreichbar: Der Mentor zeigt, er sperrt nicht (ADR-0079).
 class Scheinwerfer extends StatefulWidget {
-  const Scheinwerfer({required this.child, this.oben, super.key});
+  const Scheinwerfer({required this.child, super.key});
 
   final Widget child;
-
-  /// Was **über** dem Schleier liegt — der Kasten des Mentors.
-  final Widget? oben;
 
   /// Wie dunkel der Schleier ist.
   static const double dunkel = 0.62;
@@ -36,6 +33,10 @@ class Scheinwerfer extends StatefulWidget {
 class _ScheinwerferState extends State<Scheinwerfer>
     with SingleTickerProviderStateMixin {
   final Map<GlobalKey, double> _ziele = <GlobalKey, double>{};
+
+  /// Ziele, die nur mit anderen im Licht liegen — der Kasten des
+  /// Mentors. Allein ziehen sie keinen Schleier auf.
+  final Set<GlobalKey> _begleiter = <GlobalKey>{};
   final GlobalKey _flaeche = GlobalKey();
   final ValueNotifier<int> _neu = ValueNotifier<int>(0);
   late final AnimationController _blende;
@@ -53,12 +54,14 @@ class _ScheinwerferState extends State<Scheinwerfer>
     super.dispose();
   }
 
-  void _melde(GlobalKey ziel, double radius) {
+  void _melde(GlobalKey ziel, double radius, {bool begleiter = false}) {
     _ziele[ziel] = radius;
+    begleiter ? _begleiter.add(ziel) : _begleiter.remove(ziel);
     _wechsel();
   }
 
   void _abmelden(GlobalKey ziel) {
+    _begleiter.remove(ziel);
     if (_ziele.remove(ziel) != null) _wechsel();
   }
 
@@ -66,7 +69,7 @@ class _ScheinwerferState extends State<Scheinwerfer>
   void _wechsel() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (_ziele.isEmpty) {
+      if (_ziele.keys.every(_begleiter.contains)) {
         _blende.reverse();
       } else {
         final ruhig = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
@@ -124,7 +127,6 @@ class _ScheinwerferState extends State<Scheinwerfer>
                 ),
               ),
             ),
-            ?widget.oben,
           ],
         ),
       ),
@@ -182,11 +184,17 @@ class ScheinwerferZiel extends StatefulWidget {
     required this.child,
     this.aktiv = true,
     this.radius = 14,
+    this.begleiter = false,
     super.key,
   });
 
   final Widget child;
   final bool aktiv;
+
+  /// Liegt im Licht, **wenn** ein anderes Ziel den Schleier aufzieht —
+  /// allein zieht es keinen auf. Für den Kasten des Mentors: Er spricht
+  /// auch dort, wo er auf nichts zeigt.
+  final bool begleiter;
 
   /// Die Rundung des Lochs — so rund wie das Ziel.
   final double radius;
@@ -208,7 +216,11 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
   @override
   void didUpdateWidget(ScheinwerferZiel alt) {
     super.didUpdateWidget(alt);
-    if (alt.aktiv != widget.aktiv || alt.radius != widget.radius) _melde();
+    if (alt.aktiv != widget.aktiv ||
+        alt.radius != widget.radius ||
+        alt.begleiter != widget.begleiter) {
+      _melde();
+    }
   }
 
   void _melde() {
@@ -216,7 +228,7 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
     if (_bei != bei) _bei?._abmelden(_ziel);
     _bei = bei;
     if (widget.aktiv) {
-      bei?._melde(_ziel, widget.radius);
+      bei?._melde(_ziel, widget.radius, begleiter: widget.begleiter);
     } else {
       bei?._abmelden(_ziel);
     }
@@ -234,7 +246,9 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
   @override
   void activate() {
     super.activate();
-    if (widget.aktiv) _bei?._melde(_ziel, widget.radius);
+    if (widget.aktiv) {
+      _bei?._melde(_ziel, widget.radius, begleiter: widget.begleiter);
+    }
   }
 
   @override

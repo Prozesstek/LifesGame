@@ -109,7 +109,7 @@ void main() {
       expect(start.leuchtet, Bereich.kampf);
     });
 
-    test('nach dem ersten Sieg ist der Weg gegangen', () {
+    test('nach dem ersten Sieg erklärt er die Gebiete (Issue #183)', () {
       final start = ErsterStart.aus(
         const ErsterStartStand(
           hatGewohnheit: true,
@@ -122,11 +122,50 @@ void main() {
           jeBesessen: 1,
           level: 3,
           billigstesStueck: billig,
+          gewohnheitenJe: 1,
+        ),
+      );
+
+      expect(start.schritt, Schritt.gebiete);
+      expect(start.leuchtet, Bereich.gewohnheiten);
+    });
+
+    test('mit der zweiten Gewohnheit ist der Weg gegangen', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          hatGekaempft: true,
+          stufenGeschafft: 1,
+          seiten: 1,
+          gelernt: 1,
+          angelegt: 1,
+          jeBesessen: 1,
+          level: 3,
+          billigstesStueck: billig,
+          gewohnheitenJe: 2,
         ),
       );
 
       expect(start.schritt, isNull);
       expect(start.leuchtet, isNull);
+    });
+
+    test('vor dem Sieg erklärt er die Gebiete nicht, auch mit zweien', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          seiten: 1,
+          gelernt: 1,
+          angelegt: 1,
+          level: 2,
+          billigstesStueck: billig,
+          gewohnheitenJe: 2,
+        ),
+      );
+
+      expect(start.schritt, Schritt.grube);
     });
 
     test('ein verlorener Lauf beendet den Weg nicht', () {
@@ -303,6 +342,7 @@ void main() {
           jeBesessen: 2,
           level: 4,
           billigstesStueck: billig,
+          gewohnheitenJe: 2,
         ),
       ];
 
@@ -377,10 +417,54 @@ void main() {
 
       expect(aufgedeckt(tester), <String>['Gewohnheiten']);
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
-      expect(find.text('Was willst du jeden Tag tun?'), findsOneWidget);
+      // Die Frage stellt nur noch der Mentor, nicht auch die Karte
+      // (Issue #183).
+      expect(find.text('Was willst du jeden Tag tun?'), findsNothing);
+      expect(find.text('Willkommen! Was willst du jeden Tag tun?'), findsOne);
       expect(find.byType(TodayCard), findsNothing);
       expect(find.byType(DailyQuestsCard), findsNothing);
       expect(leuchtet(tester), isNull);
+    });
+
+    testWidgets('erst der Mentor, dann fliegen die Zeilen nacheinander '
+        'herein (Issue #183)', (tester) async {
+      useTallView(tester);
+      final container = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(const SaveData.empty()),
+          todayProvider.overrideWithValue(heute),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+
+      double sichtbar(Finder zeile) => tester
+          .widget<Opacity>(
+            find.ancestor(of: zeile, matching: find.byType(Opacity)).first,
+          )
+          .opacity;
+
+      final erste = find.text(ErsteGewohnheitKarte.vorschlaege.first.name);
+      final eigenes = find.byKey(ErsteGewohnheitKarte.eigenesKey);
+
+      await tester.pump();
+      expect(sichtbar(erste), 0);
+      expect(sichtbar(eigenes), 0);
+
+      // Die erste ist da, bevor die letzte losfliegt.
+      await tester.pump(
+        ErsteGewohnheitKarte.warten + ErsteGewohnheitKarte.flug,
+      );
+      expect(sichtbar(erste), 1);
+      expect(sichtbar(eigenes), lessThan(1));
+
+      await tester.pumpAndSettle();
+      expect(sichtbar(eigenes), 1);
     });
 
     testWidgets('ein Vorschlag legt mit einem Tipp eine Gewohnheit an', (
@@ -427,7 +511,11 @@ void main() {
     ) async {
       final c = await starte(tester);
 
-      // Die Wahl des Gebiets steht erst da, wenn etwas im Feld steht.
+      // Das Feld kommt erst mit einem Tipp auf „Etwas Eigenes“, die
+      // Wahl des Gebiets erst, wenn etwas im Feld steht.
+      expect(find.byKey(ErsteGewohnheitKarte.feldKey), findsNothing);
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
       expect(find.byKey(ErsteGewohnheitKarte.losKey), findsNothing);
 
       await tester.enterText(
@@ -452,6 +540,8 @@ void main() {
     testWidgets('ein leeres Feld legt nichts an', (tester) async {
       final c = await starte(tester);
 
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), '   ');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();

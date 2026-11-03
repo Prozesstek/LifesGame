@@ -186,11 +186,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Rune, Rucksack, Helm; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Bild (`Mentor.bild`, noch ein Platzhalter) | Flutter |
-| `lib/mentor/mentor_kasten.dart` | sein Kasten über einem Bildschirm (`MentorFlaeche`) — **nimmt keinen Tipp an** | Flutter |
+| `lib/mentor/mentor_kasten.dart` | sein Kasten **oben im Fluss** eines Bildschirms (`MentorZeile`, `MentorFlaeche`) — schiebt den Inhalt nach unten, deckt nichts zu, **nimmt keinen Tipp an** (ADR-0096) | Flutter |
 | `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
-| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht — **nimmt keinen Tipp an**; dazu `ZielPunkt`, der gelbe Punkt | Flutter |
+| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; dazu `ZielPunkt`, der gelbe Punkt | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
-| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“ **mittig**, solange es keine Gewohnheit gibt: **drei Vorschläge und das Eigene, je eine große Zeile** | Flutter |
+| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander hereinfliegen ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
@@ -342,7 +342,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1074 Tests
+flutter test             # 1077 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -912,7 +912,7 @@ Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 | Frage | Antwortet |
 |---|---|
 | Welcher Kreis steht da? | `ErsterStart.aus` — Theorie mit dem ersten Häkchen, Fähigkeiten mit der ersten Seite, Kampf mit der ersten angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2, **Statistik mit dem ersten Häkchen** (ADR-0087) |
-| Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; null nach dem ersten Sieg |
+| Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; nach dem ersten Sieg noch `Schritt.gebiete`, bis zwei Gewohnheiten liefen (ADR-0096), dann null |
 | Was sagt er hier? | `Mentor.satz(schritt, ort)` — eine Tabelle; ein Bildschirm legt `MentorFlaeche` um sich und `Zeigefinger` um sein Ziel |
 | Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
