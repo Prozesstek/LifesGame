@@ -37,6 +37,13 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       billigstesStueck: GearCatalog.cheapestPrice,
       jeBesessen: zahlen.everOwnedCount,
       level: ref.watch(playerLevelProvider).level,
+      // Was je lief: Abgehaktes und alles mit einem Plan (der Plan ist
+      // eine Historie, ADR-0064), dazu die eigenen. Fällt nie.
+      gewohnheitenJe: <String>{
+        ...habits.trackedIds,
+        ...habits.activeIds,
+        for (final eigene in habits.customHabits) eigene.id,
+      }.length,
     ),
   );
 });

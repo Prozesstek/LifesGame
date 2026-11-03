@@ -32,6 +32,7 @@ class ErsterStartStand {
     this.billigstesStueck = 0,
     this.jeBesessen = 0,
     this.level = 1,
+    this.gewohnheitenJe = 0,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -71,6 +72,11 @@ class ErsterStartStand {
   final int jeBesessen;
 
   final int level;
+
+  /// Wie viele verschiedene Gewohnheiten je liefen — laufend, pausiert
+  /// oder abgehakt. Daran hängt der letzte Satz des Mentors
+  /// ([Schritt.gebiete]).
+  final int gewohnheitenJe;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -94,6 +100,12 @@ enum Schritt {
 
   /// Der erste Sieg in der Grube.
   grube,
+
+  /// **Die Gebiete, ganz am Ende** (Issue #183): Was ein Gebiet ist und
+  /// dass es im Kampf stärkt, sagt der Mentor erst nach dem ersten Sieg —
+  /// und er bleibt dabei, bis eine zweite Gewohnheit da ist. Der Sieg
+  /// hat die Plätze dafür gebracht (ADR-0093).
+  gebiete,
 }
 
 /// Welche Bereiche die Startseite zeigt, welcher gerade dran ist, und
@@ -149,6 +161,9 @@ class ErsterStart {
   /// gibt es dort zum ersten Mal etwas zu sehen.
   static const int levelFuerCharakter = 2;
 
+  /// Ab wie vielen Gewohnheiten der Mentor die Gebiete erklärt hat.
+  static const int gewohnheitenNachDenGebieten = 2;
+
   final Set<Bereich> sichtbar;
 
   /// Wo der Mentor steht — null, wenn der Weg gegangen ist.
@@ -178,6 +193,7 @@ class ErsterStart {
     Schritt.ersteSeite => Bereich.theorie,
     Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
+    Schritt.gebiete => Bereich.gewohnheiten,
     Schritt.gewohnheit || Schritt.abhaken || null => null,
   };
 
@@ -191,8 +207,9 @@ class ErsterStart {
   /// Gewohnheit gibt.
   bool get zeigtTagesaufgaben => zeigt(Bereich.theorie);
 
-  /// Ob der Weg des Mentors gegangen ist: **der erste Sieg, sonst nichts**.
-  /// Genau dann ist [schritt] null.
+  /// Ob der Pflichtweg des Mentors gegangen ist: **der erste Sieg, sonst
+  /// nichts**. Danach steht er höchstens noch bei [Schritt.gebiete], und
+  /// der sperrt und schenkt nichts.
   ///
   /// Steht einzeln da, weil die Plätze für Gewohnheiten daran hängen
   /// (ADR-0093): `ersterStartProvider` liest den Tracker, und der Tracker
@@ -222,6 +239,8 @@ class ErsterStart {
         ? Schritt.faehigkeitAnlegen
         : !gewonnen
         ? Schritt.grube
+        : s.gewohnheitenJe < gewohnheitenNachDenGebieten
+        ? Schritt.gebiete
         : null;
 
     final faehigkeiten =

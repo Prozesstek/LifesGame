@@ -64,16 +64,6 @@ class HomeScreen extends ConsumerWidget {
   /// Holzleiste ein Fünftel niedriger wird.
   static const double bottomCircleSize = 50;
 
-  /// Wie hoch die untere Reihe samt Namen, Rand und Holzrahmen steht —
-  /// so viel lässt der Kasten des Mentors frei (ADR-0079).
-  static const double untereReihe =
-      bottomCircleSize + 12 + HubCircle.labelHeight + _leisteDazu;
-
-  /// Dasselbe für die obere Reihe: Steht der Kasten oben, beginnt er
-  /// unter dem Rahmen.
-  static const double obereReihe =
-      HubCircle.diameter + 12 + HubCircle.labelHeight + _leisteDazu;
-
   /// Die Bereiche der unteren Leiste.
   static const List<Bereich> untereBereiche = <Bereich>[
     Bereich.laden,
@@ -87,9 +77,6 @@ class HomeScreen extends ConsumerWidget {
 
   /// Der Innenabstand der Leisten — knapper als der von [HolzGruppe].
   static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 5, 4, 2);
-
-  /// Was Holz und Innenabstand einer Leiste an Höhe dazugeben.
-  static const double _leisteDazu = 2 * Holz.kartenRand + 3 + 5 + 2;
 
   /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
   static const String hintergrund = 'assets/UI/Berg.jpg';
@@ -152,8 +139,8 @@ class HomeScreen extends ConsumerWidget {
         child: AufstiegHost(
           child: MentorFlaeche(
             ort: MentorOrt.start,
-            obenFrei: obereReihe,
-            untenFrei: untenDa ? untereReihe : 0,
+            // Der Kasten steht unter Level und Gold, nicht über der Leiste.
+            mitKasten: false,
             // **Die Kreise rahmen den Bildschirm** (23.10.2026): oben und
             // unten je ein Holzrahmen, bündig am Rand; dazwischen Level,
             // Gold und „Heute“ vor dem Berg.
@@ -164,13 +151,19 @@ class HomeScreen extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      HubCircle(
-                        icon: Icons.check_circle_outline,
-                        label: 'Gewohnheiten',
-                        image: HubCircleImage.plain,
-                        symbol: BereichZeichen.gewohnheiten,
-                        progress: heute,
-                        onTap: () => _open(context, const HabitsScreen()),
+                      // Immer da; im Licht nur, wenn der Mentor die Gebiete
+                      // erklärt (Issue #183).
+                      kreis(
+                        Bereich.gewohnheiten,
+                        (leuchtet) => HubCircle(
+                          icon: Icons.check_circle_outline,
+                          label: 'Gewohnheiten',
+                          image: HubCircleImage.plain,
+                          symbol: BereichZeichen.gewohnheiten,
+                          progress: heute,
+                          leuchtet: leuchtet,
+                          onTap: () => _open(context, const HabitsScreen()),
+                        ),
                       ),
                       kreis(
                         Bereich.theorie,
@@ -258,6 +251,16 @@ class HomeScreen extends ConsumerWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
                                         children: <Widget>[
+                                          // **Der Mentor über dem, worum
+                                          // es geht** (Issue #183): Man
+                                          // liest von oben nach unten. Er
+                                          // steht in derselben Spalte wie
+                                          // die erste Frage, damit er mit
+                                          // ihr in die Mitte rückt.
+                                          const MentorZeile(
+                                            ort: MentorOrt.start,
+                                            rand: 0,
+                                          ),
                                           // **Einmal** (ADR-0085): Eigene Gewohnheiten
                                           // von vor den Skills fragen nach ihrem
                                           // Gebiet. Sonst steht hier nichts.

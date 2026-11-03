@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1074, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1077, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,35 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 03.11.2026, abends: Tutorialscreen 1 (#183)
+
+Frederik, Issue #183 mit Skizze. Zwei Rückfragen, beide wie empfohlen:
+[ADR-0096](../decisions/0096-mentor-oben-gebiete-am-ende.md).
+
+| Was | Wie |
+|---|---|
+| **Mentor** | **immer oben**, im Fluss statt schwebend — auf allen vier Orten; auf der Startseite direkt über der Karte, beide mittig |
+| **Erste Karte** | keine Überschrift, „Freund anrufen“ weg, keine Kampfwert-Zeichen, Plus grün |
+| **„Etwas Eigenes“** | eine Zeile wie die Vorschläge; ein Tipp öffnet das Feld, der Haken zum Anlegen ist ein grüner Kreis |
+| **„Ich habe schon einen Stand“** | weg; eingefügt wird im Charakter (ab Level 2) |
+| **Animation** | erst der Mentor, dann fliegen die Zeilen nacheinander von unten herein |
+| **Gebiete** | neuer letzter Schritt nach dem ersten Sieg: „Gewohnheiten füllen ihr Gebiet, jedes stärkt im Kampf. Leg eine zweite an!“, Gewohnheiten im Licht — bis zwei Gewohnheiten liefen |
+
+**Ohne Rückfrage entschieden:** Die Zeilen fliegen von unten, nicht von der
+Seite — von rechts ragten sie über den Rand der Karte. Der Kasten liegt als
+**Begleiter** im Licht: Er zieht allein keinen Schleier auf. Wer schon zwei
+Gewohnheiten hat, hört den letzten Satz nicht.
+
+App 1077 (vorher 1074). Leerer Start (mitten im Hereinfliegen und fertig),
+„Etwas Eigenes“ offen, der Gebiete-Schritt und der Baum in 390 × 844
+gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- Wer umzieht, braucht jetzt Level 2, um einen Stand einzufügen.
+- Ob der Gebiete-Satz zwölf Wörter lang sein darf (ADR-0095 sagt ein paar).
+- **AktivesBrett hat ADR-0096 nicht gesehen.**
 
 ## 03.11.2026: Konzept „Zufriedenheit“, noch nicht gebaut
 
