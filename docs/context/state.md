@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 02.11.2026 · Frederik
+**Zuletzt aktualisiert:** 03.11.2026 · Frederik
 
 ---
 
@@ -38,7 +38,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1072, dazu die acht Packages (theory 218, habits 375, gear
+**Tests:** App 1074, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 52, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -134,6 +134,47 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 03.11.2026: drei Vorschläge, eine Zeile je Vorschlag
+
+Frederik: „bei dem Tutorial gerne nur 3 Gewohnheiten vorschlagen und die
+eigene. In der Mitte des Screens und eine Gewohnheit in einer Zeile …
+Das soll bei der Theorie dann genauso sein, dass einem 3 Lektionen
+vorgeschlagen werden + die Möglichkeit den Baum selber zu erkunden“.
+Gebaut ohne Fragerunde.
+
+| Was | Wie |
+|---|---|
+| **Erste Gewohnheit** | drei Zeilen statt sechs Chips: Zwei Minuten lesen (Geist), Spazieren gehen (Körper), Freund anrufen (Gesellschaft); darunter „Etwas Eigenes“ als vierte Zeile; 18 statt 12 Punkte |
+| **Lage** | die Karte steht mittig auf der Startseite, solange sie fragt |
+| **Theorie** | solange die erste Seite fehlt, statt des Baums „Womit fängst du an?“: drei Seiten groß untereinander, darunter „Baum selbst erkunden“ |
+| **Licht** | die ganze Wahl liegt im Scheinwerfer, der gelbe Punkt oben rechts |
+
+**Ohne Rückfrage entschieden:**
+
+- **Drei Gebiete bei den Gewohnheiten**, damit die Wahl auch eine
+  zwischen Kampfwerten ist. Bett machen, Liegestütze, Wasser und
+  Aufräumen sind weg.
+- **Am Anfang kämen in der Theorie nur zwei Vorschläge** (Grundlagen und
+  ein neues Gebiet). Für den Einstieg füllt `vorschlaege(auffuellen:)`
+  mit weiteren unberührten Gebieten auf drei auf; sonst bleibt alles,
+  wie es war. Alle drei kosten den einen Startpunkt.
+- **„Baum selbst erkunden“ gilt für diesen Besuch.** Wer zurückkommt und
+  noch nichts gelesen hat, sieht die Wahl wieder.
+
+**Beim Bauen gefunden — ein Fehler aus ADR-0095:** Fiel ein Ziel des
+Scheinwerfers aus dem Baum, wollte der Schleier es beim Malen noch
+ausmessen („inactive element“), weil es sich erst in `dispose`
+abmeldete. Jetzt meldet es sich in `deactivate` ab.
+
+App 1074 (vorher 1072), theory 219 (vorher 218). Startseite und
+Theorie in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- Ob drei Gebiete als Seiten am Anfang (Geist, Körper, Wissenschaft)
+  „Lektionen“ genug sind — es sind die Einführungen der Wurzeln.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 02.11.2026, danach: das Tutorial zeigt, statt zu erklären
 

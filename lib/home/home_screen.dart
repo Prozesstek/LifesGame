@@ -240,58 +240,75 @@ class HomeScreen extends ConsumerWidget {
                               // überzulaufen. Darunter das **Lagerfeuer**
                               // (ADR-0076) mit Truhe, Tagesaufgaben und
                               // Rückfrage.
+                              // **Die erste Frage steht in der Mitte**
+                              // (03.11.2026): Sonst ist die Seite noch leer,
+                              // und oben am Rand sähe sie aus wie Nebensache.
                               Expanded(
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: <Widget>[
-                                      // **Einmal** (ADR-0085): Eigene Gewohnheiten
-                                      // von vor den Skills fragen nach ihrem
-                                      // Gebiet. Sonst steht hier nichts.
-                                      if (tracker
-                                          .customWithoutArea
-                                          .isNotEmpty) ...<Widget>[
-                                        const GebietFrageKarte(),
-                                        const SizedBox(height: 10),
-                                      ],
-                                      // **Die Wahl des Eis** (ADR-0086) — über
-                                      // „Heute“. Erst wenn es eine Gewohnheit
-                                      // gibt: Vorher fragt die Startseite nach
-                                      // ihr, und das Ei wartet. Ist es gewählt,
-                                      // steht das Tier oben in der Leiste.
-                                      if (!start.fragtNachGewohnheit &&
-                                          !hatTier) ...<Widget>[
-                                        const HaustierKarte(),
-                                        const SizedBox(height: 10),
-                                      ],
-                                      // Ohne Gewohnheit ist „Heute“ die erste
-                                      // Frage, keine leere Liste.
-                                      if (start.fragtNachGewohnheit)
-                                        const Zeigefinger(
-                                          schritt: Schritt.gewohnheit,
-                                          child: ErsteGewohnheitKarte(),
-                                        )
-                                      else
-                                        const Zeigefinger(
-                                          schritt: Schritt.abhaken,
-                                          child: TodayCard(),
-                                        ),
-                                      // **Das Lagerfeuer** (ADR-0076) direkt darunter:
-                                      // Truhe und Tagesaufgaben standen hier bis zum
-                                      // 18.10. als zwei Karten, jetzt warten sie dort,
-                                      // zusammen mit der Rückfrage.
-                                      if (start.zeigtTagesaufgaben) ...<Widget>[
-                                        const SizedBox(height: 10),
-                                        LagerfeuerKarte(
-                                          amFeuer: ref.watch(amFeuerProvider),
-                                          onOpen: () => _open(
-                                            context,
-                                            const LagerfeuerScreen(),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                child: LayoutBuilder(
+                                  builder: (context, platz) => SingleChildScrollView(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight: platz.maxHeight,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            start.fragtNachGewohnheit
+                                            ? MainAxisAlignment.center
+                                            : MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: <Widget>[
+                                          // **Einmal** (ADR-0085): Eigene Gewohnheiten
+                                          // von vor den Skills fragen nach ihrem
+                                          // Gebiet. Sonst steht hier nichts.
+                                          if (tracker
+                                              .customWithoutArea
+                                              .isNotEmpty) ...<Widget>[
+                                            const GebietFrageKarte(),
+                                            const SizedBox(height: 10),
+                                          ],
+                                          // **Die Wahl des Eis** (ADR-0086) — über
+                                          // „Heute“. Erst wenn es eine Gewohnheit
+                                          // gibt: Vorher fragt die Startseite nach
+                                          // ihr, und das Ei wartet. Ist es gewählt,
+                                          // steht das Tier oben in der Leiste.
+                                          if (!start.fragtNachGewohnheit &&
+                                              !hatTier) ...<Widget>[
+                                            const HaustierKarte(),
+                                            const SizedBox(height: 10),
+                                          ],
+                                          // Ohne Gewohnheit ist „Heute“ die erste
+                                          // Frage, keine leere Liste.
+                                          if (start.fragtNachGewohnheit)
+                                            const Zeigefinger(
+                                              schritt: Schritt.gewohnheit,
+                                              child: ErsteGewohnheitKarte(),
+                                            )
+                                          else
+                                            const Zeigefinger(
+                                              schritt: Schritt.abhaken,
+                                              child: TodayCard(),
+                                            ),
+                                          // **Das Lagerfeuer** (ADR-0076) direkt darunter:
+                                          // Truhe und Tagesaufgaben standen hier bis zum
+                                          // 18.10. als zwei Karten, jetzt warten sie dort,
+                                          // zusammen mit der Rückfrage.
+                                          if (start
+                                              .zeigtTagesaufgaben) ...<Widget>[
+                                            const SizedBox(height: 10),
+                                            LagerfeuerKarte(
+                                              amFeuer: ref.watch(
+                                                amFeuerProvider,
+                                              ),
+                                              onOpen: () => _open(
+                                                context,
+                                                const LagerfeuerScreen(),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

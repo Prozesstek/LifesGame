@@ -13,6 +13,7 @@ import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/home/erster_start.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
+import 'package:lifes_game/home/widgets/erste_gewohnheit.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/mentor/mentor.dart';
 import 'package:lifes_game/mentor/mentor_kasten.dart';
@@ -24,6 +25,7 @@ import 'package:lifes_game/theory/lesson_screen.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/tree_overview.dart';
+import 'package:lifes_game/theory/widgets/tree_view.dart';
 import 'package:theory/theory.dart';
 
 import 'gear_helpers.dart';
@@ -148,13 +150,54 @@ void main() {
 
       expect(find.byType(SkillTreeScreen), findsOneWidget);
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.baum));
+      // Ein Ring um die ganze Wahl, nicht um jede Zeile (03.11.2026).
+      expect(find.byKey(Zeigefinger.ringKey), findsOneWidget);
       expect(
         find.ancestor(
           of: find.byType(ContinueReadingTile),
           matching: find.byType(ZeigeRing),
         ),
-        findsOneWidget,
+        findsWidgets,
       );
+    });
+
+    testWidgets('die erste Frage: drei Vorschläge und das Eigene, je eine '
+        'Zeile', (tester) async {
+      await starte(tester);
+
+      expect(ErsteGewohnheitKarte.vorschlaege, hasLength(3));
+      final zeilen = <Rect>[
+        for (final v in ErsteGewohnheitKarte.vorschlaege)
+          tester.getRect(find.text(v.name)),
+        tester.getRect(find.byKey(ErsteGewohnheitKarte.feldKey)),
+      ];
+      for (var i = 1; i < zeilen.length; i++) {
+        expect(zeilen[i].top, greaterThan(zeilen[i - 1].bottom), reason: '$i');
+      }
+      // Mittig: Die Frage steht nicht oben am Rand.
+      final karte = tester.getRect(find.byType(ErsteGewohnheitKarte));
+      final mitte =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio / 2;
+      expect((karte.center.dy - mitte).abs(), lessThan(120));
+    });
+
+    testWidgets('in der Theorie zuerst drei Seiten, der Baum auf Wunsch', (
+      tester,
+    ) async {
+      await starte(
+        tester,
+        stand: SaveData(habits: einHaekchen),
+        home: const SkillTreeScreen(),
+      );
+
+      expect(find.byType(ContinueReadingTile), findsNWidgets(3));
+      expect(find.byType(TreeView), findsNothing);
+
+      await tester.tap(find.byKey(SkillTreeScreen.erkundenKey));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TreeView), findsWidgets);
+      expect(find.byKey(SkillTreeScreen.erkundenKey), findsNothing);
     });
 
     testWidgets('die erste Seite bringt jedem Funkenstoß, und auf Level 2 '
