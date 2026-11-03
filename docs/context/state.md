@@ -135,6 +135,27 @@ vom 02.10.
 
 ---
 
+## 03.11.2026: Konzept „Zufriedenheit“, noch nicht gebaut
+
+Frederik: „Zufriedenheit fehlt: Statistiken überarbeiten,
+Wochenrückblick am Montag … wieviel Minuten/Stunden man was gemacht hat
+… lass das aber erst konzipieren“. In zwei Fragerunden entschieden:
+[`zufriedenheit.md`](../vorlagen/zufriedenheit.md).
+
+| Frage | Entschieden |
+|---|---|
+| Woher die Minuten? | **jede Gewohnheit bekommt eine geschätzte Dauer**, die keine Zahl im Spiel erzeugt |
+| Vergleich mit sinnlosen Tätigkeiten? | **in Einheiten** („so lang wie 4 Folgen einer Serie“), keine Statistik über andere |
+| Prozent gegen andere? | **bis zum Server keine**, stattdessen Aussagen aus Studien — gegen Claudes Empfehlung (warten) |
+| Kampf gegen dich vor 7 Tagen? | **später**, eigene Runde |
+| Wochenrückblick? | **montags beim ersten Öffnen** von selbst |
+| Statistik? | **weniger, aber klarer**, dazu Belege aus Studien |
+
+**Die Quellen in der Vorlage sind aus dem Gedächtnis** und vor dem Bau
+nachzuschlagen. Offen: welche drei Zahlen oben in der Statistik stehen
+und ob das Level ab jetzt täglich mitgeschrieben wird. **AktivesBrett
+hat es nicht gesehen.**
+
 ## 03.11.2026: drei Vorschläge, eine Zeile je Vorschlag
 
 Frederik: „bei dem Tutorial gerne nur 3 Gewohnheiten vorschlagen und die
