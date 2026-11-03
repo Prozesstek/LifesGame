@@ -4,6 +4,7 @@ import 'package:theory/theory.dart';
 
 import '../../gear/gear_controller.dart';
 import '../../gear/widgets/character_figure.dart';
+import '../../mentor/mentor.dart';
 import '../../mentor/mentor_kasten.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -177,7 +178,19 @@ class _MentorSagt extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        MentorBild(seite: gross ? 64 : 48),
+        // Beim Fragen steht er ganz da, beim Antworten sein Kopf.
+        if (gross)
+          SizedBox(
+            width: 96,
+            child: Image.asset(
+              Mentor.figur,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+              errorBuilder: (_, _, _) => const MentorBild(seite: 64),
+            ),
+          )
+        else
+          const MentorBild(seite: 48),
         const SizedBox(width: 10),
         Expanded(
           child: HolzKarte(

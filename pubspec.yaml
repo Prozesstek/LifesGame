@@ -117,6 +117,8 @@ flutter:
     # des Startbildschirms und seine Charakter-Fassung.
     - assets/UI/
     - assets/UI/Holz/
+    # Der Mentor (ADR-0079): Figur und Kopf, aus Frederiks Bild vom 03.11.
+    - assets/Mentor/
 
     # Klaenge. Welche Datei zu welchem Anlass gehoert, entscheidet
     # `SoundEffect` in `lib/audio/sound_effects.dart`.
