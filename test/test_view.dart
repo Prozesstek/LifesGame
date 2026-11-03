@@ -4,6 +4,7 @@ import 'package:lifes_game/achievements/widgets/achievement_unlock_sheet.dart';
 import 'package:lifes_game/character/widgets/ability_unlock_sheet.dart';
 import 'package:lifes_game/habits/widgets/habit_timer_sheet.dart';
 import 'package:lifes_game/progression/show_level_up.dart';
+import 'package:lifes_game/theory/widgets/mentor_dialog.dart';
 import 'package:lifes_game/theory/widgets/umblaettern.dart';
 import 'package:theory/theory.dart';
 
@@ -50,9 +51,8 @@ Future<void> schonErledigt(WidgetTester tester) async {
 Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
   final teaser = lesson.teaser;
   if (teaser != null) {
-    await tester.tap(find.text(teaser.options.first));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Weiter'));
+    await waehle(tester, teaser.options.first);
+    await tester.tap(find.text('Buch öffnen'));
     await tester.pumpAndSettle();
   }
   await buchDurch(tester);
@@ -109,4 +109,13 @@ Future<void> feiernSchliessen(WidgetTester tester) async {
     await tester.tap(knopf);
     await tester.pumpAndSettle();
   }
+}
+
+/// Wählt beim Mentor eine Antwort und sagt sie ihm (03.11.2026): Erst legt
+/// ein Tipp sie fest, dann sagt „Antworten“ sie.
+Future<void> waehle(WidgetTester tester, String antwort) async {
+  await tester.tap(find.text(antwort));
+  await tester.pump();
+  await tester.tap(find.byKey(MentorDialog.antwortenKey));
+  await tester.pumpAndSettle();
 }

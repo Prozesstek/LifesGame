@@ -55,7 +55,7 @@ class MentorKasten extends StatelessWidget {
   Widget _zeile() {
     return Row(
       children: <Widget>[
-        const _MentorBild(),
+        const MentorBild(),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -74,39 +74,40 @@ class MentorKasten extends StatelessWidget {
 }
 
 /// Das Bild des Mentors — bis Frederiks Figur kommt, ein gezeichneter
-/// Kopf in einem Kreis (`Mentor.bild`).
-class _MentorBild extends StatelessWidget {
-  const _MentorBild();
+/// Kopf in einem Kreis (`Mentor.bild`). Auch dort, wo er abfragt
+/// (`MentorDialog`).
+class MentorBild extends StatelessWidget {
+  const MentorBild({this.seite = MentorKasten.bildSeite, super.key});
+
+  final double seite;
 
   @override
   Widget build(BuildContext context) {
-    const kopf = _Platzhalter();
+    final kopf = _Platzhalter(seite: seite);
     final bild = Mentor.bild;
     if (bild == null) return kopf;
-    return PixelArt(
-      assetPath: bild,
-      side: MentorKasten.bildSeite,
-      fallback: kopf,
-    );
+    return PixelArt(assetPath: bild, side: seite, fallback: kopf);
   }
 }
 
 class _Platzhalter extends StatelessWidget {
-  const _Platzhalter();
+  const _Platzhalter({required this.seite});
+
+  final double seite;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MentorKasten.bildSeite,
-      height: MentorKasten.bildSeite,
+      width: seite,
+      height: seite,
       decoration: BoxDecoration(
         color: Palette.backgroundRaised,
         shape: BoxShape.circle,
         border: Border.all(color: Palette.goldOnDark, width: 2),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.person_rounded,
-        size: 36,
+        size: seite * 0.64,
         color: Palette.goldOnDark,
       ),
     );

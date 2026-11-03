@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/theory/antwort_klang.dart';
 import 'package:lifes_game/theory/widgets/review_section.dart';
-import 'package:lifes_game/theory/widgets/runden_balken.dart';
+import 'package:lifes_game/theory/widgets/mentor_dialog.dart';
 import 'package:lifes_game/ui/aufstieg.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
@@ -743,8 +743,7 @@ void main() {
     Future<void> zweiteRunde(WidgetTester tester) async {
       while (find.textContaining('Noch einmal').evaluate().isNotEmpty) {
         final question = shownQuestion();
-        await tester.tap(find.text(question.options[question.correctIndex]));
-        await tester.pumpAndSettle();
+        await waehle(tester, question.options[question.correctIndex]);
         await tester.tap(find.text('Weiter'));
         await tester.pumpAndSettle();
       }
@@ -766,8 +765,7 @@ void main() {
             ? question.correctIndex
             : (question.correctIndex + 1) % question.options.length;
 
-        await tester.tap(find.text(question.options[option]));
-        await tester.pumpAndSettle();
+        await waehle(tester, question.options[option]);
 
         final isLast = i == _first.questionCount - 1;
         await tester.tap(find.text(isLast ? 'Auswerten' : 'Weiter'));
@@ -808,12 +806,8 @@ void main() {
         final wahl = richtig
             ? frage.correctIndex
             : (frage.correctIndex + 1) % frage.options.length;
-        await tester.tap(find.text(frage.options[wahl]));
-        await tester.pumpAndSettle();
+        await waehle(tester, frage.options[wahl]);
       }
-
-      int balken(WidgetTester tester) =>
-          tester.widget<RundenBalken>(find.byType(RundenBalken)).geloest;
 
       int konfetti(WidgetTester tester) => tester
           .state<AufstiegHostState>(find.byType(AufstiegHost))
@@ -846,13 +840,10 @@ void main() {
           expect(find.text('Was schätzt du?'), findsOneWidget);
           expect(find.text(raetsel.prompt), findsOneWidget);
           expect(find.text(seite.sections.first.heading), findsNothing);
-          final knopf = tester.widget<FilledButton>(
-            find.ancestor(
-              of: find.text('Weiter'),
-              matching: find.byType(FilledButton),
-            ),
-          );
-          expect(knopf.onPressed, isNull);
+          // Weiter geht es erst nach einer Schätzung: Bis dahin gibt es
+          // weder „Antworten“ noch „Buch öffnen“.
+          expect(find.byKey(MentorDialog.antwortenKey), findsNothing);
+          expect(find.text('Buch öffnen'), findsNothing);
         });
 
         testWidgets('daneben ist überraschend, nicht falsch — und zählt '
@@ -868,12 +859,11 @@ void main() {
           final daneben = raetsel.options.firstWhere(
             (o) => o != raetsel.options[raetsel.correctIndex],
           );
-          await tester.tap(find.text(daneben));
-          await tester.pumpAndSettle();
+          await waehle(tester, daneben);
 
           expect(find.text('Überraschend, oder?'), findsOneWidget);
-          expect(find.text(raetsel.explanation), findsOneWidget);
-          expect(find.text('Nicht ganz'), findsNothing);
+          expect(find.textContaining(raetsel.explanation), findsOneWidget);
+          expect(find.text('Nicht ganz.'), findsNothing);
           expect(find.byIcon(Icons.close), findsNothing);
           expect(mitschrift.gespielt, isEmpty);
           expect(
@@ -881,7 +871,7 @@ void main() {
             isNull,
           );
 
-          await tester.tap(find.text('Weiter'));
+          await tester.tap(find.text('Buch öffnen'));
           await tester.pumpAndSettle();
           expect(find.text(seite.sections.first.heading), findsOneWidget);
         });
@@ -895,10 +885,9 @@ void main() {
           addTearDown(container.dispose);
           await pumpeSeite(tester, container);
 
-          await tester.tap(find.text(raetsel.options[raetsel.correctIndex]));
-          await tester.pumpAndSettle();
+          await waehle(tester, raetsel.options[raetsel.correctIndex]);
 
-          expect(find.text('Gut geschätzt'), findsOneWidget);
+          expect(find.text('Gut geschätzt!'), findsOneWidget);
           expect(mitschrift.gespielt, <SoundEffect>[SoundEffect.ton1]);
         });
 
@@ -915,12 +904,10 @@ void main() {
             final frage = seite.questions.firstWhere(
               (q) => find.text(q.prompt).evaluate().isNotEmpty,
             );
-            await tester.tap(
-              find.text(
-                frage.options[(frage.correctIndex + 1) % frage.options.length],
-              ),
+            await waehle(
+              tester,
+              frage.options[(frage.correctIndex + 1) % frage.options.length],
             );
-            await tester.pumpAndSettle();
             final letzte = i == seite.questionCount - 1;
             await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
             await tester.pumpAndSettle();
@@ -929,8 +916,7 @@ void main() {
             final frage = seite.questions.firstWhere(
               (q) => find.text(q.prompt).evaluate().isNotEmpty,
             );
-            await tester.tap(find.text(frage.options[frage.correctIndex]));
-            await tester.pumpAndSettle();
+            await waehle(tester, frage.options[frage.correctIndex]);
             await tester.tap(find.text('Weiter'));
             await tester.pumpAndSettle();
           }
@@ -980,7 +966,6 @@ void main() {
 
         for (var i = 0; i < _first.questionCount; i++) {
           await antworte(tester, richtig: true);
-          expect(balken(tester), i + 1);
           final letzte = i == _first.questionCount - 1;
           await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
           if (!letzte) await tester.pumpAndSettle();
@@ -1011,8 +996,7 @@ void main() {
         await zuDenFragen(tester, _first);
 
         await antworte(tester, richtig: false);
-        expect(balken(tester), 0);
-        expect(find.text('Nicht ganz'), findsOneWidget);
+        expect(find.text('Nicht ganz.'), findsOneWidget);
         for (var i = 1; i < _first.questionCount; i++) {
           await tester.tap(find.text('Weiter'));
           await tester.pumpAndSettle();
@@ -1024,7 +1008,6 @@ void main() {
         // Die zweite Runde holt die falsche nach — und füllt den Balken.
         expect(find.text('Noch einmal — die letzte'), findsOneWidget);
         await antworte(tester, richtig: true);
-        expect(balken(tester), _first.questionCount);
         await tester.tap(find.text('Weiter'));
         await tester.pump();
         expect(konfetti(tester), 0);
@@ -1042,7 +1025,9 @@ void main() {
       });
     });
 
-    testWidgets('vor der Antwort geht es nicht weiter', (tester) async {
+    testWidgets('erst wählen, dann antworten: der Mentor fragt ab', (
+      tester,
+    ) async {
       useTallView(tester);
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -1050,13 +1035,23 @@ void main() {
       await pump(tester, container);
       await zuDenFragen(tester, _first);
 
-      final button = tester.widget<FilledButton>(
-        find.ancestor(
-          of: find.text('Weiter'),
-          matching: find.byType(FilledButton),
-        ),
-      );
-      expect(button.onPressed, isNull);
+      // Vor der Wahl gibt es weder „Antworten“ noch „Weiter“.
+      expect(find.byKey(MentorDialog.antwortenKey), findsNothing);
+      expect(find.byKey(MentorDialog.weiterKey), findsNothing);
+
+      // Ein Tipp legt nur fest — gezählt ist noch nichts.
+      final frage = shownQuestion();
+      await tester.tap(find.text(frage.options[frage.correctIndex]));
+      await tester.pumpAndSettle();
+      expect(find.byKey(MentorDialog.antwortenKey), findsOneWidget);
+      expect(find.byKey(MentorDialog.urteilKey), findsNothing);
+
+      // Erst „Antworten“: Die Figur sagt es, der Mentor antwortet.
+      await tester.tap(find.byKey(MentorDialog.antwortenKey));
+      await tester.pumpAndSettle();
+      expect(find.byKey(MentorDialog.spielerKey), findsOneWidget);
+      expect(find.byKey(MentorDialog.urteilKey), findsOneWidget);
+      expect(find.byKey(MentorDialog.weiterKey), findsOneWidget);
     });
 
     group('Die zweite Runde (ADR-0055)', () {
@@ -1070,8 +1065,7 @@ void main() {
           final option = i < falsch
               ? (question.correctIndex + 1) % question.options.length
               : question.correctIndex;
-          await tester.tap(find.text(question.options[option]));
-          await tester.pumpAndSettle();
+          await waehle(tester, question.options[option]);
           final isLast = i == _first.questionCount - 1;
           await tester.tap(find.text(isLast ? 'Auswerten' : 'Weiter'));
           await tester.pumpAndSettle();
@@ -1119,12 +1113,10 @@ void main() {
         await ersteRunde(tester, falsch: 1);
 
         final frage = shownQuestion();
-        await tester.tap(
-          find.text(
-            frage.options[(frage.correctIndex + 1) % frage.options.length],
-          ),
+        await waehle(
+          tester,
+          frage.options[(frage.correctIndex + 1) % frage.options.length],
         );
-        await tester.pumpAndSettle();
         await tester.tap(find.text('Weiter'));
         await tester.pumpAndSettle();
 
@@ -1166,11 +1158,10 @@ void main() {
       final question = shownQuestion();
       expect(find.text(question.explanation), findsNothing);
 
-      await tester.tap(find.text(question.options[question.correctIndex]));
-      await tester.pumpAndSettle();
+      await waehle(tester, question.options[question.correctIndex]);
 
       expect(find.text(question.explanation), findsOneWidget);
-      expect(find.text('Richtig'), findsOneWidget);
+      expect(find.text('Richtig!'), findsOneWidget);
     });
 
     testWidgets('alles richtig: bestanden, mit Erfahrung und Gold', (
