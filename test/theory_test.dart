@@ -9,6 +9,7 @@ import 'package:lifes_game/ui/aufstieg.dart';
 import 'package:lifes_game/achievements/achievements_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/lesson_screen.dart';
+import 'package:lifes_game/theory/widgets/umblaettern.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/widgets/lesson_result_view.dart';
 import 'package:lifes_game/theory/review_controller.dart';
@@ -957,12 +958,10 @@ void main() {
 
         expect(find.text(_first.sections.first.heading), findsOneWidget);
         expect(find.text(_first.sections[1].heading), findsNothing);
-        expect(
-          find.text('${_first.questionCount} Fragen beantworten'),
-          findsNothing,
-        );
+        // Kein Knopf „Weiter“ mehr, geblättert wird am Eselsohr.
+        expect(find.text('Weiter'), findsNothing);
 
-        await tester.tap(find.text('Weiter'));
+        await tester.tap(find.byKey(Umblaettern.ohrVorKey));
         await tester.pumpAndSettle();
 
         expect(find.text(_first.sections[1].heading), findsOneWidget);

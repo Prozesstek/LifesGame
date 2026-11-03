@@ -4,6 +4,7 @@ import 'package:lifes_game/achievements/widgets/achievement_unlock_sheet.dart';
 import 'package:lifes_game/character/widgets/ability_unlock_sheet.dart';
 import 'package:lifes_game/habits/widgets/habit_timer_sheet.dart';
 import 'package:lifes_game/progression/show_level_up.dart';
+import 'package:lifes_game/theory/widgets/umblaettern.dart';
 import 'package:theory/theory.dart';
 
 /// Gibt dem Test ein hohes Fenster.
@@ -42,8 +43,8 @@ Future<void> schonErledigt(WidgetTester tester) async {
 
 /// Blättert eine Seite bis zu ihren Fragen und beginnt sie.
 ///
-/// Seit dem 18.10. kommt der Text in Häppchen (`LeseHaeppchen`): Der Knopf
-/// zu den Fragen steht erst auf dem letzten Abschnitt, davor „Weiter“.
+/// Seit dem 18.10. kommt der Text in Häppchen (`LeseHaeppchen`), seit
+/// dem 03.11. in einem Buch ohne Knopf ([buchDurch]).
 /// Hat die Seite ein Rätsel, wird es zuerst geraten — irgendwie, es
 /// zählt nicht.
 Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
@@ -54,13 +55,21 @@ Future<void> zuDenFragen(WidgetTester tester, Lesson lesson) async {
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
   }
-  final start = find.text('${lesson.questionCount} Fragen beantworten');
-  for (var i = 0; i < lesson.sections.length && start.evaluate().isEmpty; i++) {
-    await tester.tap(find.text('Weiter'));
+  await buchDurch(tester);
+}
+
+/// Blättert das Buch bis über die letzte Seite, dann klappt es zu.
+///
+/// Seit dem 03.11. gibt es keinen Knopf „Weiter“ mehr: Geblättert wird am
+/// Eselsohr unten rechts, und auf der letzten Seite schließt es das Buch.
+Future<void> buchDurch(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+  for (var i = 0; i < 40; i++) {
+    final ohr = find.byKey(Umblaettern.ohrVorKey);
+    if (ohr.evaluate().isEmpty) return;
+    await tester.tap(ohr);
     await tester.pumpAndSettle();
   }
-  await tester.tap(start);
-  await tester.pumpAndSettle();
 }
 
 /// Schließt jede Feier, die gerade über dem Bildschirm liegt —

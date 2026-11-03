@@ -18,6 +18,8 @@ import '../ui/palette.dart';
 import 'antwort_klang.dart';
 import 'theory_controller.dart';
 import 'widgets/antwort_leiste.dart';
+import 'widgets/bibliothek.dart';
+import 'widgets/node_icon.dart';
 import 'widgets/lese_haeppchen.dart';
 import 'widgets/lesson_result_view.dart';
 import 'widgets/question_card.dart';
@@ -116,6 +118,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
   /// Was geschätzt wurde. Wird nirgends gespeichert und zählt nicht.
   int? _geschaetzt;
+
+  /// Das Buch, solange gelesen wird — es klappt zu, bevor es zurückgeht.
+  final GlobalKey<LeseHaeppchenState> _leser = GlobalKey<LeseHaeppchenState>();
 
   Lesson get _lesson => widget.lesson;
 
@@ -347,45 +352,66 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     final fragt = _stage == _Stage.quiz || _stage == _Stage.repeat;
+    final liest = _stage == _Stage.reading;
     return PopScope(
-      canPop: _feier == null,
+      // **Beim Lesen klappt erst das Buch zu** (03.11.2026), dann geht es
+      // zurück.
+      canPop: _feier == null && !liest,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _feiern();
+        if (didPop) return;
+        if (liest) {
+          _leser.currentState?.schliessen(() => Navigator.of(context).pop());
+          return;
+        }
+        _feiern();
       },
       child: SeitenFarbe(
         gebiet: _gebiet,
-        child: Scaffold(
-          // **Die einzige Seite, die ganz Pergament ist.** Überall sonst
-          // liegen Pergamentflächen auf Leder; hier ist der Bildschirm
-          // selbst die Seite, die gelesen wird — ein Fließtext über die
-          // volle Höhe braucht keinen Rahmen, der ihn zur Karte macht.
-          backgroundColor: Palette.surface,
-          appBar: AppBar(
-            title: Text(_lesson.title),
-            backgroundColor: Palette.surface,
-            bottom: fragt ? _balken() : null,
-          ),
-          body: AufstiegHost(
-            key: _host,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _maxWidth),
-                child: switch (_stage) {
-                  _Stage.raten => _buildRaetsel(),
-                  _Stage.reading => LeseHaeppchen(
-                    lesson: _lesson,
-                    onStart: _startQuiz,
-                  ),
-                  _Stage.quiz => _buildQuiz(),
-                  _Stage.repeat => _buildRepeat(),
-                  _Stage.result => _buildResult(),
-                },
+        // **Gelesen wird in der Bibliothek** (03.11.2026): Das Buch liegt
+        // vor Regalen und Kamin, ohne Kopfzeile darüber.
+        child: Bibliothek(
+          schleier: liest ? 0.35 : 0,
+          child: Scaffold(
+            backgroundColor: liest ? Colors.transparent : Palette.surface,
+            appBar: AppBar(
+              title: liest ? null : Text(_lesson.title),
+              backgroundColor: liest ? Colors.transparent : Palette.surface,
+              surfaceTintColor: Colors.transparent,
+              foregroundColor: liest ? Palette.textOnDark : null,
+              bottom: fragt ? _balken() : null,
+            ),
+            body: AufstiegHost(
+              key: _host,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxWidth),
+                  child: switch (_stage) {
+                    _Stage.raten => _buildRaetsel(),
+                    _Stage.reading => LeseHaeppchen(
+                      key: _leser,
+                      lesson: _lesson,
+                      onStart: _startQuiz,
+                      zeichen: _deckelZeichen(),
+                    ),
+                    _Stage.quiz => _buildQuiz(),
+                    _Stage.repeat => _buildRepeat(),
+                    _Stage.result => _buildResult(),
+                  },
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  /// Das Zeichen auf dem Deckel: das des Knotens, sonst keins.
+  IconData? _deckelZeichen() {
+    for (final knoten in ref.read(theoryGraphProvider).nodes) {
+      if (knoten.lesson.id == _lesson.id) return iconForNode(knoten.iconId);
+    }
+    return null;
   }
 
   PreferredSizeWidget _balken() {

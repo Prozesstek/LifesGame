@@ -314,8 +314,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
-| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, Striche oben, „Weiter“ | Flutter |
-| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband mit dem Stapel der Seiten, das Blatt dreht sich am Rücken um, der Finger zieht es mit (`Umblaettern`); jede Seite behält beim Wandern ihren Zustand | Flutter |
+| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, **das Buch klappt auf und zu** (Deckel mit Titel und Zeichen), darunter „1 / 3“ — **kein Knopf „Weiter“**; `schliessen` klappt es vor dem Zurück zu | Flutter |
+| `lib/theory/widgets/bibliothek.dart` | **die Bibliothek** hinter Baum und Seite (`assets/UI/Bibliothek.jpg`, Frederiks Bild), mit Schleier | Flutter |
+| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband; **am Rand die Kanten des Gelesenen links und des Restes rechts**, das Blatt dreht sich am Rücken um, der Finger zieht es mit, **ein Eselsohr unten zeigt die Richtung** und blättert auf Tipp; über die letzte Seite hinaus `onSchluss` (`Umblaettern`); der Deckel (`BuchDeckel`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/seiten_farbe.dart` | **die Farbe der Seite** — die ihres Gebiets, von oben gereicht: betonte Wörter, Merksatz, Striche, Balken; ob eine Antwort sitzt, bleibt grün und rot | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
 | `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
@@ -342,7 +343,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1077 Tests
+flutter test             # 1079 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

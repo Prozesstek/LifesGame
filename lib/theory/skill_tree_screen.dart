@@ -18,6 +18,7 @@ import '../ui/palette.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
 import 'vorschlag_flow.dart';
+import 'widgets/bibliothek.dart';
 import 'widgets/node_action_panel.dart';
 import 'widgets/points_chip.dart';
 import 'widgets/tree_overview.dart';
@@ -105,113 +106,123 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _leave();
       },
-      child: Scaffold(
-        backgroundColor: Palette.background,
-        appBar: AppBar(
-          title: const Text('Theorie'),
-          // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
-          // als Pergamentleiste darüber zu liegen.
-          backgroundColor: Palette.background,
-          foregroundColor: Palette.textOnDark,
-          actions: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(child: PointsChip(points: available)),
-            ),
-          ],
-        ),
-        // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
-        // auf dem Gewohnheiten-Bildschirm.
-        body: AufstiegHost(
-          child: MentorFlaeche(
-            ort: MentorOrt.baum,
-            child: Column(
-              children: <Widget>[
-                // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
-                // `OnDark`: Ihre Karte ist Pergament.
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-                  child: ReviewSection(),
-                ),
-                Expanded(
-                  child: OnDark(
-                    child: _zeigtEinstieg
-                        ? _Einstieg(
-                            graph: graph,
-                            vorschlaege: ref.watch(einstiegVorschlaegeProvider),
-                            onRead: _go,
-                            onErkunden: () => setState(() => _erkunden = true),
-                          )
-                        : Column(
-                            children: <Widget>[
-                              _Header(
-                                graph: graph,
-                                area: graph.nodeById(_areaId),
-                                skills: ref.watch(skillsProvider),
-                                areas:
-                                    <(TheoryNode, ({int passed, int total}))>[
-                                      for (final id in theoryRootIds)
-                                        if (graph.nodeById(id)
-                                            case final TheoryNode wurzel)
-                                          (
-                                            wurzel,
-                                            progress.progressBelow(
-                                              id,
-                                              graph,
-                                              includeSelf: true,
-                                            ),
-                                          ),
-                                    ],
-                                areaIndex: _current,
-                                onSelectArea: _goToArea,
-                                // Bis zu drei, der erste wie bisher: erst im
-                                // Gebiet, das gerade offen ist, dann irgendwo,
-                                // dann der Weg der Grundlagen — danach, was zum
-                                // Gelesenen und zu den Gewohnheiten passt.
-                                vorschlaege: ref.watch(
-                                  vorschlaegeProvider(_areaId),
-                                ),
-                                onRead: _go,
-                              ),
-                              Expanded(
-                                child: PageView.builder(
-                                  controller: _pages,
-                                  itemCount: theoryRootIds.length,
-                                  onPageChanged: (i) =>
-                                      setState(() => _current = i),
-                                  itemBuilder: (context, i) {
-                                    final id = theoryRootIds[i];
-
-                                    return TreeView(
-                                      graph: graph,
-                                      progress: progress,
-                                      availablePoints: available,
-                                      path: _paths[id]!,
-                                      panelOpen: _panelOpen[id]!,
-                                      onTogglePanel: () => setState(
-                                        () => _panelOpen[id] = !_panelOpen[id]!,
-                                      ),
-                                      onEnter: (node) => setState(() {
-                                        _paths[id]!.add(node.id);
-                                        _panelOpen[id] = true;
-                                      }),
-                                      onLeave: _leave,
-                                      onAction: _act,
-                                      onPrevArea: i > 0
-                                          ? () => _goToArea(i - 1)
-                                          : null,
-                                      onNextArea: i < theoryRootIds.length - 1
-                                          ? () => _goToArea(i + 1)
-                                          : null,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
+      // **Die Bibliothek dahinter** (03.11.2026): Der Baum steht in
+      // dunklem, warmem Holz statt auf glattem Leder.
+      child: Bibliothek(
+        schleier: 0.55,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Theorie'),
+            // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
+            // als Pergamentleiste darüber zu liegen.
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: Palette.textOnDark,
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Center(child: PointsChip(points: available)),
+              ),
+            ],
+          ),
+          // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
+          // auf dem Gewohnheiten-Bildschirm.
+          body: AufstiegHost(
+            child: MentorFlaeche(
+              ort: MentorOrt.baum,
+              child: Column(
+                children: <Widget>[
+                  // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
+                  // `OnDark`: Ihre Karte ist Pergament.
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: ReviewSection(),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: OnDark(
+                      child: _zeigtEinstieg
+                          ? _Einstieg(
+                              graph: graph,
+                              vorschlaege: ref.watch(
+                                einstiegVorschlaegeProvider,
+                              ),
+                              onRead: _go,
+                              onErkunden: () =>
+                                  setState(() => _erkunden = true),
+                            )
+                          : Column(
+                              children: <Widget>[
+                                _Header(
+                                  graph: graph,
+                                  area: graph.nodeById(_areaId),
+                                  skills: ref.watch(skillsProvider),
+                                  areas:
+                                      <(TheoryNode, ({int passed, int total}))>[
+                                        for (final id in theoryRootIds)
+                                          if (graph.nodeById(id)
+                                              case final TheoryNode wurzel)
+                                            (
+                                              wurzel,
+                                              progress.progressBelow(
+                                                id,
+                                                graph,
+                                                includeSelf: true,
+                                              ),
+                                            ),
+                                      ],
+                                  areaIndex: _current,
+                                  onSelectArea: _goToArea,
+                                  // Bis zu drei, der erste wie bisher: erst im
+                                  // Gebiet, das gerade offen ist, dann irgendwo,
+                                  // dann der Weg der Grundlagen — danach, was zum
+                                  // Gelesenen und zu den Gewohnheiten passt.
+                                  vorschlaege: ref.watch(
+                                    vorschlaegeProvider(_areaId),
+                                  ),
+                                  onRead: _go,
+                                ),
+                                Expanded(
+                                  child: PageView.builder(
+                                    controller: _pages,
+                                    itemCount: theoryRootIds.length,
+                                    onPageChanged: (i) =>
+                                        setState(() => _current = i),
+                                    itemBuilder: (context, i) {
+                                      final id = theoryRootIds[i];
+
+                                      return TreeView(
+                                        graph: graph,
+                                        progress: progress,
+                                        availablePoints: available,
+                                        path: _paths[id]!,
+                                        panelOpen: _panelOpen[id]!,
+                                        onTogglePanel: () => setState(
+                                          () =>
+                                              _panelOpen[id] = !_panelOpen[id]!,
+                                        ),
+                                        onEnter: (node) => setState(() {
+                                          _paths[id]!.add(node.id);
+                                          _panelOpen[id] = true;
+                                        }),
+                                        onLeave: _leave,
+                                        onAction: _act,
+                                        onPrevArea: i > 0
+                                            ? () => _goToArea(i - 1)
+                                            : null,
+                                        onNextArea: i < theoryRootIds.length - 1
+                                            ? () => _goToArea(i + 1)
+                                            : null,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
