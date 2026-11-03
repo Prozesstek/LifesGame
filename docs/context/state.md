@@ -135,6 +135,19 @@ vom 02.10.
 
 ---
 
+## 03.11.2026, zuletzt: der Mentor hat ein Gesicht
+
+Frederik schickte die Figur: ein alter Zauberer mit Kapuze, weißem Bart und
+Stab, Pixelart mit durchsichtigem Grund. Sie ersetzt den Platzhalter-Kopf.
+
+| Wo | Was |
+|---|---|
+| **Kreis neben jedem Satz** | sein Kopf (`assets/Mentor/Mentor_Kopf.png`, 256 × 256, aus dem Bild geschnitten) |
+| **Wo er abfragt** | über der Frage steht er ganz (`assets/Mentor/Mentor.png`, auf 477 × 520 verkleinert) |
+
+Startseite und Abfrage in 390 × 844 gerendert und angesehen. **Nicht am
+Handy.** Die Herkunft: Frederiks Datei vom 03.11.
+
 ## 03.11.2026, spät: die Theorie in der Bibliothek
 
 Frederik, mit einem Bild (Bibliothek in Pixelart): Hintergrund für die
@@ -164,7 +177,6 @@ PR #184 auf.
 ### Offen
 
 - Ob zwei Tipps je Antwort auf Dauer stören.
-- Die Figur des Mentors ist weiter ein Platzhalter (`Mentor.bild`).
 - **AktivesBrett hat ADR-0097 nicht gesehen** — die Buchseite vom 23.10. war seine.
 
 ## 03.11.2026, abends: Tutorialscreen 1 (#183)

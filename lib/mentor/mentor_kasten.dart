@@ -73,9 +73,9 @@ class MentorKasten extends StatelessWidget {
   }
 }
 
-/// Das Bild des Mentors — bis Frederiks Figur kommt, ein gezeichneter
-/// Kopf in einem Kreis (`Mentor.bild`). Auch dort, wo er abfragt
-/// (`MentorDialog`).
+/// Das Bild des Mentors: sein Kopf in einem Kreis (`Mentor.bild`) —
+/// neben jedem Satz und dort, wo er abfragt (`MentorDialog`). Fehlt die
+/// Datei, ein gezeichneter Kopf.
 class MentorBild extends StatelessWidget {
   const MentorBild({this.seite = MentorKasten.bildSeite, super.key});
 
@@ -84,9 +84,18 @@ class MentorBild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kopf = _Platzhalter(seite: seite);
-    final bild = Mentor.bild;
-    if (bild == null) return kopf;
-    return PixelArt(assetPath: bild, side: seite, fallback: kopf);
+    return Container(
+      width: seite,
+      height: seite,
+      decoration: BoxDecoration(
+        color: Palette.backgroundRaised,
+        shape: BoxShape.circle,
+        border: Border.all(color: Palette.goldOnDark, width: 2),
+      ),
+      child: ClipOval(
+        child: PixelArt(assetPath: Mentor.bild, side: seite, fallback: kopf),
+      ),
+    );
   }
 }
 

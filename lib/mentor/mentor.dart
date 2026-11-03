@@ -36,12 +36,15 @@ class MentorSatz {
 /// noch ein paar Wörter** — wohin es geht, zeigen Licht und gelber
 /// Punkt.
 abstract final class Mentor {
-  /// Sein Bild, 64 × 64 wie alles Gezeichnete (`PixelArt`).
-  ///
-  /// **Noch ein Platzhalter**: Frederik schickt die Figur. Bis dahin
-  /// zeigt der Kasten einen gezeichneten Kopf. Wer das Bild bringt,
-  /// legt es nach `assets/Mentor/` und trägt den Pfad hier ein.
-  static const String? bild = null;
+  /// Sein Kopf, quadratisch 256 × 256 (`PixelArt`) — im Kreis neben
+  /// jedem Satz. **Seit dem 03.11.2026 Frederiks Figur**: ein alter
+  /// Zauberer mit Kapuze, Bart und Stab. Fehlt die Datei, zeigt der
+  /// Kreis einen gezeichneten Kopf.
+  static const String bild = 'assets/Mentor/Mentor_Kopf.png';
+
+  /// Die ganze Figur, 477 × 520 — dort, wo er abfragt und Platz hat
+  /// (`MentorDialog`).
+  static const String figur = 'assets/Mentor/Mentor.png';
 
   /// Was er im Beute-Dialog des ersten Siegs sagt. Den ersten
   /// Gegenstand legt das Spiel von selbst an (`Loadout._add`); der Satz
