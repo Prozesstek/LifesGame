@@ -55,6 +55,24 @@ void main() {
     expect(vorschlaege(p), isNotEmpty);
   });
 
+  test('aufgefüllt sind es am Anfang drei, mit einem Punkt', () {
+    // Der Einstieg in die Theorie (03.11.2026): drei Seiten zur Wahl,
+    // obwohl ohne Auffüllen nur zwei kämen.
+    const p = TheoryProgress.empty();
+    final ohne = vorschlaege(p, punkte: 1);
+    final mit = p.vorschlaege(
+      graph,
+      path: theoryBasicsPath,
+      availablePoints: 1,
+      auffuellen: true,
+    );
+
+    expect(ohne.length, lessThan(3));
+    expect(mit, hasLength(3));
+    expect(mit.first.node.id, ohne.first.node.id);
+    expect(mit.map((v) => v.node.id).toSet(), hasLength(3));
+  });
+
   test('höchstens drei, keine Seite zweimal', () {
     var p = const TheoryProgress.empty();
     for (final id in <String>['koerper', 'geist', 'kraft-muskulatur']) {

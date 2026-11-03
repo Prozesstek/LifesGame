@@ -181,6 +181,25 @@ final vorschlaegeProvider = Provider.family<List<TheoryVorschlag>, String?>((
       );
 });
 
+/// **Drei Seiten für den Einstieg** (03.11.2026): solange die erste Seite
+/// fehlt, steht die Theorie nicht als Baum da, sondern als drei Zeilen
+/// und „Selbst erkunden“. Wie [vorschlaegeProvider], nur bis drei
+/// aufgefüllt — sonst wären es am Anfang zwei.
+final einstiegVorschlaegeProvider = Provider<List<TheoryVorschlag>>((ref) {
+  final tracker = ref.watch(habitTrackerProvider);
+  return ref
+      .watch(theoryProgressProvider)
+      .vorschlaege(
+        ref.watch(theoryGraphProvider),
+        path: theoryBasicsPath,
+        availablePoints: ref.watch(availableTheoryPointsProvider),
+        gewicht: <String, int>{
+          for (final area in SkillArea.values) area.name: tracker.xpIn(area),
+        },
+        auffuellen: true,
+      );
+});
+
 /// Die Seite nach der Lektion [lessonId] (ADR-0070) — für den Knopf auf
 /// dem Ergebnis. Null, wenn die Lektion an keinem Knoten hängt oder
 /// nichts zu lesen und nichts zu bezahlen ist.
