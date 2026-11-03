@@ -156,7 +156,7 @@ richtige Antwort. Das Eselsohr links erscheint ab Seite 2. Die Ergebnisseite
 liegt in einer Holzkarte. `RundenBalken`, `AntwortLeiste` und `QuestionCard`
 sind gelöscht.
 
-App 1081 (vorher 1077). Baum, Buch zu, halb offen, offen, mitten im
+App 1079 (vorher 1077). Baum, Buch zu, halb offen, offen, mitten im
 Umblättern, Rätsel, gewählt, falsch, richtig, zweite Runde und Ergebnis in
 390 × 844 gerendert und angesehen. **Nicht am Handy, nicht gehört.** Baut auf
 PR #184 auf.
