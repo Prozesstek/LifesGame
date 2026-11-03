@@ -312,15 +312,14 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_action_panel.dart` | der Knopf **über** dem Startknoten | Flutter |
 | `lib/theory/widgets/tree_overview.dart` | **der Überblick**: vier Gebiete mit Stand, „Weiterlesen“, Legende ([ADR-0056](docs/decisions/0056-ueberblick-im-wissensbaum.md)) | Flutter |
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
-| `lib/theory/lesson_screen.dart` | lesen → Fragen → Ergebnis → **direkt zur nächsten Seite**; seit dem 18.10. **eine Spielrunde**: Klang und Vibration je Antwort, Balken oben, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
+| `lib/theory/lesson_screen.dart` | **in der Bibliothek**: Rätsel beim Mentor → Buch → der Mentor fragt ab → Ergebnis → **direkt zur nächsten Seite** ([ADR-0097](docs/decisions/0097-theorie-in-der-bibliothek.md)); Klang und Vibration je Antwort, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
 | `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, **das Buch klappt auf und zu** (Deckel mit Titel und Zeichen), darunter „1 / 3“ — **kein Knopf „Weiter“**; `schliessen` klappt es vor dem Zurück zu | Flutter |
 | `lib/theory/widgets/bibliothek.dart` | **die Bibliothek** hinter Baum und Seite (`assets/UI/Bibliothek.jpg`, Frederiks Bild), mit Schleier | Flutter |
 | `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband; **am Rand die Kanten des Gelesenen links und des Restes rechts**, das Blatt dreht sich am Rücken um, der Finger zieht es mit, **ein Eselsohr unten zeigt die Richtung** und blättert auf Tipp; über die letzte Seite hinaus `onSchluss` (`Umblaettern`); der Deckel (`BuchDeckel`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/seiten_farbe.dart` | **die Farbe der Seite** — die ihres Gebiets, von oben gereicht: betonte Wörter, Merksatz, Striche, Balken; ob eine Antwort sitzt, bleibt grün und rot | Flutter |
 | `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
-| `lib/theory/widgets/antwort_leiste.dart` | **das Urteil von unten**: grün oder rot, die Erklärung, der Knopf weiter | Flutter |
-| `lib/theory/widgets/runden_balken.dart` | der Balken oben, der mit jeder Antwort **vorspringt**, die sitzt | Flutter |
+| `lib/theory/widgets/mentor_dialog.dart` | **der Mentor fragt ab** (ADR-0097): oben er mit der Frage, darunter die Antworten als Holzknöpfe; **ein Tipp wählt, erst „Antworten“ zählt**, dann sagt die eigene Figur samt Ausrüstung die Antwort und der Mentor antwortet mit Urteil und Erklärung — **rechnet nichts** | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
 | `lib/theory/vorschlag_flow.dart` | **was ein Tipp auf einen Vorschlag tut**: öffnen, falls nötig, dann lesen — eine Stelle für Baum und Aufstieg | Flutter |
 | `lib/theory/review_flow.dart` | was eine Antwort auf die Rückfrage auslöst | Flutter |

@@ -370,8 +370,7 @@ void main() {
         final frage = seite.questions.firstWhere(
           (q) => find.text(q.prompt).evaluate().isNotEmpty,
         );
-        await tester.tap(find.text(frage.options[frage.correctIndex]));
-        await tester.pumpAndSettle();
+        await waehle(tester, frage.options[frage.correctIndex]);
         final letzte = i == seite.questionCount - 1;
         await tester.tap(find.text(letzte ? 'Auswerten' : 'Weiter'));
         await tester.pumpAndSettle();

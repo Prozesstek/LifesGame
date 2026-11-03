@@ -14,16 +14,15 @@ import '../achievements/show_achievement_unlock.dart';
 import '../character/show_ability_unlock.dart';
 import '../skills/gebiet_farbe.dart';
 import '../ui/aufstieg.dart';
+import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'antwort_klang.dart';
 import 'theory_controller.dart';
-import 'widgets/antwort_leiste.dart';
 import 'widgets/bibliothek.dart';
 import 'widgets/node_icon.dart';
 import 'widgets/lese_haeppchen.dart';
 import 'widgets/lesson_result_view.dart';
-import 'widgets/question_card.dart';
-import 'widgets/runden_balken.dart';
+import 'widgets/mentor_dialog.dart';
 import 'widgets/seiten_farbe.dart';
 import '../gear/gear_controller.dart';
 
@@ -39,12 +38,15 @@ enum _Stage { raten, reading, quiz, repeat, result }
 /// **Hat die Seite ein Rätsel**, kommt es zuerst: geschätzt, nicht
 /// gewertet (`Lesson.teaser`).
 ///
-/// **Seit dem 18.10. eine Spielrunde wie bei Duolingo**: Der Text kommt
-/// in Häppchen (`LeseHaeppchen`), jede Antwort klingt — richtig eine
-/// Stufe höher als die davor (`AntwortKlang`) —, springt oder wackelt,
-/// und von unten kommt das Urteil (`AntwortLeiste`). Oben springt ein
-/// Balken mit jeder, die sitzt. Am Ende zählen Erfahrung und Gold hoch,
-/// drei von drei werfen Konfetti. **Keine Zahl ändert sich.**
+/// **Seit dem 18.10. eine Spielrunde**: jede Antwort klingt — richtig
+/// eine Stufe höher als die davor (`AntwortKlang`). Am Ende zählen
+/// Erfahrung und Gold hoch, drei von drei werfen Konfetti.
+///
+/// **Seit dem 03.11. in der Bibliothek**: Gelesen wird in einem Buch,
+/// das auf- und zuklappt (`LeseHaeppchen`), danach fragt der Mentor ab
+/// (`MentorDialog`) — erst wählen, dann antworten, die eigene Figur sagt
+/// es ihm, und er antwortet. Auch das Rätsel stellt er, vor dem Buch.
+/// **Keine Zahl ändert sich.**
 class LessonScreen extends ConsumerStatefulWidget {
   const LessonScreen({required this.lesson, this.gebiet, super.key});
 
@@ -98,10 +100,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   /// Tonleiter. Eine falsche setzt sie zurück.
   int _inFolge = 0;
 
-  /// Welche Fragen (als Platz in der Lektion) schon einmal richtig
-  /// beantwortet sind. So weit steht der Balken oben.
-  Set<int> _geloest = const <int>{};
-
   /// Zählt jede neu gestellte Frage. Daran erkennt der Wechsel, dass er
   /// schieben muss — auch wenn in der zweiten Runde dieselbe wiederkommt.
   int _gestellt = 0;
@@ -154,8 +152,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
   void _zumText() => setState(() => _stage = _Stage.reading);
 
-  bool get _isAnswered => _answers[_index] != null;
-
   bool get _isLastQuestion => _index == _lesson.questionCount - 1;
 
   void _startQuiz() {
@@ -166,27 +162,24 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       _result = null;
       _shuffled = ShuffledLesson.of(_lesson, Random());
       _inFolge = 0;
-      _geloest = const <int>{};
       _gestellt++;
     });
   }
 
   void _answer(int option) {
     final richtig = _question.isCorrect(option);
-    final platz = _lessonIndexAt(_index);
     setState(() {
       final updated = List<int?>.of(_answers);
       updated[_index] = option;
       _answers = updated;
-      _antwortZaehlt(richtig, platz);
+      _antwortZaehlt(richtig);
     });
     _antwortKlingt(richtig);
   }
 
   /// Nur innerhalb von `setState` aufrufen.
-  void _antwortZaehlt(bool richtig, int platz) {
+  void _antwortZaehlt(bool richtig) {
     _inFolge = richtig ? _inFolge + 1 : 0;
-    if (richtig) _geloest = <int>{..._geloest, platz};
   }
 
   /// Klang und Vibration einer Antwort. Im Browser wird aus der
@@ -253,7 +246,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final richtig = frage.isCorrect(option);
     setState(() {
       _nachholAntwort = option;
-      _antwortZaehlt(richtig, _nachholen.first);
+      _antwortZaehlt(richtig);
     });
     _antwortKlingt(richtig);
   }
@@ -351,7 +344,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fragt = _stage == _Stage.quiz || _stage == _Stage.repeat;
     final liest = _stage == _Stage.reading;
     return PopScope(
       // **Beim Lesen klappt erst das Buch zu** (03.11.2026), dann geht es
@@ -367,18 +359,17 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       },
       child: SeitenFarbe(
         gebiet: _gebiet,
-        // **Gelesen wird in der Bibliothek** (03.11.2026): Das Buch liegt
-        // vor Regalen und Kamin, ohne Kopfzeile darüber.
+        // **Alles in der Bibliothek** (03.11.2026): Das Buch liegt vor
+        // Regalen und Kamin, danach fragt dort der Mentor ab — ohne
+        // Kopfzeile und ohne Balken darüber.
         child: Bibliothek(
-          schleier: liest ? 0.35 : 0,
+          schleier: 0.35,
           child: Scaffold(
-            backgroundColor: liest ? Colors.transparent : Palette.surface,
+            backgroundColor: Colors.transparent,
             appBar: AppBar(
-              title: liest ? null : Text(_lesson.title),
-              backgroundColor: liest ? Colors.transparent : Palette.surface,
+              backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
-              foregroundColor: liest ? Palette.textOnDark : null,
-              bottom: fragt ? _balken() : null,
+              foregroundColor: Palette.textOnDark,
             ),
             body: AufstiegHost(
               key: _host,
@@ -414,62 +405,32 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     return null;
   }
 
-  PreferredSizeWidget _balken() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(RundenBalken.hoehe + 10),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-        child: RundenBalken(
-          geloest: _geloest.length,
-          gesamt: _lesson.questionCount,
-        ),
-      ),
-    );
-  }
-
+  /// **Das Rätsel stellt der Mentor, bevor das Buch aufgeht** — geschätzt,
+  /// nicht gewertet.
   Widget _buildRaetsel() {
     final raetsel = _raetsel;
     if (raetsel == null) return const SizedBox.shrink();
-    return _Frage(
+    return MentorDialog(
       gestellt: _gestellt,
-      kopf: const Row(
-        children: <Widget>[
-          Icon(Icons.lightbulb_outline, size: 16, color: Palette.accent),
-          SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'Was schätzt du?',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Palette.accent,
-              ),
-            ),
-          ),
-        ],
-      ),
+      kopf: 'Was schätzt du?',
       frage: raetsel,
-      gewaehlt: _geschaetzt,
-      onSelect: _schaetze,
-      knopf: 'Weiter',
-      onWeiter: _geschaetzt != null ? _zumText : null,
+      beantwortet: _geschaetzt,
+      onAntwort: _schaetze,
+      knopf: 'Buch öffnen',
+      onWeiter: _zumText,
       geraten: true,
     );
   }
 
   Widget _buildQuiz() {
-    final gewaehlt = _answers[_index];
-    return _Frage(
+    return MentorDialog(
       gestellt: _gestellt,
-      kopf: Text(
-        'Frage ${_index + 1} von ${_lesson.questionCount}',
-        style: const TextStyle(fontSize: 12, color: Palette.muted),
-      ),
+      kopf: 'Frage ${_index + 1} von ${_lesson.questionCount}',
       frage: _question,
-      gewaehlt: gewaehlt,
-      onSelect: _answer,
+      beantwortet: _answers[_index],
+      onAntwort: _answer,
       knopf: _isLastQuestion ? 'Auswerten' : 'Weiter',
-      onWeiter: _isAnswered ? _next : null,
+      onWeiter: _next,
     );
   }
 
@@ -477,32 +438,16 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final frage = _nachholFrage;
     if (frage == null) return const SizedBox.shrink();
     final offen = _nachholen.length;
-
-    return _Frage(
+    return MentorDialog(
       gestellt: _gestellt,
-      kopf: Row(
-        children: <Widget>[
-          const Icon(Icons.replay_rounded, size: 16, color: Palette.accent),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              offen == 1
-                  ? 'Noch einmal — die letzte'
-                  : 'Noch einmal — $offen offen',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Palette.accent,
-              ),
-            ),
-          ),
-        ],
-      ),
+      kopf: offen == 1
+          ? 'Noch einmal — die letzte'
+          : 'Noch einmal — $offen offen',
       frage: frage,
-      gewaehlt: _nachholAntwort,
-      onSelect: _answerRepeat,
+      beantwortet: _nachholAntwort,
+      onAntwort: _answerRepeat,
       knopf: 'Weiter',
-      onWeiter: _nachholAntwort != null ? _nextRepeat : null,
+      onWeiter: _nextRepeat,
     );
   }
 
@@ -517,6 +462,17 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         ? ref.watch(stepAfterLessonProvider(_lesson.id))
         : null;
 
+    // Auf Pergament im Holzrahmen, vor der Bibliothek.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+      child: HolzKarte(
+        padding: EdgeInsets.zero,
+        child: _ergebnis(result, weiter),
+      ),
+    );
+  }
+
+  Widget _ergebnis(LessonResult result, TheoryStep? weiter) {
     return LessonResultView(
       lesson: _lesson,
       result: result,
@@ -554,106 +510,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Eine Frage samt Urteil von unten. Die Frage schiebt sich herein, die
-/// vorige hinaus nach links; die Leiste bleibt stehen und klappt zu.
-class _Frage extends StatelessWidget {
-  const _Frage({
-    required this.gestellt,
-    required this.kopf,
-    required this.frage,
-    required this.gewaehlt,
-    required this.onSelect,
-    required this.knopf,
-    required this.onWeiter,
-    this.geraten = false,
-  });
-
-  /// Ob es das Rätsel ist — dann zählt nichts, und daneben ist nicht rot.
-  final bool geraten;
-
-  /// Die wievielte gestellte Frage — wechselt sie, wird geschoben.
-  final int gestellt;
-  final Widget kopf;
-  final Question frage;
-  final int? gewaehlt;
-  final ValueChanged<int> onSelect;
-  final String knopf;
-
-  /// Null, solange nicht geantwortet ist.
-  final VoidCallback? onWeiter;
-
-  static const Duration schieben = Duration(milliseconds: 280);
-
-  @override
-  Widget build(BuildContext context) {
-    final schluessel = ValueKey<int>(gestellt);
-    final weiter = onWeiter;
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: ClipRect(
-            child: AnimatedSwitcher(
-              duration: schieben,
-              // Die neue bremst ins Ziel, die alte ist schnell weg — sonst
-              // stünden beide in der Mitte halb übereinander.
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              layoutBuilder: (jetzt, vorige) => Stack(
-                fit: StackFit.expand,
-                children: <Widget>[...vorige, ?jetzt],
-              ),
-              transitionBuilder: (kind, animation) {
-                // Dieselbe Animation läuft für die gehende rückwärts: Sie
-                // schiebt sich nach links hinaus, die neue von rechts herein.
-                final kommt = kind.key == schluessel;
-                final weg = Tween<Offset>(
-                  begin: Offset(kommt ? 1 : -1, 0),
-                  end: Offset.zero,
-                ).animate(animation);
-                // Immer dieselbe Form des Baums, nur die Deckkraft wechselt —
-                // sonst würde die gehende Frage beim Wechsel neu gebaut.
-                return SlideTransition(
-                  position: weg,
-                  child: FadeTransition(
-                    opacity: kommt ? kAlwaysCompleteAnimation : animation,
-                    child: kind,
-                  ),
-                );
-              },
-              child: ListView(
-                key: schluessel,
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                children: <Widget>[
-                  kopf,
-                  const SizedBox(height: 12),
-                  QuestionCard(
-                    question: frage,
-                    selected: gewaehlt,
-                    onSelect: onSelect,
-                    geraten: geraten,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        AntwortLeiste(
-          richtig: gewaehlt == null ? null : frage.isCorrect(gewaehlt),
-          erklaerung: frage.explanation,
-          knopf: knopf,
-          onWeiter: weiter ?? () {},
-          richtigWort: geraten ? 'Gut geschätzt' : 'Richtig',
-          falschWort: geraten ? 'Überraschend, oder?' : 'Nicht ganz',
-          falschFarbe: geraten ? Palette.accent : Palette.enemy,
-          falschZeichen: geraten
-              ? Icons.lightbulb_rounded
-              : Icons.close_rounded,
-        ),
-      ],
     );
   }
 }

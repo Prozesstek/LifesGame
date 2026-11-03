@@ -135,6 +135,38 @@ vom 02.10.
 
 ---
 
+## 03.11.2026, spät: die Theorie in der Bibliothek
+
+Frederik, mit einem Bild (Bibliothek in Pixelart): Hintergrund für die
+Theorie, ein richtiges Buch, danach fragt der Mentor ab. Drei Rückfragen,
+alle wie empfohlen: [ADR-0097](../decisions/0097-theorie-in-der-bibliothek.md).
+
+| Was | Wie |
+|---|---|
+| **Hintergrund** | die Bibliothek hinter Baum, Buch, Fragen und Ergebnis (`assets/UI/Bibliothek.jpg`, aus Frederiks Bild auf 880 × 880 verkleinert) |
+| **Buch** | klappt auf, beim Zurück und nach der letzten Seite zu; Deckel mit Titel und Zeichen |
+| **Blättern** | kein „Weiter“, keine Striche: Eselsohr unten in der Richtung, darunter „1 / 3“ mit Wisch-Zeichen |
+| **Rand** | links die Kanten des Gelesenen, rechts die des Restes |
+| **Abfragen** | der Mentor oben mit der Frage, Antworten als Holzknöpfe; ein Tipp wählt, „Antworten“ zählt; die eigene Figur sagt es, der Mentor antwortet mit Urteil, richtiger Antwort und Erklärung |
+| **Rätsel** | stellt der Mentor vor dem Buch, dann „Buch öffnen“ |
+| **Oben** | kein Balken, keine Kopfzeile, nur der Zurück-Pfeil |
+
+**Ohne Rückfrage entschieden:** Der Mentor nennt bei „Nicht ganz.“ die
+richtige Antwort. Das Eselsohr links erscheint ab Seite 2. Die Ergebnisseite
+liegt in einer Holzkarte. `RundenBalken`, `AntwortLeiste` und `QuestionCard`
+sind gelöscht.
+
+App 1081 (vorher 1077). Baum, Buch zu, halb offen, offen, mitten im
+Umblättern, Rätsel, gewählt, falsch, richtig, zweite Runde und Ergebnis in
+390 × 844 gerendert und angesehen. **Nicht am Handy, nicht gehört.** Baut auf
+PR #184 auf.
+
+### Offen
+
+- Ob zwei Tipps je Antwort auf Dauer stören.
+- Die Figur des Mentors ist weiter ein Platzhalter (`Mentor.bild`).
+- **AktivesBrett hat ADR-0097 nicht gesehen** — die Buchseite vom 23.10. war seine.
+
 ## 03.11.2026, abends: Tutorialscreen 1 (#183)
 
 Frederik, Issue #183 mit Skizze. Zwei Rückfragen, beide wie empfohlen:
