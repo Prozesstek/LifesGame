@@ -222,6 +222,21 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
     }
   }
 
+  /// **Abmelden, sobald es aus dem Baum fällt** — nicht erst in
+  /// `dispose`: Das kommt nach dem Malen, und bis dahin würde der Schleier
+  /// ein Ziel ausmessen, das nicht mehr dasteht („inactive element“).
+  @override
+  void deactivate() {
+    _bei?._abmelden(_ziel);
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    if (widget.aktiv) _bei?._melde(_ziel, widget.radius);
+  }
+
   @override
   void dispose() {
     _bei?._abmelden(_ziel);

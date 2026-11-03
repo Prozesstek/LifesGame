@@ -147,10 +147,15 @@ class ContinueReadingTile extends StatelessWidget {
     required this.onTap,
     this.cost,
     this.grund,
+    this.gross = false,
     super.key,
   });
 
   final TheoryNode node;
+
+  /// Groß für den Einstieg in die Theorie (03.11.2026): eine Zeile je
+  /// Seite, mitten auf dem Bildschirm.
+  final bool gross;
 
   /// Warum diese Seite vorgeschlagen wird — es steht als Zeichen vorn
   /// (`VorschlagZeichen`). Ohne Grund das Buch.
@@ -186,25 +191,27 @@ class ContinueReadingTile extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: gross
+                  ? const EdgeInsets.symmetric(horizontal: 14, vertical: 16)
+                  : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: <Widget>[
                   Icon(
                     warum == null
                         ? Icons.menu_book_rounded
                         : VorschlagZeichen.of(warum),
-                    size: 18,
+                    size: gross ? 26 : 18,
                     color: farbe,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: gross ? 12 : 8),
                   Expanded(
                     // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
                     child: Text(
                       node.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: TextStyle(
+                        fontSize: gross ? 18 : 13,
                         color: Palette.textOnDark,
                         fontWeight: FontWeight.w700,
                       ),
@@ -217,7 +224,11 @@ class ContinueReadingTile extends StatelessWidget {
                   ],
                   // Nicht der Pfeil des Gebietswechsels: Dieser führt in
                   // eine Seite, jener zum nächsten Gebiet.
-                  Icon(Icons.arrow_forward_rounded, size: 18, color: farbe),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: gross ? 24 : 18,
+                    color: farbe,
+                  ),
                 ],
               ),
             ),

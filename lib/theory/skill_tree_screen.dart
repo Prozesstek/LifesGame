@@ -4,6 +4,7 @@ import 'package:habits/habits.dart';
 import 'package:theory/theory.dart';
 
 import '../home/erster_start.dart';
+import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
@@ -42,6 +43,9 @@ import 'widgets/review_section.dart';
 class SkillTreeScreen extends ConsumerWidget {
   const SkillTreeScreen({super.key});
 
+  /// „Baum selbst erkunden“ im Einstieg.
+  static const Key erkundenKey = ValueKey<String>('theorie-selbst-erkunden');
+
   @override
   Widget build(BuildContext context, WidgetRef ref) => const _AreaPager();
 }
@@ -74,6 +78,9 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
   };
 
   int _current = 0;
+
+  /// Ob der Spieler den Einstieg weggelegt hat, um selbst zu suchen.
+  bool _erkunden = false;
 
   String get _areaId => theoryRootIds[_current];
   List<String> get _path => _paths[_areaId]!;
@@ -128,69 +135,80 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                 ),
                 Expanded(
                   child: OnDark(
-                    child: Column(
-                      children: <Widget>[
-                        _Header(
-                          graph: graph,
-                          area: graph.nodeById(_areaId),
-                          skills: ref.watch(skillsProvider),
-                          areas: <(TheoryNode, ({int passed, int total}))>[
-                            for (final id in theoryRootIds)
-                              if (graph.nodeById(id)
-                                  case final TheoryNode wurzel)
-                                (
-                                  wurzel,
-                                  progress.progressBelow(
-                                    id,
-                                    graph,
-                                    includeSelf: true,
-                                  ),
-                                ),
-                          ],
-                          areaIndex: _current,
-                          onSelectArea: _goToArea,
-                          // Bis zu drei, der erste wie bisher: erst im
-                          // Gebiet, das gerade offen ist, dann irgendwo,
-                          // dann der Weg der Grundlagen — danach, was zum
-                          // Gelesenen und zu den Gewohnheiten passt.
-                          vorschlaege: ref.watch(vorschlaegeProvider(_areaId)),
-                          onRead: _go,
-                        ),
-                        Expanded(
-                          child: PageView.builder(
-                            controller: _pages,
-                            itemCount: theoryRootIds.length,
-                            onPageChanged: (i) => setState(() => _current = i),
-                            itemBuilder: (context, i) {
-                              final id = theoryRootIds[i];
-
-                              return TreeView(
+                    child: _zeigtEinstieg
+                        ? _Einstieg(
+                            graph: graph,
+                            vorschlaege: ref.watch(einstiegVorschlaegeProvider),
+                            onRead: _go,
+                            onErkunden: () => setState(() => _erkunden = true),
+                          )
+                        : Column(
+                            children: <Widget>[
+                              _Header(
                                 graph: graph,
-                                progress: progress,
-                                availablePoints: available,
-                                path: _paths[id]!,
-                                panelOpen: _panelOpen[id]!,
-                                onTogglePanel: () => setState(
-                                  () => _panelOpen[id] = !_panelOpen[id]!,
+                                area: graph.nodeById(_areaId),
+                                skills: ref.watch(skillsProvider),
+                                areas:
+                                    <(TheoryNode, ({int passed, int total}))>[
+                                      for (final id in theoryRootIds)
+                                        if (graph.nodeById(id)
+                                            case final TheoryNode wurzel)
+                                          (
+                                            wurzel,
+                                            progress.progressBelow(
+                                              id,
+                                              graph,
+                                              includeSelf: true,
+                                            ),
+                                          ),
+                                    ],
+                                areaIndex: _current,
+                                onSelectArea: _goToArea,
+                                // Bis zu drei, der erste wie bisher: erst im
+                                // Gebiet, das gerade offen ist, dann irgendwo,
+                                // dann der Weg der Grundlagen — danach, was zum
+                                // Gelesenen und zu den Gewohnheiten passt.
+                                vorschlaege: ref.watch(
+                                  vorschlaegeProvider(_areaId),
                                 ),
-                                onEnter: (node) => setState(() {
-                                  _paths[id]!.add(node.id);
-                                  _panelOpen[id] = true;
-                                }),
-                                onLeave: _leave,
-                                onAction: _act,
-                                onPrevArea: i > 0
-                                    ? () => _goToArea(i - 1)
-                                    : null,
-                                onNextArea: i < theoryRootIds.length - 1
-                                    ? () => _goToArea(i + 1)
-                                    : null,
-                              );
-                            },
+                                onRead: _go,
+                              ),
+                              Expanded(
+                                child: PageView.builder(
+                                  controller: _pages,
+                                  itemCount: theoryRootIds.length,
+                                  onPageChanged: (i) =>
+                                      setState(() => _current = i),
+                                  itemBuilder: (context, i) {
+                                    final id = theoryRootIds[i];
+
+                                    return TreeView(
+                                      graph: graph,
+                                      progress: progress,
+                                      availablePoints: available,
+                                      path: _paths[id]!,
+                                      panelOpen: _panelOpen[id]!,
+                                      onTogglePanel: () => setState(
+                                        () => _panelOpen[id] = !_panelOpen[id]!,
+                                      ),
+                                      onEnter: (node) => setState(() {
+                                        _paths[id]!.add(node.id);
+                                        _panelOpen[id] = true;
+                                      }),
+                                      onLeave: _leave,
+                                      onAction: _act,
+                                      onPrevArea: i > 0
+                                          ? () => _goToArea(i - 1)
+                                          : null,
+                                      onNextArea: i < theoryRootIds.length - 1
+                                          ? () => _goToArea(i + 1)
+                                          : null,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],
@@ -200,6 +218,15 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
       ),
     );
   }
+
+  /// **Der Einstieg** (03.11.2026): Solange die erste Seite fehlt, steht
+  /// statt des Baums eine Wahl aus drei Seiten da — wer lieber selbst
+  /// sucht, legt sie weg. Danach nie wieder: Der Schritt des Mentors ist
+  /// dann vorbei.
+  bool get _zeigtEinstieg =>
+      !_erkunden &&
+      ref.watch(ersterStartProvider).schritt == Schritt.ersteSeite &&
+      ref.watch(einstiegVorschlaegeProvider).isNotEmpty;
 
   /// Zum Gebiet [index] wechseln.
   ///
@@ -430,6 +457,92 @@ class _LegendKnopf extends StatelessWidget {
               Icons.help_outline_rounded,
               size: 20,
               color: Palette.textOnDarkDim,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// **Der Einstieg in die Theorie** (03.11.2026): drei Seiten, je eine in
+/// einer großen Zeile, mittig — und darunter der Weg in den Baum.
+///
+/// Frederik: „dass einem 3 Lektionen vorgeschlagen werden + die
+/// Möglichkeit den Baum selber zu erkunden“. Der Baum mit vier Gebieten,
+/// Balken und Legende ist für die erste Seite zu viel auf einmal.
+class _Einstieg extends StatelessWidget {
+  const _Einstieg({
+    required this.graph,
+    required this.vorschlaege,
+    required this.onRead,
+    required this.onErkunden,
+  });
+
+  final TheoryGraph graph;
+  final List<TheoryVorschlag> vorschlaege;
+  final ValueChanged<TheoryStep> onRead;
+  final VoidCallback onErkunden;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          // **Die ganze Wahl liegt im Licht des Mentors** (ADR-0095), nicht
+          // nur die erste Zeile: Alle drei und der Baum sind gemeint.
+          child: Zeigefinger(
+            schritt: Schritt.ersteSeite,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const Text(
+                    'Womit fängst du an?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Palette.textOnDark,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  for (final v in vorschlaege) ...<Widget>[
+                    ContinueReadingTile(
+                      gross: true,
+                      node: v.node,
+                      grund: v.grund,
+                      farbe: switch (gebietVon(graph, v.node.id)) {
+                        final SkillArea g => GebietFarbe.leder(g),
+                        null => Palette.accentOnDark,
+                      },
+                      cost: v.step.needsOpening ? v.node.cost : null,
+                      onTap: () => onRead(v.step),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  const SizedBox(height: 6),
+                  Center(
+                    child: TextButton.icon(
+                      key: SkillTreeScreen.erkundenKey,
+                      onPressed: onErkunden,
+                      // Hell: Der Knopf steht auf Leder, nicht Pergament.
+                      style: TextButton.styleFrom(
+                        foregroundColor: Palette.textOnDark,
+                      ),
+                      icon: const Icon(Icons.account_tree_outlined, size: 22),
+                      label: const Text(
+                        'Baum selbst erkunden',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

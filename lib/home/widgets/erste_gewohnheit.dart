@@ -45,8 +45,12 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
   static const Key losKey = ValueKey<String>('erste-gewohnheit-los');
   static const Key standKey = ValueKey<String>('erste-gewohnheit-stand');
 
-  /// Der erste Vorschlag ist die Startvorlage (ADR-0052): Sie kostet
-  /// keinen Platz für eine eigene Gewohnheit und bringt ihren Timer mit.
+  /// **Drei Vorschläge und das Eigene** (03.11.2026): je einer in einer
+  /// Zeile, groß genug zum Lesen — bis dahin waren es sechs kleine Chips.
+  /// Drei Gebiete, damit die Wahl auch eine zwischen Kampfwerten ist.
+  ///
+  /// Der erste ist die Startvorlage (ADR-0052): Sie kostet keinen Platz
+  /// für eine eigene Gewohnheit und bringt ihren Timer mit.
   static final List<ErsterVorschlag> vorschlaege = <ErsterVorschlag>[
     ErsterVorschlag(
       HabitCatalog.starter.name,
@@ -54,10 +58,7 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
       vorlageId: HabitCatalog.starterId,
     ),
     const ErsterVorschlag('Spazieren gehen', SkillArea.koerper),
-    const ErsterVorschlag('Zehn Liegestütze', SkillArea.koerper),
-    const ErsterVorschlag('Bett machen', SkillArea.geist),
-    const ErsterVorschlag('Ein Glas Wasser', SkillArea.koerper),
-    const ErsterVorschlag('Fünf Minuten aufräumen', SkillArea.geist),
+    const ErsterVorschlag('Freund anrufen', SkillArea.gesellschaft),
   ];
 
   /// So lang wie im Formular einer eigenen Gewohnheit.
@@ -113,50 +114,47 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
     final bereit = _name.text.trim().isNotEmpty;
 
     return HolzKarte(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           const Text(
             'Was willst du jeden Tag tun?',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 17,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Palette.text,
             ),
           ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: <Widget>[
-              for (final vorschlag in ErsteGewohnheitKarte.vorschlaege)
-                Druck(
-                  child: ActionChip(
-                    avatar: StatIcon(vorschlag.area.kampfwert, size: 15),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    label: Text(
-                      vorschlag.name,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    onPressed: () => _nimm(vorschlag),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
+          for (final vorschlag in ErsteGewohnheitKarte.vorschlaege) ...<Widget>[
+            _VorschlagZeile(
+              vorschlag: vorschlag,
+              onTap: () => _nimm(vorschlag),
+            ),
+            const SizedBox(height: 8),
+          ],
           TextField(
             key: ErsteGewohnheitKarte.feldKey,
             controller: _name,
             maxLength: ErsteGewohnheitKarte.maxNameLength,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _lege(_name.text, _area),
-            decoration: const InputDecoration(
-              hintText: 'Oder etwas Eigenes',
-              border: OutlineInputBorder(),
+            style: const TextStyle(fontSize: 18, color: Palette.text),
+            decoration: InputDecoration(
+              hintText: 'Etwas Eigenes',
+              hintStyle: const TextStyle(fontSize: 18, color: Palette.muted),
+              prefixIcon: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(Icons.edit_rounded, size: 24, color: Palette.muted),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(_VorschlagZeile.rund),
+              ),
               counterText: '',
-              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),
           // Wohin das Eigene gehört, und der Knopf — erst wenn etwas im
@@ -204,6 +202,66 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Ein Vorschlag als eigene Zeile: das Zeichen seines Gebiets in dessen
+/// Farbe, der Name groß, rechts das Plus.
+class _VorschlagZeile extends StatelessWidget {
+  const _VorschlagZeile({required this.vorschlag, required this.onTap});
+
+  final ErsterVorschlag vorschlag;
+  final VoidCallback onTap;
+
+  static const double rund = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = GebietFarbe.pergament(vorschlag.area);
+    return Semantics(
+      button: true,
+      label: '${vorschlag.name}, ${vorschlag.area.label}',
+      excludeSemantics: true,
+      child: Druck(
+        child: Material(
+          color: Palette.surfaceRaised,
+          borderRadius: BorderRadius.circular(rund),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(rund),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(rund),
+                border: Border.all(color: farbe.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Icon(gebietZeichen(vorschlag.area), size: 24, color: farbe),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      vorschlag.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Palette.text,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  StatIcon(vorschlag.area.kampfwert, size: 18),
+                  const SizedBox(width: 10),
+                  Icon(Icons.add_circle_rounded, size: 26, color: farbe),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -54,7 +54,7 @@ cd packages/gear
 dart test                          # 137 Tests, prüft Preise, Sets, Würfel, Laden und Beute
 
 cd packages/theory
-dart test                          # 218 Tests, prüft auch den Inhalt
+dart test                          # 219 Tests, prüft auch den Inhalt
 
 cd packages/identity
 dart test                          # 25 Tests, nur noch der Wortlaut

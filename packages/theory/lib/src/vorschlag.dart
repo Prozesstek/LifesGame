@@ -60,6 +60,10 @@ extension TheoryVorschlaege on TheoryProgress {
   /// Vorgeschlagen wird nur, was offen ist oder sich mit
   /// [availablePoints] öffnen lässt. Ohne freien Punkt bleibt also
   /// höchstens, was schon offen ist.
+  ///
+  /// Mit [auffuellen] kommen statt *eines* unberührten Gebiets so viele,
+  /// bis [hoechstens] erreicht ist — für den Einstieg in die Theorie
+  /// (03.11.2026), wo sonst nur zwei Vorschläge stünden.
   List<TheoryVorschlag> vorschlaege(
     TheoryGraph graph, {
     required List<String> path,
@@ -67,6 +71,7 @@ extension TheoryVorschlaege on TheoryProgress {
     Map<String, int> gewicht = const <String, int>{},
     String? under,
     int hoechstens = 3,
+    bool auffuellen = false,
   }) {
     final offen = openIdsIn(graph);
     final ergebnis = <TheoryVorschlag>[];
@@ -118,9 +123,10 @@ extension TheoryVorschlaege on TheoryProgress {
       ..sort((a, b) => (gewicht[b.id] ?? 0).compareTo(gewicht[a.id] ?? 0));
     for (final wurzel in unberuehrt) {
       if (nimm(
-        ersterAus(<TheoryNode>[wurzel]),
-        TheoryVorschlagGrund.neuesGebiet,
-      )) {
+            ersterAus(<TheoryNode>[wurzel]),
+            TheoryVorschlagGrund.neuesGebiet,
+          ) &&
+          !auffuellen) {
         break;
       }
     }

@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 218 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 219 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/vorschlag.dart` | **Vorschläge für das nächste Kapitel** ([ADR-0091](docs/decisions/0091-vorschlaege-fuers-naechste-kapitel.md)): bis zu drei, jeder mit Grund — offen, Grundlagen, weiter, wo du warst, passt zu deinen Gewohnheiten, neues Gebiet; der erste ist `suggestedStep` | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
@@ -190,7 +190,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
 | `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht — **nimmt keinen Tipp an**; dazu `ZielPunkt`, der gelbe Punkt | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
-| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“, solange es keine Gewohnheit gibt | Flutter |
+| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** „Was willst du jeden Tag tun?“ — steht statt „Heute“ **mittig**, solange es keine Gewohnheit gibt: **drei Vorschläge und das Eigene, je eine große Zeile** | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
@@ -305,7 +305,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/lauf_ergebnis.dart` | das Blatt am Ende eines Laufs: „Sieg“ grün oder „Niederlage“ rot, Ebene und Zeit, XP und Gold gleiten herein, die Funde — **nach einer Niederlage statt dessen drei Tipps**, jeder ein Knopf in seinen Bereich (ADR-0084) —, zuletzt „Weiter“ | Flutter |
 | `lib/combat/widgets/siegerblatt_funde.dart` | **die Funde im Siegerblatt** (ADR-0083): drehen sich nacheinander um, **das Seltenste zuletzt**, Pfeil gegen das Getragene, Tipp öffnet das Blatt, Häkchen verkaufen | Flutter |
 | `lib/theory/theory_controller.dart` | Riverpod-Brücke Inhalt ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile — **immer offen**, schlägt den Weg der Grundlagen vor | Flutter |
+| `lib/theory/skill_tree_screen.dart` | vier Gebiete zum Wischen, Kopfzeile — **immer offen**, schlägt den Weg der Grundlagen vor; **solange die erste Seite fehlt, steht statt des Baums der Einstieg**: drei Seiten (`einstiegVorschlaegeProvider`) und „Baum selbst erkunden“ | Flutter |
 | `lib/theory/widgets/tree_view.dart` | ein Gebiet: Startknoten unten, eine Ebene darüber | Flutter |
 | `lib/theory/widgets/tree_layout.dart` | wo jeder Knoten sitzt — reine Rechnung, testbar | Flutter |
 | `lib/theory/widgets/tree_painter.dart` | die Verbindungslinien | Flutter |
@@ -342,7 +342,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1072 Tests
+flutter test             # 1074 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -365,7 +365,7 @@ dart test                              # 375 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 218 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 52 Tests
 cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
