@@ -1,7 +1,10 @@
-"""Zeichnet die Bilder der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von neun der zwölf Stücke aus ADR-0077.
+
+Fledermaushaube, Nachtmantel und Schattenstiefel stehen seit dem 04.11.
+in `tool/pixel/` (pxl).
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
-das nur auf Frederiks Rechner liegt. Diese zwölf sind deshalb
+das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
 **gezeichnet**, mit denselben Werkzeugen wie AktivesBretts Fähigkeiten
 (`tool/faehigkeit_icons.py`): Raster 32 × 32, Kontur, Licht und Schatten,
 hart vergrössert auf 256 × 256.
@@ -10,7 +13,7 @@ Dazu kommen:
 
 * zwei Bilder für die neuen Grundangriffe (Speerstich, Sichelhieb) unter
   `assets/Faehigkeiten/`,
-* sechs Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
+* vier Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
   Rüstungen und Helme nehmen den **Umriss** von Lederwams und Lederkappe
   und färben ihn neu ein — so sitzen sie genau, ohne Pillow. Die zwei
   Waffen sind auf dem 64er-Raster der Figur gezeichnet.
@@ -110,15 +113,6 @@ def flickenmantel():
     return b.fertig()
 
 
-def nachtmantel():
-    b = Bild()
-    _mantel(b, NACHT, BLUT)
-    b.vieleck(((6, 2), (10, 4), (9, 9)), NACHT_HELL)
-    b.vieleck(((26, 2), (22, 4), (23, 9)), NACHT_HELL)
-    b.linie(16, 10, 16, 29, 1.2, BLUT_HELL)
-    return b.fertig()
-
-
 def _haube(b, c):
     b.kreis(16, 16, 10, c)
     b.rechteck(6, 16, 27, 22, c)
@@ -130,16 +124,6 @@ def falkenhaube():
     b.vieleck(((13, 20), (19, 20), (16, 27)), GOLD)
     b.linie(9, 19, 23, 19, 1.4, LEDER_HELL)
     b.strich(22, 9, 29, 2, 2.2, FEDER)
-    return b.fertig()
-
-
-def fledermaushaube():
-    b = Bild()
-    b.vieleck(((7, 12), (9, 1), (14, 9)), NACHT_HELL)
-    b.vieleck(((25, 12), (23, 1), (18, 9)), NACHT_HELL)
-    _haube(b, NACHT)
-    b.linie(10, 18, 14, 18, 1.4, BLUT_HELL)
-    b.linie(18, 18, 22, 18, 1.4, BLUT_HELL)
     return b.fertig()
 
 
@@ -156,14 +140,6 @@ def hasenlaeufer():
         b.linie(x, 5, x - 1, 1, 1.0, BLUT_HELL)
     b.linie(10, 6, 19, 6, 1.4, BRAUN)
     b.linie(8, 26, 28, 26, 1.2, BRAUN)
-    return b.fertig()
-
-
-def schattenstiefel():
-    b = Bild()
-    _stiefel(b, NACHT)
-    b.linie(10, 8, 19, 8, 1.6, BLUT_HELL)
-    b.linie(8, 27, 28, 27, 1.2, NACHT_HELL)
     return b.fertig()
 
 
@@ -314,8 +290,6 @@ def _umgefaerbt(vorlage, rampe, flicken=None):
 def _figur_ruestungen():
     vorlage = _lies(os.path.join(WURZEL, 'character',
                                  'Charakter_Lederwams.png'))
-    nacht = _umgefaerbt(vorlage, (KONTUR, NACHT, NACHT_HELL, BLUT))
-
     def flicken(x, y, stufe):
         if stufe in (KONTUR,):
             return stufe
@@ -323,7 +297,7 @@ def _figur_ruestungen():
         return (MOOS, ROST, SCHIEFER, HANF)[feld]
 
     flick = _umgefaerbt(vorlage, (KONTUR, BRAUN, HANF, HANF), flicken)
-    return {'Nachtmantel': nacht, 'Flickenmantel': flick}
+    return {'Flickenmantel': flick}
 
 
 def _figur_helme():
@@ -332,12 +306,7 @@ def _figur_helme():
     falke = _umgefaerbt(vorlage, (KONTUR, BRAUN, LEDER, LEDER_HELL))
     for x, y in ((40, 4), (41, 3), (42, 2), (43, 1), (41, 4), (42, 3)):
         falke.px[y][x] = FEDER
-    fleder = _umgefaerbt(vorlage, (KONTUR, NACHT, NACHT_HELL, NACHT_HELL))
-    for dx in range(3):
-        for dy in range(3 - dx):
-            fleder.px[2 + dy + dx][24 + dx] = NACHT_HELL
-            fleder.px[2 + dy + dx][39 - dx] = NACHT_HELL
-    return {'Falkenhaube': falke, 'Fledermaushaube': fleder}
+    return {'Falkenhaube': falke}
 
 
 def _figur_waffen():
@@ -363,11 +332,8 @@ LADEN = {
     'Waffen/Speere/Langspeer': langspeer,
     'Waffen/Sicheln/Blutsichel': blutsichel,
     'Ruestung/Flickenmantel': flickenmantel,
-    'Ruestung/Nachtmantel': nachtmantel,
     'Helme/Falkenhaube': falkenhaube,
-    'Helme/Fledermaushaube': fledermaushaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
-    'Schuhe/Schattenstiefel': schattenstiefel,
     'Ringe/Seelenring': seelenring,
     'Ringe/Frostreif': frostreif,
     'Talismane/Echostein': echostein,
