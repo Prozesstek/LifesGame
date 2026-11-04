@@ -8,6 +8,7 @@ import '../ui/holz.dart';
 import 'abilities_controller.dart';
 import 'ability_unlock.dart';
 import 'widgets/ability_unlock_sheet.dart';
+import '../ui/gehrung.dart';
 
 /// Feiert jede Fähigkeit, die seit [before] dazugekommen ist.
 ///
@@ -53,6 +54,7 @@ Future<void> showAbilityUnlocks(
       builder: (_) => SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
         child: HolzRahmen(
+          art: RahmenArt.messing,
           child: AbilityUnlockSheet(
             ability: ability,
             pit: pit,

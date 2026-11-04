@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1090, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1106, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -135,6 +135,38 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 04.11.2026, zuletzt: eigene Sprites, und der Rahmen auf Gehrung
+
+Frederik: „Ich würde gerne alle externen Sprites ersetzen durch eigene“ —
+mit einer Liste zum Abhaken: [`eigene-sprites.md`](../vorlagen/eigene-sprites.md)
+(139 fremde Bilder in zwölf Bereichen). Gezeichnet wird mit **pxl**
+([claude-pxl](https://github.com/crsolver/claude-pxl), MIT), installiert auf
+Frederiks Rechner unter `~/.claude/skills/pxl-pixel-art`; die Quellen liegen
+unter `tool/pixel/`.
+
+| Was | Wie | PR |
+|---|---|---|
+| **Kreis Gewohnheiten** | Quest-Rolle mit Haken | #189, gemergt |
+| **Langbogen** | Wurzelbogen aus verwachsenem Holz, Geisterknospe; Quelle mit Schuss-Animation (20 Bilder), im Spiel nur das stehende Bild | #190 |
+| **Buch der Theorie** | Foliant mit dem Talentbaum (war Frederiks Zeichnung) | #190 |
+| **Kreis Kampf** | eigene Schwerter, breit, kühler Stahl | #190 |
+| **Der Rahmen** | **gemalt auf Gehrung statt gedehnt**, vier Arten: Holz, Ranken, Eisen, Messing ([ADR-0099](../decisions/0099-rahmen-auf-gehrung.md)) | #190 |
+| **Planke, Knopf, Seil, Balken** | ebenfalls gemalt, „aus einem Guss“ — `assets/UI/Holz/` ist gelöscht, vom UI-Paket ist nichts mehr im Spiel | #190 |
+
+**Neue Regeln, von Frederik:** Jedes Bild hat 64 × 64 Pixel. Und: **erst
+zeigen, auf sein Okay warten, dann einbauen.**
+
+App 1106 (vorher 1090). Startseite, Theorie, Charakter, Dungeon-Eingang
+und Aufstiegsfeier in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- Die Figur trägt den alten Langbogen; `Langbogen.png` und
+  `CharacterButton.png` liegen ungenutzt.
+- Herkunft klären: Grundfigur, Gold, ButtonBG, Berg, Bibliothek, Mentor.
+- **AktivesBrett hat ADR-0099 und die Liste nicht gesehen.** pxl hat er
+  schon: Er hat parallel das Vampirset neu gezeichnet (#191–#194, unten).
 
 ## 04.11.2026, zum Schluss: die Blutsichel
 

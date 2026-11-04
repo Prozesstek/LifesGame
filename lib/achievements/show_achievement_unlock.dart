@@ -6,6 +6,7 @@ import '../audio/sound_effects.dart';
 import '../ui/holz.dart';
 import 'achievements_controller.dart';
 import 'widgets/achievement_unlock_sheet.dart';
+import '../ui/gehrung.dart';
 
 /// Feiert jede Errungenschaft, die seit [before] dazugekommen ist.
 ///
@@ -48,6 +49,7 @@ Future<void> showAchievementUnlocks(
       builder: (_) => SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
         child: HolzRahmen(
+          art: RahmenArt.messing,
           child: AchievementUnlockSheet(achievement: achievement),
         ),
       ),

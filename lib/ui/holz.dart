@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'druck.dart';
+import 'gehrung.dart';
+import 'holz_teile.dart';
 import 'palette.dart';
 
-/// Die gezeichneten Flächen aus dem UI-Paket: Planke, Rahmen, Balken,
-/// Knopf.
+/// Die Holzflächen der Oberfläche: Planke, Knopf, Balken, Seil, Rahmen.
+///
+/// **Seit ADR-0099 alle gemalt, nicht gedehnt** — der Rahmen auf Gehrung
+/// (`lib/ui/gehrung.dart`), die übrigen Teile in `lib/ui/holz_teile.dart`,
+/// mit denselben Farben und derselben Maserung. Hier stehen nur noch ihre
+/// Maße und die Widgets, die sie tragen.
 ///
 /// **Eine Stelle für Pfade und Schnittkanten.** Jedes Teil ist ein
 /// kleines Pixelbild, das per `centerSlice` gedehnt wird: Die Ecken bleiben
@@ -17,25 +23,12 @@ import 'palette.dart';
 /// gemalt — die Glyphen der Knöpfe und die rote Füllung des Balkens sind
 /// entfernt, weil beides der Code zeichnet.
 abstract final class Holz {
-  static const String _ordner = 'assets/UI/Holz';
-
-  static const String planke = '$_ordner/Planke.png';
-  static const String rahmen = '$_ordner/Rahmen.png';
-  static const String seil = '$_ordner/Seil.png';
-  static const String balken = '$_ordner/Balken.png';
-  static const String knopf = '$_ordner/Knopf.png';
-  static const String knopfGedrueckt = '$_ordner/KnopfGedrueckt.png';
-
   /// Logische Punkte je Bildpunkt. **Ganzzahlig**, sonst werden die
   /// Pixel ungleich breit.
   static const double pixel = 2;
 
-  /// Die Planke ist 45 × 23 groß; gedehnt wird nur zwischen den Enden.
-  static const Rect plankeMitte = Rect.fromLTRB(4, 3, 41, 20);
+  /// Die Planke ist 23 Bildpunkte hoch, doppelt gezeichnet.
   static const double plankeHoehe = 23 * pixel;
-
-  /// Der Rahmen ist 71 × 67; die Ecken tragen Knäufe, 11 Bildpunkte groß.
-  static const Rect rahmenMitte = Rect.fromLTRB(11, 11, 60, 57);
 
   /// Wie weit der Inhalt vom Außenrand des Rahmens wegbleibt.
   static const double rahmenRand = 12 * pixel;
@@ -49,60 +42,19 @@ abstract final class Holz {
   /// hängenden Rahmen, damit beide aus einem Satz wirken.
   static const Color kante = Color(0xFF3A1F0C);
 
+  /// Das Holz innen in einer [HolzGruppe], bevor das Leder es abdunkelt.
+  static const Color gruppenGrund = Color(0xFF9E6230);
+
   /// Wie breit diese Kante im hängenden Rahmen ist. Der Inhalt bleibt um
   /// genau so viel von ihr weg, sonst malt er sie zu.
   static const double kantenBreite = 2;
 
-  /// Das Seil über dem Rahmen, 61 × 23.
+  /// Das Seil über dem Rahmen, 61 × 23 Bildpunkte.
   static const Size seilGroesse = Size(61 * pixel, 23 * pixel);
 
-  /// Der Balken ist 61 × 12. Innen liegt eine Rinne, 6 Bildpunkte links
-  /// und 4 rechts vom Rand, von Zeile 3 bis 8.
-  static const Rect balkenMitte = Rect.fromLTRB(8, 1, 53, 11);
-  static const double balkenBildHoehe = 12;
-  static const double balkenRinneLinks = 6;
-  static const double balkenRinneRechts = 4;
-  static const double balkenRinneOben = 3;
-  static const double balkenRinneHoehe = 6;
-
-  /// Die beiden Enden zusammen, in Bildpunkten — darunter lässt sich der
-  /// Balken nicht dehnen, sondern nur noch stauchen.
-  static const double balkenMindestBreite = 61 - (53 - 8) + 1;
-
-  /// Der Knopf ist 14 × 14, gezeichnet dreifach — so groß wie ein
-  /// Symbolknopf in der Kopfzeile.
+  /// Der Knopf ist 14 × 14 Bildpunkte, dreifach gezeichnet — so groß wie
+  /// ein Symbolknopf in der Kopfzeile.
   static const double knopfSeite = 14 * 3;
-
-  /// Ein Teil, per `centerSlice` gedehnt und [zoom]-fach vergrößert.
-  ///
-  /// **Zwei Fallstricke, beide mit einer Assertion statt einer Meldung:**
-  /// `centerSlice` erwartet *logische* Punkte, nicht Bildpunkte — die
-  /// Mitte wird deshalb hier mit dem Zoom multipliziert. Und Flutter
-  /// vergleicht die gedehnte Größe auf exakte Gleichheit; ein Zoom wie
-  /// 1,5 rechnet sich über `1 / 1,5` nicht glatt zurück und bricht ab.
-  /// Deshalb nur ganze Zweierpotenzen.
-  static DecorationImage _gedehnt(String pfad, Rect mitte, {int zoom = 2}) {
-    assert(zoom == 1 || zoom == 2 || zoom == 4, 'nur 1, 2 oder 4');
-    final z = zoom.toDouble();
-    return DecorationImage(
-      image: AssetImage(pfad),
-      centerSlice: Rect.fromLTRB(
-        mitte.left * z,
-        mitte.top * z,
-        mitte.right * z,
-        mitte.bottom * z,
-      ),
-      scale: 1 / z,
-      filterQuality: FilterQuality.none,
-    );
-  }
-
-  /// Der Rahmen als Fläche, für Eigenes wie die Anschlagtafel.
-  static DecorationImage rahmenBild({int zoom = 1}) =>
-      _gedehnt(rahmen, rahmenMitte, zoom: zoom);
-
-  /// Die Planke als Fläche — für ein Schild, das kein Knopf ist.
-  static DecorationImage plankeBild() => _gedehnt(planke, plankeMitte);
 
   /// Hintergrund eines Hauptknopfs — für `ButtonStyle.backgroundBuilder`.
   ///
@@ -116,8 +68,8 @@ abstract final class Holz {
     final aus = states.contains(WidgetState.disabled);
     final gedrueckt = states.contains(WidgetState.pressed);
 
-    Widget flaeche = DecoratedBox(
-      decoration: BoxDecoration(image: _gedehnt(planke, plankeMitte)),
+    Widget flaeche = CustomPaint(
+      painter: const PlankenMaler(pixel: pixel),
       child: child,
     );
     if (gedrueckt) {
@@ -176,14 +128,8 @@ abstract final class Holz {
     Widget? child,
   ) {
     final gedrueckt = states.contains(WidgetState.pressed);
-    Widget flaeche = DecoratedBox(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(gedrueckt ? knopfGedrueckt : knopf),
-          fit: BoxFit.fill,
-          filterQuality: FilterQuality.none,
-        ),
-      ),
+    Widget flaeche = CustomPaint(
+      painter: KnopfMaler(gedrueckt: gedrueckt),
       child: child,
     );
     if (states.contains(WidgetState.disabled)) {
@@ -210,8 +156,8 @@ abstract final class Holz {
 /// Ein Balken in der Holzfassung — Leben, Energie, Erfahrung.
 ///
 /// Ersetzt `LinearProgressIndicator` dort, wo ein Wert sichtbar sein soll.
-/// Die Fassung kommt aus dem Bild, die Füllung zeichnet der Code: So kann
-/// derselbe Balken rot, blau oder golden sein.
+/// Die Fassung malt `BalkenMaler`, die Füllung zeichnet dieses Widget: So
+/// kann derselbe Balken rot, blau oder golden sein.
 class HolzBalken extends StatelessWidget {
   const HolzBalken({
     required this.value,
@@ -225,10 +171,10 @@ class HolzBalken extends StatelessWidget {
   final Color color;
 
   /// 1 oder 2: Der Balken ist 12 Bildpunkte hoch, also 12 oder 24
-  /// Punkte. Zwischenwerte gehen nicht (siehe `Holz._gedehnt`).
+  /// Punkte.
   final int zoom;
 
-  double get height => Holz.balkenBildHoehe * zoom;
+  double get height => BalkenMaler.hoehe * zoom.toDouble();
 
   @override
   Widget build(BuildContext context) {
@@ -239,34 +185,18 @@ class HolzBalken extends StatelessWidget {
       height: height,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final links = Holz.balkenRinneLinks * s;
+          final links = BalkenMaler.rinneLinks * s;
           final rinne =
-              constraints.maxWidth - links - Holz.balkenRinneRechts * s;
+              constraints.maxWidth - links - BalkenMaler.rinneRechts * s;
           final breite = rinne * anteil;
-          final oben = Holz.balkenRinneOben * s;
-          final hoehe = Holz.balkenRinneHoehe * s;
-
-          // **Schmaler als die beiden Enden geht nicht.** `centerSlice`
-          // bricht dann mit einer Assertion ab, statt zu schrumpfen — und
-          // eine Zeile im ersten Bildaufbau hat oft noch keine Breite.
-          if (constraints.maxWidth < Holz.balkenMindestBreite * s) {
-            return const SizedBox.expand(
-              child: ColoredBox(color: Palette.trackOnDark),
-            );
-          }
+          // Die oberste Zeile der Rinne ist ihr dunkler Rand.
+          final oben = (BalkenMaler.rinneOben + 1) * s;
+          final hoehe = (BalkenMaler.rinneHoehe - 1) * s;
 
           return Stack(
             children: <Widget>[
               Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    image: Holz._gedehnt(
-                      Holz.balken,
-                      Holz.balkenMitte,
-                      zoom: zoom,
-                    ),
-                  ),
-                ),
+                child: CustomPaint(painter: BalkenMaler(pixel: s)),
               ),
               if (breite > 0)
                 Positioned(
@@ -279,8 +209,8 @@ class HolzBalken extends StatelessWidget {
                     // ein `ColoredBox` ohne Kind nimmt nur, was es muss.
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      // Das obere Drittel heller — wie im Original, das
-                      // sonst flach wie eine Fläche aus dem Code aussähe.
+                      // Das obere Drittel heller, sonst sähe die Füllung
+                      // flach wie eine Fläche aus dem Code aus.
                       Expanded(
                         child: ColoredBox(
                           color: Color.lerp(color, Colors.white, 0.3)!,
@@ -304,29 +234,28 @@ class HolzBalken extends StatelessWidget {
 /// Schrift auf dem Untergrund, für den die Palette gemacht ist
 /// ([Palette.surface]).
 class HolzRahmen extends StatelessWidget {
-  const HolzRahmen({required this.child, super.key});
+  const HolzRahmen({required this.child, this.art = RahmenArt.holz, super.key});
 
   final Widget child;
+
+  /// Welcher Rahmen — Messing für Belohnungen, Eisen im Dungeon (ADR-0099).
+  final RahmenArt art;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Image.asset(
-          Holz.seil,
-          width: Holz.seilGroesse.width,
-          height: Holz.seilGroesse.height,
-          filterQuality: FilterQuality.none,
+        SizedBox.fromSize(
+          size: Holz.seilGroesse,
+          child: const CustomPaint(painter: SeilMaler(pixel: Holz.pixel)),
         ),
         // Das Seil greift über die Oberkante — sonst hinge der Rahmen an
         // einer Lücke.
         Transform.translate(
           offset: const Offset(0, -2 * Holz.pixel),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              image: Holz._gedehnt(Holz.rahmen, Holz.rahmenMitte),
-            ),
+          child: CustomPaint(
+            painter: GehrungsMaler(pixel: Holz.pixel, art: art),
             child: Padding(
               padding: const EdgeInsets.all(Holz.rahmenRand),
               child: DecoratedBox(
@@ -377,10 +306,15 @@ class HolzKarte extends StatelessWidget {
     this.padding = const EdgeInsets.all(14),
     this.color = Palette.surface,
     this.edgeColor = Holz.kante,
+    this.art,
     super.key,
   });
 
   final Widget child;
+
+  /// Welcher Rahmen. Ohne Angabe der des Bildschirms (`RahmenOrt`), dort
+  /// ohne Angabe Holz (ADR-0099).
+  final RahmenArt? art;
 
   /// Abstand des Inhalts vom Pergamentrand.
   final EdgeInsetsGeometry padding;
@@ -399,10 +333,8 @@ class HolzKarte extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        image: Holz._gedehnt(Holz.rahmen, Holz.rahmenMitte, zoom: 1),
-      ),
+    return CustomPaint(
+      painter: GehrungsMaler(art: art ?? RahmenOrt.of(context)),
       child: Padding(
         padding: const EdgeInsets.all(Holz.kartenRand),
         child: AnimatedContainer(
@@ -453,9 +385,10 @@ class HolzGruppe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        image: Holz._gedehnt(Holz.rahmen, Holz.rahmenMitte, zoom: 1),
+    return CustomPaint(
+      painter: GehrungsMaler(
+        art: RahmenOrt.of(context),
+        mitte: Holz.gruppenGrund,
       ),
       child: Padding(
         padding: const EdgeInsets.all(Holz.kartenRand),
@@ -477,7 +410,11 @@ class HolzGruppe extends StatelessWidget {
 /// Dialog selbst wird durchsichtig, der Rahmen trägt ihn, innen bleibt
 /// ein gewöhnlicher [AlertDialog] mit seinen Knöpfen.
 class HolzDialog extends StatelessWidget {
-  const HolzDialog({required this.child, super.key});
+  const HolzDialog({required this.child, this.art = RahmenArt.holz, super.key});
+
+  /// Welcher Rahmen — ein Dialog erbt den Ort des Bildschirms nicht, er
+  /// sagt ihn selbst (ADR-0099).
+  final RahmenArt art;
 
   /// Meist ein [AlertDialog]. Er wird auf Pergament gelegt und verliert
   /// seine eigenen Ecken und seinen Schatten.
@@ -511,6 +448,7 @@ class HolzDialog extends StatelessWidget {
               2 * Holz.rahmenRand -
               2 * Holz.kantenBreite;
           return HolzRahmen(
+            art: art,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: hoehe > 0 ? hoehe : 0),
               child: Theme(

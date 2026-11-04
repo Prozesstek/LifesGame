@@ -9,6 +9,7 @@ import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import 'siegerblatt_funde.dart';
+import '../../ui/gehrung.dart';
 
 /// Das Blatt am Ende eines Laufs in der Grube (Frederik, 30.09.) —
 /// **Sieg und Niederlage im selben Aufbau.**
@@ -113,6 +114,7 @@ class _LaufErgebnisState extends State<LaufErgebnis>
   @override
   Widget build(BuildContext context) {
     return HolzDialog(
+      art: RahmenArt.eisen,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         // Viele Funde machen das Blatt höher als ein kleines Handy.

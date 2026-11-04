@@ -25,6 +25,7 @@ import 'widgets/tree_overview.dart';
 import 'widgets/tree_view.dart';
 import '../ui/aufstieg.dart';
 import 'widgets/review_section.dart';
+import '../ui/gehrung.dart';
 
 /// Der Skillbaum: ein Bildschirm je Gebiet, waagerecht zu wischen
 /// (ADR-0026).
@@ -98,130 +99,139 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
     final progress = ref.watch(theoryProgressProvider);
     final available = ref.watch(availableTheoryPointsProvider);
 
-    return PopScope(
-      // Steht der Spieler tief im Baum, geht die Zurück-Geste eine Ebene
-      // zurück statt aus der Theorie heraus. Sonst verlöre ein Druck den
-      // ganzen Weg — und der Weg ist hier die Navigation.
-      canPop: _path.length == 1,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _leave();
-      },
-      // **Die Bibliothek dahinter** (03.11.2026): Der Baum steht in
-      // dunklem, warmem Holz statt auf glattem Leder.
-      child: Bibliothek(
-        schleier: 0.55,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            title: const Text('Theorie'),
-            // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
-            // als Pergamentleiste darüber zu liegen.
+    return RahmenOrt(
+      art: RahmenArt.ranken,
+      child: PopScope(
+        // Steht der Spieler tief im Baum, geht die Zurück-Geste eine Ebene
+        // zurück statt aus der Theorie heraus. Sonst verlöre ein Druck den
+        // ganzen Weg — und der Weg ist hier die Navigation.
+        canPop: _path.length == 1,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _leave();
+        },
+        // **Die Bibliothek dahinter** (03.11.2026): Der Baum steht in
+        // dunklem, warmem Holz statt auf glattem Leder.
+        child: Bibliothek(
+          schleier: 0.55,
+          child: Scaffold(
             backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            foregroundColor: Palette.textOnDark,
-            actions: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Center(child: PointsChip(points: available)),
-              ),
-            ],
-          ),
-          // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
-          // auf dem Gewohnheiten-Bildschirm.
-          body: AufstiegHost(
-            child: MentorFlaeche(
-              ort: MentorOrt.baum,
-              child: Column(
-                children: <Widget>[
-                  // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
-                  // `OnDark`: Ihre Karte ist Pergament.
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-                    child: ReviewSection(),
-                  ),
-                  Expanded(
-                    child: OnDark(
-                      child: _zeigtEinstieg
-                          ? _Einstieg(
-                              graph: graph,
-                              vorschlaege: ref.watch(
-                                einstiegVorschlaegeProvider,
-                              ),
-                              onRead: _go,
-                              onErkunden: () =>
-                                  setState(() => _erkunden = true),
-                            )
-                          : Column(
-                              children: <Widget>[
-                                _Header(
-                                  graph: graph,
-                                  area: graph.nodeById(_areaId),
-                                  skills: ref.watch(skillsProvider),
-                                  areas:
-                                      <(TheoryNode, ({int passed, int total}))>[
-                                        for (final id in theoryRootIds)
-                                          if (graph.nodeById(id)
-                                              case final TheoryNode wurzel)
-                                            (
-                                              wurzel,
-                                              progress.progressBelow(
-                                                id,
-                                                graph,
-                                                includeSelf: true,
-                                              ),
-                                            ),
-                                      ],
-                                  areaIndex: _current,
-                                  onSelectArea: _goToArea,
-                                  // Bis zu drei, der erste wie bisher: erst im
-                                  // Gebiet, das gerade offen ist, dann irgendwo,
-                                  // dann der Weg der Grundlagen — danach, was zum
-                                  // Gelesenen und zu den Gewohnheiten passt.
-                                  vorschlaege: ref.watch(
-                                    vorschlaegeProvider(_areaId),
-                                  ),
-                                  onRead: _go,
-                                ),
-                                Expanded(
-                                  child: PageView.builder(
-                                    controller: _pages,
-                                    itemCount: theoryRootIds.length,
-                                    onPageChanged: (i) =>
-                                        setState(() => _current = i),
-                                    itemBuilder: (context, i) {
-                                      final id = theoryRootIds[i];
-
-                                      return TreeView(
-                                        graph: graph,
-                                        progress: progress,
-                                        availablePoints: available,
-                                        path: _paths[id]!,
-                                        panelOpen: _panelOpen[id]!,
-                                        onTogglePanel: () => setState(
-                                          () =>
-                                              _panelOpen[id] = !_panelOpen[id]!,
-                                        ),
-                                        onEnter: (node) => setState(() {
-                                          _paths[id]!.add(node.id);
-                                          _panelOpen[id] = true;
-                                        }),
-                                        onLeave: _leave,
-                                        onAction: _act,
-                                        onPrevArea: i > 0
-                                            ? () => _goToArea(i - 1)
-                                            : null,
-                                        onNextArea: i < theoryRootIds.length - 1
-                                            ? () => _goToArea(i + 1)
-                                            : null,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+            appBar: AppBar(
+              title: const Text('Theorie'),
+              // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
+              // als Pergamentleiste darüber zu liegen.
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              foregroundColor: Palette.textOnDark,
+              actions: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Center(child: PointsChip(points: available)),
+                ),
+              ],
+            ),
+            // Über der Rückfrage steigen Erfahrung und Gold auf, wie früher
+            // auf dem Gewohnheiten-Bildschirm.
+            body: AufstiegHost(
+              child: MentorFlaeche(
+                ort: MentorOrt.baum,
+                child: Column(
+                  children: <Widget>[
+                    // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
+                    // `OnDark`: Ihre Karte ist Pergament.
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                      child: ReviewSection(),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: OnDark(
+                        child: _zeigtEinstieg
+                            ? _Einstieg(
+                                graph: graph,
+                                vorschlaege: ref.watch(
+                                  einstiegVorschlaegeProvider,
+                                ),
+                                onRead: _go,
+                                onErkunden: () =>
+                                    setState(() => _erkunden = true),
+                              )
+                            : Column(
+                                children: <Widget>[
+                                  _Header(
+                                    graph: graph,
+                                    area: graph.nodeById(_areaId),
+                                    skills: ref.watch(skillsProvider),
+                                    areas:
+                                        <
+                                          (
+                                            TheoryNode,
+                                            ({int passed, int total}),
+                                          )
+                                        >[
+                                          for (final id in theoryRootIds)
+                                            if (graph.nodeById(id)
+                                                case final TheoryNode wurzel)
+                                              (
+                                                wurzel,
+                                                progress.progressBelow(
+                                                  id,
+                                                  graph,
+                                                  includeSelf: true,
+                                                ),
+                                              ),
+                                        ],
+                                    areaIndex: _current,
+                                    onSelectArea: _goToArea,
+                                    // Bis zu drei, der erste wie bisher: erst im
+                                    // Gebiet, das gerade offen ist, dann irgendwo,
+                                    // dann der Weg der Grundlagen — danach, was zum
+                                    // Gelesenen und zu den Gewohnheiten passt.
+                                    vorschlaege: ref.watch(
+                                      vorschlaegeProvider(_areaId),
+                                    ),
+                                    onRead: _go,
+                                  ),
+                                  Expanded(
+                                    child: PageView.builder(
+                                      controller: _pages,
+                                      itemCount: theoryRootIds.length,
+                                      onPageChanged: (i) =>
+                                          setState(() => _current = i),
+                                      itemBuilder: (context, i) {
+                                        final id = theoryRootIds[i];
+
+                                        return TreeView(
+                                          graph: graph,
+                                          progress: progress,
+                                          availablePoints: available,
+                                          path: _paths[id]!,
+                                          panelOpen: _panelOpen[id]!,
+                                          onTogglePanel: () => setState(
+                                            () => _panelOpen[id] =
+                                                !_panelOpen[id]!,
+                                          ),
+                                          onEnter: (node) => setState(() {
+                                            _paths[id]!.add(node.id);
+                                            _panelOpen[id] = true;
+                                          }),
+                                          onLeave: _leave,
+                                          onAction: _act,
+                                          onPrevArea: i > 0
+                                              ? () => _goToArea(i - 1)
+                                              : null,
+                                          onNextArea:
+                                              i < theoryRootIds.length - 1
+                                              ? () => _goToArea(i + 1)
+                                              : null,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

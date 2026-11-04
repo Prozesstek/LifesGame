@@ -25,6 +25,7 @@ import 'widgets/lesson_result_view.dart';
 import 'widgets/mentor_dialog.dart';
 import 'widgets/seiten_farbe.dart';
 import '../gear/gear_controller.dart';
+import '../ui/gehrung.dart';
 
 /// Was der Bildschirm gerade zeigt.
 ///
@@ -345,49 +346,52 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     final liest = _stage == _Stage.reading;
-    return PopScope(
-      // **Beim Lesen klappt erst das Buch zu** (03.11.2026), dann geht es
-      // zurück.
-      canPop: _feier == null && !liest,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        if (liest) {
-          _leser.currentState?.schliessen(() => Navigator.of(context).pop());
-          return;
-        }
-        _feiern();
-      },
-      child: SeitenFarbe(
-        gebiet: _gebiet,
-        // **Alles in der Bibliothek** (03.11.2026): Das Buch liegt vor
-        // Regalen und Kamin, danach fragt dort der Mentor ab — ohne
-        // Kopfzeile und ohne Balken darüber.
-        child: Bibliothek(
-          schleier: 0.35,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
+    return RahmenOrt(
+      art: RahmenArt.ranken,
+      child: PopScope(
+        // **Beim Lesen klappt erst das Buch zu** (03.11.2026), dann geht es
+        // zurück.
+        canPop: _feier == null && !liest,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (liest) {
+            _leser.currentState?.schliessen(() => Navigator.of(context).pop());
+            return;
+          }
+          _feiern();
+        },
+        child: SeitenFarbe(
+          gebiet: _gebiet,
+          // **Alles in der Bibliothek** (03.11.2026): Das Buch liegt vor
+          // Regalen und Kamin, danach fragt dort der Mentor ab — ohne
+          // Kopfzeile und ohne Balken darüber.
+          child: Bibliothek(
+            schleier: 0.35,
+            child: Scaffold(
               backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              foregroundColor: Palette.textOnDark,
-            ),
-            body: AufstiegHost(
-              key: _host,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxWidth),
-                  child: switch (_stage) {
-                    _Stage.raten => _buildRaetsel(),
-                    _Stage.reading => LeseHaeppchen(
-                      key: _leser,
-                      lesson: _lesson,
-                      onStart: _startQuiz,
-                      zeichen: _deckelZeichen(),
-                    ),
-                    _Stage.quiz => _buildQuiz(),
-                    _Stage.repeat => _buildRepeat(),
-                    _Stage.result => _buildResult(),
-                  },
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                foregroundColor: Palette.textOnDark,
+              ),
+              body: AufstiegHost(
+                key: _host,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxWidth),
+                    child: switch (_stage) {
+                      _Stage.raten => _buildRaetsel(),
+                      _Stage.reading => LeseHaeppchen(
+                        key: _leser,
+                        lesson: _lesson,
+                        onStart: _startQuiz,
+                        zeichen: _deckelZeichen(),
+                      ),
+                      _Stage.quiz => _buildQuiz(),
+                      _Stage.repeat => _buildRepeat(),
+                      _Stage.result => _buildResult(),
+                    },
+                  ),
                 ),
               ),
             ),

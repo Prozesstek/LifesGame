@@ -17,7 +17,8 @@ abstract final class BereichZeichen {
   /// `tool/pixel/kreis_gewohnheiten.px.js`.
   static const String gewohnheiten = 'assets/UI/Kreis_Gewohnheiten.png';
 
-  /// Die gekreuzten Schwerter auf dem Kampf-Kreis, wie auf „Hinab“.
+  /// Die gekreuzten Schwerter auf dem Kampf-Kreis, wie auf „Hinab“ —
+  /// seit dem 04.11.2026 gezeichnet mit pxl: `tool/pixel/kreis_kampf.px.js`.
   static const String kampf = 'assets/UI/Kreis_Kampf.png';
 
   /// Drei Balken, die steigen, auf dem Statistik-Kreis.
@@ -39,7 +40,9 @@ abstract final class BereichZeichen {
   /// 28.10. ein Profil-Männchen wie in einer App.
   static const String charakter = 'assets/UI/Kreis_Charakter.png';
 
-  /// Das Buch auf dem Theorie-Kreis — Frederiks Zeichnung, 64 × 64.
+  /// Das Buch auf dem Theorie-Kreis — ein Foliant mit dem Talentbaum,
+  /// seit dem 04.11.2026 gezeichnet mit pxl: `tool/pixel/kreis_theorie.px.js`.
+  /// Bis dahin Frederiks Zeichnung.
   static const String theorie = 'assets/UI/Buch.png';
 
   /// Alle Zeichen der Kreise.
@@ -65,8 +68,8 @@ abstract final class BereichZeichen {
   /// ist. Ein unbekanntes Bild gilt als bis in die Ecken gefüllt.
   static double reichweite(String pfad) => switch (pfad) {
     gewohnheiten => 1.31,
-    theorie => 0.99,
-    kampf => 1.42,
+    theorie => 1.16,
+    kampf => 1.07,
     statistik => 1.11,
     laden => 1.26,
     faehigkeiten => 1.18,

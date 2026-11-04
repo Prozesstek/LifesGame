@@ -7,6 +7,7 @@ import '../../ui/ruhm_zahl.dart';
 import '../tagesgrube_text.dart';
 import 'raumzeile.dart';
 import 'teilen_knopf.dart';
+import '../../ui/gehrung.dart';
 
 /// Das Blatt am Ende der Tagesgrube (ADR-0072): wie es lief, was es an
 /// Ruhm bringt, und der Knopf zum Teilen.
@@ -42,6 +43,7 @@ class TagesgrubeErgebnis extends StatelessWidget {
               'neuer Dungeon.';
 
     return HolzDialog(
+      art: RahmenArt.eisen,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         elevation: 0,

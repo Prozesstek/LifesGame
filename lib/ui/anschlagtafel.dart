@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'druck.dart';
+import 'gehrung.dart';
 import 'holz.dart';
+import 'holz_teile.dart';
 import 'palette.dart';
 
 /// Eine **Anschlagtafel** wie am Gemeindehaus: dunkle Bretter im
@@ -47,8 +49,8 @@ class Anschlagtafel extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(top: schildUeberstand),
-          child: DecoratedBox(
-            decoration: BoxDecoration(image: Holz.rahmenBild()),
+          child: CustomPaint(
+            painter: GehrungsMaler(art: RahmenOrt.of(context)),
             child: Padding(
               padding: const EdgeInsets.all(Holz.kartenRand),
               child: DecoratedBox(
@@ -101,8 +103,8 @@ class _Schild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(image: Holz.plankeBild()),
+    return CustomPaint(
+      painter: const PlankenMaler(pixel: Holz.pixel),
       child: SizedBox(
         height: Holz.plankeHoehe,
         child: Padding(
