@@ -9,7 +9,7 @@ RPGs kennt:
 
 | Kreis | Zeichen | woher |
 |---|---|---|
-| Gewohnheiten | Schriftrolle mit Haken — die Quest | Raven fc305, Haken gezeichnet |
+| Gewohnheiten | Schriftrolle mit Haken — die Quest | seit 04.11.2026 `tool/pixel/kreis_gewohnheiten.px.js` (pxl), nicht mehr hier |
 | Kampf | zwei gekreuzte Schwerter | Raven fc721 |
 | Statistik | drei Balken, die steigen | gezeichnet |
 | Laden | ein Münzbeutel | Raven fc158, die Münze fc131 |
@@ -31,7 +31,7 @@ Braucht Pillow.
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image
 
 ZIEL = Path(__file__).resolve().parent.parent / "assets" / "UI"
 RAVEN = Path.home() / (
@@ -49,18 +49,6 @@ def raven(ordner, nummer):
 
 def gross(bild):
     return bild.resize((SEITE, SEITE), Image.NEAREST)
-
-
-def mit_haken(bild):
-    """Ein grüner Haken unten rechts auf der Rolle — erledigt, wie im
-    Kreis eines Häkchens. Auf dem 64er-Raster, ohne Kantenglättung."""
-    bild = bild.copy()
-    malen = ImageDraw.Draw(bild)
-    punkte = [(36, 46), (43, 53), (58, 36)]
-    malen.line(punkte, fill=KONTUR, width=10, joint="curve")
-    malen.line(punkte, fill=(84, 160, 64, 255), width=5, joint="curve")
-    malen.line([(37, 45), (43, 51)], fill=(140, 210, 104, 255), width=1)
-    return bild
 
 
 def mit_muenze(beutel, muenze):
@@ -184,7 +172,6 @@ def balken():
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Gewohnheiten": mit_haken(raven(ordner, 305)),
         "Kreis_Kampf": raven(ordner, 721),
         "Kreis_Statistik": balken(),
         "Kreis_Laden": mit_muenze(raven(ordner, 158), raven(ordner, 131)),
