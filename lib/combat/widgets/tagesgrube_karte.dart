@@ -16,6 +16,7 @@ import '../tagesgrube_text.dart';
 import 'raumzeile.dart';
 import 'schwerter_zeichen.dart';
 import 'teilen_knopf.dart';
+import '../../ui/gehrung.dart';
 
 /// **Die Tagesgrube im Eingang der Grube** (ADR-0072): dieselbe Grube für
 /// alle, ein Versuch am Tag.
@@ -387,6 +388,7 @@ class _OhneFormFrage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HolzDialog(
+      art: RahmenArt.eisen,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         elevation: 0,

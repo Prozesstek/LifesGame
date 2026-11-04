@@ -11,6 +11,7 @@ import '../../mentor/zeigefinger.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/gehrung.dart';
 
 /// Fragt nach einem Lauf, ob ein Schlüssel einen Extra-Wurf auf der
 /// Kaskade öffnen soll (ADR-0048, ADR-0083). Gibt `true` zurück, wenn ja.
@@ -27,6 +28,7 @@ Future<bool> askToOpenLoot(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => HolzDialog(
+      art: RahmenArt.messing,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         title: const Text('Ein Schlüssel'),
@@ -80,6 +82,7 @@ Future<bool> showLoot(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => HolzDialog(
+      art: RahmenArt.messing,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         title: Text(headline),

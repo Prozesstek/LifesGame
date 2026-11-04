@@ -5,6 +5,7 @@ import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
+import '../../ui/gehrung.dart';
 
 /// Die Zeichnung der Truhe — Raven fc6 (`assets/RAVEN.md`).
 const String truhenBild = 'assets/Items/Truhe.png';
@@ -166,7 +167,10 @@ String chestSummary(ChestContent inhalt) {
 Future<void> showChestReveal(BuildContext context, ChestContent inhalt) {
   return showDialog<void>(
     context: context,
-    builder: (context) => HolzDialog(child: _Enthuellung(inhalt: inhalt)),
+    builder: (context) => HolzDialog(
+      art: RahmenArt.messing,
+      child: _Enthuellung(inhalt: inhalt),
+    ),
   );
 }
 

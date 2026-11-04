@@ -11,6 +11,7 @@ import 'statistik_text.dart';
 import 'widgets/kalender_raster.dart';
 import 'widgets/statistik_graphen.dart';
 import 'widgets/statistik_karten.dart';
+import '../ui/gehrung.dart';
 
 /// **Die Statistik** (ADR-0087): wie die Gewohnheiten laufen — als Woche,
 /// Monat, Jahr oder alles seit dem ersten Häkchen, mit Blättern.
@@ -61,56 +62,60 @@ class _StatistikScreenState extends ConsumerState<StatistikScreen> {
       null => StatFarbe.erledigt,
     };
 
-    return StatTon(
-      erledigt: ton,
-      child: Scaffold(
-        appBar: AppBar(title: Text(habit?.name ?? 'Statistik')),
-        body: SafeArea(
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _maxWidth),
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                children: <Widget>[
-                  if (rueckblick != null &&
-                      rechnung.anfang.year <= rueckblick) ...<Widget>[
-                    _Ankuendigung(jahr: rueckblick),
-                    const SizedBox(height: 12),
-                  ],
-                  _ZeitraumWahl(
-                    gewaehlt: _zeitraum,
-                    onWahl: (z) => setState(() {
-                      _zeitraum = z;
-                      _fenster = null;
-                      _gewaehlt = null;
-                    }),
-                  ),
-                  const SizedBox(height: 6),
-                  _Blaettern(
-                    fenster: fenster,
-                    davor: fenster.blaetterbar && fenster.von > rechnung.anfang,
-                    danach: fenster.blaetterbar && fenster.bis < heute,
-                    onWechsel: (neu) => setState(() {
-                      _fenster = neu;
-                      _gewaehlt = null;
-                    }),
-                  ),
-                  const SizedBox(height: 8),
-                  Aufbau(
-                    schluessel: fenster,
-                    builder: (context, wert) => _Inhalt(
-                      rechnung: rechnung,
+    return RahmenOrt(
+      art: RahmenArt.ranken,
+      child: StatTon(
+        erledigt: ton,
+        child: Scaffold(
+          appBar: AppBar(title: Text(habit?.name ?? 'Statistik')),
+          body: SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxWidth),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  children: <Widget>[
+                    if (rueckblick != null &&
+                        rechnung.anfang.year <= rueckblick) ...<Widget>[
+                      _Ankuendigung(jahr: rueckblick),
+                      const SizedBox(height: 12),
+                    ],
+                    _ZeitraumWahl(
+                      gewaehlt: _zeitraum,
+                      onWahl: (z) => setState(() {
+                        _zeitraum = z;
+                        _fenster = null;
+                        _gewaehlt = null;
+                      }),
+                    ),
+                    const SizedBox(height: 6),
+                    _Blaettern(
                       fenster: fenster,
-                      habit: habit,
-                      gewaehlt: _gewaehlt,
-                      wachsen: wert,
-                      onTag: (tag) => setState(
-                        () => _gewaehlt = _gewaehlt == tag ? null : tag,
+                      davor:
+                          fenster.blaetterbar && fenster.von > rechnung.anfang,
+                      danach: fenster.blaetterbar && fenster.bis < heute,
+                      onWechsel: (neu) => setState(() {
+                        _fenster = neu;
+                        _gewaehlt = null;
+                      }),
+                    ),
+                    const SizedBox(height: 8),
+                    Aufbau(
+                      schluessel: fenster,
+                      builder: (context, wert) => _Inhalt(
+                        rechnung: rechnung,
+                        fenster: fenster,
+                        habit: habit,
+                        gewaehlt: _gewaehlt,
+                        wachsen: wert,
+                        onTag: (tag) => setState(
+                          () => _gewaehlt = _gewaehlt == tag ? null : tag,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

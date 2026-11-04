@@ -9,6 +9,7 @@ import '../ui/palette.dart';
 import 'statistik_text.dart';
 import 'widgets/kalender_raster.dart';
 import 'widgets/statistik_karten.dart';
+import '../ui/gehrung.dart';
 
 /// **Der Jahresrückblick** (ADR-0087): ein Kalenderjahr der Gewohnheiten
 /// in Zahlen, das sich aufbaut wie der Wochenrückblick.
@@ -53,193 +54,196 @@ class JahresrueckblickScreen extends ConsumerWidget {
     var schritt = 0;
     Widget spaeter(Widget kind) => _Spaeter(schritt: schritt++, child: kind);
 
-    return Scaffold(
-      appBar: AppBar(title: Text('$jahr')),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              children: <Widget>[
-                spaeter(
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: Palette.goldOnDark,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        '$jahr',
-                        style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.goldOnDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                spaeter(
-                  HolzKarte(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 14,
-                    ),
-                    child: Row(
+    return RahmenOrt(
+      art: RahmenArt.ranken,
+      child: Scaffold(
+        appBar: AppBar(title: Text('$jahr')),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxWidth),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                children: <Widget>[
+                  spaeter(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Expanded(
-                          child: _Zaehler(
-                            key: haekchenKey,
-                            icon: Icons.check,
-                            farbe: StatFarbe.erledigt,
-                            wert: rueckblick.haekchen,
-                            erklaerung: 'Häkchen im Jahr',
-                          ),
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: Palette.goldOnDark,
+                          size: 30,
                         ),
-                        Expanded(
-                          child: _Zaehler(
-                            icon: Icons.check_circle,
-                            farbe: StatFarbe.erledigt,
-                            wert: rueckblick.quote.prozent ?? 0,
-                            nach: ' %',
-                            erklaerung: 'Erledigt von fällig',
-                          ),
-                        ),
-                        Expanded(
-                          child: _Zaehler(
-                            icon: Icons.star,
-                            farbe: Palette.gold,
-                            wert: rueckblick.perfekteWochen,
-                            erklaerung: 'Perfekte Wochen',
-                          ),
-                        ),
-                        Expanded(
-                          child: _Zaehler(
-                            icon: Icons.local_fire_department,
-                            farbe: Palette.accent,
-                            wert: rueckblick.laengsteKette,
-                            erklaerung: 'Längste Kette in diesem Jahr',
+                        const SizedBox(width: 10),
+                        Text(
+                          '$jahr',
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.goldOnDark,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                spaeter(
-                  HolzKarte(
-                    padding: const EdgeInsets.all(12),
-                    child: Aufbau(
-                      schluessel: jahr,
-                      dauer: const Duration(milliseconds: 2400),
-                      builder: (context, wert) => KalenderRaster(
-                        rechnung: rechnung,
-                        fenster: fenster,
-                        fortschritt: wert,
-                        onTag: (_) {},
-                      ),
-                    ),
-                  ),
-                ),
-                if (beste != null || meiste != null) ...<Widget>[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   spaeter(
-                    StatKarte(
-                      key: besteKey,
-                      icon: Icons.emoji_events,
-                      erklaerung: 'Die Gewohnheit des Jahres',
-                      child: Column(
-                        children: <Widget>[
-                          if (beste != null)
-                            _Gewohnheit(
-                              habit: tracker.definitionFor(beste.habitId),
-                              name: name(beste.habitId),
-                              icon: Icons.check_circle,
-                              wert: StatText.prozent(beste.quote),
-                              erklaerung: 'Die beste Quote',
-                            ),
-                          if (meiste != null)
-                            _Gewohnheit(
-                              habit: tracker.definitionFor(meiste.habitId),
-                              name: name(meiste.habitId),
-                              icon: Icons.check,
-                              wert: StatText.zahl(meiste.haekchen),
-                              erklaerung: 'Die meisten Häkchen',
-                            ),
-                          if (rueckblick.besterMonat case final monat?)
-                            _Gewohnheit(
-                              habit: null,
-                              name: StatText.monatLang(monat.monat.month),
-                              icon: Icons.calendar_month,
-                              wert: StatText.prozent(monat.quote),
-                              erklaerung: 'Der beste Monat',
-                            ),
-                        ],
+                    HolzKarte(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 14,
                       ),
-                    ),
-                  ),
-                ],
-                if (mengen.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 12),
-                  spaeter(
-                    StatKarte(
-                      icon: Icons.functions,
-                      erklaerung: 'Was zusammenkam',
-                      child: Column(
-                        children: <Widget>[
-                          for (final g in mengen)
-                            _Gewohnheit(
-                              habit: tracker.definitionFor(g.habitId),
-                              name: name(g.habitId),
-                              icon: Icons.functions,
-                              wert:
-                                  '${StatText.zahl(g.menge)} '
-                                  '${tracker.definitionFor(g.habitId)?.goal?.unit ?? ''}',
-                              erklaerung: 'Zusammen im Jahr',
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-                if (vorjahr != null) ...<Widget>[
-                  const SizedBox(height: 12),
-                  spaeter(
-                    StatKarte(
-                      key: vorjahrKey,
-                      icon: Icons.compare_arrows,
-                      erklaerung: 'Gegen ${jahr - 1}',
                       child: Row(
                         children: <Widget>[
                           Expanded(
-                            child: _Gegen(
+                            child: _Zaehler(
+                              key: haekchenKey,
                               icon: Icons.check,
-                              jetzt: rueckblick.haekchen,
-                              damals: vorjahr.haekchen,
-                              erklaerung: 'Häkchen gegen ${jahr - 1}',
+                              farbe: StatFarbe.erledigt,
+                              wert: rueckblick.haekchen,
+                              erklaerung: 'Häkchen im Jahr',
                             ),
                           ),
                           Expanded(
-                            child: _Gegen(
+                            child: _Zaehler(
                               icon: Icons.check_circle,
-                              jetzt: rueckblick.quote.prozent ?? 0,
-                              damals: vorjahr.quote.prozent ?? 0,
+                              farbe: StatFarbe.erledigt,
+                              wert: rueckblick.quote.prozent ?? 0,
                               nach: ' %',
-                              erklaerung: 'Quote gegen ${jahr - 1}',
+                              erklaerung: 'Erledigt von fällig',
+                            ),
+                          ),
+                          Expanded(
+                            child: _Zaehler(
+                              icon: Icons.star,
+                              farbe: Palette.gold,
+                              wert: rueckblick.perfekteWochen,
+                              erklaerung: 'Perfekte Wochen',
+                            ),
+                          ),
+                          Expanded(
+                            child: _Zaehler(
+                              icon: Icons.local_fire_department,
+                              farbe: Palette.accent,
+                              wert: rueckblick.laengsteKette,
+                              erklaerung: 'Längste Kette in diesem Jahr',
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  spaeter(
+                    HolzKarte(
+                      padding: const EdgeInsets.all(12),
+                      child: Aufbau(
+                        schluessel: jahr,
+                        dauer: const Duration(milliseconds: 2400),
+                        builder: (context, wert) => KalenderRaster(
+                          rechnung: rechnung,
+                          fenster: fenster,
+                          fortschritt: wert,
+                          onTag: (_) {},
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (beste != null || meiste != null) ...<Widget>[
+                    const SizedBox(height: 12),
+                    spaeter(
+                      StatKarte(
+                        key: besteKey,
+                        icon: Icons.emoji_events,
+                        erklaerung: 'Die Gewohnheit des Jahres',
+                        child: Column(
+                          children: <Widget>[
+                            if (beste != null)
+                              _Gewohnheit(
+                                habit: tracker.definitionFor(beste.habitId),
+                                name: name(beste.habitId),
+                                icon: Icons.check_circle,
+                                wert: StatText.prozent(beste.quote),
+                                erklaerung: 'Die beste Quote',
+                              ),
+                            if (meiste != null)
+                              _Gewohnheit(
+                                habit: tracker.definitionFor(meiste.habitId),
+                                name: name(meiste.habitId),
+                                icon: Icons.check,
+                                wert: StatText.zahl(meiste.haekchen),
+                                erklaerung: 'Die meisten Häkchen',
+                              ),
+                            if (rueckblick.besterMonat case final monat?)
+                              _Gewohnheit(
+                                habit: null,
+                                name: StatText.monatLang(monat.monat.month),
+                                icon: Icons.calendar_month,
+                                wert: StatText.prozent(monat.quote),
+                                erklaerung: 'Der beste Monat',
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (mengen.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 12),
+                    spaeter(
+                      StatKarte(
+                        icon: Icons.functions,
+                        erklaerung: 'Was zusammenkam',
+                        child: Column(
+                          children: <Widget>[
+                            for (final g in mengen)
+                              _Gewohnheit(
+                                habit: tracker.definitionFor(g.habitId),
+                                name: name(g.habitId),
+                                icon: Icons.functions,
+                                wert:
+                                    '${StatText.zahl(g.menge)} '
+                                    '${tracker.definitionFor(g.habitId)?.goal?.unit ?? ''}',
+                                erklaerung: 'Zusammen im Jahr',
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (vorjahr != null) ...<Widget>[
+                    const SizedBox(height: 12),
+                    spaeter(
+                      StatKarte(
+                        key: vorjahrKey,
+                        icon: Icons.compare_arrows,
+                        erklaerung: 'Gegen ${jahr - 1}',
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: _Gegen(
+                                icon: Icons.check,
+                                jetzt: rueckblick.haekchen,
+                                damals: vorjahr.haekchen,
+                                erklaerung: 'Häkchen gegen ${jahr - 1}',
+                              ),
+                            ),
+                            Expanded(
+                              child: _Gegen(
+                                icon: Icons.check_circle,
+                                jetzt: rueckblick.quote.prozent ?? 0,
+                                damals: vorjahr.quote.prozent ?? 0,
+                                nach: ' %',
+                                erklaerung: 'Quote gegen ${jahr - 1}',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

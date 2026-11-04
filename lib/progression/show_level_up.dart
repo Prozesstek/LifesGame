@@ -16,6 +16,7 @@ import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'level_provider.dart';
 import 'level_roadmap.dart';
+import '../ui/gehrung.dart';
 
 /// Das Level vor einer Handlung — **vorher** lesen, danach ist der
 /// Unterschied verschwunden.
@@ -58,6 +59,7 @@ Future<void> showLevelUp(
   final gewaehlt = await showDialog<TheoryStep>(
     context: context,
     builder: (dialog) => HolzDialog(
+      art: RahmenArt.messing,
       child: LevelUpSheet(
         levelUp: auf,
         vorschlaege: vorschlaege,

@@ -18,6 +18,7 @@ import 'widgets/eingangs_glut.dart';
 import 'widgets/schwerter_zeichen.dart';
 import 'widgets/tagesform_kreis.dart';
 import 'widgets/tagesgrube_karte.dart';
+import '../ui/gehrung.dart';
 
 /// Der Eingang zur Grube: die Tagesgrube, darunter die **eine** Ebene,
 /// in die es als Nächstes geht, und „Hinab“.
@@ -49,66 +50,70 @@ class LadderScreen extends ConsumerWidget {
     final stand = ref.watch(ladderProvider);
     final stufe = stand.nextRung;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dungeon')),
-      body: MentorFlaeche(
-        ort: MentorOrt.eingang,
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: LadderScreen._maxWidth,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                child: Column(
-                  children: <Widget>[
-                    const TagesgrubeKarte(),
-                    const Spacer(),
-                    EingangsGlut(
-                      ebene: stufe,
-                      child: _Ebene(stufe: stufe),
-                    ),
-                    _Belohnung(stand: stand, stufe: stufe),
-                    const Spacer(),
-                    // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
-                    // kann lang werden („Angriff +10 %, Leben +10 %, …“).
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _Schluessel(),
-                        SizedBox(width: 16),
-                        Flexible(child: TagesformKreis()),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Zeigefinger(
-                      schritt: Schritt.grube,
-                      radius: 10,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => PitScreen(stage: PitStage(stufe)),
+    return RahmenOrt(
+      art: RahmenArt.eisen,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Dungeon')),
+        body: MentorFlaeche(
+          ort: MentorOrt.eingang,
+          child: SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: LadderScreen._maxWidth,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: Column(
+                    children: <Widget>[
+                      const TagesgrubeKarte(),
+                      const Spacer(),
+                      EingangsGlut(
+                        ebene: stufe,
+                        child: _Ebene(stufe: stufe),
+                      ),
+                      _Belohnung(stand: stand, stufe: stufe),
+                      const Spacer(),
+                      // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
+                      // kann lang werden („Angriff +10 %, Leben +10 %, …“).
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          _Schluessel(),
+                          SizedBox(width: 16),
+                          Flexible(child: TagesformKreis()),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Zeigefinger(
+                        schritt: Schritt.grube,
+                        radius: 10,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    PitScreen(stage: PitStage(stufe)),
+                              ),
                             ),
-                          ),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            textStyle: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          key: LadderScreen.hinabKey,
-                          child: const SchwerterZeichen(
-                            size: 30,
-                            semanticLabel: 'Hinab',
+                            key: LadderScreen.hinabKey,
+                            child: const SchwerterZeichen(
+                              size: 30,
+                              semanticLabel: 'Hinab',
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

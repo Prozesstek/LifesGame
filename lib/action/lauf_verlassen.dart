@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../ui/holz.dart';
 import '../ui/palette.dart';
+import '../ui/gehrung.dart';
 
 /// Die Rückfrage, bevor ein laufender Lauf verlassen wird — **eine Stelle**
 /// für die Grube und die Tagesgrube.
@@ -27,6 +28,7 @@ Future<bool> fragtVorDemGehen(
   final geht = await showDialog<bool>(
     context: context,
     builder: (context) => HolzDialog(
+      art: RahmenArt.eisen,
       child: AlertDialog(
         backgroundColor: Palette.surface,
         elevation: 0,

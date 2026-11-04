@@ -8,12 +8,14 @@ geprüft.
 | Datei | Blatt | Ausschnitt (x, y, Breite, Höhe) | Bearbeitet |
 |---|---|---|---|
 | `Planke.png` | `freefantasy.png` | 138, 5, 45, 23 | Zapfen oben und unten abgeschnitten |
-| `Rahmen.png` | `freefantasy.png` | 165, 72, 71, 67 | ohne Seil |
 | `Seil.png` | `freefantasy.png` | 170, 50, 61, 23 | — |
 | `Balken.png` | `MediavelFree.png` | 2, 98, 61, 12 | rote Füllung entfernt, der Code zeichnet sie |
 | `Knopf.png` | `MediavelFree.png` | 81, 1, 14, 14 | Glyphe entfernt, der Code setzt das Symbol |
 | `KnopfGedrueckt.png` | `MediavelFree.png` | 97, 1, 14, 14 | ebenso |
 
 Wo jedes Teil gedehnt wird, steht in `lib/ui/holz.dart`.
+
+**Der Rahmen ist seit dem 04.11.2026 eigen** (ADR-0099): gemalt auf
+Gehrung von `lib/ui/gehrung.dart`, kein Bild mehr.
 
 Offen: **Quelle und Urheber** als Link nachtragen.

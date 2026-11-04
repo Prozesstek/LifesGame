@@ -27,9 +27,9 @@
 | Rüstung, Helme, Schuhe, Ringe, Talismane | 40 | 0 |
 | Fähigkeiten | 39 | 0 |
 | Ausrüstung auf der Figur | 24 | 0 |
-| Holz-Oberfläche | 6 | 0 |
+| Holz-Oberfläche | 6 | 1 |
 | Dungeon: Held, Gegner, Bosse | 15 Figuren (25 Dateien) | 0 |
-| **Summe** | **139** | **3** |
+| **Summe** | **139** | **4** |
 
 Die Zahlen werden beim Abhaken nachgezogen.
 
@@ -183,7 +183,7 @@ Sitzt auf jeder Karte, jedem Dialog, jedem Knopf. Wer sie tauscht, prüft
 `lib/ui/holz.dart` (wo gedehnt wird) und `test/palette_test.dart`.
 
 - [ ] Planke
-- [ ] Rahmen
+- [x] Rahmen — gemalt auf Gehrung, in vier Arten (`lib/ui/gehrung.dart`, ADR-0099)
 - [ ] Seil
 - [ ] Balken
 - [ ] Knopf

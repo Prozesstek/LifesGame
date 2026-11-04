@@ -273,7 +273,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/dev/grube_werkbank.dart` | **die Werkbank in der Grube**, nur auf dem Dev-Stand: Funde jeder Seltenheit vor den Helden legen, Gegner jeder Art beschwören; der Lauf steht still, solange sie offen ist | Flutter |
 | `lib/dev/save_slot.dart` | echter Stand vs. Dev-Stand | Flutter |
 | `lib/audio/sound_effects.dart` | welcher Klang zu welchem Moment gehört — **eine Tabelle**, in Tests stumm | Flutter |
-| `lib/ui/holz.dart` | Planke, Rahmen, Balken, Knopf aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche, `HolzGruppe` um die Kreise der Startseite | Flutter |
+| `lib/ui/holz.dart` | Planke, Balken, Knopf, Seil aus dem UI-Paket — **über das Theme**, nicht je Knopf; `HolzKarte`, `HolzDialog`, `HolzBlatt` für jede Fläche, `HolzGruppe` um die Kreise der Startseite | Flutter |
+| `lib/ui/gehrung.dart` | **der Rahmen, gemalt auf Gehrung** ([ADR-0099](docs/decisions/0099-rahmen-auf-gehrung.md)): vier Trapeze, Licht von oben links, nichts gedehnt; vier Arten — Holz, Ranken (Theorie, Statistik), Eisen (Dungeon), Messing (Belohnungen); ein Bildschirm sagt seine Art mit `RahmenOrt`, ein Dialog mit `HolzDialog(art:)` | Flutter |
 | `lib/ui/aufstieg.dart` | **Zahlen steigen dort auf, wo getippt wurde** — der Host merkt sich den Finger; von dort **fliegen Münzen und Funken zur Leiste** (`fliege`) und platzt das **Konfetti** (`konfetti`); **was in der Mitte steht** (`zeigeInDerMitte`), liegt über den Zahlen und unter den Münzen | Flutter |
 | `lib/ui/beute_flug.dart` | **Münzen zur Goldzahl, Funken zum Balken, grüne Funken zum Gebiet** — reine Rechnung; ein Ziel meldet sich mit `FlugZielMarke` an | Flutter |
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
@@ -345,7 +346,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1090 Tests
+flutter test             # 1100 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
