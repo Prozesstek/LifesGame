@@ -136,6 +136,14 @@ vom 02.10.
 
 ---
 
+## 04.11.2026, ganz zuletzt: die Schattenstiefel
+
+Neu mit pxl (`tool/pixel/schattenstiefel.px.js`), passend zu Haube und Mantel:
+ein Paar in der Ausrichtung der Festen Stiefel, mit Flügelplatte um einen Stein,
+zwei Spitzen am offenen Kragen, Kralle an der Kappe und Sporn. Schuhe zeigen sich nicht auf
+der Figur, es gibt also nur das Ladenbild. Nicht in der laufenden App, nicht am
+Handy.
+
 ## 04.11.2026, zuletzt: der Nachtmantel passt zur Haube
 
 AktivesBrett: „mach mal die rüstung, also den brustteil, passend“. Neu mit pxl
