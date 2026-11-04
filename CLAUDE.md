@@ -263,8 +263,8 @@ durch die Grube ersetzt und gelöscht.
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/kreis_zeichen.py` | legt die Zeichen der Kreise nach `assets/UI/Kreis_*.png` — fünf aus Raven, Rucksack und Balken gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
-| `tool/item_icons.py` | **zeichnet** neun der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre vier Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); Fledermaushaube, Nachtmantel und Schattenstiefel stehen seit dem 04.11. in `tool/pixel/` | Python |
-| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen des Kreises Gewohnheiten, Fledermaushaube und Nachtmantel samt Bild auf der Figur, Schattenstiefel | pxl |
+| `tool/item_icons.py` | **zeichnet** acht der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset steht seit dem 04.11. in `tool/pixel/` | Python |
+| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen des Kreises Gewohnheiten, das Vampirset (Haube, Mantel, Stiefel, Sichel) | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |

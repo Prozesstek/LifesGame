@@ -136,6 +136,14 @@ vom 02.10.
 
 ---
 
+## 04.11.2026, zum Schluss: die Blutsichel
+
+Neu mit pxl (`tool/pixel/blutsichel.px.js`), dunkler Stahl, Ausrichtung wie bisher: Griff unten
+links, die Klinge biegt sich nach rechts. Glühende Schneide, Runen, Dornen, Flügelhaut
+darunter, Parierstange aus zwei Flügeln um einen Stein, Blut, das an der Schneide herabläuft.
+Auf der Figur steht sie höher als bisher, sonst verschwand der Griff im Mantel.
+Damit ist das ganze Vampirset neu. Nicht in der laufenden App, nicht am Handy.
+
 ## 04.11.2026, ganz zuletzt: die Schattenstiefel
 
 Neu mit pxl (`tool/pixel/schattenstiefel.px.js`), passend zu Haube und Mantel:
