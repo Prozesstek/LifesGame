@@ -52,7 +52,8 @@ abstract final class GearIcons {
         'assets/Waffen/Schwerter/GeschliffeneKlinge.png',
     'gear-kriegsstab': 'assets/Waffen/Staebe/Kriegsstab.png',
     'gear-zweihaender': 'assets/Waffen/Schwerter/Zweihaender.png',
-    'gear-langbogen': 'assets/Waffen/Boegen/Langbogen.png',
+    // Gezeichnet mit pxl: tool/pixel/bogen_verwachsen.px.js (04.11.2026).
+    'gear-langbogen': 'assets/Waffen/Boegen/Wurzelbogen.png',
     'gear-sonnenklinge': 'assets/Waffen/Schwerter/Sonnenklinge.png',
     'gear-lederwams': 'assets/Ruestung/Lederwams.png',
     'gear-gestepptes-wams': 'assets/Ruestung/GesteppteWams.png',
