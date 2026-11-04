@@ -17,6 +17,7 @@ import 'package:lifes_game/combat/widgets/tagesgrube_ergebnis.dart';
 import 'package:lifes_game/combat/widgets/tagesgrube_karte.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/home/erster_start.dart';
+import 'package:progression/progression.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -64,6 +65,13 @@ void main() {
       overrides: [
         savedGameProvider.overrideWithValue(stand),
         todayProvider.overrideWithValue(heute),
+        // Der Tagesdungeon wartet seit ADR-0098 auf Level 4; hier geht es
+        // um ihn selbst, nicht um die Sperre.
+        playerLevelProvider.overrideWithValue(
+          LevelCurve.levelFor(
+            LevelCurve.totalXpFor(LevelExtra.tagesdungeon.level),
+          ),
+        ),
       ],
     );
     addTearDown(c.dispose);
@@ -273,9 +281,16 @@ void main() {
       );
       expect(
         ErsterStart.aus(
-          const ErsterStartStand(haekchen: 1, hatGekaempft: true),
+          const ErsterStartStand(haekchen: 1, hatGekaempft: true, level: 4),
         ).zeigtTagesgrube,
         isTrue,
+      );
+      // Und frühestens auf Level 4 (ADR-0098).
+      expect(
+        ErsterStart.aus(
+          const ErsterStartStand(haekchen: 1, hatGekaempft: true, level: 3),
+        ).zeigtTagesgrube,
+        isFalse,
       );
       expect(ErsterStart.allesOffen.zeigtTagesgrube, isTrue);
     });

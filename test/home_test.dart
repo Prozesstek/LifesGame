@@ -14,6 +14,7 @@ import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/ui/bereich_zeichen.dart';
 import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/home/widgets/status_leiste.dart';
+import 'package:lifes_game/progression/widgets/level_roadmap_blatt.dart';
 import 'package:lifes_game/ui/level_abzeichen.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -496,7 +497,9 @@ void main() {
       expect(find.textContaining('Gold'), findsNothing);
     });
 
-    testWidgets('der Satz zur Erfahrung kommt erst auf Tipp', (tester) async {
+    testWidgets('ein Tipp auf den Ring öffnet die Roadmap (ADR-0098)', (
+      tester,
+    ) async {
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
@@ -505,11 +508,16 @@ void main() {
       expect(find.text(satz), findsNothing);
 
       // Seit dem 22.10. ist der Erfahrungsbalken ein Ring um das
-      // Level-Abzeichen oben rechts; der Satz steht im Tipp darauf.
+      // Level-Abzeichen oben rechts; seit ADR-0098 öffnet ein Tipp die
+      // Roadmap, und der Satz steht oben darin.
       await tester.tap(find.byKey(StatusLeiste.ringKey));
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
       expect(find.text(satz), findsOneWidget);
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      expect(find.byType(LevelRoadmapBlatt), findsOneWidget);
+      // Der nächste Meilenstein ist Level 2, das Haustier steht weiter
+      // unten auf Level 5.
+      expect(find.byKey(LevelRoadmapBlatt.zeileKey(2)), findsOneWidget);
+      expect(find.byKey(LevelRoadmapBlatt.zeileKey(5)), findsOneWidget);
     });
 
     testWidgets(

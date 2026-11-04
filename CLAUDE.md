@@ -68,8 +68,9 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
-| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, **Skill-Kurve**, reines Dart, 52 Tests | nur Dart-SDK |
-| `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze | nur Dart-SDK |
+| `packages/progression/` | Levelkurve, Fähigkeitsslots, Theoriepunkte, **Machtkurve**, **Skill-Kurve**, **was erst mit einem Level aufgeht**, reines Dart, 58 Tests | nur Dart-SDK |
+| `packages/progression/lib/src/level_up.dart` | was ein **Aufstieg** bringt — Macht, Theoriepunkte, Plätze, Extras, Ultimate | nur Dart-SDK |
+| `packages/progression/lib/src/level_extras.dart` | **was erst mit einem Level aufgeht** ([ADR-0098](docs/decisions/0098-level-roadmap.md)): Lagerfeuer 3, Tagesdungeon 4, Haustier 5, Statistik 7, Sammlung 10 — der Weg des Mentors bleibt an Taten (`LevelExtra`) | nur Dart-SDK |
 | `packages/progression/lib/src/ability_slots.dart` | ab welchem Level welcher Slot aufgeht — und der **Platz der Ultimate** auf Level 15 ([ADR-0073](docs/decisions/0073-ultimate-mana-und-neue-arten.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
@@ -253,7 +254,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/character/identity_controller.dart` | Riverpod-Brücke Identität ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/character/ability_unlock.dart` | was neu ist und wohin es passt — reine Rechnung | Flutter |
 | `lib/character/show_ability_unlock.dart` | die Feier, aufgerufen an genau zwei Stellen | Flutter |
-| `lib/progression/show_level_up.dart` | die Feier eines **Aufstiegs** — nach den Errungenschaften, vor den Fähigkeiten | Flutter |
+| `lib/progression/show_level_up.dart` | die Feier eines **Aufstiegs** — nach den Errungenschaften, vor den Fähigkeiten; nennt, was aufgeht, und **blass das nächste Ziel** (ADR-0098) | Flutter |
+| `lib/progression/level_roadmap.dart` | **die Level-Roadmap** (ADR-0098): was welches Level bringt, die Meilensteine, der nächste — reine Rechnung, **eine Stelle** für Blatt und Feier; wie ein Extra heißt (`LevelRoadmap.extra`) | Flutter |
+| `lib/progression/widgets/level_roadmap_blatt.dart` | das Blatt dazu, **ein Tipp auf den Level-Ring**: Erfahrung bis zum nächsten Level, dann der Pfad — erreicht mit Haken, der nächste golden, spätere mit Schloss | Flutter |
 | `lib/village/village_map.dart` | **das Dorf (Prototyp)**: Karte als Text, Wege, Laufen, Türen, reines Dart, ohne Bildschirm testbar | Flutter |
 | `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, **hinein nur über den Knopf am Gebäude**, „Heute“ immer einen Tipp entfernt | Flutter |
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
@@ -342,7 +345,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1079 Tests
+flutter test             # 1090 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -366,7 +369,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
-cd packages/progression ; dart test    # 52 Tests
+cd packages/progression ; dart test    # 58 Tests
 cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
@@ -917,6 +920,7 @@ Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 | Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
 | Erklärt sich die Grube noch? | `ErsterStart.grubeErklaertSich` — bis die erste Stufe geschafft ist ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) |
+| Was wartet auf ein Level? | `LevelExtra` — Lagerfeuer, Tagesdungeon, Haustier, Statistik, Sammlung; `ErsterStart` liest es (`zeigtTagesaufgaben`, `zeigtTagesgrube`, `zeigtHaustier`, `zeigtSammlung`), **was ein Stand schon hat, behält er** ([ADR-0098](docs/decisions/0098-level-roadmap.md)) |
 
 **Abgeleitet, nie gespeichert, und jede Zahl darf nur wachsen** — sonst
 verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in

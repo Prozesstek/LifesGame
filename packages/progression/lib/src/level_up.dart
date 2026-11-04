@@ -1,5 +1,6 @@
 import 'ability_slots.dart';
 import 'level_curve.dart';
+import 'level_extras.dart';
 import 'power_curve.dart';
 import 'theory_points.dart';
 
@@ -17,6 +18,8 @@ class LevelUp {
     required this.theoryPoints,
     required this.powerGain,
     required this.newSlots,
+    required this.extras,
+    required this.opensUltimate,
   });
 
   factory LevelUp.between(int from, int to) {
@@ -33,6 +36,12 @@ class LevelUp {
           if (AbilitySlots.levelForSlot(slot) case final ab?)
             if (ab > from && ab <= to) slot,
       ],
+      extras: <LevelExtra>[
+        for (final e in LevelExtra.values)
+          if (e.level > from && e.level <= to) e,
+      ],
+      opensUltimate:
+          AbilitySlots.ultimateLevel > from && AbilitySlots.ultimateLevel <= to,
     );
   }
 
@@ -47,6 +56,17 @@ class LevelUp {
 
   /// Die Fähigkeitsplätze, die dabei aufgehen, ab 1 gezählt.
   final List<int> newSlots;
+
+  /// Was dabei aufgeht (ADR-0098) — Lagerfeuer, Haustier und so fort.
+  final List<LevelExtra> extras;
+
+  /// Ob der Platz der Ultimate aufgeht (ADR-0073).
+  final bool opensUltimate;
+
+  /// Ob der Aufstieg mehr bringt als Punkt und Macht — ein Meilenstein
+  /// auf der Roadmap.
+  bool get isMilestone =>
+      newSlots.isNotEmpty || extras.isNotEmpty || opensUltimate || isMax;
 
   bool get isLevelUp => to > from;
 

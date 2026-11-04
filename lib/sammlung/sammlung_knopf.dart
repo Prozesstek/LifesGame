@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../home/erster_start_provider.dart';
 import '../ui/druck.dart';
 import '../ui/palette.dart';
 import 'sammlung.dart';
@@ -12,6 +13,9 @@ import 'sammlung_screen.dart';
 ///
 /// **Kein `IconButton`**: Das Theme macht jeden zur Holzplanke, und in
 /// der Kopfzeile läse sich eine Planke als Hauptknopf.
+///
+/// **Erst ab Level 10** (ADR-0098, `LevelExtra.sammlung`); vorher steht
+/// hier nichts.
 class SammlungKnopf extends ConsumerWidget {
   const SammlungKnopf({required this.art, super.key});
 
@@ -22,6 +26,9 @@ class SammlungKnopf extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(ersterStartProvider).zeigtSammlung) {
+      return const SizedBox.shrink();
+    }
     final prozent = ref.watch(sammelStandProvider(art)).prozent;
     return Padding(
       padding: const EdgeInsets.only(right: 8),

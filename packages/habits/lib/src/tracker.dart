@@ -1395,6 +1395,14 @@ class HabitTracker {
   /// Die Tage, an denen die Truhe geöffnet wurde.
   Set<Day> get openedChests => _openedChests;
 
+  /// Ob je etwas am Lagerfeuer geschah — eine Truhe, eine Daily, ein
+  /// Vorsatz für morgen. Daran behält ein alter Stand das Feuer, auch
+  /// wenn sein Level unter der Schwelle liegt (ADR-0098).
+  bool get warAmFeuer =>
+      _openedChests.isNotEmpty ||
+      _claimedQuests.isNotEmpty ||
+      _firstUp.isNotEmpty;
+
   bool hasOpenedChest(Day day) => _openedChests.contains(day);
 
   /// Ob sich die Truhe von [day] öffnen lässt: jede laufende Gewohnheit

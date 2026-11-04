@@ -69,7 +69,8 @@ void main() {
       expect(start.zeigt(Bereich.kampf), isFalse);
       expect(start.schritt, Schritt.ersteSeite);
       expect(start.leuchtet, Bereich.theorie);
-      expect(start.zeigtTagesaufgaben, isTrue);
+      // Das Lagerfeuer wartet seit ADR-0098 auf Level 3.
+      expect(start.zeigtTagesaufgaben, isFalse);
     });
 
     test('die erste Seite deckt die Fähigkeiten auf, und sie leuchten', () {
@@ -344,6 +345,22 @@ void main() {
           billigstesStueck: billig,
           gewohnheitenJe: 2,
         ),
+        // Die Statistik wartet seit ADR-0098 auf Level 7.
+        ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 20,
+          hatGekaempft: true,
+          stufenGeschafft: 3,
+          seiten: 8,
+          grundlagenGelesen: true,
+          gelernt: 2,
+          angelegt: 2,
+          goldVerdient: 400,
+          jeBesessen: 2,
+          level: 7,
+          billigstesStueck: billig,
+          gewohnheitenJe: 2,
+        ),
       ];
 
       var bisher = <Bereich>{};
@@ -555,17 +572,12 @@ void main() {
     ) async {
       await starte(tester, SaveData(habits: einHaekchen));
 
-      // Mit dem ersten Häkchen auch die Statistik (ADR-0087): Ab dann
-      // gibt es einen Tag zu sehen.
-      expect(aufgedeckt(tester), <String>[
-        'Gewohnheiten',
-        'Theorie',
-        'Statistik',
-      ]);
+      // Die Statistik kam bis ADR-0098 mit dem ersten Häkchen, jetzt
+      // wartet sie auf Level 7 — wie das Lagerfeuer auf Level 3.
+      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
       expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
-      // Die Tagesaufgaben warten am Lagerfeuer (ADR-0076).
-      expect(find.byType(LagerfeuerKarte), findsOneWidget);
+      expect(find.byType(LagerfeuerKarte), findsNothing);
     });
 
     testWidgets('wer schon unten war, geht mit der Waffe allein hinab', (

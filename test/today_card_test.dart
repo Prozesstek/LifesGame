@@ -112,7 +112,7 @@ void main() {
         .tracker
         .check(zweite.id, heute)
         .tracker;
-    await startseite(tester, tracker);
+    await startseite(tester, tracker, allesOffen: true);
 
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
@@ -146,7 +146,7 @@ void main() {
     expect(find.byType(LagerfeuerKarte), findsNothing);
 
     final erledigt = offen.check(starter.id, heute).tracker;
-    final container = await startseite(tester, erledigt);
+    final container = await startseite(tester, erledigt, allesOffen: true);
     await tester.tap(find.byKey(LagerfeuerKarte.oeffnenKey));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(DailyChestCard.oeffnenKey));

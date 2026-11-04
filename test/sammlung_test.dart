@@ -8,6 +8,8 @@ import 'package:identity/identity.dart';
 import 'package:lifes_game/achievements/achievements_card.dart';
 import 'package:lifes_game/achievements/achievements_screen.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/sammlung/sammlung.dart';
@@ -232,6 +234,8 @@ void main() {
         ProviderScope(
           overrides: [
             savedGameProvider.overrideWithValue(const SaveData.empty()),
+            // Die Sammlung wartet seit ADR-0098 auf Level 10.
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
           ],
           child: const MaterialApp(home: EquipmentScreen()),
         ),
@@ -250,6 +254,7 @@ void main() {
         ProviderScope(
           overrides: [
             savedGameProvider.overrideWithValue(const SaveData.empty()),
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
           ],
           child: const MaterialApp(home: AbilitiesScreen()),
         ),

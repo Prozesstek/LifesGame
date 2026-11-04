@@ -15,6 +15,7 @@ import '../ui/druck.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import 'level_provider.dart';
+import 'level_roadmap.dart';
 
 /// Das Level vor einer Handlung — **vorher** lesen, danach ist der
 /// Unterschied verschwunden.
@@ -91,6 +92,9 @@ class LevelUpSheet extends StatelessWidget {
   static Key vorschlagKey(String nodeId) =>
       ValueKey<String>('aufstieg-vorschlag-$nodeId');
 
+  /// Die Zeile „Als Nächstes“ — für Tests.
+  static const Key ausblickKey = ValueKey<String>('aufstieg-ausblick');
+
   /// „4 %" aus einem Faktor von 1,04.
   static String prozent(double faktor) => '${((faktor - 1) * 100).round()} %';
 
@@ -106,10 +110,16 @@ class LevelUpSheet extends StatelessWidget {
               ? '+1 Talentpunkt für den Talentbaum'
               : '+${auf.theoryPoints} Talentpunkte für den Talentbaum',
         ),
-      for (final slot in auf.newSlots)
-        (Icons.add_box_outlined, 'Fähigkeitsplatz $slot ist offen'),
-      if (auf.isMax) (Icons.workspace_premium, 'Das Höchstlevel. Respekt.'),
+      // Plätze, Ultimate, Extras, Rahmen — eine Stelle mit der Roadmap
+      // (ADR-0098).
+      for (final g in LevelRoadmap.gewinne(auf)) (g.icon, g.feier),
     ];
+    // **Was als Nächstes kommt** (ADR-0098): der nächste Meilenstein mit
+    // seinem ersten Gewinn, damit man weiß, worauf man zuläuft.
+    final naechster = LevelRoadmap.naechsterMeilenstein(auf.to);
+    final ausblick = naechster == null
+        ? null
+        : LevelRoadmap.gewinneAuf(naechster).first;
 
     return AlertDialog(
       backgroundColor: Palette.surface,
@@ -150,6 +160,15 @@ class LevelUpSheet extends StatelessWidget {
           const SizedBox(height: 14),
           for (var i = 0; i < zeilen.length; i++)
             _Zeile(icon: zeilen[i].$1, text: zeilen[i].$2, nummer: i),
+          if (naechster != null && ausblick != null) ...<Widget>[
+            const SizedBox(height: 8),
+            _Ausblick(
+              key: LevelUpSheet.ausblickKey,
+              level: naechster,
+              gewinn: ausblick,
+              nummer: zeilen.length,
+            ),
+          ],
           if (vorschlaege.isNotEmpty) ...<Widget>[
             const SizedBox(height: 10),
             for (final (v, farbe) in vorschlaege)
@@ -281,6 +300,72 @@ class _Vorschlag extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// **Was als Nächstes kommt** — blass unter dem, was gerade kam:
+/// „Level 5 · Haustier“ (ADR-0098).
+class _Ausblick extends StatelessWidget {
+  const _Ausblick({
+    required this.level,
+    required this.gewinn,
+    required this.nummer,
+    super.key,
+  });
+
+  final int level;
+  final RoadmapGewinn gewinn;
+  final int nummer;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = 300 + 150 * nummer;
+    final gesamt = start + 350;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: gesamt),
+      curve: Interval(start / gesamt, 1, curve: Curves.easeOut),
+      builder: (context, t, child) => Opacity(opacity: t, child: child),
+      child: Semantics(
+        label: 'Als Nächstes: Level $level, ${gewinn.name}',
+        excludeSemantics: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Palette.surfaceSunken.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: <Widget>[
+              const Icon(
+                Icons.arrow_upward_rounded,
+                size: 16,
+                color: Palette.muted,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Level $level',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Palette.textDim,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(gewinn.icon, size: 16, color: Palette.textDim),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  gewinn.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: Palette.textDim),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:progression/progression.dart';
 
+import '../../progression/widgets/level_roadmap_blatt.dart';
 import '../../skills/widgets/gebiets_balken.dart';
 import '../../ui/aufstieg.dart';
 import '../../ui/beute_flug.dart';
@@ -59,7 +60,7 @@ class StatusLeiste extends StatelessWidget {
   final int xp;
   final int gold;
 
-  /// Der Ring, zum Finden in Tests: Ein Tipp sagt, wie viel noch fehlt.
+  /// Der Ring, zum Finden in Tests: Ein Tipp öffnet die Roadmap.
   static const Key ringKey = ValueKey<String>('level-ring');
 
   @override
@@ -90,21 +91,26 @@ class StatusLeiste extends StatelessWidget {
               child: GebietsBalken(aufDunkel: true),
             ),
           ),
-        Tooltip(
-          triggerMode: TooltipTriggerMode.tap,
-          message: level.isMaxLevel
-              ? 'Höchste Stufe erreicht'
-              : '${level.xpIntoLevel} von ${level.xpForLevel} Erfahrung '
-                    'bis Level ${level.level + 1}',
-          child: Druck(
-            child: FlugZielMarke(
-              ziel: FlugZiel.erfahrung,
-              staerke: 0.12,
-              child: LevelRing(
-                key: ringKey,
-                level: level.level,
-                anteil: level.ratio,
-                groesse: klein ? kleinerRing : 54,
+        // **Ein Tipp öffnet die Roadmap** (ADR-0098): wie viel fehlt, und
+        // was die nächsten Level bringen. Bis dahin stand hier nur der
+        // Satz zur Erfahrung als Tooltip.
+        Builder(
+          builder: (context) => Semantics(
+            button: true,
+            child: Druck(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => LevelRoadmapBlatt.zeige(context, level),
+                child: FlugZielMarke(
+                  ziel: FlugZiel.erfahrung,
+                  staerke: 0.12,
+                  child: LevelRing(
+                    key: ringKey,
+                    level: level.level,
+                    anteil: level.ratio,
+                    groesse: klein ? kleinerRing : 54,
+                  ),
+                ),
               ),
             ),
           ),
