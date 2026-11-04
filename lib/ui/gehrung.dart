@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'holz_teile.dart';
+
 /// Welcher Rahmen — er sagt, wo man ist.
 enum RahmenArt {
   /// Alltag: Holz mit Messingecken, Splittern, Astlöchern, Moos.
@@ -38,22 +40,12 @@ class GehrungsMaler extends CustomPainter {
   /// Breite einer Leiste in Bildpunkten.
   static const int breite = 12;
 
-  static const Color _k = Color(0xFF130505);
-  static const Color _tief = Color(0xFF5D3A2B);
-  static const Color _schatten = Color(0xFF894D2D);
-  static const Color _holz = Color(0xFFA8602F);
-  static const Color _licht = Color(0xFFC0803C);
-  static const Color _glanz = Color(0xFFDDA05A);
   // Das dunklere Holz des Dungeons.
   static const Color _eTief = Color(0xFF2E211C);
   static const Color _eSchatten = Color(0xFF4A3329);
   static const Color _eHolz = Color(0xFF654332);
   static const Color _eLicht = Color(0xFF7D5640);
   static const Color _eGlanz = Color(0xFF94694D);
-  // Messing.
-  static const Color _mHell = Color(0xFFF3DC95);
-  static const Color _mMitte = Color(0xFFC9A04A);
-  static const Color _mTief = Color(0xFF6E5420);
   // Eisen.
   static const Color _iHell = Color(0xFFB9B6C0);
   static const Color _iMitte = Color(0xFF6E6A76);
@@ -175,13 +167,13 @@ class GehrungsMaler extends CustomPainter {
       laengs = o + 11;
     }
     final hell = seite == 'o' || seite == 'l';
-    final glanz = dunkel ? _eGlanz : _glanz;
-    final licht = dunkel ? _eLicht : _licht;
-    final holz = dunkel ? _eHolz : _holz;
-    final schatten = dunkel ? _eSchatten : _schatten;
-    final tief = dunkel ? _eTief : _tief;
+    final glanz = dunkel ? _eGlanz : HolzTon.glanz;
+    final licht = dunkel ? _eLicht : HolzTon.licht;
+    final holz = dunkel ? _eHolz : HolzTon.holz;
+    final schatten = dunkel ? _eSchatten : HolzTon.schatten;
+    final tief = dunkel ? _eTief : HolzTon.tief;
 
-    if (quer == 0 || quer == breite - 1) return _k;
+    if (quer == 0 || quer == breite - 1) return HolzTon.kante;
     final ecke = math.min(l, r) < breite && math.min(o, u) < breite;
     if (ecke && math.min(l, r) == math.min(o, u)) return tief;
     if (quer == 1) return hell ? glanz : schatten;
@@ -226,13 +218,13 @@ class GehrungsMaler extends CustomPainter {
       }
       for (final (dl, dq) in <(int, int)>[(-1, 0), (2, 0), (1, 1), (0, 2)]) {
         final (x, y) = _auf(b, seite, a + dl, dq);
-        b.setze(x, y, _k);
+        b.setze(x, y, HolzTon.kante);
       }
       // Manchmal läuft ein Riss weiter ins Holz.
       if (z.nextBool()) {
         for (var q = 3; q < 6; q++) {
           final (x, y) = _auf(b, seite, a + (q - 3), q);
-          b.setze(x, y, _tief);
+          b.setze(x, y, HolzTon.tief);
         }
       }
     }
@@ -246,17 +238,31 @@ class GehrungsMaler extends CustomPainter {
       final a = breite + 6 + z.nextInt(_laenge(b, seite) - 2 * breite - 14);
       for (final (dl, dq, c) in <(int, int, Color)>[
         // Ring
-        (-1, 4, _schatten), (0, 3, _schatten), (1, 3, _schatten),
-        (2, 4, _schatten), (2, 5, _schatten), (2, 6, _tief),
-        (1, 7, _tief), (0, 7, _tief), (-1, 6, _tief), (-1, 5, _schatten),
+        (-1, 4, HolzTon.schatten),
+        (0, 3, HolzTon.schatten),
+        (1, 3, HolzTon.schatten),
+        (2, 4, HolzTon.schatten),
+        (2, 5, HolzTon.schatten),
+        (2, 6, HolzTon.tief),
+        (1, 7, HolzTon.tief),
+        (0, 7, HolzTon.tief),
+        (-1, 6, HolzTon.tief),
+        (-1, 5, HolzTon.schatten),
         // Kern
-        (0, 4, _tief), (1, 4, _tief), (0, 5, _k), (1, 5, _tief),
-        (0, 6, _tief), (1, 6, _tief),
+        (0, 4, HolzTon.tief),
+        (1, 4, HolzTon.tief),
+        (0, 5, HolzTon.kante),
+        (1, 5, HolzTon.tief),
+        (0, 6, HolzTon.tief), (1, 6, HolzTon.tief),
         // Licht oben am Rand
-        (0, 2, _glanz), (1, 2, _glanz),
+        (0, 2, HolzTon.glanz), (1, 2, HolzTon.glanz),
         // Fasern, die ausweichen
-        (-3, 3, _schatten), (-2, 2, _schatten), (3, 2, _schatten),
-        (4, 3, _schatten), (-3, 8, _schatten), (4, 8, _schatten),
+        (-3, 3, HolzTon.schatten),
+        (-2, 2, HolzTon.schatten),
+        (3, 2, HolzTon.schatten),
+        (4, 3, HolzTon.schatten),
+        (-3, 8, HolzTon.schatten),
+        (4, 8, HolzTon.schatten),
       ]) {
         final (x, y) = _auf(b, seite, a + dl, dq);
         b.setze(x, y, c);
@@ -325,12 +331,12 @@ class GehrungsMaler extends CustomPainter {
   /// Eine Messing-Einlage innen, entlang der ganzen Kante.
   void _einlage(_Bild b) {
     for (var x = breite - 3; x <= b.w - breite + 2; x++) {
-      b.setze(x, breite - 3, _mMitte);
-      b.setze(x, b.h - breite + 2, _mTief);
+      b.setze(x, breite - 3, HolzTon.messing);
+      b.setze(x, b.h - breite + 2, HolzTon.messingTief);
     }
     for (var y = breite - 3; y <= b.h - breite + 2; y++) {
-      b.setze(breite - 3, y, _mHell);
-      b.setze(b.w - breite + 2, y, _mTief);
+      b.setze(breite - 3, y, HolzTon.messingHell);
+      b.setze(b.w - breite + 2, y, HolzTon.messingTief);
     }
     // Ziernägel, etwa alle 40 Bildpunkte.
     for (var seite = 0; seite < 4; seite++) {
@@ -338,7 +344,15 @@ class GehrungsMaler extends CustomPainter {
       final n = math.max(1, (lang - 2 * breite) ~/ 40);
       for (var i = 1; i <= n; i++) {
         final a = breite + (lang - 2 * breite) * i ~/ (n + 1);
-        _knopf(b, seite, a, 5, _mHell, _mMitte, _mTief);
+        _knopf(
+          b,
+          seite,
+          a,
+          5,
+          HolzTon.messingHell,
+          HolzTon.messing,
+          HolzTon.messingTief,
+        );
       }
     }
   }
@@ -379,9 +393,9 @@ class GehrungsMaler extends CustomPainter {
   /// Messing, im Dungeon Eisen.
   void _ecken(_Bild b) {
     final eisen = art == RahmenArt.eisen;
-    final hell = eisen ? _iHell : _mHell;
-    final mitte = eisen ? _iMitte : _mMitte;
-    final tief = eisen ? _iTief : _mTief;
+    final hell = eisen ? _iHell : HolzTon.messingHell;
+    final mitte = eisen ? _iMitte : HolzTon.messing;
+    final tief = eisen ? _iTief : HolzTon.messingTief;
     // Das L in der Ecke oben links, für die anderen gespiegelt.
     const arm = 11, dick = 4;
     for (final (sx, sy) in <(bool, bool)>[
@@ -404,7 +418,7 @@ class GehrungsMaler extends CustomPainter {
               (x > dick && y == dick) ||
               (y > dick && x == dick);
           final c = rand
-              ? _k
+              ? HolzTon.kante
               : (x == 1 || y == 1)
               ? hell
               : (x == dick - 1 || y == dick - 1)

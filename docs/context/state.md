@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1100, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1106, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -152,20 +152,19 @@ unter `tool/pixel/`.
 | **Buch der Theorie** | Foliant mit dem Talentbaum (war Frederiks Zeichnung) | #190 |
 | **Kreis Kampf** | eigene Schwerter, breit, kühler Stahl | #190 |
 | **Der Rahmen** | **gemalt auf Gehrung statt gedehnt**, vier Arten: Holz, Ranken, Eisen, Messing ([ADR-0099](../decisions/0099-rahmen-auf-gehrung.md)) | #190 |
+| **Planke, Knopf, Seil, Balken** | ebenfalls gemalt, „aus einem Guss“ — `assets/UI/Holz/` ist gelöscht, vom UI-Paket ist nichts mehr im Spiel | #190 |
 
 **Neue Regeln, von Frederik:** Jedes Bild hat 64 × 64 Pixel. Und: **erst
 zeigen, auf sein Okay warten, dann einbauen.**
 
-App 1100 (vorher 1090). Startseite, Theorie, Dungeon-Eingang und
-Aufstiegsfeier in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+App 1106 (vorher 1090). Startseite, Theorie, Charakter, Dungeon-Eingang
+und Aufstiegsfeier in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
 
 ### Offen
 
 - Die Figur trägt den alten Langbogen; `Langbogen.png` und
   `CharacterButton.png` liegen ungenutzt.
 - Herkunft klären: Grundfigur, Gold, ButtonBG, Berg, Bibliothek, Mentor.
-- Planke, Seil, Balken und Knöpfe sind noch aus dem Paket — neben dem neuen
-  Rahmen ein anderer Zeichenstil.
 - **AktivesBrett hat ADR-0099 und die Liste nicht gesehen**, und er braucht
   pxl, um die Quellen zu ändern.
 

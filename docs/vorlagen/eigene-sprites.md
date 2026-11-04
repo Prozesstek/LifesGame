@@ -27,9 +27,9 @@
 | Rüstung, Helme, Schuhe, Ringe, Talismane | 40 | 0 |
 | Fähigkeiten | 39 | 0 |
 | Ausrüstung auf der Figur | 24 | 0 |
-| Holz-Oberfläche | 6 | 1 |
+| Holz-Oberfläche | 6 | 6 |
 | Dungeon: Held, Gegner, Bosse | 15 Figuren (25 Dateien) | 0 |
-| **Summe** | **139** | **4** |
+| **Summe** | **139** | **9** |
 
 Die Zahlen werden beim Abhaken nachgezogen.
 
@@ -177,17 +177,17 @@ sonst trägt die Figur das alte Bild.
 - [ ] Lederkappe · [ ] Eisenhaube · [ ] Schuppenhaube · [ ] Visierhelm
 - [ ] Turnierhelm · [ ] Drachenhelm · [ ] Runenkrone · [ ] Krone des Hochwächters
 
-## 11. Holz-Oberfläche (`assets/UI/Holz/`, aus `UIBundleFree`)
+## 11. Holz-Oberfläche — **ganz ersetzt**, `assets/UI/Holz/` ist gelöscht (ADR-0099)
 
 Sitzt auf jeder Karte, jedem Dialog, jedem Knopf. Wer sie tauscht, prüft
 `lib/ui/holz.dart` (wo gedehnt wird) und `test/palette_test.dart`.
 
-- [ ] Planke
+- [x] Planke — gemalt (`PlankenMaler`, `lib/ui/holz_teile.dart`)
 - [x] Rahmen — gemalt auf Gehrung, in vier Arten (`lib/ui/gehrung.dart`, ADR-0099)
-- [ ] Seil
-- [ ] Balken
-- [ ] Knopf
-- [ ] Knopf gedrückt
+- [x] Seil — gemalt (`SeilMaler`)
+- [x] Balken — gemalt (`BalkenMaler`)
+- [x] Knopf — gemalt (`KnopfMaler`)
+- [x] Knopf gedrückt — derselbe Maler, das Licht umgedreht
 
 ## 12. Dungeon (`assets/Grube/`, aus dem Kampf-Paket)
 

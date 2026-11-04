@@ -64,7 +64,13 @@ Flächen, höchstens 64.
 ## Konsequenzen
 
 - `Rahmen.png` ist gelöscht, ebenso `Holz.rahmen`, `rahmenMitte` und
-  `rahmenBild`. Planke, Seil, Balken und Knöpfe bleiben vorerst aus dem Paket.
+  `rahmenBild`.
+- **Noch am selben Tag folgten die übrigen Teile** (Frederik: „alles aus
+  einem Guss“): Planke, Knopf, Seil und Balken sind ebenfalls gemalt
+  (`lib/ui/holz_teile.dart`), mit denselben Farben (`HolzTon`) und
+  derselben Maserung. Der Knopf dreht gedrückt sein Licht um; die Rinne
+  des Balkens sitzt jetzt mittig. `assets/UI/Holz/` ist ganz gelöscht —
+  vom UI-Paket ist nichts mehr im Spiel.
 - Die Anschlagtafel („Heute“, Dailies) malt denselben Rahmen.
 - **Ein neuer Bildschirm ist Holz, solange er nichts sagt.** Wer Theorie oder
   Dungeon baut, legt `RahmenOrt` um ihn; wer einen Belohnungs-Dialog baut,
