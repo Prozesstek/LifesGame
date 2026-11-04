@@ -1,6 +1,7 @@
-"""Zeichnet die Bilder von elf der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von zehn der zwölf Stücke aus ADR-0077.
 
-Die Fledermaushaube steht seit dem 04.11. in `tool/pixel/` (pxl).
+Fledermaushaube und Nachtmantel stehen seit dem 04.11. in `tool/pixel/`
+(pxl).
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
 das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
@@ -12,7 +13,7 @@ Dazu kommen:
 
 * zwei Bilder für die neuen Grundangriffe (Speerstich, Sichelhieb) unter
   `assets/Faehigkeiten/`,
-* fünf Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
+* vier Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
   Rüstungen und Helme nehmen den **Umriss** von Lederwams und Lederkappe
   und färben ihn neu ein — so sitzen sie genau, ohne Pillow. Die zwei
   Waffen sind auf dem 64er-Raster der Figur gezeichnet.
@@ -109,15 +110,6 @@ def flickenmantel():
         b.rechteck(x0, y0, x1, y1, c)
     for x, y in ((14, 12), (16, 12), (16, 22), (17, 17), (11, 17)):
         b.setze(x, y, KONTUR)
-    return b.fertig()
-
-
-def nachtmantel():
-    b = Bild()
-    _mantel(b, NACHT, BLUT)
-    b.vieleck(((6, 2), (10, 4), (9, 9)), NACHT_HELL)
-    b.vieleck(((26, 2), (22, 4), (23, 9)), NACHT_HELL)
-    b.linie(16, 10, 16, 29, 1.2, BLUT_HELL)
     return b.fertig()
 
 
@@ -306,8 +298,6 @@ def _umgefaerbt(vorlage, rampe, flicken=None):
 def _figur_ruestungen():
     vorlage = _lies(os.path.join(WURZEL, 'character',
                                  'Charakter_Lederwams.png'))
-    nacht = _umgefaerbt(vorlage, (KONTUR, NACHT, NACHT_HELL, BLUT))
-
     def flicken(x, y, stufe):
         if stufe in (KONTUR,):
             return stufe
@@ -315,7 +305,7 @@ def _figur_ruestungen():
         return (MOOS, ROST, SCHIEFER, HANF)[feld]
 
     flick = _umgefaerbt(vorlage, (KONTUR, BRAUN, HANF, HANF), flicken)
-    return {'Nachtmantel': nacht, 'Flickenmantel': flick}
+    return {'Flickenmantel': flick}
 
 
 def _figur_helme():
@@ -350,7 +340,6 @@ LADEN = {
     'Waffen/Speere/Langspeer': langspeer,
     'Waffen/Sicheln/Blutsichel': blutsichel,
     'Ruestung/Flickenmantel': flickenmantel,
-    'Ruestung/Nachtmantel': nachtmantel,
     'Helme/Falkenhaube': falkenhaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
     'Schuhe/Schattenstiefel': schattenstiefel,
