@@ -1,7 +1,7 @@
-"""Zeichnet die Bilder von zehn der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von neun der zwölf Stücke aus ADR-0077.
 
-Fledermaushaube und Nachtmantel stehen seit dem 04.11. in `tool/pixel/`
-(pxl).
+Fledermaushaube, Nachtmantel und Schattenstiefel stehen seit dem 04.11.
+in `tool/pixel/` (pxl).
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
 das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
@@ -140,14 +140,6 @@ def hasenlaeufer():
         b.linie(x, 5, x - 1, 1, 1.0, BLUT_HELL)
     b.linie(10, 6, 19, 6, 1.4, BRAUN)
     b.linie(8, 26, 28, 26, 1.2, BRAUN)
-    return b.fertig()
-
-
-def schattenstiefel():
-    b = Bild()
-    _stiefel(b, NACHT)
-    b.linie(10, 8, 19, 8, 1.6, BLUT_HELL)
-    b.linie(8, 27, 28, 27, 1.2, NACHT_HELL)
     return b.fertig()
 
 
@@ -342,7 +334,6 @@ LADEN = {
     'Ruestung/Flickenmantel': flickenmantel,
     'Helme/Falkenhaube': falkenhaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
-    'Schuhe/Schattenstiefel': schattenstiefel,
     'Ringe/Seelenring': seelenring,
     'Ringe/Frostreif': frostreif,
     'Talismane/Echostein': echostein,
