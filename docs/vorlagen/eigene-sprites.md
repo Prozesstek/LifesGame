@@ -222,7 +222,9 @@ neuen Eintrag dort.
 - Die zwölf Stücke aus ADR-0077 und ihre sechs Bilder auf der Figur
 - Kreise Ausrüstung (Rucksack) und Statistik (Balken)
 - Das Dorf (`tool/dorf_kacheln.py`)
-- Frederiks Zeichnungen: Buch, Stein, Fledermaus, die drei Böden
+- Frederiks Zeichnungen: Stein, Fledermaus, die drei Böden
+- Das Buch der Theorie — war Frederiks Zeichnung, seit 04.11. neu mit pxl
+  (`tool/pixel/kreis_theorie.px.js`): ein Foliant mit dem Talentbaum
 
 ## Herkunft klären
 
