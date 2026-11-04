@@ -59,10 +59,12 @@ void main() {
     }
   });
 
-  test('die Schwerter werden kleiner, der Helm bleibt groß', () {
+  test('was in die Ecken reicht, wird kleiner, der Helm bleibt groß', () {
+    // Bis zum 04.11.2026 waren es die Schwerter von Raven; die eigenen
+    // reichen nicht mehr so weit. Am weitesten reicht jetzt die Rolle.
     const size = HubCircle.diameter;
     expect(
-      HubCircle.symbolSideFor(BereichZeichen.kampf, size),
+      HubCircle.symbolSideFor(BereichZeichen.gewohnheiten, size),
       lessThan(HubCircle.symbolSideFor(BereichZeichen.charakter, size)),
     );
     expect(

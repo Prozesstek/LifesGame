@@ -10,7 +10,7 @@ RPGs kennt:
 | Kreis | Zeichen | woher |
 |---|---|---|
 | Gewohnheiten | Schriftrolle mit Haken — die Quest | seit 04.11.2026 `tool/pixel/kreis_gewohnheiten.px.js` (pxl), nicht mehr hier |
-| Kampf | zwei gekreuzte Schwerter | Raven fc721 |
+| Kampf | zwei gekreuzte Schwerter | seit 04.11.2026 `tool/pixel/kreis_kampf.px.js` (pxl), nicht mehr hier |
 | Statistik | drei Balken, die steigen | gezeichnet |
 | Laden | ein Münzbeutel | Raven fc158, die Münze fc131 |
 | Fähigkeiten | ein Runenstein, der blau leuchtet | Raven fc326, umgefärbt |
@@ -172,7 +172,6 @@ def balken():
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Kampf": raven(ordner, 721),
         "Kreis_Statistik": balken(),
         "Kreis_Laden": mit_muenze(raven(ordner, 158), raven(ordner, 131)),
         "Kreis_Faehigkeiten": leuchtend(raven(ordner, 326)),
