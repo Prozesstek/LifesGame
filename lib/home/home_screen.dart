@@ -275,7 +275,8 @@ class HomeScreen extends ConsumerWidget {
                                           // gibt: Vorher fragt die Startseite nach
                                           // ihr, und das Ei wartet. Ist es gewählt,
                                           // steht das Tier oben in der Leiste.
-                                          if (!start.fragtNachGewohnheit &&
+                                          // Seit ADR-0098 erst auf Level 5.
+                                          if (start.zeigtHaustier &&
                                               !hatTier) ...<Widget>[
                                             const HaustierKarte(),
                                             const SizedBox(height: 10),

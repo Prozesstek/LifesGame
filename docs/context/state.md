@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 03.11.2026 · Frederik
+**Zuletzt aktualisiert:** 04.11.2026 · Frederik
 
 ---
 
@@ -29,6 +29,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Startseite** | **vor dem Berg**, acht Kreise mit Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
+| **Level** | **eine Roadmap auf dem Level-Ring**, die Feier nennt das nächste Ziel; Lagerfeuer, Tagesdungeon, Haustier, Statistik und Sammlung **warten auf ein Level** | ADR-0098 |
 | **Stärke** | Level und Seltenheit vervielfachen, Gewohnheiten addieren, **das Gebiet bestimmt den Kampfwert** | ADR-0042, -0088 |
 | **Ausrüstung** | Exemplare mit Würfen, Tagesladen, Beute mit Schlüsseln, Sets, Legendäre, Verkauf zu einem Viertel, **eigener Bereich mit allen 60 Stücken**, **Rahmen und Name in der Farbe der Seltenheit**, **Kräfte auf jeder Seltenheit, das Vampirset** | ADR-0029–0031, -0034, -0047, -0048, -0057, -0077 |
 | **Fähigkeiten** | 39 Fähigkeiten und 8 Waffenzüge in der Grube, **vier Ultimates auf eigenem Platz ab Level 15**, **drei Passive ohne Knopf**, neunundzwanzig Arten von Wirkung, eigener Bereich mit allen Werten | ADR-0022, -0049, -0073, -0074 |
@@ -38,8 +39,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1079, dazu die acht Packages (theory 219, habits 375, gear
-137, action_combat 406, progression 52, abilities 43, identity 25,
+**Tests:** App 1090, dazu die acht Packages (theory 219, habits 375, gear
+137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -134,6 +135,46 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 04.11.2026: die Level-Roadmap
+
+Frederik: „so eine Art Level Roadmap … Das man sieht was z.B. beim nächsten
+Levelup passiert und bestimmte Bereiche auch erst mit einem bestimmten Level
+freigeschalten werden. z.B. Haustiere erst ab Level 5“. In einer Fragerunde,
+viermal wie empfohlen: [ADR-0098](../decisions/0098-level-roadmap.md).
+
+| Level | geht auf | ein fleißiger Spieler, etwa |
+|---|---|---|
+| 3 | Lagerfeuer (Truhe, Dailies, „Morgen zuerst“) | Tag 2 |
+| 4 | Tagesdungeon | Tag 3 |
+| 5 | Haustier | Tag 4 |
+| 7 | Statistik | Tag 6 |
+| 10 | Sammlung samt Errungenschaften | Tag 11 |
+
+| Was | Wie |
+|---|---|
+| **Roadmap** | ein Tipp auf den Level-Ring: Erfahrung bis zum nächsten Level, „+1 Talentpunkt, +4 % Kraft je Level“, darunter die Meilensteine — erreicht mit Haken, der nächste golden, spätere mit Schloss |
+| **Feier** | nennt, was aufgeht („Haustier ist offen“, neuer Rahmen, Ultimate), darunter blass das nächste Ziel |
+| **Mentor-Weg** | unverändert an Taten |
+| **Alte Stände** | behalten Ei, Lagerfeuer und Tagesdungeon, wenn sie sie schon benutzt haben |
+
+**Ohne Rückfrage entschieden:** Statistik und Sammlung werden **nicht**
+behalten — sie halten nichts, was jemand besitzt, und es gibt keine Spur,
+dass jemand sie geöffnet hat. Die Frage „Morgen zuerst“ nach dem
+geschafften Tag gehört zum Feuer und wartet mit ihm. Der Tooltip am Ring ist
+weg, sein Satz steht oben in der Roadmap.
+
+App 1090 (vorher 1079), progression 58 (vorher 52). Elf Tests gingen von
+Level 1 mit Feuer, Tagesdungeon oder Sammlung aus und stehen jetzt höher.
+Roadmap und Feier in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
+
+### Offen
+
+- **Tester unter Level 7 oder 10 verlieren Statistik bzw. Sammlung**, bis sie
+  dort sind — und Errungenschaften sind bis Level 10 nicht anzusehen.
+- Die Truhe der ersten ein, zwei Tage fällt weg; `runway_sim` zählt es nicht.
+- **Nach Level 15 hat die Roadmap nur Rahmen** — eigene Runde.
+- **AktivesBrett hat ADR-0098 nicht gesehen.**
 
 ## 03.11.2026, zuletzt: der Mentor hat ein Gesicht
 

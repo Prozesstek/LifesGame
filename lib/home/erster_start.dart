@@ -1,3 +1,5 @@
+import 'package:progression/progression.dart';
+
 /// Die acht Bereiche der Startseite.
 enum Bereich {
   gewohnheiten,
@@ -8,7 +10,8 @@ enum Bereich {
   ausruestung,
   charakter,
 
-  /// Die Statistik der Gewohnheiten (ADR-0087) — mit dem ersten Häkchen.
+  /// Die Statistik der Gewohnheiten (ADR-0087) — mit dem ersten Häkchen,
+  /// seit ADR-0098 frühestens auf Level 7.
   statistik,
 }
 
@@ -33,6 +36,9 @@ class ErsterStartStand {
     this.jeBesessen = 0,
     this.level = 1,
     this.gewohnheitenJe = 0,
+    this.hatTier = false,
+    this.warAmFeuer = false,
+    this.tagesgrubeVersucht = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -77,6 +83,17 @@ class ErsterStartStand {
   /// oder abgehakt. Daran hängt der letzte Satz des Mentors
   /// ([Schritt.gebiete]).
   final int gewohnheitenJe;
+
+  /// **Was ein Stand schon hat, behält er** (ADR-0098): ein gewähltes Ei,
+  /// …
+  final bool hatTier;
+
+  /// … etwas, das je am Lagerfeuer geschah …
+  final bool warAmFeuer;
+
+  /// … und ein Versuch in der Tagesgrube. Ein Extra, das man schon
+  /// benutzt hat, verschwindet nicht, nur weil das Level darunter liegt.
+  final bool tagesgrubeVersucht;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -127,6 +144,9 @@ class ErsterStart {
     this.fragtNachGewohnheit,
     this.grubeErklaertSich,
     this.zeigtTagesgrube,
+    this.zeigtTagesaufgaben,
+    this.zeigtHaustier,
+    this.zeigtSammlung,
   );
 
   /// Alles offen, kein Schritt — für Tests anderer Bereiche und für jeden
@@ -145,6 +165,9 @@ class ErsterStart {
     null,
     false,
     false,
+    true,
+    true,
+    true,
     true,
   );
 
@@ -183,8 +206,25 @@ class ErsterStart {
   ///
   /// **Nach dem ersten Lauf, gewonnen oder verloren.** Sie hat einen
   /// Versuch am Tag; wer die Steuerung noch nie in der Hand hatte,
-  /// verbrauchte ihn beim Ausprobieren.
+  /// verbrauchte ihn beim Ausprobieren. **Und frühestens auf Level 4**
+  /// (ADR-0098, `LevelExtra.tagesdungeon`).
   final bool zeigtTagesgrube;
+
+  /// Ob das Lagerfeuer brennt — Truhe, Dailies, „Morgen zuerst“
+  /// (ADR-0076). Mit dem ersten Häkchen, wie die Theorie, **und
+  /// frühestens auf Level 3** (ADR-0098). Der Name ist älter als das
+  /// Feuer; an ihm hängen auch der Streifen der Dailies und die Frage
+  /// nach dem geschafften Tag.
+  final bool zeigtTagesaufgaben;
+
+  /// Ob das Haustier da ist oder sein Ei gewählt werden kann (ADR-0086):
+  /// erst, wenn es eine Gewohnheit gibt, **und frühestens auf Level 5**
+  /// (ADR-0098) — außer das Ei ist schon gewählt.
+  final bool zeigtHaustier;
+
+  /// Ob der Weg in die Sammlung offen ist (ADR-0080) — **ab Level 10**
+  /// (ADR-0098).
+  final bool zeigtSammlung;
 
   /// Der Kreis, der als Nächstes dran ist — höchstens einer. Es ist der
   /// Kreis des Schritts; bei der Gewohnheit und beim Häkchen ist das Ziel
@@ -201,11 +241,6 @@ class ErsterStart {
 
   /// Ob alle acht Kreise stehen.
   bool get fertig => sichtbar.length == Bereich.values.length;
-
-  /// Tagesaufgaben und Truhe kommen mit dem ersten Häkchen, wie die
-  /// Theorie — vorher stünden dort drei Aufgaben, bevor es eine
-  /// Gewohnheit gibt.
-  bool get zeigtTagesaufgaben => zeigt(Bereich.theorie);
 
   /// Ob der Pflichtweg des Mentors gegangen ist: **der erste Sieg, sonst
   /// nichts**. Danach steht er höchstens noch bei [Schritt.gebiete], und
@@ -260,15 +295,25 @@ class ErsterStart {
       // **Mit dem ersten Häkchen** (ADR-0087): Ab dann gibt es einen Tag
       // zu sehen. Nicht über `abgehakt` — ein Sieg ohne Häkchen hätte
       // nichts, was die Statistik zeigen könnte.
-      if (s.haekchen > 0) Bereich.statistik,
+      // **Und frühestens auf Level 7** (ADR-0098). Sie hält nichts, was
+      // jemand besitzt; ein alter Stand darunter wartet auf sie.
+      if (s.haekchen > 0 && LevelExtra.statistik.offenAuf(s.level))
+        Bereich.statistik,
     };
+    final fragt = !s.hatGewohnheit && s.haekchen == 0;
 
     return ErsterStart._(
       Set<Bereich>.unmodifiable(sichtbar),
       schritt,
-      !s.hatGewohnheit && s.haekchen == 0,
+      fragt,
       s.stufenGeschafft == 0,
-      s.hatGekaempft,
+      s.hatGekaempft &&
+          (LevelExtra.tagesdungeon.offenAuf(s.level) || s.tagesgrubeVersucht),
+      // Tagesaufgaben und Truhe mit dem ersten Häkchen, wie die Theorie —
+      // vorher stünden dort drei Aufgaben, bevor es eine Gewohnheit gibt.
+      theorie && (LevelExtra.lagerfeuer.offenAuf(s.level) || s.warAmFeuer),
+      s.hatTier || (!fragt && LevelExtra.haustier.offenAuf(s.level)),
+      LevelExtra.sammlung.offenAuf(s.level),
     );
   }
 }

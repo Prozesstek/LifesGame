@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
 
 import '../habits/habits_controller.dart';
+import '../home/erster_start_provider.dart';
 import '../ui/holz.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
@@ -21,6 +22,9 @@ import 'widgets/morgen_zuerst.dart';
 /// einer gibt es nichts zu wählen — und noch nichts gewählt ist: Wer am
 /// Feuer schon gewählt hat, wird nicht zweimal gefragt.
 Future<void> frageMorgenZuerst(BuildContext context, WidgetRef ref) async {
+  // Die Frage gehört dem Feuer: Brennt es noch nicht (ADR-0098), fragt
+  // auch niemand.
+  if (!ref.read(ersterStartProvider).zeigtTagesaufgaben) return;
   final morgen = ref.read(todayProvider).next;
   final tracker = ref.read(habitTrackerProvider);
   if (tracker.firstUpOn(morgen) != null) return;

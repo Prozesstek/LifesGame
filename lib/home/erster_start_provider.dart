@@ -3,8 +3,10 @@ import 'package:gear/gear.dart';
 
 import '../achievements/achievements_controller.dart';
 import '../character/abilities_controller.dart';
+import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
 import '../habits/habits_controller.dart';
+import '../haustier/haustier_controller.dart';
 import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'erster_start.dart';
@@ -44,6 +46,10 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
         ...habits.activeIds,
         for (final eigene in habits.customHabits) eigene.id,
       }.length,
+      // Was ein Stand schon hat, behält er (ADR-0098).
+      hatTier: ref.watch(haustierProvider).art != null,
+      warAmFeuer: habits.warAmFeuer,
+      tagesgrubeVersucht: !ref.watch(dailyPitProvider).isEmpty,
     ),
   );
 });
