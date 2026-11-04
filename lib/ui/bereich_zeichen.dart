@@ -13,6 +13,8 @@ abstract final class BereichZeichen {
   // `tool/kreis_zeichen.py`. Das Systemzeichen bleibt nur Ersatz.
 
   /// Die Schriftrolle mit Haken auf dem Gewohnheiten-Kreis — die Quest.
+  /// Seit dem 04.11.2026 gezeichnet mit pxl:
+  /// `tool/pixel/kreis_gewohnheiten.px.js`.
   static const String gewohnheiten = 'assets/UI/Kreis_Gewohnheiten.png';
 
   /// Die gekreuzten Schwerter auf dem Kampf-Kreis, wie auf „Hinab“.
@@ -62,7 +64,7 @@ abstract final class BereichZeichen {
   /// `test/bereich_zeichen_test.dart` misst nach, ob keine Zahl zu klein
   /// ist. Ein unbekanntes Bild gilt als bis in die Ecken gefüllt.
   static double reichweite(String pfad) => switch (pfad) {
-    gewohnheiten => 1.18,
+    gewohnheiten => 1.31,
     theorie => 0.99,
     kampf => 1.42,
     statistik => 1.11,
