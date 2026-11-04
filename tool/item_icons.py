@@ -1,7 +1,7 @@
-"""Zeichnet die Bilder von neun der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von acht der zwölf Stücke aus ADR-0077.
 
-Fledermaushaube, Nachtmantel und Schattenstiefel stehen seit dem 04.11.
-in `tool/pixel/` (pxl).
+Das Vampirset (Fledermaushaube, Nachtmantel, Schattenstiefel, Blutsichel)
+steht seit dem 04.11. in `tool/pixel/` (pxl).
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
 das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
@@ -13,7 +13,7 @@ Dazu kommen:
 
 * zwei Bilder für die neuen Grundangriffe (Speerstich, Sichelhieb) unter
   `assets/Faehigkeiten/`,
-* vier Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
+* drei Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
   Rüstungen und Helme nehmen den **Umriss** von Lederwams und Lederkappe
   und färben ihn neu ein — so sitzen sie genau, ohne Pillow. Die zwei
   Waffen sind auf dem 64er-Raster der Figur gezeichnet.
@@ -81,18 +81,6 @@ def langspeer():
     b.vieleck(((21, 11), (24, 4), (29, 3), (28, 8), (21, 13)), SILBER)
     b.linie(21, 9, 25, 13, 2.2, STAHL)
     b.linie(9, 24, 6, 27, 2.4, LEDER_HELL)
-    return b.fertig()
-
-
-def blutsichel():
-    b = Bild()
-    # Die Klinge beginnt, wo der Griff endet, und biegt sich über ihn.
-    b.ring(19, 13, 9, 3.2, SILBER, 150, 15)
-    b.ring(19, 13, 7.6, 1.2, BLUT_HELL, 165, 5)
-    b.strich(7, 29, 12, 18, 2.4, NACHT_HELL)
-    b.linie(6, 30, 8, 28, 2.6, BLUT)
-    b.kreis(27, 23, 1.5, BLUT_HELL)
-    b.kreis(25, 27, 1.1, BLUT)
     return b.fertig()
 
 
@@ -317,20 +305,13 @@ def _figur_waffen():
         speer.linie(41, 52, 54, 16, 2.0, BRAUN)
         speer.vieleck(((52, 18), (55, 9), (58, 16)), SILBER)
         speer.fertig(licht=False)
-
-        sichel = Bild()
-        sichel.linie(42, 46, 47, 31, 2.2, NACHT_HELL)
-        sichel.ring(52, 32, 7, 2.2, SILBER, 190, 30)
-        sichel.ring(52, 32, 5.8, 0.8, BLUT_HELL, 200, 20)
-        sichel.fertig(licht=False)
     finally:
         fi.RASTER = alt
-    return {'Langspeer': speer, 'Blutsichel': sichel}
+    return {'Langspeer': speer}
 
 
 LADEN = {
     'Waffen/Speere/Langspeer': langspeer,
-    'Waffen/Sicheln/Blutsichel': blutsichel,
     'Ruestung/Flickenmantel': flickenmantel,
     'Helme/Falkenhaube': falkenhaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
