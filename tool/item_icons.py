@@ -1,6 +1,7 @@
-"""Zeichnet die Bilder von elf der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von neun der zwölf Stücke aus ADR-0077.
 
-Die Fledermaushaube steht seit dem 04.11. in `tool/pixel/` (pxl).
+Fledermaushaube, Nachtmantel und Schattenstiefel stehen seit dem 04.11.
+in `tool/pixel/` (pxl).
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
 das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
@@ -12,7 +13,7 @@ Dazu kommen:
 
 * zwei Bilder für die neuen Grundangriffe (Speerstich, Sichelhieb) unter
   `assets/Faehigkeiten/`,
-* fünf Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
+* vier Bilder für die Figur (`assets/character/Charakter_<Name>.png`):
   Rüstungen und Helme nehmen den **Umriss** von Lederwams und Lederkappe
   und färben ihn neu ein — so sitzen sie genau, ohne Pillow. Die zwei
   Waffen sind auf dem 64er-Raster der Figur gezeichnet.
@@ -112,15 +113,6 @@ def flickenmantel():
     return b.fertig()
 
 
-def nachtmantel():
-    b = Bild()
-    _mantel(b, NACHT, BLUT)
-    b.vieleck(((6, 2), (10, 4), (9, 9)), NACHT_HELL)
-    b.vieleck(((26, 2), (22, 4), (23, 9)), NACHT_HELL)
-    b.linie(16, 10, 16, 29, 1.2, BLUT_HELL)
-    return b.fertig()
-
-
 def _haube(b, c):
     b.kreis(16, 16, 10, c)
     b.rechteck(6, 16, 27, 22, c)
@@ -148,14 +140,6 @@ def hasenlaeufer():
         b.linie(x, 5, x - 1, 1, 1.0, BLUT_HELL)
     b.linie(10, 6, 19, 6, 1.4, BRAUN)
     b.linie(8, 26, 28, 26, 1.2, BRAUN)
-    return b.fertig()
-
-
-def schattenstiefel():
-    b = Bild()
-    _stiefel(b, NACHT)
-    b.linie(10, 8, 19, 8, 1.6, BLUT_HELL)
-    b.linie(8, 27, 28, 27, 1.2, NACHT_HELL)
     return b.fertig()
 
 
@@ -306,8 +290,6 @@ def _umgefaerbt(vorlage, rampe, flicken=None):
 def _figur_ruestungen():
     vorlage = _lies(os.path.join(WURZEL, 'character',
                                  'Charakter_Lederwams.png'))
-    nacht = _umgefaerbt(vorlage, (KONTUR, NACHT, NACHT_HELL, BLUT))
-
     def flicken(x, y, stufe):
         if stufe in (KONTUR,):
             return stufe
@@ -315,7 +297,7 @@ def _figur_ruestungen():
         return (MOOS, ROST, SCHIEFER, HANF)[feld]
 
     flick = _umgefaerbt(vorlage, (KONTUR, BRAUN, HANF, HANF), flicken)
-    return {'Nachtmantel': nacht, 'Flickenmantel': flick}
+    return {'Flickenmantel': flick}
 
 
 def _figur_helme():
@@ -350,10 +332,8 @@ LADEN = {
     'Waffen/Speere/Langspeer': langspeer,
     'Waffen/Sicheln/Blutsichel': blutsichel,
     'Ruestung/Flickenmantel': flickenmantel,
-    'Ruestung/Nachtmantel': nachtmantel,
     'Helme/Falkenhaube': falkenhaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
-    'Schuhe/Schattenstiefel': schattenstiefel,
     'Ringe/Seelenring': seelenring,
     'Ringe/Frostreif': frostreif,
     'Talismane/Echostein': echostein,

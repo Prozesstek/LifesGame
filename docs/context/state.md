@@ -136,6 +136,23 @@ vom 02.10.
 
 ---
 
+## 04.11.2026, ganz zuletzt: die Schattenstiefel
+
+Neu mit pxl (`tool/pixel/schattenstiefel.px.js`), passend zu Haube und Mantel:
+ein Paar in der Ausrichtung der Festen Stiefel, mit Flügelplatte um einen Stein,
+zwei Spitzen am offenen Kragen, Kralle an der Kappe und Sporn. Schuhe zeigen sich nicht auf
+der Figur, es gibt also nur das Ladenbild. Nicht in der laufenden App, nicht am
+Handy.
+
+## 04.11.2026, zuletzt: der Nachtmantel passt zur Haube
+
+AktivesBrett: „mach mal die rüstung, also den brustteil, passend“. Neu mit pxl
+(`tool/pixel/nachtmantel.px.js`): vorn ein Harnisch mit Stirnband-Linie und
+Fledermaus um einen Stein, hinten Flügel als Mantel, Krallen auf den Schultern.
+Eigene Fassung auf der Figur statt des umgefärbten Lederwamses;
+`tool/item_icons.py` zeichnet ihn nicht mehr. Nicht in der laufenden App, nicht
+am Handy.
+
 ## 04.11.2026, danach: die Fledermaushaube ist eine Fledermaus
 
 AktivesBrett: „schau dir mal bitte die vampierrüstung im spiel an. Kannst du
