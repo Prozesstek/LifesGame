@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 04.11.2026 · Frederik
+**Zuletzt aktualisiert:** 04.11.2026 · AktivesBrett
 
 ---
 
@@ -165,8 +165,50 @@ und Aufstiegsfeier in 390 × 844 gerendert und angesehen. **Nicht am Handy.**
 - Die Figur trägt den alten Langbogen; `Langbogen.png` und
   `CharacterButton.png` liegen ungenutzt.
 - Herkunft klären: Grundfigur, Gold, ButtonBG, Berg, Bibliothek, Mentor.
-- **AktivesBrett hat ADR-0099 und die Liste nicht gesehen**, und er braucht
-  pxl, um die Quellen zu ändern.
+- **AktivesBrett hat ADR-0099 und die Liste nicht gesehen.** pxl hat er
+  schon: Er hat parallel das Vampirset neu gezeichnet (#191–#194, unten).
+
+## 04.11.2026, zum Schluss: die Blutsichel
+
+Neu mit pxl (`tool/pixel/blutsichel.px.js`), dunkler Stahl, Ausrichtung wie bisher: Griff unten
+links, die Klinge biegt sich nach rechts. Glühende Schneide, Runen, Dornen, Flügelhaut
+darunter, Parierstange aus zwei Flügeln um einen Stein, Blut, das an der Schneide herabläuft.
+Auf der Figur steht sie höher als bisher, sonst verschwand der Griff im Mantel.
+Damit ist das ganze Vampirset neu. Nicht in der laufenden App, nicht am Handy.
+
+## 04.11.2026, ganz zuletzt: die Schattenstiefel
+
+Neu mit pxl (`tool/pixel/schattenstiefel.px.js`), passend zu Haube und Mantel:
+ein Paar in der Ausrichtung der Festen Stiefel, mit Flügelplatte um einen Stein,
+zwei Spitzen am offenen Kragen, Kralle an der Kappe und Sporn. Schuhe zeigen sich nicht auf
+der Figur, es gibt also nur das Ladenbild. Nicht in der laufenden App, nicht am
+Handy.
+
+## 04.11.2026, zuletzt: der Nachtmantel passt zur Haube
+
+AktivesBrett: „mach mal die rüstung, also den brustteil, passend“. Neu mit pxl
+(`tool/pixel/nachtmantel.px.js`): vorn ein Harnisch mit Stirnband-Linie und
+Fledermaus um einen Stein, hinten Flügel als Mantel, Krallen auf den Schultern.
+Eigene Fassung auf der Figur statt des umgefärbten Lederwamses;
+`tool/item_icons.py` zeichnet ihn nicht mehr. Nicht in der laufenden App, nicht
+am Handy.
+
+## 04.11.2026, danach: die Fledermaushaube ist eine Fledermaus
+
+AktivesBrett: „schau dir mal bitte die vampierrüstung im spiel an. Kannst du
+den Helm einfach mal neu machen, sodass er geil wird“. Neu gezeichnet mit pxl
+(`tool/pixel/fledermaushaube.px.js`), die Hälfte gespiegelt: hohe Ohren,
+Flügel an den Wangen, Stirnband mit Grat, glühende Augen, Fangzähne. Farben
+aus Nachtmantel und Blutsichel.
+
+**Ohne Rückfrage entschieden:** Die Figur trägt eine eigene kleine Fassung mit
+freiem Gesicht statt der umgefärbten Lederkappe, sonst sähen Laden und Figur
+verschieden aus. `tool/item_icons.py` zeichnet die Haube nicht mehr, sonst
+überschriebe es sie.
+
+pxl vergrößert nur seine Vorschau; dafür gibt es `tool/pixel/vergroessern.js`.
+Bilder angesehen, auch auf der Figur mit Nachtmantel. **Nicht in der laufenden
+App, nicht am Handy.** Frederik hat sie nicht gesehen.
 
 ## 04.11.2026: die Level-Roadmap
 

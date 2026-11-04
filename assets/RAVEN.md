@@ -130,4 +130,5 @@ Echostein, Irrlichtamulett —, die Grundangriffe Speerstich und
 Sichelhieb und ihre sechs Bilder auf der Figur
 (`character/Charakter_<Name>.png`). Gezeichnet von `tool/item_icons.py`,
 die Rüstungen und Helme auf der Figur als umgefärbter Umriss von
-Lederwams und Lederkappe.
+Lederwams und Lederkappe. Das Vampirset (Haube, Mantel, Stiefel, Sichel)
+steht seit dem 04.11. in `tool/pixel/`.
