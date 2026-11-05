@@ -16,6 +16,15 @@
 
 ---
 
+## 05.11.2026, danach: die Sichel auf der Figur ist das Ladenbild
+
+AktivesBrett: „als item sieht die richtig geil aus aber live an dem charakter
+ist die noch ziemlich arsch“ und „der griff ist doch da kürzer und die klinge
+runder und länger“. Die Fassung auf der Figur rechnet jetzt alle Punkte aus dem
+Ladenbild (`tool/pixel/blutsichel.px.js`, `hin` und `zurueck`), verkleinert und
+um 22° aufgerichtet, sonst bliebe neben dem Arm kein Platz. Auf der Figur mit dem
+Vampirset angesehen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
