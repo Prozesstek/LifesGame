@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 04.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 05.11.2026 · Frederik
 
 ---
 
@@ -135,6 +135,25 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 05.11.2026: die Tastatur schiebt nicht mehr alles hoch
+
+Frederik: „irgendwie sind alle texteingabefelder buggy aufm handy weil durch
+das hochsliden der tastatur alles hochslidet und man nicht sieht was man
+eingibt“ — Haustiername, eigene Gewohnheit und so weiter.
+
+**Doppelt geschoben:** Chrome auf Android schiebt die ganze Seite hoch, um das
+Feld zu zeigen, und Flutter rückt den Inhalt zusätzlich um die Höhe der
+Tastatur nach oben. Jetzt wird die Seite kleiner statt verschoben
+(`interactive-widget=resizes-content`, `web/index.html`), und nur Flutter
+rückt. Flutter ersetzt das Viewport-Tag beim Start; ein kleines Skript hängt
+den Wert an Flutters Tag an. Im Release-Build per Chrome geprüft, dass der
+Wert am Ende dasteht. **Nicht am Handy** — nur dort zeigt sich, ob es hilft.
+
+### Offen
+
+- Safari auf dem iPhone kennt den Wert nicht; dort ändert sich nichts.
+- Die Android-App betrifft es nicht, nur die Web-Fassung.
 
 ## 04.11.2026, zuletzt: eigene Sprites, und der Rahmen auf Gehrung
 
