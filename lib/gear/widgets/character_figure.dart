@@ -23,10 +23,14 @@ class CharacterFigure extends StatelessWidget {
   static const String assetPath = 'assets/character/Charakter.png';
 
   /// In welcher Reihenfolge die Plätze auf der Figur liegen, von unten
-  /// nach oben. Die Rüstung reicht bis unter den Helm, die Waffe liegt
-  /// vor der Rüstung.
+  /// nach oben. Die Rüstung reicht bis unter den Helm, die Stiefel
+  /// stehen über ihrem Saum, die Waffe liegt vor der Rüstung.
+  ///
+  /// **Von den Schuhen hat bisher nur der Schattenstiefel ein Bild**; die
+  /// übrigen neun lassen die Füsse frei, das geht ohne Eintrag.
   static const List<GearSlot> layers = <GearSlot>[
     GearSlot.ruestung,
+    GearSlot.schuhe,
     GearSlot.waffe,
     GearSlot.helm,
   ];
@@ -69,6 +73,8 @@ class CharacterFigure extends StatelessWidget {
     // Seit ADR-0077 — umgefärbtes Lederwams, `tool/item_icons.py`
     'gear-flickenmantel': 'assets/character/Charakter_Flickenmantel.png',
     'gear-nachtmantel': 'assets/character/Charakter_Nachtmantel.png',
+    // Schuhe — gezeichnet, `tool/pixel/schattenstiefel.px.js`
+    'gear-schattenstiefel': 'assets/character/Charakter_Schattenstiefel.png',
     // Waffe — erzeugt
     'gear-kurzbogen': 'assets/character/Charakter_Kurzbogen.png',
     'gear-uebungsklinge': 'assets/character/Charakter_Uebungsklinge.png',

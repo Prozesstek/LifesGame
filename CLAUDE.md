@@ -202,7 +202,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
-| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
+| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |

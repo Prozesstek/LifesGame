@@ -15,7 +15,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('jedes Stück auf Helm, Rüstung und Waffe hat eine Zeichnung', () {
-    for (final slot in CharacterFigure.layers) {
+    // Schuhe sind die Ausnahme: Bisher trägt nur der Schattenstiefel ein Bild.
+    final plaetze = CharacterFigure.layers.where((s) => s != GearSlot.schuhe);
+    for (final slot in plaetze) {
       for (final item in GearCatalog.forSlot(slot)) {
         expect(
           CharacterFigure.overlays,
@@ -89,6 +91,32 @@ void main() {
       CharacterFigure.overlays['gear-kurzbogen']!,
       CharacterFigure.overlays['gear-drachenhelm']!,
     ]);
+  });
+
+  testWidgets('Schattenstiefel stehen über der Rüstung, unter der Waffe', (
+    tester,
+  ) async {
+    await zeige(
+      tester,
+      worn: <String>[
+        'gear-kurzbogen',
+        'gear-schattenstiefel',
+        'gear-lederwams',
+      ],
+    );
+
+    expect(figurenbilder(tester), <String>[
+      CharacterFigure.assetPath,
+      CharacterFigure.overlays['gear-lederwams']!,
+      CharacterFigure.overlays['gear-schattenstiefel']!,
+      CharacterFigure.overlays['gear-kurzbogen']!,
+    ]);
+  });
+
+  testWidgets('Schuhe ohne Bild lassen die Füsse frei', (tester) async {
+    await zeige(tester, worn: <String>['gear-feste-stiefel']);
+
+    expect(figurenbilder(tester), <String>[CharacterFigure.assetPath]);
   });
 
   testWidgets('Ring und Talisman zeigen sich nicht auf der Figur', (

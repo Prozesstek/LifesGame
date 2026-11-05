@@ -105,18 +105,56 @@ sprite("blutsichel", { w: 62, h: 62, outline: "k" },
   ...haut(), ...schneide(), ...griff(), ...parier(), ...blut(),
   glow("er", { r: 2, strength: 0.25 }))
 
-// Dieselbe Sichel auf der Figur: deckungsgleich mit Charakter.png, der
-// Griff liegt in der rechten Hand. Wer sie verschiebt, schiebt alles.
-const klein = (x, y) =>
-  Math.hypot(x - 53, y - 20) <= 9 && Math.hypot(x - 55, y - 22) > 8 && y < 24
+// Dieselbe Sichel auf der Figur: das Ladenbild verkleinert und etwas
+// aufgerichtet, sonst bliebe rechts neben dem Arm kein Platz für die grosse
+// Klinge. Der kurze Griff liegt in der Hand. Alle Punkte kommen aus dem
+// Ladenbild: `hin` trägt sie auf die Figur, `zurueck` fragt dort nach.
+const MASS = 0.45
+const WINKEL = (22 * Math.PI) / 180
+const [co, si] = [Math.cos(WINKEL), Math.sin(WINKEL)]
+const hin = (x, y) => [
+  43 + MASS * ((x - 2) * co + (y - 60) * si),
+  50 + MASS * (-(x - 2) * si + (y - 60) * co),
+]
+const zurueck = (X, Y) => {
+  const [u, v] = [(X - 43) / MASS, (Y - 50) / MASS]
+  return [2 + u * co - v * si, 60 + u * si + v * co]
+}
+const klein = (punkte) => {
+  const raus = []
+  for (let i = 0; i < punkte.length; i += 2) raus.push(...hin(punkte[i], punkte[i + 1]))
+  return raus
+}
+const fKlinge = (X, Y) => klinge(...zurueck(X, Y))
+const fAussen = (X, Y) => aussen(...zurueck(X, Y))
+const fInnen = (X, Y) => innen(...zurueck(X, Y))
+const flaeche = [34, 8, 28, 40]
+const ganz = (x, y) => hin(x, y).map(Math.round)
+
 sprite("charakter_blutsichel", { w: 62, h: 62, outline: "k" },
-  // Die Haut zuerst, dann die Klinge darüber.
-  poly([46, 22, 49, 15, 56, 14, 53, 18, 51, 17, 50, 21, 48, 20], "b"),
-  clip(klein, rect(38, 8, 24, 18, "S")),
-  clip((x, y) => klein(x, y) && Math.hypot(x - 53, y - 20) > 8, rect(38, 8, 24, 18, "s")),
-  clip((x, y) => klein(x, y) && Math.hypot(x - 55, y - 22) <= 9, rect(38, 8, 24, 18, "r")),
-  // Der Griff hell genug, um sich vom Mantel abzuheben.
-  line(40, 50, 47, 24, "N", 3), line(40, 49, 46, 25, "l"),
-  px(42, 42, "b"), px(43, 42, "b"), px(44, 35, "b"), px(45, 35, "b"),
-  poly([44, 24, 46, 21, 49, 24, 46, 27], "n"),
-  px(46, 23, "e"), px(46, 24, "e"), px(46, 25, "b"))
+  // Die Flügelhaut unter der Klinge.
+  poly(klein([17, 32, 24, 13, 38, 10, 46, 13, 41, 21, 37, 17, 34, 27, 28, 22, 26, 34, 21, 28]), "m"),
+  poly(klein([18, 28, 24, 15, 37, 12, 40, 15, 36, 15, 33, 22, 28, 19, 25, 27, 21, 24]), "b"),
+  // Dornen auf dem Rücken.
+  ...[205, 232, 259].map((g) => {
+    const [ax, ay] = auf(g - 7, 25), [bx, by] = auf(g, 31), [cx, cy] = auf(g + 7, 25)
+    return poly(klein([ax, ay, bx, by, cx, cy]), "S")
+  }),
+  // Die Klinge: dunkler Stahl, heller Rücken, glühende Schneide.
+  clip(fKlinge, rect(...flaeche, "t")),
+  clip((x, y) => fKlinge(x, y) && fAussen(x, y) > 23.8, rect(...flaeche, "s")),
+  clip((x, y) => fKlinge(x, y) && fInnen(x, y) <= 26.2, rect(...flaeche, "r")),
+  // Der kurze Griff, rot umwickelt, unten die Kralle.
+  line(...ganz(14, 36), ...ganz(4, 58), "N", 3),
+  line(...ganz(9, 42), ...ganz(13, 44), "b"), line(...ganz(5, 52), ...ganz(9, 54), "b"),
+  poly(klein([0, 57, 8, 58, 2, 65]), "c"),
+  // Die Parierstange: zwei kleine Flügel um den Stein.
+  poly(klein([14, 33, 3, 27, 5, 37, 9, 34, 11, 41, 15, 38, 21, 41, 20, 37, 25, 37, 20, 33]), "n"),
+  poly(klein([14, 31, 9, 36, 14, 41, 19, 36]), "k"),
+  poly(klein([14, 33, 11, 36, 14, 39, 17, 36]), "b"),
+  px(...ganz(14, 36), "e"),
+  // Blut hängt an der Schneide.
+  ...(() => {
+    const [x, y] = ganz(50, 14)
+    return [rect(x, y, 1, 5, "b"), rect(x - 1, y + 4, 3, 2, "b"), px(x - 1, y + 4, "B")]
+  })())
