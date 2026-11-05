@@ -3,6 +3,25 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Im Handy-Browser schieben Chrome und Flutter beide — das Feld verschwindet
+
+Seit Chrome 108 verkleinert Android beim Öffnen der Tastatur nur den
+sichtbaren Ausschnitt und **schiebt die Seite hoch**, bis das Eingabefeld zu
+sehen ist (`interactive-widget=resizes-visual`). Flutter web misst denselben
+Ausschnitt (`visualViewport`), meldet die Tastatur als `viewInsets` und rückt
+Dialoge und Blätter **selbst** nach oben. Zusammen ist das Feld zweimal
+verschoben und steht über dem Bildschirm. Kein Test sieht das, und am
+Rechner gibt es keine Tastatur.
+
+**Abhilfe:** `interactive-widget=resizes-content` — die Seite wird kleiner,
+statt verschoben zu werden. Ein `<meta name="viewport">` in `index.html`
+hilft dabei **nicht**: Flutter entfernt beim Start jedes und setzt sein
+eigenes (`FullPageEmbeddingStrategy._applyViewportMeta`). Deshalb hängt ein
+Skript in `web/index.html` den Wert an Flutters Tag an, sobald es erscheint.
+
+**Prüfen:** `flutter build web --release`, `build/web` ausliefern und mit
+`chrome --headless=new --dump-dom` nach `meta[name=viewport]` sehen.
+
 ## `pump(dauer)` beendet eine Animation nicht
 
 Die große Flamme (`TagesFlammeFeier`) blendet nach einem Tipp in 220 ms

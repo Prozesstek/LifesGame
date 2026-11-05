@@ -35,6 +35,40 @@
 
   <title>Lifes Game</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Die Tastatur am Handy (05.11.2026): Chrome auf Android schiebt beim
+    Oeffnen der Tastatur die ganze Seite hoch, um das Eingabefeld zu
+    zeigen ("resizes-visual"). Flutter rueckt den Inhalt zusaetzlich selbst
+    um die Hoehe der Tastatur nach oben (viewInsets) -- doppelt geschoben
+    landet das Feld oberhalb des Bildschirms. Mit "resizes-content" wird
+    die Seite kleiner statt verschoben, und nur Flutter rueckt.
+
+    Flutter ersetzt beim Start jedes viewport-Meta durch sein eigenes;
+    deshalb haengt dieses Skript den Wert an Flutters Tag an, sobald es
+    erscheint. Siehe docs/context/gotchas.md.
+  -->
+  <script>
+    (function () {
+      var wert = 'interactive-widget=resizes-content';
+      function nachziehen() {
+        var metas = document.querySelectorAll('meta[name="viewport"]');
+        for (var i = 0; i < metas.length; i++) {
+          var inhalt = metas[i].getAttribute('content') || '';
+          if (inhalt.indexOf('interactive-widget') === -1) {
+            metas[i].setAttribute('content', inhalt + ', ' + wert);
+          }
+        }
+      }
+      new MutationObserver(nachziehen).observe(document.head, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['content'],
+      });
+      nachziehen();
+    })();
+  </script>
 </head>
 <body>
   <!--
