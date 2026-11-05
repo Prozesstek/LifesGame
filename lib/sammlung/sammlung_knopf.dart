@@ -7,6 +7,8 @@ import '../ui/palette.dart';
 import 'sammlung.dart';
 import 'sammlung_provider.dart';
 import 'sammlung_screen.dart';
+import 'package:progression/progression.dart';
+import '../progression/widgets/gesperrt_bis_level.dart';
 
 /// Der Weg in die Sammlung, oben rechts in Ausrüstung und Fähigkeiten
 /// (Issues #137, #138): ein Zeichen und wie viel dieses Reiters man hat.
@@ -15,7 +17,7 @@ import 'sammlung_screen.dart';
 /// der Kopfzeile läse sich eine Planke als Hauptknopf.
 ///
 /// **Erst ab Level 10** (ADR-0098, `LevelExtra.sammlung`); vorher steht
-/// hier nichts.
+/// das Zeichen mit Schloss da, ein Tipp öffnet die Level-Roadmap.
 class SammlungKnopf extends ConsumerWidget {
   const SammlungKnopf({required this.art, super.key});
 
@@ -26,9 +28,26 @@ class SammlungKnopf extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(ersterStartProvider).zeigtSammlung) {
-      return const SizedBox.shrink();
+    final start = ref.watch(ersterStartProvider);
+    // Ab Level 10; darunter mit Schloss zu sehen (ADR-0098).
+    if (start.istGesperrt(LevelExtra.sammlung)) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: GesperrtBisLevel(
+          level: LevelExtra.sammlung.level,
+          rund: true,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Icon(
+              Icons.collections_bookmark_outlined,
+              size: 22,
+              color: Palette.accent,
+            ),
+          ),
+        ),
+      );
     }
+    if (!start.zeigtSammlung) return const SizedBox.shrink();
     final prozent = ref.watch(sammelStandProvider(art)).prozent;
     return Padding(
       padding: const EdgeInsets.only(right: 8),

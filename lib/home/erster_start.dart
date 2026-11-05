@@ -146,8 +146,9 @@ class ErsterStart {
     this.zeigtTagesgrube,
     this.zeigtTagesaufgaben,
     this.zeigtHaustier,
-    this.zeigtSammlung,
-  );
+    this.zeigtSammlung, [
+    this.gesperrt = const <LevelExtra>{},
+  ]);
 
   /// Alles offen, kein Schritt — für Tests anderer Bereiche und für jeden
   /// Stand, der durch ist.
@@ -226,6 +227,23 @@ class ErsterStart {
   /// (ADR-0098).
   final bool zeigtSammlung;
 
+  /// **Was man schon sieht, aber noch nicht öffnen kann** (Frederik,
+  /// 04.11.2026: „wenn man die Sachen schon sieht, aber sie halt mit so
+  /// einem Schloss gesperrt sind“). Ein Extra steht hier, sobald seine
+  /// übrige Bedingung erfüllt ist — die Statistik nach dem ersten Häkchen,
+  /// das Ei, wenn es eine Gewohnheit gibt —, solange das Level fehlt.
+  ///
+  /// Die `zeigt…`-Felder bleiben, was **offen** ist; darauf hören auch der
+  /// Streifen der Dailies und die Frage nach dem geschafften Tag.
+  final Set<LevelExtra> gesperrt;
+
+  /// Ob [extra] mit Schloss dasteht.
+  bool istGesperrt(LevelExtra extra) => gesperrt.contains(extra);
+
+  /// Ob [bereich] mit Schloss dasteht — heute nur die Statistik.
+  bool bereichGesperrt(Bereich bereich) =>
+      bereich == Bereich.statistik && istGesperrt(LevelExtra.statistik);
+
   /// Der Kreis, der als Nächstes dran ist — höchstens einer. Es ist der
   /// Kreis des Schritts; bei der Gewohnheit und beim Häkchen ist das Ziel
   /// „Heute“ in der Mitte, kein Kreis.
@@ -295,25 +313,51 @@ class ErsterStart {
       // **Mit dem ersten Häkchen** (ADR-0087): Ab dann gibt es einen Tag
       // zu sehen. Nicht über `abgehakt` — ein Sieg ohne Häkchen hätte
       // nichts, was die Statistik zeigen könnte.
-      // **Und frühestens auf Level 7** (ADR-0098). Sie hält nichts, was
-      // jemand besitzt; ein alter Stand darunter wartet auf sie.
-      if (s.haekchen > 0 && LevelExtra.statistik.offenAuf(s.level))
-        Bereich.statistik,
+      // **Offen erst auf Level 7** (ADR-0098); darunter steht sie mit
+      // Schloss da ([gesperrt]).
+      if (s.haekchen > 0) Bereich.statistik,
     };
     final fragt = !s.hatGewohnheit && s.haekchen == 0;
+
+    // Je Extra: Ist seine übrige Bedingung erfüllt (es wäre zu sehen), und
+    // ist es offen — über das Level oder weil der Stand es schon benutzt
+    // hat?
+    final extras = <LevelExtra, (bool, bool)>{
+      LevelExtra.lagerfeuer: (
+        // Tagesaufgaben und Truhe mit dem ersten Häkchen, wie die
+        // Theorie — vorher stünden dort drei Aufgaben ohne Gewohnheit.
+        theorie,
+        LevelExtra.lagerfeuer.offenAuf(s.level) || s.warAmFeuer,
+      ),
+      LevelExtra.tagesdungeon: (
+        s.hatGekaempft,
+        LevelExtra.tagesdungeon.offenAuf(s.level) || s.tagesgrubeVersucht,
+      ),
+      LevelExtra.haustier: (
+        !fragt || s.hatTier,
+        LevelExtra.haustier.offenAuf(s.level) || s.hatTier,
+      ),
+      LevelExtra.statistik: (
+        s.haekchen > 0,
+        LevelExtra.statistik.offenAuf(s.level),
+      ),
+      LevelExtra.sammlung: (true, LevelExtra.sammlung.offenAuf(s.level)),
+    };
+    bool offen(LevelExtra e) => extras[e]!.$1 && extras[e]!.$2;
 
     return ErsterStart._(
       Set<Bereich>.unmodifiable(sichtbar),
       schritt,
       fragt,
       s.stufenGeschafft == 0,
-      s.hatGekaempft &&
-          (LevelExtra.tagesdungeon.offenAuf(s.level) || s.tagesgrubeVersucht),
-      // Tagesaufgaben und Truhe mit dem ersten Häkchen, wie die Theorie —
-      // vorher stünden dort drei Aufgaben, bevor es eine Gewohnheit gibt.
-      theorie && (LevelExtra.lagerfeuer.offenAuf(s.level) || s.warAmFeuer),
-      s.hatTier || (!fragt && LevelExtra.haustier.offenAuf(s.level)),
-      LevelExtra.sammlung.offenAuf(s.level),
+      offen(LevelExtra.tagesdungeon),
+      offen(LevelExtra.lagerfeuer),
+      offen(LevelExtra.haustier),
+      offen(LevelExtra.sammlung),
+      Set<LevelExtra>.unmodifiable(<LevelExtra>{
+        for (final MapEntry(key: e, value: (zuSehen, auf)) in extras.entries)
+          if (zuSehen && !auf) e,
+      }),
     );
   }
 }

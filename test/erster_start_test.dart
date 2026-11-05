@@ -19,6 +19,9 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'package:lifes_game/progression/widgets/gesperrt_bis_level.dart';
+import 'package:lifes_game/progression/widgets/level_roadmap_blatt.dart';
+import 'package:lifes_game/statistik/statistik_screen.dart';
 
 /// Der erste Start (ADR-0068): Die Startseite fragt nach einer
 /// Gewohnheit, und die Bereiche kommen nach und nach.
@@ -572,12 +575,24 @@ void main() {
     ) async {
       await starte(tester, SaveData(habits: einHaekchen));
 
-      // Die Statistik kam bis ADR-0098 mit dem ersten Häkchen, jetzt
-      // wartet sie auf Level 7 — wie das Lagerfeuer auf Level 3.
+      // Die Statistik kommt mit dem ersten Häkchen, offen ist sie aber
+      // erst auf Level 7 — bis dahin mit Schloss, wie das Lagerfeuer bis
+      // Level 3 (ADR-0098).
+      // Offen sind nur diese zwei; die Statistik steht gesperrt daneben.
       expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
       expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
-      expect(find.byType(LagerfeuerKarte), findsNothing);
+      expect(find.byType(LagerfeuerKarte), findsOneWidget);
+      // Statistik, Lagerfeuer und das Ei des Haustiers (Level 5).
+      expect(find.byKey(GesperrtBisLevel.schlossKey), findsNWidgets(3));
+
+      // Ein Tipp auf die gesperrte Statistik zeigt die Roadmap, nicht die
+      // Statistik.
+      await tester.tap(find.byKey(HubCircle.keyFor('Statistik')).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(LevelRoadmapBlatt), findsOneWidget);
+      expect(find.byType(StatistikScreen), findsNothing);
     });
 
     testWidgets('wer schon unten war, geht mit der Waffe allein hinab', (
