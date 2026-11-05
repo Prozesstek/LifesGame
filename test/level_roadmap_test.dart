@@ -70,10 +70,38 @@ void main() {
     });
 
     test('die Statistik ab Level 7, die Sammlung ab Level 10', () {
-      expect(auf(6).zeigt(Bereich.statistik), isFalse);
-      expect(auf(7).zeigt(Bereich.statistik), isTrue);
+      expect(auf(6).bereichGesperrt(Bereich.statistik), isTrue);
+      expect(auf(7).bereichGesperrt(Bereich.statistik), isFalse);
       expect(auf(9).zeigtSammlung, isFalse);
       expect(auf(10).zeigtSammlung, isTrue);
+    });
+
+    test('was noch fehlt, ist zu sehen — mit Schloss', () {
+      final start = auf(2);
+      // Zu sehen, aber zu: alles, dessen übrige Bedingung erfüllt ist.
+      expect(start.zeigt(Bereich.statistik), isTrue);
+      expect(start.gesperrt, <LevelExtra>{
+        LevelExtra.lagerfeuer,
+        LevelExtra.tagesdungeon,
+        LevelExtra.haustier,
+        LevelExtra.statistik,
+        LevelExtra.sammlung,
+      });
+      // Offen ist davon nichts.
+      expect(start.zeigtTagesaufgaben, isFalse);
+      expect(start.zeigtTagesgrube, isFalse);
+      expect(start.zeigtHaustier, isFalse);
+      expect(start.zeigtSammlung, isFalse);
+      // Auf Level 10 ist nichts mehr gesperrt.
+      expect(auf(10).gesperrt, isEmpty);
+    });
+
+    test('ohne erfüllte Bedingung kein Schloss: kein Kampf, kein Dungeon', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(hatGewohnheit: true, haekchen: 1),
+      );
+      expect(start.istGesperrt(LevelExtra.tagesdungeon), isFalse);
+      expect(start.zeigtTagesgrube, isFalse);
     });
 
     test('was ein Stand schon hat, behält er', () {

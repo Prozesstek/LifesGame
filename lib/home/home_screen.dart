@@ -34,6 +34,8 @@ import '../mentor/zeigefinger.dart';
 import '../haustier/widgets/haustier_karte.dart';
 import '../haustier/haustier_controller.dart';
 import '../skills/widgets/gebiet_frage_karte.dart';
+import 'package:progression/progression.dart';
+import '../progression/widgets/gesperrt_bis_level.dart';
 
 /// Startbildschirm — „Heute“ in der Mitte, die Bereiche darum herum.
 ///
@@ -194,12 +196,19 @@ class HomeScreen extends ConsumerWidget {
                       // sie zählt — mit dem ersten Häkchen.
                       kreis(
                         Bereich.statistik,
-                        (_) => HubCircle(
-                          icon: Icons.insights,
-                          label: 'Statistik',
-                          image: HubCircleImage.plain,
-                          symbol: BereichZeichen.statistik,
-                          onTap: () => _open(context, const StatistikScreen()),
+                        // **Ab Level 7, aber schon zu sehen** — mit Schloss.
+                        (_) => GesperrtBisLevel(
+                          level: LevelExtra.statistik.level,
+                          aktiv: start.bereichGesperrt(Bereich.statistik),
+                          rund: true,
+                          child: HubCircle(
+                            icon: Icons.insights,
+                            label: 'Statistik',
+                            image: HubCircleImage.plain,
+                            symbol: BereichZeichen.statistik,
+                            onTap: () =>
+                                _open(context, const StatistikScreen()),
+                          ),
                         ),
                       ),
                     ],
@@ -275,10 +284,20 @@ class HomeScreen extends ConsumerWidget {
                                           // gibt: Vorher fragt die Startseite nach
                                           // ihr, und das Ei wartet. Ist es gewählt,
                                           // steht das Tier oben in der Leiste.
-                                          // Seit ADR-0098 erst auf Level 5.
-                                          if (start.zeigtHaustier &&
+                                          // Seit ADR-0098 erst auf Level 5 —
+                                          // darunter mit Schloss zu sehen.
+                                          if ((start.zeigtHaustier ||
+                                                  start.istGesperrt(
+                                                    LevelExtra.haustier,
+                                                  )) &&
                                               !hatTier) ...<Widget>[
-                                            const HaustierKarte(),
+                                            GesperrtBisLevel(
+                                              level: LevelExtra.haustier.level,
+                                              aktiv: start.istGesperrt(
+                                                LevelExtra.haustier,
+                                              ),
+                                              child: const HaustierKarte(),
+                                            ),
                                             const SizedBox(height: 10),
                                           ],
                                           // Ohne Gewohnheit ist „Heute“ die erste
@@ -297,16 +316,26 @@ class HomeScreen extends ConsumerWidget {
                                           // Truhe und Tagesaufgaben standen hier bis zum
                                           // 18.10. als zwei Karten, jetzt warten sie dort,
                                           // zusammen mit der Rückfrage.
-                                          if (start
-                                              .zeigtTagesaufgaben) ...<Widget>[
+                                          // Ab Level 3, darunter mit Schloss.
+                                          if (start.zeigtTagesaufgaben ||
+                                              start.istGesperrt(
+                                                LevelExtra.lagerfeuer,
+                                              )) ...<Widget>[
                                             const SizedBox(height: 10),
-                                            LagerfeuerKarte(
-                                              amFeuer: ref.watch(
-                                                amFeuerProvider,
+                                            GesperrtBisLevel(
+                                              level:
+                                                  LevelExtra.lagerfeuer.level,
+                                              aktiv: start.istGesperrt(
+                                                LevelExtra.lagerfeuer,
                                               ),
-                                              onOpen: () => _open(
-                                                context,
-                                                const LagerfeuerScreen(),
+                                              child: LagerfeuerKarte(
+                                                amFeuer: ref.watch(
+                                                  amFeuerProvider,
+                                                ),
+                                                onOpen: () => _open(
+                                                  context,
+                                                  const LagerfeuerScreen(),
+                                                ),
                                               ),
                                             ),
                                           ],

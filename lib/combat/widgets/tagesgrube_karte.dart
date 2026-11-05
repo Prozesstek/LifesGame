@@ -17,6 +17,8 @@ import 'raumzeile.dart';
 import 'schwerter_zeichen.dart';
 import 'teilen_knopf.dart';
 import '../../ui/gehrung.dart';
+import 'package:progression/progression.dart';
+import '../../progression/widgets/gesperrt_bis_level.dart';
 
 /// **Die Tagesgrube im Eingang der Grube** (ADR-0072): dieselbe Grube für
 /// alle, ein Versuch am Tag.
@@ -47,7 +49,10 @@ class TagesgrubeKarte extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(ersterStartProvider).zeigtTagesgrube) {
+    final start = ref.watch(ersterStartProvider);
+    // Ab Level 4; darunter mit Schloss zu sehen (ADR-0098).
+    final gesperrt = start.istGesperrt(LevelExtra.tagesdungeon);
+    if (!start.zeigtTagesgrube && !gesperrt) {
       return const SizedBox.shrink();
     }
     final heute = ref.watch(todayDailyPitProvider);
@@ -55,46 +60,50 @@ class TagesgrubeKarte extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: HolzKarte(
-        padding: const EdgeInsets.fromLTRB(12, 8, 10, 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: _Titel(number: heute.number),
+      child: GesperrtBisLevel(
+        level: LevelExtra.tagesdungeon.level,
+        aktiv: gesperrt,
+        child: HolzKarte(
+          padding: const EdgeInsets.fromLTRB(12, 8, 10, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: _Titel(number: heute.number),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _Verfassung(
+                    // Nach dem Versuch zählt, wie man hinabgestiegen ist —
+                    // nicht, was seitdem abgehakt wurde.
+                    condition: lauf?.condition ?? heute.condition,
+                    open: lauf == null ? heute.open : 0,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (lauf == null)
+                _Davor(
+                  loadout: heute.loadout,
+                  onHinab: () => _hinab(context, ref, heute),
+                )
+              else
+                _Danach(
+                  lauf: lauf,
+                  text: TagesgrubeText.teilen(
+                    number: heute.number,
+                    run: lauf,
+                    dayStreak: ref
+                        .watch(habitTrackerProvider)
+                        .currentDayStreak(ref.watch(todayProvider)),
                   ),
                 ),
-                const SizedBox(width: 8),
-                _Verfassung(
-                  // Nach dem Versuch zählt, wie man hinabgestiegen ist —
-                  // nicht, was seitdem abgehakt wurde.
-                  condition: lauf?.condition ?? heute.condition,
-                  open: lauf == null ? heute.open : 0,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (lauf == null)
-              _Davor(
-                loadout: heute.loadout,
-                onHinab: () => _hinab(context, ref, heute),
-              )
-            else
-              _Danach(
-                lauf: lauf,
-                text: TagesgrubeText.teilen(
-                  number: heute.number,
-                  run: lauf,
-                  dayStreak: ref
-                      .watch(habitTrackerProvider)
-                      .currentDayStreak(ref.watch(todayProvider)),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

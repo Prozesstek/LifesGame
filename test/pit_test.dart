@@ -94,7 +94,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('4'), findsOneWidget);
+      // In der Anzeige der Etage — das Schloss der Tagesgrube trägt seit
+      // ADR-0098 ebenfalls eine 4.
+      expect(
+        find.descendant(
+          of: find.byKey(LadderScreen.ebeneKey),
+          matching: find.text('4'),
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(LadderScreen.hinabKey));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));

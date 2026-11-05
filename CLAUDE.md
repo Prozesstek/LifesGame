@@ -257,6 +257,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/progression/show_level_up.dart` | die Feier eines **Aufstiegs** — nach den Errungenschaften, vor den Fähigkeiten; nennt, was aufgeht, und **blass das nächste Ziel** (ADR-0098) | Flutter |
 | `lib/progression/level_roadmap.dart` | **die Level-Roadmap** (ADR-0098): was welches Level bringt, die Meilensteine, der nächste — reine Rechnung, **eine Stelle** für Blatt und Feier; wie ein Extra heißt (`LevelRoadmap.extra`) | Flutter |
 | `lib/progression/widgets/level_roadmap_blatt.dart` | das Blatt dazu, **ein Tipp auf den Level-Ring**: Erfahrung bis zum nächsten Level, dann der Pfad — erreicht mit Haken, der nächste golden, spätere mit Schloss | Flutter |
+| `lib/progression/widgets/gesperrt_bis_level.dart` | **gesperrt, aber zu sehen**: ein Extra, dem nur das Level fehlt, steht grau mit Schloss und Level da, ein Tipp öffnet die Roadmap — Statistik, Ei, Lagerfeuer, Tagesdungeon, Sammlung; **die Hülle bleibt stehen** (`aktiv`); was gesperrt ist, sagt `ErsterStart.istGesperrt` | Flutter |
 | `lib/village/village_map.dart` | **das Dorf (Prototyp)**: Karte als Text, Wege, Laufen, Türen, reines Dart, ohne Bildschirm testbar | Flutter |
 | `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, **hinein nur über den Knopf am Gebäude**, „Heute“ immer einen Tipp entfernt | Flutter |
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
@@ -349,7 +350,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1106 Tests
+flutter test             # 1108 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

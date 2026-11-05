@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1106, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1108, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -135,6 +135,32 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 05.11.2026, danach: gesperrt, aber zu sehen
+
+Frederik am 04.11.: „wenn man die Sachen schon sieht, aber sie halt mit so
+einem Schloss gesperrt sind“. Was nach ADR-0098 auf ein Level wartet, steht
+jetzt grau mit Schloss und Level da, sobald nur noch das Level fehlt;
+ein Tipp öffnet die Level-Roadmap.
+
+| Was | Schloss bis |
+|---|---|
+| Lagerfeuer auf der Startseite | 3 |
+| Tagesdungeon im Eingang | 4 |
+| Ei auf der Startseite (mit der ersten Gewohnheit) | 5 |
+| Kreis Statistik (mit dem ersten Häkchen) | 7 |
+| Knopf zur Sammlung | 10 |
+
+Neu: `GesperrtBisLevel`, `ErsterStart.istGesperrt` und `bereichGesperrt`.
+Die `zeigt…`-Felder bleiben, was **offen** ist — der Streifen der Dailies
+und die Frage nach dem geschafften Tag hören weiter darauf. App 1108
+(vorher 1106). Startseite in 390 × 844 gerendert und angesehen, Frederik
+hat sie abgenommen. **Nicht am Handy.**
+
+### Offen
+
+- Beim Knopf zur Sammlung verdeckt das Schloss das Zeichen fast ganz.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 05.11.2026: die Tastatur schiebt nicht mehr alles hoch
 
