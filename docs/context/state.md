@@ -25,6 +25,28 @@ Ladenbild (`tool/pixel/blutsichel.px.js`, `hin` und `zurueck`), verkleinert und
 um 22° aufgerichtet, sonst bliebe neben dem Arm kein Platz. Auf der Figur mit dem
 Vampirset angesehen. **Nicht in der laufenden App, nicht am Handy.**
 
+## 05.11.2026: die Schattenstiefel auf der Figur
+
+AktivesBrett: „schuhe sind ausgerüstet aber sie haben keinen optische
+veränderung“. Schuhe liegen jetzt als Platz auf der Figur, über der Rüstung und
+unter der Waffe; `tool/pixel/schattenstiefel.px.js` zeichnet die Fassung von
+vorn. Auf der Figur mit dem Vampirset angesehen. **Nicht in der laufenden App,
+nicht am Handy.**
+
+### Offen
+
+- **Die übrigen neun Schuhe haben kein Bild auf der Figur**, die Füsse bleiben
+  dort frei; `character_figure_test.dart` nimmt Schuhe deshalb aus.
+
+## 05.11.2026, zuletzt: der Frostreif
+
+AktivesBrett schickte ein Foto: ein Ring aus geschliffenem Eis mit blauem
+Diamanten. Neu mit pxl (`tool/pixel/frostreif.px.js`): breiter Reif mit
+Sternfacetten und körnigem Rand, sichtbare Innenwand, ein in den Reif
+eingelassener Brillant mit schmalem Silberrand, darum Schneeflocken, Splitter
+und ein Hauch aus einzelnen Pixeln. Ringe zeigen sich nicht auf der Figur.
+Das Bild ist abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
@@ -135,7 +157,8 @@ vom 02.10.
   Charakter im Kampfmaßstab.
 - Die Waffenzüge stehen nicht im Fähigkeiten-Katalog.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
-- Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
+- Ring und Talisman zeigen sich nicht auf der Figur, von den Schuhen nur
+  die Schattenstiefel.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
 - `world.dart` (1.936 Zeilen), `tracker.dart` (1.858) und
   `action_game.dart` (1.222) liegen über der 800-Zeilen-Grenze.

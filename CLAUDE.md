@@ -202,7 +202,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
-| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Waffe und Helm** (`overlays`, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
+| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
@@ -264,8 +264,8 @@ durch die Grube ersetzt und gelöscht.
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
 | `tool/kreis_zeichen.py` | legt die Zeichen der Kreise nach `assets/UI/Kreis_*.png` — fünf aus Raven, Rucksack und Balken gezeichnet (Python mit Pillow) | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
-| `tool/item_icons.py` | **zeichnet** acht der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset steht seit dem 04.11. in `tool/pixel/` | Python |
-| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen des Kreises Gewohnheiten, das Vampirset (Haube, Mantel, Stiefel, Sichel) | pxl |
+| `tool/item_icons.py` | **zeichnet** sieben der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset und der Frostreif stehen in `tool/pixel/` | Python |
+| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen des Kreises Gewohnheiten, das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |

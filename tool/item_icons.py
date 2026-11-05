@@ -1,7 +1,7 @@
-"""Zeichnet die Bilder von acht der zwölf Stücke aus ADR-0077.
+"""Zeichnet die Bilder von sieben der zwölf Stücke aus ADR-0077.
 
 Das Vampirset (Fledermaushaube, Nachtmantel, Schattenstiefel, Blutsichel)
-steht seit dem 04.11. in `tool/pixel/` (pxl).
+steht seit dem 04.11. in `tool/pixel/` (pxl), der Frostreif seit dem 05.11.
 
 Die übrigen Stücke tragen Bilder aus dem Raven-Paket (`assets/RAVEN.md`),
 das nur auf Frederiks Rechner liegt. Diese Stücke sind deshalb
@@ -46,8 +46,6 @@ BLUT = farbe('a8305f')
 BLUT_HELL = farbe('d65c8f')
 NACHT = farbe('2e2340')
 NACHT_HELL = farbe('4f3d6e')
-EIS = farbe('8fd3f0')
-EIS_HELL = farbe('dcf5ff')
 IRRLICHT = farbe('c6f2b4')
 LEDER = farbe('9a6a3e')
 LEDER_HELL = farbe('c48a52')
@@ -142,16 +140,6 @@ def seelenring():
     b.kreis(15, 9, 1.6, VIOLETT_HELL)
     for x, y in ((8, 5), (24, 4), (27, 11)):
         b.kreis(x, y, 1.2, VIOLETT_HELL)
-    return b.fertig()
-
-
-def frostreif():
-    b = Bild()
-    _ring(b, EIS)
-    for i in range(6):
-        w = math.radians(i * 60)
-        b.linie(16, 9, 16 + math.cos(w) * 6, 9 + math.sin(w) * 6, 1.4, EIS_HELL)
-    b.kreis(16, 9, 2.4, WEISS)
     return b.fertig()
 
 
@@ -316,7 +304,6 @@ LADEN = {
     'Helme/Falkenhaube': falkenhaube,
     'Schuhe/Hasenlaeufer': hasenlaeufer,
     'Ringe/Seelenring': seelenring,
-    'Ringe/Frostreif': frostreif,
     'Talismane/Echostein': echostein,
     'Talismane/Irrlichtamulett': irrlichtamulett,
 }
