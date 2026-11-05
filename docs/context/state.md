@@ -16,37 +16,6 @@
 
 ---
 
-## 05.11.2026, danach: die Sichel auf der Figur ist das Ladenbild
-
-AktivesBrett: „als item sieht die richtig geil aus aber live an dem charakter
-ist die noch ziemlich arsch“ und „der griff ist doch da kürzer und die klinge
-runder und länger“. Die Fassung auf der Figur rechnet jetzt alle Punkte aus dem
-Ladenbild (`tool/pixel/blutsichel.px.js`, `hin` und `zurueck`), verkleinert und
-um 22° aufgerichtet, sonst bliebe neben dem Arm kein Platz. Auf der Figur mit dem
-Vampirset angesehen. **Nicht in der laufenden App, nicht am Handy.**
-
-## 05.11.2026: die Schattenstiefel auf der Figur
-
-AktivesBrett: „schuhe sind ausgerüstet aber sie haben keinen optische
-veränderung“. Schuhe liegen jetzt als Platz auf der Figur, über der Rüstung und
-unter der Waffe; `tool/pixel/schattenstiefel.px.js` zeichnet die Fassung von
-vorn. Auf der Figur mit dem Vampirset angesehen. **Nicht in der laufenden App,
-nicht am Handy.**
-
-### Offen
-
-- **Die übrigen neun Schuhe haben kein Bild auf der Figur**, die Füsse bleiben
-  dort frei; `character_figure_test.dart` nimmt Schuhe deshalb aus.
-
-## 05.11.2026, zuletzt: der Frostreif
-
-AktivesBrett schickte ein Foto: ein Ring aus geschliffenem Eis mit blauem
-Diamanten. Neu mit pxl (`tool/pixel/frostreif.px.js`): breiter Reif mit
-Sternfacetten und körnigem Rand, sichtbare Innenwand, ein in den Reif
-eingelassener Brillant mit schmalem Silberrand, darum Schneeflocken, Splitter
-und ein Hauch aus einzelnen Pixeln. Ringe zeigen sich nicht auf der Figur.
-Das Bild ist abgenommen. **Nicht in der laufenden App, nicht am Handy.**
-
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
@@ -167,6 +136,37 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 05.11.2026, zuletzt: der Frostreif
+
+AktivesBrett schickte ein Foto: ein Ring aus geschliffenem Eis mit blauem
+Diamanten. Neu mit pxl (`tool/pixel/frostreif.px.js`): breiter Reif mit
+Sternfacetten und körnigem Rand, sichtbare Innenwand, ein in den Reif
+eingelassener Brillant mit schmalem Silberrand, darum Schneeflocken, Splitter
+und ein Hauch aus einzelnen Pixeln. Ringe zeigen sich nicht auf der Figur.
+Das Bild ist abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
+## 05.11.2026, danach: die Sichel auf der Figur ist das Ladenbild
+
+AktivesBrett: „als item sieht die richtig geil aus aber live an dem charakter
+ist die noch ziemlich arsch“ und „der griff ist doch da kürzer und die klinge
+runder und länger“. Die Fassung auf der Figur rechnet jetzt alle Punkte aus dem
+Ladenbild (`tool/pixel/blutsichel.px.js`, `hin` und `zurueck`), verkleinert und
+um 22° aufgerichtet, sonst bliebe neben dem Arm kein Platz. Auf der Figur mit dem
+Vampirset angesehen. **Nicht in der laufenden App, nicht am Handy.**
+
+## 05.11.2026: die Schattenstiefel auf der Figur
+
+AktivesBrett: „schuhe sind ausgerüstet aber sie haben keinen optische
+veränderung“. Schuhe liegen jetzt als Platz auf der Figur, über der Rüstung und
+unter der Waffe; `tool/pixel/schattenstiefel.px.js` zeichnet die Fassung von
+vorn. Auf der Figur mit dem Vampirset angesehen. **Nicht in der laufenden App,
+nicht am Handy.**
+
+### Offen
+
+- **Die übrigen neun Schuhe haben kein Bild auf der Figur**, die Füsse bleiben
+  dort frei; `character_figure_test.dart` nimmt Schuhe deshalb aus.
 
 ## 05.11.2026, danach: gesperrt, aber zu sehen
 
