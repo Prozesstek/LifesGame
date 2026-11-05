@@ -65,3 +65,19 @@ sprite("schattenstiefel", { w: 64, h: 64 },
   stamp("_stiefel", 30, 3, { flip: "x" }),
   stamp("_stiefel", 1, 18),
   glow("e", { r: 2, strength: 0.25 }))
+
+// Dieselben Stiefel auf der Figur, von vorn: deckungsgleich mit
+// Charakter.png, die Mitte des Körpers liegt auf der Spiegelkante.
+//   node tool/pixel/vergroessern.js tool/pixel/out/sprites/charakter_schattenstiefel.png assets/character/Charakter_Schattenstiefel.png
+sprite("charakter_schattenstiefel", { w: 62, h: 62, mx: true, outline: "k" },
+  // Der Schaft über dem Bein.
+  rect(25, 50, 4, 9, "n"), vline(25, 50, 9, "d"),
+  poly([26, 52, 29, 52, 29, 56, 27, 58, 26, 56], "N"),
+  px(27, 53, "b"), px(27, 54, "e"), px(27, 55, "b"),
+  // Der Fuss, die Spitze nach aussen, vorn die Kralle.
+  rect(23, 58, 6, 4, "n"), rect(23, 58, 6, 1, "N"),
+  hline(23, 61, 6, "d"),
+  poly([21, 59, 25, 59, 23, 62], "s"),
+  // Der Kragen mit seiner Spitze, darunter das rote Band.
+  rect(24, 48, 5, 2, "n"), hline(24, 50, 5, "b"),
+  poly([24, 49, 22, 43, 27, 48], "n"), line(23, 45, 24, 48, "N"))

@@ -16,6 +16,19 @@
 
 ---
 
+## 05.11.2026: die Schattenstiefel auf der Figur
+
+AktivesBrett: „schuhe sind ausgerüstet aber sie haben keinen optische
+veränderung“. Schuhe liegen jetzt als Platz auf der Figur, über der Rüstung und
+unter der Waffe; `tool/pixel/schattenstiefel.px.js` zeichnet die Fassung von
+vorn. Auf der Figur mit dem Vampirset angesehen. **Nicht in der laufenden App,
+nicht am Handy.**
+
+### Offen
+
+- **Die übrigen neun Schuhe haben kein Bild auf der Figur**, die Füsse bleiben
+  dort frei; `character_figure_test.dart` nimmt Schuhe deshalb aus.
+
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
@@ -126,7 +139,8 @@ vom 02.10.
   Charakter im Kampfmaßstab.
 - Die Waffenzüge stehen nicht im Fähigkeiten-Katalog.
 - „Gefestigte“ Seiten im Baum sind nicht zu sehen.
-- Schuhe, Ring und Talisman zeigen sich nicht auf der Figur.
+- Ring und Talisman zeigen sich nicht auf der Figur, von den Schuhen nur
+  die Schattenstiefel.
 - Quelle und Urheber der Asset-Pakete fehlen in den HERKUNFT-Dateien.
 - `world.dart` (1.936 Zeilen), `tracker.dart` (1.858) und
   `action_game.dart` (1.222) liegen über der 800-Zeilen-Grenze.
