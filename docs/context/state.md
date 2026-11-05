@@ -29,6 +29,15 @@ nicht am Handy.**
 - **Die übrigen neun Schuhe haben kein Bild auf der Figur**, die Füsse bleiben
   dort frei; `character_figure_test.dart` nimmt Schuhe deshalb aus.
 
+## 05.11.2026, zuletzt: der Frostreif
+
+AktivesBrett schickte ein Foto: ein Ring aus geschliffenem Eis mit blauem
+Diamanten. Neu mit pxl (`tool/pixel/frostreif.px.js`): breiter Reif mit
+Sternfacetten und körnigem Rand, sichtbare Innenwand, ein in den Reif
+eingelassener Brillant mit schmalem Silberrand, darum Schneeflocken, Splitter
+und ein Hauch aus einzelnen Pixeln. Ringe zeigen sich nicht auf der Figur.
+Das Bild ist abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
