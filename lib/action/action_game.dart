@@ -14,6 +14,7 @@ import 'beute_am_boden.dart';
 import 'beute_bild.dart';
 import 'beute_regen.dart';
 import 'damage_popup.dart';
+import 'fels_tiefe.dart';
 import 'figure_state.dart';
 import 'kampfgefuehl.dart';
 import 'neue_arten_bild.dart';
@@ -81,6 +82,40 @@ class ActionGame extends Game {
   /// Sekunde neu zu bauen hiesse, auch das Steuerkreuz und die Overlays
   /// neu zu bauen. So hängt nur die Kopfzeile daran.
   final ValueNotifier<int> frame = ValueNotifier<int>(0);
+
+  /// Zählt hoch, wenn sich Kopfzeile, Karte und Knöpfe neu bauen sollen —
+  /// **höchstens [anzeigeAbstand] oft**, nicht in jedem Bild.
+  ///
+  /// Balken, Zahlen und Abklingzeiten müssen nicht mit 60 oder 120 Bildern
+  /// je Sekunde laufen; das Spielfeld darunter tut es weiter. Was der
+  /// Spieler auslöst, meldet sich sofort ([meldeAnzeige]), damit ein Knopf
+  /// nicht hinterherhinkt.
+  final ValueNotifier<int> anzeige = ValueNotifier<int>(0);
+
+  /// Der Abstand zwischen zwei Neubauten der Anzeige, in Sekunden.
+  static const double anzeigeAbstand = 1 / 30;
+
+  double _seitAnzeige = 0;
+
+  /// Baut die Anzeige sofort neu — nach einem Tipp, nicht aus einem Bau.
+  void meldeAnzeige() {
+    _seitAnzeige = 0;
+    anzeige.value++;
+  }
+
+  /// Wirkt eine Fähigkeit ohne Ziel und zeigt es sofort.
+  bool wirke(String id) {
+    final gewirkt = sim.cast(id);
+    meldeAnzeige();
+    return gewirkt;
+  }
+
+  /// Gibt beide Takte frei.
+  void disposeTakte() {
+    frame.dispose();
+    anzeige.dispose();
+    fog.dispose();
+  }
 
   /// Was der Held schon gesehen hat — für die Karte oben links. Beim
   /// Start ist der Umkreis des Eingangs schon aufgedeckt.
@@ -194,7 +229,9 @@ class ActionGame extends Game {
     _zielId = null;
     _zielPunkt = null;
     if (id == null) return false;
-    return punkt == null ? sim.cast(id) : sim.castAt(id, punkt);
+    final gewirkt = punkt == null ? sim.cast(id) : sim.castAt(id, punkt);
+    meldeAnzeige();
+    return gewirkt;
   }
 
   void cancelAim() {
@@ -434,7 +471,11 @@ class ActionGame extends Game {
     // die Kopfzeile neben dem Spielfeld, während gebaut wird
     // (`gotchas.md`). Ohne vergangene Zeit hat sich ohnehin nichts
     // geändert.
-    if (dt > 0) frame.value++;
+    if (dt > 0) {
+      frame.value++;
+      _seitAnzeige += dt;
+      if (_seitAnzeige >= anzeigeAbstand) meldeAnzeige();
+    }
     if (_endeGemeldet) {
       // **Erst wenn eingesammelt ist.** Der Brunnen des Wächters ist der
       // Höhepunkt des Laufs; stünde das Ergebnis sofort darüber, sähe ihn
@@ -594,6 +635,9 @@ class ActionGame extends Game {
   /// Blöcke aneinanderstossen statt als Kacheln dazustehen.
   static const double _steinBreite = 1.15;
 
+  /// Welche Wandfelder ohne Stein bleiben — einmal je Karte gerechnet.
+  late final FelsTiefe _felsTiefe = FelsTiefe.aus(sim.level);
+
   void _drawFloor(Canvas canvas, Vec2 kamera, GrubeBilder? bilder) {
     const feld = ActionBalance.tileSize;
 
@@ -620,10 +664,34 @@ class ActionGame extends Game {
         false;
 
     for (var y = vonY; y <= bisY; y++) {
+      // **Tiefer Fels als eine Fläche je Zeile** (`FelsTiefe`): Steine
+      // bekommt nur der Rand, zwei Felder breit. Sonst wären es drei
+      // Zeichenbefehle je Wandfeld, die niemand als Wand wahrnimmt.
+      int? felsVon;
+      void felsZu(int bis) {
+        final von = felsVon;
+        if (von == null) return;
+        felsVon = null;
+        final flaeche = Rect.fromLTWH(
+          von * feld,
+          y * feld,
+          (bis - von) * feld,
+          feld,
+        );
+        canvas.drawRect(flaeche, bilder != null ? _bodenDunkel : _wand);
+        if (bilder != null) canvas.drawRect(flaeche, _fuge);
+      }
+
       for (var x = vonX; x <= bisX; x++) {
         if (x < 0 || y < 0 || x >= sim.level.width || y >= sim.level.height) {
+          felsZu(x);
           continue;
         }
+        if (_felsTiefe.istTief(x, y)) {
+          felsVon ??= x;
+          continue;
+        }
+        felsZu(x);
         final rect = Rect.fromLTWH(x * feld, y * feld, feld, feld);
 
         if (sim.level.gatesClosed && sim.level.isGateAt(x, y)) {
@@ -644,6 +712,7 @@ class ActionGame extends Game {
           canvas.drawRect(rect, hell ? _bodenHell : _bodenDunkel);
         }
       }
+      felsZu(bisX + 1);
     }
   }
 

@@ -137,18 +137,21 @@ class _WeiterZeichenState extends State<WeiterZeichen>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _takt,
-      builder: (context, kind) => Transform.translate(
-        offset: Offset(0, 3 * Curves.easeInOut.transform(_takt.value)),
-        child: kind,
-      ),
-      child: const Icon(
-        Icons.arrow_drop_down_rounded,
-        key: WeiterZeichen.zeichenKey,
-        size: 28,
-        color: Palette.accent,
-        semanticLabel: 'Tippen für weiter',
+    // Eigene Ebene: Das Dreieck wippt ohne Ende (`gotchas.md`).
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _takt,
+        builder: (context, kind) => Transform.translate(
+          offset: Offset(0, 3 * Curves.easeInOut.transform(_takt.value)),
+          child: kind,
+        ),
+        child: const Icon(
+          Icons.arrow_drop_down_rounded,
+          key: WeiterZeichen.zeichenKey,
+          size: 28,
+          color: Palette.accent,
+          semanticLabel: 'Tippen für weiter',
+        ),
       ),
     );
   }

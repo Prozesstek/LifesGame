@@ -24,11 +24,18 @@ class BuchPapier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      // Die Fasern einmal malen, nicht bei jedem Bild des Umblätterns.
-      painter: const _PapierMaler(),
-      isComplex: true,
-      child: SizedBox.expand(child: child),
+    // **Papier und Text auf getrennten Ebenen.** Der Text schreibt sich
+    // Wort für Wort; läge er auf derselben Ebene, malte jedes Bild davon
+    // auch die gut tausend Fasern des Papiers neu (`gotchas.md`).
+    final text = child;
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        const RepaintBoundary(
+          child: CustomPaint(painter: _PapierMaler(), isComplex: true),
+        ),
+        if (text != null) RepaintBoundary(child: text),
+      ],
     );
   }
 }

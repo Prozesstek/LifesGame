@@ -111,19 +111,23 @@ class _ScheinwerferState extends State<Scheinwerfer>
           fit: StackFit.expand,
           children: <Widget>[
             widget.child,
+            // Eigene Ebene: Der Schleier zeichnet beim Einblenden und
+            // Rollen neu — ohne sie malte der ganze Bildschirm darunter mit.
             IgnorePointer(
-              child: CustomPaint(
-                key: _flaeche,
-                painter: _Schleier(
-                  loecher: _loecher,
-                  blende: _blende,
-                  neu: _neu,
-                ),
-                child: AnimatedBuilder(
-                  animation: _blende,
-                  builder: (_, _) => _blende.value > 0
-                      ? const SizedBox.expand(key: Scheinwerfer.schleierKey)
-                      : const SizedBox.expand(),
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  key: _flaeche,
+                  painter: _Schleier(
+                    loecher: _loecher,
+                    blende: _blende,
+                    neu: _neu,
+                  ),
+                  child: AnimatedBuilder(
+                    animation: _blende,
+                    builder: (_, _) => _blende.value > 0
+                        ? const SizedBox.expand(key: Scheinwerfer.schleierKey)
+                        : const SizedBox.expand(),
+                  ),
                 ),
               ),
             ),
@@ -313,41 +317,44 @@ class _ZielPunktState extends State<ZielPunkt>
       child: SizedBox(
         width: g,
         height: g,
-        child: AnimatedBuilder(
-          animation: _takt,
-          builder: (context, _) {
-            final t = Curves.easeInOut.transform(_takt.value);
-            return Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: <Widget>[
-                // Der Hof, der beim Pulsieren aufgeht.
-                Container(
-                  width: g * (1 + 0.9 * t),
-                  height: g * (1 + 0.9 * t),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Palette.hinweis.withValues(alpha: 0.35 * (1 - t)),
+        // Eigene Ebene: Der Punkt pulsiert (`gotchas.md`).
+        child: RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _takt,
+            builder: (context, _) {
+              final t = Curves.easeInOut.transform(_takt.value);
+              return Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: <Widget>[
+                  // Der Hof, der beim Pulsieren aufgeht.
+                  Container(
+                    width: g * (1 + 0.9 * t),
+                    height: g * (1 + 0.9 * t),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Palette.hinweis.withValues(alpha: 0.35 * (1 - t)),
+                    ),
                   ),
-                ),
-                Container(
-                  width: g,
-                  height: g,
-                  decoration: BoxDecoration(
-                    color: Palette.hinweis,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Palette.background, width: 2.5),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Palette.hinweis.withValues(alpha: 0.6),
-                        blurRadius: 8,
-                      ),
-                    ],
+                  Container(
+                    width: g,
+                    height: g,
+                    decoration: BoxDecoration(
+                      color: Palette.hinweis,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Palette.background, width: 2.5),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Palette.hinweis.withValues(alpha: 0.6),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

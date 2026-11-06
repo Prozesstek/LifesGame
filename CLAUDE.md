@@ -150,7 +150,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/action/beute_bild.dart` | zeichnet Münzen und Funken | Flutter |
 | `lib/action/beute_anzeige.dart` | die Kasse oben, der Erfahrungsbalken unten, das Level in der Mitte, wenn es mitten im Lauf steigt | Flutter |
 | `lib/action/kampfgefuehl.dart` | **wie laut das Bild auf die Welt antwortet**: Trefferstopp, Beben, roter Rand bei wenig Leben, und wie dicht Klänge folgen dürfen — reine Rechnung, ändert keine Zahl des Kampfes | Flutter |
-| `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; nur Darstellung | Flutter |
+| `lib/action/minimap.dart` | die **Karte oben links** — was gesehen ist, bleibt aufgedeckt; der Boden als fertiges Bild, neu gemalt nur bei neuen Feldern; nur Darstellung | Flutter |
 | `lib/action/hero_power.dart` | womit der Held in die Grube geht — Werte, Level, Seltenheit, **eine Stelle** | Flutter |
 | `lib/action/neue_arten_bild.dart` | wie Falle, Begleiter, Haken-Faden, Eis, Stillstand und die Kerben des Wächters im Bild stehen — **nur Darstellung** | Flutter |
 | `lib/action/pit_tints.dart` | welche Farbe die Fläche einer Fähigkeit trägt — **eine Tabelle** | Flutter |
@@ -355,7 +355,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1120 Tests
+flutter test             # 1129 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

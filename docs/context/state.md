@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1120, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1129, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -136,6 +136,43 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 06.11.2026, zuletzt: die Grube baut weniger neu
+
+Frederik: „Wie könnten wir die App Performance mäßig optimieren“, danach:
+„fang mit der Grube an“.
+
+| Was | vorher | jetzt |
+|---|---|---|
+| Kopfzeile, Karte, Fähigkeitsknöpfe | in **jedem** Bild neu gebaut (60 oder 120 je Sekunde) | höchstens **30-mal** je Sekunde (`ActionGame.anzeige`), nach einem Tipp sofort (`meldeAnzeige`, `wirke`) |
+| Karte oben links | baute sich **doppelt** (eigener Takt in der Kopfzeile) und malte jedes Feld einzeln | ein Takt; der Boden ist ein **fertiges Bild**, neu nur bei neuen Feldern (`MinimapFog.bodenBild`) |
+
+Spielfeld, Erfahrungsbalken, Aufstieg, Wächtername und die Zeichen des
+ersten Laufs laufen weiter in jedem Bild — sie sind Bewegung.
+
+**Nicht gemessen**, weder am Rechner noch am Handy: Ob es spürbar ist,
+zeigt erst `flutter run --profile` mit dem Overlay. Ob 30 Bilder je
+Sekunde für Abklingzeit und Glanz der Knöpfe ruckeln, ebenso.
+
+**Danach** (Frederik: „reicht nicht auch 2 Steine als Wand“): Steine
+bekommt nur der Rand, zwei Felder breit; tiefer Fels ist eine dunkle
+Fläche je Zeile (`FelsTiefe`). Rund ein Viertel aller Felder einer Grube.
+Nur Darstellung. Frederik hat es lokal angesehen: „sieht gut aus“.
+
+**Und** (Frederik: „warum laggt das tutorial so und die bücher
+animation?“): Was ohne Ende läuft — Haustier, `Pulsieren`, gelber
+Punkt, Dreieck des Mentors, Schleier —, malte ohne eigene Ebene die
+ganze Seite in jedem Bild neu; im Buch malte jedes geschriebene Wort
+das Papier mit seinen Fasern neu (`gotchas.md`). Jetzt je eine
+`RepaintBoundary`, Papier und Text getrennt. **Lokal im Debug-Build
+nicht wieder angesehen**; der Debug-Build im Browser ist ohnehin
+deutlich langsamer als die ausgelieferte Fassung.
+
+App 1129 (vorher 1120).
+
+### Offen
+
+- Grube und Statistik verzögert laden (`deferred as`) für den Web-Start.
 
 ## 06.11.2026, danach: Tutorial bis zum ersten Buch, der Reihe nach
 

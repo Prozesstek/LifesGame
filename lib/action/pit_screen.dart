@@ -80,7 +80,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
 
   @override
   void dispose() {
-    _game.frame.dispose();
+    _game.disposeTakte();
     super.dispose();
   }
 
@@ -364,7 +364,7 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   }
 
   void _nochmal() {
-    _game.frame.dispose();
+    _game.disposeTakte();
     setState(() {
       _game = _neuerLauf();
       _ergebnisGezeigt = false;

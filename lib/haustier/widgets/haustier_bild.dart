@@ -100,17 +100,21 @@ class _HaustierBildState extends State<HaustierBild>
       excludeSemantics: true,
       child: SizedBox.square(
         dimension: widget.groesse,
-        child: AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[_leben, _sprung]),
-          builder: (context, _) => CustomPaint(
-            painter: _TierMaler(
-              art: widget.art,
-              stufe: widget.stufe,
-              laune: widget.laune,
-              praegung: widget.praegung,
-              zubehoer: widget.zubehoer,
-              t: _leben.value,
-              sprung: _sprung.isAnimating ? _sprung.value : 0,
+        // Eigene Ebene: Das Tier atmet ohne Ende, und es steht auf der
+        // Startseite — ohne sie malte sie sich in jedem Bild ganz neu.
+        child: RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: Listenable.merge(<Listenable>[_leben, _sprung]),
+            builder: (context, _) => CustomPaint(
+              painter: _TierMaler(
+                art: widget.art,
+                stufe: widget.stufe,
+                laune: widget.laune,
+                praegung: widget.praegung,
+                zubehoer: widget.zubehoer,
+                t: _leben.value,
+                sprung: _sprung.isAnimating ? _sprung.value : 0,
+              ),
             ),
           ),
         ),

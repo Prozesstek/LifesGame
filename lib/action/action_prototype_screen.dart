@@ -37,12 +37,12 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
 
   @override
   void dispose() {
-    _game?.frame.dispose();
+    _game?.disposeTakte();
     super.dispose();
   }
 
   void _start(ActionStats stats) {
-    _game?.frame.dispose();
+    _game?.disposeTakte();
     // Im Entwicklermodus liegen drei Fähigkeiten fest auf den Plätzen —
     // Schaden auf Entfernung, Fläche, Heilung. Zum Ausprobieren, nicht
     // als Regel; im Spiel liegt dort, was der Charakter angelegt hat.
@@ -92,7 +92,7 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
                 stats: _gewaehlt,
                 onAgain: () => _start(_gewaehlt ?? ActionStats.gereift),
                 onBack: () => setState(() {
-                  _game?.frame.dispose();
+                  _game?.disposeTakte();
                   _game = null;
                   _fertig = false;
                 }),
