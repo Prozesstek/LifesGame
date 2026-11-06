@@ -102,34 +102,38 @@ class _PulsierenState extends State<Pulsieren>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _takt,
-      child: widget.child,
-      builder: (context, kind) {
-        // 0 bis 1 und zurück, weich. Abgeschaltet bleibt der Baum
-        // derselbe, nur ohne Schein und ohne Wachsen.
-        final an = widget.aktiv;
-        final t = an ? 0.5 - 0.5 * math.cos(2 * math.pi * _takt.value) : 0.0;
-        return Transform.scale(
-          scale: 1 + Pulsieren.wachsen * t,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.radius),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Palette.accentOnDark.withValues(
-                    alpha: an ? 0.45 + 0.4 * t : 0,
+    // **Eigene Ebene**: Was ohne Ende läuft, malt sonst in jedem Bild den
+    // ganzen Bildschirm um sich neu (`gotchas.md`).
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _takt,
+        child: widget.child,
+        builder: (context, kind) {
+          // 0 bis 1 und zurück, weich. Abgeschaltet bleibt der Baum
+          // derselbe, nur ohne Schein und ohne Wachsen.
+          final an = widget.aktiv;
+          final t = an ? 0.5 - 0.5 * math.cos(2 * math.pi * _takt.value) : 0.0;
+          return Transform.scale(
+            scale: 1 + Pulsieren.wachsen * t,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.radius),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: Palette.accentOnDark.withValues(
+                      alpha: an ? 0.45 + 0.4 * t : 0,
+                    ),
+                    blurRadius: 10 + 10 * t,
+                    spreadRadius: 1 + 2 * t,
                   ),
-                  blurRadius: 10 + 10 * t,
-                  spreadRadius: 1 + 2 * t,
-                ),
-              ],
+                ],
+              ),
+              position: DecorationPosition.background,
+              child: kind,
             ),
-            position: DecorationPosition.background,
-            child: kind,
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1122, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1129, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -154,12 +154,24 @@ ersten Laufs laufen weiter in jedem Bild — sie sind Bewegung.
 zeigt erst `flutter run --profile` mit dem Overlay. Ob 30 Bilder je
 Sekunde für Abklingzeit und Glanz der Knöpfe ruckeln, ebenso.
 
-App 1122 (vorher 1120).
+**Danach** (Frederik: „reicht nicht auch 2 Steine als Wand“): Steine
+bekommt nur der Rand, zwei Felder breit; tiefer Fels ist eine dunkle
+Fläche je Zeile (`FelsTiefe`). Rund ein Viertel aller Felder einer Grube.
+Nur Darstellung. Frederik hat es lokal angesehen: „sieht gut aus“.
+
+**Und** (Frederik: „warum laggt das tutorial so und die bücher
+animation?“): Was ohne Ende läuft — Haustier, `Pulsieren`, gelber
+Punkt, Dreieck des Mentors, Schleier —, malte ohne eigene Ebene die
+ganze Seite in jedem Bild neu; im Buch malte jedes geschriebene Wort
+das Papier mit seinen Fasern neu (`gotchas.md`). Jetzt je eine
+`RepaintBoundary`, Papier und Text getrennt. **Lokal im Debug-Build
+nicht wieder angesehen**; der Debug-Build im Browser ist ohnehin
+deutlich langsamer als die ausgelieferte Fassung.
+
+App 1129 (vorher 1120).
 
 ### Offen
 
-- Startseite: Daueranimationen (Haustier, Feuer, `Pulsieren`) ohne
-  `RepaintBoundary`; `Scheinwerfer` malt immer neu.
 - Grube und Statistik verzögert laden (`deferred as`) für den Web-Start.
 
 ## 06.11.2026, danach: Tutorial bis zum ersten Buch, der Reihe nach

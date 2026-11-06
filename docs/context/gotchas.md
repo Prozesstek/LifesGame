@@ -3,6 +3,29 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Was ohne Ende läuft, malt ohne eigene Ebene den ganzen Bildschirm
+
+Das Haustier atmet, `Pulsieren` pulsiert, das Dreieck des Mentors wippt —
+jedes über ein `AnimationController.repeat()`. Eine Animation markiert
+ihr Bild als schmutzig, und Flutter malt dann **alles bis zur nächsten
+`RepaintBoundary`** neu. Gab es keine, war das die ganze Seite: Berg,
+Holzrahmen, Anschlagtafel, sechzigmal je Sekunde, solange das Tier auf
+der Startseite steht. Das Tutorial ruckelte, weil dort fast immer
+etwas pulsiert.
+
+Beim Buch dasselbe eine Ebene tiefer: Papier (gut tausend gemalte
+Fasern) und Text lagen auf einer Ebene, und der Text schreibt sich Wort
+für Wort — jedes Wort malte das Papier neu. Der Kommentar „die Fasern
+einmal malen“ stand daneben; `isComplex` ist nur ein Hinweis.
+
+Kein Test und kein Analyzer meldet das; im Debug-Build im Browser
+fühlt es sich wie allgemeine Langsamkeit an.
+
+**Regel:** Wer `repeat()` schreibt, legt das Animierte in eine
+`RepaintBoundary`. Teures Gemaltes, das sich nicht ändert, bekommt eine
+eigene, getrennt von dem, was sich darüber bewegt.
+`test/eigene_ebene_test.dart` zählt mit, wie oft der Nachbar malt.
+
 ## Im Handy-Browser schieben Chrome und Flutter beide — das Feld verschwindet
 
 Seit Chrome 108 verkleinert Android beim Öffnen der Tastatur nur den
