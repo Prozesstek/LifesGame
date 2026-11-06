@@ -268,7 +268,7 @@ class _AimGestureState extends State<_AimGesture> {
         // Nichts zu zielen: wirken, solange der Finger unten ist. Ein
         // Knopf, der erst beim Loslassen auslöst, fühlt sich zäh an.
         if (ability.aim == PitAim.selbst) {
-          game.sim.cast(ability.id);
+          game.wirke(ability.id);
           return;
         }
         _start = event.position;

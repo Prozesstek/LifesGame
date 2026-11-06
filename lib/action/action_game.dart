@@ -82,6 +82,40 @@ class ActionGame extends Game {
   /// neu zu bauen. So hängt nur die Kopfzeile daran.
   final ValueNotifier<int> frame = ValueNotifier<int>(0);
 
+  /// Zählt hoch, wenn sich Kopfzeile, Karte und Knöpfe neu bauen sollen —
+  /// **höchstens [anzeigeAbstand] oft**, nicht in jedem Bild.
+  ///
+  /// Balken, Zahlen und Abklingzeiten müssen nicht mit 60 oder 120 Bildern
+  /// je Sekunde laufen; das Spielfeld darunter tut es weiter. Was der
+  /// Spieler auslöst, meldet sich sofort ([meldeAnzeige]), damit ein Knopf
+  /// nicht hinterherhinkt.
+  final ValueNotifier<int> anzeige = ValueNotifier<int>(0);
+
+  /// Der Abstand zwischen zwei Neubauten der Anzeige, in Sekunden.
+  static const double anzeigeAbstand = 1 / 30;
+
+  double _seitAnzeige = 0;
+
+  /// Baut die Anzeige sofort neu — nach einem Tipp, nicht aus einem Bau.
+  void meldeAnzeige() {
+    _seitAnzeige = 0;
+    anzeige.value++;
+  }
+
+  /// Wirkt eine Fähigkeit ohne Ziel und zeigt es sofort.
+  bool wirke(String id) {
+    final gewirkt = sim.cast(id);
+    meldeAnzeige();
+    return gewirkt;
+  }
+
+  /// Gibt beide Takte frei.
+  void disposeTakte() {
+    frame.dispose();
+    anzeige.dispose();
+    fog.dispose();
+  }
+
   /// Was der Held schon gesehen hat — für die Karte oben links. Beim
   /// Start ist der Umkreis des Eingangs schon aufgedeckt.
   late final MinimapFog fog = MinimapFog()
@@ -194,7 +228,9 @@ class ActionGame extends Game {
     _zielId = null;
     _zielPunkt = null;
     if (id == null) return false;
-    return punkt == null ? sim.cast(id) : sim.castAt(id, punkt);
+    final gewirkt = punkt == null ? sim.cast(id) : sim.castAt(id, punkt);
+    meldeAnzeige();
+    return gewirkt;
   }
 
   void cancelAim() {
@@ -434,7 +470,11 @@ class ActionGame extends Game {
     // die Kopfzeile neben dem Spielfeld, während gebaut wird
     // (`gotchas.md`). Ohne vergangene Zeit hat sich ohnehin nichts
     // geändert.
-    if (dt > 0) frame.value++;
+    if (dt > 0) {
+      frame.value++;
+      _seitAnzeige += dt;
+      if (_seitAnzeige >= anzeigeAbstand) meldeAnzeige();
+    }
     if (_endeGemeldet) {
       // **Erst wenn eingesammelt ist.** Der Brunnen des Wächters ist der
       // Höhepunkt des Laufs; stünde das Ergebnis sofort darüber, sähe ihn

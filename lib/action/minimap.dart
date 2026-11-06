@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 
@@ -39,6 +41,40 @@ class MinimapFog {
 
   int get seenCount => _seen.length;
 
+  /// Der aufgedeckte Boden als fertiges Bild — neu gemalt nur, wenn ein
+  /// Feld dazukam oder die Größe wechselt. Sonst wären es in jedem Bild
+  /// hunderte Rechtecke für etwas, das sich kaum ändert.
+  ui.Picture? _boden;
+  int _bodenStand = -1;
+  double _bodenZelle = 0;
+
+  /// Gibt das Bild frei, wenn der Lauf endet.
+  void dispose() {
+    _boden?.dispose();
+    _boden = null;
+  }
+
+  ui.Picture bodenBild(Level level, double cell, Paint wand, Paint boden) {
+    final alt = _boden;
+    if (alt != null && _bodenStand == seenCount && _bodenZelle == cell) {
+      return alt;
+    }
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    for (final index in _seen) {
+      final x = index % _width;
+      final y = index ~/ _width;
+      canvas.drawRect(
+        Rect.fromLTWH(x * cell, y * cell, cell, cell),
+        level.isWallAt(x, y) ? wand : boden,
+      );
+    }
+    alt?.dispose();
+    _bodenStand = seenCount;
+    _bodenZelle = cell;
+    return _boden = recorder.endRecording();
+  }
+
   /// Auf welchem Feld ein Punkt liegt.
   static (int, int) tileOf(Vec2 position) {
     const feld = ActionBalance.tileSize;
@@ -79,20 +115,19 @@ class PitMinimap extends StatelessWidget {
           border: Border.all(color: Palette.textOnDarkDim, width: 1),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: ValueListenableBuilder<int>(
-          valueListenable: game.frame,
-          builder: (context, _, _) => CustomPaint(
-            size: Size(level.width * zelle, level.height * zelle),
-            painter: _MinimapPainter(
-              level: game.sim.level,
-              fog: game.fog,
-              hero: game.sim.heroView.position,
-              enemies: <Vec2>[
-                for (final view in game.sim.views)
-                  if (view.faction == Faction.gegner) view.position,
-              ],
-              cell: zelle,
-            ),
+        // Kein eigener Takt: Die Karte steht in der Kopfzeile und baut
+        // sich mit ihr neu (`ActionGame.anzeige`).
+        child: CustomPaint(
+          size: Size(level.width * zelle, level.height * zelle),
+          painter: _MinimapPainter(
+            level: game.sim.level,
+            fog: game.fog,
+            hero: game.sim.heroView.position,
+            enemies: <Vec2>[
+              for (final view in game.sim.views)
+                if (view.faction == Faction.gegner) view.position,
+            ],
+            cell: zelle,
           ),
         ),
       ),
@@ -122,15 +157,7 @@ class _MinimapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (var y = 0; y < level.height; y++) {
-      for (var x = 0; x < level.width; x++) {
-        if (!fog.isSeen(x, y)) continue;
-        canvas.drawRect(
-          Rect.fromLTWH(x * cell, y * cell, cell, cell),
-          level.isWallAt(x, y) ? _wand : _boden,
-        );
-      }
-    }
+    canvas.drawPicture(fog.bodenBild(level, cell, _wand, _boden));
 
     final massstab = cell / ActionBalance.tileSize;
     for (final gegner in enemies) {
@@ -144,7 +171,8 @@ class _MinimapPainter extends CustomPainter {
     canvas.drawCircle(Offset(hero.x * massstab, hero.y * massstab), 2.4, _held);
   }
 
-  // Jedes Bild neu: Der Held läuft, und die Karte ist klein.
+  // Bei jedem Neubau der Kopfzeile: Der Held läuft, der Boden kommt
+  // fertig aus `MinimapFog.bodenBild`.
   @override
   bool shouldRepaint(covariant _MinimapPainter oldDelegate) => true;
 }

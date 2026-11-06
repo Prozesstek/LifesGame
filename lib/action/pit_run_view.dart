@@ -98,7 +98,7 @@ class _PitRunViewState extends State<PitRunView> {
       // Daumen am Knopf. Was nichts zu zielen hat, wirkt beim Drücken.
       if (event is KeyDownEvent) {
         if (ability.aim == PitAim.selbst) {
-          game.sim.cast(ability.id);
+          game.wirke(ability.id);
         } else {
           game.beginAim(ability.id);
           final maus = _maus;
@@ -187,7 +187,7 @@ class _PitRunViewState extends State<PitRunView> {
               right: 16,
               bottom: 24,
               child: ValueListenableBuilder<int>(
-                valueListenable: game.frame,
+                valueListenable: game.anzeige,
                 builder: (context, _, _) => AbilityButtons(game: game),
               ),
             ),
@@ -207,7 +207,7 @@ class _Hud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
-      valueListenable: game.frame,
+      valueListenable: game.anzeige,
       builder: (context, _, _) {
         final sim = game.sim;
         final boss = sim.bossView;

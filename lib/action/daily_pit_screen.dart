@@ -78,7 +78,7 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
 
   @override
   void dispose() {
-    _game.frame.dispose();
+    _game.disposeTakte();
     super.dispose();
   }
 

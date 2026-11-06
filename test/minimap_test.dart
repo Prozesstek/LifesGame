@@ -75,5 +75,44 @@ void main() {
       final game = await zeige(tester);
       expect(game.fog.seenCount, greaterThan(0));
     });
+
+    // Leistung: Die Kopfzeile samt Karte baut sich nicht in jedem Bild
+    // neu, sondern höchstens 30-mal je Sekunde — und sofort, wenn der
+    // Spieler etwas auslöst.
+    testWidgets('die Anzeige folgt einem langsameren Takt', (tester) async {
+      final game = await zeige(tester);
+      final bilderVorher = game.frame.value;
+      final anzeigeVorher = game.anzeige.value;
+
+      for (var i = 0; i < 60; i++) {
+        game.update(1 / 120);
+      }
+
+      expect(game.frame.value - bilderVorher, 60);
+      final neubauten = game.anzeige.value - anzeigeVorher;
+      expect(neubauten, inInclusiveRange(14, 15));
+
+      final vorTipp = game.anzeige.value;
+      game.meldeAnzeige();
+      expect(game.anzeige.value, vorTipp + 1);
+    });
+
+    test('der Boden der Karte wird nur bei neuen Feldern neu gemalt', () {
+      final level = LevelCatalog.grube;
+      final fog = MinimapFog()
+        ..reveal(
+          level,
+          ActionWorld(
+            level: level,
+            heroStats: ActionStats.gereift,
+          ).heroView.position,
+        );
+      addTearDown(fog.dispose);
+      final paint = Paint();
+
+      final erstes = fog.bodenBild(level, 2, paint, paint);
+      expect(fog.bodenBild(level, 2, paint, paint), same(erstes));
+      expect(fog.bodenBild(level, 3, paint, paint), isNot(same(erstes)));
+    });
   });
 }
