@@ -12,6 +12,7 @@ import '../../habits/widgets/habit_countdown.dart';
 import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
 import '../../ui/anschlagtafel.dart';
+import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
@@ -208,6 +209,8 @@ class _Zettel extends StatelessWidget {
             child: Pulsieren(
               key: TodayCard.pulsKey(habit.id),
               aktiv: hervorheben && !done,
+              // Erst, wenn die Tafel hereingeflogen ist.
+              verzoegerung: DerReiheNach.fertigNach(1),
               child: Steckbrief(
                 neigung: neigungFuer(habit.id),
                 saat: habit.id.hashCode,

@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../../habits/habits_controller.dart';
 import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
+import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -100,13 +101,13 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
 
   /// Wie lange der Mentor allein steht, bevor die erste Zeile kommt —
   /// so lang, wie sein Kasten zum Hereinschieben braucht.
-  static const Duration warten = Duration(milliseconds: 320);
+  static const Duration warten = DerReiheNach.mentor;
 
   /// Abstand zwischen zwei Zeilen.
-  static const Duration abstand = Duration(milliseconds: 140);
+  static const Duration abstand = DerReiheNach.abstand;
 
   /// Wie lange eine Zeile fliegt.
-  static const Duration flug = Duration(milliseconds: 380);
+  static const Duration flug = DerReiheNach.flug;
 
   /// Wie lange das Hereinfliegen insgesamt dauert — die Vorschläge und
   /// danach das Eigene.

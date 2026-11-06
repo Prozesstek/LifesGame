@@ -22,6 +22,7 @@ import 'widgets/erste_gewohnheit.dart';
 import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
 import 'widgets/today_card.dart';
+import '../ui/der_reihe_nach.dart';
 import '../ui/druck.dart';
 import '../ui/holz.dart';
 import '../lagerfeuer/am_feuer_provider.dart';
@@ -30,6 +31,8 @@ import '../lagerfeuer/widgets/lagerfeuer_karte.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/scheinwerfer.dart';
+import '../mentor/buehne.dart';
+import '../mentor/weiter_tipp.dart';
 import '../mentor/zeigefinger.dart';
 import '../haustier/widgets/haustier_karte.dart';
 import '../haustier/haustier_controller.dart';
@@ -90,6 +93,35 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
+      // Gewohnheiten-Bildschirm (`AufstiegHost.maybeOf`).
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Palette.background,
+          image: DecorationImage(
+            image: const AssetImage(hintergrund),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Palette.background.withValues(alpha: bergSchleier),
+              BlendMode.srcATop,
+            ),
+          ),
+        ),
+        child: AufstiegHost(
+          // **Die Bühne** (06.11.2026): Ein neuer Schritt des Mentors
+          // gilt hier erst, wenn keine Feier mehr darüber liegt — dann
+          // baut er sich der Reihe nach auf, während man hinsieht.
+          child: Buehne(
+            child: Consumer(builder: (context, ref, _) => _seite(context, ref)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Alles unter der Bühne — liest den **gezeigten** Stand.
+  Widget _seite(BuildContext context, WidgetRef ref) {
     final xp = ref.watch(effectiveXpProvider);
     final gold = ref.watch(goldProvider);
 
@@ -117,10 +149,17 @@ class HomeScreen extends ConsumerWidget {
 
     // Ein Kreis an seinem Platz: versteckt, bis er dran ist. Ist er der
     // nächste, liegt er im Licht des Mentors (ADR-0095).
-    Widget kreis(Bereich bereich, Widget Function(bool leuchtet) bauen) {
+    // **Der Reihe nach** (06.11.2026): erst der Mentor, dann die Kreise
+    // einer Leiste von links nach rechts ([nr]).
+    Widget kreis(
+      Bereich bereich,
+      Widget Function(bool leuchtet) bauen, {
+      required int nr,
+    }) {
       final leuchtet = start.leuchtet == bereich;
       return Aufgedeckt(
         sichtbar: zeigt(bereich),
+        verzoegerung: DerReiheNach.mentor + DerReiheNach.abstand * nr,
         child: ScheinwerferZiel(
           aktiv: leuchtet,
           radius: lichtRadius,
@@ -133,355 +172,340 @@ class HomeScreen extends ConsumerWidget {
     // Bis dahin stünde dort leeres Holz.
     final untenDa = untereBereiche.any(zeigt);
 
-    return Scaffold(
-      // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
-      // Gewohnheiten-Bildschirm (`AufstiegHost.maybeOf`).
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Palette.background,
-          image: DecorationImage(
-            image: const AssetImage(hintergrund),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Palette.background.withValues(alpha: bergSchleier),
-              BlendMode.srcATop,
-            ),
-          ),
-        ),
-        // **Ein Tipp irgendwohin führt weiter**, solange der Mentor auf die
-        // Gewohnheiten zeigt (06.11.2026).
-        child: AufstiegHost(
-          child: WeiterTipp(
-            aktiv: start.schritt == Schritt.gewohnheitenZeigen,
-            onWeiter: () =>
-                ref.read(gewohnheitenGezeigtProvider.notifier).weiter(),
-            // Unter der Feier: Ein Tipp auf die große Flamme schließt erst sie.
-
-            child: MentorFlaeche(
-              ort: MentorOrt.start,
-              // Der Kasten steht unter Level und Gold, nicht über der Leiste.
-              mitKasten: false,
-              // **Die Kreise rahmen den Bildschirm** (23.10.2026): oben und
-              // unten je ein Holzrahmen, bündig am Rand; dazwischen Level,
-              // Gold und „Heute“ vor dem Berg.
-              child: Column(
-                children: <Widget>[
-                  // **Auf dem ersten Screen nur Mentor und Wahl** (06.11.2026):
-                  // Leiste, Level und Gold kommen mit der ersten Gewohnheit.
-                  EinblendLeiste(
-                    sichtbar: !start.nurMentor,
-                    vonOben: true,
-                    child: _Leiste(
-                      oben: true,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          // Immer da; im Licht nur, wenn der Mentor die Gebiete
-                          // erklärt (Issue #183).
-                          kreis(
-                            Bereich.gewohnheiten,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.check_circle_outline,
-                              label: 'Gewohnheiten',
-                              image: HubCircleImage.plain,
-                              symbol: BereichZeichen.gewohnheiten,
-                              progress: heute,
-                              leuchtet: leuchtet,
-                              onTap: () => _open(context, const HabitsScreen()),
-                            ),
-                          ),
-                          kreis(
-                            Bereich.theorie,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.account_tree_outlined,
-                              label: 'Theorie',
-                              image: HubCircleImage.plain,
-                              symbol: BereichZeichen.theorie,
-                              leuchtet: leuchtet,
-                              onTap: () =>
-                                  _open(context, const SkillTreeScreen()),
-                            ),
-                          ),
-                          // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
-                          // Waffe allein schlagbar, und wer zuerst kämpft,
-                          // weiß danach, wofür er liest.
-                          kreis(
-                            Bereich.kampf,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.sports_martial_arts,
-                              label: 'Kampf',
-                              image: HubCircleImage.plain,
-                              symbol: BereichZeichen.kampf,
-                              leuchtet: leuchtet,
-                              onTap: () => _open(context, const LadderScreen()),
-                            ),
-                          ),
-                          // **Die Statistik** (ADR-0087) oben, neben dem, was
-                          // sie zählt — mit dem ersten Häkchen.
-                          kreis(
-                            Bereich.statistik,
-                            // **Ab Level 7, aber schon zu sehen** — mit Schloss.
-                            (_) => GesperrtBisLevel(
-                              level: LevelExtra.statistik.level,
-                              aktiv: start.bereichGesperrt(Bereich.statistik),
-                              rund: true,
-                              child: HubCircle(
-                                icon: Icons.insights,
-                                label: 'Statistik',
-                                image: HubCircleImage.plain,
-                                symbol: BereichZeichen.statistik,
-                                onTap: () =>
-                                    _open(context, const StatistikScreen()),
-                              ),
-                            ),
-                          ),
-                        ],
+    // **Ein Tipp irgendwohin führt weiter**, solange der Mentor auf die
+    // Gewohnheiten zeigt (06.11.2026). Unter der Feier: Ein Tipp auf die
+    // große Flamme schließt erst sie.
+    return WeiterTipp(
+      aktiv: start.schritt == Schritt.gewohnheitenZeigen,
+      onWeiter: () =>
+          ref.read(hinweiseProvider.notifier).weiter(Hinweis.gewohnheiten),
+      child: MentorFlaeche(
+        ort: MentorOrt.start,
+        // Der Kasten steht unter Level und Gold, nicht über der Leiste.
+        mitKasten: false,
+        // **Die Kreise rahmen den Bildschirm** (23.10.2026): oben und
+        // unten je ein Holzrahmen, bündig am Rand; dazwischen Level,
+        // Gold und „Heute“ vor dem Berg.
+        child: Column(
+          children: <Widget>[
+            // **Auf dem ersten Screen nur Mentor und Wahl** (06.11.2026):
+            // Leiste, Level und Gold kommen mit der ersten Gewohnheit.
+            EinblendLeiste(
+              sichtbar: !start.nurMentor,
+              vonOben: true,
+              verzoegerung: DerReiheNach.mentor,
+              child: _Leiste(
+                oben: true,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    // Immer da; im Licht nur, wenn der Mentor die Gebiete
+                    // erklärt (Issue #183).
+                    kreis(
+                      Bereich.gewohnheiten,
+                      nr: 0,
+                      (leuchtet) => HubCircle(
+                        icon: Icons.check_circle_outline,
+                        label: 'Gewohnheiten',
+                        image: HubCircleImage.plain,
+                        symbol: BereichZeichen.gewohnheiten,
+                        progress: heute,
+                        leuchtet: leuchtet,
+                        onTap: () => _open(context, const HabitsScreen()),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: SafeArea(
-                      // Ohne die obere Leiste rückt der Inhalt selbst von
-                      // der Statusleiste des Handys weg.
-                      top: start.nurMentor,
-                      bottom: false,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: _maxWidth,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                            child: Column(
-                              children: <Widget>[
-                                // **Level und Gold oben rechts** (22.10.2026),
-                                // der Ring um das Abzeichen ist der
-                                // Erfahrungsbalken — seit dem 23.10. unter
-                                // dem oberen Rahmen.
-                                // **Das Haustier links daneben** (24.10.2026),
-                                // ohne Rahmen — erst, wenn es geschlüpft ist.
-                                EinblendLeiste(
-                                  sichtbar: !start.zeigtWenig,
-                                  vonOben: true,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: StatusLeiste(
-                                      xp: xp,
-                                      gold: gold,
-                                      links: zeigtTier
-                                          ? const HaustierKarte()
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                                // **Heute** (ADR-0053) bekommt, was übrig
-                                // bleibt. Eine lange Liste rollt, statt
-                                // überzulaufen. Darunter das **Lagerfeuer**
-                                // (ADR-0076) mit Truhe, Tagesaufgaben und
-                                // Rückfrage.
-                                // **Die erste Frage steht in der Mitte**
-                                // (03.11.2026): Sonst ist die Seite noch leer,
-                                // und oben am Rand sähe sie aus wie Nebensache.
-                                Expanded(
-                                  child: LayoutBuilder(
-                                    builder: (context, platz) => SingleChildScrollView(
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minHeight: platz.maxHeight,
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment: start.nurMentor
-                                              ? MainAxisAlignment.center
-                                              : MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: <Widget>[
-                                            // **Der Mentor über dem, worum
-                                            // es geht** (Issue #183): Man
-                                            // liest von oben nach unten. Er
-                                            // steht in derselben Spalte wie
-                                            // die erste Frage, damit er mit
-                                            // ihr in die Mitte rückt.
-                                            const MentorZeile(
-                                              ort: MentorOrt.start,
-                                              rand: 0,
-                                            ),
-                                            // **Einmal** (ADR-0085): Eigene Gewohnheiten
-                                            // von vor den Skills fragen nach ihrem
-                                            // Gebiet. Sonst steht hier nichts.
-                                            if (tracker
-                                                .customWithoutArea
-                                                .isNotEmpty) ...<Widget>[
-                                              const GebietFrageKarte(),
-                                              const SizedBox(height: 10),
-                                            ],
-                                            // **Die Wahl des Eis** (ADR-0086) — über
-                                            // „Heute“. Erst wenn es eine Gewohnheit
-                                            // gibt: Vorher fragt die Startseite nach
-                                            // ihr, und das Ei wartet. Ist es gewählt,
-                                            // steht das Tier oben in der Leiste.
-                                            // Seit ADR-0098 erst auf Level 5 —
-                                            // darunter mit Schloss zu sehen.
-                                            if ((start.zeigtHaustier ||
-                                                    start.istGesperrt(
-                                                      LevelExtra.haustier,
-                                                    )) &&
-                                                !hatTier &&
-                                                !start.zeigtWenig) ...<Widget>[
-                                              GesperrtBisLevel(
-                                                level:
-                                                    LevelExtra.haustier.level,
-                                                aktiv: start.istGesperrt(
-                                                  LevelExtra.haustier,
-                                                ),
-                                                child: const HaustierKarte(),
-                                              ),
-                                              const SizedBox(height: 10),
-                                            ],
-                                            // Ohne Gewohnheit ist „Heute“ die erste
-                                            // Frage, keine leere Liste.
-                                            if (start.fragtNachGewohnheit)
-                                              const Zeigefinger(
-                                                schritt: Schritt.gewohnheit,
-                                                child: ErsteGewohnheitKarte(),
-                                              )
-                                            else
-                                              // **Mit Schlüssel**: Nach dem ersten
-                                              // Häkchen erscheint das Ei davor —
-                                              // ohne ihn baute sich „Heute“ neu, und
-                                              // der Stempel schlüge nicht auf
-                                              // (`gotchas.md`).
-                                              const Zeigefinger(
-                                                key: ValueKey<String>('heute'),
-                                                schritt: Schritt.abhaken,
-                                                child: TodayCard(),
-                                              ),
-                                            // **Das Lagerfeuer** (ADR-0076) direkt darunter:
-                                            // Truhe und Tagesaufgaben standen hier bis zum
-                                            // 18.10. als zwei Karten, jetzt warten sie dort,
-                                            // zusammen mit der Rückfrage.
-                                            // Ab Level 3, darunter mit Schloss.
-                                            if ((start.zeigtTagesaufgaben ||
-                                                    start.istGesperrt(
-                                                      LevelExtra.lagerfeuer,
-                                                    )) &&
-                                                !start.zeigtWenig) ...<Widget>[
-                                              const SizedBox(height: 10),
-                                              GesperrtBisLevel(
-                                                level:
-                                                    LevelExtra.lagerfeuer.level,
-                                                aktiv: start.istGesperrt(
-                                                  LevelExtra.lagerfeuer,
-                                                ),
-                                                child: LagerfeuerKarte(
-                                                  amFeuer: ref.watch(
-                                                    amFeuerProvider,
-                                                  ),
-                                                  onOpen: () => _open(
-                                                    context,
-                                                    const LagerfeuerScreen(),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    kreis(
+                      Bereich.theorie,
+                      nr: 1,
+                      (leuchtet) => HubCircle(
+                        icon: Icons.account_tree_outlined,
+                        label: 'Theorie',
+                        image: HubCircleImage.plain,
+                        symbol: BereichZeichen.theorie,
+                        leuchtet: leuchtet,
+                        onTap: () => _open(context, const SkillTreeScreen()),
+                      ),
+                    ),
+                    // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
+                    // Waffe allein schlagbar, und wer zuerst kämpft,
+                    // weiß danach, wofür er liest.
+                    kreis(
+                      Bereich.kampf,
+                      nr: 2,
+                      (leuchtet) => HubCircle(
+                        icon: Icons.sports_martial_arts,
+                        label: 'Kampf',
+                        image: HubCircleImage.plain,
+                        symbol: BereichZeichen.kampf,
+                        leuchtet: leuchtet,
+                        onTap: () => _open(context, const LadderScreen()),
+                      ),
+                    ),
+                    // **Die Statistik** (ADR-0087) oben, neben dem, was
+                    // sie zählt — mit dem ersten Häkchen.
+                    kreis(
+                      Bereich.statistik,
+                      nr: 3,
+                      // **Ab Level 7, aber schon zu sehen** — mit Schloss.
+                      (_) => GesperrtBisLevel(
+                        level: LevelExtra.statistik.level,
+                        aktiv: start.bereichGesperrt(Bereich.statistik),
+                        rund: true,
+                        child: HubCircle(
+                          icon: Icons.insights,
+                          label: 'Statistik',
+                          image: HubCircleImage.plain,
+                          symbol: BereichZeichen.statistik,
+                          onTap: () => _open(context, const StatistikScreen()),
                         ),
                       ),
                     ),
-                  ),
-                  // Im Debug-Build hängt der Knopf des Entwicklermodus in der
-                  // Leiste; solange sie fehlt, steht er hier.
-                  if (!untenDa && devModeAvailable)
-                    const SafeArea(
-                      top: false,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: _DevKnopf(),
-                      ),
-                    ),
-                  EinblendLeiste(
-                    sichtbar: untenDa,
-                    child: _Leiste(
-                      oben: false,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: SafeArea(
+                // Ohne die obere Leiste rückt der Inhalt selbst von
+                // der Statusleiste des Handys weg.
+                top: start.nurMentor,
+                bottom: false,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxWidth),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                      child: Column(
                         children: <Widget>[
-                          kreis(
-                            Bereich.laden,
-                            (_) => HubCircle(
-                              icon: Icons.storefront_outlined,
-                              label: 'Laden',
-                              image: HubCircleImage.plain,
-                              symbol: BereichZeichen.laden,
-                              size: bottomCircleSize,
-                              onTap: () => _open(context, const ShopScreen()),
+                          // **Level und Gold oben rechts** (22.10.2026),
+                          // der Ring um das Abzeichen ist der
+                          // Erfahrungsbalken — seit dem 23.10. unter
+                          // dem oberen Rahmen.
+                          // **Das Haustier links daneben** (24.10.2026),
+                          // ohne Rahmen — erst, wenn es geschlüpft ist.
+                          EinblendLeiste(
+                            sichtbar: !start.zeigtWenig,
+                            vonOben: true,
+                            verzoegerung:
+                                DerReiheNach.mentor + DerReiheNach.abstand,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: StatusLeiste(
+                                xp: xp,
+                                gold: gold,
+                                links: zeigtTier ? const HaustierKarte() : null,
+                              ),
                             ),
                           ),
-                          kreis(
-                            Bereich.faehigkeiten,
-                            (leuchtet) => HubCircle(
-                              icon: Icons.auto_awesome,
-                              label: 'Fähigkeiten',
-                              image: HubCircleImage.plain,
-                              size: bottomCircleSize,
-                              symbol: BereichZeichen.faehigkeiten,
-                              leuchtet: leuchtet,
-                              onTap: () =>
-                                  _open(context, const AbilitiesScreen()),
-                            ),
-                          ),
-                          kreis(
-                            Bereich.ausruestung,
-                            (_) => HubCircle(
-                              icon: Icons.shield_outlined,
-                              label: 'Ausrüstung',
-                              image: HubCircleImage.plain,
-                              size: bottomCircleSize,
-                              symbol: BereichZeichen.ausruestung,
-                              onTap: () =>
-                                  _open(context, const EquipmentScreen()),
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              // Nur im Debug-Build. Im Release ist der Zweig
-                              // samt Bildschirm gar nicht erst im Bündel
-                              // (ADR-0021), und an dieser Stelle steht dann
-                              // nichts.
-                              if (devModeAvailable) const _DevKnopf(),
-                              kreis(
-                                Bereich.charakter,
-                                (_) => HubCircle(
-                                  icon: Icons.person_outline,
-                                  label: 'Charakter',
-                                  size: bottomCircleSize,
-                                  image: HubCircleImage.plain,
-                                  symbol: BereichZeichen.charakter,
-                                  onTap: () =>
-                                      _open(context, const CharacterScreen()),
+                          // **Heute** (ADR-0053) bekommt, was übrig
+                          // bleibt. Eine lange Liste rollt, statt
+                          // überzulaufen. Darunter das **Lagerfeuer**
+                          // (ADR-0076) mit Truhe, Tagesaufgaben und
+                          // Rückfrage.
+                          // **Die erste Frage steht in der Mitte**
+                          // (03.11.2026): Sonst ist die Seite noch leer,
+                          // und oben am Rand sähe sie aus wie Nebensache.
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, platz) => SingleChildScrollView(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: platz.maxHeight,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: start.nurMentor
+                                        ? MainAxisAlignment.center
+                                        : MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: <Widget>[
+                                      // **Der Mentor über dem, worum
+                                      // es geht** (Issue #183): Man
+                                      // liest von oben nach unten. Er
+                                      // steht in derselben Spalte wie
+                                      // die erste Frage, damit er mit
+                                      // ihr in die Mitte rückt.
+                                      const MentorZeile(
+                                        ort: MentorOrt.start,
+                                        rand: 0,
+                                      ),
+                                      // **Einmal** (ADR-0085): Eigene Gewohnheiten
+                                      // von vor den Skills fragen nach ihrem
+                                      // Gebiet. Sonst steht hier nichts.
+                                      if (tracker
+                                          .customWithoutArea
+                                          .isNotEmpty) ...<Widget>[
+                                        const GebietFrageKarte(),
+                                        const SizedBox(height: 10),
+                                      ],
+                                      // **Die Wahl des Eis** (ADR-0086) — über
+                                      // „Heute“. Erst wenn es eine Gewohnheit
+                                      // gibt: Vorher fragt die Startseite nach
+                                      // ihr, und das Ei wartet. Ist es gewählt,
+                                      // steht das Tier oben in der Leiste.
+                                      // Seit ADR-0098 erst auf Level 5 —
+                                      // darunter mit Schloss zu sehen.
+                                      if ((start.zeigtHaustier ||
+                                              start.istGesperrt(
+                                                LevelExtra.haustier,
+                                              )) &&
+                                          !hatTier &&
+                                          !start.zeigtWenig) ...<Widget>[
+                                        GesperrtBisLevel(
+                                          level: LevelExtra.haustier.level,
+                                          aktiv: start.istGesperrt(
+                                            LevelExtra.haustier,
+                                          ),
+                                          child: const HaustierKarte(),
+                                        ),
+                                        const SizedBox(height: 10),
+                                      ],
+                                      // Ohne Gewohnheit ist „Heute“ die erste
+                                      // Frage, keine leere Liste.
+                                      if (start.fragtNachGewohnheit)
+                                        const Zeigefinger(
+                                          schritt: Schritt.gewohnheit,
+                                          child: ErsteGewohnheitKarte(),
+                                        )
+                                      else
+                                        // **Mit Schlüssel**: Nach dem ersten
+                                        // Häkchen erscheint das Ei davor —
+                                        // ohne ihn baute sich „Heute“ neu, und
+                                        // der Stempel schlüge nicht auf
+                                        // (`gotchas.md`).
+                                        // Auf Screen 2 fliegt sie nach dem Mentor herein
+                                        // (06.11.2026).
+                                        DerReiheNach(
+                                          key: const ValueKey<String>('heute'),
+                                          nr: 0,
+                                          aktiv: start.nurMentor,
+                                          child: const Zeigefinger(
+                                            schritt: Schritt.abhaken,
+                                            child: TodayCard(),
+                                          ),
+                                        ),
+                                      // **Das Lagerfeuer** (ADR-0076) direkt darunter:
+                                      // Truhe und Tagesaufgaben standen hier bis zum
+                                      // 18.10. als zwei Karten, jetzt warten sie dort,
+                                      // zusammen mit der Rückfrage.
+                                      // Ab Level 3, darunter mit Schloss.
+                                      if ((start.zeigtTagesaufgaben ||
+                                              start.istGesperrt(
+                                                LevelExtra.lagerfeuer,
+                                              )) &&
+                                          !start.zeigtWenig) ...<Widget>[
+                                        const SizedBox(height: 10),
+                                        GesperrtBisLevel(
+                                          level: LevelExtra.lagerfeuer.level,
+                                          aktiv: start.istGesperrt(
+                                            LevelExtra.lagerfeuer,
+                                          ),
+                                          child: LagerfeuerKarte(
+                                            amFeuer: ref.watch(amFeuerProvider),
+                                            onOpen: () => _open(
+                                              context,
+                                              const LagerfeuerScreen(),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+            // Im Debug-Build hängt der Knopf des Entwicklermodus in der
+            // Leiste; solange sie fehlt, steht er hier.
+            if (!untenDa && devModeAvailable)
+              const SafeArea(
+                top: false,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _DevKnopf(),
+                ),
+              ),
+            EinblendLeiste(
+              sichtbar: untenDa,
+              child: _Leiste(
+                oben: false,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    kreis(
+                      Bereich.laden,
+                      nr: 0,
+                      (_) => HubCircle(
+                        icon: Icons.storefront_outlined,
+                        label: 'Laden',
+                        image: HubCircleImage.plain,
+                        symbol: BereichZeichen.laden,
+                        size: bottomCircleSize,
+                        onTap: () => _open(context, const ShopScreen()),
+                      ),
+                    ),
+                    kreis(
+                      Bereich.faehigkeiten,
+                      nr: 1,
+                      (leuchtet) => HubCircle(
+                        icon: Icons.auto_awesome,
+                        label: 'Fähigkeiten',
+                        image: HubCircleImage.plain,
+                        size: bottomCircleSize,
+                        symbol: BereichZeichen.faehigkeiten,
+                        leuchtet: leuchtet,
+                        onTap: () => _open(context, const AbilitiesScreen()),
+                      ),
+                    ),
+                    kreis(
+                      Bereich.ausruestung,
+                      nr: 2,
+                      (_) => HubCircle(
+                        icon: Icons.shield_outlined,
+                        label: 'Ausrüstung',
+                        image: HubCircleImage.plain,
+                        size: bottomCircleSize,
+                        symbol: BereichZeichen.ausruestung,
+                        onTap: () => _open(context, const EquipmentScreen()),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        // Nur im Debug-Build. Im Release ist der Zweig
+                        // samt Bildschirm gar nicht erst im Bündel
+                        // (ADR-0021), und an dieser Stelle steht dann
+                        // nichts.
+                        if (devModeAvailable) const _DevKnopf(),
+                        kreis(
+                          Bereich.charakter,
+                          nr: 3,
+                          (_) => HubCircle(
+                            icon: Icons.person_outline,
+                            label: 'Charakter',
+                            size: bottomCircleSize,
+                            image: HubCircleImage.plain,
+                            symbol: BereichZeichen.charakter,
+                            onTap: () =>
+                                _open(context, const CharacterScreen()),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -519,72 +543,46 @@ class _Leiste extends StatelessWidget {
   }
 }
 
-/// **Solange [aktiv], fängt sie jeden Tipp** und meldet [onWeiter]
-/// (06.11.2026): Der Mentor sagt etwas, das man nur lesen muss, und ein
-/// Tipp irgendwohin führt weiter — wie in einem Dialog. Die Hülle steht
-/// immer, sonst baute sich darunter alles neu (`gotchas.md`).
-class WeiterTipp extends StatelessWidget {
-  const WeiterTipp({
-    required this.aktiv,
-    required this.onWeiter,
-    required this.child,
-    super.key,
-  });
-
-  final bool aktiv;
-  final VoidCallback onWeiter;
-  final Widget child;
-
-  static const Key flaecheKey = ValueKey<String>('weiter-tipp');
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.passthrough,
-      children: <Widget>[
-        child,
-        Positioned.fill(
-          child: IgnorePointer(
-            ignoring: !aktiv,
-            child: GestureDetector(
-              key: flaecheKey,
-              behavior: HitTestBehavior.opaque,
-              onTap: onWeiter,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Ein Kreis, der erst erscheint, wenn er dran ist (ADR-0068).
 ///
 /// **Der Platz bleibt frei, auch wenn nichts zu sehen ist.** Die Kreise
 /// springen sonst bei jedem neuen um; so wächst jeder an seiner Stelle
 /// heran. Solange er versteckt ist, nimmt er keinen Tipp an und steht
 /// für den Vorleser nicht da.
+///
+/// **Der Reihe nach** (06.11.2026): Ein Kreis wartet [verzoegerung],
+/// bevor er heranwächst — erst der Mentor, dann die Kreise einer nach
+/// dem anderen (`DerReiheNach`).
 class Aufgedeckt extends StatelessWidget {
-  const Aufgedeckt({required this.sichtbar, required this.child, super.key});
+  const Aufgedeckt({
+    required this.sichtbar,
+    required this.child,
+    this.verzoegerung = Duration.zero,
+    super.key,
+  });
 
   final bool sichtbar;
   final Widget child;
+  final Duration verzoegerung;
 
   static const Duration dauer = Duration(milliseconds: 450);
 
   @override
   Widget build(BuildContext context) {
+    final gesamt = verzoegerung + dauer;
+    final ab = verzoegerung.inMicroseconds / gesamt.inMicroseconds;
     return IgnorePointer(
       ignoring: !sichtbar,
       child: ExcludeSemantics(
         excluding: !sichtbar,
         child: AnimatedOpacity(
           opacity: sichtbar ? 1 : 0,
-          duration: dauer,
+          duration: gesamt,
+          curve: Interval(ab, 1),
           child: AnimatedScale(
             scale: sichtbar ? 1 : 0.6,
-            duration: dauer,
-            curve: Curves.easeOutBack,
+            duration: gesamt,
+            curve: Interval(ab, 1, curve: Curves.easeOutBack),
             child: child,
           ),
         ),
@@ -603,6 +601,7 @@ class EinblendLeiste extends StatelessWidget {
     required this.sichtbar,
     required this.child,
     this.vonOben = false,
+    this.verzoegerung = Duration.zero,
     super.key,
   });
 
@@ -610,12 +609,18 @@ class EinblendLeiste extends StatelessWidget {
   final bool vonOben;
   final Widget child;
 
+  /// Wie lange sie wartet, bevor sie hereinfährt — der Reihe nach
+  /// (`DerReiheNach`).
+  final Duration verzoegerung;
+
   static const Duration dauer = Duration(milliseconds: 520);
 
   static const Key leisteKey = ValueKey<String>('untere-leiste');
 
   @override
   Widget build(BuildContext context) {
+    final gesamt = verzoegerung + dauer;
+    final ab = verzoegerung.inMicroseconds / gesamt.inMicroseconds;
     return IgnorePointer(
       ignoring: !sichtbar,
       child: ExcludeSemantics(
@@ -626,15 +631,16 @@ class EinblendLeiste extends StatelessWidget {
             key: vonOben ? null : leisteKey,
             alignment: vonOben ? Alignment.bottomCenter : Alignment.topCenter,
             heightFactor: sichtbar ? 1 : 0,
-            duration: dauer,
-            curve: Curves.easeOutCubic,
+            duration: gesamt,
+            curve: Interval(ab, 1, curve: Curves.easeOutCubic),
             child: AnimatedSlide(
               offset: sichtbar ? Offset.zero : Offset(0, vonOben ? -1 : 1),
-              duration: dauer,
-              curve: Curves.easeOutBack,
+              duration: gesamt,
+              curve: Interval(ab, 1, curve: Curves.easeOutBack),
               child: AnimatedOpacity(
                 opacity: sichtbar ? 1 : 0,
-                duration: dauer,
+                duration: gesamt,
+                curve: Interval(ab, 1),
                 child: child,
               ),
             ),

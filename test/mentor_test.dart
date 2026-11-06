@@ -27,6 +27,7 @@ import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/tree_overview.dart';
 import 'package:lifes_game/theory/widgets/tree_view.dart';
+import 'package:lifes_game/theory/widgets/talentpunkt_einfuehrung.dart';
 import 'package:theory/theory.dart';
 
 import 'gear_helpers.dart';
@@ -152,6 +153,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SkillTreeScreen), findsOneWidget);
+      // Erst der Talentpunkt, groß in der Mitte; ein Tipp schickt ihn hoch.
+      expect(sagt(tester), satz(Schritt.talentpunkt, MentorOrt.baum));
+      expect(find.byKey(TalentpunktEinfuehrung.punktKey), findsOneWidget);
+      expect(find.byType(ContinueReadingTile), findsNothing);
+      await tester.tapAt(const Offset(200, 600));
+      await tester.pumpAndSettle();
+      expect(find.byKey(TalentpunktEinfuehrung.punktKey), findsNothing);
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.baum));
       // Ein Ring um die ganze Wahl, nicht um jede Zeile (03.11.2026).
       expect(find.byKey(Zeigefinger.ringKey), findsOneWidget);
@@ -369,8 +377,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.start));
 
-      // 4. Die erste Seite, über den Vorschlag im Baum.
+      // 4. Die erste Seite, über den Vorschlag im Baum — erst der
+      // Talentpunkt, ein Tipp schickt ihn an seinen Platz.
       await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
+      await tester.pumpAndSettle();
+      expect(sagt(tester), satz(Schritt.talentpunkt, MentorOrt.baum));
+      await tester.tapAt(const Offset(200, 600));
       await tester.pumpAndSettle();
       // Der erste Vorschlag ist der des Mentors.
       await tester.tap(find.byType(ContinueReadingTile).first);

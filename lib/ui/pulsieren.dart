@@ -23,12 +23,17 @@ class Pulsieren extends StatefulWidget {
     required this.aktiv,
     required this.child,
     this.radius = 6,
+    this.verzoegerung = Duration.zero,
     super.key,
   });
 
   final bool aktiv;
   final Widget child;
   final double radius;
+
+  /// Wie lange es wartet, bevor es zu atmen beginnt — bis das Ziel
+  /// hereingeflogen ist (`DerReiheNach.fertigNach`).
+  final Duration verzoegerung;
 
   /// Ein Atemzug.
   static const Duration takt = Duration(milliseconds: 1100);
@@ -47,6 +52,7 @@ class _PulsierenState extends State<Pulsieren>
     with SingleTickerProviderStateMixin {
   // In `initState` angelegt, nicht faul (`gotchas.md`).
   late final AnimationController _takt;
+  bool _wartet = false;
 
   @override
   void initState() {
@@ -69,7 +75,18 @@ class _PulsierenState extends State<Pulsieren>
   void _stelle() {
     final ruhig = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     if (widget.aktiv && Pulsieren.pulsiert && !ruhig) {
-      if (!_takt.isAnimating) _takt.repeat();
+      if (_takt.isAnimating || _wartet) return;
+      if (widget.verzoegerung == Duration.zero) {
+        _takt.repeat();
+        return;
+      }
+      // Nur außerhalb von Tests (dort pulsiert nichts), also kein
+      // Zeitgeber, der einen Test überdauert.
+      _wartet = true;
+      Future<void>.delayed(widget.verzoegerung, () {
+        _wartet = false;
+        if (mounted && widget.aktiv && !_takt.isAnimating) _takt.repeat();
+      });
     } else {
       _takt
         ..stop()

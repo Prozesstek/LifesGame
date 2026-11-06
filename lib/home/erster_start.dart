@@ -40,6 +40,7 @@ class ErsterStartStand {
     this.warAmFeuer = false,
     this.tagesgrubeVersucht = false,
     this.gewohnheitenGezeigt = false,
+    this.talentpunktGezeigt = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -100,6 +101,9 @@ class ErsterStartStand {
   /// ist ([Schritt.gewohnheitenZeigen]). **Nicht gespeichert**: Wer vor
   /// der ersten Seite neu startet, hört ihn noch einmal — ein Tipp.
   final bool gewohnheitenGezeigt;
+
+  /// … und ob der Talentpunkt erklärt ist ([Schritt.talentpunkt]).
+  final bool talentpunktGezeigt;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -119,6 +123,12 @@ enum Schritt {
   /// Häkchen zeigt der Mentor auf ihren Kreis; ein Tipp irgendwohin
   /// führt weiter. Der einzige Schritt, der nicht an einer Tat hängt.
   gewohnheitenZeigen,
+
+  /// **Was ein Talentpunkt ist** (06.11.2026): Beim ersten Öffnen der
+  /// Theorie steht er groß in der Mitte, der Mentor erklärt, ein Tipp
+  /// schickt ihn an seinen Platz oben rechts. Auf der Startseite ist es
+  /// derselbe Weg wie [ersteSeite].
+  talentpunkt,
 
   /// Die erste Seite — sie bringt jedem Funkenstoß.
   ersteSeite,
@@ -218,6 +228,7 @@ class ErsterStart {
   bool get zeigtWenig =>
       nurMentor ||
       schritt == Schritt.gewohnheitenZeigen ||
+      schritt == Schritt.talentpunkt ||
       schritt == Schritt.ersteSeite;
 
   /// Ob die Grube sich noch erklärt (ADR-0069): das Geister-Steuerkreuz,
@@ -273,7 +284,7 @@ class ErsterStart {
   /// „Heute“ in der Mitte, kein Kreis.
   Bereich? get leuchtet => switch (schritt) {
     Schritt.gewohnheitenZeigen => Bereich.gewohnheiten,
-    Schritt.ersteSeite => Bereich.theorie,
+    Schritt.talentpunkt || Schritt.ersteSeite => Bereich.theorie,
     Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
     Schritt.gebiete => Bereich.gewohnheiten,
@@ -312,9 +323,11 @@ class ErsterStart {
         : !abgehakt
         ? Schritt.abhaken
         : !gelesen
-        ? (s.gewohnheitenGezeigt
-              ? Schritt.ersteSeite
-              : Schritt.gewohnheitenZeigen)
+        ? (!s.gewohnheitenGezeigt
+              ? Schritt.gewohnheitenZeigen
+              : !s.talentpunktGezeigt
+              ? Schritt.talentpunkt
+              : Schritt.ersteSeite)
         : !angelegt
         ? Schritt.faehigkeitAnlegen
         : !gewonnen

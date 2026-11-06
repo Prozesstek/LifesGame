@@ -11,22 +11,31 @@ import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'erster_start.dart';
 
-/// Ob der Hinweis auf die Gewohnheiten weggetippt ist — **nur für diese
-/// Sitzung** ([ErsterStartStand.gewohnheitenGezeigt]).
-final gewohnheitenGezeigtProvider = NotifierProvider<GewohnheitenGezeigt, bool>(
-  GewohnheitenGezeigt.new,
-);
+/// Ein Hinweis des Mentors, den man nur lesen muss und wegtippt
+/// (06.11.2026) — statt an einer Tat hängt er an diesem Tipp.
+enum Hinweis {
+  /// Wo die Gewohnheiten wohnen ([Schritt.gewohnheitenZeigen]).
+  gewohnheiten,
 
-class GewohnheitenGezeigt extends Notifier<bool> {
-  GewohnheitenGezeigt({this.schon = false});
+  /// Was ein Talentpunkt ist ([Schritt.talentpunkt]).
+  talentpunkt,
+}
 
-  /// Für Tests, die den Hinweis nicht prüfen.
-  final bool schon;
+/// Welche [Hinweis]e weggetippt sind — **nur für diese Sitzung**: Wer
+/// vor der ersten Seite neu startet, hört sie noch einmal, ein Tipp je
+/// Hinweis. Der Spielstand bleibt, wie er ist.
+final hinweiseProvider = NotifierProvider<Hinweise, Set<Hinweis>>(Hinweise.new);
+
+class Hinweise extends Notifier<Set<Hinweis>> {
+  Hinweise({this.schon = const <Hinweis>{}});
+
+  /// Für Tests, die die Hinweise nicht prüfen.
+  final Set<Hinweis> schon;
 
   @override
-  bool build() => schon;
+  Set<Hinweis> build() => schon;
 
-  void weiter() => state = true;
+  void weiter(Hinweis hinweis) => state = <Hinweis>{...state, hinweis};
 }
 
 /// Welche Bereiche die Startseite zeigt — **rechnet nichts**, trägt nur
@@ -68,7 +77,12 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       hatTier: ref.watch(haustierProvider).art != null,
       warAmFeuer: habits.warAmFeuer,
       tagesgrubeVersucht: !ref.watch(dailyPitProvider).isEmpty,
-      gewohnheitenGezeigt: ref.watch(gewohnheitenGezeigtProvider),
+      gewohnheitenGezeigt: ref
+          .watch(hinweiseProvider)
+          .contains(Hinweis.gewohnheiten),
+      talentpunktGezeigt: ref
+          .watch(hinweiseProvider)
+          .contains(Hinweis.talentpunkt),
     ),
   );
 });

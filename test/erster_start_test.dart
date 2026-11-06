@@ -107,9 +107,23 @@ void main() {
           haekchen: 1,
           billigstesStueck: billig,
           gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
         ),
       );
       expect(danach.schritt, Schritt.ersteSeite);
+
+      // Dazwischen: der Talentpunkt, beim ersten Öffnen der Theorie.
+      final dazwischen = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+        ),
+      );
+      expect(dazwischen.schritt, Schritt.talentpunkt);
+      expect(dazwischen.leuchtet, Bereich.theorie);
+      expect(dazwischen.zeigtWenig, isTrue);
       expect(danach.leuchtet, Bereich.theorie);
       expect(danach.zeigtWenig, isTrue, reason: 'bis zur ersten Seite');
     });
@@ -274,6 +288,7 @@ void main() {
           haekchen: ErsterStart.haekchenFuerKampf,
           billigstesStueck: billig,
           gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
         ),
       );
 
@@ -291,6 +306,7 @@ void main() {
           hatGekaempft: true,
           billigstesStueck: billig,
           gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
         ),
       );
 
@@ -739,6 +755,34 @@ void main() {
 
       expect(c.read(habitTrackerProvider).customHabits, isEmpty);
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
+    });
+
+    testWidgets('die Bühne: hinter Flamme und Errungenschaft bleibt alles, '
+        'wie es war, danach kommt der neue Schritt (06.11.2026)', (
+      tester,
+    ) async {
+      await starte(tester);
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // Die große Flamme steht: Darunter ist noch Screen 2.
+      expect(find.text('Geschafft? Hak es ab!'), findsOneWidget);
+      expect(zuSehen(tester), isNot(contains('Theorie')));
+
+      await tester.pumpAndSettle();
+      // Jetzt die Errungenschaft, und darunter noch immer Screen 2.
+      expect(find.text('Geschafft? Hak es ab!'), findsOneWidget);
+
+      await feiernSchliessen(tester);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Hier findest du alle Gewohnheiten, auch neue.'),
+        findsOneWidget,
+      );
+      expect(zuSehen(tester), contains('Theorie'));
     });
 
     testWidgets('Screen 2: nur Mentor und Tafel, der Zettel pulsiert bis '

@@ -96,6 +96,14 @@ class AufstiegHostState extends State<AufstiegHost>
 
   final List<_Auftritt> _auftritte = <_Auftritt>[];
 
+  /// Wie viel gerade in der Mitte steht — gemeldet, **bevor** gebaut
+  /// wird, damit die Bühne (`Buehne`) im selben Bild davon weiß.
+  final ValueNotifier<int> _inDerMitte = ValueNotifier<int>(0);
+
+  /// Ob gerade etwas in der Mitte steht (die große Flamme, der
+  /// Streifen der Dailies).
+  ValueListenable<int> get inDerMitte => _inDerMitte;
+
   /// Was geschehen soll, wenn ein Wurf gelandet ist, und wann — in der
   /// Zeit des Hosts ([_zeit]), nicht der Uhr: Läuft der Host nicht,
   /// landet auch nichts.
@@ -213,11 +221,14 @@ class AufstiegHostState extends State<AufstiegHost>
     void fertig() {
       if (auftritt.ende.isCompleted) return;
       auftritt.ende.complete();
-      if (mounted) setState(() => _auftritte.remove(auftritt));
+      if (!mounted) return;
+      setState(() => _auftritte.remove(auftritt));
+      _inDerMitte.value = _auftritte.length;
     }
 
     auftritt.kind = bauen(fertig);
     setState(() => _auftritte.add(auftritt));
+    _inDerMitte.value = _auftritte.length;
     return auftritt.ende.future;
   }
 
@@ -287,6 +298,7 @@ class AufstiegHostState extends State<AufstiegHost>
     }
     _uhrOderNichts?.dispose();
     _bild.dispose();
+    _inDerMitte.dispose();
     for (final notifier in _unterwegs.values) {
       notifier.dispose();
     }

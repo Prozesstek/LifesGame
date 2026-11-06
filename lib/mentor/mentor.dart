@@ -67,6 +67,11 @@ abstract final class Mentor {
       'Gewohnheiten füllen ihr Gebiet, jedes stärkt im Kampf. Leg eine '
       'zweite an!';
 
+  /// Was er sagt, während der Talentpunkt groß in der Mitte steht
+  /// (06.11.2026).
+  static const String talentpunkt =
+      'Talentpunkte öffnen Seiten. Jedes Level bringt einen.';
+
   /// Was er bei [schritt] an [ort] sagt — null, wenn er dort schweigt.
   static MentorSatz? satz(Schritt? schritt, MentorOrt ort) {
     return switch ((schritt, ort)) {
@@ -80,8 +85,11 @@ abstract final class Mentor {
         'Hier findest du alle Gewohnheiten, auch neue.',
         weiter: true,
       ),
-      (Schritt.ersteSeite, MentorOrt.start) => const MentorSatz(
-        'Lies deine erste Seite.',
+      (Schritt.talentpunkt || Schritt.ersteSeite, MentorOrt.start) =>
+        const MentorSatz('Lies deine erste Seite.'),
+      (Schritt.talentpunkt, MentorOrt.baum) => const MentorSatz(
+        talentpunkt,
+        weiter: true,
       ),
       (Schritt.ersteSeite, MentorOrt.baum) => const MentorSatz(
         'Hier geht es los. Eine Seite, ein Punkt.',
