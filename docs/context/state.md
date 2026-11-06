@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 05.11.2026 · Frederik
+**Zuletzt aktualisiert:** 06.11.2026 · Frederik
 
 ---
 
@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1108, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1113, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -136,6 +136,35 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 06.11.2026: Tutorial, Screen 1 — nur Mentor und Wahl
+
+Frederik will das Tutorial „Screen für Screen“ durchgehen. Screen 1:
+„Nur den Mentor und die Auswahl der Gewohnheiten anzeigen“, der Haken
+beim Eigenen sei „buggy“, und die vier Zeichen darunter stünden „ohne
+Aussage“.
+
+| Was | Wie |
+|---|---|
+| **Am Anfang** | nur Mentor und Wahl vor dem Berg; obere Leiste, Level und Gold fahren mit der ersten Gewohnheit von oben herein (`EinblendLeiste(vonOben:)`) |
+| **Etwas Eigenes** | die Vorschläge klappen weg; Feld mit „z. B. Gitarre üben“ statt „Wie heißt sie?“, darunter die Planke „Weiter“ — der Haken ist weg |
+| **Das Gebiet** | eine eigene Frage: „Wobei hilft dir „Gitarre üben“?“, vier gleich hohe Kacheln mit Beispielen (Körper: Sport, Schlaf, Essen …); **ein Tipp legt an** |
+| **Lange Namen** | die Frage bricht auf höchstens drei Zeilen um; am Handy mit 57 Zeichen geprüft |
+
+**Ohne Rückfrage entschieden:** ein Pfeil zurück beim Namen (zu den
+Vorschlägen) und bei der Frage (zum Namen); was im Feld steht, bleibt.
+Die Beispiele sagen nicht, was ein Gebiet im Kampf bringt — das erklärt
+der Mentor wie bisher am Ende.
+
+App 1113 (vorher 1108); vier Tests der Startseite gingen von einem
+leeren Stand mit Leiste aus und haben jetzt eine Gewohnheit. In
+390 × 844 gerendert und im Browser angesehen, Frederik hat ihn
+abgenommen. **Nicht am Handy.**
+
+### Offen
+
+- Screen 2 und folgende.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 05.11.2026, zuletzt: der Frostreif
 

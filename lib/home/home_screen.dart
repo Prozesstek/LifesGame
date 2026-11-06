@@ -148,75 +148,84 @@ class HomeScreen extends ConsumerWidget {
             // Gold und „Heute“ vor dem Berg.
             child: Column(
               children: <Widget>[
-                _Leiste(
-                  oben: true,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      // Immer da; im Licht nur, wenn der Mentor die Gebiete
-                      // erklärt (Issue #183).
-                      kreis(
-                        Bereich.gewohnheiten,
-                        (leuchtet) => HubCircle(
-                          icon: Icons.check_circle_outline,
-                          label: 'Gewohnheiten',
-                          image: HubCircleImage.plain,
-                          symbol: BereichZeichen.gewohnheiten,
-                          progress: heute,
-                          leuchtet: leuchtet,
-                          onTap: () => _open(context, const HabitsScreen()),
-                        ),
-                      ),
-                      kreis(
-                        Bereich.theorie,
-                        (leuchtet) => HubCircle(
-                          icon: Icons.account_tree_outlined,
-                          label: 'Theorie',
-                          image: HubCircleImage.plain,
-                          symbol: BereichZeichen.theorie,
-                          leuchtet: leuchtet,
-                          onTap: () => _open(context, const SkillTreeScreen()),
-                        ),
-                      ),
-                      // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
-                      // Waffe allein schlagbar, und wer zuerst kämpft,
-                      // weiß danach, wofür er liest.
-                      kreis(
-                        Bereich.kampf,
-                        (leuchtet) => HubCircle(
-                          icon: Icons.sports_martial_arts,
-                          label: 'Kampf',
-                          image: HubCircleImage.plain,
-                          symbol: BereichZeichen.kampf,
-                          leuchtet: leuchtet,
-                          onTap: () => _open(context, const LadderScreen()),
-                        ),
-                      ),
-                      // **Die Statistik** (ADR-0087) oben, neben dem, was
-                      // sie zählt — mit dem ersten Häkchen.
-                      kreis(
-                        Bereich.statistik,
-                        // **Ab Level 7, aber schon zu sehen** — mit Schloss.
-                        (_) => GesperrtBisLevel(
-                          level: LevelExtra.statistik.level,
-                          aktiv: start.bereichGesperrt(Bereich.statistik),
-                          rund: true,
-                          child: HubCircle(
-                            icon: Icons.insights,
-                            label: 'Statistik',
+                // **Auf dem ersten Screen nur Mentor und Wahl** (06.11.2026):
+                // Leiste, Level und Gold kommen mit der ersten Gewohnheit.
+                EinblendLeiste(
+                  sichtbar: !start.fragtNachGewohnheit,
+                  vonOben: true,
+                  child: _Leiste(
+                    oben: true,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        // Immer da; im Licht nur, wenn der Mentor die Gebiete
+                        // erklärt (Issue #183).
+                        kreis(
+                          Bereich.gewohnheiten,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.check_circle_outline,
+                            label: 'Gewohnheiten',
                             image: HubCircleImage.plain,
-                            symbol: BereichZeichen.statistik,
-                            onTap: () =>
-                                _open(context, const StatistikScreen()),
+                            symbol: BereichZeichen.gewohnheiten,
+                            progress: heute,
+                            leuchtet: leuchtet,
+                            onTap: () => _open(context, const HabitsScreen()),
                           ),
                         ),
-                      ),
-                    ],
+                        kreis(
+                          Bereich.theorie,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.account_tree_outlined,
+                            label: 'Theorie',
+                            image: HubCircleImage.plain,
+                            symbol: BereichZeichen.theorie,
+                            leuchtet: leuchtet,
+                            onTap: () =>
+                                _open(context, const SkillTreeScreen()),
+                          ),
+                        ),
+                        // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
+                        // Waffe allein schlagbar, und wer zuerst kämpft,
+                        // weiß danach, wofür er liest.
+                        kreis(
+                          Bereich.kampf,
+                          (leuchtet) => HubCircle(
+                            icon: Icons.sports_martial_arts,
+                            label: 'Kampf',
+                            image: HubCircleImage.plain,
+                            symbol: BereichZeichen.kampf,
+                            leuchtet: leuchtet,
+                            onTap: () => _open(context, const LadderScreen()),
+                          ),
+                        ),
+                        // **Die Statistik** (ADR-0087) oben, neben dem, was
+                        // sie zählt — mit dem ersten Häkchen.
+                        kreis(
+                          Bereich.statistik,
+                          // **Ab Level 7, aber schon zu sehen** — mit Schloss.
+                          (_) => GesperrtBisLevel(
+                            level: LevelExtra.statistik.level,
+                            aktiv: start.bereichGesperrt(Bereich.statistik),
+                            rund: true,
+                            child: HubCircle(
+                              icon: Icons.insights,
+                              label: 'Statistik',
+                              image: HubCircleImage.plain,
+                              symbol: BereichZeichen.statistik,
+                              onTap: () =>
+                                  _open(context, const StatistikScreen()),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SafeArea(
-                    top: false,
+                    // Ohne die obere Leiste rückt der Inhalt selbst von
+                    // der Statusleiste des Handys weg.
+                    top: start.fragtNachGewohnheit,
                     bottom: false,
                     child: Center(
                       child: ConstrainedBox(
@@ -231,12 +240,20 @@ class HomeScreen extends ConsumerWidget {
                               // dem oberen Rahmen.
                               // **Das Haustier links daneben** (24.10.2026),
                               // ohne Rahmen — erst, wenn es geschlüpft ist.
-                              StatusLeiste(
-                                xp: xp,
-                                gold: gold,
-                                links: zeigtTier ? const HaustierKarte() : null,
+                              EinblendLeiste(
+                                sichtbar: !start.fragtNachGewohnheit,
+                                vonOben: true,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: StatusLeiste(
+                                    xp: xp,
+                                    gold: gold,
+                                    links: zeigtTier
+                                        ? const HaustierKarte()
+                                        : null,
+                                  ),
+                                ),
                               ),
-                              const SizedBox(height: 8),
                               // **Heute** (ADR-0053) bekommt, was übrig
                               // bleibt. Eine lange Liste rollt, statt
                               // überzulaufen. Darunter das **Lagerfeuer**
@@ -509,17 +526,20 @@ class Aufgedeckt extends StatelessWidget {
 }
 
 /// Eine Leiste, die **von unten hereinfährt**, sobald sie [sichtbar] wird
-/// (ADR-0095). Bis dahin nimmt sie keinen Platz, keinen Tipp und steht
-/// für den Vorleser nicht da. Das Kind bleibt immer im Baum, damit seine
-/// Kreise beim Einblenden nicht neu gebaut werden (`gotchas.md`).
+/// (ADR-0095) — mit [vonOben] von oben. Bis dahin nimmt sie keinen
+/// Platz, keinen Tipp und steht für den Vorleser nicht da. Das Kind
+/// bleibt immer im Baum, damit seine Kreise beim Einblenden nicht neu
+/// gebaut werden (`gotchas.md`).
 class EinblendLeiste extends StatelessWidget {
   const EinblendLeiste({
     required this.sichtbar,
     required this.child,
+    this.vonOben = false,
     super.key,
   });
 
   final bool sichtbar;
+  final bool vonOben;
   final Widget child;
 
   static const Duration dauer = Duration(milliseconds: 520);
@@ -534,13 +554,14 @@ class EinblendLeiste extends StatelessWidget {
         excluding: !sichtbar,
         child: ClipRect(
           child: AnimatedAlign(
-            key: leisteKey,
-            alignment: Alignment.topCenter,
+            // Der Schlüssel gehört der unteren Leiste (Tests messen sie).
+            key: vonOben ? null : leisteKey,
+            alignment: vonOben ? Alignment.bottomCenter : Alignment.topCenter,
             heightFactor: sichtbar ? 1 : 0,
             duration: dauer,
             curve: Curves.easeOutCubic,
             child: AnimatedSlide(
-              offset: sichtbar ? Offset.zero : const Offset(0, 1),
+              offset: sichtbar ? Offset.zero : Offset(0, vonOben ? -1 : 1),
               duration: dauer,
               curve: Curves.easeOutBack,
               child: AnimatedOpacity(

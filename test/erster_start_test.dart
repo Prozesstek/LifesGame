@@ -13,6 +13,7 @@ import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/erste_gewohnheit.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
+import 'package:lifes_game/home/widgets/status_leiste.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -430,12 +431,14 @@ void main() {
         .check(HabitCatalog.starterId, heute)
         .tracker;
 
-    testWidgets('der erste Start zeigt einen Kreis und eine Frage', (
+    testWidgets('der erste Start zeigt nur den Mentor und die Frage', (
       tester,
     ) async {
       await starte(tester);
 
-      expect(aufgedeckt(tester), <String>['Gewohnheiten']);
+      // Keine Leiste, kein Level, kein Gold (06.11.2026).
+      expect(aufgedeckt(tester), isEmpty);
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
       // Die Frage stellt nur noch der Mentor, nicht auch die Karte
       // (Issue #183).
@@ -526,28 +529,48 @@ void main() {
       expect(tracker.customHabits, isEmpty);
     });
 
-    testWidgets('etwas Eigenes: schreiben, Gebiet wählen, anlegen', (
+    testWidgets('etwas Eigenes: Name, Weiter, ein Tipp aufs Gebiet legt an', (
       tester,
     ) async {
       final c = await starte(tester);
 
       // Das Feld kommt erst mit einem Tipp auf „Etwas Eigenes“, die
-      // Wahl des Gebiets erst, wenn etwas im Feld steht.
+      // Frage nach dem Gebiet erst nach „Weiter“.
       expect(find.byKey(ErsteGewohnheitKarte.feldKey), findsNothing);
       await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
       await tester.pumpAndSettle();
-      expect(find.byKey(ErsteGewohnheitKarte.losKey), findsNothing);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(ErsteGewohnheitKarte.weiterKey))
+            .onPressed,
+        isNull,
+      );
 
       await tester.enterText(
         find.byKey(ErsteGewohnheitKarte.feldKey),
         'Gitarre üben',
       );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const ValueKey<String>('erste-gewohnheit-geist')),
-      );
       await tester.pump();
-      await tester.tap(find.byKey(ErsteGewohnheitKarte.losKey));
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(ErsteGewohnheitKarte.gebietFrageFuer('Gitarre üben')),
+        findsOneWidget,
+      );
+      // Jedes Gebiet mit Beispielen, die man ohne das Spiel versteht.
+      for (final area in SkillArea.values) {
+        expect(find.text(area.label), findsOneWidget);
+        expect(
+          find.text(ErsteGewohnheitKarte.beispiele[area]!),
+          findsOneWidget,
+        );
+      }
+      expect(c.read(habitTrackerProvider).customHabits, isEmpty);
+
+      await tester.tap(
+        find.byKey(ErsteGewohnheitKarte.gebietKey(SkillArea.geist)),
+      );
       await tester.pumpAndSettle();
 
       final eigene = c.read(habitTrackerProvider).customHabits.single;
@@ -555,6 +578,87 @@ void main() {
       expect(eigene.area, SkillArea.geist);
       expect(eigene.stat, HabitStat.klarheit);
       expect(find.byType(ErsteGewohnheitKarte), findsNothing);
+      // Jetzt kommen Leiste und Level dazu.
+      expect(aufgedeckt(tester), contains('Gewohnheiten'));
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('von der Frage nach dem Gebiet zurück zum Namen', (
+      tester,
+    ) async {
+      final c = await starte(tester);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), 'Ab');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(ErsteGewohnheitKarte.gebietFrageFuer('Ab')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurueckKey));
+      await tester.pumpAndSettle();
+      expect(find.byKey(ErsteGewohnheitKarte.feldKey), findsOneWidget);
+      expect(find.text('Ab'), findsOneWidget);
+      expect(c.read(habitTrackerProvider).customHabits, isEmpty);
+    });
+
+    testWidgets('ein Name von 60 Zeichen sprengt am Handy nichts', (
+      tester,
+    ) async {
+      final c = await starte(tester);
+      // Am Handy, nicht im hohen Testfenster.
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpAndSettle();
+
+      final lang = 'Jeden Morgen vor der Arbeit zwanzig Minuten Spanisch üben';
+      expect(lang.length, lessThanOrEqualTo(60));
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), lang);
+      await tester.pump();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Jede Kachel steht ganz im Bild und nimmt den Tipp.
+      for (final area in SkillArea.values) {
+        expect(
+          find.byKey(ErsteGewohnheitKarte.gebietKey(area)).hitTestable(),
+          findsOneWidget,
+        );
+      }
+      await tester.tap(
+        find.byKey(ErsteGewohnheitKarte.gebietKey(SkillArea.wissenschaft)),
+      );
+      await tester.pumpAndSettle();
+      expect(c.read(habitTrackerProvider).customHabits.single.name, lang);
+    });
+
+    testWidgets('beim Eigenen verschwinden die Vorschläge, zurück kommen '
+        'sie wieder', (tester) async {
+      await starte(tester);
+      final erster = find.text(ErsteGewohnheitKarte.vorschlaege.first.name);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsNothing);
+
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), 'Ab');
+      await tester.pump();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsNothing);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurueckKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurAuswahlKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsOneWidget);
+      expect(find.byKey(ErsteGewohnheitKarte.eigenesKey), findsOneWidget);
     });
 
     testWidgets('ein leeres Feld legt nichts an', (tester) async {
