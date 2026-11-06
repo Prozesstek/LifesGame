@@ -12,7 +12,7 @@ import '../../ui/gold_icon.dart';
 import '../../ui/level_abzeichen.dart';
 import '../../ui/palette.dart';
 
-/// **Level und Gold oben rechts** — das Abzeichen mit einem Ring darum,
+/// **Level oben rechts, das Gold nur kurz** — das Abzeichen mit einem Ring darum,
 /// der die Erfahrung bis zum nächsten Level zeigt, daneben das Gold
 /// (Frederik, 22.10.2026).
 ///
@@ -66,7 +66,7 @@ class StatusLeiste extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final host = AufstiegHost.maybeOf(context);
-    if (host == null) return _leiste(LevelCurve.levelFor(xp), gold);
+    if (host == null) return _leiste(LevelCurve.levelFor(xp), gold, 0);
     final unterwegsGold = host.unterwegs(FlugZiel.gold);
     final unterwegsXp = host.unterwegs(FlugZiel.erfahrung);
     return ListenableBuilder(
@@ -74,11 +74,12 @@ class StatusLeiste extends StatelessWidget {
       builder: (context, _) => _leiste(
         LevelCurve.levelFor(xp - unterwegsXp.value),
         gold - unterwegsGold.value,
+        unterwegsGold.value,
       ),
     );
   }
 
-  Widget _leiste(PlayerLevel level, int gold) {
+  Widget _leiste(PlayerLevel level, int gold, int goldUnterwegs) {
     return Row(
       mainAxisSize: klein ? MainAxisSize.min : MainAxisSize.max,
       children: <Widget>[
@@ -116,29 +117,133 @@ class StatusLeiste extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        FlugZielMarke(
-          ziel: FlugZiel.gold,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const GoldIcon(),
-              const SizedBox(width: 5),
-              // Die Zahl schrumpft nicht — ein Goldbetrag mit
-              // Auslassungspunkten wäre keine Zahl mehr.
-              Text(
-                '$gold',
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  // Die Titelzeile ist Pergament, nicht Leder.
-                  color: klein ? Palette.gold : Palette.goldOnDark,
-                ),
-              ),
-            ],
-          ),
-        ),
+        KurzesGold(gold: gold, unterwegs: goldUnterwegs, klein: klein),
       ],
+    );
+  }
+}
+
+/// **Das Gold zeigt sich nur, wenn es mehr wird** (06.11.2026, Frederik:
+/// „Gold soll nur da angezeigt werden, wo es auch wirklich gebraucht
+/// wird … man sieht es kurz, wenn es sich erhöht, verschwindet dann
+/// aber wieder“). Gebraucht wird es im Laden, beim Haustier und beim
+/// Verkaufen; hier fliegen nur die Münzen eines Häkchens hin.
+///
+/// **Der Platz bleibt, und die Marke auch**: Unsichtbar ist es das Ziel
+/// der Münzen (`FlugZielMarke`), und es tauchte sonst ohne Ziel auf.
+/// Solange Münzen fliegen, steht es; danach hält es [halten] und blendet
+/// aus — **über einen Takt, keinen Zeitgeber** (`gotchas.md`).
+class KurzesGold extends StatefulWidget {
+  const KurzesGold({
+    required this.gold,
+    required this.unterwegs,
+    this.klein = false,
+    super.key,
+  });
+
+  /// Was angekommen ist.
+  final int gold;
+
+  /// Was noch fliegt.
+  final int unterwegs;
+
+  final bool klein;
+
+  /// Einblenden, stehen, ausblenden.
+  static const Duration ein = Duration(milliseconds: 200);
+  static const Duration halten = Duration(milliseconds: 1600);
+  static const Duration aus = Duration(milliseconds: 400);
+
+  /// Woran Tests es finden.
+  static const Key goldKey = ValueKey<String>('kurzes-gold');
+
+  @override
+  State<KurzesGold> createState() => _KurzesGoldState();
+}
+
+class _KurzesGoldState extends State<KurzesGold>
+    with SingleTickerProviderStateMixin {
+  // In `initState`, nicht faul (`gotchas.md`).
+  late final AnimationController _takt;
+
+  static final double _einEnde =
+      KurzesGold.ein.inMicroseconds / _gesamt.inMicroseconds;
+  static final double _haltenEnde =
+      (KurzesGold.ein + KurzesGold.halten).inMicroseconds /
+      _gesamt.inMicroseconds;
+  static final Duration _gesamt =
+      KurzesGold.ein + KurzesGold.halten + KurzesGold.aus;
+
+  @override
+  void initState() {
+    super.initState();
+    _takt = AnimationController(vsync: this, duration: _gesamt);
+    if (widget.unterwegs > 0) _zeige();
+  }
+
+  @override
+  void didUpdateWidget(KurzesGold alt) {
+    super.didUpdateWidget(alt);
+    final mehr = widget.gold > alt.gold;
+    final fliegt = widget.unterwegs > alt.unterwegs;
+    if (mehr || fliegt) _zeige();
+  }
+
+  /// Steht es schon, bleibt es stehen und hält von vorn; sonst blendet es
+  /// ein.
+  void _zeige() {
+    final steht = _takt.value >= _einEnde && _takt.value < _haltenEnde;
+    _takt.forward(from: steht ? _einEnde : 0);
+  }
+
+  @override
+  void dispose() {
+    _takt.dispose();
+    super.dispose();
+  }
+
+  double _deckkraft() {
+    final t = _takt.value;
+    if (!_takt.isAnimating && (t == 0 || t == 1)) return 0;
+    if (t < _einEnde) return t / _einEnde;
+    if (t < _haltenEnde) return 1;
+    return (1 - (t - _haltenEnde) / (1 - _haltenEnde)).clamp(0.0, 1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _takt,
+      builder: (context, kind) {
+        final deckkraft = _deckkraft();
+        return ExcludeSemantics(
+          excluding: deckkraft == 0,
+          child: Opacity(opacity: deckkraft, child: kind),
+        );
+      },
+      child: FlugZielMarke(
+        ziel: FlugZiel.gold,
+        child: Row(
+          key: KurzesGold.goldKey,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const GoldIcon(),
+            const SizedBox(width: 5),
+            // Die Zahl schrumpft nicht — ein Goldbetrag mit
+            // Auslassungspunkten wäre keine Zahl mehr.
+            Text(
+              '${widget.gold}',
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                // Die Titelzeile ist Pergament, nicht Leder.
+                color: widget.klein ? Palette.gold : Palette.goldOnDark,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 05.11.2026 · Frederik
+**Zuletzt aktualisiert:** 06.11.2026 · Frederik
 
 ---
 
@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1108, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1120, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -136,6 +136,70 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 06.11.2026, danach: Tutorial bis zum ersten Buch, der Reihe nach
+
+Weiter Screen für Screen, jeder im Browser angesehen und abgenommen.
+
+| Was | Wie |
+|---|---|
+| **Screen 2** | wie Screen 1: bis zum ersten Häkchen nur Mentor und „Heute“; der Zettel **pulsiert** golden (`Pulsieren`) |
+| **„Heute“** | **ohne Schild**, überall: Doppelhaken, „0 / 1“ und die kleine Flamme der Tageskette sind weg; zu den Gewohnheiten führt ihr Kreis |
+| **Gold** | nur, wo es gebraucht wird: auf Startseite und Gewohnheiten **nur kurz beim Abhaken** (`KurzesGold`), im Charakter gar nicht; Laden, Haustier, Verkauf, Dungeon bleiben |
+| **Flammenfeier** | 5 statt 2,6 Sekunden |
+| **Nach dem ersten Häkchen** | neuer Schritt: „Hier findest du alle Gewohnheiten, auch neue.“ — ein Dreieck ▼, **ein Tipp irgendwohin führt weiter** (`WeiterTipp`) |
+| **Bis zur ersten Seite** | nur Gewohnheiten, Theorie und „Heute“ (`ErsterStart.zeigtWenig`); Level, Gold, Ei, Feuer, Laden, Statistik warten |
+| **Theorie, erstes Öffnen** | der **Talentpunkt** groß in der Mitte, der Mentor: „Talentpunkte öffnen Seiten. Jedes Level bringt einen.“ — ein Tipp schickt ihn nach oben rechts, dann kommen die Bücher |
+| **Der Reihe nach** | jeder Tutorial-Screen baut sich auf: Mentor, dann eins nach dem anderen, zuletzt Licht und Punkt (`DerReiheNach`); die Startseite steht auf einer **Bühne** (`Buehne`), damit nichts hinter Flamme und Errungenschaft entsteht |
+
+**Ohne Rückfrage entschieden:** Die Hinweise (Gewohnheiten, Talentpunkt)
+gelten **nur für die Sitzung** — wer vor der ersten Seite neu startet,
+tippt sie noch einmal weg; der Spielstand bleibt, wie er ist. Gold fliegt
+nicht zum Laden, sondern erscheint kurz: Den Kreis gibt es am Anfang
+nicht. Den Kampf sieht im Theorie-Schritt, wer schon unten war.
+
+**Beim Bauen gefunden:** Erschien nach dem ersten Häkchen das Ei vor
+„Heute“, baute sich die Tafel neu, und der Stempel schlug nicht auf
+(`gotchas.md`) — jetzt mit festem Schlüssel. Und der große Talentpunkt
+stand über dem `Scaffold` ohne Textstil, also gelb unterstrichen.
+
+App 1120 (vorher 1113). Die Regel „der Reihe nach“ steht in `CLAUDE.md`.
+**Nicht am Handy.**
+
+### Offen
+
+- Die erste Seite und alles danach.
+- Ob der Takt (0,32 s Mentor, 130 ms Abstand) am Handy richtig ist.
+- **AktivesBrett hat es nicht gesehen.**
+
+## 06.11.2026: Tutorial, Screen 1 — nur Mentor und Wahl
+
+Frederik will das Tutorial „Screen für Screen“ durchgehen. Screen 1:
+„Nur den Mentor und die Auswahl der Gewohnheiten anzeigen“, der Haken
+beim Eigenen sei „buggy“, und die vier Zeichen darunter stünden „ohne
+Aussage“.
+
+| Was | Wie |
+|---|---|
+| **Am Anfang** | nur Mentor und Wahl vor dem Berg; obere Leiste, Level und Gold fahren mit der ersten Gewohnheit von oben herein (`EinblendLeiste(vonOben:)`) |
+| **Etwas Eigenes** | die Vorschläge klappen weg; Feld mit „z. B. Gitarre üben“ statt „Wie heißt sie?“, darunter die Planke „Weiter“ — der Haken ist weg |
+| **Das Gebiet** | eine eigene Frage: „Wobei hilft dir „Gitarre üben“?“, vier gleich hohe Kacheln mit Beispielen (Körper: Sport, Schlaf, Essen …); **ein Tipp legt an** |
+| **Lange Namen** | die Frage bricht auf höchstens drei Zeilen um; am Handy mit 57 Zeichen geprüft |
+
+**Ohne Rückfrage entschieden:** ein Pfeil zurück beim Namen (zu den
+Vorschlägen) und bei der Frage (zum Namen); was im Feld steht, bleibt.
+Die Beispiele sagen nicht, was ein Gebiet im Kampf bringt — das erklärt
+der Mentor wie bisher am Ende.
+
+App 1113 (vorher 1108); vier Tests der Startseite gingen von einem
+leeren Stand mit Leiste aus und haben jetzt eine Gewohnheit. In
+390 × 844 gerendert und im Browser angesehen, Frederik hat ihn
+abgenommen. **Nicht am Handy.**
+
+### Offen
+
+- Screen 2 und folgende.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 05.11.2026, zuletzt: der Frostreif
 

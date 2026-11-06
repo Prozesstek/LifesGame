@@ -4,7 +4,6 @@ import 'package:progression/progression.dart';
 
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
-import '../../ui/gold_icon.dart';
 import '../../ui/level_abzeichen.dart';
 import '../../ui/ruhm_zahl.dart';
 
@@ -19,7 +18,6 @@ class IdentityCard extends StatelessWidget {
     required this.identity,
     required this.earnedTitleIds,
     required this.level,
-    required this.gold,
     required this.fame,
     required this.onEditName,
     required this.onChooseTitle,
@@ -37,11 +35,10 @@ class IdentityCard extends StatelessWidget {
   /// weit es bis zum nächsten ist. Gerechnet wird das in
   /// `package:progression`, hier wird nur angezeigt.
   final PlayerLevel level;
-  final int gold;
 
   /// Der Ruhm-Stand. **Eine Zahl zum Vergleichen, kein Guthaben**
-  /// (ADR-0033, Punkt 5) — deshalb steht sie neben dem Gold und nicht
-  /// darunter mit einem Knopf daneben.
+  /// (ADR-0033, Punkt 5) — ohne Knopf daneben. **Das Gold steht hier
+  /// nicht mehr** (06.11.2026): nur noch, wo man es ausgibt.
   final int fame;
   final VoidCallback onEditName;
   final VoidCallback onChooseTitle;
@@ -84,29 +81,7 @@ class IdentityCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      const GoldIcon(size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$gold',
-                        semanticsLabel: '$gold Gold',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.gold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  RuhmZahl(fame: fame),
-                ],
-              ),
+              RuhmZahl(fame: fame),
             ],
           ),
           const SizedBox(height: 12),

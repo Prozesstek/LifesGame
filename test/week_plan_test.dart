@@ -228,7 +228,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(TodayCard),
-          matching: find.text('0 / 1'),
+          matching: find.text(zweite.name),
         ),
         findsOneWidget,
       );
@@ -246,6 +246,8 @@ void main() {
         4,
       }, today: mittwoch);
       await zeige(tester, container(nurDonnerstag), const HomeScreen());
+      // Vor dem ersten Häkchen fliegt die Tafel erst herein (06.11.2026).
+      await tester.pumpAndSettle();
 
       expect(
         find.descendant(

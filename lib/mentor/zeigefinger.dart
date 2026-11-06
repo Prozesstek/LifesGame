@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../home/erster_start.dart';
 import '../home/erster_start_provider.dart';
+import '../ui/der_reihe_nach.dart';
 import 'scheinwerfer.dart';
 
 /// Zeigt, worauf der Mentor gerade zeigt (ADR-0079, seit ADR-0095 mit
@@ -78,10 +79,31 @@ class ZeigeRing extends StatelessWidget {
             const Positioned(
               top: -ueberstand,
               right: -ueberstand,
-              child: ZielPunkt(key: Zeigefinger.ringKey),
+              child: _SpaeterPunkt(),
             ),
         ],
       ),
+    );
+  }
+}
+
+/// **Der Punkt kommt zuletzt** (06.11.2026): erst der Mentor, dann sein
+/// Ziel, dann der Punkt — er blendet ein, wenn das Ziel steht.
+class _SpaeterPunkt extends StatelessWidget {
+  const _SpaeterPunkt();
+
+  static const Duration blende = Duration(milliseconds: 220);
+
+  @override
+  Widget build(BuildContext context) {
+    final warten = DerReiheNach.fertigNach(1);
+    final gesamt = warten + blende;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: gesamt,
+      curve: Interval(warten.inMicroseconds / gesamt.inMicroseconds, 1),
+      builder: (context, t, kind) => Opacity(opacity: t, child: kind),
+      child: const ZielPunkt(key: Zeigefinger.ringKey),
     );
   }
 }

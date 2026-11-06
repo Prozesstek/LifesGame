@@ -11,6 +11,33 @@ import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'erster_start.dart';
 
+/// Ein Hinweis des Mentors, den man nur lesen muss und wegtippt
+/// (06.11.2026) — statt an einer Tat hängt er an diesem Tipp.
+enum Hinweis {
+  /// Wo die Gewohnheiten wohnen ([Schritt.gewohnheitenZeigen]).
+  gewohnheiten,
+
+  /// Was ein Talentpunkt ist ([Schritt.talentpunkt]).
+  talentpunkt,
+}
+
+/// Welche [Hinweis]e weggetippt sind — **nur für diese Sitzung**: Wer
+/// vor der ersten Seite neu startet, hört sie noch einmal, ein Tipp je
+/// Hinweis. Der Spielstand bleibt, wie er ist.
+final hinweiseProvider = NotifierProvider<Hinweise, Set<Hinweis>>(Hinweise.new);
+
+class Hinweise extends Notifier<Set<Hinweis>> {
+  Hinweise({this.schon = const <Hinweis>{}});
+
+  /// Für Tests, die die Hinweise nicht prüfen.
+  final Set<Hinweis> schon;
+
+  @override
+  Set<Hinweis> build() => schon;
+
+  void weiter(Hinweis hinweis) => state = <Hinweis>{...state, hinweis};
+}
+
 /// Welche Bereiche die Startseite zeigt — **rechnet nichts**, trägt nur
 /// zusammen (ADR-0068).
 ///
@@ -50,6 +77,12 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       hatTier: ref.watch(haustierProvider).art != null,
       warAmFeuer: habits.warAmFeuer,
       tagesgrubeVersucht: !ref.watch(dailyPitProvider).isEmpty,
+      gewohnheitenGezeigt: ref
+          .watch(hinweiseProvider)
+          .contains(Hinweis.gewohnheiten),
+      talentpunktGezeigt: ref
+          .watch(hinweiseProvider)
+          .contains(Hinweis.talentpunkt),
     ),
   );
 });

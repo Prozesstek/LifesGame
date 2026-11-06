@@ -39,19 +39,22 @@ class TagesFlammeFeier extends StatefulWidget {
   /// Woran Tests sie finden.
   static const Key feierKey = ValueKey<String>('tages-flamme');
 
-  static const Duration dauer = Duration(milliseconds: 2600);
+  /// **5 statt 2,6 Sekunden** (06.11.2026, Frederik: „länger anzeigen
+  /// lassen, damit man versteht, was passiert“): Jeder Schritt — zünden,
+  /// die Zahl rollt, heute fängt Feuer — hat Zeit, für sich zu stehen.
+  static const Duration dauer = Duration(milliseconds: 5000);
 
   /// Wie schnell sie nach einem Tipp verschwindet.
   static const Duration weg = Duration(milliseconds: 220);
 
   // Der Ablauf, in Sekunden ab dem Häkchen.
-  static const double _ein = 0.22;
-  static const double _zuenden = 0.18;
-  static const double _zahl = 0.45;
-  static const double _zahlSteht = 0.85;
-  static const double _heute = 0.78;
-  static const double _heuteSteht = 1.2;
-  static const double _aus = 2.15;
+  static const double _ein = 0.3;
+  static const double _zuenden = 0.35;
+  static const double _zahl = 1.1;
+  static const double _zahlSteht = 1.7;
+  static const double _heute = 2.0;
+  static const double _heuteSteht = 2.6;
+  static const double _aus = 4.4;
 
   @override
   State<TagesFlammeFeier> createState() => _TagesFlammeFeierState();

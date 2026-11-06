@@ -39,6 +39,8 @@ class ErsterStartStand {
     this.hatTier = false,
     this.warAmFeuer = false,
     this.tagesgrubeVersucht = false,
+    this.gewohnheitenGezeigt = false,
+    this.talentpunktGezeigt = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -94,6 +96,14 @@ class ErsterStartStand {
   /// … und ein Versuch in der Tagesgrube. Ein Extra, das man schon
   /// benutzt hat, verschwindet nicht, nur weil das Level darunter liegt.
   final bool tagesgrubeVersucht;
+
+  /// Ob der Hinweis auf die Gewohnheiten in dieser Sitzung weggetippt
+  /// ist ([Schritt.gewohnheitenZeigen]). **Nicht gespeichert**: Wer vor
+  /// der ersten Seite neu startet, hört ihn noch einmal — ein Tipp.
+  final bool gewohnheitenGezeigt;
+
+  /// … und ob der Talentpunkt erklärt ist ([Schritt.talentpunkt]).
+  final bool talentpunktGezeigt;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -108,6 +118,17 @@ enum Schritt {
 
   /// Das erste Häkchen.
   abhaken,
+
+  /// **Wo die Gewohnheiten wohnen** (06.11.2026): Nach dem ersten
+  /// Häkchen zeigt der Mentor auf ihren Kreis; ein Tipp irgendwohin
+  /// führt weiter. Der einzige Schritt, der nicht an einer Tat hängt.
+  gewohnheitenZeigen,
+
+  /// **Was ein Talentpunkt ist** (06.11.2026): Beim ersten Öffnen der
+  /// Theorie steht er groß in der Mitte, der Mentor erklärt, ein Tipp
+  /// schickt ihn an seinen Platz oben rechts. Auf der Startseite ist es
+  /// derselbe Weg wie [ersteSeite].
+  talentpunkt,
 
   /// Die erste Seite — sie bringt jedem Funkenstoß.
   ersteSeite,
@@ -196,6 +217,20 @@ class ErsterStart {
   /// Ob „Heute“ statt einer Liste die erste Frage stellt.
   final bool fragtNachGewohnheit;
 
+  /// **Die ersten zwei Screens zeigen nur den Mentor und das, worum es
+  /// geht** (06.11.2026): die erste Frage, dann das erste Häkchen. Leiste,
+  /// Level, Gold, Ei und Feuer kommen erst danach.
+  bool get nurMentor => fragtNachGewohnheit || schritt == Schritt.abhaken;
+
+  /// **Bis zur ersten Seite nur, was man kennt** (06.11.2026): der Kreis
+  /// der Gewohnheiten, „Heute“ und das neue Ziel, die Theorie. Level,
+  /// Gold, Ei, Feuer und die gesperrte Statistik warten.
+  bool get zeigtWenig =>
+      nurMentor ||
+      schritt == Schritt.gewohnheitenZeigen ||
+      schritt == Schritt.talentpunkt ||
+      schritt == Schritt.ersteSeite;
+
   /// Ob die Grube sich noch erklärt (ADR-0069): das Geister-Steuerkreuz,
   /// das Zeichen am Helden und nach einer Niederlage der Weg zur Theorie.
   ///
@@ -248,7 +283,8 @@ class ErsterStart {
   /// Kreis des Schritts; bei der Gewohnheit und beim Häkchen ist das Ziel
   /// „Heute“ in der Mitte, kein Kreis.
   Bereich? get leuchtet => switch (schritt) {
-    Schritt.ersteSeite => Bereich.theorie,
+    Schritt.gewohnheitenZeigen => Bereich.gewohnheiten,
+    Schritt.talentpunkt || Schritt.ersteSeite => Bereich.theorie,
     Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
     Schritt.gebiete => Bereich.gewohnheiten,
@@ -287,7 +323,11 @@ class ErsterStart {
         : !abgehakt
         ? Schritt.abhaken
         : !gelesen
-        ? Schritt.ersteSeite
+        ? (!s.gewohnheitenGezeigt
+              ? Schritt.gewohnheitenZeigen
+              : !s.talentpunktGezeigt
+              ? Schritt.talentpunkt
+              : Schritt.ersteSeite)
         : !angelegt
         ? Schritt.faehigkeitAnlegen
         : !gewonnen

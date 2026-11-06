@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../../habits/habits_controller.dart';
 import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
+import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -34,9 +35,11 @@ class ErsterVorschlag {
 /// **Ohne eigene Überschrift** (Issue #183): Die Frage stellt der Mentor
 /// darüber; dasselbe zweimal zu lesen wäre einmal zu viel.
 ///
-/// **Ein Tipp genügt.** Ein Vorschlag legt sofort an; nur wer etwas
-/// Eigenes schreibt, wählt dazu sein Gebiet — der Kampfwert folgt
-/// daraus (ADR-0088). Wann, an welchen Tagen
+/// **Ein Tipp genügt.** Ein Vorschlag legt sofort an. Wer etwas
+/// Eigenes schreibt, wird danach gefragt, zu welchem Gebiet es gehört
+/// (06.11.2026): vier große Kacheln mit Namen, ein Tipp legt an; der
+/// Kampfwert folgt daraus (ADR-0088). Bis dahin standen vier kleine
+/// Kreise ohne Namen unter dem Feld, daneben ein Haken. Wann, an welchen Tagen
 /// und was es danach gibt, fragt später die Kachel (ADR-0052) — am
 /// Anfang zählt das erste Häkchen, nicht das Formular.
 ///
@@ -46,7 +49,35 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
   const ErsteGewohnheitKarte({super.key});
 
   static const Key feldKey = ValueKey<String>('erste-gewohnheit-feld');
-  static const Key losKey = ValueKey<String>('erste-gewohnheit-los');
+
+  /// „Weiter“ unter dem Namen — führt zur Frage nach dem Gebiet.
+  static const Key weiterKey = ValueKey<String>('erste-gewohnheit-weiter');
+
+  /// Zurück vom Namen zu den Vorschlägen.
+  static const Key zurAuswahlKey = ValueKey<String>(
+    'erste-gewohnheit-zur-auswahl',
+  );
+
+  /// Zurück von der Frage nach dem Gebiet zum Namen.
+  static const Key zurueckKey = ValueKey<String>('erste-gewohnheit-zurueck');
+
+  /// Die Kachel eines Gebiets; ein Tipp legt an.
+  static Key gebietKey(SkillArea area) =>
+      ValueKey<String>('erste-gewohnheit-${area.name}');
+
+  /// Die Frage über den vier Gebieten — **in Alltagssprache** (06.11.2026):
+  /// Am Anfang weiß niemand, was ein Gebiet im Spiel tut.
+  /// Mit dem eigenen Namen darin: „Wobei hilft dir „Gitarre üben“?“.
+  static String gebietFrageFuer(String name) => 'Wobei hilft dir „$name“?';
+
+  /// Was unter jedem Gebiet steht: Dinge, die man kennt. Sie erklären das
+  /// Gebiet nebenbei; was es im Kampf bringt, sagt der Mentor am Ende.
+  static const Map<SkillArea, String> beispiele = <SkillArea, String>{
+    SkillArea.koerper: 'Sport, Schlaf, Essen',
+    SkillArea.geist: 'Lesen, Meditieren, Tagebuch',
+    SkillArea.wissenschaft: 'Lernen, Sprachen, Forschen',
+    SkillArea.gesellschaft: 'Freunde, Familie, Helfen',
+  };
 
   /// Die Zeile „Etwas Eigenes“ — ein Tipp öffnet das Feld.
   static const Key eigenesKey = ValueKey<String>('erste-gewohnheit-eigenes');
@@ -70,13 +101,13 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
 
   /// Wie lange der Mentor allein steht, bevor die erste Zeile kommt —
   /// so lang, wie sein Kasten zum Hereinschieben braucht.
-  static const Duration warten = Duration(milliseconds: 320);
+  static const Duration warten = DerReiheNach.mentor;
 
   /// Abstand zwischen zwei Zeilen.
-  static const Duration abstand = Duration(milliseconds: 140);
+  static const Duration abstand = DerReiheNach.abstand;
 
   /// Wie lange eine Zeile fliegt.
-  static const Duration flug = Duration(milliseconds: 380);
+  static const Duration flug = DerReiheNach.flug;
 
   /// Wie lange das Hereinfliegen insgesamt dauert — die Vorschläge und
   /// danach das Eigene.
@@ -90,8 +121,7 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
 class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
     with SingleTickerProviderStateMixin {
   final TextEditingController _name = TextEditingController();
-  SkillArea _area = SkillArea.koerper;
-  bool _eigenesOffen = false;
+  _Stufe _stufe = _Stufe.auswahl;
 
   // In `initState` angelegt, nicht faul (`gotchas.md`).
   late final AnimationController _einflug;
@@ -184,26 +214,46 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          for (final (i, vorschlag) in vorschlaege.indexed) ...<Widget>[
-            _fliegt(
-              i,
-              _VorschlagZeile(
-                icon: gebietZeichen(vorschlag.area),
-                farbe: GebietFarbe.pergament(vorschlag.area),
-                name: vorschlag.name,
-                semantik: '${vorschlag.name}, ${vorschlag.area.label}',
-                onTap: () => _nimm(vorschlag),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
+          // **Wer etwas Eigenes schreibt, sieht nur noch seine Frage**
+          // (06.11.2026): Die Vorschläge klappen weg, bis er zurückgeht.
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            alignment: Alignment.topCenter,
+            child: _stufe != _Stufe.auswahl
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      for (final (i, vorschlag)
+                          in vorschlaege.indexed) ...<Widget>[
+                        _fliegt(
+                          i,
+                          _VorschlagZeile(
+                            icon: gebietZeichen(vorschlag.area),
+                            farbe: GebietFarbe.pergament(vorschlag.area),
+                            name: vorschlag.name,
+                            semantik:
+                                '${vorschlag.name}, ${vorschlag.area.label}',
+                            onTap: () => _nimm(vorschlag),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
+          ),
           _fliegt(
             vorschlaege.length,
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
               alignment: Alignment.topCenter,
-              child: _eigenesOffen ? _eigenesFeld() : _eigenesZeile(),
+              child: switch (_stufe) {
+                _Stufe.auswahl => _eigenesZeile(),
+                _Stufe.name => _eigenesFeld(),
+                _Stufe.gebiet => _gebietFrage(),
+              },
             ),
           ),
         ],
@@ -221,8 +271,42 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
       farbe: Palette.textDim,
       name: 'Etwas Eigenes',
       semantik: 'Etwas Eigenes',
-      onTap: () => setState(() => _eigenesOffen = true),
+      onTap: () => setState(() => _stufe = _Stufe.name),
     );
+  }
+
+  /// Ein Pfeil zurück, ohne Wort (ADR-0060).
+  Widget _zurueck({
+    required Key key,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Druck(
+        child: InkWell(
+          key: key,
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: const Padding(
+            padding: EdgeInsets.all(6),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              size: 24,
+              color: Palette.textDim,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _zumGebiet() {
+    if (_name.text.trim().isEmpty) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _stufe = _Stufe.gebiet);
   }
 
   Widget _eigenesFeld() {
@@ -230,16 +314,28 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // Zurück zu den Vorschlägen; was im Feld steht, bleibt.
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _zurueck(
+            key: ErsteGewohnheitKarte.zurAuswahlKey,
+            label: 'Zurück zu den Vorschlägen',
+            onTap: () => setState(() => _stufe = _Stufe.auswahl),
+          ),
+        ),
+        const SizedBox(height: 4),
         TextField(
           key: ErsteGewohnheitKarte.feldKey,
           controller: _name,
           autofocus: true,
           maxLength: ErsteGewohnheitKarte.maxNameLength,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _lege(_name.text, _area),
+          textInputAction: TextInputAction.next,
+          onSubmitted: (_) => _zumGebiet(),
           style: const TextStyle(fontSize: 18, color: Palette.text),
           decoration: InputDecoration(
-            hintText: 'Wie heißt sie?',
+            // Ein Beispiel statt einer zweiten Frage: Gefragt hat der
+            // Mentor schon („Was willst du jeden Tag tun?“).
+            hintText: 'z. B. Gitarre üben',
             hintStyle: const TextStyle(fontSize: 18, color: Palette.muted),
             filled: true,
             fillColor: Palette.surfaceRaised,
@@ -254,39 +350,151 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
             contentPadding: const EdgeInsets.symmetric(vertical: 16),
           ),
         ),
-        // Wohin das Eigene gehört, und der Knopf — erst wenn etwas im
-        // Feld steht. Vorher wären es vier Zeichen ohne Bezug.
-        if (bereit) ...<Widget>[
-          const SizedBox(height: 8),
-          // Nur das Gebiet (ADR-0085); was es im Kampf stärkt, folgt
-          // daraus (ADR-0088) und erklärt der Mentor am Ende.
-          Row(
-            children: <Widget>[
-              for (final area in SkillArea.values)
-                _Wahl(
-                  key: ValueKey<String>('erste-gewohnheit-${area.name}'),
-                  icon: gebietZeichen(area),
-                  farbe: GebietFarbe.pergament(area),
-                  label: '${area.label}, stärkt ${area.kampfwert.label}',
-                  gewaehlt: area == _area,
-                  onTap: () => setState(() => _area = area),
-                ),
-              const Spacer(),
-              // Grün wie die Plus-Zeichen darüber (Issue #183).
-              IconButton(
-                key: ErsteGewohnheitKarte.losKey,
-                onPressed: () => _lege(_name.text, _area),
-                iconSize: 40,
-                icon: const Icon(
-                  Icons.check_circle_rounded,
-                  color: Palette.success,
-                  semanticLabel: 'Anlegen',
+        const SizedBox(height: 10),
+        // Die Planke über das Theme, wie überall; grau, solange das Feld
+        // leer ist.
+        FilledButton(
+          key: ErsteGewohnheitKarte.weiterKey,
+          onPressed: bereit ? _zumGebiet : null,
+          child: const Text('Weiter'),
+        ),
+      ],
+    );
+  }
+
+  /// **Die Frage nach dem Gebiet** (06.11.2026): vier Kacheln mit
+  /// Zeichen und Namen in ihrer Farbe (ADR-0090). Ein Tipp legt an — ein
+  /// Knopf zum Bestätigen wäre ein Schritt ohne Entscheidung. Was das
+  /// Gebiet im Kampf stärkt (ADR-0088), erklärt der Mentor am Ende.
+  Widget _gebietFrage() {
+    final name = _name.text.trim();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            _zurueck(
+              key: ErsteGewohnheitKarte.zurueckKey,
+              label: 'Zurück zum Namen',
+              onTap: () => setState(() => _stufe = _Stufe.name),
+            ),
+            const SizedBox(width: 6),
+            // Ein Name darf 60 Zeichen haben: höchstens drei Zeilen, dann
+            // Auslassung — die Kacheln darunter rücken nur nach unten.
+            Expanded(
+              child: Text(
+                ErsteGewohnheitKarte.gebietFrageFuer(name),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Palette.text,
                 ),
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        for (final reihe in <List<SkillArea>>[
+          SkillArea.values.sublist(0, 2),
+          SkillArea.values.sublist(2),
+        ]) ...<Widget>[
+          Row(
+            children: <Widget>[
+              for (final (i, area) in reihe.indexed) ...<Widget>[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(
+                  child: _GebietKachel(
+                    key: ErsteGewohnheitKarte.gebietKey(area),
+                    area: area,
+                    onTap: () => _lege(name, area),
+                  ),
+                ),
+              ],
             ],
           ),
+          const SizedBox(height: 8),
         ],
       ],
+    );
+  }
+}
+
+/// Wo die Karte gerade steht.
+enum _Stufe { auswahl, name, gebiet }
+
+/// Ein Gebiet als große Kachel: Zeichen und Name in seiner Farbe.
+class _GebietKachel extends StatelessWidget {
+  const _GebietKachel({required this.area, required this.onTap, super.key});
+
+  final SkillArea area;
+  final VoidCallback onTap;
+
+  /// Zwei Zeilen zu 12 Punkten bei Zeilenhöhe 1,3.
+  static const double _beispielHoehe = 2 * 12 * 1.3;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = GebietFarbe.pergament(area);
+    final beispiel = ErsteGewohnheitKarte.beispiele[area] ?? '';
+    return Semantics(
+      button: true,
+      label: '${area.label}: $beispiel',
+      excludeSemantics: true,
+      child: Druck(
+        child: Material(
+          color: Palette.surfaceRaised,
+          borderRadius: BorderRadius.circular(_VorschlagZeile.rund),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(_VorschlagZeile.rund),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(6, 12, 6, 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_VorschlagZeile.rund),
+                border: Border.all(color: farbe, width: 1.5),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(gebietZeichen(area), size: 32, color: farbe),
+                  const SizedBox(height: 6),
+                  Text(
+                    area.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: farbe,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Immer Platz für zwei Zeilen, damit alle vier Kacheln
+                  // gleich hoch sind, ob ein Beispiel umbricht oder nicht.
+                  SizedBox(
+                    height: _beispielHoehe,
+                    child: Center(
+                      child: Text(
+                        beispiel,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          height: 1.3,
+                          color: Palette.textDim,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -356,60 +564,6 @@ class _VorschlagZeile extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Ein Gebiet als Kreis zum Antippen.
-class _Wahl extends StatelessWidget {
-  const _Wahl({
-    required this.label,
-    required this.gewaehlt,
-    required this.onTap,
-    required this.icon,
-    required this.farbe,
-    super.key,
-  });
-
-  /// Nur für den Vorleser — zu sehen ist das Zeichen.
-  final String label;
-  final bool gewaehlt;
-  final VoidCallback onTap;
-  final IconData icon;
-
-  /// Die Farbe des Gebiets (ADR-0090): das Zeichen immer, der Rand, wenn
-  /// gewählt.
-  final Color farbe;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: Semantics(
-        button: true,
-        selected: gewaehlt,
-        label: label,
-        excludeSemantics: true,
-        child: Druck(
-          child: InkWell(
-            onTap: onTap,
-            customBorder: const CircleBorder(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: gewaehlt ? Palette.surfaceRaised : null,
-                border: Border.all(
-                  color: gewaehlt ? farbe : Palette.muted,
-                  width: gewaehlt ? 2 : 1,
-                ),
-              ),
-              child: Icon(icon, size: 18, color: farbe),
             ),
           ),
         ),

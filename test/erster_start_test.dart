@@ -13,6 +13,13 @@ import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/erste_gewohnheit.dart';
 import 'package:lifes_game/home/widgets/hub_circle.dart';
+import 'package:lifes_game/home/widgets/status_leiste.dart';
+import 'package:lifes_game/haustier/widgets/haustier_karte.dart';
+import 'package:lifes_game/ui/pulsieren.dart';
+import 'package:lifes_game/mentor/mentor_kasten.dart';
+import 'package:lifes_game/theory/skill_tree_screen.dart';
+import 'package:theory/theory.dart';
+import 'tutorial_helfer.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -58,6 +65,22 @@ void main() {
       expect(start.sichtbar, <Bereich>{Bereich.gewohnheiten});
     });
 
+    test('nur der Mentor bis zum ersten Häkchen, dann alles (06.11.2026)', () {
+      ErsterStart mit({bool gewohnheit = false, int haekchen = 0}) =>
+          ErsterStart.aus(
+            ErsterStartStand(
+              hatGewohnheit: gewohnheit,
+              haekchen: haekchen,
+              billigstesStueck: billig,
+            ),
+          );
+
+      expect(mit().nurMentor, isTrue);
+      expect(mit(gewohnheit: true).nurMentor, isTrue);
+      expect(mit(gewohnheit: true, haekchen: 1).nurMentor, isFalse);
+      expect(ErsterStart.allesOffen.nurMentor, isFalse);
+    });
+
     test('das erste Häkchen deckt die Theorie auf, und sie leuchtet '
         '(ADR-0079)', () {
       final start = ErsterStart.aus(
@@ -70,10 +93,52 @@ void main() {
 
       expect(start.zeigt(Bereich.theorie), isTrue);
       expect(start.zeigt(Bereich.kampf), isFalse);
-      expect(start.schritt, Schritt.ersteSeite);
-      expect(start.leuchtet, Bereich.theorie);
+      // Erst zeigt der Mentor, wo die Gewohnheiten wohnen (06.11.2026).
+      expect(start.schritt, Schritt.gewohnheitenZeigen);
+      expect(start.leuchtet, Bereich.gewohnheiten);
+      expect(start.zeigtWenig, isTrue);
       // Das Lagerfeuer wartet seit ADR-0098 auf Level 3.
       expect(start.zeigtTagesaufgaben, isFalse);
+
+      // Weggetippt, schickt er in die Theorie.
+      final danach = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
+        ),
+      );
+      expect(danach.schritt, Schritt.ersteSeite);
+
+      // Dazwischen: der Talentpunkt, beim ersten Öffnen der Theorie.
+      final dazwischen = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+        ),
+      );
+      expect(dazwischen.schritt, Schritt.talentpunkt);
+      expect(dazwischen.leuchtet, Bereich.theorie);
+      expect(dazwischen.zeigtWenig, isTrue);
+      expect(danach.leuchtet, Bereich.theorie);
+      expect(danach.zeigtWenig, isTrue, reason: 'bis zur ersten Seite');
+    });
+
+    test('wer schon gelesen hat, hört den Hinweis nicht', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          seiten: 1,
+          billigstesStueck: billig,
+        ),
+      );
+      expect(start.schritt, Schritt.faehigkeitAnlegen);
+      expect(start.zeigtWenig, isFalse);
     });
 
     test('die erste Seite deckt die Fähigkeiten auf, und sie leuchten', () {
@@ -222,6 +287,8 @@ void main() {
           hatGewohnheit: true,
           haekchen: ErsterStart.haekchenFuerKampf,
           billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
         ),
       );
 
@@ -238,6 +305,8 @@ void main() {
           haekchen: 1,
           hatGekaempft: true,
           billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+          talentpunktGezeigt: true,
         ),
       );
 
@@ -388,12 +457,14 @@ void main() {
     Future<ProviderContainer> starte(
       WidgetTester tester, [
       SaveData stand = const SaveData.empty(),
+      bool hinweisWeg = false,
     ]) async {
       useTallView(tester);
       final container = ProviderContainer(
         overrides: [
           savedGameProvider.overrideWithValue(stand),
           todayProvider.overrideWithValue(heute),
+          if (hinweisWeg) hinweisGesehen,
         ],
       );
       addTearDown(container.dispose);
@@ -415,6 +486,20 @@ void main() {
         kreis.label,
     ];
 
+    /// Die Namen der Kreise, die zu sehen sind — auch wenn gerade nur
+    /// die Weiter-Fläche des Mentors Tipps annimmt.
+    List<String> zuSehen(WidgetTester tester) => <String>[
+      for (final element in find.byType(Aufgedeckt).evaluate())
+        if ((element.widget as Aufgedeckt).sichtbar)
+          for (final kreis in tester.widgetList<HubCircle>(
+            find.descendant(
+              of: find.byWidget(element.widget),
+              matching: find.byType(HubCircle),
+            ),
+          ))
+            kreis.label,
+    ];
+
     /// Der Name des Kreises, der leuchtet — oder null.
     String? leuchtet(WidgetTester tester) {
       final kreise = tester
@@ -430,12 +515,14 @@ void main() {
         .check(HabitCatalog.starterId, heute)
         .tracker;
 
-    testWidgets('der erste Start zeigt einen Kreis und eine Frage', (
+    testWidgets('der erste Start zeigt nur den Mentor und die Frage', (
       tester,
     ) async {
       await starte(tester);
 
-      expect(aufgedeckt(tester), <String>['Gewohnheiten']);
+      // Keine Leiste, kein Level, kein Gold (06.11.2026).
+      expect(aufgedeckt(tester), isEmpty);
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
       // Die Frage stellt nur noch der Mentor, nicht auch die Karte
       // (Issue #183).
@@ -526,28 +613,48 @@ void main() {
       expect(tracker.customHabits, isEmpty);
     });
 
-    testWidgets('etwas Eigenes: schreiben, Gebiet wählen, anlegen', (
+    testWidgets('etwas Eigenes: Name, Weiter, ein Tipp aufs Gebiet legt an', (
       tester,
     ) async {
       final c = await starte(tester);
 
       // Das Feld kommt erst mit einem Tipp auf „Etwas Eigenes“, die
-      // Wahl des Gebiets erst, wenn etwas im Feld steht.
+      // Frage nach dem Gebiet erst nach „Weiter“.
       expect(find.byKey(ErsteGewohnheitKarte.feldKey), findsNothing);
       await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
       await tester.pumpAndSettle();
-      expect(find.byKey(ErsteGewohnheitKarte.losKey), findsNothing);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(ErsteGewohnheitKarte.weiterKey))
+            .onPressed,
+        isNull,
+      );
 
       await tester.enterText(
         find.byKey(ErsteGewohnheitKarte.feldKey),
         'Gitarre üben',
       );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const ValueKey<String>('erste-gewohnheit-geist')),
-      );
       await tester.pump();
-      await tester.tap(find.byKey(ErsteGewohnheitKarte.losKey));
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(ErsteGewohnheitKarte.gebietFrageFuer('Gitarre üben')),
+        findsOneWidget,
+      );
+      // Jedes Gebiet mit Beispielen, die man ohne das Spiel versteht.
+      for (final area in SkillArea.values) {
+        expect(find.text(area.label), findsOneWidget);
+        expect(
+          find.text(ErsteGewohnheitKarte.beispiele[area]!),
+          findsOneWidget,
+        );
+      }
+      expect(c.read(habitTrackerProvider).customHabits, isEmpty);
+
+      await tester.tap(
+        find.byKey(ErsteGewohnheitKarte.gebietKey(SkillArea.geist)),
+      );
       await tester.pumpAndSettle();
 
       final eigene = c.read(habitTrackerProvider).customHabits.single;
@@ -555,6 +662,86 @@ void main() {
       expect(eigene.area, SkillArea.geist);
       expect(eigene.stat, HabitStat.klarheit);
       expect(find.byType(ErsteGewohnheitKarte), findsNothing);
+      // Leiste und Level warten noch auf das erste Häkchen (Screen 2).
+      expect(aufgedeckt(tester), isEmpty);
+    });
+
+    testWidgets('von der Frage nach dem Gebiet zurück zum Namen', (
+      tester,
+    ) async {
+      final c = await starte(tester);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), 'Ab');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(ErsteGewohnheitKarte.gebietFrageFuer('Ab')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurueckKey));
+      await tester.pumpAndSettle();
+      expect(find.byKey(ErsteGewohnheitKarte.feldKey), findsOneWidget);
+      expect(find.text('Ab'), findsOneWidget);
+      expect(c.read(habitTrackerProvider).customHabits, isEmpty);
+    });
+
+    testWidgets('ein Name von 60 Zeichen sprengt am Handy nichts', (
+      tester,
+    ) async {
+      final c = await starte(tester);
+      // Am Handy, nicht im hohen Testfenster.
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpAndSettle();
+
+      final lang = 'Jeden Morgen vor der Arbeit zwanzig Minuten Spanisch üben';
+      expect(lang.length, lessThanOrEqualTo(60));
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), lang);
+      await tester.pump();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Jede Kachel steht ganz im Bild und nimmt den Tipp.
+      for (final area in SkillArea.values) {
+        expect(
+          find.byKey(ErsteGewohnheitKarte.gebietKey(area)).hitTestable(),
+          findsOneWidget,
+        );
+      }
+      await tester.tap(
+        find.byKey(ErsteGewohnheitKarte.gebietKey(SkillArea.wissenschaft)),
+      );
+      await tester.pumpAndSettle();
+      expect(c.read(habitTrackerProvider).customHabits.single.name, lang);
+    });
+
+    testWidgets('beim Eigenen verschwinden die Vorschläge, zurück kommen '
+        'sie wieder', (tester) async {
+      await starte(tester);
+      final erster = find.text(ErsteGewohnheitKarte.vorschlaege.first.name);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.eigenesKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsNothing);
+
+      await tester.enterText(find.byKey(ErsteGewohnheitKarte.feldKey), 'Ab');
+      await tester.pump();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.weiterKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsNothing);
+
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurueckKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ErsteGewohnheitKarte.zurAuswahlKey));
+      await tester.pumpAndSettle();
+      expect(erster, findsOneWidget);
+      expect(find.byKey(ErsteGewohnheitKarte.eigenesKey), findsOneWidget);
     });
 
     testWidgets('ein leeres Feld legt nichts an', (tester) async {
@@ -570,18 +757,115 @@ void main() {
       expect(find.byType(ErsteGewohnheitKarte), findsOneWidget);
     });
 
-    testWidgets('nach dem ersten Häkchen leuchtet die Theorie (ADR-0079)', (
+    testWidgets('die Bühne: hinter Flamme und Errungenschaft bleibt alles, '
+        'wie es war, danach kommt der neue Schritt (06.11.2026)', (
       tester,
     ) async {
+      await starte(tester);
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // Die große Flamme steht: Darunter ist noch Screen 2.
+      expect(find.text('Geschafft? Hak es ab!'), findsOneWidget);
+      expect(zuSehen(tester), isNot(contains('Theorie')));
+
+      await tester.pumpAndSettle();
+      // Jetzt die Errungenschaft, und darunter noch immer Screen 2.
+      expect(find.text('Geschafft? Hak es ab!'), findsOneWidget);
+
+      await feiernSchliessen(tester);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Hier findest du alle Gewohnheiten, auch neue.'),
+        findsOneWidget,
+      );
+      expect(zuSehen(tester), contains('Theorie'));
+    });
+
+    testWidgets('Screen 2: nur Mentor und Tafel, der Zettel pulsiert bis '
+        'zum Häkchen', (tester) async {
+      // Ohne Timer: Ein Tipp hakt ab (die Startvorlage öffnete ihn).
+      final c = await starte(tester);
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pumpAndSettle();
+      final id = c.read(habitTrackerProvider).customHabits.single.id;
+      final puls = find.byKey(TodayCard.pulsKey(id));
+      bool pulsiert() => tester.widget<Pulsieren>(puls).aktiv;
+
+      expect(aufgedeckt(tester), isEmpty);
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
+      expect(find.byType(HaustierKarte), findsNothing);
+      expect(find.byType(LagerfeuerKarte), findsNothing);
+      expect(find.text('Geschafft? Hak es ab!'), findsOneWidget);
+      expect(pulsiert(), isTrue);
+
+      await tester.tap(find.text('Spazieren gehen'));
+      await tester.pumpAndSettle();
+      // Die große Flamme und die Feier liegen darüber.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      expect(c.read(habitTrackerProvider).isChecked(id, heute), isTrue);
+      expect(pulsiert(), isFalse);
+      expect(zuSehen(tester), contains('Theorie'));
+      // Level und Gold warten bis nach der ersten Seite (06.11.2026).
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
+    });
+
+    testWidgets('nach dem ersten Häkchen zeigt er auf die Gewohnheiten, '
+        'ein Tipp irgendwohin schickt in die Theorie', (tester) async {
       await starte(tester, SaveData(habits: einHaekchen));
+
+      expect(zuSehen(tester), <String>['Gewohnheiten', 'Theorie']);
+      // Bis zum Tipp nimmt nur die Fläche des Mentors einen an.
+      expect(aufgedeckt(tester), isEmpty);
+      expect(leuchtet(tester), 'Gewohnheiten');
+      expect(
+        find.text('Hier findest du alle Gewohnheiten, auch neue.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(WeiterZeichen.zeichenKey), findsOneWidget);
+      // Nur, was man kennt: kein Ei, kein Feuer, keine Statistik, kein Level.
+      expect(find.byType(LagerfeuerKarte), findsNothing);
+      expect(find.byType(HaustierKarte), findsNothing);
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
+
+      // Ein Tipp mitten auf die Tafel hakt nichts ab, er führt weiter.
+      await tester.tap(find.byType(TodayCard));
+      await tester.pumpAndSettle();
+      expect(find.text('Lies deine erste Seite.'), findsOneWidget);
+      expect(find.byKey(WeiterZeichen.zeichenKey), findsNothing);
+      expect(leuchtet(tester), 'Theorie');
+      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      expect(find.byType(LagerfeuerKarte), findsNothing);
+
+      // Jetzt nehmen die Kreise ihre Tipps wieder an.
+      await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SkillTreeScreen), findsOneWidget);
+    });
+
+    testWidgets('nach der ersten Seite stehen Ei, Feuer und Statistik mit '
+        'Schloss da (ADR-0098)', (tester) async {
+      var theorie = const TheoryProgress.empty();
+      final seite = habitsBranch.lessons.first;
+      theorie = theorie.submit(seite, <int?>[
+        for (final frage in seite.questions) frage.correctIndex,
+      ]).progress;
+      await starte(tester, SaveData(habits: einHaekchen, theory: theorie));
 
       // Die Statistik kommt mit dem ersten Häkchen, offen ist sie aber
       // erst auf Level 7 — bis dahin mit Schloss, wie das Lagerfeuer bis
       // Level 3 (ADR-0098).
-      // Offen sind nur diese zwei; die Statistik steht gesperrt daneben.
-      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      // Die Statistik steht gesperrt neben den offenen Kreisen.
+      expect(
+        aufgedeckt(tester),
+        containsAll(<String>['Gewohnheiten', 'Theorie', 'Fähigkeiten']),
+      );
       expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
-      expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
       expect(find.byType(LagerfeuerKarte), findsOneWidget);
       // Statistik, Lagerfeuer und das Ei des Haustiers (Level 5).
@@ -606,6 +890,7 @@ void main() {
           habits: einHaekchen,
           ladder: const LadderProgress.empty().recordDefeat(1),
         ),
+        true,
       );
 
       // Keine Seite gelesen, keine Fähigkeit: nur der Waffenzug.
@@ -632,6 +917,7 @@ void main() {
           habits: einHaekchen,
           ladder: const LadderProgress.empty().recordDefeat(1),
         ),
+        true,
       );
 
       expect(aufgedeckt(tester), containsAll(<String>['Kampf', 'Theorie']));

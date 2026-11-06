@@ -13,6 +13,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// Merkt sich, was gespielt werden sollte, statt es zu spielen.
 class _Mitschrift implements SoundPlayer {
@@ -126,6 +127,7 @@ void main() {
         overrides: [
           savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
           todayProvider.overrideWithValue(heute),
+          hinweisGesehen,
           soundPlayerProvider.overrideWithValue(mitschrift),
         ],
       );
@@ -160,11 +162,12 @@ void main() {
       expect(inDerFlamme('2'), findsNothing);
       expect(inDerFlamme('Mo'), findsOneWidget, reason: 'die Woche');
 
-      await tester.pump(const Duration(milliseconds: 500));
+      // Seit dem 06.11.2026 langsamer: Die Zahl rollt ab 1,1 s.
+      await tester.pump(const Duration(milliseconds: 1300));
       expect(inDerFlamme('1'), findsOneWidget, reason: 'sie rollt hinaus');
       expect(inDerFlamme('2'), findsOneWidget, reason: 'die neue herein');
 
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
       expect(inDerFlamme('1'), findsNothing);
       expect(inDerFlamme('2'), findsOneWidget);
       expect(mitschrift.gespielt, contains(SoundEffect.ketteSteigt));

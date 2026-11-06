@@ -25,14 +25,16 @@ import 'palette.dart';
 /// aussieht.
 class Anschlagtafel extends StatelessWidget {
   const Anschlagtafel({
-    required this.schild,
     required this.child,
+    this.schild,
     this.onSchild,
     super.key,
   });
 
-  /// Was auf dem Schild über der Tafel steht — hell auf Holz.
-  final Widget schild;
+  /// Was auf dem Schild über der Tafel steht — hell auf Holz. **Ohne
+  /// Schild** (null) beginnt die Tafel gleich mit ihren Brettern: „Heute“
+  /// braucht seit dem 06.11.2026 keins, zu den Gewohnheiten führt der Kreis.
+  final Widget? schild;
 
   /// Wohin ein Tipp aufs Schild führt; ohne ist es nur ein Schild.
   final VoidCallback? onSchild;
@@ -44,11 +46,13 @@ class Anschlagtafel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final schild = this.schild;
+    final ueberstand = schild == null ? 0.0 : schildUeberstand;
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(top: schildUeberstand),
+          padding: EdgeInsets.only(top: ueberstand),
           child: CustomPaint(
             painter: GehrungsMaler(art: RahmenOrt.of(context)),
             child: Padding(
@@ -62,9 +66,9 @@ class Anschlagtafel extends StatelessWidget {
                   painter: const _Bretter(),
                   child: Padding(
                     // Oben bleibt die untere Hälfte des Schilds frei.
-                    padding: const EdgeInsets.fromLTRB(
+                    padding: EdgeInsets.fromLTRB(
                       6,
-                      schildUeberstand + 8,
+                      schild == null ? 14 : schildUeberstand + 8,
                       6,
                       18,
                     ),
@@ -75,21 +79,22 @@ class Anschlagtafel extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Druck(
-              enabled: onSchild != null,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onSchild,
-                child: _Schild(child: schild),
+        if (schild != null)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Druck(
+                enabled: onSchild != null,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onSchild,
+                  child: _Schild(child: schild),
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

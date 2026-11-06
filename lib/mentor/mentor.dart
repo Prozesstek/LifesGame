@@ -21,9 +21,13 @@ enum MentorOrt {
 /// liest von oben nach unten, erst der Satz, dann das Ziel. Bis dahin
 /// stand er meist unten, gegenüber seinem Ziel.
 class MentorSatz {
-  const MentorSatz(this.text);
+  const MentorSatz(this.text, {this.weiter = false});
 
   final String text;
+
+  /// Ob ein Tipp irgendwohin weiterführt — dann zeigt unten rechts im
+  /// Kasten ein kleines Zeichen, dass es weitergeht (06.11.2026).
+  final bool weiter;
 }
 
 /// Der Mentor, der neue Spieler durch den ersten Start führt (ADR-0079).
@@ -63,6 +67,11 @@ abstract final class Mentor {
       'Gewohnheiten füllen ihr Gebiet, jedes stärkt im Kampf. Leg eine '
       'zweite an!';
 
+  /// Was er sagt, während der Talentpunkt groß in der Mitte steht
+  /// (06.11.2026).
+  static const String talentpunkt =
+      'Talentpunkte öffnen Seiten. Jedes Level bringt einen.';
+
   /// Was er bei [schritt] an [ort] sagt — null, wenn er dort schweigt.
   static MentorSatz? satz(Schritt? schritt, MentorOrt ort) {
     return switch ((schritt, ort)) {
@@ -72,8 +81,15 @@ abstract final class Mentor {
       (Schritt.abhaken, MentorOrt.start) => const MentorSatz(
         'Geschafft? Hak es ab!',
       ),
-      (Schritt.ersteSeite, MentorOrt.start) => const MentorSatz(
-        'Lies deine erste Seite.',
+      (Schritt.gewohnheitenZeigen, MentorOrt.start) => const MentorSatz(
+        'Hier findest du alle Gewohnheiten, auch neue.',
+        weiter: true,
+      ),
+      (Schritt.talentpunkt || Schritt.ersteSeite, MentorOrt.start) =>
+        const MentorSatz('Lies deine erste Seite.'),
+      (Schritt.talentpunkt, MentorOrt.baum) => const MentorSatz(
+        talentpunkt,
+        weiter: true,
       ),
       (Schritt.ersteSeite, MentorOrt.baum) => const MentorSatz(
         'Hier geht es los. Eine Seite, ein Punkt.',

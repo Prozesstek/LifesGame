@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:habits/habits.dart';
 import 'package:lifes_game/character/abilities_screen.dart';
 import 'package:lifes_game/character/character_screen.dart';
 import 'package:lifes_game/gear/equipment_screen.dart';
@@ -28,6 +29,7 @@ import 'package:lifes_game/main.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 void main() {
   group('HomeScreen', () {
@@ -135,7 +137,15 @@ void main() {
     });
     testWidgets('Gewohnheiten führt zum Tracker', (tester) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedGameProvider.overrideWithValue(_eineGewohnheit()),
+            hinweisGesehen,
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.byKey(HubCircle.keyFor('Gewohnheiten')));
@@ -197,6 +207,7 @@ void main() {
             savedGameProvider.overrideWithValue(
               SaveData(
                 theory: _mitHandbuch(),
+                habits: _eineGewohnheit().habits,
                 ladder: const LadderProgress.empty().recordDefeat(1),
               ),
             ),
@@ -501,7 +512,16 @@ void main() {
       tester,
     ) async {
       useTallView(tester);
-      await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
+      // Bis zum ersten Häkchen steht der Ring nicht da (06.11.2026); ein
+      // Häkchen brächte aber Erfahrung. Also: alles offen, ohne Stand.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
+          child: const LifesGameApp(),
+        ),
+      );
       await tester.pump();
 
       const satz = '0 von 100 Erfahrung bis Level 2';
@@ -565,6 +585,15 @@ void main() {
 /// geben zusammen 275 Erfahrung und damit Level 3 — genau die Stufe, auf
 /// der der zweite Fähigkeitsslot aufgeht. Vier Lektionen wären 220 und
 /// damit fünf Punkte zu wenig.
+/// Ein Stand mit einer Gewohnheit **und einem Häkchen** — bis dahin
+/// zeigt die Startseite nur den Mentor und keine Leiste (06.11.2026).
+SaveData _eineGewohnheit() => SaveData(
+  habits: const HabitTracker.empty()
+      .activate(HabitCatalog.starterId)
+      .check(HabitCatalog.starterId, const Day(2026, 1, 5))
+      .tracker,
+);
+
 TheoryProgress _mitHandbuch() {
   var progress = const TheoryProgress.empty();
   for (final lesson in habitsBranch.lessons) {
@@ -595,6 +624,7 @@ SaveData _kampfbereit() {
 
   return SaveData(
     theory: progress,
+    habits: _eineGewohnheit().habits,
     abilities: const ChosenAbilities.empty().withAt(
       0,
       _ersterFaehigkeitsknotenMoveId,
@@ -634,6 +664,7 @@ SaveData _ohneHandbuchAberMitMoves() {
 
   return SaveData(
     theory: progress,
+    habits: _eineGewohnheit().habits,
     abilities: const ChosenAbilities.empty().withAt(
       0,
       _ersterFaehigkeitsknotenMoveId,

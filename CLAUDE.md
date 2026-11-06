@@ -190,6 +190,11 @@ durch die Grube ersetzt und gelöscht.
 | `lib/mentor/mentor_kasten.dart` | sein Kasten **oben im Fluss** eines Bildschirms (`MentorZeile`, `MentorFlaeche`) — schiebt den Inhalt nach unten, deckt nichts zu, **nimmt keinen Tipp an** (ADR-0096) | Flutter |
 | `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
 | `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; dazu `ZielPunkt`, der gelbe Punkt | Flutter |
+| `lib/mentor/buehne.dart` | **die Bühne**: ein neuer Stand des ersten Starts gilt darunter erst, wenn keine Feier in der Mitte steht und kein Blatt darüber liegt — sonst flöge alles hinter Flamme und Errungenschaft herein; überschreibt `ersterStartProvider` in einer eigenen `ProviderScope` | Flutter |
+| `lib/mentor/weiter_tipp.dart` | **ein Tipp irgendwohin führt weiter** (`WeiterTipp`), solange der Mentor etwas sagt, das man nur lesen muss — liegt unter der Feier; dazu im Kasten das Dreieck ▼ (`WeiterZeichen`) | Flutter |
+| `lib/ui/der_reihe_nach.dart` | **im Tutorial baut sich jeder Screen der Reihe nach auf** (`DerReiheNach`): erst der Mentor, dann eins nach dem anderen, zuletzt Licht, Punkt und Pulsieren — ein Takt für alle | Flutter |
+| `lib/ui/pulsieren.dart` | **was man jetzt antippen soll, pulsiert** — golden, ohne Ende, in Tests still (`Pulsieren.pulsiert`) | Flutter |
+| `lib/theory/widgets/talentpunkt_einfuehrung.dart` | **der Talentpunkt vor dem ersten Buch**: groß in der Mitte, der Mentor erklärt, ein Tipp schickt ihn an seinen Platz oben rechts | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
 | `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander hereinfliegen ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
@@ -350,7 +355,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1108 Tests
+flutter test             # 1120 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -936,6 +941,20 @@ aus einen Kreis antippen**, überschreiben `ersterStartProvider` mit
 Fähigkeit. **Seine Sätze sind die Ausnahme von ADR-0060**: Er erklärt
 ohne Antippen, weil er nach dem ersten Sieg für immer schweigt. Sein
 Kasten nimmt keinen Tipp an — der Mentor zeigt, er sperrt nicht.
+
+**Im Tutorial baut sich jeder Screen der Reihe nach auf** (06.11.2026,
+Frederik): erst schiebt sich der Mentor herein, dann fliegt eins nach
+dem anderen herein, was neu ist, zuletzt kommen Licht, gelber Punkt und
+Pulsieren. **Wer etwas Neues ins Tutorial baut, legt es in
+`DerReiheNach`** (oder gibt `Aufgedeckt`/`EinblendLeiste` eine
+`verzoegerung`), sonst erscheint es als einziges auf einmal. Damit man
+es sieht, steht die Startseite auf einer **Bühne** (`Buehne`): Ein
+neuer Schritt gilt dort erst, wenn keine Feier mehr darüber liegt.
+**Hinweise, die man nur liest** (`Hinweis`: wo die Gewohnheiten wohnen,
+was ein Talentpunkt ist), führen auf Tipp weiter und gelten nur für die
+Sitzung (`hinweiseProvider`); Tests der Startseite, die nach einem
+Häkchen weitertippen, nehmen `hinweisGesehen` aus
+`test/tutorial_helfer.dart`.
 
 **Die Grube erklärt sich, bis die erste Stufe geschafft ist**
 ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)): ein
