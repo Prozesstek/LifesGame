@@ -14,6 +14,7 @@ import 'beute_am_boden.dart';
 import 'beute_bild.dart';
 import 'beute_regen.dart';
 import 'damage_popup.dart';
+import 'fels_tiefe.dart';
 import 'figure_state.dart';
 import 'kampfgefuehl.dart';
 import 'neue_arten_bild.dart';
@@ -634,6 +635,9 @@ class ActionGame extends Game {
   /// Blöcke aneinanderstossen statt als Kacheln dazustehen.
   static const double _steinBreite = 1.15;
 
+  /// Welche Wandfelder ohne Stein bleiben — einmal je Karte gerechnet.
+  late final FelsTiefe _felsTiefe = FelsTiefe.aus(sim.level);
+
   void _drawFloor(Canvas canvas, Vec2 kamera, GrubeBilder? bilder) {
     const feld = ActionBalance.tileSize;
 
@@ -660,10 +664,34 @@ class ActionGame extends Game {
         false;
 
     for (var y = vonY; y <= bisY; y++) {
+      // **Tiefer Fels als eine Fläche je Zeile** (`FelsTiefe`): Steine
+      // bekommt nur der Rand, zwei Felder breit. Sonst wären es drei
+      // Zeichenbefehle je Wandfeld, die niemand als Wand wahrnimmt.
+      int? felsVon;
+      void felsZu(int bis) {
+        final von = felsVon;
+        if (von == null) return;
+        felsVon = null;
+        final flaeche = Rect.fromLTWH(
+          von * feld,
+          y * feld,
+          (bis - von) * feld,
+          feld,
+        );
+        canvas.drawRect(flaeche, bilder != null ? _bodenDunkel : _wand);
+        if (bilder != null) canvas.drawRect(flaeche, _fuge);
+      }
+
       for (var x = vonX; x <= bisX; x++) {
         if (x < 0 || y < 0 || x >= sim.level.width || y >= sim.level.height) {
+          felsZu(x);
           continue;
         }
+        if (_felsTiefe.istTief(x, y)) {
+          felsVon ??= x;
+          continue;
+        }
+        felsZu(x);
         final rect = Rect.fromLTWH(x * feld, y * feld, feld, feld);
 
         if (sim.level.gatesClosed && sim.level.isGateAt(x, y)) {
@@ -684,6 +712,7 @@ class ActionGame extends Game {
           canvas.drawRect(rect, hell ? _bodenHell : _bodenDunkel);
         }
       }
+      felsZu(bisX + 1);
     }
   }
 
