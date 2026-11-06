@@ -137,6 +137,25 @@ vom 02.10.
 
 ---
 
+## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
+
+Frederik: „mach das mit deferred laden“. Grube, Tagesgrube, Statistik,
+Prototyp und Dorf werden per `deferred as` erst beim ersten Öffnen
+geladen (`oeffneGeladen`, `lib/ui/spaeter_laden.dart`); scheitert es im
+Browser ohne Netz, bleibt man stehen und sieht eine kurze Meldung.
+
+| Release-Build Web | vorher | jetzt |
+|---|---|---|
+| `main.dart.js` | 3.957 KB (gzip 1.202 KB) | 3.627 KB (gzip 1.094 KB) |
+| nachgeladen | — | 8 Teile, zusammen 354 KB |
+
+**Ehrlich eingeordnet:** Das Startpaket ist rund 9 % kleiner. Den
+größten Teil des Starts lädt ohnehin CanvasKit (die Grafik-Engine, mehrere
+MB), daran ändert das nichts. Am Handy nicht gemessen.
+
+Sechs Tests pumpten nach „Hinab“ einen Takt zu wenig
+(`test/nachladen.dart`, `gotchas.md`). App 1129, unverändert.
+
 ## 06.11.2026, zuletzt: die Grube baut weniger neu
 
 Frederik: „Wie könnten wir die App Performance mäßig optimieren“, danach:

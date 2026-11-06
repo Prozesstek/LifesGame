@@ -289,6 +289,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
 | `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
 | `lib/ui/sprung.dart` | **wie etwas aufspringt** — eine gedämpfte Feder für Häkchen und Flamme | Flutter |
+| `lib/ui/spaeter_laden.dart` | **ein Bildschirm, der erst beim ersten Öffnen geladen wird** (`oeffneGeladen`): Grube, Tagesgrube, Statistik, Prototyp, Dorf — Flame und fl_chart liegen damit nicht im Startpaket der Web-Fassung | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |

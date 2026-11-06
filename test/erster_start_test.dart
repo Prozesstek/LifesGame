@@ -29,6 +29,7 @@ import 'test_view.dart';
 import 'package:lifes_game/progression/widgets/gesperrt_bis_level.dart';
 import 'package:lifes_game/progression/widgets/level_roadmap_blatt.dart';
 import 'package:lifes_game/statistik/statistik_screen.dart';
+import 'nachladen.dart';
 
 /// Der erste Start (ADR-0068): Die Startseite fragt nach einer
 /// Gewohnheit, und die Bereiche kommen nach und nach.
@@ -901,8 +902,7 @@ void main() {
       expect(find.byType(LadderScreen), findsOneWidget);
 
       await tester.tap(find.byKey(LadderScreen.hinabKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await nachgeladen(tester);
 
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
       expect(grube.stage.number, 1);

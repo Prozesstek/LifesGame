@@ -3,6 +3,23 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein nachgeladener Bildschirm braucht im Test einen Takt mehr
+
+Grube, Tagesgrube, Statistik, Prototyp und Dorf werden seit dem
+06.11.2026 erst beim ersten Öffnen geladen (`deferred as`,
+`oeffneGeladen`). `loadLibrary` ist im Widget-Test erst fertig, wenn ein
+`pump` mit vergangener Zeit läuft; geschoben wird danach. Ein Test mit
+`tap`, `pump()`, `pump(1 s)` findet den Bildschirm dann nicht — „No
+element“, ohne Hinweis auf das Nachladen.
+
+Und: Die Dart-VM prüft es. Wer `grube.PitScreen` baut, ohne vorher
+`grube.loadLibrary()` abzuwarten, bekommt „Deferred library grube was
+not loaded“.
+
+**Regel:** Nach einem Tipp, der nachlädt, `nachgeladen(tester)` aus
+`test/nachladen.dart`. Wer einen Bildschirm `deferred` importiert,
+öffnet ihn nur über `oeffneGeladen`.
+
 ## Was ohne Ende läuft, malt ohne eigene Ebene den ganzen Bildschirm
 
 Das Haustier atmet, `Pulsieren` pulsiert, das Dreieck des Mentors wippt —

@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
-import '../action/action_prototype_screen.dart';
+import '../action/action_prototype_screen.dart' deferred as prototyp;
 import '../action/hero_power.dart';
-import '../action/pit_screen.dart';
+import '../action/pit_screen.dart' deferred as grube;
 import '../action/pit_text.dart';
 import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
@@ -21,7 +21,8 @@ import 'dev_controller.dart';
 import 'save_slot.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
-import '../village/village_screen.dart';
+import '../ui/spaeter_laden.dart';
+import '../village/village_screen.dart' deferred as dorf;
 
 /// Die Werkbank: Erfahrung, Gold, Punkte und Sachen per Knopfdruck.
 ///
@@ -117,10 +118,10 @@ class DevScreen extends ConsumerWidget {
 
                 const _SectionTitle('Dungeon'),
                 _EbenenWahl(
-                  onHinab: (ebene) => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => PitScreen(stage: PitStage(ebene)),
-                    ),
+                  onHinab: (ebene) => oeffneGeladen<void>(
+                    context,
+                    laden: grube.loadLibrary,
+                    bauen: () => grube.PitScreen(stage: PitStage(ebene)),
                   ),
                   onSpringen: (ebene) =>
                       ref.read(ladderProvider.notifier).devSpringeZu(ebene),
@@ -174,10 +175,10 @@ class DevScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ActionPrototypeScreen(),
-                      ),
+                    onPressed: () => oeffneGeladen<void>(
+                      context,
+                      laden: prototyp.loadLibrary,
+                      bauen: () => prototyp.ActionPrototypeScreen(),
                     ),
                     icon: const Icon(Icons.sports_martial_arts, size: 18),
                     label: const Text('Die Grube (Echtzeit-Prototyp)'),
@@ -192,10 +193,10 @@ class DevScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const VillageScreen(),
-                      ),
+                    onPressed: () => oeffneGeladen<void>(
+                      context,
+                      laden: dorf.loadLibrary,
+                      bauen: () => dorf.VillageScreen(),
                     ),
                     icon: const Icon(Icons.holiday_village, size: 18),
                     label: const Text('Das Dorf (Prototyp)'),
