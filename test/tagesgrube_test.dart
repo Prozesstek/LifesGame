@@ -25,6 +25,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/ui/ruhm_zahl.dart';
 
 import 'test_view.dart';
+import 'nachladen.dart';
 
 /// Die Tagesgrube in der App (ADR-0072): dieselbe Grube für alle, ein
 /// Versuch am Tag, danach ein Text zum Teilen.
@@ -342,8 +343,7 @@ void main() {
     /// `pumpAndSettle`: Flame zeichnet dauerhaft (`gotchas.md`).
     Future<void> hinab(WidgetTester tester) async {
       await tester.tap(find.byKey(TagesgrubeKarte.hinabKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await nachgeladen(tester);
     }
 
     ActionGame spielVon(WidgetTester tester) =>
@@ -419,8 +419,7 @@ void main() {
       await tester.tap(find.byKey(TagesgrubeKarte.hinabKey));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(TagesgrubeKarte.trotzdemKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await nachgeladen(tester);
 
       expect(find.byType(DailyPitScreen), findsOneWidget);
       expect(

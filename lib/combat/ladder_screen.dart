@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
-import '../action/pit_screen.dart';
+import '../action/pit_screen.dart' deferred as grube;
+import '../ui/spaeter_laden.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
 import '../home/erster_start.dart';
@@ -91,11 +92,11 @@ class LadderScreen extends ConsumerWidget {
                         child: SizedBox(
                           width: double.infinity,
                           child: FilledButton(
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    PitScreen(stage: PitStage(stufe)),
-                              ),
+                            onPressed: () => oeffneGeladen<void>(
+                              context,
+                              laden: grube.loadLibrary,
+                              bauen: () =>
+                                  grube.PitScreen(stage: PitStage(stufe)),
                             ),
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),

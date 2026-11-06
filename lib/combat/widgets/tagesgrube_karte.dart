@@ -2,7 +2,8 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../action/daily_pit_screen.dart';
+import '../../action/daily_pit_screen.dart' deferred as tagesgrube;
+import '../../ui/spaeter_laden.dart';
 import '../../action/pit_text.dart';
 import '../../habits/habits_controller.dart';
 import '../../home/erster_start_provider.dart';
@@ -132,11 +133,11 @@ class TagesgrubeKarte extends ConsumerWidget {
         .start(jetzt.day, jetzt.condition);
     if (!begonnen || !context.mounted) return;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            DailyPitScreen(day: jetzt.day, condition: jetzt.condition),
-      ),
+    await oeffneGeladen<void>(
+      context,
+      laden: tagesgrube.loadLibrary,
+      bauen: () =>
+          tagesgrube.DailyPitScreen(day: jetzt.day, condition: jetzt.condition),
     );
   }
 }

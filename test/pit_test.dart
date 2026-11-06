@@ -13,6 +13,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'nachladen.dart';
 
 /// Die Grube als Kampf des Spiels (ADR-0039).
 void main() {
@@ -104,8 +105,7 @@ void main() {
         findsOneWidget,
       );
       await tester.tap(find.byKey(LadderScreen.hinabKey));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await nachgeladen(tester);
 
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
       expect(grube.stage.number, 4);
@@ -120,9 +120,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(LadderScreen.hinabKey));
-      // Kein pumpAndSettle: Flame zeichnet dauerhaft (`gotchas.md`).
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await nachgeladen(tester);
 
       final grube = tester.widget<PitScreen>(find.byType(PitScreen));
       expect(grube.stage.number, 1);

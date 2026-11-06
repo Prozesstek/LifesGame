@@ -11,7 +11,8 @@ import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
-import '../statistik/statistik_screen.dart';
+import '../statistik/statistik_screen.dart' deferred as statistik;
+import '../ui/spaeter_laden.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
 import '../ui/bereich_zeichen.dart';
@@ -256,7 +257,11 @@ class HomeScreen extends ConsumerWidget {
                           label: 'Statistik',
                           image: HubCircleImage.plain,
                           symbol: BereichZeichen.statistik,
-                          onTap: () => _open(context, const StatistikScreen()),
+                          onTap: () => oeffneGeladen<void>(
+                            context,
+                            laden: statistik.loadLibrary,
+                            bauen: () => statistik.StatistikScreen(),
+                          ),
                         ),
                       ),
                     ),
