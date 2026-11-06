@@ -508,10 +508,13 @@ void main() {
       tester,
     ) async {
       useTallView(tester);
-      // Ohne Gewohnheit steht der Ring noch nicht da (06.11.2026).
+      // Bis zum ersten Häkchen steht der Ring nicht da (06.11.2026); ein
+      // Häkchen brächte aber Erfahrung. Also: alles offen, ohne Stand.
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [savedGameProvider.overrideWithValue(_eineGewohnheit())],
+          overrides: [
+            ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+          ],
           child: const LifesGameApp(),
         ),
       );
@@ -578,10 +581,13 @@ void main() {
 /// geben zusammen 275 Erfahrung und damit Level 3 — genau die Stufe, auf
 /// der der zweite Fähigkeitsslot aufgeht. Vier Lektionen wären 220 und
 /// damit fünf Punkte zu wenig.
-/// Ein Stand mit einer laufenden Gewohnheit — ohne sie fragt die
-/// Startseite nur nach ihr und zeigt keine Leiste (06.11.2026).
+/// Ein Stand mit einer Gewohnheit **und einem Häkchen** — bis dahin
+/// zeigt die Startseite nur den Mentor und keine Leiste (06.11.2026).
 SaveData _eineGewohnheit() => SaveData(
-  habits: const HabitTracker.empty().activate(HabitCatalog.starterId),
+  habits: const HabitTracker.empty()
+      .activate(HabitCatalog.starterId)
+      .check(HabitCatalog.starterId, const Day(2026, 1, 5))
+      .tracker,
 );
 
 TheoryProgress _mitHandbuch() {

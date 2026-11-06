@@ -48,7 +48,6 @@ class CharacterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(equippedStatsProvider);
     final level = ref.watch(playerLevelProvider);
-    final gold = ref.watch(goldProvider);
     final identity = ref.watch(identityProvider);
     final achievementStats = ref.watch(achievementStatsProvider);
     final earnedTitleIds = ref.watch(earnedTitleIdsProvider);
@@ -71,7 +70,6 @@ class CharacterScreen extends ConsumerWidget {
                   identity: identity,
                   earnedTitleIds: earnedTitleIds,
                   level: level,
-                  gold: gold,
                   fame: ref.watch(fameProvider),
                   onEditName: () => _editName(context, ref, identity),
                   onChooseTitle: () =>

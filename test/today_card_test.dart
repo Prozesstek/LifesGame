@@ -62,8 +62,9 @@ void main() {
         .setCue(starter.id, 'Nach dem Zähneputzen');
     await startseite(tester, tracker);
 
-    expect(inDerKarte(find.byIcon(Icons.checklist_rounded)), findsOneWidget);
-    expect(inDerKarte(find.text('0 / 2')), findsOneWidget);
+    // Auf dem Schild steht kein Zähler mehr (06.11.2026).
+    expect(inDerKarte(find.byIcon(Icons.checklist_rounded)), findsNothing);
+    expect(inDerKarte(find.text('0 / 2')), findsNothing);
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
     expect(inDerKarte(find.text('Nach dem Zähneputzen')), findsOneWidget);
@@ -87,7 +88,6 @@ void main() {
     );
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.byIcon(Icons.check_circle)), findsOneWidget);
-    expect(inDerKarte(find.text('1 / 2')), findsOneWidget);
 
     // Die Feier zum ersten Häkchen liegt jetzt über der Karte.
     await tester.tapAt(const Offset(10, 10));
@@ -117,7 +117,6 @@ void main() {
     expect(inDerKarte(find.text(starter.name)), findsOneWidget);
     expect(inDerKarte(find.text(zweite.name)), findsOneWidget);
     expect(inDerKarte(find.byIcon(Icons.check_circle)), findsNWidgets(2));
-    expect(inDerKarte(find.text('2 / 2')), findsOneWidget);
     // Die Truhe wartet am Lagerfeuer (ADR-0076), das Feuer sagt es.
     expect(find.byKey(DailyChestCard.oeffnenKey), findsNothing);
     expect(
@@ -173,27 +172,6 @@ void main() {
     expect(find.byType(HabitsScreen), findsOneWidget);
   });
 
-  testWidgets('die Flamme zeigt die Tageskette', (tester) async {
-    // Zwei Gewohnheiten im Wechsel: Keine hat eine Kette über einen Tag,
-    // die Tageskette steht trotzdem auf drei (ADR-0055).
-    final tracker = const HabitTracker.empty()
-        .activate(starter.id)
-        .activate(zweite.id)
-        .check(starter.id, heute.previous.previous)
-        .tracker
-        .check(zweite.id, heute.previous)
-        .tracker
-        .check(starter.id, heute)
-        .tracker;
-    await startseite(tester, tracker);
-
-    expect(
-      inDerKarte(find.byIcon(Icons.local_fire_department_rounded)),
-      findsOneWidget,
-    );
-    expect(inDerKarte(find.text('3')), findsOneWidget);
-  });
-
   testWidgets('ohne Kette keine Flamme', (tester) async {
     await startseite(tester, const HabitTracker.empty().activate(starter.id));
 
@@ -203,13 +181,22 @@ void main() {
     );
   });
 
-  testWidgets('der Kopf führt zum Gewohnheiten-Bildschirm', (tester) async {
-    await startseite(tester, const HabitTracker.empty().activate(starter.id));
+  testWidgets('die Tafel hat kein Schild mehr (06.11.2026)', (tester) async {
+    // Zu den Gewohnheiten führt ihr Kreis; mit dem Schild gingen Pfeil,
+    // Zähler und die kleine Flamme der Tageskette.
+    final tracker = const HabitTracker.empty()
+        .activate(starter.id)
+        .check(starter.id, heute.previous)
+        .tracker
+        .check(starter.id, heute)
+        .tracker;
+    await startseite(tester, tracker);
 
-    await tester.tap(inDerKarte(find.byIcon(Icons.checklist_rounded)));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(HabitsScreen), findsOneWidget);
+    expect(inDerKarte(find.byIcon(Icons.chevron_right_rounded)), findsNothing);
+    expect(
+      inDerKarte(find.byIcon(Icons.local_fire_department_rounded)),
+      findsNothing,
+    );
   });
 
   testWidgets('abgehakt schlägt ein Stempel auf den Zettel', (tester) async {

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
@@ -17,7 +15,9 @@ import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
-import '../../ui/sprung.dart';
+import '../../ui/pulsieren.dart';
+import '../erster_start.dart';
+import '../erster_start_provider.dart';
 
 /// **Heute** auf der Startseite: die offenen Gewohnheiten, abhakbar ohne
 /// Bildschirmwechsel.
@@ -39,7 +39,7 @@ import '../../ui/sprung.dart';
 /// Ein Zeitziel öffnet dort seinen Timer (ADR-0067); die Restzeit steht
 /// rechts in der Zeile.
 /// Alles Weitere (Ziele Schritt für Schritt, Auslöser ändern, Vorlagen)
-/// bleibt dort; ein Tipp aufs Schild führt hin.
+/// bleibt dort; hin führt der Kreis „Gewohnheiten“.
 ///
 /// **Eine Anschlagtafel, jede Gewohnheit ein Zettel** (23.10.2026,
 /// Frederik: „die Gewohnheiten aber eigentlich auch“ — nach den
@@ -53,6 +53,12 @@ class TodayCard extends ConsumerWidget {
   /// (ADR-0076).
   static const Key flammeKey = ValueKey<String>('heute-zuerst');
 
+  /// Der Schein um den Zettel von [habitId], der beim ersten Häkchen
+  /// pulsiert (06.11.2026).
+  static Key pulsKey(String habitId) {
+    return ValueKey<String>('heute-puls-$habitId');
+  }
+
   /// Das Zeichen des Gebiets an der Zeile von [habitId] (ADR-0085).
   static Key gebietKey(String habitId) {
     return ValueKey<String>('heute-gebiet-$habitId');
@@ -65,18 +71,14 @@ class TodayCard extends ConsumerWidget {
 
     // Samt Einrückung und „jetzt dran" (ADR-0065).
     final liste = tracker.stackOn(today);
-    final erledigt = liste
-        .where((eintrag) => tracker.isChecked(eintrag.habit.id, today))
-        .length;
+    // Beim ersten Häkchen leuchtet die Gewohnheit (06.11.2026).
+    final hervorheben =
+        ref.watch(ersterStartProvider).schritt == Schritt.abhaken;
 
+    // **Ohne Schild** (06.11.2026, Frederik): Zu den Gewohnheiten führt
+    // jederzeit ihr Kreis. Mit dem Schild ging die kleine Flamme der
+    // Tageskette — die Kette zeigt die große Feier beim ersten Häkchen.
     return Anschlagtafel(
-      onSchild: () => _oeffneGewohnheiten(context),
-      schild: _Kopf(
-        done: erledigt,
-        total: liste.length,
-        streak: tracker.currentDayStreak(today),
-        heuteGetan: tracker.hasCheckOn(today),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,6 +107,7 @@ class TodayCard extends ConsumerWidget {
                 cued: eintrag.isCued,
                 timed: tracker.hasTimer(eintrag.habit.id),
                 zuerst: tracker.firstUpOn(today) == eintrag.habit.id,
+                hervorheben: hervorheben,
                 onTap: () => tapHabit(context, ref, eintrag.habit),
                 onTimerDone: () =>
                     finishHabitTimer(context, ref, eintrag.habit),
@@ -121,224 +124,6 @@ void _oeffneGewohnheiten(BuildContext context) {
   ).push(MaterialPageRoute<void>(builder: (_) => const HabitsScreen()));
 }
 
-/// Das Schild über der Tafel: „Heute“, die Tageskette und der Stand.
-/// Getippt wird das ganze Schild ([Anschlagtafel.onSchild]).
-class _Kopf extends StatelessWidget {
-  const _Kopf({
-    required this.done,
-    required this.total,
-    required this.streak,
-    required this.heuteGetan,
-  });
-
-  final int done;
-  final int total;
-
-  /// Die Tageskette (ADR-0055) — die eine Zahl, die man schützen will.
-  final int streak;
-
-  /// Ob heute schon etwas abgehakt ist. Sonst brennt die Flamme blass:
-  /// Die Kette lebt noch, aber heute trägt sie noch nichts.
-  final bool heuteGetan;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        const Icon(Icons.checklist_rounded, size: 20, semanticLabel: 'Heute'),
-        // Immer im Baum, auch ohne Kette: Sonst entstünde sie mit dem
-        // ersten Häkchen neu und hätte kein Vorher, aus dem sie zünden
-        // könnte.
-        _Flamme(streak: streak, heuteGetan: heuteGetan),
-        if (total > 0) ...<Widget>[
-          const SizedBox(width: 10),
-          Text('$done / $total'),
-        ],
-        const Icon(Icons.chevron_right_rounded, size: 18),
-      ],
-    );
-  }
-}
-
-/// Die Flamme der Tageskette: kräftig, sobald heute etwas abgehakt ist,
-/// blass, solange der Tag sie noch nicht trägt. Ohne Kette steht nichts
-/// da.
-///
-/// **Mit dem ersten Häkchen des Tages zündet sie** (18.10.), wie die
-/// Flamme bei Duolingo: Sie schiesst hoch und pendelt zurück, glüht,
-/// Funken steigen, und die Zahl rollt eins weiter. Danach brennt sie
-/// still. Nur dann — wer die Startseite später öffnet, sieht sie schon
-/// brennen.
-class _Flamme extends StatefulWidget {
-  const _Flamme({required this.streak, required this.heuteGetan});
-
-  final int streak;
-  final bool heuteGetan;
-
-  static const Duration zuenden = Duration(milliseconds: 900);
-
-  @override
-  State<_Flamme> createState() => _FlammeState();
-}
-
-class _FlammeState extends State<_Flamme> with SingleTickerProviderStateMixin {
-  // In `initState`, nicht faul: Ohne Kette baut die Flamme nichts, und
-  // ein fauler Controller entstünde erst in `dispose` (`gotchas.md`).
-  late final AnimationController _zuenden;
-
-  @override
-  void initState() {
-    super.initState();
-    _zuenden = AnimationController(
-      vsync: this,
-      duration: _Flamme.zuenden,
-      value: 1,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_Flamme alt) {
-    super.didUpdateWidget(alt);
-    if (!alt.heuteGetan && widget.heuteGetan) _zuenden.forward(from: 0);
-  }
-
-  @override
-  void dispose() {
-    _zuenden.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final streak = widget.streak;
-    if (streak <= 0) return const SizedBox.shrink();
-    // Auf dem Schild, also auf Holz: hell, nicht in Tinte.
-    final farbe = widget.heuteGetan
-        ? Palette.goldOnDark
-        : Palette.textOnDark.withValues(alpha: 0.55);
-    return Padding(
-      padding: const EdgeInsets.only(left: 10),
-      child: Semantics(
-        label: widget.heuteGetan
-            ? '$streak Tage am Stück'
-            : '$streak Tage am Stück, heute noch offen',
-        child: AnimatedBuilder(
-          animation: _zuenden,
-          builder: (context, _) {
-            final t = _zuenden.value;
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                CustomPaint(
-                  painter: t < 1 ? _GlutMaler(t) : null,
-                  child: Transform.scale(
-                    scale: Sprung.stoss(t, hoehe: 0.8),
-                    alignment: Alignment.bottomCenter,
-                    child: Icon(
-                      Icons.local_fire_department_rounded,
-                      size: 20,
-                      color: farbe,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 2),
-                _RollendeZahl(wert: streak, farbe: farbe),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// Die Zahl der Kette: Die neue rollt von unten herein, die alte nach
-/// oben hinaus.
-class _RollendeZahl extends StatelessWidget {
-  const _RollendeZahl({required this.wert, required this.farbe});
-
-  final int wert;
-  final Color farbe;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 380),
-      transitionBuilder: (child, animation) {
-        final neu = child.key == ValueKey<int>(wert);
-        final rollen = Tween<Offset>(
-          begin: Offset(0, neu ? 0.8 : -0.8),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
-        return SlideTransition(
-          position: rollen,
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      child: Text(
-        '$wert',
-        key: ValueKey<int>(wert),
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: farbe,
-        ),
-      ),
-    );
-  }
-}
-
-/// Der Schein hinter der zündenden Flamme und die Funken, die aufsteigen.
-class _GlutMaler extends CustomPainter {
-  const _GlutMaler(this.t);
-
-  final double t;
-
-  static const int _funken = 6;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final mitte = size.center(Offset.zero);
-    final r = size.shortestSide / 2;
-
-    final glut = Sprung.vergeht(t, 0.7);
-    if (glut > 0) {
-      final weit = r * (1.3 + 1.2 * (1 - glut));
-      canvas.drawCircle(
-        mitte,
-        weit,
-        Paint()
-          ..shader = RadialGradient(
-            colors: <Color>[
-              Palette.tintLava.withValues(alpha: 0.7 * glut),
-              Palette.tintLava.withValues(alpha: 0),
-            ],
-          ).createShader(Rect.fromCircle(center: mitte, radius: weit)),
-      );
-    }
-
-    final steigen = Sprung.abschnitt(t, 0.08, 1);
-    if (steigen <= 0 || steigen >= 1) return;
-    for (var i = 0; i < _funken; i++) {
-      final seite = (i - (_funken - 1) / 2) * r * 0.32;
-      final hoch = r * (0.4 + steigen * (2.4 + 0.5 * (i % 3)));
-      final wackeln = math.sin(steigen * 9 + i * 1.7) * r * 0.2;
-      canvas.drawCircle(
-        Offset(mitte.dx + seite + wackeln, mitte.dy - hoch),
-        1.8 * (1 - steigen) + 0.4,
-        Paint()
-          ..color = (i.isEven ? Palette.tintLava : Palette.accent).withValues(
-            alpha: 1 - steigen,
-          ),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GlutMaler alt) => alt.t != t;
-}
-
 /// Eine Gewohnheit von heute als Zettel an der Tafel: antippen hakt ab —
 /// oder nimmt das Häkchen zurück. Erledigt steht sie grau da, ohne
 /// Auslöser, und ein Stempel liegt darauf.
@@ -353,9 +138,14 @@ class _Zettel extends StatelessWidget {
     this.cued = false,
     this.timed = false,
     this.zuerst = false,
+    this.hervorheben = false,
     this.onTimerDone,
     super.key,
   });
+
+  /// Ob der Mentor gerade auf das erste Häkchen wartet — dann pulsiert
+  /// der offene Zettel (06.11.2026).
+  final bool hervorheben;
 
   /// Je Stufe im Stapel so weit nach rechts, höchstens drei Stufen.
   static const double _schritt = 14;
@@ -415,24 +205,28 @@ class _Zettel extends StatelessWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
-            child: Steckbrief(
-              neigung: neigungFuer(habit.id),
-              saat: habit.id.hashCode,
-              abgestempelt: done,
-              innen: innen,
-              stempelGroesse: _stempel,
-              // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
-              // auf der Kachel; erledigt blass.
-              streifen: switch (habit.area) {
-                final SkillArea gebiet => GebietFarbe.pergament(
-                  gebiet,
-                ).withValues(alpha: done ? 0.4 : 1),
-                null => null,
-              },
-              child: PlatzLaedtEin(
-                aktiv: cued,
-                radius: 6,
-                child: _zeile(text, done ? null : treat),
+            child: Pulsieren(
+              key: TodayCard.pulsKey(habit.id),
+              aktiv: hervorheben && !done,
+              child: Steckbrief(
+                neigung: neigungFuer(habit.id),
+                saat: habit.id.hashCode,
+                abgestempelt: done,
+                innen: innen,
+                stempelGroesse: _stempel,
+                // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
+                // auf der Kachel; erledigt blass.
+                streifen: switch (habit.area) {
+                  final SkillArea gebiet => GebietFarbe.pergament(
+                    gebiet,
+                  ).withValues(alpha: done ? 0.4 : 1),
+                  null => null,
+                },
+                child: PlatzLaedtEin(
+                  aktiv: cued,
+                  radius: 6,
+                  child: _zeile(text, done ? null : treat),
+                ),
               ),
             ),
           ),

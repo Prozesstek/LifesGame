@@ -103,7 +103,7 @@ class HomeScreen extends ConsumerWidget {
 
     final start = ref.watch(ersterStartProvider);
     final hatTier = ref.watch(haustierProvider).art != null;
-    final zeigtTier = hatTier && !start.fragtNachGewohnheit;
+    final zeigtTier = hatTier && !start.nurMentor;
 
     // Ein Kreis an seinem Platz: versteckt, bis er dran ist. Ist er der
     // nächste, liegt er im Licht des Mentors (ADR-0095).
@@ -151,7 +151,7 @@ class HomeScreen extends ConsumerWidget {
                 // **Auf dem ersten Screen nur Mentor und Wahl** (06.11.2026):
                 // Leiste, Level und Gold kommen mit der ersten Gewohnheit.
                 EinblendLeiste(
-                  sichtbar: !start.fragtNachGewohnheit,
+                  sichtbar: !start.nurMentor,
                   vonOben: true,
                   child: _Leiste(
                     oben: true,
@@ -225,7 +225,7 @@ class HomeScreen extends ConsumerWidget {
                   child: SafeArea(
                     // Ohne die obere Leiste rückt der Inhalt selbst von
                     // der Statusleiste des Handys weg.
-                    top: start.fragtNachGewohnheit,
+                    top: start.nurMentor,
                     bottom: false,
                     child: Center(
                       child: ConstrainedBox(
@@ -241,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                               // **Das Haustier links daneben** (24.10.2026),
                               // ohne Rahmen — erst, wenn es geschlüpft ist.
                               EinblendLeiste(
-                                sichtbar: !start.fragtNachGewohnheit,
+                                sichtbar: !start.nurMentor,
                                 vonOben: true,
                                 child: Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
@@ -270,8 +270,7 @@ class HomeScreen extends ConsumerWidget {
                                         minHeight: platz.maxHeight,
                                       ),
                                       child: Column(
-                                        mainAxisAlignment:
-                                            start.fragtNachGewohnheit
+                                        mainAxisAlignment: start.nurMentor
                                             ? MainAxisAlignment.center
                                             : MainAxisAlignment.start,
                                         crossAxisAlignment:
@@ -307,7 +306,8 @@ class HomeScreen extends ConsumerWidget {
                                                   start.istGesperrt(
                                                     LevelExtra.haustier,
                                                   )) &&
-                                              !hatTier) ...<Widget>[
+                                              !hatTier &&
+                                              !start.nurMentor) ...<Widget>[
                                             GesperrtBisLevel(
                                               level: LevelExtra.haustier.level,
                                               aktiv: start.istGesperrt(
@@ -325,7 +325,13 @@ class HomeScreen extends ConsumerWidget {
                                               child: ErsteGewohnheitKarte(),
                                             )
                                           else
+                                            // **Mit Schlüssel**: Nach dem ersten
+                                            // Häkchen erscheint das Ei davor —
+                                            // ohne ihn baute sich „Heute“ neu, und
+                                            // der Stempel schlüge nicht auf
+                                            // (`gotchas.md`).
                                             const Zeigefinger(
+                                              key: ValueKey<String>('heute'),
                                               schritt: Schritt.abhaken,
                                               child: TodayCard(),
                                             ),
@@ -334,10 +340,11 @@ class HomeScreen extends ConsumerWidget {
                                           // 18.10. als zwei Karten, jetzt warten sie dort,
                                           // zusammen mit der Rückfrage.
                                           // Ab Level 3, darunter mit Schloss.
-                                          if (start.zeigtTagesaufgaben ||
-                                              start.istGesperrt(
-                                                LevelExtra.lagerfeuer,
-                                              )) ...<Widget>[
+                                          if ((start.zeigtTagesaufgaben ||
+                                                  start.istGesperrt(
+                                                    LevelExtra.lagerfeuer,
+                                                  )) &&
+                                              !start.nurMentor) ...<Widget>[
                                             const SizedBox(height: 10),
                                             GesperrtBisLevel(
                                               level:

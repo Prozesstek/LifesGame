@@ -196,6 +196,11 @@ class ErsterStart {
   /// Ob „Heute“ statt einer Liste die erste Frage stellt.
   final bool fragtNachGewohnheit;
 
+  /// **Die ersten zwei Screens zeigen nur den Mentor und das, worum es
+  /// geht** (06.11.2026): die erste Frage, dann das erste Häkchen. Leiste,
+  /// Level, Gold, Ei und Feuer kommen erst danach.
+  bool get nurMentor => fragtNachGewohnheit || schritt == Schritt.abhaken;
+
   /// Ob die Grube sich noch erklärt (ADR-0069): das Geister-Steuerkreuz,
   /// das Zeichen am Helden und nach einer Niederlage der Weg zur Theorie.
   ///

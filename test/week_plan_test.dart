@@ -228,7 +228,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(TodayCard),
-          matching: find.text('0 / 1'),
+          matching: find.text(zweite.name),
         ),
         findsOneWidget,
       );

@@ -361,24 +361,39 @@ void main() {
       expect(sichtbar(), 0, reason: 'danach verblasst er wieder');
     });
 
-    testWidgets('das erste Häkchen des Tages zündet die Flamme', (
-      tester,
-    ) async {
+    testWidgets('das Gold zeigt sich nur, solange es mehr wird '
+        '(06.11.2026)', (tester) async {
+      await startseite(tester, mitGestern());
+      final gold = find.byKey(KurzesGold.goldKey);
+      double sichtbar() => tester
+          .widget<Opacity>(
+            find.ancestor(of: gold, matching: find.byType(Opacity)).first,
+          )
+          .opacity;
+
+      expect(sichtbar(), 0, reason: 'ohne Münzen kein Gold');
+
+      await tester.tap(inDerKarte(find.text(drei[1].name)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(sichtbar(), 1, reason: 'die Münzen fliegen hin');
+
+      await tester.pumpAndSettle();
+      expect(sichtbar(), 0, reason: 'danach verschwindet es wieder');
+    });
+
+    testWidgets('das erste Häkchen des Tages faucht, das zweite klingt '
+        'eine Stufe höher', (tester) async {
+      // Die kleine Flamme auf dem Schild ist seit dem 06.11.2026 weg;
+      // die Kette zeigt die große Feier (tages_flamme_test.dart).
       final (_, mitschrift) = await startseite(tester, mitGestern());
-      expect(inDerKarte(find.text('1')), findsOneWidget);
 
       await tester.tap(inDerKarte(find.text(drei[1].name)));
       await tester.pump(const Duration(milliseconds: 120));
-
-      // Die Zahl rollt: die alte hinaus, die neue herein.
-      expect(inDerKarte(find.text('1')), findsOneWidget);
-      expect(inDerKarte(find.text('2')), findsOneWidget);
       expect(mitschrift.gespielt.first, SoundEffect.ton1);
       expect(mitschrift.gespielt, contains(SoundEffect.kette));
 
       await tester.pumpAndSettle();
-      expect(inDerKarte(find.text('1')), findsNothing);
-      expect(inDerKarte(find.text('2')), findsOneWidget);
 
       // Das zweite zündet nichts mehr und klingt eine Stufe höher.
       mitschrift.gespielt.clear();
