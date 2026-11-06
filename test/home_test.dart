@@ -29,6 +29,7 @@ import 'package:lifes_game/main.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 void main() {
   group('HomeScreen', () {
@@ -138,7 +139,10 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [savedGameProvider.overrideWithValue(_eineGewohnheit())],
+          overrides: [
+            savedGameProvider.overrideWithValue(_eineGewohnheit()),
+            hinweisGesehen,
+          ],
           child: const LifesGameApp(),
         ),
       );

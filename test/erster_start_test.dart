@@ -16,6 +16,10 @@ import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/home/widgets/status_leiste.dart';
 import 'package:lifes_game/haustier/widgets/haustier_karte.dart';
 import 'package:lifes_game/ui/pulsieren.dart';
+import 'package:lifes_game/mentor/mentor_kasten.dart';
+import 'package:lifes_game/theory/skill_tree_screen.dart';
+import 'package:theory/theory.dart';
+import 'tutorial_helfer.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/lagerfeuer/widgets/lagerfeuer_karte.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -89,10 +93,38 @@ void main() {
 
       expect(start.zeigt(Bereich.theorie), isTrue);
       expect(start.zeigt(Bereich.kampf), isFalse);
-      expect(start.schritt, Schritt.ersteSeite);
-      expect(start.leuchtet, Bereich.theorie);
+      // Erst zeigt der Mentor, wo die Gewohnheiten wohnen (06.11.2026).
+      expect(start.schritt, Schritt.gewohnheitenZeigen);
+      expect(start.leuchtet, Bereich.gewohnheiten);
+      expect(start.zeigtWenig, isTrue);
       // Das Lagerfeuer wartet seit ADR-0098 auf Level 3.
       expect(start.zeigtTagesaufgaben, isFalse);
+
+      // Weggetippt, schickt er in die Theorie.
+      final danach = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
+        ),
+      );
+      expect(danach.schritt, Schritt.ersteSeite);
+      expect(danach.leuchtet, Bereich.theorie);
+      expect(danach.zeigtWenig, isTrue, reason: 'bis zur ersten Seite');
+    });
+
+    test('wer schon gelesen hat, hört den Hinweis nicht', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 1,
+          seiten: 1,
+          billigstesStueck: billig,
+        ),
+      );
+      expect(start.schritt, Schritt.faehigkeitAnlegen);
+      expect(start.zeigtWenig, isFalse);
     });
 
     test('die erste Seite deckt die Fähigkeiten auf, und sie leuchten', () {
@@ -241,6 +273,7 @@ void main() {
           hatGewohnheit: true,
           haekchen: ErsterStart.haekchenFuerKampf,
           billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
         ),
       );
 
@@ -257,6 +290,7 @@ void main() {
           haekchen: 1,
           hatGekaempft: true,
           billigstesStueck: billig,
+          gewohnheitenGezeigt: true,
         ),
       );
 
@@ -407,12 +441,14 @@ void main() {
     Future<ProviderContainer> starte(
       WidgetTester tester, [
       SaveData stand = const SaveData.empty(),
+      bool hinweisWeg = false,
     ]) async {
       useTallView(tester);
       final container = ProviderContainer(
         overrides: [
           savedGameProvider.overrideWithValue(stand),
           todayProvider.overrideWithValue(heute),
+          if (hinweisWeg) hinweisGesehen,
         ],
       );
       addTearDown(container.dispose);
@@ -432,6 +468,20 @@ void main() {
         find.byType(HubCircle).hitTestable(),
       ))
         kreis.label,
+    ];
+
+    /// Die Namen der Kreise, die zu sehen sind — auch wenn gerade nur
+    /// die Weiter-Fläche des Mentors Tipps annimmt.
+    List<String> zuSehen(WidgetTester tester) => <String>[
+      for (final element in find.byType(Aufgedeckt).evaluate())
+        if ((element.widget as Aufgedeckt).sichtbar)
+          for (final kreis in tester.widgetList<HubCircle>(
+            find.descendant(
+              of: find.byWidget(element.widget),
+              matching: find.byType(HubCircle),
+            ),
+          ))
+            kreis.label,
     ];
 
     /// Der Name des Kreises, der leuchtet — oder null.
@@ -716,22 +766,62 @@ void main() {
 
       expect(c.read(habitTrackerProvider).isChecked(id, heute), isTrue);
       expect(pulsiert(), isFalse);
-      expect(aufgedeckt(tester), contains('Theorie'));
-      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsOneWidget);
+      expect(zuSehen(tester), contains('Theorie'));
+      // Level und Gold warten bis nach der ersten Seite (06.11.2026).
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
     });
 
-    testWidgets('nach dem ersten Häkchen leuchtet die Theorie (ADR-0079)', (
-      tester,
-    ) async {
+    testWidgets('nach dem ersten Häkchen zeigt er auf die Gewohnheiten, '
+        'ein Tipp irgendwohin schickt in die Theorie', (tester) async {
       await starte(tester, SaveData(habits: einHaekchen));
+
+      expect(zuSehen(tester), <String>['Gewohnheiten', 'Theorie']);
+      // Bis zum Tipp nimmt nur die Fläche des Mentors einen an.
+      expect(aufgedeckt(tester), isEmpty);
+      expect(leuchtet(tester), 'Gewohnheiten');
+      expect(
+        find.text('Hier findest du alle Gewohnheiten, auch neue.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(WeiterZeichen.zeichenKey), findsOneWidget);
+      // Nur, was man kennt: kein Ei, kein Feuer, keine Statistik, kein Level.
+      expect(find.byType(LagerfeuerKarte), findsNothing);
+      expect(find.byType(HaustierKarte), findsNothing);
+      expect(find.byKey(StatusLeiste.ringKey).hitTestable(), findsNothing);
+
+      // Ein Tipp mitten auf die Tafel hakt nichts ab, er führt weiter.
+      await tester.tap(find.byType(TodayCard));
+      await tester.pumpAndSettle();
+      expect(find.text('Lies deine erste Seite.'), findsOneWidget);
+      expect(find.byKey(WeiterZeichen.zeichenKey), findsNothing);
+      expect(leuchtet(tester), 'Theorie');
+      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      expect(find.byType(LagerfeuerKarte), findsNothing);
+
+      // Jetzt nehmen die Kreise ihre Tipps wieder an.
+      await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SkillTreeScreen), findsOneWidget);
+    });
+
+    testWidgets('nach der ersten Seite stehen Ei, Feuer und Statistik mit '
+        'Schloss da (ADR-0098)', (tester) async {
+      var theorie = const TheoryProgress.empty();
+      final seite = habitsBranch.lessons.first;
+      theorie = theorie.submit(seite, <int?>[
+        for (final frage in seite.questions) frage.correctIndex,
+      ]).progress;
+      await starte(tester, SaveData(habits: einHaekchen, theory: theorie));
 
       // Die Statistik kommt mit dem ersten Häkchen, offen ist sie aber
       // erst auf Level 7 — bis dahin mit Schloss, wie das Lagerfeuer bis
       // Level 3 (ADR-0098).
-      // Offen sind nur diese zwei; die Statistik steht gesperrt daneben.
-      expect(aufgedeckt(tester), <String>['Gewohnheiten', 'Theorie']);
+      // Die Statistik steht gesperrt neben den offenen Kreisen.
+      expect(
+        aufgedeckt(tester),
+        containsAll(<String>['Gewohnheiten', 'Theorie', 'Fähigkeiten']),
+      );
       expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
-      expect(leuchtet(tester), 'Theorie');
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
       expect(find.byType(LagerfeuerKarte), findsOneWidget);
       // Statistik, Lagerfeuer und das Ei des Haustiers (Level 5).
@@ -756,6 +846,7 @@ void main() {
           habits: einHaekchen,
           ladder: const LadderProgress.empty().recordDefeat(1),
         ),
+        true,
       );
 
       // Keine Seite gelesen, keine Fähigkeit: nur der Waffenzug.
@@ -782,6 +873,7 @@ void main() {
           habits: einHaekchen,
           ladder: const LadderProgress.empty().recordDefeat(1),
         ),
+        true,
       );
 
       expect(aufgedeckt(tester), containsAll(<String>['Kampf', 'Theorie']));

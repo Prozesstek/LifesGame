@@ -5,6 +5,7 @@ import '../home/erster_start_provider.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
+import '../ui/pulsieren.dart';
 import 'mentor.dart';
 import 'scheinwerfer.dart';
 
@@ -15,9 +16,17 @@ import 'scheinwerfer.dart';
 /// still — keine Bewegung ohne Ende, also nichts, worauf
 /// `pumpAndSettle` warten müsste.
 class MentorKasten extends StatelessWidget {
-  const MentorKasten({required this.text, this.gerahmt = true, super.key});
+  const MentorKasten({
+    required this.text,
+    this.gerahmt = true,
+    this.weiter = false,
+    super.key,
+  });
 
   final String text;
+
+  /// Ob unten rechts das Zeichen steht, dass ein Tipp weiterführt.
+  final bool weiter;
 
   /// Ob er im eigenen Holzrahmen steht. In einem Dialog nicht: Der hat
   /// schon einen, und zwei ineinander wären dicker als der Inhalt.
@@ -53,7 +62,7 @@ class MentorKasten extends StatelessWidget {
   }
 
   Widget _zeile() {
-    return Row(
+    final zeile = Row(
       children: <Widget>[
         const MentorBild(),
         const SizedBox(width: 12),
@@ -68,7 +77,79 @@ class MentorKasten extends StatelessWidget {
             ),
           ),
         ),
+        // Platz für das Zeichen, damit der Text nicht darunter läuft.
+        if (weiter) const SizedBox(width: 14),
       ],
+    );
+    if (!weiter) return zeile;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        zeile,
+        const Positioned(right: -6, bottom: -6, child: WeiterZeichen()),
+      ],
+    );
+  }
+}
+
+/// **Ein Tipp führt weiter** (06.11.2026): das kleine Dreieck unten
+/// rechts, wie in Dialogen von Rollenspielen. Es hüpft sacht; in Tests
+/// steht es still, wie alles, was pulsiert (`Pulsieren.pulsiert`).
+class WeiterZeichen extends StatefulWidget {
+  const WeiterZeichen({super.key});
+
+  static const Key zeichenKey = ValueKey<String>('mentor-weiter');
+
+  @override
+  State<WeiterZeichen> createState() => _WeiterZeichenState();
+}
+
+class _WeiterZeichenState extends State<WeiterZeichen>
+    with SingleTickerProviderStateMixin {
+  // In `initState`, nicht faul (`gotchas.md`).
+  late final AnimationController _takt;
+
+  @override
+  void initState() {
+    super.initState();
+    _takt = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ruhig = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (Pulsieren.pulsiert && !ruhig) {
+      if (!_takt.isAnimating) _takt.repeat(reverse: true);
+    } else {
+      _takt.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _takt.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _takt,
+      builder: (context, kind) => Transform.translate(
+        offset: Offset(0, 3 * Curves.easeInOut.transform(_takt.value)),
+        child: kind,
+      ),
+      child: const Icon(
+        Icons.arrow_drop_down_rounded,
+        key: WeiterZeichen.zeichenKey,
+        size: 28,
+        color: Palette.accent,
+        semanticLabel: 'Tippen für weiter',
+      ),
     );
   }
 }
@@ -165,7 +246,9 @@ class MentorZeile extends ConsumerWidget {
                   child: ScheinwerferZiel(
                     radius: 12,
                     begleiter: true,
-                    child: IgnorePointer(child: MentorKasten(text: satz.text)),
+                    child: IgnorePointer(
+                      child: MentorKasten(text: satz.text, weiter: satz.weiter),
+                    ),
                   ),
                 ),
               ),

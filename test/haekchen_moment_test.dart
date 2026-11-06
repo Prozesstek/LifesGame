@@ -21,6 +21,7 @@ import 'package:lifes_game/ui/konfetti.dart';
 import 'package:lifes_game/ui/sprung.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// Merkt sich, was gespielt werden sollte, statt es zu spielen.
 class _Mitschrift implements SoundPlayer {
@@ -261,6 +262,7 @@ void main() {
         overrides: [
           savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
           todayProvider.overrideWithValue(heute),
+          hinweisGesehen,
           soundPlayerProvider.overrideWithValue(mitschrift),
         ],
       );
@@ -465,6 +467,7 @@ void main() {
       overrides: [
         savedGameProvider.overrideWithValue(SaveData(habits: mitDreien())),
         todayProvider.overrideWithValue(heute),
+        hinweisGesehen,
       ],
     );
     addTearDown(container.dispose);

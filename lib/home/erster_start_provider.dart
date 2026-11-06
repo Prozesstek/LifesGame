@@ -11,6 +11,24 @@ import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'erster_start.dart';
 
+/// Ob der Hinweis auf die Gewohnheiten weggetippt ist — **nur für diese
+/// Sitzung** ([ErsterStartStand.gewohnheitenGezeigt]).
+final gewohnheitenGezeigtProvider = NotifierProvider<GewohnheitenGezeigt, bool>(
+  GewohnheitenGezeigt.new,
+);
+
+class GewohnheitenGezeigt extends Notifier<bool> {
+  GewohnheitenGezeigt({this.schon = false});
+
+  /// Für Tests, die den Hinweis nicht prüfen.
+  final bool schon;
+
+  @override
+  bool build() => schon;
+
+  void weiter() => state = true;
+}
+
 /// Welche Bereiche die Startseite zeigt — **rechnet nichts**, trägt nur
 /// zusammen (ADR-0068).
 ///
@@ -50,6 +68,7 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       hatTier: ref.watch(haustierProvider).art != null,
       warAmFeuer: habits.warAmFeuer,
       tagesgrubeVersucht: !ref.watch(dailyPitProvider).isEmpty,
+      gewohnheitenGezeigt: ref.watch(gewohnheitenGezeigtProvider),
     ),
   );
 });

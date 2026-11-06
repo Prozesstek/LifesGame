@@ -13,6 +13,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// Der Scheinwerfer, der gelbe Punkt und die untere Leiste, die erst mit
 /// ihrem ersten Kreis kommt (ADR-0095).
@@ -29,6 +30,7 @@ void main() {
       overrides: [
         savedGameProvider.overrideWithValue(stand),
         todayProvider.overrideWithValue(heute),
+        hinweisGesehen,
         if (allesOffen)
           ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
       ],

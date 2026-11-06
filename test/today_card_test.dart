@@ -15,6 +15,7 @@ import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/ui/anschlagtafel.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// „Heute" auf der Startseite (ADR-0053).
 ///
@@ -36,6 +37,7 @@ void main() {
       overrides: [
         savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
         todayProvider.overrideWithValue(heute),
+        hinweisGesehen,
         if (allesOffen)
           ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
       ],

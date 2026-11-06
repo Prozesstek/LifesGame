@@ -13,6 +13,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// Merkt sich, was gespielt werden sollte, statt es zu spielen.
 class _Mitschrift implements SoundPlayer {
@@ -126,6 +127,7 @@ void main() {
         overrides: [
           savedGameProvider.overrideWithValue(SaveData(habits: tracker)),
           todayProvider.overrideWithValue(heute),
+          hinweisGesehen,
           soundPlayerProvider.overrideWithValue(mitschrift),
         ],
       );

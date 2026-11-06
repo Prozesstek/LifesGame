@@ -39,6 +39,7 @@ class ErsterStartStand {
     this.hatTier = false,
     this.warAmFeuer = false,
     this.tagesgrubeVersucht = false,
+    this.gewohnheitenGezeigt = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -94,6 +95,11 @@ class ErsterStartStand {
   /// … und ein Versuch in der Tagesgrube. Ein Extra, das man schon
   /// benutzt hat, verschwindet nicht, nur weil das Level darunter liegt.
   final bool tagesgrubeVersucht;
+
+  /// Ob der Hinweis auf die Gewohnheiten in dieser Sitzung weggetippt
+  /// ist ([Schritt.gewohnheitenZeigen]). **Nicht gespeichert**: Wer vor
+  /// der ersten Seite neu startet, hört ihn noch einmal — ein Tipp.
+  final bool gewohnheitenGezeigt;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -108,6 +114,11 @@ enum Schritt {
 
   /// Das erste Häkchen.
   abhaken,
+
+  /// **Wo die Gewohnheiten wohnen** (06.11.2026): Nach dem ersten
+  /// Häkchen zeigt der Mentor auf ihren Kreis; ein Tipp irgendwohin
+  /// führt weiter. Der einzige Schritt, der nicht an einer Tat hängt.
+  gewohnheitenZeigen,
 
   /// Die erste Seite — sie bringt jedem Funkenstoß.
   ersteSeite,
@@ -201,6 +212,14 @@ class ErsterStart {
   /// Level, Gold, Ei und Feuer kommen erst danach.
   bool get nurMentor => fragtNachGewohnheit || schritt == Schritt.abhaken;
 
+  /// **Bis zur ersten Seite nur, was man kennt** (06.11.2026): der Kreis
+  /// der Gewohnheiten, „Heute“ und das neue Ziel, die Theorie. Level,
+  /// Gold, Ei, Feuer und die gesperrte Statistik warten.
+  bool get zeigtWenig =>
+      nurMentor ||
+      schritt == Schritt.gewohnheitenZeigen ||
+      schritt == Schritt.ersteSeite;
+
   /// Ob die Grube sich noch erklärt (ADR-0069): das Geister-Steuerkreuz,
   /// das Zeichen am Helden und nach einer Niederlage der Weg zur Theorie.
   ///
@@ -253,6 +272,7 @@ class ErsterStart {
   /// Kreis des Schritts; bei der Gewohnheit und beim Häkchen ist das Ziel
   /// „Heute“ in der Mitte, kein Kreis.
   Bereich? get leuchtet => switch (schritt) {
+    Schritt.gewohnheitenZeigen => Bereich.gewohnheiten,
     Schritt.ersteSeite => Bereich.theorie,
     Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
@@ -292,7 +312,9 @@ class ErsterStart {
         : !abgehakt
         ? Schritt.abhaken
         : !gelesen
-        ? Schritt.ersteSeite
+        ? (s.gewohnheitenGezeigt
+              ? Schritt.ersteSeite
+              : Schritt.gewohnheitenZeigen)
         : !angelegt
         ? Schritt.faehigkeitAnlegen
         : !gewonnen

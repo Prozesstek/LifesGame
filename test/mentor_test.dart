@@ -31,6 +31,7 @@ import 'package:theory/theory.dart';
 
 import 'gear_helpers.dart';
 import 'test_view.dart';
+import 'tutorial_helfer.dart';
 
 /// Der Mentor (ADR-0079): wer er ist, was er sagt, und dass er einen
 /// neuen Spieler vom leeren Stand bis in die Grube bringt.
@@ -86,12 +87,14 @@ void main() {
       WidgetTester tester, {
       SaveData stand = const SaveData.empty(),
       Widget home = const HomeScreen(),
+      bool hinweisWeg = false,
     }) async {
       useTallView(tester);
       final container = ProviderContainer(
         overrides: [
           savedGameProvider.overrideWithValue(stand),
           todayProvider.overrideWithValue(heute),
+          if (hinweisWeg) hinweisGesehen,
         ],
       );
       addTearDown(container.dispose);
@@ -139,6 +142,10 @@ void main() {
     testWidgets('nach dem ersten Häkchen schickt er in die Theorie, und dort '
         'zeigt er auf die erste Seite', (tester) async {
       await starte(tester, stand: SaveData(habits: einHaekchen));
+      // Erst: wo die Gewohnheiten wohnen; ein Tipp irgendwohin weiter.
+      expect(sagt(tester), satz(Schritt.gewohnheitenZeigen, MentorOrt.start));
+      await tester.tapAt(const Offset(200, 700));
+      await tester.pumpAndSettle();
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.start));
 
       await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
@@ -189,6 +196,7 @@ void main() {
         tester,
         stand: SaveData(habits: einHaekchen),
         home: const SkillTreeScreen(),
+        hinweisWeg: true,
       );
 
       expect(find.byType(ContinueReadingTile), findsNWidgets(3));
@@ -354,9 +362,14 @@ void main() {
       await tester.pumpAndSettle();
       await feiernSchliessen(tester);
       expect(c.read(habitTrackerProvider).totalChecks, 1);
+      expect(sagt(tester), satz(Schritt.gewohnheitenZeigen, MentorOrt.start));
+
+      // 3. Wo die Gewohnheiten wohnen — ein Tipp irgendwohin.
+      await tester.tapAt(const Offset(200, 700));
+      await tester.pumpAndSettle();
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.start));
 
-      // 3. Die erste Seite, über den Vorschlag im Baum.
+      // 4. Die erste Seite, über den Vorschlag im Baum.
       await tester.tap(find.byKey(HubCircle.keyFor('Theorie')));
       await tester.pumpAndSettle();
       // Der erste Vorschlag ist der des Mentors.
