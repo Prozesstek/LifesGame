@@ -121,6 +121,8 @@ class DevScreen extends ConsumerWidget {
                   onHinab: (ebene) => oeffneGeladen<void>(
                     context,
                     laden: grube.loadLibrary,
+                    vorbereiten: () => grube.grubeVorladen(),
+                    fortschritt: () => grube.grubeFortschritt,
                     bauen: () => grube.PitScreen(stage: PitStage(ebene)),
                   ),
                   onSpringen: (ebene) =>

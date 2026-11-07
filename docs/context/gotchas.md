@@ -3,6 +3,18 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Bilder, die nebenher laden, laufen als Würfel durchs Spiel
+
+`ActionGame.onLoad` lud die Bilder der Grube bewusst ohne `await` und
+**eins nach dem anderen**. Am Rechner merkt das niemand; im Browser ist
+jedes Bild eine eigene Anfrage, und gut dreißig in Reihe dauerten
+Sekunden — so lange liefen die Würfel des Prototyps, und Uhr und Gegner
+schon mit (07.11.2026).
+
+**Regel:** Mehrere Dateien mit `Future.wait` laden, nicht in einer
+Schleife mit `await`. Was ein Bildschirm zum Spielen braucht, wird
+**vor** dem Öffnen geholt (`oeffneGeladen(vorbereiten:)`), nicht danach.
+
 ## Ein nachgeladener Bildschirm braucht im Test einen Takt mehr
 
 Grube, Tagesgrube, Statistik, Prototyp und Dorf werden seit dem

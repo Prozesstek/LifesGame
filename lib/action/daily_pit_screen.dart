@@ -15,6 +15,9 @@ import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
 import 'pit_run_view.dart';
 
+// Über den Prefix des Nachladens erreichbar (`grube.grubeVorladen`).
+export 'grube_vorladen.dart';
+
 /// Der eine Lauf des Tages durch die Tagesgrube (ADR-0072).
 ///
 /// **Wer hier ankommt, hat seinen Versuch schon gebraucht.** Der Eingang

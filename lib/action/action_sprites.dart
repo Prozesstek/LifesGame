@@ -1,8 +1,8 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:action_combat/action_combat.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
@@ -453,17 +453,39 @@ class GrubeBilder {
   /// Lädt einmal je App-Lauf. Ein neuer Lauf in der Grube bekommt
   /// dieselben Bilder, statt sie ein zweites Mal zu entpacken.
   static Future<GrubeBilder> load() {
-    return _laden ??= _loadAll();
+    return _laden ??= _loadAll().then((bilder) => _fertig = bilder);
   }
 
+  /// Die Bilder, **wenn sie schon da sind** — sonst null. Der Lauf nimmt
+  /// sie damit im allerersten Bild, statt einen Takt Würfel zu zeigen.
+  static GrubeBilder? get fertig => _fertig;
+  static GrubeBilder? _fertig;
+
+  /// Wie viel davon schon da ist, von 0 bis 1 — für den Balken des
+  /// Ladebildschirms (`lib/ui/ladebildschirm.dart`).
+  static final ValueNotifier<double> fortschritt = ValueNotifier<double>(0);
+
+  /// **Alle zugleich, nicht eins nach dem anderen.** Im Browser ist jedes
+  /// Bild eine eigene Anfrage; nacheinander standen gut dreißig davon in
+  /// der Schlange, und der Lauf zeigte so lange Würfel (07.11.2026).
   static Future<GrubeBilder> _loadAll() async {
+    final files = GrubeFiguren.files.toList();
+    var fertig = 0;
     final images = <String, ui.Image>{};
-    for (final file in GrubeFiguren.files) {
-      final data = await rootBundle.load('${GrubeFiguren.folder}/$file');
-      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-      images[file] = (await codec.getNextFrame()).image;
-    }
+    await Future.wait(<Future<void>>[
+      for (final file in files)
+        _ladeEins(file).then((bild) {
+          images[file] = bild;
+          fortschritt.value = ++fertig / files.length;
+        }),
+    ]);
     return GrubeBilder._(images);
+  }
+
+  static Future<ui.Image> _ladeEins(String file) async {
+    final data = await rootBundle.load('${GrubeFiguren.folder}/$file');
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    return (await codec.getNextFrame()).image;
   }
 
   static final Paint _paint = Paint()..filterQuality = FilterQuality.none;

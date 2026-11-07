@@ -289,7 +289,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/konfetti.dart` | das Konfetti, wenn der Tag geschafft ist — gesät, reine Rechnung | Flutter |
 | `lib/ui/muenz_bild.dart` | wie eine fliegende Münze und ein Funke aussehen — **eine Stelle** für den Goldregen der Grube und das Häkchen | Flutter |
 | `lib/ui/sprung.dart` | **wie etwas aufspringt** — eine gedämpfte Feder für Häkchen und Flamme | Flutter |
-| `lib/ui/spaeter_laden.dart` | **ein Bildschirm, der erst beim ersten Öffnen geladen wird** (`oeffneGeladen`): Grube, Tagesgrube, Statistik, Prototyp, Dorf — Flame und fl_chart liegen damit nicht im Startpaket der Web-Fassung | Flutter |
+| `lib/ui/spaeter_laden.dart` | **ein Bildschirm, der erst beim ersten Öffnen geladen wird** (`oeffneGeladen`): Grube, Tagesgrube, Statistik, Prototyp, Dorf — Flame und fl_chart liegen damit nicht im Startpaket der Web-Fassung; **wartet beim Dungeon auch auf die Bilder** (`vorbereiten`) und zeigt dabei den Ladebildschirm, wenn es länger als einen Augenblick dauert | Flutter |
+| `lib/ui/ladebildschirm.dart` | **der Ladebildschirm** (Issue #135): die eigene Figur läuft, Holzbalken, ein Tipp aus `LadeTipps` — **dieselben Tipps stehen in `web/index.html`**, wo derselbe Bildschirm den Start der Web-Fassung überbrückt (`web/flutter_bootstrap.js` meldet die Stufen) | Flutter |
+| `lib/action/grube_vorladen.dart` | **alle Bilder des Dungeons, bevor der Lauf beginnt** (`grubeVorladen`, gleichzeitig statt nacheinander) — sonst laufen Würfel durch die Grube | Flutter |
 | `lib/ui/druck.dart` | **jeder Knopf gibt nach** — `Druck` für Eigenes, `Druck.builder` im Theme | Flutter |
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
@@ -356,7 +358,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1139 Tests
+flutter test             # 1145 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
