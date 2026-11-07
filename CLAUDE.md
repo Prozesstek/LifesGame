@@ -186,7 +186,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Rune, Rucksack, Helm; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
-| `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Kopf (`Mentor.bild`) und seine ganze Figur (`Mentor.figur`), beide aus Frederiks Bild in `assets/Mentor/` | Flutter |
+| `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Kopf (`Mentor.bild`) aus Frederiks Bild in `assets/Mentor/` — **überall der Kopf im Kreis**, auch beim Abfragen (07.11.2026); die ganze Figur `Mentor.png` liegt ungenutzt dort | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten **oben im Fluss** eines Bildschirms (`MentorZeile`, `MentorFlaeche`) — schiebt den Inhalt nach unten, deckt nichts zu, **nimmt keinen Tipp an** (ADR-0096) | Flutter |
 | `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
 | `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; der Rand läuft weich aus; dazu `ZielPunkt`, der gelbe Punkt, und `ScheinwerferLicht`, ein warmer Schein unter einem Ziel | Flutter |
@@ -207,7 +207,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
-| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen | Flutter |
+| `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen; dazu `CharacterKopf`, ihr Kopf im Kreis samt Helm — wo der Mentor abfragt | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
@@ -356,7 +356,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1129 Tests
+flutter test             # 1130 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

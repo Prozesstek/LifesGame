@@ -46,10 +46,6 @@ abstract final class Mentor {
   /// Kreis einen gezeichneten Kopf.
   static const String bild = 'assets/Mentor/Mentor_Kopf.png';
 
-  /// Die ganze Figur, 477 × 520 — dort, wo er abfragt und Platz hat
-  /// (`MentorDialog`).
-  static const String figur = 'assets/Mentor/Mentor.png';
-
   /// Was er im Beute-Dialog des ersten Siegs sagt. Den ersten
   /// Gegenstand legt das Spiel von selbst an (`Loadout._add`); der Satz
   /// steht deshalb dort und nicht als eigener Schritt. Danach sagt er nur

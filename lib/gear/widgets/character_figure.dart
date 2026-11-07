@@ -169,3 +169,49 @@ class _KeineFigur extends StatelessWidget {
     );
   }
 }
+
+/// **Der Kopf der eigenen Figur im Kreis** — wie der Mentor neben seinen
+/// Sätzen (`MentorBild`), samt Helm, wenn einer getragen wird
+/// (Frederik, 07.11.2026). Ein Ausschnitt aus [CharacterFigure], kein
+/// eigenes Bild: Jeder Helm, der auf die Figur passt, passt auch hier.
+class CharacterKopf extends StatelessWidget {
+  const CharacterKopf({required this.seite, this.worn = const [], super.key});
+
+  final double seite;
+
+  /// Wie bei [CharacterFigure].
+  final List<String> worn;
+
+  /// Der Ausschnitt auf der 256er-Fläche: Kopf samt Helm, ohne Rumpf.
+  /// Gemessen an `Charakter.png` (Kopf 88–168 × 24–108) und den höchsten
+  /// Helmen (Lederkappe ab 12).
+  static const Rect ausschnitt = Rect.fromLTWH(73, 8, 110, 110);
+
+  @override
+  Widget build(BuildContext context) {
+    final k = seite / ausschnitt.width;
+    return Container(
+      width: seite,
+      height: seite,
+      decoration: BoxDecoration(
+        color: Palette.backgroundRaised,
+        shape: BoxShape.circle,
+        border: Border.all(color: Palette.goldOnDark, width: 2),
+      ),
+      child: ClipOval(
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: <Widget>[
+            Positioned(
+              left: -ausschnitt.left * k,
+              top: -ausschnitt.top * k,
+              width: PixelArt.assetSize * k,
+              height: PixelArt.assetSize * k,
+              child: CharacterFigure(worn: worn),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

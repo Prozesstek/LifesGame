@@ -151,18 +151,19 @@ gelber Punkt weg, „dafür einen Scheinwerfer“.
 | **Zeilen** | Name in der Mitte, kein Pfeil; Zeichen links, Preis rechts |
 | **Licht** | kein gelber Punkt; ein warmer Schein unter der Wahl (`ScheinwerferLicht`), und **der Rand des Schleiers läuft überall weich aus** |
 | **Buch** | **nur noch das Eselsohr rechts unten** — links liegt der Rücken, dort knickt keine Ecke um; zurück per Wisch |
+| **Abfrage** | der Mentor **immer als Kopf im Kreis**, nicht mehr ganz beim Fragen; die eigene Figur ebenso (`CharacterKopf`, samt Helm) — damit ist auch die nackte Figur weg |
 
 **Ohne Rückfrage entschieden:** „Die Welt verstehen“ statt „Verstehen,
 wie die Welt tickt“ — brach am Handy um. Der weiche Rand gilt für alle
 Ziele im Tutorial; gerendert ist nur der Einstieg.
 
-App 1129, unverändert (ein Test prüft jetzt das Licht statt des Punkts).
+App 1130 (vorher 1129; ein Test prüft jetzt das Licht statt des Punkts).
 In 390 × 844 gerendert, Frederik hat ihn abgenommen. **Nicht am Handy.**
 
 ### Offen
 
 - Die Abfrage und alles nach der ersten Seite.
-- Bei einem neuen Spieler ist die eigene Figur in der Abfrage nackt.
+- `assets/Mentor/Mentor.png`, die ganze Figur, wird nirgends mehr gebraucht.
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
 
