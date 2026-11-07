@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.11.2026 · Frederik
+**Zuletzt aktualisiert:** 07.11.2026 · Frederik
 
 ---
 
@@ -136,6 +136,32 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 07.11.2026: Tutorial, der Einstieg in die Theorie
+
+Weiter Screen für Screen. Frederik zum Einstieg nach dem Talentpunkt:
+Mentor tiefer, die Frage sagt zu wenig, Namen in die Mitte, Pfeil und
+gelber Punkt weg, „dafür einen Scheinwerfer“.
+
+| Was | Wie |
+|---|---|
+| **Mentor** | direkt über der Wahl, beide mittig — wie auf der Startseite (ADR-0096) |
+| **Frage** | „Was interessiert dich am meisten?“ statt „Womit fängst du an?“ |
+| **Namen** | was man davon hat (`EinstiegNamen`): Deinen Kopf verstehen, Stärker und fitter werden, Die Welt verstehen, Besser mit Menschen — **nur im Einstieg**, sonst heißen die Gebiete weiter wie die Wurzeln |
+| **Zeilen** | Name in der Mitte, kein Pfeil; Zeichen links, Preis rechts |
+| **Licht** | kein gelber Punkt; ein warmer Schein unter der Wahl (`ScheinwerferLicht`), und **der Rand des Schleiers läuft überall weich aus** |
+
+**Ohne Rückfrage entschieden:** „Die Welt verstehen“ statt „Verstehen,
+wie die Welt tickt“ — brach am Handy um. Der weiche Rand gilt für alle
+Ziele im Tutorial; gerendert ist nur der Einstieg.
+
+App 1129, unverändert (ein Test prüft jetzt das Licht statt des Punkts).
+In 390 × 844 gerendert, Frederik hat ihn abgenommen. **Nicht am Handy.**
+
+### Offen
+
+- Das Buch, die Abfrage und alles nach der ersten Seite.
+- Bei einem neuen Spieler ist die eigene Figur in der Abfrage nackt.
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
 

@@ -18,6 +18,7 @@ import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/mentor/mentor.dart';
 import 'package:lifes_game/mentor/mentor_kasten.dart';
+import 'package:lifes_game/mentor/scheinwerfer.dart';
 import 'package:lifes_game/mentor/zeigefinger.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -161,8 +162,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(TalentpunktEinfuehrung.punktKey), findsNothing);
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.baum));
-      // Ein Ring um die ganze Wahl, nicht um jede Zeile (03.11.2026).
-      expect(find.byKey(Zeigefinger.ringKey), findsOneWidget);
+      // Die ganze Wahl im Licht, ohne gelben Punkt (07.11.2026).
+      expect(find.byKey(Zeigefinger.ringKey), findsNothing);
+      expect(find.byType(ScheinwerferLicht), findsOneWidget);
       expect(
         find.ancestor(
           of: find.byType(ContinueReadingTile),

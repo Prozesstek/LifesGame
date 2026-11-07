@@ -18,12 +18,17 @@ class Zeigefinger extends ConsumerWidget {
     required this.child,
     this.aktiv = true,
     this.radius = 14,
+    this.punkt = true,
     super.key,
   });
 
   final Schritt schritt;
   final Widget child;
   final bool aktiv;
+
+  /// Ob der gelbe Punkt dazukommt. Ohne ihn zeigt nur das Licht — wo
+  /// die ganze Fläche gemeint ist, nicht ein Knopf darin (07.11.2026).
+  final bool punkt;
 
   /// Die Rundung des Ziels — so rund liegt es im Licht.
   final double radius;
@@ -38,7 +43,12 @@ class Zeigefinger extends ConsumerWidget {
     // **Bleibt stehen und blendet nur aus.** Fiele er weg, stünde das
     // Ziel an einer anderen Stelle im Baum und baute sich neu — samt
     // allem, was darin gerade aufspringt (`gotchas.md`).
-    return ZeigeRing(sichtbar: zeigt, radius: radius, child: child);
+    return ZeigeRing(
+      sichtbar: zeigt,
+      radius: radius,
+      punkt: punkt,
+      child: child,
+    );
   }
 }
 
@@ -51,11 +61,15 @@ class ZeigeRing extends StatelessWidget {
     required this.child,
     this.radius = 14,
     this.sichtbar = true,
+    this.punkt = true,
     super.key,
   });
 
   final Widget child;
   final double radius;
+
+  /// Ob der gelbe Punkt dazukommt (siehe [Zeigefinger.punkt]).
+  final bool punkt;
 
   /// Ob gerade gezeigt wird. Aus heißt: nur das Ziel.
   final bool sichtbar;
@@ -75,7 +89,7 @@ class ZeigeRing extends StatelessWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           child,
-          if (sichtbar)
+          if (sichtbar && punkt)
             const Positioned(
               top: -ueberstand,
               right: -ueberstand,

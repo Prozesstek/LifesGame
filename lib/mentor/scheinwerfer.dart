@@ -18,6 +18,9 @@ class Scheinwerfer extends StatefulWidget {
   /// Wie dunkel der Schleier ist.
   static const double dunkel = 0.62;
 
+  /// Wie weich der Rand des Lichts ausläuft, in Punkten.
+  static const double weich = 10;
+
   /// Wie weit das Licht um ein Ziel herum reicht.
   static const double rand = 6;
 
@@ -159,19 +162,29 @@ class _Schleier extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final t = Curves.easeOut.transform(blende.value);
     if (t == 0) return;
-    final pfad = Path()
-      ..fillType = PathFillType.evenOdd
-      ..addRect(Offset.zero & size);
-    for (final loch in loecher()) {
-      pfad.addRRect(loch);
-    }
-    canvas.drawPath(
-      pfad,
+    // **Weiche Kante** (07.11.2026): erst der ganze Schleier, dann die
+    // Löcher weich herausgenommen — wie der Rand eines Lichtkegels, nicht
+    // wie ein ausgeschnittenes Fenster. Das Loch ist um [weich] größer,
+    // damit das Ziel selbst ganz im Licht liegt.
+    final alles = Offset.zero & size;
+    canvas.saveLayer(alles, Paint());
+    canvas.drawRect(
+      alles,
       Paint()
         ..color = Palette.scheinwerfer.withValues(
           alpha: Scheinwerfer.dunkel * t,
         ),
     );
+    final heraus = Paint()
+      ..blendMode = BlendMode.dstOut
+      ..maskFilter = const MaskFilter.blur(
+        BlurStyle.normal,
+        Scheinwerfer.weich,
+      );
+    for (final loch in loecher()) {
+      canvas.drawRRect(loch.inflate(Scheinwerfer.weich), heraus);
+    }
+    canvas.restore();
   }
 
   @override
@@ -359,4 +372,51 @@ class _ZielPunktState extends State<ZielPunkt>
       ),
     );
   }
+}
+
+/// **Ein Lichtkegel auf dem Ziel** (Frederik, 07.11.2026): Wo der Schleier
+/// allein auf dunklem Grund kaum auffällt — die Bibliothek ist selbst
+/// dunkel —, liegt unter dem Ziel ein warmer Schein, der nach außen
+/// ausläuft. Er nimmt keinen Tipp an und ändert keine Größe.
+class ScheinwerferLicht extends StatelessWidget {
+  const ScheinwerferLicht({required this.child, super.key});
+
+  final Widget child;
+
+  /// Wie hell die Mitte ist.
+  static const double staerke = 0.4;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: const _Lichtkegel(), child: child);
+  }
+}
+
+class _Lichtkegel extends CustomPainter {
+  const _Lichtkegel();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Breiter und höher als das Ziel, damit der Rand weich ausläuft.
+    final flaeche = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: size.width * 1.5,
+      height: size.height * 1.4,
+    );
+    canvas.drawOval(
+      flaeche,
+      Paint()
+        ..shader = RadialGradient(
+          colors: <Color>[
+            Palette.goldOnDark.withValues(alpha: ScheinwerferLicht.staerke),
+            Palette.goldOnDark.withValues(alpha: ScheinwerferLicht.staerke / 3),
+            Palette.goldOnDark.withValues(alpha: 0),
+          ],
+          stops: const <double>[0, 0.55, 1],
+        ).createShader(flaeche),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Lichtkegel alt) => false;
 }
