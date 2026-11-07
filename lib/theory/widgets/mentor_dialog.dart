@@ -4,7 +4,6 @@ import 'package:theory/theory.dart';
 
 import '../../gear/gear_controller.dart';
 import '../../gear/widgets/character_figure.dart';
-import '../../mentor/mentor.dart';
 import '../../mentor/mentor_kasten.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -167,6 +166,10 @@ class _MentorSagt extends StatelessWidget {
   final String? kopf;
   final bool gross;
 
+  /// Wie groß sein Kopf neben jedem Satz steht — beim Fragen wie beim
+  /// Urteil derselbe.
+  static const double kopfSeite = 52;
+
   /// Ein Wort vorneweg in Farbe — „Richtig!“ oder „Nicht ganz.“.
   final String? titel;
   final Color? farbe;
@@ -178,19 +181,10 @@ class _MentorSagt extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // Beim Fragen steht er ganz da, beim Antworten sein Kopf.
-        if (gross)
-          SizedBox(
-            width: 96,
-            child: Image.asset(
-              Mentor.figur,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (_, _, _) => const MentorBild(seite: 64),
-            ),
-          )
-        else
-          const MentorBild(seite: 48),
+        // **Immer sein Kopf im Kreis** (Frederik, 07.11.2026): Bis dahin
+        // stand er beim Fragen ganz da und beim Antworten nur als Kopf —
+        // zwei Bilder für denselben Mentor auf einem Bildschirm.
+        const MentorBild(seite: _MentorSagt.kopfSeite),
         const SizedBox(width: 10),
         Expanded(
           child: HolzKarte(
@@ -305,9 +299,9 @@ class _SpielerSagt extends ConsumerWidget {
     final loadout = ref.watch(loadoutProvider);
     return Row(
       key: MentorDialog.spielerKey,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(width: 40),
+        const SizedBox(width: 62),
         Expanded(
           child: HolzKarte(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -322,15 +316,15 @@ class _SpielerSagt extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(width: 6),
-        SizedBox.square(
-          dimension: 100,
-          child: CharacterFigure(
-            worn: <String>[
-              for (final slot in CharacterFigure.layers)
-                ?loadout.equippedCopyIn(slot)?.itemId,
-            ],
-          ),
+        const SizedBox(width: 10),
+        // Der eigene Kopf im Kreis, wie der Mentor gegenüber — nicht die
+        // ganze Figur (Frederik, 07.11.2026).
+        CharacterKopf(
+          seite: _MentorSagt.kopfSeite,
+          worn: <String>[
+            for (final slot in CharacterFigure.layers)
+              ?loadout.equippedCopyIn(slot)?.itemId,
+          ],
         ),
       ],
     );

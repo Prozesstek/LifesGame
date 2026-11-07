@@ -90,19 +90,24 @@ Future<void> feiernSchliessen(WidgetTester tester) async {
     } else if (find.byType(LevelUpSheet).evaluate().isNotEmpty) {
       knopf = find.descendant(
         of: find.byType(LevelUpSheet),
-        matching: find.text('Weiter'),
+        matching: find.text(LevelUpSheet.weiter),
       );
     } else if (find.byType(AbilityUnlockSheet).evaluate().isNotEmpty) {
-      final inventar = find.descendant(
+      // „Ins Inventar“, wenn es die Wahl gibt; im Tutorial ist sie schon
+      // angelegt („Weiter geht's“); ohne freien Platz „Weiter“.
+      Finder imBlatt(String text) => find.descendant(
         of: find.byType(AbilityUnlockSheet),
-        matching: find.text('Ins Inventar'),
+        matching: find.text(text),
       );
-      knopf = inventar.evaluate().isNotEmpty
-          ? inventar
-          : find.descendant(
-              of: find.byType(AbilityUnlockSheet),
-              matching: find.text('Weiter'),
-            );
+      knopf =
+          <Finder>[
+            imBlatt('Ins Inventar'),
+            imBlatt(AbilityUnlockSheet.weiter),
+            imBlatt('Weiter'),
+          ].firstWhere(
+            (f) => f.evaluate().isNotEmpty,
+            orElse: () => imBlatt('Weiter'),
+          );
     } else {
       return;
     }

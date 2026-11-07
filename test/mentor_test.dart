@@ -18,6 +18,7 @@ import 'package:lifes_game/home/widgets/hub_circle.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/mentor/mentor.dart';
 import 'package:lifes_game/mentor/mentor_kasten.dart';
+import 'package:lifes_game/mentor/scheinwerfer.dart';
 import 'package:lifes_game/mentor/zeigefinger.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -161,8 +162,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(TalentpunktEinfuehrung.punktKey), findsNothing);
       expect(sagt(tester), satz(Schritt.ersteSeite, MentorOrt.baum));
-      // Ein Ring um die ganze Wahl, nicht um jede Zeile (03.11.2026).
-      expect(find.byKey(Zeigefinger.ringKey), findsOneWidget);
+      // Die ganze Wahl im Licht, ohne gelben Punkt (07.11.2026).
+      expect(find.byKey(Zeigefinger.ringKey), findsNothing);
+      expect(find.byType(ScheinwerferLicht), findsOneWidget);
       expect(
         find.ancestor(
           of: find.byType(ContinueReadingTile),
@@ -274,7 +276,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(c.read(chosenAbilitiesProvider).contains('funkenstoss'), isTrue);
-      expect(c.read(ersterStartProvider).schritt, Schritt.grube);
+      // Dann zeigt er auf der Startseite, wo die Fähigkeiten liegen.
+      expect(c.read(ersterStartProvider).schritt, Schritt.faehigkeitenZeigen);
       expect(find.byKey(Zeigefinger.ringKey), findsNothing);
       expect(sagt(tester), isNull, reason: 'hier gibt es nichts mehr zu tun');
     });
@@ -289,6 +292,7 @@ void main() {
           abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
         ),
         home: const LadderScreen(),
+        hinweisWeg: true,
       );
 
       expect(sagt(tester), satz(Schritt.grube, MentorOrt.eingang));
@@ -322,7 +326,28 @@ void main() {
       );
     });
 
-    testWidgets('mit der zweiten Gewohnheit schweigt er', (tester) async {
+    testWidgets('mit der zweiten Gewohnheit beginnt der Rundgang '
+        '(07.11.2026)', (tester) async {
+      final stand = ersteSeiteGelesen();
+      final zweite = HabitCatalog.all
+          .firstWhere((v) => v.id != HabitCatalog.starterId)
+          .id;
+      final c = await starte(
+        tester,
+        stand: SaveData(
+          habits: stand.habits.activate(zweite),
+          theory: stand.theory,
+          abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
+          ladder: const LadderProgress.empty().defeat(1),
+        ),
+      );
+
+      final schritt = c.read(ersterStartProvider).schritt;
+      expect(schritt, anyOf(Schritt.laden, Schritt.goldSammeln));
+      expect(sagt(tester), satz(schritt!, MentorOrt.start));
+    });
+
+    testWidgets('nach zwei Etagen schweigt er', (tester) async {
       final stand = ersteSeiteGelesen();
       final zweite = HabitCatalog.all
           .firstWhere((v) => v.id != HabitCatalog.starterId)
@@ -333,7 +358,7 @@ void main() {
           habits: stand.habits.activate(zweite),
           theory: stand.theory,
           abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
-          ladder: const LadderProgress.empty().defeat(1),
+          ladder: const LadderProgress.empty().defeat(1).defeat(2),
         ),
       );
 
@@ -404,7 +429,20 @@ void main() {
 
       expect(c.read(passedPagesProvider), 1);
       expect(c.read(playerLevelProvider).level, 2);
-      expect(c.read(ersterStartProvider).schritt, Schritt.faehigkeitAnlegen);
+      // **Im Tutorial legt das Spiel Funkenstoß selbst an** (07.11.2026),
+      // dann zeigt der Mentor, wo die Fähigkeiten liegen.
+      expect(c.read(chosenAbilitiesProvider).contains('funkenstoss'), isTrue);
+      expect(c.read(ersterStartProvider).schritt, Schritt.faehigkeitenZeigen);
+      // Ein Tipp irgendwohin, und es geht in den Dungeon.
+      // Zurück aus Seite und Baum auf die Startseite.
+      Navigator.of(tester.element(find.byType(LessonScreen))).pop();
+      await tester.pumpAndSettle();
+      Navigator.of(tester.element(find.byType(SkillTreeScreen))).pop();
+      await tester.pumpAndSettle();
+      expect(sagt(tester), satz(Schritt.faehigkeitenZeigen, MentorOrt.start));
+      await tester.tapAt(const Offset(200, 700));
+      await tester.pumpAndSettle();
+      expect(sagt(tester), satz(Schritt.grube, MentorOrt.start));
     });
   });
 

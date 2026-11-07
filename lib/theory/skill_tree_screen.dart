@@ -7,6 +7,7 @@ import '../home/erster_start.dart';
 import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
+import '../mentor/scheinwerfer.dart';
 import '../mentor/zeigefinger.dart';
 import '../skills/gebiet_farbe.dart';
 import '../skills/skills.dart';
@@ -156,6 +157,9 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
               body: AufstiegHost(
                 child: MentorFlaeche(
                   ort: MentorOrt.baum,
+                  // Im Einstieg steht er direkt über der Wahl, nicht oben
+                  // unter der Leiste — wie auf der Startseite (ADR-0096).
+                  mitKasten: talentpunkt || !_zeigtEinstieg,
                   child: Column(
                     children: <Widget>[
                       // **Die Rückfrage des Tages** (Issue #88), ausserhalb von
@@ -517,6 +521,22 @@ class _LegendKnopf extends StatelessWidget {
 /// Frederik: „dass einem 3 Lektionen vorgeschlagen werden + die
 /// Möglichkeit den Baum selber zu erkunden“. Der Baum mit vier Gebieten,
 /// Balken und Legende ist für die erste Seite zu viel auf einmal.
+/// **Wie die Gebiete im Einstieg heißen** (Frederik, 07.11.2026): was
+/// man davon hat, nicht der Name der Wurzel. Im Baum, bei den Skills und
+/// den Farben bleiben Körper, Geist, Wissenschaft und Gesellschaft — sie
+/// heißen dort wie die vier Gebiete (ADR-0085). Eine Tabelle; was hier
+/// fehlt, steht mit seinem Namen da.
+abstract final class EinstiegNamen {
+  static const Map<String, String> namen = <String, String>{
+    'koerper': 'Stärker und fitter werden',
+    'geist': 'Deinen Kopf verstehen',
+    'wissenschaft': 'Die Welt verstehen',
+    'gesellschaft': 'Besser mit Menschen',
+  };
+
+  static String? von(String knotenId) => namen[knotenId];
+}
+
 class _Einstieg extends StatelessWidget {
   const _Einstieg({
     required this.graph,
@@ -539,61 +559,79 @@ class _Einstieg extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 480),
           // **Die ganze Wahl liegt im Licht des Mentors** (ADR-0095), nicht
           // nur die erste Zeile: Alle drei und der Baum sind gemeint.
-          child: Zeigefinger(
-            schritt: Schritt.ersteSeite,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const Text(
-                    'Womit fängst du an?',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Palette.textOnDark,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const MentorZeile(ort: MentorOrt.baum, rand: 0),
+              const SizedBox(height: 8),
+              ScheinwerferLicht(
+                child: Zeigefinger(
+                  schritt: Schritt.ersteSeite,
+                  // Kein gelber Punkt: Gemeint ist die ganze Wahl, das Licht
+                  // zeigt sie (Frederik, 07.11.2026).
+                  punkt: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const Text(
+                          'Was interessiert dich am meisten?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Palette.textOnDark,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        for (final (i, v) in vorschlaege.indexed) ...<Widget>[
+                          // Der Reihe nach, nach dem Mentor (06.11.2026).
+                          DerReiheNach(
+                            nr: i,
+                            child: ContinueReadingTile(
+                              gross: true,
+                              mittig: true,
+                              titel: EinstiegNamen.von(v.node.id),
+                              node: v.node,
+                              grund: v.grund,
+                              farbe: switch (gebietVon(graph, v.node.id)) {
+                                final SkillArea g => GebietFarbe.leder(g),
+                                null => Palette.accentOnDark,
+                              },
+                              cost: v.step.needsOpening ? v.node.cost : null,
+                              onTap: () => onRead(v.step),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        const SizedBox(height: 6),
+                        Center(
+                          child: TextButton.icon(
+                            key: SkillTreeScreen.erkundenKey,
+                            onPressed: onErkunden,
+                            // Hell: Der Knopf steht auf Leder, nicht Pergament.
+                            style: TextButton.styleFrom(
+                              foregroundColor: Palette.textOnDark,
+                            ),
+                            icon: const Icon(
+                              Icons.account_tree_outlined,
+                              size: 22,
+                            ),
+                            label: const Text(
+                              'Baum selbst erkunden',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  for (final (i, v) in vorschlaege.indexed) ...<Widget>[
-                    // Der Reihe nach, nach dem Mentor (06.11.2026).
-                    DerReiheNach(
-                      nr: i,
-                      child: ContinueReadingTile(
-                        gross: true,
-                        node: v.node,
-                        grund: v.grund,
-                        farbe: switch (gebietVon(graph, v.node.id)) {
-                          final SkillArea g => GebietFarbe.leder(g),
-                          null => Palette.accentOnDark,
-                        },
-                        cost: v.step.needsOpening ? v.node.cost : null,
-                        onTap: () => onRead(v.step),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  const SizedBox(height: 6),
-                  Center(
-                    child: TextButton.icon(
-                      key: SkillTreeScreen.erkundenKey,
-                      onPressed: onErkunden,
-                      // Hell: Der Knopf steht auf Leder, nicht Pergament.
-                      style: TextButton.styleFrom(
-                        foregroundColor: Palette.textOnDark,
-                      ),
-                      icon: const Icon(Icons.account_tree_outlined, size: 22),
-                      label: const Text(
-                        'Baum selbst erkunden',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

@@ -127,4 +127,21 @@ void main() {
 
     expect(figurenbilder(tester), <String>[CharacterFigure.assetPath]);
   });
+
+  testWidgets('der Kopf im Kreis trägt denselben Helm wie die Figur', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CharacterKopf(seite: 52, worn: <String>['gear-lederkappe']),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(CharacterKopf)), const Size(52, 52));
+    final figur = tester.widget<CharacterFigure>(find.byType(CharacterFigure));
+    expect(figur.worn, <String>['gear-lederkappe']);
+  });
 }

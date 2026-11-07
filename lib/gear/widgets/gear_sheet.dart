@@ -33,6 +33,8 @@ import '../sell_flow.dart';
 import '../weapon_ability_line.dart';
 import 'copy_stats.dart';
 import 'rarity_badge.dart';
+import '../../home/erster_start.dart';
+import '../../mentor/zeigefinger.dart';
 
 /// Zeigt das Blatt zu [item] — mit [exemplar], wenn ein bestimmtes
 /// angetippt wurde.
@@ -463,16 +465,22 @@ class _Exemplar extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                 ],
-                FilledButton.icon(
-                  style: _planke,
-                  key: ValueKey<String>('schloss-${copy.uid}'),
-                  onPressed: () =>
-                      ref.read(loadoutProvider.notifier).toggleLock(copy.uid),
-                  icon: Icon(
-                    gesperrt ? Icons.lock : Icons.lock_open_outlined,
-                    size: 16,
+                // Im Rundgang zeigt der Mentor auf das Schloss (07.11.2026).
+                Zeigefinger(
+                  schritt: Schritt.sperren,
+                  aktiv: !gesperrt,
+                  radius: 8,
+                  child: FilledButton.icon(
+                    style: _planke,
+                    key: ValueKey<String>('schloss-${copy.uid}'),
+                    onPressed: () =>
+                        ref.read(loadoutProvider.notifier).toggleLock(copy.uid),
+                    icon: Icon(
+                      gesperrt ? Icons.lock : Icons.lock_open_outlined,
+                      size: 16,
+                    ),
+                    label: Text(gesperrt ? 'Gesperrt' : 'Sperren'),
                   ),
-                  label: Text(gesperrt ? 'Gesperrt' : 'Sperren'),
                 ),
               ],
             ),

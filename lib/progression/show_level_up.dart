@@ -7,6 +7,7 @@ import 'package:progression/progression.dart';
 import 'package:theory/theory.dart';
 
 import '../audio/sound_effects.dart';
+import '../home/erster_start_provider.dart';
 import '../skills/gebiet_farbe.dart';
 import '../theory/theory_controller.dart';
 import '../theory/vorschlag_flow.dart';
@@ -44,7 +45,10 @@ Future<void> showLevelUp(
   // **Bringt das Level einen Punkt, steht darunter, wofür** (26.10.2026):
   // dieselben Vorschläge wie oben im Baum, ohne Gebiet vorneweg.
   final graph = ref.read(theoryGraphProvider);
-  final vorschlaege = auf.theoryPoints > 0
+  // **Im Tutorial keine** (Frederik, 07.11.2026): Dort zeigt der Mentor
+  // den Weg, und drei Seiten zur Wahl führten von ihm weg.
+  final imTutorial = ref.read(ersterStartProvider).schritt != null;
+  final vorschlaege = auf.theoryPoints > 0 && !imTutorial
       ? <(TheoryVorschlag, Color)>[
           for (final v in ref.read(vorschlaegeProvider(null)))
             (
@@ -97,24 +101,29 @@ class LevelUpSheet extends StatelessWidget {
   /// Die Zeile „Als Nächstes“ — für Tests.
   static const Key ausblickKey = ValueKey<String>('aufstieg-ausblick');
 
-  /// „4 %" aus einem Faktor von 1,04.
-  static String prozent(double faktor) => '${((faktor - 1) * 100).round()} %';
+  /// Der Knopf, mittig (Frederik, 07.11.2026).
+  static const String weiter = "Weiter geht's";
 
   @override
   Widget build(BuildContext context) {
     final auf = levelUp;
-    final zeilen = <(IconData, String)>[
-      (Icons.bolt, 'Im Kampf ${prozent(auf.powerGain)} stärker'),
+    // **Ohne „Im Kampf 4 % stärker“** (Frederik, 07.11.2026): Das sagt
+    // die Roadmap; in der Feier stehen nur Dinge, die man bekommt.
+    final zeilen = <(IconData, String, Color)>[
       if (auf.theoryPoints > 0)
         (
-          Icons.menu_book,
+          // Dasselbe Zeichen wie oben in der Theorie (`PointsChip`), in
+          // Gold wie dort.
+          Icons.hexagon_rounded,
           auf.theoryPoints == 1
               ? '+1 Talentpunkt für den Talentbaum'
               : '+${auf.theoryPoints} Talentpunkte für den Talentbaum',
+          Palette.gold,
         ),
       // Plätze, Ultimate, Extras, Rahmen — eine Stelle mit der Roadmap
       // (ADR-0098).
-      for (final g in LevelRoadmap.gewinne(auf)) (g.icon, g.feier),
+      for (final g in LevelRoadmap.gewinne(auf))
+        (g.icon, g.feier, Palette.accent),
     ];
     // **Was als Nächstes kommt** (ADR-0098): der nächste Meilenstein mit
     // seinem ersten Gewinn, damit man weiß, worauf man zuläuft.
@@ -161,7 +170,12 @@ class LevelUpSheet extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           for (var i = 0; i < zeilen.length; i++)
-            _Zeile(icon: zeilen[i].$1, text: zeilen[i].$2, nummer: i),
+            _Zeile(
+              icon: zeilen[i].$1,
+              text: zeilen[i].$2,
+              farbe: zeilen[i].$3,
+              nummer: i,
+            ),
           if (naechster != null && ausblick != null) ...<Widget>[
             const SizedBox(height: 8),
             _Ausblick(
@@ -183,10 +197,11 @@ class LevelUpSheet extends StatelessWidget {
           ],
         ],
       ),
+      actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Weiter'),
+          child: const Text(weiter),
         ),
       ],
     );
@@ -195,9 +210,15 @@ class LevelUpSheet extends StatelessWidget {
 
 /// Eine Zeile, die nach der vorigen hereinkommt.
 class _Zeile extends StatelessWidget {
-  const _Zeile({required this.icon, required this.text, required this.nummer});
+  const _Zeile({
+    required this.icon,
+    required this.text,
+    required this.farbe,
+    required this.nummer,
+  });
 
   final IconData icon;
+  final Color farbe;
   final String text;
   final int nummer;
 
@@ -220,7 +241,7 @@ class _Zeile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: <Widget>[
-            Icon(icon, size: 20, color: Palette.accent),
+            Icon(icon, size: 20, color: farbe),
             const SizedBox(width: 10),
             Flexible(
               child: Text(

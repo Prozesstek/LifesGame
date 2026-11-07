@@ -1,11 +1,18 @@
 import 'dart:async';
 
+import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../achievements/show_achievement_unlock.dart';
+import '../character/abilities_controller.dart';
+import '../character/show_ability_unlock.dart';
 import '../combat/ladder_controller.dart';
+import '../home/erster_start.dart';
+import '../mentor/mentor.dart';
+import '../mentor/mentor_kasten.dart';
+import '../mentor/zeigefinger.dart';
 import '../progression/level_provider.dart';
 import '../progression/show_level_up.dart';
 import '../ui/gold_icon.dart';
@@ -72,11 +79,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: ShopScreen.maxWidth),
-            child: _heute(gold),
+      body: MentorFlaeche(
+        ort: MentorOrt.laden,
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: ShopScreen.maxWidth),
+              child: _heute(gold),
+            ),
           ),
         ),
       ),
@@ -87,9 +97,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final angebote = ref.watch(dailyOffersProvider);
     final loadout = ref.watch(loadoutProvider);
     final rung = ref.watch(ladderProvider).highestDefeated;
+    // Im Rundgang ist das Angebot des Mentors vorgewählt (07.11.2026).
+    final vorgewaehlt = angebote.firstWhere(
+      (c) => c.uid.endsWith('-mentor'),
+      orElse: () => angebote.first,
+    );
     final gewaehlt = angebote.firstWhere(
       (c) => c.uid == _gewaehlt,
-      orElse: () => angebote.first,
+      orElse: () => vorgewaehlt,
     );
     final item = gewaehlt.item;
     final block = loadout.blockFor(
@@ -133,6 +148,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     if (item == null) return;
     final vorherErrungen = achievementsBefore(ref);
     final vorherLevel = levelBefore(ref);
+    final vorherFaehigkeiten = ref.read(unlockedAbilitiesProvider);
     final block = ref.read(loadoutProvider.notifier).buy(offer);
     if (!context.mounted) return;
 
@@ -149,7 +165,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     // Vier Errungenschaften hängen am Laden (ADR-0033) — hier ist der
     // Moment, in dem sich eine davon überschreiten lässt.
     if (block != null) return;
-    _feiern(context, ref, vorherErrungen, vorherLevel);
+    _feiern(context, ref, vorherErrungen, vorherLevel, vorherFaehigkeiten);
   }
 
   /// Errungenschaften im Laden zahlen auch Erfahrung (ADR-0033).
@@ -158,6 +174,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     WidgetRef ref,
     Set<String> vorherErrungen,
     int vorherLevel,
+    List<Ability> vorherFaehigkeiten,
   ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
@@ -165,6 +182,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         await showAchievementUnlocks(context, ref, before: vorherErrungen);
         if (!context.mounted) return;
         await showLevelUp(context, ref, before: vorherLevel);
+        if (!context.mounted) return;
+        // „Beim Händler“ bringt Sammeln (07.11.2026).
+        await showAbilityUnlocks(context, ref, before: vorherFaehigkeiten);
       }());
     });
   }
@@ -225,14 +245,20 @@ class _Raster extends StatelessWidget {
               SizedBox(
                 width: breite,
                 height: _hoehe,
-                child: ShopItemCell(
-                  copy: copy,
-                  isSelected: copy.uid == gewaehlteUid,
-                  isOwned: isOwned(copy),
-                  isEquipped: isEquipped(copy),
-                  gesammelt: gesammelt(copy),
-                  block: blockFor(copy),
-                  onTap: () => onWaehle(copy.uid),
+                // Der Mentor zeigt im Rundgang auf sein Angebot.
+                child: Zeigefinger(
+                  schritt: Schritt.laden,
+                  aktiv: copy.uid.endsWith('-mentor'),
+                  radius: 10,
+                  child: ShopItemCell(
+                    copy: copy,
+                    isSelected: copy.uid == gewaehlteUid,
+                    isOwned: isOwned(copy),
+                    isEquipped: isEquipped(copy),
+                    gesammelt: gesammelt(copy),
+                    block: blockFor(copy),
+                    onTap: () => onWaehle(copy.uid),
+                  ),
                 ),
               ),
           ],

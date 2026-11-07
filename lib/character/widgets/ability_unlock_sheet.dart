@@ -26,8 +26,16 @@ class AbilityUnlockSheet extends StatelessWidget {
     required this.pit,
     required this.hasFreeSlot,
     required this.nextSlotLevel,
+    this.angelegt = false,
     super.key,
   });
+
+  /// Ob das Spiel sie schon angelegt hat (im Tutorial, 07.11.2026) — dann
+  /// gibt es nichts zu wählen, nur „Weiter“.
+  final bool angelegt;
+
+  /// Der Knopf, wenn sie schon angelegt ist.
+  static const String weiter = "Weiter geht's";
 
   final Ability ability;
 
@@ -81,7 +89,9 @@ class AbilityUnlockSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Du hast ${pit.name} freigeschaltet',
+              angelegt
+                  ? '${pit.name} ist angelegt'
+                  : 'Du hast ${pit.name} freigeschaltet',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Palette.text,
@@ -126,6 +136,14 @@ class AbilityUnlockSheet extends StatelessWidget {
   }
 
   List<Widget> _actions(BuildContext context) {
+    if (angelegt) {
+      return <Widget>[
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(weiter),
+        ),
+      ];
+    }
     if (hasFreeSlot) {
       return <Widget>[
         FilledButton.icon(

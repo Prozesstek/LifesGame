@@ -22,6 +22,10 @@ import 'widgets/verkauf_leiste.dart';
 import '../ui/gold_icon.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
+import '../home/erster_start.dart';
+import '../mentor/mentor.dart';
+import '../mentor/mentor_kasten.dart';
+import '../mentor/zeigefinger.dart';
 
 /// Der Ausrüstungs-Bildschirm: sechs Plätze oben, darunter der Rucksack
 /// (ADR-0057, Issue #137).
@@ -51,6 +55,15 @@ class EquipmentScreen extends ConsumerStatefulWidget {
 }
 
 class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
+  /// Der erste Platz, auf dem etwas liegt — dorthin zeigt der Mentor beim
+  /// Sperren.
+  static GearSlot? _erstesAngelegtes(Loadout loadout) {
+    for (final slot in GearSlot.values) {
+      if (loadout.equippedCopyIn(slot) != null) return slot;
+    }
+    return null;
+  }
+
   /// Die Ordnung des Rasters. Sie gehört zur Ansicht, nicht zum
   /// Spielstand: Wer den Bildschirm wieder öffnet, sieht wieder A bis Z.
   GearGrouping _gruppierung = GearGrouping.values.first;
@@ -194,123 +207,134 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
         backgroundColor: Palette.surface,
         actions: const <Widget>[SammlungKnopf(art: SammelArt.ausruestung)],
       ),
-      body: SafeArea(
-        child: Align(
-          // **Oben, nicht in der Mitte**: Ein kurzer Inhalt — wenige
-          // eigene Fähigkeiten, ein leerer Rucksack — rutschte sonst in
-          // die Mitte des Bildschirms (beim Ansehen gefunden, 20.10.).
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: EquipmentScreen._maxWidth,
-            ),
-            // **Kein ListView.** Eine ListView baut nur, was in der Nähe
-            // des Sichtbaren liegt. Wer ein Stück von unten zieht und die
-            // Fläche nach oben rollt, bekäme seine Kachel dabei verworfen,
-            // und mit ihr das Ende des Ziehens. 48 Kacheln sind wenig genug,
-            // um sie alle gebaut zu halten.
-            child: SingleChildScrollView(
-              controller: _scroll,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _Anziehpuppe(
-                    links: _linkeSeite,
-                    rechts: _rechteSeite,
-                    figur: CharacterFigure(
-                      worn: <String>[
-                        for (final slot in GearSlot.values)
-                          ?loadout.equippedCopyIn(slot)?.itemId,
-                      ],
-                    ),
-                    platz: (slot) => _Ablage(
-                      slot: slot,
-                      gezogen: _gezogen,
-                      onAblegen: _lege,
-                      child: (dragState) => EquipmentSlotTile(
+      body: MentorFlaeche(
+        ort: MentorOrt.ausruestung,
+        child: SafeArea(
+          child: Align(
+            // **Oben, nicht in der Mitte**: Ein kurzer Inhalt — wenige
+            // eigene Fähigkeiten, ein leerer Rucksack — rutschte sonst in
+            // die Mitte des Bildschirms (beim Ansehen gefunden, 20.10.).
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: EquipmentScreen._maxWidth,
+              ),
+              // **Kein ListView.** Eine ListView baut nur, was in der Nähe
+              // des Sichtbaren liegt. Wer ein Stück von unten zieht und die
+              // Fläche nach oben rollt, bekäme seine Kachel dabei verworfen,
+              // und mit ihr das Ende des Ziehens. 48 Kacheln sind wenig genug,
+              // um sie alle gebaut zu halten.
+              child: SingleChildScrollView(
+                controller: _scroll,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    _Anziehpuppe(
+                      links: _linkeSeite,
+                      rechts: _rechteSeite,
+                      figur: CharacterFigure(
+                        worn: <String>[
+                          for (final slot in GearSlot.values)
+                            ?loadout.equippedCopyIn(slot)?.itemId,
+                        ],
+                      ),
+                      platz: (slot) => _Ablage(
                         slot: slot,
-                        equipped: loadout.equippedCopyIn(slot),
-                        hasAny: loadout.copiesIn(slot).isNotEmpty,
-                        dragState: dragState,
-                        onTap: () => _tippePlatz(slot, loadout),
-                      ),
-                    ),
-                  ),
-                  // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
-                  // „keine Sets" sagt, ist eine Zeile über nichts.
-                  if (loadout.wearsAnySetPiece) ...<Widget>[
-                    const SizedBox(height: 16),
-                    SetCard(loadout: loadout),
-                  ],
-                  // **Aufräumen je Seltenheit** (Issue #137): ein Knopf für
-                  // jede, in der etwas Schlechteres liegt. Gesperrtes bleibt.
-                  // Nur sichtbar, wenn es etwas zu räumen gibt.
-                  if (loadout.junk.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 16),
-                    _Aufraeumen(loadout: loadout),
-                  ],
-                  // **Mit Häkchen verkaufen** (ADR-0083): wie Aufräumen,
-                  // aber man wählt selbst, was geht.
-                  if (rucksack.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 12),
-                    VerkaufLeiste(
-                      waehlen: _waehlen,
-                      anzahl: auswahl.length,
-                      gold: VerkaufAuswahl.erloes(loadout, auswahl),
-                      onUmschalten: _umschalten,
-                      onVerkaufen: _verkaufeAuswahl,
-                      aufDunkel: true,
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  // Wie viel im Rucksack liegt, und wie geordnet wird —
-                  // ohne Worte.
-                  Row(
-                    children: <Widget>[
-                      const Icon(
-                        Icons.backpack_outlined,
-                        size: 20,
-                        color: Palette.textOnDark,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${rucksack.length}',
-                        semanticsLabel: '${rucksack.length} Stück im Rucksack',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Palette.textOnDark,
+                        gezogen: _gezogen,
+                        onAblegen: _lege,
+                        // Im Rundgang zeigt der Mentor auf das erste
+                        // angelegte Stück: das zum Sperren (07.11.2026).
+                        child: (dragState) => Zeigefinger(
+                          schritt: Schritt.sperren,
+                          aktiv: slot == _erstesAngelegtes(loadout),
+                          radius: 10,
+                          child: EquipmentSlotTile(
+                            slot: slot,
+                            equipped: loadout.equippedCopyIn(slot),
+                            hasAny: loadout.copiesIn(slot).isNotEmpty,
+                            dragState: dragState,
+                            onTap: () => _tippePlatz(slot, loadout),
+                          ),
                         ),
                       ),
-                      const Spacer(),
-                      _Gruppenwahl(
-                        aktiv: _gruppierung,
-                        onWaehle: (g) => setState(() => _gruppierung = g),
+                    ),
+                    // **Nur sichtbar, wenn etwas anliegt.** Eine Karte, die
+                    // „keine Sets" sagt, ist eine Zeile über nichts.
+                    if (loadout.wearsAnySetPiece) ...<Widget>[
+                      const SizedBox(height: 16),
+                      SetCard(loadout: loadout),
+                    ],
+                    // **Aufräumen je Seltenheit** (Issue #137): ein Knopf für
+                    // jede, in der etwas Schlechteres liegt. Gesperrtes bleibt.
+                    // Nur sichtbar, wenn es etwas zu räumen gibt.
+                    if (loadout.junk.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 16),
+                      _Aufraeumen(loadout: loadout),
+                    ],
+                    // **Mit Häkchen verkaufen** (ADR-0083): wie Aufräumen,
+                    // aber man wählt selbst, was geht.
+                    if (rucksack.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      VerkaufLeiste(
+                        waehlen: _waehlen,
+                        anzahl: auswahl.length,
+                        gold: VerkaufAuswahl.erloes(loadout, auswahl),
+                        onUmschalten: _umschalten,
+                        onVerkaufen: _verkaufeAuswahl,
+                        aufDunkel: true,
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  for (final gruppe in groupGear(_gruppierung))
-                    ..._gruppe(
-                      gruppe,
-                      loadout: loadout,
-                      rucksack: rucksack,
-                      auswahl: auswahl,
+                    const SizedBox(height: 20),
+                    // Wie viel im Rucksack liegt, und wie geordnet wird —
+                    // ohne Worte.
+                    Row(
+                      children: <Widget>[
+                        const Icon(
+                          Icons.backpack_outlined,
+                          size: 20,
+                          color: Palette.textOnDark,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${rucksack.length}',
+                          semanticsLabel:
+                              '${rucksack.length} Stück im Rucksack',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Palette.textOnDark,
+                          ),
+                        ),
+                        const Spacer(),
+                        _Gruppenwahl(
+                          aktiv: _gruppierung,
+                          onWaehle: (g) => setState(() => _gruppierung = g),
+                        ),
+                      ],
                     ),
-                  const SizedBox(height: 4),
-                  FilledButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ShopScreen(),
+                    const SizedBox(height: 12),
+                    for (final gruppe in groupGear(_gruppierung))
+                      ..._gruppe(
+                        gruppe,
+                        loadout: loadout,
+                        rucksack: rucksack,
+                        auswahl: auswahl,
+                      ),
+                    const SizedBox(height: 4),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ShopScreen(),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.storefront_outlined,
+                        semanticLabel: 'Zum Laden',
                       ),
                     ),
-                    child: const Icon(
-                      Icons.storefront_outlined,
-                      semanticLabel: 'Zum Laden',
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

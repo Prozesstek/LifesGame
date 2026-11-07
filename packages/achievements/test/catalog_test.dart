@@ -25,14 +25,15 @@ void main() {
       }
     });
 
-    test('34 Meilensteine und 8 Entdeckungen', () {
+    test('35 Meilensteine und 8 Entdeckungen', () {
       // Der zwanzigste ist „Zehn Truhen“ (ADR-0073), die Quelle des
       // Glückstranks; der zweiundzwanzigste die „Erste Seite“
       // (ADR-0079), die Quelle von Funkenstoß. Dazu je Gebiet drei
-      // Skill-Titel (ADR-0085).
-      expect(AchievementCatalog.milestoneCount, 34);
+      // Skill-Titel (ADR-0085), dazu „Beim Händler“, die Quelle von
+      // Sammeln (07.11.2026).
+      expect(AchievementCatalog.milestoneCount, 35);
       expect(AchievementCatalog.discoveryCount, 8);
-      expect(AchievementCatalog.all, hasLength(42));
+      expect(AchievementCatalog.all, hasLength(43));
     });
 
     test('jeder Bereich ist besetzt', () {
@@ -112,15 +113,16 @@ void main() {
     // Seit ADR-0073 mit „Zehn Truhen“ (mittel): 75, 25 und 10 mehr; seit
     // ADR-0074 mit „Sieben Tage in Form“ (mittel) noch einmal so viel;
     // seit ADR-0079 mit der „Ersten Seite“ (klein) 30, 10 und 5 dazu;
-    // seit ADR-0085 je Gebiet klein, mittel, gross: 1020, 340 und 160.
-    test('über ein Spielerleben: 2880 Erfahrung, 960 Gold, 570 Ruhm', () {
-      expect(AchievementCatalog.lifetimeXp, 2880);
-      expect(AchievementCatalog.lifetimeGold, 960);
-      expect(AchievementCatalog.lifetimeFame, 570);
+    // seit ADR-0085 je Gebiet klein, mittel, gross: 1020, 340 und 160;
+    // seit dem 07.11.2026 mit „Beim Händler“ (klein) 30, 10 und 5 dazu.
+    test('über ein Spielerleben: 2910 Erfahrung, 970 Gold, 575 Ruhm', () {
+      expect(AchievementCatalog.lifetimeXp, 2910);
+      expect(AchievementCatalog.lifetimeGold, 970);
+      expect(AchievementCatalog.lifetimeFame, 575);
     });
 
     test(
-        'der Ruhm teilt sich in 450 aus Meilensteinen und 120 aus Entdeckungen',
+        'der Ruhm teilt sich in 455 aus Meilensteinen und 120 aus Entdeckungen',
         () {
       var meilensteine = 0;
       var entdeckungen = 0;
@@ -131,7 +133,7 @@ void main() {
           entdeckungen += a.tier.fame;
         }
       }
-      expect(meilensteine, 450);
+      expect(meilensteine, 455);
       expect(entdeckungen, 120);
     });
 

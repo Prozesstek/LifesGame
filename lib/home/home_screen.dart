@@ -176,10 +176,18 @@ class HomeScreen extends ConsumerWidget {
     // **Ein Tipp irgendwohin führt weiter**, solange der Mentor auf die
     // Gewohnheiten zeigt (06.11.2026). Unter der Feier: Ein Tipp auf die
     // große Flamme schließt erst sie.
+    final hinweis = switch (start.schritt) {
+      Schritt.gewohnheitenZeigen => Hinweis.gewohnheiten,
+      Schritt.faehigkeitenZeigen => Hinweis.faehigkeiten,
+      _ => null,
+    };
     return WeiterTipp(
-      aktiv: start.schritt == Schritt.gewohnheitenZeigen,
-      onWeiter: () =>
-          ref.read(hinweiseProvider.notifier).weiter(Hinweis.gewohnheiten),
+      aktiv: hinweis != null,
+      onWeiter: () {
+        if (hinweis != null) {
+          ref.read(hinweiseProvider.notifier).weiter(hinweis);
+        }
+      },
       child: MentorFlaeche(
         ort: MentorOrt.start,
         // Der Kasten steht unter Level und Gold, nicht über der Leiste.

@@ -465,6 +465,14 @@ class Loadout {
 
   int get soldCount => _sold.length;
 
+  /// Wie viele Stücke je im Laden gekauft wurden — aus der Historie, fällt
+  /// also nie. Beute zählt nicht mit (der Rundgang des Mentors, 07.11.2026).
+  int get boughtCount =>
+      _acquired.where((c) => c.uid.startsWith('laden-')).length;
+
+  /// Ob gerade etwas gesperrt ist (ADR-0081).
+  bool get hatGesperrtes => _locked.isNotEmpty;
+
   /// Wie viele Stücke je als Beute kamen — die laufende Nummer der
   /// nächsten (`GearLoot.drop`), damit jede eine eigene Uid bekommt.
   int get lootCount =>

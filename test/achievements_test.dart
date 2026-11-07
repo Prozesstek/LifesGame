@@ -74,7 +74,7 @@ void main() {
       expect(find.bySemanticsLabel(RegExp('0 Ruhm')), findsWidgets);
       // Oben die Summe, seit ADR-0085 zweiundvierzig — darunter
       // „Beständig“ mit seinen dreissig Tagen.
-      expect(find.text('0 / 42'), findsOneWidget);
+      expect(find.text('0 / 43'), findsOneWidget);
       expect(find.text('0 / 30'), findsOneWidget);
     });
   });
@@ -181,7 +181,7 @@ void main() {
         find.bySemanticsLabel(RegExp('Errungenschaften:')),
         findsOneWidget,
       );
-      expect(find.textContaining(' / 42'), findsOneWidget);
+      expect(find.textContaining(' / 43'), findsOneWidget);
 
       await tester.tap(find.byType(AchievementsCard));
       await tester.pumpAndSettle();
