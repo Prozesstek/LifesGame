@@ -115,9 +115,10 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                     // Wohin die neue Fähigkeit soll, liegt mit im Licht
                     // des Mentors (ADR-0095) — ohne eigenen Punkt.
                     ScheinwerferZiel(
-                      aktiv:
-                          ref.watch(ersterStartProvider).schritt ==
-                          Schritt.faehigkeitAnlegen,
+                      aktiv: switch (ref.watch(ersterStartProvider).schritt) {
+                        Schritt.faehigkeitAnlegen || Schritt.geschenk => true,
+                        _ => false,
+                      },
                       radius: 12,
                       child: AbilitySlotsRow(
                         einladen: offen.any((id) => !chosen.contains(id)),
@@ -255,9 +256,15 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
             onEnde: _beendeZiehen,
             // Der Mentor zeigt auf das, was gelernt und noch nicht
             // angelegt ist (ADR-0079) — beim ersten Mal Funkenstoß.
-            child: Zeigefinger(
-              schritt: Schritt.faehigkeitAnlegen,
-              aktiv: !chosen.contains(ability.moveId),
+            // Im Rundgang zeigt er auf das Geschenk (07.11.2026).
+            child: ZeigeRing(
+              sichtbar:
+                  !chosen.contains(ability.moveId) &&
+                  switch (ref.watch(ersterStartProvider).schritt) {
+                    Schritt.faehigkeitAnlegen => true,
+                    Schritt.geschenk => ability.moveId == geschenkDesMentors,
+                    _ => false,
+                  },
               // Wird für einen Platz gewählt, wackelt, was dorthin kann.
               child: Wackeln(
                 aktiv:

@@ -171,6 +171,7 @@ void main() {
           angelegt: 1,
           level: 2,
           billigstesStueck: billig,
+          faehigkeitenGezeigt: true,
         ),
       );
 
@@ -200,25 +201,61 @@ void main() {
       expect(start.leuchtet, Bereich.gewohnheiten);
     });
 
-    test('mit der zweiten Gewohnheit ist der Weg gegangen', () {
-      final start = ErsterStart.aus(
-        const ErsterStartStand(
+    group('der Rundgang (07.11.2026)', () {
+      ErsterStart nach({
+        int gekauft = 0,
+        bool gesperrt = false,
+        bool geschenk = false,
+        int gold = 100,
+        int etagen = 1,
+      }) => ErsterStart.aus(
+        ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 1,
           hatGekaempft: true,
-          stufenGeschafft: 1,
+          stufenGeschafft: etagen,
           seiten: 1,
           gelernt: 1,
           angelegt: 1,
           jeBesessen: 1,
           level: 3,
           billigstesStueck: billig,
+          goldVerdient: gold,
           gewohnheitenJe: 2,
+          gekauft: gekauft,
+          etwasGesperrt: gesperrt,
+          geschenkAngelegt: geschenk,
         ),
       );
 
-      expect(start.schritt, isNull);
-      expect(start.leuchtet, isNull);
+      test('nach der zweiten Gewohnheit geht es in den Laden', () {
+        expect(nach().schritt, Schritt.laden);
+        expect(nach().leuchtet, Bereich.laden);
+      });
+
+      test('reicht das Gold nicht, wartet er', () {
+        expect(nach(gold: billig - 1).schritt, Schritt.goldSammeln);
+        expect(nach(gold: billig - 1).leuchtet, isNull);
+      });
+
+      test('gekauft: sperren, dann das Geschenk, dann ist es vorbei', () {
+        expect(nach(gekauft: 1).schritt, Schritt.sperren);
+        expect(nach(gekauft: 1).leuchtet, Bereich.ausruestung);
+        expect(nach(gekauft: 1, gesperrt: true).schritt, Schritt.geschenk);
+        expect(nach(gekauft: 1, gesperrt: true).leuchtet, Bereich.faehigkeiten);
+        expect(
+          nach(gekauft: 1, gesperrt: true, geschenk: true).schritt,
+          isNull,
+        );
+      });
+
+      test('wer das Schloss wieder öffnet, muss nicht noch einmal sperren', () {
+        expect(nach(gekauft: 1, geschenk: true).schritt, isNull);
+      });
+
+      test('wer weiter ist, macht keinen Rundgang', () {
+        expect(nach(etagen: ErsterStart.rundgangVorbeiAb).schritt, isNull);
+      });
     });
 
     test('vor dem Sieg erklärt er die Gebiete nicht, auch mit zweien', () {
@@ -232,10 +269,43 @@ void main() {
           level: 2,
           billigstesStueck: billig,
           gewohnheitenJe: 2,
+          faehigkeitenGezeigt: true,
         ),
       );
 
       expect(start.schritt, Schritt.grube);
+    });
+
+    test('ist die erste angelegt, zeigt er erst, wo die Fähigkeiten liegen '
+        '(07.11.2026)', () {
+      const stand = ErsterStartStand(
+        hatGewohnheit: true,
+        haekchen: 1,
+        seiten: 1,
+        gelernt: 1,
+        angelegt: 1,
+        level: 2,
+        billigstesStueck: billig,
+      );
+      final start = ErsterStart.aus(stand);
+      expect(start.schritt, Schritt.faehigkeitenZeigen);
+      expect(start.leuchtet, Bereich.faehigkeiten);
+      // Wer schon unten war, hört es nicht noch einmal.
+      expect(
+        ErsterStart.aus(
+          const ErsterStartStand(
+            hatGewohnheit: true,
+            haekchen: 1,
+            seiten: 1,
+            gelernt: 1,
+            angelegt: 1,
+            level: 2,
+            billigstesStueck: billig,
+            hatGekaempft: true,
+          ),
+        ).schritt,
+        Schritt.grube,
+      );
     });
 
     test('ein verlorener Lauf beendet den Weg nicht', () {
@@ -849,8 +919,8 @@ void main() {
       expect(find.byType(SkillTreeScreen), findsOneWidget);
     });
 
-    testWidgets('nach der ersten Seite stehen Ei, Feuer und Statistik mit '
-        'Schloss da (ADR-0098)', (tester) async {
+    testWidgets('im Tutorial steht nach der ersten Seite nichts mit Schloss '
+        'da (07.11.2026)', (tester) async {
       var theorie = const TheoryProgress.empty();
       final seite = habitsBranch.lessons.first;
       theorie = theorie.submit(seite, <int?>[
@@ -858,16 +928,51 @@ void main() {
       ]).progress;
       await starte(tester, SaveData(habits: einHaekchen, theory: theorie));
 
-      // Die Statistik kommt mit dem ersten Häkchen, offen ist sie aber
-      // erst auf Level 7 — bis dahin mit Schloss, wie das Lagerfeuer bis
-      // Level 3 (ADR-0098).
-      // Die Statistik steht gesperrt neben den offenen Kreisen.
+      // Bis das Tutorial vorbei ist, nur, was offen ist (Frederik): Ei,
+      // Feuer und Statistik warten, statt mit Schloss hereinzukommen.
       expect(
         aufgedeckt(tester),
         containsAll(<String>['Gewohnheiten', 'Theorie', 'Fähigkeiten']),
       );
-      expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
+      expect(aufgedeckt(tester), isNot(contains('Statistik')));
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
+      expect(find.byKey(GesperrtBisLevel.schlossKey), findsNothing);
+    });
+
+    testWidgets('nach dem Tutorial stehen Ei, Feuer und Statistik mit '
+        'Schloss da (ADR-0098)', (tester) async {
+      useTallView(tester);
+      final c = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(SaveData(habits: einHaekchen)),
+          todayProvider.overrideWithValue(heute),
+          // Zwei Etagen, zwei Gewohnheiten: Der Mentor schweigt.
+          ersterStartProvider.overrideWithValue(
+            ErsterStart.aus(
+              const ErsterStartStand(
+                hatGewohnheit: true,
+                haekchen: 1,
+                hatGekaempft: true,
+                stufenGeschafft: ErsterStart.rundgangVorbeiAb,
+                seiten: 1,
+                angelegt: 1,
+                gewohnheitenJe: 2,
+                level: 2,
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
       expect(find.byType(LagerfeuerKarte), findsOneWidget);
       // Statistik, Lagerfeuer und das Ei des Haustiers (Level 5).
       expect(find.byKey(GesperrtBisLevel.schlossKey), findsNWidgets(3));

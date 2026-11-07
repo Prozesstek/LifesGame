@@ -34,6 +34,7 @@ class AchievementStats {
     this.highestRung = 0,
     this.comebackVictories = 0,
     this.everOwnedCount = 0,
+    this.boughtCount = 0,
     this.slotsEverOwned = 0,
     this.completeSetsEverOwned = 0,
     this.soldCount = 0,
@@ -119,6 +120,10 @@ class AchievementStats {
   /// liegt an ADR-0031: `Loadout.soldIds` ist eine Historie, keine
   /// Bilanz.
   final int everOwnedCount;
+
+  /// Wie viele Stücke je im Laden gekauft wurden — Beute nicht. Aus der
+  /// Historie, fällt also nie.
+  final int boughtCount;
 
   /// Auf wie vielen der sechs Plätze je ein Stück lag.
   final int slotsEverOwned;

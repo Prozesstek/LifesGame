@@ -46,7 +46,10 @@ void main() {
         hatGewohnheit: true,
         haekchen: mitGewohnheit.haekchen,
         hatGekaempft: true,
-        stufenGeschafft: 1,
+        // Zwei Etagen und zwei Gewohnheiten: Das Tutorial samt Rundgang ist
+        // vorbei — darin gibt es kein Schloss (07.11.2026).
+        stufenGeschafft: ErsterStart.rundgangVorbeiAb,
+        gewohnheitenJe: 2,
         level: level,
         hatTier: hatTier,
         warAmFeuer: warAmFeuer,
@@ -94,6 +97,21 @@ void main() {
       expect(start.zeigtSammlung, isFalse);
       // Auf Level 10 ist nichts mehr gesperrt.
       expect(auf(10).gesperrt, isEmpty);
+    });
+
+    test('im Tutorial kein Schloss, und die Statistik wartet', () {
+      final start = ErsterStart.aus(
+        const ErsterStartStand(
+          hatGewohnheit: true,
+          haekchen: 3,
+          hatGekaempft: true,
+          stufenGeschafft: 1,
+          level: 2,
+        ),
+      );
+      expect(start.schritt, Schritt.gebiete);
+      expect(start.gesperrt, isEmpty);
+      expect(start.zeigt(Bereich.statistik), isFalse);
     });
 
     test('ohne erfüllte Bedingung kein Schloss: kein Kampf, kein Dungeon', () {

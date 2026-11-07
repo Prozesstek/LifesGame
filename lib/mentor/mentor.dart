@@ -13,6 +13,12 @@ enum MentorOrt {
 
   /// Der Eingang zur Grube.
   eingang,
+
+  /// Der Laden (Rundgang, 07.11.2026).
+  laden,
+
+  /// Die Ausrüstung (Rundgang, 07.11.2026).
+  ausruestung,
 }
 
 /// Ein Satz des Mentors.
@@ -45,10 +51,6 @@ abstract final class Mentor {
   /// Zauberer mit Kapuze, Bart und Stab. Fehlt die Datei, zeigt der
   /// Kreis einen gezeichneten Kopf.
   static const String bild = 'assets/Mentor/Mentor_Kopf.png';
-
-  /// Die ganze Figur, 477 × 520 — dort, wo er abfragt und Platz hat
-  /// (`MentorDialog`).
-  static const String figur = 'assets/Mentor/Mentor.png';
 
   /// Was er im Beute-Dialog des ersten Siegs sagt. Den ersten
   /// Gegenstand legt das Spiel von selbst an (`Loadout._add`); der Satz
@@ -100,6 +102,10 @@ abstract final class Mentor {
       (Schritt.faehigkeitAnlegen, MentorOrt.faehigkeiten) => const MentorSatz(
         'Leg sie auf den freien Platz.',
       ),
+      (Schritt.faehigkeitenZeigen, MentorOrt.start) => const MentorSatz(
+        'Hier liegen deine Fähigkeiten.',
+        weiter: true,
+      ),
       (Schritt.grube, MentorOrt.start) => const MentorSatz(
         'Ab in den Dungeon!',
       ),
@@ -107,6 +113,28 @@ abstract final class Mentor {
         'Besieg den Boss, nimm seine Beute.',
       ),
       (Schritt.gebiete, MentorOrt.start) => const MentorSatz(gebiete),
+      // **Der Rundgang** (07.11.2026): Laden, Ausrüstung, Fähigkeiten.
+      (Schritt.goldSammeln, MentorOrt.start) => const MentorSatz(
+        'Hak noch etwas ab, dann reicht dein Gold.',
+      ),
+      (Schritt.laden, MentorOrt.start) => const MentorSatz(
+        'Gönn dir was im Laden!',
+      ),
+      (Schritt.laden, MentorOrt.laden) => const MentorSatz(
+        'Das hier ist für dich.',
+      ),
+      (Schritt.sperren, MentorOrt.start) => const MentorSatz(
+        'Sperr dein Lieblingsstück.',
+      ),
+      (Schritt.sperren, MentorOrt.ausruestung) => const MentorSatz(
+        'Tipp ein Stück an und sperr es.',
+      ),
+      (Schritt.geschenk, MentorOrt.start) => const MentorSatz(
+        'Ein Geschenk für dich! Probier es aus.',
+      ),
+      (Schritt.geschenk, MentorOrt.faehigkeiten) => const MentorSatz(
+        'Tausch Funkenstoß gegen dein Geschenk.',
+      ),
       _ => null,
     };
   }

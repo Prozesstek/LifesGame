@@ -22,6 +22,7 @@ int _retriedLessons(AchievementStats s) => s.retriedLessons;
 int _highestRung(AchievementStats s) => s.highestRung;
 int _comebackVictories(AchievementStats s) => s.comebackVictories;
 int _everOwnedCount(AchievementStats s) => s.everOwnedCount;
+int _boughtCount(AchievementStats s) => s.boughtCount;
 int _slotsEverOwned(AchievementStats s) => s.slotsEverOwned;
 int _completeSetsEverOwned(AchievementStats s) => s.completeSetsEverOwned;
 int _soldCount(AchievementStats s) => s.soldCount;
@@ -346,8 +347,22 @@ abstract final class AchievementCatalog {
       requirement: 'Ein Ausrüstungsstück kaufen',
       measure: _everOwnedCount,
     ),
-    // Sammeln ist die Fähigkeit des Ladens: Es heilt und schildet, statt
-    // zu schlagen — und passt damit zu dem, der seine Ausrüstung pflegt.
+    // **Das Geschenk des Mentors** (07.11.2026): Am Ende des Tutorials
+    // kauft man im Laden, und dafür gibt es Sammeln — die Fähigkeit des
+    // Ladens, sie heilt und schildet, statt zu schlagen. „Erster Kauf"
+    // zählt auch Beute und ist nach dem ersten Sieg schon da; ihn
+    // umzustellen nähme ihn alten Ständen weg. Bis dahin hing Sammeln an
+    // „Voll ausgerüstet".
+    Achievement(
+      id: 'beim-haendler',
+      name: 'Beim Händler',
+      area: AchievementArea.laden,
+      kind: AchievementKind.milestone,
+      tier: AchievementTier.klein,
+      requirement: 'Ein Stück im Laden kaufen',
+      measure: _boughtCount,
+      moveId: 'mend',
+    ),
     Achievement(
       id: 'voll-ausgeruestet',
       name: 'Voll ausgerüstet',
@@ -357,7 +372,6 @@ abstract final class AchievementCatalog {
       requirement: 'Auf allen 6 Plätzen je ein Stück besessen haben',
       measure: _slotsEverOwned,
       target: 6,
-      moveId: 'mend',
     ),
     Achievement(
       id: 'sammler',

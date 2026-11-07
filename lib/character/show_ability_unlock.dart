@@ -3,6 +3,8 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../home/erster_start.dart';
+import '../home/erster_start_provider.dart';
 import '../progression/level_provider.dart';
 import '../ui/holz.dart';
 import 'abilities_controller.dart';
@@ -43,6 +45,21 @@ Future<void> showAbilityUnlocks(
       level: ref.read(playerLevelProvider).level,
     );
 
+    // **Im Tutorial legt das Spiel sie selbst an** (Frederik, 07.11.2026):
+    // Ein freier Platz, eine Fähigkeit — da gibt es nichts zu wählen. Der
+    // Mentor zeigt danach nur, wo die Fähigkeiten liegen, und schickt in
+    // den Dungeon. Nach dem Tutorial fragt die Feier wieder.
+    final vonSelbst =
+        slot != null &&
+        ref.read(ersterStartProvider).schritt == Schritt.faehigkeitAnlegen;
+    if (vonSelbst) {
+      // Einen Bildaufbau später: Davor kann noch die Feier des Aufstiegs
+      // abgebaut werden (`gotchas.md`).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(chosenAbilitiesProvider.notifier).choose(slot, ability.moveId);
+      });
+    }
+
     final choice = await showModalBottomSheet<UnlockChoice>(
       context: context,
       // Die Feier hängt im Holzrahmen; das Blatt selbst ist durchsichtig.
@@ -59,13 +76,14 @@ Future<void> showAbilityUnlocks(
             ability: ability,
             pit: pit,
             hasFreeSlot: slot != null,
+            angelegt: vonSelbst,
             nextSlotLevel: nextSlotLevel(ref.read(playerLevelProvider).level),
           ),
         ),
       ),
     );
 
-    if (choice != UnlockChoice.equip || slot == null) continue;
+    if (vonSelbst || choice != UnlockChoice.equip || slot == null) continue;
 
     // **Einen Bildaufbau später.** `showModalBottomSheet` kehrt zurück,
     // während das Blatt noch abgebaut wird; ein Provider-Wechsel fällt

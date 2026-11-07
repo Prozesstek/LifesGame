@@ -148,10 +148,20 @@ class ContinueReadingTile extends StatelessWidget {
     this.cost,
     this.grund,
     this.gross = false,
+    this.mittig = false,
+    this.titel,
     super.key,
   });
 
+  /// Was statt des Namens des Knotens dasteht — im Einstieg sagen die
+  /// Gebiete, was man davon hat (`EinstiegNamen`).
+  final String? titel;
+
   final TheoryNode node;
+
+  /// Der Name in der Mitte, ohne Pfeil — im Einstieg, wo die ganze Zeile
+  /// der Knopf ist (Frederik, 07.11.2026).
+  final bool mittig;
 
   /// Groß für den Einstieg in die Theorie (03.11.2026): eine Zeile je
   /// Seite, mitten auf dem Bildschirm.
@@ -194,47 +204,108 @@ class ContinueReadingTile extends StatelessWidget {
               padding: gross
                   ? const EdgeInsets.symmetric(horizontal: 14, vertical: 16)
                   : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Row(
-                children: <Widget>[
-                  Icon(
-                    warum == null
-                        ? Icons.menu_book_rounded
-                        : VorschlagZeichen.of(warum),
-                    size: gross ? 26 : 18,
-                    color: farbe,
-                  ),
-                  SizedBox(width: gross ? 12 : 8),
-                  Expanded(
-                    // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
-                    child: Text(
-                      node.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: gross ? 18 : 13,
-                        color: Palette.textOnDark,
-                        fontWeight: FontWeight.w700,
-                      ),
+              child: mittig
+                  ? _Mittig(
+                      zeichen: warum == null
+                          ? Icons.menu_book_rounded
+                          : VorschlagZeichen.of(warum),
+                      name: titel ?? node.name,
+                      farbe: farbe,
+                      preis: preis,
+                    )
+                  : Row(
+                      children: <Widget>[
+                        Icon(
+                          warum == null
+                              ? Icons.menu_book_rounded
+                              : VorschlagZeichen.of(warum),
+                          size: gross ? 26 : 18,
+                          color: farbe,
+                        ),
+                        SizedBox(width: gross ? 12 : 8),
+                        Expanded(
+                          // Buch, Name, Pfeil — „Weiterlesen“ sagt das Buch.
+                          child: Text(
+                            node.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: gross ? 18 : 13,
+                              color: Palette.textOnDark,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        if (preis != null) ...<Widget>[
+                          const SizedBox(width: 8),
+                          PunktPreis(cost: preis),
+                          const SizedBox(width: 6),
+                        ],
+                        // Nicht der Pfeil des Gebietswechsels: Dieser führt in
+                        // eine Seite, jener zum nächsten Gebiet.
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: gross ? 24 : 18,
+                          color: farbe,
+                        ),
+                      ],
                     ),
-                  ),
-                  if (preis != null) ...<Widget>[
-                    const SizedBox(width: 8),
-                    PunktPreis(cost: preis),
-                    const SizedBox(width: 6),
-                  ],
-                  // Nicht der Pfeil des Gebietswechsels: Dieser führt in
-                  // eine Seite, jener zum nächsten Gebiet.
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: gross ? 24 : 18,
-                    color: farbe,
-                  ),
-                ],
-              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Eine Zeile des Einstiegs: Zeichen links, Preis rechts, der Name genau
+/// in der Mitte der Zeile — nicht in der Mitte dessen, was übrig bleibt.
+class _Mittig extends StatelessWidget {
+  const _Mittig({
+    required this.zeichen,
+    required this.name,
+    required this.farbe,
+    required this.preis,
+  });
+
+  final IconData zeichen;
+  final String name;
+  final Color farbe;
+  final int? preis;
+
+  /// So viel Platz bleibt links und rechts für Zeichen und Preis.
+  static const double seite = 44;
+
+  @override
+  Widget build(BuildContext context) {
+    final kosten = preis;
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Icon(zeichen, size: 26, color: farbe),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: seite),
+          child: Text(
+            name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+              color: Palette.textOnDark,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        if (kosten != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: PunktPreis(cost: kosten),
+          ),
+      ],
     );
   }
 }

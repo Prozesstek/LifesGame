@@ -333,8 +333,10 @@ enum _Richtung { vor, zurueck }
 ///
 /// Der Finger zieht das Blatt mit — halb umgeschlagen losgelassen fällt
 /// es zurück oder schlägt ganz um, je nachdem, wie weit es war und wie
-/// schnell der Wisch. **Ein Eselsohr unten** zeigt, wohin es geht, und
-/// schlägt auf Tipp um: rechts vor, links zurück. Über die letzte Seite
+/// schnell der Wisch. **Ein Eselsohr rechts unten** zeigt, wohin es
+/// geht, und schlägt auf Tipp um. **Zurück nur per Wisch**: Links unten
+/// liegt der Rücken, dort knickt in einem Buch keine Ecke um (Frederik,
+/// 07.11.2026). Über die letzte Seite
 /// hinaus kommt [onSchluss] — dort schließt sich das Buch.
 ///
 /// **Gezeichnet als Drehung in 3D** um die linke Kante, mit Tiefe: Die
@@ -403,7 +405,6 @@ class Umblaettern extends StatefulWidget {
   static const double ohr = 34;
 
   static const Key ohrVorKey = ValueKey<String>('eselsohr-vor');
-  static const Key ohrZurueckKey = ValueKey<String>('eselsohr-zurueck');
 
   @override
   State<Umblaettern> createState() => UmblaetternState();
@@ -559,27 +560,15 @@ class UmblaetternState extends State<Umblaettern>
                     fit: StackFit.expand,
                     children: <Widget>[
                       ..._lagen(context),
-                      // Die Eselsohren nur, wenn das Blatt ruht.
+                      // Das Eselsohr nur, wenn das Blatt ruht.
                       if (_richtung == null && vorDa)
                         Positioned(
                           right: 0,
                           bottom: 0,
                           child: _Eselsohr(
                             key: Umblaettern.ohrVorKey,
-                            rechts: true,
                             label: _amEnde ? 'Buch schließen' : 'Umblättern',
                             onTap: vor,
-                          ),
-                        ),
-                      if (_richtung == null && _hier > 0)
-                        Positioned(
-                          left: 0,
-                          bottom: 0,
-                          child: _Eselsohr(
-                            key: Umblaettern.ohrZurueckKey,
-                            rechts: false,
-                            label: 'Zurückblättern',
-                            onTap: zurueck,
                           ),
                         ),
                     ],
@@ -640,17 +629,11 @@ class UmblaetternState extends State<Umblaettern>
   }
 }
 
-/// **Das Eselsohr**: eine umgeknickte Ecke unten, in der Richtung, in die
-/// es weitergeht. Ein Tipp darauf blättert.
+/// **Das Eselsohr**: die umgeknickte Ecke rechts unten. Ein Tipp darauf
+/// blättert vor.
 class _Eselsohr extends StatelessWidget {
-  const _Eselsohr({
-    required this.rechts,
-    required this.label,
-    required this.onTap,
-    super.key,
-  });
+  const _Eselsohr({required this.label, required this.onTap, super.key});
 
-  final bool rechts;
   final String label;
   final VoidCallback onTap;
 
@@ -666,11 +649,11 @@ class _Eselsohr extends StatelessWidget {
         // Größer als das Ohr selbst, damit der Daumen es trifft.
         child: SizedBox.square(
           dimension: Umblaettern.ohr + 18,
-          child: Align(
-            alignment: rechts ? Alignment.bottomRight : Alignment.bottomLeft,
+          child: const Align(
+            alignment: Alignment.bottomRight,
             child: CustomPaint(
-              size: const Size.square(Umblaettern.ohr),
-              painter: _OhrMaler(rechts: rechts),
+              size: Size.square(Umblaettern.ohr),
+              painter: _OhrMaler(),
             ),
           ),
         ),
@@ -680,48 +663,34 @@ class _Eselsohr extends StatelessWidget {
 }
 
 class _OhrMaler extends CustomPainter {
-  const _OhrMaler({required this.rechts});
-
-  final bool rechts;
+  const _OhrMaler();
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
     // Die Ecke, die fehlt: dort sieht man den Einband.
-    final ecke = rechts
-        ? (Path()
-            ..moveTo(w, 0)
-            ..lineTo(w, h)
-            ..lineTo(0, h)
-            ..close())
-        : (Path()
-            ..moveTo(0, 0)
-            ..lineTo(w, h)
-            ..lineTo(0, h)
-            ..close());
+    final ecke = Path()
+      ..moveTo(w, 0)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
     canvas.drawPath(ecke, Paint()..color = Palette.einbandDunkel);
     // Der umgeknickte Teil: die Rückseite des Papiers, etwas dunkler,
     // mit Schatten darunter.
-    final knick = rechts
-        ? (Path()
-            ..moveTo(w, 0)
-            ..lineTo(0, h)
-            ..lineTo(0, 0)
-            ..close())
-        : (Path()
-            ..moveTo(0, 0)
-            ..lineTo(w, 0)
-            ..lineTo(w, h)
-            ..close());
+    final knick = Path()
+      ..moveTo(w, 0)
+      ..lineTo(0, h)
+      ..lineTo(0, 0)
+      ..close();
     canvas.drawShadow(knick, Colors.black, 3, false);
     canvas.drawPath(
       knick,
       Paint()
-        ..shader = LinearGradient(
-          begin: rechts ? Alignment.topLeft : Alignment.topRight,
-          end: rechts ? Alignment.bottomRight : Alignment.bottomLeft,
-          colors: const <Color>[Palette.papier, Palette.papierFaser],
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[Palette.papier, Palette.papierFaser],
         ).createShader(Offset.zero & size),
     );
     canvas.drawPath(
@@ -734,7 +703,7 @@ class _OhrMaler extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_OhrMaler alt) => alt.rechts != rechts;
+  bool shouldRepaint(_OhrMaler alt) => false;
 }
 
 /// Ein Blatt im Stapel — flach oder gedreht. **Immer derselbe Aufbau**,

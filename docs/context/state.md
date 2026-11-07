@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.11.2026 · Frederik
+**Zuletzt aktualisiert:** 07.11.2026 · Frederik
 
 ---
 
@@ -39,8 +39,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1129, dazu die acht Packages (theory 219, habits 375, gear
-137, action_combat 406, progression 58, abilities 43, identity 25,
+**Tests:** App 1139, dazu die acht Packages (theory 219, habits 375, gear
+140, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -136,6 +136,76 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 07.11.2026, danach: der Rundgang am Ende des Tutorials
+
+Frederik: „Vielleicht schickt man die User aber wenigstens nochmal zum
+Shop und dann zum Laden dann vielleicht noch zum Abschluss de Tutorials
+zu den Fähigkeiten dann haben wir alles einmal gezeigt“. In einer
+Fragerunde gewählt, Vorschlag abgenommen („Ja find ich super“).
+
+Nach der zweiten Gewohnheit (Schritt „Gebiete“) geht es dreimal weiter,
+je mit einer kleinen Aufgabe:
+
+| Station | Mentor | Aufgabe |
+|---|---|---|
+| **Laden** | „Gönn dir was im Laden!“ — dort „Das hier ist für dich.“ | etwas kaufen; **ein Angebot für höchstens 70 ist garantiert** (`DailyShop.mitMentorAngebot`), vorgewählt und mit Punkt. Reicht das Gold nicht: „Hak noch etwas ab, dann reicht dein Gold.“ |
+| **Ausrüstung** | „Sperr dein Lieblingsstück.“ — dort „Tipp ein Stück an und sperr es.“ | ein Stück sperren; der Punkt sitzt auf dem ersten angelegten, im Blatt auf „Sperren“ |
+| **Fähigkeiten** | „Ein Geschenk für dich! Probier es aus.“ — dort „Tausch Funkenstoß gegen dein Geschenk.“ | **Sammeln** anlegen; mit ihr ist das Tutorial vorbei, erst dann kommen die Schlösser |
+
+**Das Geschenk** kommt über eine neue Errungenschaft **„Beim Händler“**
+(ein Stück im Laden kaufen, `AchievementStats.boughtCount`). Sammeln
+hing bis dahin an „Voll ausgerüstet“.
+
+**Ohne Rückfrage entschieden:**
+
+- **Wer schon zwei Etagen geschafft hat, macht keinen Rundgang**
+  (`ErsterStart.rundgangVorbeiAb`) — sonst landeten bestehende Stände
+  plötzlich im Laden.
+- Das Sperren gilt auch als erledigt, wenn das Geschenk schon liegt:
+  Ein Schloss lässt sich wieder öffnen, und die Zahl darf nur wachsen.
+- Die gesperrten Plätze bei den Fähigkeiten (6, 10, Ultimate 15) bleiben
+  im Tutorial stehen — Frederik: „das passt so“.
+
+**Folgen für Stände:** Wer Sammeln über „Voll ausgerüstet“ hatte, aber
+nie im Laden gekauft hat, verliert sie bis zum ersten Kauf. Die
+Errungenschaften bringen 30 Erfahrung, 10 Gold und 5 Ruhm mehr.
+
+App 1139 (vorher 1134), gear 140 (vorher 137). Startseite, Laden,
+Ausrüstung und Fähigkeiten in 390 × 844 gerendert, Frederik hat sie
+abgenommen. **Nicht am Handy.**
+
+## 07.11.2026: Tutorial, der Einstieg in die Theorie
+
+Weiter Screen für Screen. Frederik zum Einstieg nach dem Talentpunkt:
+Mentor tiefer, die Frage sagt zu wenig, Namen in die Mitte, Pfeil und
+gelber Punkt weg, „dafür einen Scheinwerfer“.
+
+| Was | Wie |
+|---|---|
+| **Mentor** | direkt über der Wahl, beide mittig — wie auf der Startseite (ADR-0096) |
+| **Frage** | „Was interessiert dich am meisten?“ statt „Womit fängst du an?“ |
+| **Namen** | was man davon hat (`EinstiegNamen`): Deinen Kopf verstehen, Stärker und fitter werden, Die Welt verstehen, Besser mit Menschen — **nur im Einstieg**, sonst heißen die Gebiete weiter wie die Wurzeln |
+| **Zeilen** | Name in der Mitte, kein Pfeil; Zeichen links, Preis rechts |
+| **Licht** | kein gelber Punkt; ein warmer Schein unter der Wahl (`ScheinwerferLicht`), und **der Rand des Schleiers läuft überall weich aus** |
+| **Buch** | **nur noch das Eselsohr rechts unten** — links liegt der Rücken, dort knickt keine Ecke um; zurück per Wisch |
+| **Abfrage** | der Mentor **immer als Kopf im Kreis**, nicht mehr ganz beim Fragen; die eigene Figur ebenso (`CharacterKopf`, samt Helm) — damit ist auch die nackte Figur weg |
+| **Aufstieg** | ohne „Im Kampf 4 % stärker“; der Talentpunkt mit dem Sechseck der Theorie; „+1 Fähigkeitsplatz“; Knopf mittig, „Weiter geht's“; **im Tutorial keine Vorschläge** für die nächste Seite |
+| **Funkenstoß** | **im Tutorial von selbst angelegt**, die Feier sagt „Funkenstoß ist angelegt“; danach zeigt der Mentor auf der Startseite auf den Kreis: „Hier liegen deine Fähigkeiten.“ — ein Tipp, und es geht in den Dungeon. Danach fragt die Feier wieder |
+| **Schlösser** | **bis zum Ende des Tutorials nichts mit Schloss** — Ei, Lagerfeuer, Statistik, Sammlung, Tagesdungeon kamen sonst mitten im Weg herein; die Statistik steht erst da, wenn sie offen ist |
+
+**Ohne Rückfrage entschieden:** „Die Welt verstehen“ statt „Verstehen,
+wie die Welt tickt“ — brach am Handy um. Der weiche Rand gilt für alle
+Ziele im Tutorial; gerendert ist nur der Einstieg.
+
+App 1134 (vorher 1129).
+In 390 × 844 gerendert, Frederik hat ihn abgenommen. **Nicht am Handy.**
+
+### Offen
+
+- Der Weg ab dem Dungeon-Eingang.
+- ~~**Ende des Tutorials** ist der Schritt „Gebiete“~~ — seit dem Rundgang (unten) ist es das angelegte Geschenk.
+- `assets/Mentor/Mentor.png`, die ganze Figur, wird nirgends mehr gebraucht.
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
 

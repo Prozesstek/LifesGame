@@ -90,7 +90,6 @@ void main() {
     // Kein Knopf, kein Balken: Wohin es geht, zeigt das Eselsohr.
     expect(find.text('Weiter'), findsNothing);
     expect(ohr, findsOneWidget);
-    expect(find.byKey(Umblaettern.ohrZurueckKey), findsNothing);
   });
 
   testWidgets('das Eselsohr schlägt das Blatt um und raschelt', (tester) async {
@@ -116,8 +115,10 @@ void main() {
       '2 / ${_seite.sections.length}',
     );
 
-    // Jetzt geht es auch zurück, links unten.
-    await tester.tap(find.byKey(Umblaettern.ohrZurueckKey));
+    // Zurück geht es nur per Wisch: Links unten liegt der Rücken, dort
+    // knickt keine Ecke um (07.11.2026).
+    expect(ohr, findsOneWidget);
+    await tester.fling(find.byType(Umblaettern), const Offset(300, 0), 1000);
     await tester.pumpAndSettle();
     expect(find.text(_kopf(0)), findsOneWidget);
   });

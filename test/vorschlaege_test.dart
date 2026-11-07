@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/progression/show_level_up.dart';
@@ -46,6 +48,8 @@ void main() {
         playerLevelProvider.overrideWithValue(
           LevelCurve.levelFor(LevelCurve.totalXpFor(level)),
         ),
+        // Nach dem Tutorial — darin zeigt der Aufstieg keine Vorschläge.
+        ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
       ],
     );
     addTearDown(c.dispose);
@@ -92,6 +96,46 @@ void main() {
       theoryGraph.rootIdsOf(passend.single.node.id),
       contains(SkillArea.gesellschaft.name),
     );
+  });
+
+  testWidgets('im Tutorial zeigt der Aufstieg keine Vorschläge', (
+    tester,
+  ) async {
+    final c = ProviderContainer(
+      overrides: [
+        todayProvider.overrideWithValue(heute),
+        savedGameProvider.overrideWithValue(SaveData(habits: gesellig())),
+        playerLevelProvider.overrideWithValue(
+          LevelCurve.levelFor(LevelCurve.totalXpFor(2)),
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    expect(c.read(ersterStartProvider).schritt, isNotNull);
+    expect(c.read(vorschlaegeProvider(null)), isNotEmpty);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: MaterialApp(
+          home: Consumer(
+            builder: (context, ref, _) => Scaffold(
+              body: TextButton(
+                onPressed: () => showLevelUp(context, ref, before: 1),
+                child: const Text('los'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('los'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LevelUpSheet), findsOneWidget);
+    for (final v in c.read(vorschlaegeProvider(null))) {
+      expect(find.byKey(LevelUpSheet.vorschlagKey(v.node.id)), findsNothing);
+    }
   });
 
   testWidgets('beim Aufstieg mit Punkt: ein Tipp öffnet und liest', (

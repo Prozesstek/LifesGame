@@ -110,6 +110,7 @@ AchievementStats buildAchievementStats({
 
     // --- Laden ---
     everOwnedCount: loadout.everOwnedCount,
+    boughtCount: loadout.boughtCount,
     slotsEverOwned: loadout.slotsEverOwned,
     completeSetsEverOwned: loadout.completeSetsEverOwned,
     soldCount: loadout.soldCount,
