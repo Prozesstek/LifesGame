@@ -19,6 +19,9 @@ enum Hinweis {
 
   /// Was ein Talentpunkt ist ([Schritt.talentpunkt]).
   talentpunkt,
+
+  /// Wo die Fähigkeiten liegen ([Schritt.faehigkeitenZeigen]).
+  faehigkeiten,
 }
 
 /// Welche [Hinweis]e weggetippt sind — **nur für diese Sitzung**: Wer
@@ -83,6 +86,9 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       talentpunktGezeigt: ref
           .watch(hinweiseProvider)
           .contains(Hinweis.talentpunkt),
+      faehigkeitenGezeigt: ref
+          .watch(hinweiseProvider)
+          .contains(Hinweis.faehigkeiten),
     ),
   );
 });

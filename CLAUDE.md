@@ -356,7 +356,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1131 Tests
+flutter test             # 1134 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -931,7 +931,8 @@ Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 | Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |
 | Erklärt sich die Grube noch? | `ErsterStart.grubeErklaertSich` — bis die erste Stufe geschafft ist ([ADR-0069](docs/decisions/0069-die-grube-erklaert-sich-im-ersten-lauf.md)) |
-| Was wartet auf ein Level? | `LevelExtra` — Lagerfeuer, Tagesdungeon, Haustier, Statistik, Sammlung; `ErsterStart` liest es (`zeigtTagesaufgaben`, `zeigtTagesgrube`, `zeigtHaustier`, `zeigtSammlung`), **was ein Stand schon hat, behält er** ([ADR-0098](docs/decisions/0098-level-roadmap.md)) |
+| Was wartet auf ein Level? | `LevelExtra` — Lagerfeuer, Tagesdungeon, Haustier, Statistik, Sammlung; `ErsterStart` liest es (`zeigtTagesaufgaben`, `zeigtTagesgrube`, `zeigtHaustier`, `zeigtSammlung`), **was ein Stand schon hat, behält er** ([ADR-0098](docs/decisions/0098-level-roadmap.md)); **im Tutorial steht nichts mit Schloss da** (`gesperrt` leer, die Statistik erst offen) |
+| Wer legt die erste Fähigkeit an? | **im Tutorial das Spiel** (`showAbilityUnlocks`, bei `Schritt.faehigkeitAnlegen`), danach zeigt der Mentor auf ihren Kreis (`Schritt.faehigkeitenZeigen`, ein Tipp führt weiter) |
 
 **Abgeleitet, nie gespeichert, und jede Zahl darf nur wachsen** — sonst
 verschwände ein Kreis wieder. Ein neuer Bereich braucht einen Eintrag in

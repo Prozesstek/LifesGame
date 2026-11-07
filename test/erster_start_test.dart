@@ -171,6 +171,7 @@ void main() {
           angelegt: 1,
           level: 2,
           billigstesStueck: billig,
+          faehigkeitenGezeigt: true,
         ),
       );
 
@@ -232,10 +233,43 @@ void main() {
           level: 2,
           billigstesStueck: billig,
           gewohnheitenJe: 2,
+          faehigkeitenGezeigt: true,
         ),
       );
 
       expect(start.schritt, Schritt.grube);
+    });
+
+    test('ist die erste angelegt, zeigt er erst, wo die Fähigkeiten liegen '
+        '(07.11.2026)', () {
+      const stand = ErsterStartStand(
+        hatGewohnheit: true,
+        haekchen: 1,
+        seiten: 1,
+        gelernt: 1,
+        angelegt: 1,
+        level: 2,
+        billigstesStueck: billig,
+      );
+      final start = ErsterStart.aus(stand);
+      expect(start.schritt, Schritt.faehigkeitenZeigen);
+      expect(start.leuchtet, Bereich.faehigkeiten);
+      // Wer schon unten war, hört es nicht noch einmal.
+      expect(
+        ErsterStart.aus(
+          const ErsterStartStand(
+            hatGewohnheit: true,
+            haekchen: 1,
+            seiten: 1,
+            gelernt: 1,
+            angelegt: 1,
+            level: 2,
+            billigstesStueck: billig,
+            hatGekaempft: true,
+          ),
+        ).schritt,
+        Schritt.grube,
+      );
     });
 
     test('ein verlorener Lauf beendet den Weg nicht', () {
@@ -849,8 +883,8 @@ void main() {
       expect(find.byType(SkillTreeScreen), findsOneWidget);
     });
 
-    testWidgets('nach der ersten Seite stehen Ei, Feuer und Statistik mit '
-        'Schloss da (ADR-0098)', (tester) async {
+    testWidgets('im Tutorial steht nach der ersten Seite nichts mit Schloss '
+        'da (07.11.2026)', (tester) async {
       var theorie = const TheoryProgress.empty();
       final seite = habitsBranch.lessons.first;
       theorie = theorie.submit(seite, <int?>[
@@ -858,16 +892,51 @@ void main() {
       ]).progress;
       await starte(tester, SaveData(habits: einHaekchen, theory: theorie));
 
-      // Die Statistik kommt mit dem ersten Häkchen, offen ist sie aber
-      // erst auf Level 7 — bis dahin mit Schloss, wie das Lagerfeuer bis
-      // Level 3 (ADR-0098).
-      // Die Statistik steht gesperrt neben den offenen Kreisen.
+      // Bis das Tutorial vorbei ist, nur, was offen ist (Frederik): Ei,
+      // Feuer und Statistik warten, statt mit Schloss hereinzukommen.
       expect(
         aufgedeckt(tester),
         containsAll(<String>['Gewohnheiten', 'Theorie', 'Fähigkeiten']),
       );
-      expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
+      expect(aufgedeckt(tester), isNot(contains('Statistik')));
       expect(find.byKey(HubCircle.leuchtKey), findsOneWidget);
+      expect(find.byKey(GesperrtBisLevel.schlossKey), findsNothing);
+    });
+
+    testWidgets('nach dem Tutorial stehen Ei, Feuer und Statistik mit '
+        'Schloss da (ADR-0098)', (tester) async {
+      useTallView(tester);
+      final c = ProviderContainer(
+        overrides: [
+          savedGameProvider.overrideWithValue(SaveData(habits: einHaekchen)),
+          todayProvider.overrideWithValue(heute),
+          // Erster Sieg, zwei Gewohnheiten: Der Mentor schweigt.
+          ersterStartProvider.overrideWithValue(
+            ErsterStart.aus(
+              const ErsterStartStand(
+                hatGewohnheit: true,
+                haekchen: 1,
+                hatGekaempft: true,
+                stufenGeschafft: 1,
+                seiten: 1,
+                angelegt: 1,
+                gewohnheitenJe: 2,
+                level: 2,
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(HubCircle.keyFor('Statistik')), findsWidgets);
       expect(find.byType(LagerfeuerKarte), findsOneWidget);
       // Statistik, Lagerfeuer und das Ei des Haustiers (Level 5).
       expect(find.byKey(GesperrtBisLevel.schlossKey), findsNWidgets(3));

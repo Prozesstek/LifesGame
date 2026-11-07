@@ -41,6 +41,7 @@ class ErsterStartStand {
     this.tagesgrubeVersucht = false,
     this.gewohnheitenGezeigt = false,
     this.talentpunktGezeigt = false,
+    this.faehigkeitenGezeigt = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -104,6 +105,10 @@ class ErsterStartStand {
 
   /// … und ob der Talentpunkt erklärt ist ([Schritt.talentpunkt]).
   final bool talentpunktGezeigt;
+
+  /// … und ob gezeigt ist, wo die Fähigkeiten liegen
+  /// ([Schritt.faehigkeitenZeigen]).
+  final bool faehigkeitenGezeigt;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -133,8 +138,16 @@ enum Schritt {
   /// Die erste Seite — sie bringt jedem Funkenstoß.
   ersteSeite,
 
-  /// Die erste Fähigkeit auf einen Platz.
+  /// Die erste Fähigkeit auf einen Platz. **Seit dem 07.11.2026 legt das
+  /// Spiel sie im Tutorial selbst an** (`showAbilityUnlocks`); der
+  /// Schritt bleibt für Stände, die eine Fähigkeit haben, aber keine
+  /// angelegt.
   faehigkeitAnlegen,
+
+  /// **Wo die Fähigkeiten liegen** (07.11.2026): Ist die erste von selbst
+  /// angelegt, zeigt der Mentor auf ihren Kreis; ein Tipp irgendwohin
+  /// führt weiter — wie bei den Gewohnheiten.
+  faehigkeitenZeigen,
 
   /// Der erste Sieg in der Grube.
   grube,
@@ -285,7 +298,8 @@ class ErsterStart {
   Bereich? get leuchtet => switch (schritt) {
     Schritt.gewohnheitenZeigen => Bereich.gewohnheiten,
     Schritt.talentpunkt || Schritt.ersteSeite => Bereich.theorie,
-    Schritt.faehigkeitAnlegen => Bereich.faehigkeiten,
+    Schritt.faehigkeitAnlegen ||
+    Schritt.faehigkeitenZeigen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
     Schritt.gebiete => Bereich.gewohnheiten,
     Schritt.gewohnheit || Schritt.abhaken || null => null,
@@ -331,7 +345,9 @@ class ErsterStart {
         : !angelegt
         ? Schritt.faehigkeitAnlegen
         : !gewonnen
-        ? Schritt.grube
+        ? (!s.faehigkeitenGezeigt && !s.hatGekaempft
+              ? Schritt.faehigkeitenZeigen
+              : Schritt.grube)
         : s.gewohnheitenJe < gewohnheitenNachDenGebieten
         ? Schritt.gebiete
         : null;
@@ -355,7 +371,10 @@ class ErsterStart {
       // nichts, was die Statistik zeigen könnte.
       // **Offen erst auf Level 7** (ADR-0098); darunter steht sie mit
       // Schloss da ([gesperrt]).
-      if (s.haekchen > 0) Bereich.statistik,
+      // **Im Tutorial nur, was offen ist** (Frederik, 07.11.2026).
+      if (s.haekchen > 0 &&
+          (schritt == null || LevelExtra.statistik.offenAuf(s.level)))
+        Bereich.statistik,
     };
     final fragt = !s.hatGewohnheit && s.haekchen == 0;
 
@@ -394,10 +413,17 @@ class ErsterStart {
       offen(LevelExtra.lagerfeuer),
       offen(LevelExtra.haustier),
       offen(LevelExtra.sammlung),
-      Set<LevelExtra>.unmodifiable(<LevelExtra>{
-        for (final MapEntry(key: e, value: (zuSehen, auf)) in extras.entries)
-          if (zuSehen && !auf) e,
-      }),
+      // **Bis das Tutorial vorbei ist, kein Schloss** (Frederik,
+      // 07.11.2026): Bis dahin steht nur da, was offen ist — Ei, Feuer,
+      // Statistik und Sammlung mit Schloss kamen sonst mitten im Weg des
+      // Mentors herein.
+      schritt != null
+          ? const <LevelExtra>{}
+          : Set<LevelExtra>.unmodifiable(<LevelExtra>{
+              for (final MapEntry(key: e, value: (zuSehen, auf))
+                  in extras.entries)
+                if (zuSehen && !auf) e,
+            }),
     );
   }
 }

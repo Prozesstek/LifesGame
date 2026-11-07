@@ -181,7 +181,11 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [savedGameProvider.overrideWithValue(_kampfbereit())],
+          overrides: [
+            savedGameProvider.overrideWithValue(_kampfbereit()),
+            // Der Hinweis auf die Fähigkeiten ist weggetippt (07.11.2026).
+            hinweisGesehen,
+          ],
           child: const LifesGameApp(),
         ),
       );

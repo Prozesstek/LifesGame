@@ -96,6 +96,10 @@ abstract final class Mentor {
       (Schritt.faehigkeitAnlegen, MentorOrt.faehigkeiten) => const MentorSatz(
         'Leg sie auf den freien Platz.',
       ),
+      (Schritt.faehigkeitenZeigen, MentorOrt.start) => const MentorSatz(
+        'Hier liegen deine Fähigkeiten.',
+        weiter: true,
+      ),
       (Schritt.grube, MentorOrt.start) => const MentorSatz(
         'Ab in den Dungeon!',
       ),
