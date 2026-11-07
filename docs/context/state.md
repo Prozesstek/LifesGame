@@ -150,6 +150,7 @@ gelber Punkt weg, „dafür einen Scheinwerfer“.
 | **Namen** | was man davon hat (`EinstiegNamen`): Deinen Kopf verstehen, Stärker und fitter werden, Die Welt verstehen, Besser mit Menschen — **nur im Einstieg**, sonst heißen die Gebiete weiter wie die Wurzeln |
 | **Zeilen** | Name in der Mitte, kein Pfeil; Zeichen links, Preis rechts |
 | **Licht** | kein gelber Punkt; ein warmer Schein unter der Wahl (`ScheinwerferLicht`), und **der Rand des Schleiers läuft überall weich aus** |
+| **Buch** | **nur noch das Eselsohr rechts unten** — links liegt der Rücken, dort knickt keine Ecke um; zurück per Wisch |
 
 **Ohne Rückfrage entschieden:** „Die Welt verstehen“ statt „Verstehen,
 wie die Welt tickt“ — brach am Handy um. Der weiche Rand gilt für alle
@@ -160,7 +161,7 @@ In 390 × 844 gerendert, Frederik hat ihn abgenommen. **Nicht am Handy.**
 
 ### Offen
 
-- Das Buch, die Abfrage und alles nach der ersten Seite.
+- Die Abfrage und alles nach der ersten Seite.
 - Bei einem neuen Spieler ist die eigene Figur in der Abfrage nackt.
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
