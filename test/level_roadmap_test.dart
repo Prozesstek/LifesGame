@@ -46,9 +46,9 @@ void main() {
         hatGewohnheit: true,
         haekchen: mitGewohnheit.haekchen,
         hatGekaempft: true,
-        stufenGeschafft: 1,
-        // Zwei Gewohnheiten: Das Tutorial ist vorbei — darin gibt es kein
-        // Schloss (07.11.2026).
+        // Zwei Etagen und zwei Gewohnheiten: Das Tutorial samt Rundgang ist
+        // vorbei — darin gibt es kein Schloss (07.11.2026).
+        stufenGeschafft: ErsterStart.rundgangVorbeiAb,
         gewohnheitenJe: 2,
         level: level,
         hatTier: hatTier,

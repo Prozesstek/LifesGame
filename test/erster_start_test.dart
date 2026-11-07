@@ -201,25 +201,61 @@ void main() {
       expect(start.leuchtet, Bereich.gewohnheiten);
     });
 
-    test('mit der zweiten Gewohnheit ist der Weg gegangen', () {
-      final start = ErsterStart.aus(
-        const ErsterStartStand(
+    group('der Rundgang (07.11.2026)', () {
+      ErsterStart nach({
+        int gekauft = 0,
+        bool gesperrt = false,
+        bool geschenk = false,
+        int gold = 100,
+        int etagen = 1,
+      }) => ErsterStart.aus(
+        ErsterStartStand(
           hatGewohnheit: true,
           haekchen: 1,
           hatGekaempft: true,
-          stufenGeschafft: 1,
+          stufenGeschafft: etagen,
           seiten: 1,
           gelernt: 1,
           angelegt: 1,
           jeBesessen: 1,
           level: 3,
           billigstesStueck: billig,
+          goldVerdient: gold,
           gewohnheitenJe: 2,
+          gekauft: gekauft,
+          etwasGesperrt: gesperrt,
+          geschenkAngelegt: geschenk,
         ),
       );
 
-      expect(start.schritt, isNull);
-      expect(start.leuchtet, isNull);
+      test('nach der zweiten Gewohnheit geht es in den Laden', () {
+        expect(nach().schritt, Schritt.laden);
+        expect(nach().leuchtet, Bereich.laden);
+      });
+
+      test('reicht das Gold nicht, wartet er', () {
+        expect(nach(gold: billig - 1).schritt, Schritt.goldSammeln);
+        expect(nach(gold: billig - 1).leuchtet, isNull);
+      });
+
+      test('gekauft: sperren, dann das Geschenk, dann ist es vorbei', () {
+        expect(nach(gekauft: 1).schritt, Schritt.sperren);
+        expect(nach(gekauft: 1).leuchtet, Bereich.ausruestung);
+        expect(nach(gekauft: 1, gesperrt: true).schritt, Schritt.geschenk);
+        expect(nach(gekauft: 1, gesperrt: true).leuchtet, Bereich.faehigkeiten);
+        expect(
+          nach(gekauft: 1, gesperrt: true, geschenk: true).schritt,
+          isNull,
+        );
+      });
+
+      test('wer das Schloss wieder öffnet, muss nicht noch einmal sperren', () {
+        expect(nach(gekauft: 1, geschenk: true).schritt, isNull);
+      });
+
+      test('wer weiter ist, macht keinen Rundgang', () {
+        expect(nach(etagen: ErsterStart.rundgangVorbeiAb).schritt, isNull);
+      });
     });
 
     test('vor dem Sieg erklärt er die Gebiete nicht, auch mit zweien', () {
@@ -910,14 +946,14 @@ void main() {
         overrides: [
           savedGameProvider.overrideWithValue(SaveData(habits: einHaekchen)),
           todayProvider.overrideWithValue(heute),
-          // Erster Sieg, zwei Gewohnheiten: Der Mentor schweigt.
+          // Zwei Etagen, zwei Gewohnheiten: Der Mentor schweigt.
           ersterStartProvider.overrideWithValue(
             ErsterStart.aus(
               const ErsterStartStand(
                 hatGewohnheit: true,
                 haekchen: 1,
                 hatGekaempft: true,
-                stufenGeschafft: 1,
+                stufenGeschafft: ErsterStart.rundgangVorbeiAb,
                 seiten: 1,
                 angelegt: 1,
                 gewohnheitenJe: 2,

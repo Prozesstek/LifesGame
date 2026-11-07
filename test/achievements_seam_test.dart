@@ -252,8 +252,8 @@ void main() {
       // mit „Sieben Tage in Form“ noch einmal so viel; seit ADR-0079 mit
       // der „Ersten Seite“ 30 und 10 dazu; seit ADR-0085 mit den zwölf
       // Titeln der Gebiete 1020 und 340 — über Jahre verteilt.
-      expect(AchievementCatalog.lifetimeXp, 2880);
-      expect(AchievementCatalog.lifetimeGold, 960);
+      expect(AchievementCatalog.lifetimeXp, 2910);
+      expect(AchievementCatalog.lifetimeGold, 970);
       expect(AchievementCatalog.lifetimeXp, lessThan(LadderRewards.lifetimeXp));
       expect(
         AchievementCatalog.lifetimeGold,

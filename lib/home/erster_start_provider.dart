@@ -1,3 +1,4 @@
+import 'package:abilities/abilities.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
@@ -5,11 +6,25 @@ import '../achievements/achievements_controller.dart';
 import '../character/abilities_controller.dart';
 import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
+import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../haustier/haustier_controller.dart';
 import '../progression/level_provider.dart';
 import '../theory/theory_controller.dart';
 import 'erster_start.dart';
+
+/// **Das Geschenk des Mentors** am Ende des Rundgangs: die Fähigkeit, die
+/// „Beim Händler" bringt (07.11.2026) — aus dem Katalog gelesen, damit sie
+/// nur an einer Stelle steht.
+final String geschenkDesMentors = AbilityCatalog.choosable
+    .firstWhere(
+      (a) => switch (a.source) {
+        FromAchievement(:final achievementId) =>
+          achievementId == 'beim-haendler',
+        _ => false,
+      },
+    )
+    .moveId;
 
 /// Ein Hinweis des Mentors, den man nur lesen muss und wegtippt
 /// (06.11.2026) — statt an einer Tat hängt er an diesem Tipp.
@@ -89,6 +104,12 @@ final ersterStartProvider = Provider<ErsterStart>((ref) {
       faehigkeitenGezeigt: ref
           .watch(hinweiseProvider)
           .contains(Hinweis.faehigkeiten),
+      // Der Rundgang (07.11.2026).
+      gekauft: ref.watch(loadoutProvider).boughtCount,
+      etwasGesperrt: ref.watch(loadoutProvider).hatGesperrtes,
+      geschenkAngelegt: ref
+          .watch(chosenAbilitiesProvider)
+          .contains(geschenkDesMentors),
     ),
   );
 });

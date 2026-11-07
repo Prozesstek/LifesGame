@@ -326,7 +326,28 @@ void main() {
       );
     });
 
-    testWidgets('mit der zweiten Gewohnheit schweigt er', (tester) async {
+    testWidgets('mit der zweiten Gewohnheit beginnt der Rundgang '
+        '(07.11.2026)', (tester) async {
+      final stand = ersteSeiteGelesen();
+      final zweite = HabitCatalog.all
+          .firstWhere((v) => v.id != HabitCatalog.starterId)
+          .id;
+      final c = await starte(
+        tester,
+        stand: SaveData(
+          habits: stand.habits.activate(zweite),
+          theory: stand.theory,
+          abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
+          ladder: const LadderProgress.empty().defeat(1),
+        ),
+      );
+
+      final schritt = c.read(ersterStartProvider).schritt;
+      expect(schritt, anyOf(Schritt.laden, Schritt.goldSammeln));
+      expect(sagt(tester), satz(schritt!, MentorOrt.start));
+    });
+
+    testWidgets('nach zwei Etagen schweigt er', (tester) async {
       final stand = ersteSeiteGelesen();
       final zweite = HabitCatalog.all
           .firstWhere((v) => v.id != HabitCatalog.starterId)
@@ -337,7 +358,7 @@ void main() {
           habits: stand.habits.activate(zweite),
           theory: stand.theory,
           abilities: const ChosenAbilities.empty().withAt(0, 'funkenstoss'),
-          ladder: const LadderProgress.empty().defeat(1),
+          ladder: const LadderProgress.empty().defeat(1).defeat(2),
         ),
       );
 

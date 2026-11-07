@@ -235,8 +235,8 @@ abstract final class AbilityCatalog {
     ),
     Ability(
       moveId: 'mend',
-      source: FromAchievement('voll-ausgeruestet'),
-      requirement: 'Errungenschaft „Voll ausgerüstet"',
+      source: FromAchievement('beim-haendler'),
+      requirement: 'Errungenschaft „Beim Händler"',
       rarity: Rarity.uncommon,
     ),
     Ability(

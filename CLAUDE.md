@@ -90,12 +90,12 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/statistik.dart` | **die Statistik** ([ADR-0087](docs/decisions/0087-die-statistik.md)): Woche, Monat, Jahr, Gesamt; Quote **erledigt durch fällig nach dem Plan, der damals galt**, Vergleich mit den gleichen Tagen davor, Abschnitte für Balken und Kurve, Wochentage, Mengen, Rekorde, Jahresrückblick (`StatRechnung`) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 137 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 140 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
 | `packages/gear/lib/src/gates.dart` | ab welcher Sprosse Episch und Legendär kaufbar sind | nur Dart-SDK |
-| `packages/gear/lib/src/rolls.dart` | **wie gewürfelt wird**: Werte 85–115 %, Seltenheit je Stufe, der Tagesladen, die Beute ([ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)) | nur Dart-SDK |
+| `packages/gear/lib/src/rolls.dart` | **wie gewürfelt wird**: Werte 85–115 %, Seltenheit je Stufe, der Tagesladen, die Beute ([ADR-0048](docs/decisions/0048-exemplare-tagesladen-und-beute.md)); im Rundgang des Tutorials **ein Angebot für höchstens 70** (`DailyShop.mitMentorAngebot`) | nur Dart-SDK |
 | `packages/gear/lib/src/copy.dart` | ein **Exemplar**: Katalogstück plus gespeicherte Werte | nur Dart-SDK |
 | `packages/gear/lib/src/keys.dart` | die **Schlüssel** zur Beute — höchstens zehn, der Überhang verfällt beim Einsetzen | nur Dart-SDK |
 | `lib/gear/copy_text.dart` | wie ein Exemplar sich beschreibt — Werte **untereinander**, mit Unterschied zum Getragenen in Klammern (`CopyText.lines`) | Flutter |
@@ -109,7 +109,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
 | `packages/identity/lib/src/title_catalog.dart` | die **fünfundzwanzig** Titel und ihr Wortlaut — Bedingungen stehen woanders | nur Dart-SDK |
 | `packages/achievements/` | Errungenschaften, reines Dart, 25 Tests | nur Dart-SDK |
-| `packages/achievements/lib/src/catalog.dart` | die **34 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
+| `packages/achievements/lib/src/catalog.dart` | die **35 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
 | `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 406 Tests | nur Dart-SDK |
@@ -240,8 +240,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88) | Flutter |
-| `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen** | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
+| `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen**; im Rundgang zeigt der Mentor aufs Sperren | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **nur das angetippte Exemplar** (26.10.) — anlegen, ablegen, verkaufen, **sperren** — alle vier als Holzplanke; verkauft, geht es zu | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
@@ -356,7 +356,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1134 Tests
+flutter test             # 1139 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -381,7 +381,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 58 Tests
-cd packages/gear        ; dart test    # 137 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 140 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog
@@ -926,7 +926,7 @@ Grube, und im Beute-Dialog des ersten Siegs „Anlegen“:
 | Frage | Antwortet |
 |---|---|
 | Welcher Kreis steht da? | `ErsterStart.aus` — Theorie mit dem ersten Häkchen, Fähigkeiten mit der ersten Seite, Kampf mit der ersten angelegten Fähigkeit (oder einem Lauf, oder sieben Häkchen), Laden mit dem ersten bezahlbaren Stück, Ausrüstung mit dem ersten Stück, Charakter mit Level 2, **Statistik mit dem ersten Häkchen** (ADR-0087) |
-| Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; nach dem ersten Sieg noch `Schritt.gebiete`, bis zwei Gewohnheiten liefen (ADR-0096), dann null |
+| Wo steht der Mentor? | `ErsterStart.schritt` — erledigt ist ein Schritt, wenn er getan ist oder ein späterer, der ihn braucht; nach dem ersten Sieg noch `Schritt.gebiete`, bis zwei Gewohnheiten liefen (ADR-0096), dann **der Rundgang** — Laden (kaufen), Ausrüstung (sperren), Fähigkeiten (das Geschenk Sammeln über „Beim Händler“ anlegen), dann null; wer schon zwei Etagen hat, überspringt ihn (`rundgangVorbeiAb`) |
 | Was sagt er hier? | `Mentor.satz(schritt, ort)` — eine Tabelle; ein Bildschirm legt `MentorFlaeche` um sich und `Zeigefinger` um sein Ziel |
 | Welcher leuchtet? | `ErsterStart.leuchtet` — der Kreis des Schritts, höchstens einer |
 | Woher kommen die Zahlen? | `ersterStartProvider`, das meiste aus `achievementStatsProvider` |

@@ -42,6 +42,9 @@ class ErsterStartStand {
     this.gewohnheitenGezeigt = false,
     this.talentpunktGezeigt = false,
     this.faehigkeitenGezeigt = false,
+    this.gekauft = 0,
+    this.etwasGesperrt = false,
+    this.geschenkAngelegt = false,
   });
 
   /// Ob je eine Gewohnheit lief oder angelegt wurde.
@@ -109,6 +112,18 @@ class ErsterStartStand {
   /// … und ob gezeigt ist, wo die Fähigkeiten liegen
   /// ([Schritt.faehigkeitenZeigen]).
   final bool faehigkeitenGezeigt;
+
+  /// Wie viele Stücke je im Laden gekauft wurden (`Loadout.boughtCount`).
+  final int gekauft;
+
+  /// Ob gerade ein Stück gesperrt ist. **Kann fallen** — der Schritt
+  /// [Schritt.sperren] gilt deshalb auch als erledigt, wenn ein späterer
+  /// es ist.
+  final bool etwasGesperrt;
+
+  /// Ob das Geschenk des Mentors auf einem Platz liegt. Kann ebenfalls
+  /// fallen; siehe [ErsterStart.rundgangVorbeiAb].
+  final bool geschenkAngelegt;
 }
 
 /// Die Schritte, durch die der Mentor einen neuen Spieler bringt
@@ -157,6 +172,22 @@ enum Schritt {
   /// und er bleibt dabei, bis eine zweite Gewohnheit da ist. Der Sieg
   /// hat die Plätze dafür gebracht (ADR-0093).
   gebiete,
+
+  /// **Der Rundgang** (Frederik, 07.11.2026): Laden, Ausrüstung,
+  /// Fähigkeiten, je mit einer kleinen Aufgabe, dann ist das Tutorial
+  /// vorbei. Reicht das Gold noch nicht für den Laden, wartet der Mentor
+  /// hier.
+  goldSammeln,
+
+  /// Etwas im Laden kaufen — der Laden hält dafür ein Stück zum
+  /// billigsten Preis bereit (`DailyShop.mitMentorAngebot`).
+  laden,
+
+  /// Ein Stück in der Ausrüstung sperren.
+  sperren,
+
+  /// Das Geschenk anlegen: Sammeln, von „Beim Händler“, statt Funkenstoß.
+  geschenk,
 }
 
 /// Welche Bereiche die Startseite zeigt, welcher gerade dran ist, und
@@ -221,6 +252,12 @@ class ErsterStart {
 
   /// Ab wie vielen Gewohnheiten der Mentor die Gebiete erklärt hat.
   static const int gewohnheitenNachDenGebieten = 2;
+
+  /// **Wer so viele Etagen geschafft hat, macht keinen Rundgang mehr.**
+  /// Ein Stand, der weiter ist — auch die Stände von vor dem 07.11.2026 —,
+  /// wird nicht zurück in den Laden geschickt, und wer Schloss oder
+  /// Geschenk danach wieder löst, bekommt das Tutorial nicht zurück.
+  static const int rundgangVorbeiAb = 2;
 
   final Set<Bereich> sichtbar;
 
@@ -302,7 +339,13 @@ class ErsterStart {
     Schritt.faehigkeitenZeigen => Bereich.faehigkeiten,
     Schritt.grube => Bereich.kampf,
     Schritt.gebiete => Bereich.gewohnheiten,
-    Schritt.gewohnheit || Schritt.abhaken || null => null,
+    Schritt.laden => Bereich.laden,
+    Schritt.sperren => Bereich.ausruestung,
+    Schritt.geschenk => Bereich.faehigkeiten,
+    Schritt.gewohnheit ||
+    Schritt.abhaken ||
+    Schritt.goldSammeln ||
+    null => null,
   };
 
   bool zeigt(Bereich bereich) => sichtbar.contains(bereich);
@@ -350,6 +393,16 @@ class ErsterStart {
               : Schritt.grube)
         : s.gewohnheitenJe < gewohnheitenNachDenGebieten
         ? Schritt.gebiete
+        : s.stufenGeschafft >= rundgangVorbeiAb
+        ? null
+        : s.gekauft == 0
+        ? (s.goldVerdient >= s.billigstesStueck
+              ? Schritt.laden
+              : Schritt.goldSammeln)
+        : !s.etwasGesperrt && !s.geschenkAngelegt
+        ? Schritt.sperren
+        : !s.geschenkAngelegt
+        ? Schritt.geschenk
         : null;
 
     final faehigkeiten =

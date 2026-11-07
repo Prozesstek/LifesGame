@@ -5,6 +5,8 @@ import 'package:habits/habits.dart';
 
 import '../combat/ladder_controller.dart';
 import '../habits/habits_controller.dart';
+import '../home/erster_start.dart';
+import '../home/erster_start_provider.dart';
 import '../haustier/haustier_controller.dart';
 import '../progression/level_provider.dart';
 import '../achievements/achievement_stats.dart';
@@ -198,10 +200,15 @@ final dayIndexProvider = Provider<int>((ref) {
 /// Gewürfelt in `package:gear` aus dem Datum und der tiefsten
 /// geschafften Stufe; hier steht nur, woher beides kommt.
 final dailyOffersProvider = Provider<List<GearCopy>>((ref) {
-  return DailyShop.offersFor(
-    ref.watch(dayIndexProvider),
+  final tag = ref.watch(dayIndexProvider);
+  final offers = DailyShop.offersFor(
+    tag,
     highestRung: ref.watch(ladderProvider).highestDefeated,
   );
+  // **Im Rundgang hält der Laden etwas Bezahlbares bereit** (07.11.2026).
+  return ref.watch(ersterStartProvider).schritt == Schritt.laden
+      ? DailyShop.mitMentorAngebot(offers, tag)
+      : offers;
 });
 
 /// Wie viele Schlüssel je verdient wurden: jedes Häkchen, jede bestandene

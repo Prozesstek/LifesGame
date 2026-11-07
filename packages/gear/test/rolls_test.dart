@@ -293,4 +293,48 @@ void main() {
       expect(GearKeys.consume(earned: 3, consumed: 3), 3);
     });
   });
+
+  group('das Angebot des Mentors (07.11.2026)', () {
+    test('liegt nichts zum billigsten Preis da, kommt es dazu', () {
+      // Ein Tag, an dem der gewürfelte Laden nichts für 70 Gold hat.
+      final tag = List<int>.generate(400, (i) => i).firstWhere(
+        (t) => DailyShop.offersFor(t, highestRung: 0).every(
+          (o) => o.paid > GearCatalog.cheapestPrice,
+        ),
+      );
+      final vorher = DailyShop.offersFor(tag, highestRung: 0);
+      final nachher = DailyShop.mitMentorAngebot(vorher, tag);
+
+      expect(nachher, hasLength(vorher.length));
+      final geschenk = nachher.where((o) => o.uid.endsWith('-mentor'));
+      expect(geschenk, hasLength(1));
+      expect(geschenk.single.paid, GearCatalog.cheapestPrice);
+      // Es ersetzt das Angebot seines Platzes, kein anderes.
+      expect(
+        nachher.map((o) => o.item?.slot).toSet(),
+        vorher.map((o) => o.item?.slot).toSet(),
+      );
+    });
+
+    test('liegt schon etwas Billiges da, bleibt der Laden, wie er ist', () {
+      final tag = List<int>.generate(400, (i) => i).firstWhere(
+        (t) => DailyShop.offersFor(t, highestRung: 0).any(
+          (o) => o.paid <= GearCatalog.cheapestPrice,
+        ),
+      );
+      final vorher = DailyShop.offersFor(tag, highestRung: 0);
+      expect(DailyShop.mitMentorAngebot(vorher, tag), same(vorher));
+    });
+
+    test('ein Kauf zählt, Beute nicht', () {
+      final angebot = DailyShop.mentorAngebot(3);
+      final gekauft = const Loadout.empty().buy(
+        angebot,
+        availableGold: angebot.paid,
+        highestRung: 0,
+      );
+      expect(gekauft.boughtCount, 1);
+      expect(const Loadout.empty().boughtCount, 0);
+    });
+  });
 }

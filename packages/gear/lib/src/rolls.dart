@@ -142,6 +142,38 @@ abstract final class DailyShop {
     ]);
   }
 
+  /// **Das Angebot des Mentors** (Frederik, 07.11.2026): Im Rundgang am
+  /// Ende des Tutorials soll man sich etwas kaufen können, und mit rund
+  /// 70 Gold reicht der gewürfelte Laden oft nicht. Liegt heute nichts zum
+  /// billigsten Preis des Katalogs da, ersetzt das billigste Stück das
+  /// Angebot seines Platzes — mit 100 % und eigener Uid, damit es nach dem
+  /// Rundgang nicht als gekauft im gewürfelten Laden steht.
+  static List<GearCopy> mitMentorAngebot(
+    List<GearCopy> offers,
+    int dayIndex,
+  ) {
+    final billig = GearCatalog.cheapestPrice;
+    if (offers.any((o) => o.paid <= billig)) return offers;
+    final item = GearCatalog.all.firstWhere((i) => i.price == billig);
+    final geschenk = mentorAngebot(dayIndex);
+    return List<GearCopy>.unmodifiable(<GearCopy>[
+      for (final o in offers) o.item?.slot == item.slot ? geschenk : o,
+    ]);
+  }
+
+  /// Das billigste Stück des Katalogs als Angebot des Mentors.
+  static GearCopy mentorAngebot(int dayIndex) {
+    final item = GearCatalog.all.firstWhere(
+      (i) => i.price == GearCatalog.cheapestPrice,
+    );
+    return GearCopy(
+      uid: 'laden-$dayIndex-mentor',
+      itemId: item.id,
+      bonus: item.bonus.scaled,
+      paid: item.price,
+    );
+  }
+
   static GearCopy _offer(int dayIndex, GearSlot slot, int highestRung) {
     final dice = GearDice(dayIndex * 31 + slot.index * 7919 + 17);
     final rarity = GearRolls.rollRarity(highestRung, dice);
