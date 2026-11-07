@@ -62,9 +62,10 @@ void main() {
     // Seit ADR-0079 geht der zweite Platz auf Level 2 auf.
     expect(find.text('Aufgestiegen!'), findsOneWidget);
     expect(find.text('Level 2'), findsOneWidget);
-    expect(find.text('Im Kampf 4 % stärker'), findsOneWidget);
+    // Ohne Kraft in Prozent: Die steht in der Roadmap (07.11.2026).
+    expect(find.textContaining('stärker'), findsNothing);
     expect(find.text('+1 Talentpunkt für den Talentbaum'), findsOneWidget);
-    expect(find.text('Fähigkeitsplatz 2 ist offen'), findsOneWidget);
+    expect(find.text('+1 Fähigkeitsplatz'), findsOneWidget);
   });
 
   testWidgets('nach Erfahrung, die ein Level hebt, kommt die Feier', (
@@ -89,7 +90,7 @@ void main() {
     expect(find.text('Level $level'), findsOneWidget);
     expect(mitschrift.gespielt, contains(SoundEffect.errungenschaft));
 
-    await tester.tap(find.text('Weiter'));
+    await tester.tap(find.text(LevelUpSheet.weiter));
     await tester.pumpAndSettle();
     expect(find.text('Aufgestiegen!'), findsNothing);
   });

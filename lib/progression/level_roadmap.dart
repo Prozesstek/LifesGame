@@ -48,7 +48,7 @@ abstract final class LevelRoadmap {
         RoadmapGewinn(
           Icons.add_box_outlined,
           'Fähigkeitsplatz $slot',
-          'Fähigkeitsplatz $slot ist offen',
+          '+1 Fähigkeitsplatz',
         ),
       if (auf.opensUltimate)
         const RoadmapGewinn(

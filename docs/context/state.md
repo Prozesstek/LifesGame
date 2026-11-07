@@ -152,17 +152,18 @@ gelber Punkt weg, „dafür einen Scheinwerfer“.
 | **Licht** | kein gelber Punkt; ein warmer Schein unter der Wahl (`ScheinwerferLicht`), und **der Rand des Schleiers läuft überall weich aus** |
 | **Buch** | **nur noch das Eselsohr rechts unten** — links liegt der Rücken, dort knickt keine Ecke um; zurück per Wisch |
 | **Abfrage** | der Mentor **immer als Kopf im Kreis**, nicht mehr ganz beim Fragen; die eigene Figur ebenso (`CharacterKopf`, samt Helm) — damit ist auch die nackte Figur weg |
+| **Aufstieg** | ohne „Im Kampf 4 % stärker“; der Talentpunkt mit dem Sechseck der Theorie; „+1 Fähigkeitsplatz“; Knopf mittig, „Weiter geht's“; **im Tutorial keine Vorschläge** für die nächste Seite |
 
 **Ohne Rückfrage entschieden:** „Die Welt verstehen“ statt „Verstehen,
 wie die Welt tickt“ — brach am Handy um. Der weiche Rand gilt für alle
 Ziele im Tutorial; gerendert ist nur der Einstieg.
 
-App 1130 (vorher 1129; ein Test prüft jetzt das Licht statt des Punkts).
+App 1131 (vorher 1129).
 In 390 × 844 gerendert, Frederik hat ihn abgenommen. **Nicht am Handy.**
 
 ### Offen
 
-- Die Abfrage und alles nach der ersten Seite.
+- **Funkenstoß direkt anlegen?** Frederik ist unsicher — offen zur Besprechung; dann entfiele der Schritt in den Fähigkeiten.
 - `assets/Mentor/Mentor.png`, die ganze Figur, wird nirgends mehr gebraucht.
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen

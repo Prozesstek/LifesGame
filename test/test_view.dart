@@ -90,7 +90,7 @@ Future<void> feiernSchliessen(WidgetTester tester) async {
     } else if (find.byType(LevelUpSheet).evaluate().isNotEmpty) {
       knopf = find.descendant(
         of: find.byType(LevelUpSheet),
-        matching: find.text('Weiter'),
+        matching: find.text(LevelUpSheet.weiter),
       );
     } else if (find.byType(AbilityUnlockSheet).evaluate().isNotEmpty) {
       final inventar = find.descendant(
