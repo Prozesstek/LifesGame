@@ -95,6 +95,8 @@ class LadderScreen extends ConsumerWidget {
                             onPressed: () => oeffneGeladen<void>(
                               context,
                               laden: grube.loadLibrary,
+                              vorbereiten: () => grube.grubeVorladen(),
+                              fortschritt: () => grube.grubeFortschritt,
                               bauen: () =>
                                   grube.PitScreen(stage: PitStage(stufe)),
                             ),

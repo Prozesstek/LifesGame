@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 06.11.2026 · Frederik
+**Zuletzt aktualisiert:** 07.11.2026 · Frederik
 
 ---
 
@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1129, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1135, dazu die acht Packages (theory 219, habits 375, gear
 137, action_combat 406, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -136,6 +136,35 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 07.11.2026: der Ladebildschirm (#135)
+
+Issue #135 (AktivesBrett): „Ein Bild das sich bewegt und eine Progress
+bar“. Frederik dazu: Beim Start der Web-Fassung steht ein **weißer
+Bildschirm**, und im Dungeon laufen erst **Vierecke**, bevor die Bilder
+kommen.
+
+| Was | Wie |
+|---|---|
+| **Web-Start** | Lederfarbe ab dem ersten Moment; die Figur mit Startausrüstung läuft über einen ziehenden Boden, Holzbalken, ein Tipp (`web/index.html`). Der Balken springt an drei echten Stufen (App geladen, Engine bereit, App läuft, `web/flutter_bootstrap.js`) und kriecht dazwischen; beim ersten Bild der App blendet er aus |
+| **Dungeon** | die gut 30 Bilder wurden **nach** dem Start des Laufs **nacheinander** geladen, Uhr und Gegner liefen schon. Jetzt gleichzeitig und **vorher** (`grubeVorladen`); dauert es länger als 0,18 s, steht der Ladebildschirm mit der eigenen Ausrüstung da, der Balken zählt die Bilder |
+| **Tipps** | 14 Sätze in `LadeTipps`, dieselben in `index.html` — ein Test hält beide gleich |
+
+**Ohne Rückfrage entschieden:** Auf der Web-Seite trägt die Figur
+Lederkappe, Lederwams und Übungsklinge — der Spielstand ist dort noch
+nicht gelesen, nackt sah sie wie ein Fehler aus. Die Figur „läuft“ durch
+Wippen und Neigen, echte Laufbilder gibt es nicht. Fehlt ein Bild oder
+dauert es über 15 s, beginnt der Lauf trotzdem (mit Würfeln).
+
+App 1135 (vorher 1129). Beide Bildschirme in 390 × 844 bzw. im
+Headless-Chrome angesehen; der Release-Build startet im Browser und der
+Ladebildschirm verschwindet. **Nicht am Handy.**
+
+### Offen
+
+- Android zeigt beim Start das Systembild mit dem Flutter-Logo — kommt
+  mit dem eigenen Startsymbol (Ziel 9).
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 06.11.2026, ganz zuletzt: Grube und Statistik kommen erst beim Öffnen
 

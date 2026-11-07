@@ -18,6 +18,9 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- Bis Flutter sein eigenes setzt (es ersetzt dieses beim Start), sonst
+       zeigt ein Handy den Ladebildschirm in Desktopbreite, winzig. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Habit-Tracker mit rundenbasiertem RPG">
   <meta name="theme-color" content="#17110A">
 
@@ -69,8 +72,140 @@
       nachziehen();
     })();
   </script>
+  <!--
+    Der Ladebildschirm der Web-Fassung (Issue #135, 07.11.2026). Bis
+    Flutter laeuft, vergehen am Handy mehrere Sekunden (Grafik-Engine und
+    App, zusammen gut 8 MB); vorher stand dort eine weisse Seite. Jetzt:
+    Lederfarbe, die Grundfigur laeuft, ein Balken, ein Tipp. Im Spiel
+    selbst zeigt `lib/ui/ladebildschirm.dart` dasselbe, dort mit der
+    eigenen Ausruestung -- hier ist der Spielstand noch nicht gelesen.
+  -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #17110A; }
+    #lade {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #17110A; transition: opacity 300ms;
+      font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    }
+    #lade.weg { opacity: 0; pointer-events: none; }
+    #lade .laeufer { position: relative; width: 240px; height: 178px; }
+    #lade .figur {
+      position: absolute; left: 36px; bottom: 12px;
+      width: 168px; height: 168px;
+      /* Die Startausruestung: Der Spielstand ist hier noch nicht gelesen,
+         und nackt sah die Grundfigur aus wie ein Fehler. */
+      background:
+        url("assets/assets/character/Charakter_Uebungsklinge.png") center / contain no-repeat,
+        url("assets/assets/character/Charakter_Lederkappe.png") center / contain no-repeat,
+        url("assets/assets/character/Charakter_Lederwams.png") center / contain no-repeat,
+        url("assets/assets/character/Charakter.png") center / contain no-repeat;
+      image-rendering: pixelated;
+      transform-origin: 50% 100%;
+      animation: lade-schritt 350ms infinite, lade-wiegen 700ms infinite;
+    }
+    #lade .boden {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 18px;
+      background:
+        linear-gradient(90deg, #17110A, rgba(23,17,10,0) 25%, rgba(23,17,10,0) 75%, #17110A),
+        linear-gradient(#3A2A17 0 3px, transparent 3px),
+        repeating-linear-gradient(90deg, #241A0E 0 21px, #0B0805 21px 24px);
+      background-size: 100% 100%, 24px 100%, 24px 100%;
+      animation: lade-boden 350ms linear infinite;
+    }
+    #lade .balken {
+      box-sizing: border-box; width: 240px; height: 24px; margin-top: 32px;
+      border: 2px solid #130505; border-radius: 4px;
+      background: #A8602F; padding: 6px 10px 6px 10px;
+      box-shadow: inset 6px 0 0 #C9A04A, inset -6px 0 0 #C9A04A,
+                  inset 0 2px 0 #DDA05A, inset 0 -2px 0 #5D3A2B;
+    }
+    #lade .rinne {
+      height: 100%; background: #2A1810; border-top: 2px solid #130505;
+      box-sizing: border-box; overflow: hidden;
+    }
+    #lade .fuellung {
+      height: 100%; width: 5%;
+      background: linear-gradient(#EACC8C 0 33%, #E0B65B 33%);
+      transition: width 250ms;
+    }
+    #lade .tipp {
+      max-width: 300px; margin: 24px 24px 0; text-align: center;
+      color: #B09B77; font-size: 15px; line-height: 1.4;
+    }
+    @keyframes lade-schritt {
+      0%, 100% { bottom: 12px; } 50% { bottom: 18px; }
+    }
+    @keyframes lade-wiegen {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); }
+    }
+    @keyframes lade-boden {
+      from { background-position: 0 0, 0 0, 0 0; }
+      to { background-position: 0 0, -48px 0, -48px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #lade .figur, #lade .boden { animation: none; }
+    }
+  </style>
 </head>
 <body>
+  <div id="lade" role="progressbar" aria-label="Lifes Game lädt">
+    <div class="laeufer"><div class="boden"></div><div class="figur"></div></div>
+    <div class="balken"><div class="rinne"><div class="fuellung"></div></div></div>
+    <div class="tipp"></div>
+  </div>
+  <script>
+    // Dieselben Saetze wie `LadeTipps.alle` in lib/ui/ladebildschirm.dart;
+    // test/ladebildschirm_test.dart prueft, dass keiner fehlt.
+    (function () {
+      var tipps = [
+        "Jedes Häkchen heute macht dich heute stärker. Alles erledigt heißt „In Form“.",
+        "Der Boss kündigt jeden Angriff an. Lauf aus dem Ring, bevor er sich füllt.",
+        "Kurz tippen zielt von selbst, halten zielt von Hand.",
+        "Zeitkugeln füllen die Uhr im Dungeon wieder auf.",
+        "Nur ein Sieg behält die Beute. Wer verliert, verliert, was er eingesammelt hat.",
+        "Schlüssel gibt es für Häkchen, Seiten und Rückfragen. Nach einem Sieg öffnet einer eine Extra-Truhe.",
+        "Körper stärkt den Angriff, Geist das Mana, Wissenschaft die Abwehr, Gesellschaft das Leben.",
+        "Ein verpasster Tag lässt die Kette eine Stufe fallen, nicht auf null.",
+        "Streak-Eis deckt einen verpassten Tag. Manchmal steckt es in der Tagestruhe.",
+        "Jedes Level bringt einen Talentpunkt für den Talentbaum.",
+        "Ein Kreischpilz weckt den ganzen Raum. Fäll ihn zuerst.",
+        "Der Sporenpilz heilt die anderen Gegner. Fäll ihn zuerst.",
+        "Gegner bemerken dich nur, wenn sie dich sehen — oder wenn du sie triffst.",
+        "Gesperrte Stücke im Rucksack werden nie verkauft."
+      ];
+      var lade = document.getElementById('lade');
+      var fuellung = lade.querySelector('.fuellung');
+      lade.querySelector('.tipp').textContent =
+        tipps[Math.floor(Math.random() * tipps.length)];
+
+      // Echte Stufen setzt flutter_bootstrap.js: App geladen, Engine
+      // bereit, App laeuft. Dazwischen kriecht der Balken auf die naechste
+      // Stufe zu, ohne sie zu erreichen -- sonst stuende er sekundenlang.
+      var stand = 0.05, ziel = 0.05, decke = 0.4;
+      function zeichne() { fuellung.style.width = (stand * 100).toFixed(1) + '%'; }
+      var kriechen = setInterval(function () {
+        stand = Math.max(stand, ziel);
+        stand += (decke - stand) * 0.02;
+        zeichne();
+      }, 100);
+      window.lifesGameLaden = function (wert, naechsteDecke) {
+        ziel = wert;
+        decke = naechsteDecke;
+        stand = Math.max(stand, wert);
+        zeichne();
+      };
+      window.addEventListener('flutter-first-frame', function () {
+        clearInterval(kriechen);
+        stand = 1;
+        zeichne();
+        setTimeout(function () { lade.classList.add('weg'); }, 250);
+        setTimeout(function () { lade.remove(); }, 600);
+      });
+    })();
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

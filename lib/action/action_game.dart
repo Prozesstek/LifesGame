@@ -163,6 +163,8 @@ class ActionGame extends Game {
     // Ladens gar nichts — und in Widget-Tests, in denen Bilder nie fertig
     // entpackt werden, bliebe es für immer leer. So läuft der Lauf sofort
     // mit Würfeln los, und die Figuren erscheinen, sobald sie da sind.
+    // Hat der Ladebildschirm sie vorher geholt, sind sie sofort da.
+    _bilder = GrubeBilder.fertig;
     unawaited(
       GrubeBilder.load().then(
         (bilder) => _bilder = bilder,

@@ -36,6 +36,9 @@ import 'pit_run_view.dart';
 import 'staerker_werden.dart';
 import 'staerker_werden_provider.dart';
 
+// Über den Prefix des Nachladens erreichbar (`grube.grubeVorladen`).
+export 'grube_vorladen.dart';
+
 /// Ein Lauf durch eine Stufe der Grube — der Kampf des Spiels (ADR-0039).
 ///
 /// **Die Karte ist jedes Mal neu.** Der Startwert wird beim Betreten

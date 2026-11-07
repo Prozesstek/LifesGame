@@ -136,6 +136,8 @@ class TagesgrubeKarte extends ConsumerWidget {
     await oeffneGeladen<void>(
       context,
       laden: tagesgrube.loadLibrary,
+      vorbereiten: () => tagesgrube.grubeVorladen(),
+      fortschritt: () => tagesgrube.grubeFortschritt,
       bauen: () =>
           tagesgrube.DailyPitScreen(day: jetzt.day, condition: jetzt.condition),
     );

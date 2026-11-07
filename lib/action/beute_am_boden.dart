@@ -52,11 +52,15 @@ abstract final class BeuteAmBoden {
   static Future<void> laden() => _laden ??= _ladeAlle();
 
   static Future<void> _ladeAlle() async {
-    for (final slot in GearSlot.values) {
-      final daten = await rootBundle.load(GearIcons.gruppeFor(slot));
-      final codec = await ui.instantiateImageCodec(daten.buffer.asUint8List());
-      _umrisse[slot] = (await codec.getNextFrame()).image;
-    }
+    await Future.wait(<Future<void>>[
+      for (final slot in GearSlot.values) _ladeEins(slot),
+    ]);
+  }
+
+  static Future<void> _ladeEins(GearSlot slot) async {
+    final daten = await rootBundle.load(GearIcons.gruppeFor(slot));
+    final codec = await ui.instantiateImageCodec(daten.buffer.asUint8List());
+    _umrisse[slot] = (await codec.getNextFrame()).image;
   }
 
   /// Zeichnet jeden Fund, der am Boden liegt. [zeit] lässt die Säule
