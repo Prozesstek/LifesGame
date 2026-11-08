@@ -21,7 +21,7 @@
 
 | Bereich | fremd | ersetzt |
 |---|---|---|
-| Kreise der Startseite | 5 | 2 |
+| Kreise der Startseite | 5 | 3 |
 | Items (Truhe, Schlüssel) | 2 | 0 |
 | Waffen | 8 | 1 |
 | Rüstung, Helme, Schuhe, Ringe, Talismane | 40 | 0 |
@@ -29,7 +29,7 @@
 | Ausrüstung auf der Figur | 24 | 0 |
 | Holz-Oberfläche | 6 | 6 |
 | Dungeon: Held, Gegner, Bosse | 15 Figuren (25 Dateien) | 0 |
-| **Summe** | **139** | **9** |
+| **Summe** | **139** | **10** |
 
 Die Zahlen werden beim Abhaken nachgezogen.
 
@@ -42,7 +42,7 @@ ein ersetztes Zeichen kommt dort heraus.
 
 - [x] Gewohnheiten — Quest-Rolle (`tool/pixel/kreis_gewohnheiten.px.js`, PR #189)
 - [x] Kampf — gekreuzte Schwerter (`tool/pixel/kreis_kampf.px.js`)
-- [ ] Laden — Münzbeutel (Raven fc158 + fc131)
+- [x] Laden — Lederbeutel voller Gold (`tool/pixel/kreis_laden.px.js`)
 - [ ] Fähigkeiten — Runenstein (Raven fc326)
 - [ ] Charakter — Helm (Raven fc1911)
 

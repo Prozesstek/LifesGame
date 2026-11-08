@@ -12,7 +12,7 @@ RPGs kennt:
 | Gewohnheiten | Schriftrolle mit Haken — die Quest | seit 04.11.2026 `tool/pixel/kreis_gewohnheiten.px.js` (pxl), nicht mehr hier |
 | Kampf | zwei gekreuzte Schwerter | seit 04.11.2026 `tool/pixel/kreis_kampf.px.js` (pxl), nicht mehr hier |
 | Statistik | Balken mit Pfeil | seit 08.11. in `tool/pixel/kreis_statistik.px.js` |
-| Laden | ein Münzbeutel | Raven fc158, die Münze fc131 |
+| Laden | ein Lederbeutel voller Gold | seit 08.11. in `tool/pixel/kreis_laden.px.js` |
 | Fähigkeiten | ein Runenstein, der blau leuchtet | Raven fc326, umgefärbt |
 | Ausrüstung | ein Rucksack — das Inventar | gezeichnet, Raven hat keinen |
 | Charakter | ein Helm — der Charakterbogen | Raven fc1911 |
@@ -49,14 +49,6 @@ def raven(ordner, nummer):
 
 def gross(bild):
     return bild.resize((SEITE, SEITE), Image.NEAREST)
-
-
-def mit_muenze(beutel, muenze):
-    """Eine Goldmünze vorn am Beutel — sonst ist er nur ein Sack."""
-    bild = beutel.copy()
-    klein = muenze.crop(muenze.getbbox()).resize((26, 26), Image.NEAREST)
-    bild.alpha_composite(klein, (34, 34))
-    return bild
 
 
 def leuchtend(rune):
@@ -155,7 +147,6 @@ def rucksack():
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Laden": mit_muenze(raven(ordner, 158), raven(ordner, 131)),
         "Kreis_Faehigkeiten": leuchtend(raven(ordner, 326)),
         "Kreis_Ausruestung": rucksack(),
         "Kreis_Charakter": raven(ordner, 1911),

@@ -25,7 +25,8 @@ abstract final class BereichZeichen {
   /// gezeichnet mit pxl (`tool/pixel/kreis_statistik.px.js`).
   static const String statistik = 'assets/UI/Kreis_Statistik.png';
 
-  /// Der Münzbeutel auf dem Laden-Kreis.
+  /// Ein praller Lederbeutel voller Gold, davor Münzen — gezeichnet mit
+  /// pxl (`tool/pixel/kreis_laden.px.js`).
   static const String laden = 'assets/UI/Kreis_Laden.png';
 
   /// Der leuchtende Runenstein auf dem Fähigkeiten-Kreis (ADR-0049). Bis

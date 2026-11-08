@@ -137,6 +137,15 @@ vom 02.10.
 
 ---
 
+## 08.11.2026, danach: das Laden-Zeichen
+
+Ein praller Lederbeutel voller Gold mit goldener Kordel, davor eine
+stehende Münze mit Krone und ein Stapel (`tool/pixel/kreis_laden.px.js`).
+Gefragt, ob ein Einkaufswagen oder ein Ladenstand besser wäre:
+**der Beutel bleibt** — der Wagen passt nicht ins Fantasy-Bild, der Stand
+war bis zum 28.10. schon da. `tool/kreis_zeichen.py` zeichnet den Laden
+nicht mehr. Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## 08.11.2026: das Statistik-Zeichen
 
 AktivesBrett: „Fangen wir erstmal mit dem Statistik icon an … mit einem
