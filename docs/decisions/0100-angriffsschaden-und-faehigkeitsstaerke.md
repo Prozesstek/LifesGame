@@ -62,8 +62,7 @@ seinem Gebiet auch eine Spielweise.
 - **Abklingzeit tragen nur die teuersten Ringe** (Ring der Glut, Ring
   des Erzdämons): An einem günstigeren Stück machte sie es „besser“ als
   das teurere derselben Seltenheit (`catalog_test.dart`).
-- Die Stäbe tragen umgefärbte Bilder des Kriegsstabs — Platzhalter, bis
-  eigene gezeichnet sind.
+- Die Stäbe tragen den gezeichneten **Zauberstab** (`tool/pixel/zauberstab.px.js`), der Kristall je Seltenheit in einer anderen Farbe. Ihre Züge und die Figur tragen noch Platzhalter.
 - Die Waffe hat jetzt vierzehn Stücke, acht offene und sechs verdiente.
 - Das Blatt jeder Fähigkeit und Waffe sagt, womit sie skaliert; der
   Charakter zeigt die Fähigkeitsstärke als vierten Wert.

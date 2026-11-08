@@ -160,7 +160,7 @@ hinten** — den Lauf entscheidet der Grundangriff.
 
 ### Offen
 
-- **Eigene Bilder für die vier Stäbe** und ihre Züge.
+- ~~Eigene Bilder für die vier Stäbe~~ — die Stäbe tragen den **Zauberstab** (`tool/pixel/zauberstab.px.js`), nur der Kristall hat je Seltenheit eine andere Farbe. **Offen:** ihre vier Züge (Fähigkeitsbilder) und die Figur tragen noch umgefärbte Platzhalter des Kriegsstabs.
 - Alte Stände: Wer Körper hat und Magie trägt, wird schwächer.
 - Ob die Grenzen der Heilung (0,75 bis 1,5) passen, ist nicht gespielt.
 - **AktivesBrett hat ADR-0100 nicht gesehen** — seine zwölf Fähigkeiten sind eingeteilt, ohne dass er gefragt wurde.
