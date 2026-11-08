@@ -189,19 +189,11 @@ class _ErsteGewohnheitKarteState extends ConsumerState<ErsteGewohnheitKarte>
     final ende = beginn + ErsteGewohnheitKarte.flug.inMicroseconds / gesamt;
     final t = CurvedAnimation(
       parent: _einflug,
-      curve: Interval(beginn, ende.clamp(0.0, 1.0), curve: Curves.easeOutBack),
+      curve: Interval(beginn, ende.clamp(0.0, 1.0), curve: Curves.easeOut),
     );
-    return AnimatedBuilder(
-      animation: t,
-      builder: (context, kind) => Opacity(
-        opacity: t.value.clamp(0.0, 1.0),
-        child: FractionalTranslation(
-          translation: Offset(0, 0.8 * (1 - t.value)),
-          child: kind,
-        ),
-      ),
-      child: child,
-    );
+    // **Nur Deckkraft, kein Weg** (08.11.2026): Jede Zeile blendet an
+    // ihrem Platz ein.
+    return FadeTransition(opacity: t, child: child);
   }
 
   @override

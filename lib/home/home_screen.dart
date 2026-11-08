@@ -158,12 +158,15 @@ class HomeScreen extends ConsumerWidget {
       required int nr,
     }) {
       final leuchtet = start.leuchtet == bereich;
+      final warten = DerReiheNach.mentor + DerReiheNach.abstand * nr;
       return Aufgedeckt(
         sichtbar: zeigt(bereich),
-        verzoegerung: DerReiheNach.mentor + DerReiheNach.abstand * nr,
+        verzoegerung: warten,
         child: ScheinwerferZiel(
           aktiv: leuchtet,
           radius: lichtRadius,
+          // Erst wenn der Kreis steht, liegt er im Licht (08.11.2026).
+          ab: warten + Aufgedeckt.dauer,
           child: bauen(leuchtet),
         ),
       );
@@ -201,7 +204,6 @@ class HomeScreen extends ConsumerWidget {
             // Leiste, Level und Gold kommen mit der ersten Gewohnheit.
             EinblendLeiste(
               sichtbar: !start.nurMentor,
-              vonOben: true,
               verzoegerung: DerReiheNach.mentor,
               child: _Leiste(
                 oben: true,
@@ -279,9 +281,9 @@ class HomeScreen extends ConsumerWidget {
             ),
             Expanded(
               child: SafeArea(
-                // Ohne die obere Leiste rückt der Inhalt selbst von
-                // der Statusleiste des Handys weg.
-                top: start.nurMentor,
+                // Die obere Leiste hat ihren Platz immer (08.11.2026) und
+                // rückt selbst von der Statusleiste weg.
+                top: false,
                 bottom: false,
                 child: Center(
                   child: ConstrainedBox(
@@ -298,7 +300,6 @@ class HomeScreen extends ConsumerWidget {
                           // ohne Rahmen — erst, wenn es geschlüpft ist.
                           EinblendLeiste(
                             sichtbar: !start.zeigtWenig,
-                            vonOben: true,
                             verzoegerung:
                                 DerReiheNach.mentor + DerReiheNach.abstand,
                             child: Padding(
@@ -326,9 +327,11 @@ class HomeScreen extends ConsumerWidget {
                                     minHeight: platz.maxHeight,
                                   ),
                                   child: Column(
-                                    mainAxisAlignment: start.nurMentor
-                                        ? MainAxisAlignment.center
-                                        : MainAxisAlignment.start,
+                                    // **Immer von oben** (08.11.2026): Bis
+                                    // dahin stand der erste Screen mittig,
+                                    // und mit der ersten Gewohnheit sprang
+                                    // der Mentor um 70 Punkte.
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: <Widget>[
@@ -446,6 +449,8 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             EinblendLeiste(
+              // Der Schlüssel gehört der unteren Leiste (Tests messen sie).
+              key: EinblendLeiste.leisteKey,
               sichtbar: untenDa,
               child: _Leiste(
                 oben: false,
@@ -559,12 +564,12 @@ class _Leiste extends StatelessWidget {
 /// Ein Kreis, der erst erscheint, wenn er dran ist (ADR-0068).
 ///
 /// **Der Platz bleibt frei, auch wenn nichts zu sehen ist.** Die Kreise
-/// springen sonst bei jedem neuen um; so wächst jeder an seiner Stelle
-/// heran. Solange er versteckt ist, nimmt er keinen Tipp an und steht
+/// springen sonst bei jedem neuen um; so blendet jeder an seiner Stelle
+/// ein. Solange er versteckt ist, nimmt er keinen Tipp an und steht
 /// für den Vorleser nicht da.
 ///
 /// **Der Reihe nach** (06.11.2026): Ein Kreis wartet [verzoegerung],
-/// bevor er heranwächst — erst der Mentor, dann die Kreise einer nach
+/// bevor er einblendet — erst der Mentor, dann die Kreise einer nach
 /// dem anderen (`DerReiheNach`).
 class Aufgedeckt extends StatelessWidget {
   const Aufgedeckt({
@@ -592,34 +597,27 @@ class Aufgedeckt extends StatelessWidget {
           opacity: sichtbar ? 1 : 0,
           duration: gesamt,
           curve: Interval(ab, 1),
-          child: AnimatedScale(
-            scale: sichtbar ? 1 : 0.6,
-            duration: gesamt,
-            curve: Interval(ab, 1, curve: Curves.easeOutBack),
-            child: child,
-          ),
+          child: child,
         ),
       ),
     );
   }
 }
 
-/// Eine Leiste, die **von unten hereinfährt**, sobald sie [sichtbar] wird
-/// (ADR-0095) — mit [vonOben] von oben. Bis dahin nimmt sie keinen
-/// Platz, keinen Tipp und steht für den Vorleser nicht da. Das Kind
+/// Eine Leiste, die **an ihrem Platz einblendet**, sobald sie [sichtbar]
+/// wird (ADR-0095). Ihr Platz steht von Anfang an frei; bis dahin nimmt
+/// sie keinen Tipp und steht für den Vorleser nicht da. Das Kind
 /// bleibt immer im Baum, damit seine Kreise beim Einblenden nicht neu
 /// gebaut werden (`gotchas.md`).
 class EinblendLeiste extends StatelessWidget {
   const EinblendLeiste({
     required this.sichtbar,
     required this.child,
-    this.vonOben = false,
     this.verzoegerung = Duration.zero,
     super.key,
   });
 
   final bool sichtbar;
-  final bool vonOben;
   final Widget child;
 
   /// Wie lange sie wartet, bevor sie hereinfährt — der Reihe nach
@@ -638,26 +636,15 @@ class EinblendLeiste extends StatelessWidget {
       ignoring: !sichtbar,
       child: ExcludeSemantics(
         excluding: !sichtbar,
-        child: ClipRect(
-          child: AnimatedAlign(
-            // Der Schlüssel gehört der unteren Leiste (Tests messen sie).
-            key: vonOben ? null : leisteKey,
-            alignment: vonOben ? Alignment.bottomCenter : Alignment.topCenter,
-            heightFactor: sichtbar ? 1 : 0,
-            duration: gesamt,
-            curve: Interval(ab, 1, curve: Curves.easeOutCubic),
-            child: AnimatedSlide(
-              offset: sichtbar ? Offset.zero : Offset(0, vonOben ? -1 : 1),
-              duration: gesamt,
-              curve: Interval(ab, 1, curve: Curves.easeOutBack),
-              child: AnimatedOpacity(
-                opacity: sichtbar ? 1 : 0,
-                duration: gesamt,
-                curve: Interval(ab, 1),
-                child: child,
-              ),
-            ),
-          ),
+        // **Ihr Platz steht von Anfang an** (08.11.2026, Frederik: „ohne
+        // dass Sachen verschoben werden“). Bis dahin wuchs sie beim
+        // Hereinfahren von null auf ihre Höhe, und alles dazwischen
+        // rutschte mit. Jetzt blendet sie nur ein.
+        child: AnimatedOpacity(
+          opacity: sichtbar ? 1 : 0,
+          duration: gesamt,
+          curve: Interval(ab, 1),
+          child: child,
         ),
       ),
     );

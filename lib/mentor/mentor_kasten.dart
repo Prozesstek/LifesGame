@@ -37,20 +37,20 @@ class MentorKasten extends StatelessWidget {
   /// Wie groß sein Bild steht.
   static const double bildSeite = 56;
 
+  /// So lange blendet er ein — und ein neuer Satz in ihm.
+  static const Duration dauer = Duration(milliseconds: 320);
+
   @override
   Widget build(BuildContext context) {
+    // **Nur Deckkraft, kein Weg** (08.11.2026): Er blendet an seinem
+    // Platz ein, nichts gleitet — und nur, wenn er erscheint. Wechselt
+    // sein Satz, bleibt der Kasten stehen, und nur der Satz blendet neu
+    // ein (`_satz`); bis dahin verschwand der ganze Kasten kurz.
     return TweenAnimationBuilder<double>(
-      key: ValueKey<String>(text),
       tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 320),
+      duration: dauer,
       curve: Curves.easeOutCubic,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, 16 * (1 - t)),
-          child: child,
-        ),
-      ),
+      builder: (context, t, child) => Opacity(opacity: t, child: child),
       child: gerahmt
           ? HolzKarte(
               key: kastenKey,
@@ -67,13 +67,20 @@ class MentorKasten extends StatelessWidget {
         const MentorBild(),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Palette.text,
-              fontSize: 14.5,
-              height: 1.3,
-              fontWeight: FontWeight.w600,
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey<String>(text),
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: dauer,
+            curve: Curves.easeOutCubic,
+            builder: (context, t, satz) => Opacity(opacity: t, child: satz),
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Palette.text,
+                fontSize: 14.5,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),

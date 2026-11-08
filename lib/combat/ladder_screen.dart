@@ -8,9 +8,11 @@ import '../ui/spaeter_laden.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
 import '../home/erster_start.dart';
+import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../ui/der_reihe_nach.dart';
 import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
@@ -50,6 +52,9 @@ class LadderScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stand = ref.watch(ladderProvider);
     final stufe = stand.nextRung;
+    // **Im Tutorial** (08.11.2026): der Reihe nach — Etage, Beute, dann
+    // „Hinab“ —, und ohne Schlüssel und Blitz. Die erklärt dort niemand.
+    final imTutorial = ref.watch(ersterStartProvider).schritt == Schritt.grube;
 
     return RahmenOrt(
       art: RahmenArt.eisen,
@@ -69,48 +74,63 @@ class LadderScreen extends ConsumerWidget {
                     children: <Widget>[
                       const TagesgrubeKarte(),
                       const Spacer(),
-                      EingangsGlut(
-                        ebene: stufe,
-                        child: _Ebene(stufe: stufe),
+                      DerReiheNach(
+                        nr: 0,
+                        aktiv: imTutorial,
+                        child: EingangsGlut(
+                          ebene: stufe,
+                          child: _Ebene(stufe: stufe),
+                        ),
                       ),
-                      _Belohnung(stand: stand, stufe: stufe),
+                      DerReiheNach(
+                        nr: 1,
+                        aktiv: imTutorial,
+                        child: _Belohnung(stand: stand, stufe: stufe),
+                      ),
                       const Spacer(),
                       // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
                       // kann lang werden („Angriff +10 %, Leben +10 %, …“).
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          _Schluessel(),
-                          SizedBox(width: 16),
-                          Flexible(child: TagesformKreis()),
-                        ],
-                      ),
+                      if (!imTutorial)
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            _Schluessel(),
+                            SizedBox(width: 16),
+                            Flexible(child: TagesformKreis()),
+                          ],
+                        ),
                       const SizedBox(height: 10),
-                      Zeigefinger(
-                        schritt: Schritt.grube,
-                        radius: 10,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () => oeffneGeladen<void>(
-                              context,
-                              laden: grube.loadLibrary,
-                              vorbereiten: () => grube.grubeVorladen(),
-                              fortschritt: () => grube.grubeFortschritt,
-                              bauen: () =>
-                                  grube.PitScreen(stage: PitStage(stufe)),
-                            ),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      DerReiheNach(
+                        nr: 2,
+                        aktiv: imTutorial,
+                        child: Zeigefinger(
+                          schritt: Schritt.grube,
+                          radius: 10,
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: () => oeffneGeladen<void>(
+                                context,
+                                laden: grube.loadLibrary,
+                                vorbereiten: () => grube.grubeVorladen(),
+                                fortschritt: () => grube.grubeFortschritt,
+                                bauen: () =>
+                                    grube.PitScreen(stage: PitStage(stufe)),
                               ),
-                            ),
-                            key: LadderScreen.hinabKey,
-                            child: const SchwerterZeichen(
-                              size: 30,
-                              semanticLabel: 'Hinab',
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              key: LadderScreen.hinabKey,
+                              child: const SchwerterZeichen(
+                                size: 30,
+                                semanticLabel: 'Hinab',
+                              ),
                             ),
                           ),
                         ),
