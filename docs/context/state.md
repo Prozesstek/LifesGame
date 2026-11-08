@@ -137,6 +137,17 @@ vom 02.10.
 
 ---
 
+## 08.11.2026, zuletzt: das Fähigkeiten-Zeichen
+
+AktivesBrett: „mach bitte ein neues icon woran man sofort erkennt das es
+sich dabei um fähigkeiten handelt“ — nach seinem Vorbild „ein schräges
+Buch mit Feuer drauf“. Ein blaues Zauberbuch mit goldenem Rücken samt
+zwei Bünden, Goldrahmen im Deckel, Eckbeschlägen, Lesezeichen und dickem
+Seitenblock; in der Mitte ein Goldsiegel mit Flamme, von Ranken gehalten
+(`tool/pixel/kreis_faehigkeiten.px.js`). Runenstein und Hand mit Feuerball
+waren verworfen. `tool/kreis_zeichen.py` zeichnet den Kreis nicht mehr.
+Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## 08.11.2026, danach: das Laden-Zeichen
 
 Ein praller Lederbeutel voller Gold mit goldener Kordel, davor eine

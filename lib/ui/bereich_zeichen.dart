@@ -29,9 +29,10 @@ abstract final class BereichZeichen {
   /// pxl (`tool/pixel/kreis_laden.px.js`).
   static const String laden = 'assets/UI/Kreis_Laden.png';
 
-  /// Der leuchtende Runenstein auf dem Fähigkeiten-Kreis (ADR-0049). Bis
-  /// zum 28.10. das Bild von Sternenfall — ein Stern liest sich eher als
-  /// Bewertung denn als Kraft.
+  /// Ein schräg liegendes Zauberbuch mit Flammensiegel auf dem
+  /// Fähigkeiten-Kreis (ADR-0049) — gezeichnet mit pxl
+  /// (`tool/pixel/kreis_faehigkeiten.px.js`). Bis zum 28.10. das Bild von
+  /// Sternenfall, bis zum 08.11. ein Runenstein aus Raven.
   static const String faehigkeiten = 'assets/UI/Kreis_Faehigkeiten.png';
 
   /// Der Rucksack auf dem Ausrüstungs-Kreis (ADR-0057) — das Inventar,
@@ -74,7 +75,7 @@ abstract final class BereichZeichen {
     kampf => 1.07,
     statistik => 1.18,
     laden => 1.26,
-    faehigkeiten => 1.18,
+    faehigkeiten => 1.25,
     ausruestung => 0.96,
     charakter => 0.84,
     _ => 1.42,
