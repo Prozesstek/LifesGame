@@ -62,6 +62,17 @@ void main() {
   double leistenHoehe(WidgetTester tester) =>
       tester.getSize(find.byKey(EinblendLeiste.leisteKey)).height;
 
+  double leistenDeckkraft(WidgetTester tester) => tester
+      .widget<AnimatedOpacity>(
+        find
+            .descendant(
+              of: find.byKey(EinblendLeiste.leisteKey),
+              matching: find.byType(AnimatedOpacity),
+            )
+            .first,
+      )
+      .opacity;
+
   group('Der Scheinwerfer', () {
     testWidgets('liegt über allem, wenn der Mentor auf etwas zeigt', (
       tester,
@@ -105,22 +116,61 @@ void main() {
   });
 
   group('Die untere Leiste', () {
-    testWidgets('fehlt, solange keiner ihrer Kreise da ist', (tester) async {
+    testWidgets('fehlt, solange keiner ihrer Kreise da ist — ihr Platz '
+        'steht trotzdem (08.11.2026)', (tester) async {
       await starte(tester);
 
-      expect(leistenHoehe(tester), 0);
+      // Unsichtbar, aber nicht ohne Höhe: Wüchse sie beim Erscheinen,
+      // rutschte alles darüber mit.
+      expect(leistenDeckkraft(tester), 0);
+      expect(leistenHoehe(tester), greaterThan(40));
       expect(find.byKey(HubCircle.keyFor('Laden')).hitTestable(), findsNothing);
     });
 
-    testWidgets('fährt herein mit dem ersten Kreis', (tester) async {
+    testWidgets('blendet ein mit dem ersten Kreis', (tester) async {
       // Die erste Seite bringt Funkenstoß — und damit die Fähigkeiten.
       await starte(tester, stand: ersteSeiteGelesen());
 
-      expect(leistenHoehe(tester), greaterThan(40));
+      expect(leistenDeckkraft(tester), 1);
       expect(
         find.byKey(HubCircle.keyFor('Fähigkeiten')).hitTestable(),
         findsOneWidget,
       );
     });
+  });
+
+  testWidgets('bewegt sich ein Ziel, wandert das Licht mit (08.11.2026)', (
+    tester,
+  ) async {
+    // Die untere Leiste fährt herein, nachdem der Schleier steht — sein
+    // Loch blieb an der alten Stelle, und der Kreis stand im Dunkeln.
+    useTallView(tester);
+    final unten = ValueNotifier<double>(0);
+    addTearDown(unten.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scheinwerfer(
+          child: ValueListenableBuilder<double>(
+            valueListenable: unten,
+            builder: (_, abstand, _) => AnimatedPadding(
+              duration: const Duration(milliseconds: 600),
+              padding: EdgeInsets.only(top: abstand),
+              child: const Align(
+                alignment: Alignment.topLeft,
+                child: ScheinwerferZiel(child: SizedBox(width: 40, height: 40)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final state = tester.state<State<Scheinwerfer>>(find.byType(Scheinwerfer));
+    expect(Scheinwerfer.lichtVon(state).single.center.dy, closeTo(20, 1));
+
+    unten.value = 500;
+    await tester.pumpAndSettle();
+
+    expect(Scheinwerfer.lichtVon(state).single.center.dy, closeTo(520, 1));
   });
 }

@@ -12,7 +12,6 @@ import '../home/erster_start.dart';
 import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
-import '../mentor/scheinwerfer.dart';
 import '../mentor/zeigefinger.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
@@ -113,36 +112,35 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     // Wohin die neue Fähigkeit soll, liegt mit im Licht
-                    // des Mentors (ADR-0095) — ohne eigenen Punkt.
-                    ScheinwerferZiel(
-                      aktiv: switch (ref.watch(ersterStartProvider).schritt) {
-                        Schritt.faehigkeitAnlegen || Schritt.geschenk => true,
-                        _ => false,
-                      },
-                      radius: 12,
-                      child: AbilitySlotsRow(
-                        einladen: offen.any((id) => !chosen.contains(id)),
-                        level: level.level,
+                    // des Mentors (ADR-0095) — ohne eigenen Punkt, und
+                    // nur dieser eine Platz (08.11.2026).
+                    AbilitySlotsRow(
+                      licht: _lichtPlatz(
+                        ref.watch(ersterStartProvider).schritt,
+                        chosen,
+                        level.level,
+                      ),
+                      einladen: offen.any((id) => !chosen.contains(id)),
+                      level: level.level,
+                      weaponMove: weaponMove,
+                      chosen: chosen,
+                      gezogen: _gezogen,
+                      gewaehlt: _waehlt,
+                      // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
+                      // die belegten plus der nächste leere.
+                      // Eine Ultimate liegt nie auf einem der drei Plätze.
+                      nimmtAn: (slot) =>
+                          !zieheUltimate &&
+                          slot >= 2 &&
+                          slot - 2 < _belegung(chosen, level.level).length,
+                      onAblegen: _lege,
+                      onTapSlot: (slot) => _tippePlatz(
+                        context,
+                        ref,
+                        slot: slot,
                         weaponMove: weaponMove,
-                        chosen: chosen,
-                        gezogen: _gezogen,
-                        gewaehlt: _waehlt,
-                        // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
-                        // die belegten plus der nächste leere.
-                        // Eine Ultimate liegt nie auf einem der drei Plätze.
-                        nimmtAn: (slot) =>
-                            !zieheUltimate &&
-                            slot >= 2 &&
-                            slot - 2 < _belegung(chosen, level.level).length,
-                        onAblegen: _lege,
-                        onTapSlot: (slot) => _tippePlatz(
-                          context,
-                          ref,
-                          slot: slot,
-                          weaponMove: weaponMove,
-                          attack: attack,
-                          offen: offen,
-                        ),
+                        attack: attack,
+                        offen: offen,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -265,6 +263,8 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                     Schritt.geschenk => ability.moveId == geschenkDesMentors,
                     _ => false,
                   },
+              // Im Raster: Das Licht darf nicht auf die Kachel daneben.
+              eng: true,
               // Wird für einen Platz gewählt, wackelt, was dorthin kann.
               child: Wackeln(
                 aktiv:
@@ -546,6 +546,25 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       if (chosen.at(i) == moveId) return i;
     }
     return null;
+  }
+
+  /// **Welcher Platz im Licht des Mentors liegt** (08.11.2026): beim
+  /// Anlegen der erste freie, beim Geschenk der von Funkenstoß — dorthin
+  /// soll getauscht werden. Sonst keiner.
+  static int? _lichtPlatz(Schritt? schritt, ChosenAbilities chosen, int level) {
+    final plaetze = _belegung(chosen, level).length;
+    int? platzVon(String? id) {
+      for (var i = 0; i < plaetze; i++) {
+        if (chosen.at(i) == id) return i + 2;
+      }
+      return null;
+    }
+
+    return switch (schritt) {
+      Schritt.faehigkeitAnlegen => platzVon(null),
+      Schritt.geschenk => platzVon('funkenstoss') ?? platzVon(null),
+      _ => null,
+    };
   }
 
   /// Was auf den anbietbaren freien Plätzen liegt.

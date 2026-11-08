@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
+import '../../home/erster_start.dart';
+import '../../mentor/zeigefinger.dart';
 import '../../ui/palette.dart';
 import 'copy_stats.dart';
 import 'rarity_badge.dart';
@@ -24,8 +26,14 @@ class ShopItemTile extends StatelessWidget {
     this.abilityLine,
     this.setPieces = 0,
     this.requiredRung = 0,
+    this.mentorAngebot = false,
     super.key,
   });
+
+  /// Ob es das Angebot des Mentors im Rundgang ist. Dann liegt **der
+  /// Kaufen-Knopf** im Licht (08.11.2026): Das Angebot ist vorgewählt,
+  /// der nächste Tipp gehört dem Knopf — bis dahin lag er im Dunkeln.
+  final bool mentorAngebot;
 
   final GearCopy copy;
 
@@ -225,19 +233,27 @@ class ShopItemTile extends StatelessWidget {
       );
     }
     // Der Knopf trägt den Preis: Münze und Zahl, sonst nichts.
-    return FilledButton(
-      key: ShopItemTile.kaufenKey,
-      onPressed: block == null ? onBuy : null,
-      style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const Icon(Icons.shopping_cart_outlined, size: 16),
-          const SizedBox(width: 6),
-          const GoldIcon(size: 14),
-          const SizedBox(width: 3),
-          Text('${copy.paid}', semanticsLabel: 'Kaufen für ${copy.paid} Gold'),
-        ],
+    return Zeigefinger(
+      schritt: Schritt.laden,
+      aktiv: mentorAngebot && block == null,
+      radius: 4,
+      child: FilledButton(
+        key: ShopItemTile.kaufenKey,
+        onPressed: block == null ? onBuy : null,
+        style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(Icons.shopping_cart_outlined, size: 16),
+            const SizedBox(width: 6),
+            const GoldIcon(size: 14),
+            const SizedBox(width: 3),
+            Text(
+              '${copy.paid}',
+              semanticsLabel: 'Kaufen für ${copy.paid} Gold',
+            ),
+          ],
+        ),
       ),
     );
   }

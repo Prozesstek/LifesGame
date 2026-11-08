@@ -188,15 +188,15 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Kopf (`Mentor.bild`) aus Frederiks Bild in `assets/Mentor/` — **überall der Kopf im Kreis**, auch beim Abfragen (07.11.2026); die ganze Figur `Mentor.png` liegt ungenutzt dort | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten **oben im Fluss** eines Bildschirms (`MentorZeile`, `MentorFlaeche`) — schiebt den Inhalt nach unten, deckt nichts zu, **nimmt keinen Tipp an** (ADR-0096) | Flutter |
-| `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
-| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; der Rand läuft weich aus; dazu `ZielPunkt`, der gelbe Punkt, und `ScheinwerferLicht`, ein warmer Schein unter einem Ziel | Flutter |
+| `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu; **rollt sein Ziel ins Bild**, wenn es in einer Liste unten liegt; `ZurueckPfeil`, der Pfeil mit Punkt, wenn hier alles getan ist (08.11.2026) | Flutter |
+| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; der Rand läuft weich aus, im Raster kurz (`eng`); **das Licht folgt seinem Ziel** — wandert mit, wenn es sich bewegt, ist nie heller als das Ziel sichtbar, und kommt mit `ab` erst, wenn es steht (08.11.2026); dazu `ZielPunkt`, der gelbe Punkt, und `ScheinwerferLicht`, ein warmer Schein unter einem Ziel | Flutter |
 | `lib/mentor/buehne.dart` | **die Bühne**: ein neuer Stand des ersten Starts gilt darunter erst, wenn keine Feier in der Mitte steht und kein Blatt darüber liegt — sonst flöge alles hinter Flamme und Errungenschaft herein; überschreibt `ersterStartProvider` in einer eigenen `ProviderScope` | Flutter |
 | `lib/mentor/weiter_tipp.dart` | **ein Tipp irgendwohin führt weiter** (`WeiterTipp`), solange der Mentor etwas sagt, das man nur lesen muss — liegt unter der Feier; dazu im Kasten das Dreieck ▼ (`WeiterZeichen`) | Flutter |
-| `lib/ui/der_reihe_nach.dart` | **im Tutorial baut sich jeder Screen der Reihe nach auf** (`DerReiheNach`): erst der Mentor, dann eins nach dem anderen, zuletzt Licht, Punkt und Pulsieren — ein Takt für alle | Flutter |
+| `lib/ui/der_reihe_nach.dart` | **im Tutorial baut sich jeder Screen der Reihe nach auf** (`DerReiheNach`): erst der Mentor, dann eins nach dem anderen, zuletzt Licht, Punkt und Pulsieren — ein Takt für alle; **nur Deckkraft, kein Weg** (08.11.2026) | Flutter |
 | `lib/ui/pulsieren.dart` | **was man jetzt antippen soll, pulsiert** — golden, ohne Ende, in Tests still (`Pulsieren.pulsiert`) | Flutter |
 | `lib/theory/widgets/talentpunkt_einfuehrung.dart` | **der Talentpunkt vor dem ersten Buch**: groß in der Mitte, der Mentor erklärt, ein Tipp schickt ihn an seinen Platz oben rechts | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
-| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander hereinfliegen ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
+| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander einblenden ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
@@ -358,7 +358,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1145 Tests
+flutter test             # 1146 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -947,9 +947,13 @@ ohne Antippen, weil er nach dem ersten Sieg für immer schweigt. Sein
 Kasten nimmt keinen Tipp an — der Mentor zeigt, er sperrt nicht.
 
 **Im Tutorial baut sich jeder Screen der Reihe nach auf** (06.11.2026,
-Frederik): erst schiebt sich der Mentor herein, dann fliegt eins nach
-dem anderen herein, was neu ist, zuletzt kommen Licht, gelber Punkt und
-Pulsieren. **Wer etwas Neues ins Tutorial baut, legt es in
+Frederik): erst der Mentor, dann eins nach dem anderen, was neu ist,
+zuletzt kommen Licht, gelber Punkt und Pulsieren. **Seit dem 08.11.2026
+verschiebt sich dabei nichts** (Frederik: „ohne dass Sachen verschoben
+werden oder buggy aussehen“): Jedes Element hat seinen Platz vom ersten
+Bild an — auch die Leisten, wenn sie noch unsichtbar sind —, und es
+ändert sich **nur die Deckkraft**. Kein Gleiten, kein Wachsen, kein
+Nachfedern. **Wer etwas Neues ins Tutorial baut, legt es in
 `DerReiheNach`** (oder gibt `Aufgedeckt`/`EinblendLeiste` eine
 `verzoegerung`), sonst erscheint es als einziges auf einmal. Damit man
 es sieht, steht die Startseite auf einer **Bühne** (`Buehne`): Ein

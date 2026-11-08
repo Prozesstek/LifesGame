@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../ui/palette.dart';
 
@@ -24,10 +26,27 @@ class Scheinwerfer extends StatefulWidget {
   /// Wie weit das Licht um ein Ziel herum reicht.
   static const double rand = 6;
 
+  /// **Im Raster** (08.11.2026): Zwischen zwei Kacheln liegen 8 Punkte.
+  /// Mit [rand] und [weich] liefe das Licht eines Ziels über die Kachel
+  /// daneben — sie stand halb im Licht. Ein enges Ziel
+  /// ([ScheinwerferZiel.eng]) nimmt deshalb diese beiden.
+  static const double randEng = 2;
+  static const double weichEng = 3;
+
   /// Wie lange er auf- und abblendet.
   static const Duration blende = Duration(milliseconds: 380);
 
+  /// Wie lange er stehen bleibt, wenn sein letztes Ziel geht — Zeit für
+  /// das nächste, sich zu melden.
+  static const Duration halten = Duration(milliseconds: 380);
+
   static const Key schleierKey = ValueKey<String>('scheinwerfer');
+
+  /// Wo das Licht zuletzt gemalt wurde, in den Koordinaten des Schleiers.
+  @visibleForTesting
+  static List<Rect> lichtVon(State<Scheinwerfer> state) => <Rect>[
+    for (final l in (state as _ScheinwerferState)._zuletzt) l.loch.outerRect,
+  ];
 
   @override
   State<Scheinwerfer> createState() => _ScheinwerferState();
@@ -35,7 +54,8 @@ class Scheinwerfer extends StatefulWidget {
 
 class _ScheinwerferState extends State<Scheinwerfer>
     with SingleTickerProviderStateMixin {
-  final Map<GlobalKey, double> _ziele = <GlobalKey, double>{};
+  final Map<GlobalKey, ({double radius, bool eng, bool wartet})> _ziele =
+      <GlobalKey, ({double radius, bool eng, bool wartet})>{};
 
   /// Ziele, die nur mit anderen im Licht liegen — der Kasten des
   /// Mentors. Allein ziehen sie keinen Schleier auf.
@@ -48,6 +68,31 @@ class _ScheinwerferState extends State<Scheinwerfer>
   void initState() {
     super.initState();
     _blende = AnimationController(vsync: this, duration: Scheinwerfer.blende);
+    _beobachte();
+  }
+
+  /// Wo die Löcher beim letzten Malen lagen.
+  List<({RRect loch, double weich, double hell})> _zuletzt =
+      const <({RRect loch, double weich, double hell})>[];
+
+  /// **Bewegt sich ein Ziel, wandert das Licht mit** (08.11.2026). Bis
+  /// dahin wurde nur beim Ein- und Ausblenden und beim Rollen neu
+  /// gemalt. Fuhr ein Ziel erst danach an seinen Platz — der Kreis
+  /// „Fähigkeiten“ mit der unteren Leiste von unten herein —, blieb das
+  /// Loch an der alten Stelle, und das Ziel stand im Dunkeln.
+  ///
+  /// Gemessen wird nach jedem Bild, das ohnehin entsteht; selbst fordert
+  /// er keins an. Steht alles still, ruht er — und `pumpAndSettle` mit.
+  void _beobachte() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final jetzt = _loecher();
+      if (!listEquals(jetzt, _zuletzt)) {
+        _zuletzt = jetzt;
+        _neu.value++;
+      }
+      _beobachte();
+    });
   }
 
   @override
@@ -57,8 +102,14 @@ class _ScheinwerferState extends State<Scheinwerfer>
     super.dispose();
   }
 
-  void _melde(GlobalKey ziel, double radius, {bool begleiter = false}) {
-    _ziele[ziel] = radius;
+  void _melde(
+    GlobalKey ziel,
+    double radius, {
+    bool begleiter = false,
+    bool eng = false,
+    bool wartet = false,
+  }) {
+    _ziele[ziel] = (radius: radius, eng: eng, wartet: wartet);
     begleiter ? _begleiter.add(ziel) : _begleiter.remove(ziel);
     _wechsel();
   }
@@ -73,7 +124,15 @@ class _ScheinwerferState extends State<Scheinwerfer>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (_ziele.keys.every(_begleiter.contains)) {
-        _blende.reverse();
+        // **Erst kurz warten** (08.11.2026): Wechselt der Schritt, geht
+        // das alte Ziel, bevor das neue sich meldet. Ohne Pause hob sich
+        // der Schleier dazwischen und fiel gleich wieder — er flackerte.
+        // Kommt ein neues Ziel, fängt `forward` ihn auf.
+        _blende.animateBack(
+          0,
+          duration: Scheinwerfer.blende + Scheinwerfer.halten,
+          curve: const Interval(0.5, 1, curve: Curves.easeIn),
+        );
       } else {
         final ruhig = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
         ruhig ? _blende.value = 1 : _blende.forward();
@@ -82,22 +141,52 @@ class _ScheinwerferState extends State<Scheinwerfer>
     });
   }
 
-  /// Die Löcher im Schleier, in seinen eigenen Koordinaten.
-  List<RRect> _loecher() {
+  /// Die Löcher im Schleier, in seinen eigenen Koordinaten — jedes mit
+  /// der Breite seiner weichen Kante.
+  List<({RRect loch, double weich, double hell})> _loecher() {
     final flaeche = _flaeche.currentContext?.findRenderObject();
-    if (flaeche is! RenderBox || !flaeche.hasSize) return const <RRect>[];
+    if (flaeche is! RenderBox || !flaeche.hasSize) {
+      return const <({RRect loch, double weich, double hell})>[];
+    }
     final ursprung = flaeche.localToGlobal(Offset.zero);
-    return <RRect>[
-      for (final MapEntry(key: ziel, value: radius) in _ziele.entries)
-        if (ziel.currentContext?.findRenderObject() case final RenderBox box
-            when box.attached && box.hasSize)
-          RRect.fromRectAndRadius(
-            (box.localToGlobal(Offset.zero) - ursprung & box.size).inflate(
-              Scheinwerfer.rand,
+    return <({RRect loch, double weich, double hell})>[
+      for (final MapEntry(key: ziel, value: (:radius, :eng, :wartet))
+          in _ziele.entries)
+        // Ein wartendes Ziel hält den Schleier, hat aber noch kein Licht.
+        if (!wartet)
+          if (ziel.currentContext?.findRenderObject() case final RenderBox box
+              when box.attached && box.hasSize)
+            (
+              hell: _sichtbarkeit(box, flaeche),
+              loch: RRect.fromRectAndRadius(
+                (box.localToGlobal(Offset.zero) - ursprung & box.size).inflate(
+                  eng ? Scheinwerfer.randEng : Scheinwerfer.rand,
+                ),
+                Radius.circular(
+                  radius + (eng ? Scheinwerfer.randEng : Scheinwerfer.rand),
+                ),
+              ),
+              weich: eng ? Scheinwerfer.weichEng : Scheinwerfer.weich,
             ),
-            Radius.circular(radius + Scheinwerfer.rand),
-          ),
     ];
+  }
+
+  /// **Wie sichtbar ein Ziel gerade ist**, 0 bis 1 (08.11.2026): alle
+  /// Deckkräfte zwischen ihm und dem Schleier, malgenommen. Das Licht
+  /// ist nie heller als sein Ziel — blendet es ein oder aus, tut sein
+  /// Licht dasselbe. Bis dahin lag beim Wechsel eines Schritts kurz ein
+  /// heller Fleck, wo das alte Ziel schon unsichtbar war.
+  static double _sichtbarkeit(RenderObject ziel, RenderObject bis) {
+    var hell = 1.0;
+    for (RenderObject? o = ziel; o != null && o != bis; o = o.parent) {
+      hell *= switch (o) {
+        RenderOpacity(:final opacity) => opacity,
+        RenderAnimatedOpacity(:final opacity) => opacity.value,
+        _ => 1.0,
+      };
+      if (hell <= 0) return 0;
+    }
+    return hell.clamp(0.0, 1.0);
   }
 
   @override
@@ -154,7 +243,7 @@ class _Schleier extends CustomPainter {
   _Schleier({required this.loecher, required this.blende, required this.neu})
     : super(repaint: Listenable.merge(<Listenable>[blende, neu]));
 
-  final List<RRect> Function() loecher;
+  final List<({RRect loch, double weich, double hell})> Function() loecher;
   final Animation<double> blende;
   final Listenable neu;
 
@@ -175,14 +264,13 @@ class _Schleier extends CustomPainter {
           alpha: Scheinwerfer.dunkel * t,
         ),
     );
-    final heraus = Paint()
-      ..blendMode = BlendMode.dstOut
-      ..maskFilter = const MaskFilter.blur(
-        BlurStyle.normal,
-        Scheinwerfer.weich,
-      );
-    for (final loch in loecher()) {
-      canvas.drawRRect(loch.inflate(Scheinwerfer.weich), heraus);
+    for (final (:loch, :weich, :hell) in loecher()) {
+      if (hell <= 0) continue;
+      final heraus = Paint()
+        ..color = Color.fromRGBO(0, 0, 0, hell)
+        ..blendMode = BlendMode.dstOut
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, weich);
+      canvas.drawRRect(loch.inflate(weich), heraus);
     }
     canvas.restore();
   }
@@ -202,11 +290,23 @@ class ScheinwerferZiel extends StatefulWidget {
     this.aktiv = true,
     this.radius = 14,
     this.begleiter = false,
+    this.eng = false,
+    this.ab = Duration.zero,
     super.key,
   });
 
   final Widget child;
   final bool aktiv;
+
+  /// **Wie lange das Licht wartet**, nachdem [aktiv] gilt (08.11.2026).
+  /// Wer der Reihe nach einblendet, bekommt sein Licht erst, wenn er
+  /// steht — sonst läge ein heller Fleck auf leerem Grund.
+  final Duration ab;
+
+  /// Steht das Ziel dicht neben anderen — eine Kachel im Raster, ein
+  /// Platz in der Reihe —, läuft sein Licht kürzer aus
+  /// ([Scheinwerfer.randEng]), sonst stünde der Nachbar halb im Licht.
+  final bool eng;
 
   /// Liegt im Licht, **wenn** ein anderes Ziel den Schleier aufzieht —
   /// allein zieht es keinen auf. Für den Kasten des Mentors: Er spricht
@@ -220,9 +320,29 @@ class ScheinwerferZiel extends StatefulWidget {
   State<ScheinwerferZiel> createState() => _ScheinwerferZielState();
 }
 
-class _ScheinwerferZielState extends State<ScheinwerferZiel> {
+class _ScheinwerferZielState extends State<ScheinwerferZiel>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _ziel = GlobalKey();
   _ScheinwerferState? _bei;
+
+  /// Zählt [ScheinwerferZiel.ab] herunter — ein Takt statt einer Uhr,
+  /// damit `pumpAndSettle` mitwartet (`gotchas.md`). In `initState`,
+  /// nicht faul.
+  late final AnimationController _warten;
+
+  @override
+  void initState() {
+    super.initState();
+    _warten = AnimationController(vsync: this, duration: widget.ab);
+    // Ohne Wartezeit gleich fertig — und noch ohne Lauscher: Melden geht
+    // in `initState` nicht, das tut `didChangeDependencies`.
+    if (widget.aktiv) {
+      widget.ab == Duration.zero ? _warten.value = 1 : _warten.forward();
+    }
+    _warten.addStatusListener((status) {
+      if (status == AnimationStatus.completed) _melde();
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -233,9 +353,16 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
   @override
   void didUpdateWidget(ScheinwerferZiel alt) {
     super.didUpdateWidget(alt);
+    if (widget.aktiv && !alt.aktiv) {
+      _warten
+        ..duration = widget.ab
+        ..forward(from: 0);
+    }
+    if (!widget.aktiv) _warten.reset();
     if (alt.aktiv != widget.aktiv ||
         alt.radius != widget.radius ||
-        alt.begleiter != widget.begleiter) {
+        alt.begleiter != widget.begleiter ||
+        alt.eng != widget.eng) {
       _melde();
     }
   }
@@ -245,7 +372,13 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
     if (_bei != bei) _bei?._abmelden(_ziel);
     _bei = bei;
     if (widget.aktiv) {
-      bei?._melde(_ziel, widget.radius, begleiter: widget.begleiter);
+      bei?._melde(
+        _ziel,
+        widget.radius,
+        begleiter: widget.begleiter,
+        eng: widget.eng,
+        wartet: !_warten.isCompleted,
+      );
     } else {
       bei?._abmelden(_ziel);
     }
@@ -263,14 +396,13 @@ class _ScheinwerferZielState extends State<ScheinwerferZiel> {
   @override
   void activate() {
     super.activate();
-    if (widget.aktiv) {
-      _bei?._melde(_ziel, widget.radius, begleiter: widget.begleiter);
-    }
+    _melde();
   }
 
   @override
   void dispose() {
     _bei?._abmelden(_ziel);
+    _warten.dispose();
     super.dispose();
   }
 
