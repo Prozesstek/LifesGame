@@ -38,6 +38,12 @@ void main(List<String> args) {
     _jeKraft(args.length > 1 ? int.parse(args[1]) : 12);
     return;
   }
+  // `skalierung` vergleicht Körper, Geist und gemischt (Vorlage
+  // Skalierung, 08.11.2026).
+  if (args.isNotEmpty && args.first == 'skalierung') {
+    _skalierung(args.length > 1 ? int.parse(args[1]) : 12);
+    return;
+  }
   // `beute` zählt nur, wie viel in einem Lauf fällt (ADR-0083).
   if (args.isNotEmpty && args.first == 'beute') {
     _beute(args.length > 1 ? int.parse(args[1]) : 40);
@@ -261,6 +267,75 @@ void _jeFaehigkeit(int laeufe) {
       zeile.write('$quote %'.padLeft(10));
     }
     print(zeile);
+  }
+  print('');
+}
+
+/// **Körper, Geist, gemischt** (Vorlage Skalierung, 08.11.2026): drei
+/// Helden auf Tag 30 mit voller Ausrüstung, die sich nur darin
+/// unterscheiden, wohin ihre Häkchen gingen — Angriff und
+/// Fähigkeitsstärke je 13 bis 20 —, jeder mit physischen und mit
+/// magischen Fähigkeiten. **Keiner darf weit hinter den anderen liegen**,
+/// und wer zu seinem Gebiet passende Fähigkeiten trägt, soll gewinnen.
+void _skalierung(int laeufe) {
+  const stufen = <int>[20, 22, 24, 26];
+  // Angriff, Fähigkeitsstärke und Waffe: Körper mit der besten Klinge,
+  // Geist mit dem besten Stab (Zauberwaffen, 08.11.2026).
+  final helden = <String, (int, int, String)>{
+    'Körper (20/13), Klinge': (20, 13, 'gear-sonnenklinge'),
+    'gemischt (17/17), Klinge': (17, 17, 'gear-sonnenklinge'),
+    'gemischt (17/17), Stab': (17, 17, 'gear-sternenstab'),
+    'Geist (13/20), Stab': (13, 20, 'gear-sternenstab'),
+  };
+  const saetze = <String, List<String>>{
+    'Schläge': <String>['heavy_attack', 'klingenwirbel', 'rammbock'],
+    'Magie': <String>['donnerkeil', 'sternenfall', 'kettenblitz'],
+  };
+  print(
+    'Skalierung — Tag 30, volle Ausrüstung, Angriff/Fähigkeitsstärke '
+    'aus den Häkchen, $laeufe Läufe je Feld\n',
+  );
+  final kopf = StringBuffer('  ${''.padRight(38)}');
+  for (final stufe in stufen) {
+    kopf.write('Stufe $stufe'.padLeft(10));
+  }
+  print(kopf);
+  for (final MapEntry(key: name, value: (angriff, fs, waffeId))
+      in helden.entries) {
+    final waffeItem = GearCatalog.byId(waffeId)!;
+    var bonus = waffeItem.bonus;
+    final kraefte = <PitModifier>[
+      ...?PitGearPowers.byId(waffeItem.power)?.modifiers,
+    ];
+    for (final item in _besteStuecke()) {
+      if (item.slot == GearSlot.waffe) continue;
+      bonus = bonus + item.bonus;
+      kraefte.addAll(PitGearPowers.byId(item.power)?.modifiers ?? const []);
+    }
+    final waffe = AbilityCatalog.weaponMoveFor(waffeId);
+    final stats = _statsNach(
+      30,
+      bonus: bonus,
+      mitSeltenheit: true,
+      angriff: angriff,
+      faehigkeitsstaerke: fs,
+    );
+    for (final MapEntry(key: satz, value: ids) in saetze.entries) {
+      final zeile = StringBuffer('  ${'$name, $satz'.padRight(38)}');
+      for (final stufe in stufen) {
+        final quote = _siegquote(
+          stufe,
+          stats,
+          waffe,
+          ids,
+          null,
+          laeufe,
+          modifiers: kraefte,
+        );
+        zeile.write('$quote %'.padLeft(10));
+      }
+      print(zeile);
+    }
   }
   print('');
 }
@@ -609,6 +684,8 @@ ActionStats _statsNach(
   GearBonus bonus = const GearBonus(),
   bool mitSeltenheit = false,
   int? level,
+  int? angriff,
+  int? faehigkeitsstaerke,
 }) {
   final gewaehlt = HabitCatalog.all
       .take(HabitRewards.maxActiveHabits)
@@ -635,10 +712,16 @@ ActionStats _statsNach(
 
   final s = tracker.stats;
   return PitPower.hero(
-    attack: s.attack + bonus.attack,
+    attack: (angriff ?? s.attack) + bonus.attack,
     maxHp: s.maxHp + bonus.maxHp,
     defense: s.defense + bonus.defense,
-    energy: s.maxEnergy + bonus.maxEnergy,
+    // Seit der Skalierung: Geist ist Fähigkeitsstärke, Mana kommt aus dem
+    // Level und der Ausrüstung.
+    level: stufe,
+    abilityPower: (faehigkeitsstaerke ?? s.abilityPower) + bonus.abilityPower,
+    gearEnergy: bonus.maxEnergy * ActionBalance.powerScale,
+    gearManaRegen: bonus.manaRegen * ActionBalance.powerScale,
+    cooldownReduction: bonus.cooldownReduction / 100,
     levelFactor: PowerCurve.factorFor(stufe),
     weaponFactor: mitSeltenheit ? waffe : 1,
     armorFactor: mitSeltenheit ? ruestung : 1,
@@ -660,6 +743,7 @@ GearItem _bestesIn(GearSlot slot) {
   for (final item in stuecke) {
     final wert =
         item.bonus.attack * 8 +
+        item.bonus.abilityPower * 8 +
         item.bonus.maxHp +
         item.bonus.defense * 8 +
         item.bonus.maxEnergy * 8;

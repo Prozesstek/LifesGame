@@ -27,7 +27,31 @@ class PitWeapon {
     this.burnPerSecond = 0,
     this.pierce = false,
     this.arcDegrees = 0,
+    this.fs = 0,
   });
+
+  /// **Zauberwaffe** (Skalierung, 08.11.2026): der Anteil der
+  /// Fähigkeitsstärke am Grundangriff. Stäbe schlagen mit dem Geist,
+  /// alles andere mit dem Körper — sonst bliebe ein Geist-Spieler immer
+  /// schwach, denn den Lauf entscheidet der Grundangriff (ADR-0009).
+  final double fs;
+
+  /// Dieselbe Waffe, nur [faktor] mal so hart — Schlag und Brand.
+  PitWeapon mitWucht(double faktor) => PitWeapon(
+        moveId: moveId,
+        name: name,
+        power: power * faktor,
+        cooldownFactor: cooldownFactor,
+        range: range,
+        ranged: ranged,
+        hits: hits,
+        cleave: cleave,
+        manaOnHit: manaOnHit,
+        burnPerSecond: burnPerSecond * faktor,
+        pierce: pierce,
+        arcDegrees: arcDegrees,
+        fs: fs,
+      );
 
   final String moveId;
   final String name;
@@ -122,6 +146,54 @@ abstract final class PitWeapons {
     power: 0.8,
     range: 48,
     manaOnHit: 3,
+    fs: 1,
+  );
+
+  // --- Die Stäbe (Skalierung, 08.11.2026): je Seltenheit einer ---
+
+  /// Ein Funke, nicht weit, etwas langsam — der Bogen des Geists.
+  static const PitWeapon funkenwurf = PitWeapon(
+    moveId: 'staff_spark',
+    name: 'Funkenwurf',
+    power: 0.9,
+    cooldownFactor: 1.1,
+    range: 150,
+    ranged: true,
+    fs: 1,
+  );
+
+  /// Ein Splitter, der Mana zurückbringt.
+  static const PitWeapon sternsplitter = PitWeapon(
+    moveId: 'staff_star',
+    name: 'Sternsplitter',
+    power: 0.75,
+    range: 170,
+    ranged: true,
+    manaOnHit: 2,
+    fs: 1,
+  );
+
+  /// Ein Blitz, der nachbrennt.
+  static const PitWeapon runenblitz = PitWeapon(
+    moveId: 'staff_rune',
+    name: 'Runenblitz',
+    power: 1.0,
+    range: 190,
+    ranged: true,
+    burnPerSecond: 0.2,
+    fs: 1,
+  );
+
+  /// Drei Kometen auf einmal, jeder für sich leicht.
+  static const PitWeapon kometenschauer = PitWeapon(
+    moveId: 'staff_comet',
+    name: 'Kometenschauer',
+    power: 0.5,
+    cooldownFactor: 1.15,
+    range: 200,
+    ranged: true,
+    hits: 3,
+    fs: 1,
   );
 
   /// Trifft alles in Reichweite, langsam.
@@ -188,6 +260,10 @@ abstract final class PitWeapons {
     sonnenhieb,
     speerstich,
     sichelhieb,
+    funkenwurf,
+    sternsplitter,
+    runenblitz,
+    kometenschauer,
   ];
 
   /// `null` für einen Zug, der keine Waffe ist.

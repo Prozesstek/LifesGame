@@ -9,6 +9,7 @@ import 'level.dart';
 import 'pit_ability.dart';
 import 'pit_modifier.dart';
 import 'pit_weapon.dart';
+import 'skalierung.dart';
 import 'projectile.dart';
 import 'stage.dart';
 import 'stats.dart';
@@ -53,7 +54,10 @@ class ActionWorld {
         // Eigener Würfel für die Beute (ADR-0083): Ob etwas fällt, soll
         // keinen kritischen Treffer und keine Kugel verschieben.
         _lootRng = math.Random(seed * 31 + 7),
-        weapon = PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
+        weapon = PitSkalierung.waffe(
+          PitWeapons.byMoveId(weaponMoveId ?? '') ?? PitWeapons.fist,
+          heroStats,
+        ),
         _mana = heroStats.maxMana.toDouble(),
         // Sets und legendäre Kräfte werden hier einmal angewendet; die
         // Welt sieht danach nur noch die veränderten Fähigkeiten.
@@ -62,9 +66,9 @@ class ActionWorld {
               .map(PitAbilities.byId)
               .whereType<PitAbility>()
               .take(ActionBalance.maxAbilitySlots)
-              .map((a) => PitModifiers.apply(a, modifiers)),
+              .map((a) => _mitSkalierung(a, modifiers, heroStats)),
         ),
-        ultimate = _ultimateFor(ultimateId, modifiers) {
+        ultimate = _ultimateFor(ultimateId, modifiers, heroStats) {
     // Passive Wirkungen liegen auf einem Platz und gelten den ganzen
     // Lauf; gesammelt wird einmal (ADR-0074). Seit ADR-0077 bringt auch
     // die Ausrüstung welche mit — als [GrantPassive] unter den
@@ -114,10 +118,26 @@ class ActionWorld {
     _rebuildPath();
   }
 
-  static PitAbility? _ultimateFor(String? id, List<PitModifier> modifiers) {
+  /// Erst die Sets und Kräfte, dann Angriffsschaden und Fähigkeitsstärke
+  /// (`PitSkalierung`) — beides einmal beim Betreten.
+  static PitAbility _mitSkalierung(
+    PitAbility a,
+    List<PitModifier> modifiers,
+    ActionStats stats,
+  ) =>
+      PitModifiers.apply(a, <PitModifier>[
+        ...modifiers,
+        ...PitSkalierung.fuer(a, stats),
+      ]);
+
+  static PitAbility? _ultimateFor(
+    String? id,
+    List<PitModifier> modifiers,
+    ActionStats stats,
+  ) {
     if (id == null) return null;
     final ultimate = PitAbilities.ultimateById(id);
-    return ultimate == null ? null : PitModifiers.apply(ultimate, modifiers);
+    return ultimate == null ? null : _mitSkalierung(ultimate, modifiers, stats);
   }
 
   // --- Wo es weh tat (ADR-0072) ---

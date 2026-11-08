@@ -61,18 +61,27 @@ final heroPowerProvider = Provider<HeroPower>((ref) {
       attack: werte.base.attack,
       maxHp: werte.base.maxHp,
       defense: werte.base.defense,
-      energy: werte.base.maxEnergy,
+      // Geist ist seit der Skalierung Fähigkeitsstärke; Mana und Tempo
+      // kommen aus dem Level (`ActionBalance.energyAt`).
+      level: level,
+      abilityPower: werte.base.abilityPower,
       gearAttack: werte.bonus.attack + dev.attack,
       gearMaxHp: werte.bonus.maxHp + dev.maxHp,
       gearDefense: werte.bonus.defense + dev.defense,
       gearEnergy: werte.bonus.maxEnergy + dev.mana,
+      // Die neuen Zeilen der Skalierung, im Kampfmassstab der Exemplare;
+      // die Abklingzeit steht dort in Prozent mal zehn.
+      gearAbilityPower: werte.bonus.abilityPower,
+      gearManaRegen: werte.bonus.manaRegen,
+      cooldownReduction:
+          werte.bonus.cooldownReduction / (GearBonus.combatScale * 100),
       levelFactor: stufe,
       weaponFactor: waffe,
       armorFactor: ruestung,
       formAttack: form.factorFor(HabitStat.staerke),
       formHp: form.factorFor(HabitStat.ausdauer),
       formDefense: form.factorFor(HabitStat.disziplin),
-      formMana: form.factorFor(HabitStat.klarheit),
+      formAbility: form.factorFor(HabitStat.klarheit),
     ),
     levelFactor: stufe,
     weaponFactor: waffe,

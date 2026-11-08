@@ -59,6 +59,26 @@ abstract final class ActionBalance {
   // Der Energiewert des Charakters wird in der Grube zu Mana. Er bleibt
   // damit, was er im Rundenkampf war: der Wert, der Fähigkeiten bezahlt.
 
+  /// **Energie aus dem Level** (Skalierung, 08.11.2026): Bis dahin kam sie
+  /// aus der Klarheit, 8 bis 12. Jetzt wächst sie mit dem Level, damit
+  /// Geist frei wird für die Fähigkeitsstärke: Level 1 hat 8, Level 41
+  /// und darüber 12 — dieselbe Spanne wie vorher.
+  static const int energyBase = 8;
+  static const double energyPerLevel = 0.1;
+  static const int energyLevelCap = 41;
+
+  static int energyAt(int level) =>
+      energyBase +
+      ((level.clamp(1, energyLevelCap) - 1) * energyPerLevel).round();
+
+  /// Mehr als so viel kürzer klingt keine Fähigkeit ab (wie in LoL).
+  static const double maxCooldownReduction = 0.4;
+
+  /// Wie weit Heilung und Schutz mit der Fähigkeitsstärke wachsen oder
+  /// fallen: ihr Verhältnis zum Angriff, in diesen Grenzen.
+  static const double schutzMin = 0.75;
+  static const double schutzMax = 1.5;
+
   /// Mana je Punkt Energie. Tag 0 hat 8 Energie, also 40 Mana.
   static const int manaPerEnergy = 5;
 

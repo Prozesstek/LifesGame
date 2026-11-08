@@ -82,7 +82,7 @@ void _run(String label, {required double quote, Set<int>? weekdays}) {
       '${t.totalXp.toString().padLeft(5)} XP  '
       '${t.totalGold.toString().padLeft(4)} Gold  '
       'ATK ${stats.attack}  HP ${stats.maxHp}  '
-      'DEF ${stats.defense}  EN ${stats.maxEnergy}',
+      'DEF ${stats.defense}  FS ${stats.abilityPower}',
     );
   }
   print('');
