@@ -95,7 +95,7 @@ abstract final class GearCatalog {
       slot: GearSlot.waffe,
       rarity: GearRarity.rare,
       price: GearPrices.waffeRare,
-      bonus: GearBonus(attack: 4, maxEnergy: 1),
+      bonus: GearBonus(attack: 2, abilityPower: 4, maxEnergy: 1),
       why: 'Fünf Energie je Runde, dazu ein Punkt mehr Vorrat. Damit wird '
           'Sternenfall (kostet zehn) überhaupt spielbar. Wer nur zuschlagen '
           'will, ist mit der halb so teuren Übungsklinge besser bedient.',
@@ -132,7 +132,7 @@ abstract final class GearCatalog {
       rarity: GearRarity.legendary,
       power: 'legendaer-sonnenglut',
       price: GearPrices.waffeLegendary,
-      bonus: GearBonus(attack: 6, maxEnergy: 1),
+      bonus: GearBonus(attack: 6, abilityPower: 3, maxEnergy: 1),
       why: 'Der einzige Waffenzug mit einer Perfect-Wirkung: Ein perfekter '
           'Treffer entzündet den Gegner, ohne Energie zu kosten. Verdient '
           'ab Etage zwanzig im Dungeon.',
@@ -308,7 +308,11 @@ abstract final class GearCatalog {
       slot: GearSlot.helm,
       rarity: GearRarity.epic,
       price: GearPrices.helmEpic2,
-      bonus: GearBonus(maxHp: 30, defense: 2, maxEnergy: 1),
+      bonus: GearBonus(
+        maxHp: 30,
+        defense: 2,
+        maxEnergy: 1,
+      ),
       why: 'Energie auf dem Kopf, zum ersten Mal. Wer Ring und Talisman '
           'schon auf Energie hat, kommt hier auf den Vorrat, den '
           'Sternenfall braucht.',
@@ -427,7 +431,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.common,
       price: GearPrices.ringCommon1,
-      bonus: GearBonus(maxEnergy: 1),
+      bonus: GearBonus(maxEnergy: 1, manaRegen: 1),
       why: 'Ein Punkt Energie mehr heißt: Der Wuchtschlag ist eine Runde '
           'früher bezahlbar. Das teuerste der gewöhnlichen Stücke, weil es '
           'nicht eine Zahl erhöht, sondern eine Entscheidung ändert.',
@@ -438,7 +442,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.common,
       price: GearPrices.ringCommon2,
-      bonus: GearBonus(maxHp: 6, maxEnergy: 1),
+      bonus: GearBonus(maxHp: 6, maxEnergy: 1, manaRegen: 1),
       why: 'Derselbe Energiepunkt wie der schlichte Ring, dazu etwas Leben. '
           'Der ruhigere von beiden — und der bessere, wenn Kämpfe zu früh '
           'enden.',
@@ -449,7 +453,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.uncommon,
       price: GearPrices.ringUncommon1,
-      bonus: GearBonus(maxEnergy: 2),
+      bonus: GearBonus(maxEnergy: 2, manaRegen: 1),
       why: 'Zwei Punkte Energie machen aus „Wuchtschlag, wenn es reicht" '
           'ein „Wuchtschlag, wann ich will". Das Stück, das die '
           'Reihenfolge der Züge verändert.',
@@ -460,7 +464,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.uncommon,
       price: GearPrices.ringUncommon2,
-      bonus: GearBonus(maxHp: 10, maxEnergy: 2),
+      bonus: GearBonus(maxHp: 10, maxEnergy: 2, manaRegen: 1),
       why: 'Der Taktring mit zehn Lebenspunkten obendrauf. Für alle, denen '
           'der Kampf endet, bevor die zwei Punkte Energie sich auszahlen.',
     ),
@@ -470,7 +474,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.rare,
       price: GearPrices.ringRare,
-      bonus: GearBonus(maxHp: 8, maxEnergy: 3),
+      bonus: GearBonus(maxHp: 8, maxEnergy: 3, manaRegen: 2),
       why: 'Drei Punkte Energie ändern nicht einen Zug, sondern den ganzen '
           'Rhythmus. Sternenfall kostet zehn — mit diesem Ring wird er '
           'überhaupt erst erreichbar.',
@@ -482,7 +486,7 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.epic,
       price: GearPrices.ringEpic1,
-      bonus: GearBonus(attack: 1, maxHp: 10, maxEnergy: 3),
+      bonus: GearBonus(abilityPower: 1, maxHp: 10, maxEnergy: 3, manaRegen: 2),
       why: 'Der Aderring mit einem Punkt Angriff und etwas mehr Leben. Für '
           'alle, denen die drei Energie schon reichen und die den Rest des '
           'Platzes nicht verschenken wollen. Ab Etage zehn.',
@@ -493,7 +497,13 @@ abstract final class GearCatalog {
       slot: GearSlot.ring,
       rarity: GearRarity.epic,
       price: GearPrices.ringEpic2,
-      bonus: GearBonus(attack: 2, maxHp: 8, maxEnergy: 4),
+      bonus: GearBonus(
+        abilityPower: 2,
+        maxHp: 8,
+        maxEnergy: 4,
+        manaRegen: 2,
+        cooldownReduction: 6,
+      ),
       why: 'Vier Punkte Energie auf einem Platz. Damit ist Sternenfall '
           'nicht nur erreichbar, sondern jede dritte Runde bezahlbar.',
     ),
@@ -504,7 +514,13 @@ abstract final class GearCatalog {
       rarity: GearRarity.legendary,
       power: 'legendaer-erzhunger',
       price: GearPrices.ringLegendary,
-      bonus: GearBonus(attack: 3, maxHp: 12, maxEnergy: 4),
+      bonus: GearBonus(
+        abilityPower: 3,
+        maxHp: 12,
+        maxEnergy: 4,
+        manaRegen: 3,
+        cooldownReduction: 8,
+      ),
       why: 'Das teuerste Stück des Ladens, und das einzige, das auf drei '
           'Werte zugleich wirkt, ohne einen davon klein zu halten. Verdient '
           'ab dem Bergwächter.',
@@ -539,7 +555,7 @@ abstract final class GearCatalog {
       slot: GearSlot.talisman,
       rarity: GearRarity.uncommon,
       price: GearPrices.talismanUncommon1,
-      bonus: GearBonus(maxHp: 8, maxEnergy: 1),
+      bonus: GearBonus(abilityPower: 1, maxHp: 8, maxEnergy: 1),
       why: 'Der erste Talisman mit Energie. Ab hier ist der Platz keine '
           'Kleinigkeit mehr, sondern eine Entscheidung.',
     ),
@@ -549,7 +565,7 @@ abstract final class GearCatalog {
       slot: GearSlot.talisman,
       rarity: GearRarity.uncommon,
       price: GearPrices.talismanUncommon2,
-      bonus: GearBonus(attack: 2, maxHp: 10, maxEnergy: 1),
+      bonus: GearBonus(abilityPower: 2, maxHp: 10, maxEnergy: 1),
       why: 'Energie, Angriff und Leben auf einem Platz. Nichts davon viel, '
           'alles davon nützlich — der vielseitigste Kauf im Laden.',
     ),
@@ -559,7 +575,7 @@ abstract final class GearCatalog {
       slot: GearSlot.talisman,
       rarity: GearRarity.rare,
       price: GearPrices.talismanRare,
-      bonus: GearBonus(attack: 2, maxHp: 6, maxEnergy: 2),
+      bonus: GearBonus(abilityPower: 2, maxHp: 6, maxEnergy: 2),
       why: 'Zwei Punkte Energie außerhalb des Rings. Wer beide Plätze auf '
           'Energie legt, spielt einen sichtbar anderen Kampf als jemand '
           'mit denselben Werten in Angriff.',
@@ -570,7 +586,11 @@ abstract final class GearCatalog {
       slot: GearSlot.talisman,
       rarity: GearRarity.epic,
       price: GearPrices.talismanEpic1,
-      bonus: GearBonus(attack: 2, maxHp: 14, maxEnergy: 2),
+      bonus: GearBonus(
+        abilityPower: 2,
+        maxHp: 14,
+        maxEnergy: 2,
+      ),
       why: 'Das Runenamulett mit acht Lebenspunkten mehr. Für die, denen '
           'der Kampf endet, bevor die zwei Energie sich auszahlen. Ab '
           'Etage zehn.',
@@ -708,7 +728,7 @@ abstract final class GearCatalog {
       rarity: GearRarity.rare,
       power: 'kraft-seelenernte',
       price: GearPrices.seelenring,
-      bonus: GearBonus(maxHp: 6, maxEnergy: 3),
+      bonus: GearBonus(maxHp: 6, maxEnergy: 3, manaRegen: 2),
       why: 'Jeder Kill gibt Mana. In einem vollen Raum bezahlt er die '
           'Fähigkeiten, die ihn leeren.',
     ),
@@ -719,7 +739,7 @@ abstract final class GearCatalog {
       rarity: GearRarity.legendary,
       power: 'kraft-frostreif',
       price: GearPrices.frostreif,
-      bonus: GearBonus(attack: 2, maxHp: 12, maxEnergy: 4),
+      bonus: GearBonus(abilityPower: 2, maxHp: 12, maxEnergy: 4, manaRegen: 3),
       why: 'Ein Kreis aus Eis geht mit dir: Wer hineinläuft, wird langsamer '
           'und friert. Wer rückwärts schlägt, behält Abstand. Verdient ab '
           'dem Bergwächter.',
@@ -731,7 +751,7 @@ abstract final class GearCatalog {
       rarity: GearRarity.rare,
       power: 'kraft-echo',
       price: GearPrices.echostein,
-      bonus: GearBonus(attack: 2, maxHp: 8, maxEnergy: 2),
+      bonus: GearBonus(abilityPower: 2, maxHp: 8, maxEnergy: 2),
       why: 'Jede vierte Fähigkeit mit Schaden trifft ein zweites Mal, halb '
           'so hart. Lohnt sich für den, der seine Knöpfe oft drückt.',
     ),
@@ -742,11 +762,57 @@ abstract final class GearCatalog {
       rarity: GearRarity.legendary,
       power: 'kraft-irrlichter',
       price: GearPrices.irrlichtamulett,
-      bonus: GearBonus(attack: 4, maxHp: 18, maxEnergy: 3),
+      bonus: GearBonus(abilityPower: 4, maxHp: 18, maxEnergy: 3),
       why: 'Alle fünf Sekunden ein Irrlicht, bis zu drei. Sie kreisen, bis '
           'ein Gegner auftaucht, und zerplatzen an ihm — wer einen Raum '
           'betritt, hat schon drei Schüsse frei. Verdient ab dem '
           'Bergwächter.',
+    ),
+
+    // --- Die Stäbe (Skalierung, 08.11.2026) ---
+    //
+    // Ein Stab schlägt mit der Fähigkeitsstärke statt mit dem
+    // Angriffsschaden (`PitWeapon.fs`). Ohne ihn bliebe ein Geist-Spieler
+    // schwach, denn den Lauf entscheidet der Grundangriff.
+    GearItem(
+      id: 'gear-eichenstab',
+      name: 'Eichenstab',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.common,
+      price: GearPrices.eichenstab,
+      bonus: GearBonus(abilityPower: 3),
+      why: 'Der erste Stab: Er wirft Funken statt zu schlagen, und jeder '
+          'Funke trifft so hart, wie dein Geist ist.',
+    ),
+    GearItem(
+      id: 'gear-wanderstab',
+      name: 'Wanderstab',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.uncommon,
+      price: GearPrices.wanderstab,
+      bonus: GearBonus(abilityPower: 4, maxEnergy: 1),
+      why: 'Jeder Splitter bringt Mana zurück — die Waffe für den, der '
+          'lieber zaubert als schlägt.',
+    ),
+    GearItem(
+      id: 'gear-runenstab',
+      name: 'Runenstab',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.epic,
+      price: GearPrices.runenstab,
+      bonus: GearBonus(abilityPower: 6, maxEnergy: 2),
+      why: 'Ein Blitz, der nachbrennt. Mit viel Geist hält kein Gegner '
+          'lange stand.',
+    ),
+    GearItem(
+      id: 'gear-sternenstab',
+      name: 'Sternenstab',
+      slot: GearSlot.waffe,
+      rarity: GearRarity.legendary,
+      price: GearPrices.sternenstab,
+      power: 'legendaer-sternenglanz',
+      bonus: GearBonus(abilityPower: 7, maxHp: 4, maxEnergy: 2),
+      why: 'Drei Kometen auf einmal. Der stärkste Stab, den es gibt.',
     ),
   ];
 

@@ -69,7 +69,7 @@ void main() {
   group('Mana', () {
     test('ein Lauf beginnt mit vollem Mana aus der Energie', () {
       final welt = _welt();
-      expect(welt.maxMana, ActionStats.frisch.energy * 5);
+      expect(welt.maxMana, ActionStats.frisch.energy! * 5);
       expect(welt.mana, welt.maxMana);
     });
 

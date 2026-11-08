@@ -91,6 +91,12 @@ abstract final class MoveIcons {
     'mace_bash': 'assets/Faehigkeiten/Wuchtstoss.png',
     'dagger_double': 'assets/Faehigkeiten/Doppelstich.png',
     'staff_gather': 'assets/Faehigkeiten/Sammelschlag.png',
+    // Die Stäbe der Skalierung (08.11.2026) — vorerst der umgefärbte
+    // Sammelschlag, bis eigene gezeichnet sind.
+    'staff_spark': 'assets/Faehigkeiten/Funkenwurf.png',
+    'staff_star': 'assets/Faehigkeiten/Sternsplitter.png',
+    'staff_rune': 'assets/Faehigkeiten/Runenblitz.png',
+    'staff_comet': 'assets/Faehigkeiten/Kometenschauer.png',
     'greatsword_cleave': 'assets/Faehigkeiten/Spalter.png',
     'longbow_volley': 'assets/Faehigkeiten/Doppelschuss.png',
     'sunblade_flare': 'assets/Faehigkeiten/Sonnenhieb.png',

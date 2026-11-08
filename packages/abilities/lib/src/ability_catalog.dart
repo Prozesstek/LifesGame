@@ -83,6 +83,11 @@ abstract final class AbilityCatalog {
     'gear-sonnenklinge': 'sunblade_flare',
     'gear-langspeer': 'spear_thrust',
     'gear-blutsichel': 'sickle_reap',
+    // Die Stäbe der Skalierung (08.11.2026).
+    'gear-eichenstab': 'staff_spark',
+    'gear-wanderstab': 'staff_star',
+    'gear-runenstab': 'staff_rune',
+    'gear-sternenstab': 'staff_comet',
   };
 
   /// Die fünfzehn Fähigkeiten, die der Spieler auf die freien Slots legen

@@ -1,8 +1,9 @@
 # Skalierung: Angriffsschaden und Fähigkeitsstärke
 
-> **Entwurf vom 08.11.2026** (Frederik mit Claude). Noch nicht gebaut,
-> noch kein ADR. Erst lesen beide, dann wird gebaut — **vor dem
-> geschlossenen Test**.
+> **Entwurf vom 08.11.2026** (Frederik mit Claude), **am selben Tag
+> abgenommen und gebaut**: [ADR-0100](../decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md).
+> Abweichungen vom Entwurf stehen dort: Zauberwaffen (ein Stab je
+> Seltenheit), und Abklingzeit tragen nur die teuersten Ringe.
 
 ## Warum
 

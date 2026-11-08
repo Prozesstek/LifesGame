@@ -73,7 +73,11 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     final level = ref.watch(playerLevelProvider);
     final chosen = ref.watch(chosenAbilitiesProvider);
     final weaponMove = ref.watch(weaponMoveProvider);
-    final attack = ref.watch(heroPowerProvider).stats.combatAttack;
+    final held = ref.watch(heroPowerProvider).stats;
+    final KampfWerte attack = (
+      angriff: held.combatAttack,
+      faehigkeit: held.combatAbilityPower,
+    );
 
     final offen = <String>{
       for (final ability in ref.watch(unlockedAbilitiesProvider))
@@ -221,7 +225,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     required Set<String> offen,
     required Set<String> offeneUltimates,
     required ChosenAbilities chosen,
-    required int attack,
+    required KampfWerte attack,
   }) {
     final eigene = ordneFaehigkeiten(<Ability>[
       for (final ability in AbilityCatalog.choosable)
@@ -339,7 +343,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     BuildContext context,
     WidgetRef ref, {
     required Set<String> offen,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final id = ref.read(chosenAbilitiesProvider).ultimate;
     final ability = id == null ? null : AbilityCatalog.ultimateByMoveId(id);
@@ -374,7 +378,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required Ability ability,
     required bool unlocked,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final pit = PitAbilities.ultimateById(ability.moveId);
     if (pit == null) return;
@@ -388,7 +392,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         ultimateOpen: AbilitySlots.ultimateOpenAt(level),
         onUltimateSlot:
             ref.read(chosenAbilitiesProvider).ultimate == ability.moveId,
-        attack: attack,
+        werte: attack,
       ),
       freiePlaetze: const <String?>[],
     );
@@ -452,7 +456,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required int slot,
     required String weaponMove,
-    required int attack,
+    required KampfWerte attack,
     required Set<String> offen,
   }) async {
     if (slot == 1) {
@@ -460,7 +464,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       if (waffe == null) return;
       await showAbilitySheet(
         context,
-        karte: AbilityCard.waffe(waffe: waffe, attack: attack),
+        karte: AbilityCard.waffe(waffe: waffe, werte: attack),
         freiePlaetze: const <String?>[],
       );
       return;
@@ -502,7 +506,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required Ability ability,
     required bool unlocked,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final pit = PitAbilities.byId(ability.moveId);
     // Eine Fähigkeit, die die Grube nicht kennt, tut dort nichts
@@ -521,7 +525,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         pit: pit,
         unlocked: unlocked,
         currentFreeIndex: aktuell,
-        attack: attack,
+        werte: attack,
       ),
       freiePlaetze: _belegung(chosen, level),
     );

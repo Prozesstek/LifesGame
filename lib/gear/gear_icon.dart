@@ -51,6 +51,12 @@ abstract final class GearIcons {
     'gear-geschliffene-klinge':
         'assets/Waffen/Schwerter/GeschliffeneKlinge.png',
     'gear-kriegsstab': 'assets/Waffen/Staebe/Kriegsstab.png',
+    // Die Stäbe der Skalierung (08.11.2026) — vorerst der umgefärbte
+    // Kriegsstab, bis eigene gezeichnet sind.
+    'gear-eichenstab': 'assets/Waffen/Staebe/Eichenstab.png',
+    'gear-wanderstab': 'assets/Waffen/Staebe/Wanderstab.png',
+    'gear-runenstab': 'assets/Waffen/Staebe/Runenstab.png',
+    'gear-sternenstab': 'assets/Waffen/Staebe/Sternenstab.png',
     'gear-zweihaender': 'assets/Waffen/Schwerter/Zweihaender.png',
     // Gezeichnet mit pxl: tool/pixel/bogen_verwachsen.px.js (04.11.2026).
     'gear-langbogen': 'assets/Waffen/Boegen/Wurzelbogen.png',

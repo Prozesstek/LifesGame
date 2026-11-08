@@ -10,7 +10,13 @@ class ActionStats {
     required this.attack,
     required this.maxHp,
     required this.defense,
-    required this.energy,
+    this.energy,
+    this.level = 1,
+    this.abilityPower,
+    this.gearAbilityPower = 0,
+    this.abilityMultiplier,
+    this.cooldownReduction = 0,
+    this.gearManaRegen = 0,
     this.damageMultiplier = 1,
     this.hpMultiplier = 1,
     this.defenseMultiplier = 1,
@@ -27,9 +33,35 @@ class ActionStats {
   final int maxHp;
   final int defense;
 
-  /// Energie beschleunigt die Schlagfolge — der einzige Ort, an dem
-  /// Klarheit im Echtzeit-Kampf etwas tut.
-  final int energy;
+  /// Energie: Mana, Nachfluss und Schlagtempo. **Seit der Skalierung
+  /// (08.11.2026, `docs/vorlagen/skalierung.md`) kommt sie nicht mehr aus
+  /// den Gewohnheiten, sondern aus dem [level]** ([ActionBalance.energyAt]);
+  /// angegeben wird sie nur noch, wo ein fester Held gebraucht wird — die
+  /// Tagesgrube, Tests, die Simulation.
+  final int? energy;
+
+  /// Das Level des Charakters — für die Energie, wenn [energy] fehlt.
+  final int level;
+
+  /// **Fähigkeitsstärke** (FS) aus den Gewohnheiten, im selben Massstab
+  /// wie [attack]. Ohne Angabe gleich dem Angriff: Dann trifft jede
+  /// Fähigkeit wie vor der Skalierung.
+  final int? abilityPower;
+
+  /// Fähigkeitsstärke aus der Ausrüstung, im Kampfmassstab wie [gearAttack].
+  final int gearAbilityPower;
+
+  /// Was die Fähigkeitsstärke vervielfacht — Level, Seltenheit der Waffe,
+  /// Tagesform des Geists. Ohne Angabe derselbe wie [damageMultiplier].
+  final double? abilityMultiplier;
+
+  /// Wie viel kürzer Fähigkeiten abklingen, 0 bis 1 — aus der Ausrüstung,
+  /// gedeckelt bei [ActionBalance.maxCooldownReduction].
+  final double cooldownReduction;
+
+  /// Manaregeneration aus der Ausrüstung, in Zehnteln eines Manas je
+  /// Sekunde (Kampfmassstab wie [gearEnergy]).
+  final int gearManaRegen;
 
   /// Was die Ausrüstung dazugibt — **schon im Kampfmassstab** (ADR-0048).
   /// Gewürfelte Werte wie 11 statt 10 gingen im kleinen Massstab in der
@@ -44,7 +76,9 @@ class ActionStats {
   final int gearEnergy;
 
   /// Die Energie samt Ausrüstung, für Mana und Schlagtempo.
-  double get _energie => energy + gearEnergy / ActionBalance.powerScale;
+  double get _energie =>
+      (energy ?? ActionBalance.energyAt(level)) +
+      gearEnergy / ActionBalance.powerScale;
 
   /// Ein **vervielfachender** Faktor auf den Schaden — seit ADR-0042 das
   /// Level mal die Seltenheit der Waffe ([PitPower.hero]).
@@ -72,6 +106,18 @@ class ActionStats {
       ((attack * ActionBalance.powerScale + gearAttack) * damageMultiplier)
           .round();
 
+  /// Die Fähigkeitsstärke, wie die Grube sie führt — wie
+  /// [combatAttack], nur für den magischen Anteil einer Fähigkeit.
+  int get combatAbilityPower =>
+      (((abilityPower ?? attack) * ActionBalance.powerScale +
+                  gearAbilityPower) *
+              (abilityMultiplier ?? damageMultiplier))
+          .round();
+
+  /// Die Abklingzeit-Verkürzung, gedeckelt.
+  double get combatCooldownReduction =>
+      cooldownReduction.clamp(0.0, ActionBalance.maxCooldownReduction);
+
   int get combatMaxHp =>
       ((maxHp * ActionBalance.powerScale + gearMaxHp) * hpMultiplier).round();
 
@@ -92,7 +138,8 @@ class ActionStats {
   /// Mana je Sekunde.
   double get manaRegen =>
       (ActionBalance.manaRegenBase +
-          _energie * ActionBalance.manaRegenPerEnergy) *
+          _energie * ActionBalance.manaRegenPerEnergy +
+          gearManaRegen / ActionBalance.powerScale) *
       manaMultiplier;
 
   /// Sekunden zwischen zwei Schlägen.
@@ -164,7 +211,9 @@ abstract final class PitPower {
     required int attack,
     required int maxHp,
     required int defense,
-    required int energy,
+    int? energy,
+    int level = 1,
+    int? abilityPower,
     required double levelFactor,
     required double weaponFactor,
     required double armorFactor,
@@ -172,6 +221,10 @@ abstract final class PitPower {
     double formHp = 1,
     double formDefense = 1,
     double formMana = 1,
+    double? formAbility,
+    int gearAbilityPower = 0,
+    double cooldownReduction = 0,
+    int gearManaRegen = 0,
     int gearAttack = 0,
     int gearMaxHp = 0,
     int gearDefense = 0,
@@ -182,11 +235,19 @@ abstract final class PitPower {
       maxHp: maxHp,
       defense: defense,
       energy: energy,
+      level: level,
+      abilityPower: abilityPower,
+      gearAbilityPower: gearAbilityPower,
+      cooldownReduction: cooldownReduction,
+      gearManaRegen: gearManaRegen,
       gearAttack: gearAttack,
       gearMaxHp: gearMaxHp,
       gearDefense: gearDefense,
       gearEnergy: gearEnergy,
       damageMultiplier: levelFactor * weaponFactor * formAttack,
+      // Die Seltenheit der Waffe vervielfacht beide (Vorlage Skalierung).
+      abilityMultiplier:
+          levelFactor * weaponFactor * (formAbility ?? formAttack),
       hpMultiplier: levelFactor * armorFactor * formHp,
       defenseMultiplier: levelFactor * formDefense,
       manaMultiplier: formMana,

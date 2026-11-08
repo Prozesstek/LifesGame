@@ -38,7 +38,8 @@ class CharacterStats {
 
   int get defense => valueFor(HabitStat.disziplin);
 
-  int get maxEnergy => valueFor(HabitStat.klarheit);
+  /// Die Fähigkeitsstärke — aus Geist, im selben Massstab wie [attack].
+  int get abilityPower => valueFor(HabitStat.klarheit);
 
   /// Gesamtzahl aller Häkchen — für die Anzeige „so oft hast du geliefert“.
   int get totalChecks {

@@ -217,13 +217,14 @@ abstract final class StatCurve {
     maxBonus: 6,
   );
 
-  /// Energie: 8 bis 12. Unter 8 wäre der Wuchtschlag (Kosten 6)
-  /// unbezahlbar, der Kampf verlöre einen seiner vier Slots.
+  /// Fähigkeitsstärke: 13 bis 20 — **dieselbe Kurve wie der Angriff**
+  /// (Skalierung, 08.11.2026). Nur so trifft ein Feuerball bei gleich viel
+  /// Geist wie Körper so hart wie ein Schlag. Bis dahin Energie, 8 bis 12.
   static const StatRule _klarheit = StatRule(
-    base: 8,
-    checksPerPoint: 10,
+    base: 13,
+    checksPerPoint: 5,
     pointStep: 1,
-    maxBonus: 4,
+    maxBonus: 7,
   );
 
   static StatRule ruleFor(HabitStat stat) {

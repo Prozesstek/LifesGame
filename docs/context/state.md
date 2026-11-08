@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 07.11.2026 · Frederik
+**Zuletzt aktualisiert:** 08.11.2026 · Frederik
 
 ---
 
@@ -39,8 +39,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1145, dazu die acht Packages (theory 219, habits 375, gear
-140, action_combat 406, progression 58, abilities 43, identity 25,
+**Tests:** App 1149, dazu die acht Packages (theory 219, habits 375, gear
+141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -136,6 +136,35 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 08.11.2026: Angriffsschaden und Fähigkeitsstärke
+
+Frederik, Level 30: „Jetzt hab ich zwar massig Mana aber keinen
+Schaden.“ Gewünscht: wie das Item-System von LoL. Vorlage
+[`skalierung.md`](../vorlagen/skalierung.md) durchgesprochen und
+abgenommen, gebaut **vor dem Teststart**:
+[ADR-0100](../decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md).
+
+| Was | Wie |
+|---|---|
+| **Geist** | steigert die Fähigkeitsstärke (13 bis 20, wie der Angriff), nicht mehr Mana |
+| **Fähigkeiten** | 13 physisch, 14 Magie, Zehrung/Glutspur/Steinschlag gemischt; Heilung und Schutz wachsen mit der Fähigkeitsstärke |
+| **Mana und Tempo** | aus dem Level und der Ausrüstung |
+| **Ausrüstung** | Fähigkeitsstärke, Manaregeneration, Abklingzeit (nur die teuersten Ringe); Energie heißt Mana |
+| **Zauberwaffen** | ein Stab schlägt mit dem Geist; vier neue, einer je Seltenheit — **Bilder sind umgefärbte Platzhalter** |
+| **Anzeige** | Charakter mit vier Werten, das Blatt sagt „Skaliert mit“ |
+
+Gemessen (`pit_sim skalierung`, Tag 30, Stufe 24): Körper mit Klinge
+75 %, Geist mit Stab und Magie 83 %. **Ohne die Stäbe lag Geist immer
+hinten** — den Lauf entscheidet der Grundangriff.
+
+### Offen
+
+- **Eigene Bilder für die vier Stäbe** und ihre Züge.
+- Alte Stände: Wer Körper hat und Magie trägt, wird schwächer.
+- Ob die Grenzen der Heilung (0,75 bis 1,5) passen, ist nicht gespielt.
+- **AktivesBrett hat ADR-0100 nicht gesehen** — seine zwölf Fähigkeiten sind eingeteilt, ohne dass er gefragt wurde.
+- Nicht am Handy.
 
 ## 07.11.2026: der Ladebildschirm (#135)
 

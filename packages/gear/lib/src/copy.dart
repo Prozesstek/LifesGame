@@ -66,10 +66,15 @@ class GearCopy {
     if (uid is! String || itemId is! String) return null;
     if (GearCatalog.byId(itemId) == null) return null;
     final paid = json['p'];
+    final gespeichert = GearBonus.fromJson(json['b']);
+    // **Hat sich das Stück geändert** (Skalierung, 08.11.2026: Ringe und
+    // Talismane tragen Fähigkeitsstärke statt Angriff), passt der alte
+    // Wurf nicht mehr — dann gilt der neue Katalogwert mit 100 %.
+    final katalog = GearCatalog.byId(itemId)!.bonus.scaled;
     return GearCopy(
       uid: uid,
       itemId: itemId,
-      bonus: GearBonus.fromJson(json['b']),
+      bonus: gespeichert.sameFields(katalog) ? gespeichert : katalog,
       paid: paid is int && paid > 0 ? paid : 0,
     );
   }

@@ -30,6 +30,7 @@ export 'src/pit_modifier.dart';
 export 'src/pit_weapon.dart';
 export 'src/projectile.dart';
 export 'src/room_catalog.dart';
+export 'src/skalierung.dart';
 export 'src/stage.dart';
 export 'src/stats.dart';
 export 'src/vec2.dart';

@@ -66,7 +66,7 @@ void main() {
       expect(stats.attack, 13);
       expect(stats.maxHp, 160);
       expect(stats.defense, 8);
-      expect(stats.maxEnergy, 8);
+      expect(stats.abilityPower, 13);
       expect(stats.totalChecks, 0);
     });
 

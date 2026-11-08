@@ -90,7 +90,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/statistik.dart` | **die Statistik** ([ADR-0087](docs/decisions/0087-die-statistik.md)): Woche, Monat, Jahr, Gesamt; Quote **erledigt durch fällig nach dem Plan, der damals galt**, Vergleich mit den gleichen Tagen davor, Abschnitte für Balken und Kurve, Wochentage, Mengen, Rekorde, Jahresrückblick (`StatRechnung`) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 140 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 141 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -112,7 +112,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **35 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 406 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 414 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -127,6 +127,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und Kräfte der Ausrüstung** Fähigkeiten verändern — und alle Kräfte selbst (`PitGearPowers`); eine Kraft am Helden kommt als `GrantPassive` (ADR-0077) | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
+| `packages/action_combat/lib/src/skalierung.dart` | **Angriffsschaden und Fähigkeitsstärke** ([ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md)): rechnet beim Betreten jede Fähigkeit und die Waffe nach ihrem Anteil `fs` um — über die Veränderungen der Sets; dazu die Abklingzeit der Ausrüstung | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **hundert Stufen** — wie aus einer Stufe ein Faktor wird; die Zahlen gelten für 1 und 30, darüber im selben Schritt weiter ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
@@ -358,7 +359,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1145 Tests
+flutter test             # 1149 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -367,12 +368,13 @@ dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
 dart run tool/pit_sim.dart ausruestung   # nur: was jede Kraft der Ausrüstung trägt
 dart run tool/pit_sim.dart beute         # nur: wie viel Ausrüstung je Lauf fällt
+dart run tool/pit_sim.dart skalierung    # nur: Körper mit Klinge gegen Geist mit Stab (ADR-0100)
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 406 Tests
+dart test                              # 414 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -383,7 +385,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 58 Tests
-cd packages/gear        ; dart test    # 140 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 141 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog
@@ -618,7 +620,9 @@ zehnmal zu klein.
 
 **Welchen Wert eine Gewohnheit steigert, sagt ihr Gebiet**
 ([ADR-0088](docs/decisions/0088-der-kampfwert-folgt-dem-gebiet.md)):
-Körper → Angriff, Geist → Mana, Wissenschaft → Abwehr, Gesellschaft →
+Körper → Angriff, Geist → **Fähigkeitsstärke** (seit
+[ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md),
+vorher Mana), Wissenschaft → Abwehr, Gesellschaft →
 Leben. Die Zuordnung steht nur in `SkillArea.kampfwert`; `Habit.stat`
 rechnet daraus und wird nie gespeichert, ein Gebiet zählt damit auch
 für jedes alte Häkchen. Wählen lässt sich der Wert nicht mehr, und er
@@ -626,6 +630,19 @@ hat keinen eigenen Namen neben dem im Kampf: Die Bezeichner `staerke`,
 `ausdauer`, `disziplin`, `klarheit` stehen nur noch im Spielstand.
 `CustomHabit.statOhneGebiet` trägt den alten Wert einer Gewohnheit, die
 noch kein Gebiet hat, bis die Startseite einmal gefragt hat.
+
+**Angriffsschaden und Fähigkeitsstärke**
+([ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md),
+wie in LoL): Jede Fähigkeit trägt einen Anteil `PitAbility.fs`, jede
+Waffe `PitWeapon.fs` — Stäbe schlagen mit dem Geist. Schaden ist
+`power × ((1 − fs) × AS + fs × FS)`, umgerechnet **einmal beim Betreten**
+über die Veränderungen der Sets (`PitSkalierung` in `skalierung.dart`).
+Ohne eigene Fähigkeitsstärke gilt der Angriff, dann bleibt jede Zahl
+gleich. Mana, Nachfluss und Schlagtempo kommen aus dem Level
+(`ActionBalance.energyAt`) und der Ausrüstung, Abklingzeit nur aus der
+Ausrüstung, höchstens 40 %. **Wer an Anteilen, Stäben oder den neuen
+Werten dreht, lässt `dart run tool/pit_sim.dart skalierung` laufen** —
+Körper mit Klinge und Geist mit Stab müssen gleichauf liegen.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
 Grube stehen in `packages/action_combat/lib/src/balance.dart`, die Zahlen

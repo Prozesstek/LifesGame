@@ -239,7 +239,7 @@ class GearSheet extends ConsumerWidget {
       if (grund.attack != 0) ('Angriff', '+${grund.attack}'),
       if (grund.maxHp != 0) ('Lebenspunkte', '+${grund.maxHp}'),
       if (grund.defense != 0) ('Verteidigung', '+${grund.defense}'),
-      if (grund.maxEnergy != 0) ('Energie', '+${grund.maxEnergy}'),
+      if (grund.maxEnergy != 0) ('Mana', '+${grund.maxEnergy}'),
       ('Wurf', '85 bis 115 % dieser Werte'),
       // Nur Waffe und Rüstung vervielfachen (ADR-0042), und nur, wenn
       // die Seltenheit es überhaupt tut: Gewöhnlich ist ×1.

@@ -82,6 +82,11 @@ class CharacterFigure extends StatelessWidget {
     'gear-geschliffene-klinge':
         'assets/character/Charakter_GeschliffeneKlinge.png',
     'gear-kriegsstab': 'assets/character/Charakter_Kriegsstab.png',
+    // Vorerst wie der Kriegsstab (Skalierung, 08.11.2026).
+    'gear-eichenstab': 'assets/character/Charakter_Kriegsstab.png',
+    'gear-wanderstab': 'assets/character/Charakter_Kriegsstab.png',
+    'gear-runenstab': 'assets/character/Charakter_Kriegsstab.png',
+    'gear-sternenstab': 'assets/character/Charakter_Kriegsstab.png',
     'gear-zweihaender': 'assets/character/Charakter_Zweihaender.png',
     'gear-langbogen': 'assets/character/Charakter_Langbogen.png',
     'gear-sonnenklinge': 'assets/character/Charakter_Sonnenklinge.png',
