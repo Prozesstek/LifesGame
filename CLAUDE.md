@@ -268,10 +268,10 @@ durch die Grube ersetzt und gelöscht.
 | `lib/village/village_screen.dart` | das Dorf im Entwicklermodus: Tippen geht hin, Ziehen steuert, **hinein nur über den Knopf am Gebäude**, „Heute“ immer einen Tipp entfernt | Flutter |
 | `lib/village/house_screen.dart` | **das eigene Haus**: Pokale, Titel, Ausrüstung und Gold aus Truhen, alles abgeleitet (`HouseView`) | Flutter |
 | `tool/figur_ausruestung.py` | legt Rüstungen und Waffen aus dem Laden **verkleinert** auf die Figur — Platzhalter, die Helme sind gezeichnet (Python mit Pillow) | Python |
-| `tool/kreis_zeichen.py` | legt die Zeichen der Kreise nach `assets/UI/Kreis_*.png` — fünf aus Raven, Rucksack und Balken gezeichnet (Python mit Pillow) | Python |
+| `tool/kreis_zeichen.py` | legt die Zeichen der Kreise nach `assets/UI/Kreis_*.png` — zwei aus Raven, dazu der Rucksack (Python mit Pillow); Gewohnheiten, Kampf, Theorie, Statistik und Laden stehen in `tool/pixel/` | Python |
 | `tool/dorf_kacheln.py` | zeichnet die groben Dorfkacheln nach `assets/Dorf/` (Python mit Pillow) | Python |
 | `tool/item_icons.py` | **zeichnet** sieben der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset und der Frostreif stehen in `tool/pixel/` | Python |
-| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen des Kreises Gewohnheiten, das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
+| `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): Zeichen der Kreise Gewohnheiten, Statistik und Laden, das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |

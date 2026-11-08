@@ -137,6 +137,26 @@ vom 02.10.
 
 ---
 
+## 08.11.2026, danach: das Laden-Zeichen
+
+Ein praller Lederbeutel voller Gold mit goldener Kordel, davor eine
+stehende Münze mit Krone und ein Stapel (`tool/pixel/kreis_laden.px.js`).
+Gefragt, ob ein Einkaufswagen oder ein Ladenstand besser wäre:
+**der Beutel bleibt** — der Wagen passt nicht ins Fantasy-Bild, der Stand
+war bis zum 28.10. schon da. `tool/kreis_zeichen.py` zeichnet den Laden
+nicht mehr. Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
+## 08.11.2026: das Statistik-Zeichen
+
+AktivesBrett: „Fangen wir erstmal mit dem Statistik icon an … mit einem
+Wiedererkennungswert von anderen Spielen“. Nach einem Sechseck wie die
+Werte-Übersicht in Sportspielen gewählt: **drei Balken, die steigen, und ein
+goldener Pfeil darüber** (`tool/pixel/kreis_statistik.px.js`). Die Spitze ist
+ein rechter Winkel, Pixel für Pixel gesetzt und spiegelgleich zur Diagonale,
+auf der das letzte Stück des Schafts liegt. `tool/kreis_zeichen.py` zeichnet
+den Kreis nicht mehr; die Reichweite stieg auf 1,18. Abgenommen. **Nicht in
+der laufenden App, nicht am Handy.**
+
 ## 08.11.2026: Angriffsschaden und Fähigkeitsstärke
 
 Frederik, Level 30: „Jetzt hab ich zwar massig Mana aber keinen

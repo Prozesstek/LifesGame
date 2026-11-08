@@ -21,7 +21,7 @@
 
 | Bereich | fremd | ersetzt |
 |---|---|---|
-| Kreise der Startseite | 5 | 2 |
+| Kreise der Startseite | 5 | 3 |
 | Items (Truhe, Schlüssel) | 2 | 0 |
 | Waffen | 8 | 1 |
 | Rüstung, Helme, Schuhe, Ringe, Talismane | 40 | 0 |
@@ -29,7 +29,7 @@
 | Ausrüstung auf der Figur | 24 | 0 |
 | Holz-Oberfläche | 6 | 6 |
 | Dungeon: Held, Gegner, Bosse | 15 Figuren (25 Dateien) | 0 |
-| **Summe** | **139** | **9** |
+| **Summe** | **139** | **10** |
 
 Die Zahlen werden beim Abhaken nachgezogen.
 
@@ -42,7 +42,7 @@ ein ersetztes Zeichen kommt dort heraus.
 
 - [x] Gewohnheiten — Quest-Rolle (`tool/pixel/kreis_gewohnheiten.px.js`, PR #189)
 - [x] Kampf — gekreuzte Schwerter (`tool/pixel/kreis_kampf.px.js`)
-- [ ] Laden — Münzbeutel (Raven fc158 + fc131)
+- [x] Laden — Lederbeutel voller Gold (`tool/pixel/kreis_laden.px.js`)
 - [ ] Fähigkeiten — Runenstein (Raven fc326)
 - [ ] Charakter — Helm (Raven fc1911)
 
@@ -220,7 +220,9 @@ neuen Eintrag dort.
 - Zwölf Fähigkeiten von AktivesBrett, Speerstich und Sichelhieb
   (`tool/faehigkeit_icons.py`, `tool/item_icons.py`)
 - Die zwölf Stücke aus ADR-0077 und ihre sechs Bilder auf der Figur
-- Kreise Ausrüstung (Rucksack) und Statistik (Balken)
+- Kreis Ausrüstung (Rucksack)
+- Kreis Statistik — Balken und goldener Pfeil, seit 08.11. neu mit pxl
+  (`tool/pixel/kreis_statistik.px.js`)
 - Das Dorf (`tool/dorf_kacheln.py`)
 - Frederiks Zeichnungen: Stein, Fledermaus, die drei Böden
 - Das Buch der Theorie — war Frederiks Zeichnung, seit 04.11. neu mit pxl
