@@ -54,6 +54,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const ZurueckPfeil(schritt: Schritt.sperren),
         title: const Text('Laden'),
         backgroundColor: Palette.surface,
         actions: <Widget>[
@@ -138,6 +139,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             abilityLine: itemAbilityText(item),
             setPieces: loadout.equippedPiecesOf(item.setId ?? ''),
             onBuy: () => _buy(context, ref, gewaehlt),
+            mentorAngebot: gewaehlt.uid.endsWith('-mentor'),
           ),
       ],
     );
@@ -245,10 +247,14 @@ class _Raster extends StatelessWidget {
               SizedBox(
                 width: breite,
                 height: _hoehe,
-                // Der Mentor zeigt im Rundgang auf sein Angebot.
+                // Der Mentor zeigt im Rundgang auf sein Angebot. Ist es
+                // gewählt, bleibt es im Licht, und der Punkt sitzt auf
+                // „Kaufen“.
                 child: Zeigefinger(
                   schritt: Schritt.laden,
                   aktiv: copy.uid.endsWith('-mentor'),
+                  punkt: copy.uid != gewaehlteUid,
+                  eng: true,
                   radius: 10,
                   child: ShopItemCell(
                     copy: copy,

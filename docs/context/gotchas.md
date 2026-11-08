@@ -3,6 +3,43 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein Maler, der nur bei eigenen Anlässen neu malt, verpasst ein Ziel, das wandert
+
+Der Schleier des Scheinwerfers misst seine Löcher beim Malen aus — gemalt
+wurde aber nur beim Ein- und Ausblenden und beim Rollen. Nach der ersten
+Seite fährt die untere Leiste mit dem Kreis „Fähigkeiten“ herein,
+**nachdem** der Schleier steht: Das Loch blieb an der alten Stelle unter
+dem Bildschirm, und der Kreis, auf den der Mentor zeigte, stand im
+Dunkeln (08.11.2026). Im Endbild eines Tests sah alles richtig aus —
+dort wird zufällig neu gemalt. Erst Zwischenbilder alle 50 ms zeigten
+es.
+
+Dasselbe in der anderen Richtung: Ein Ziel, das ausblendet, ist noch
+eingebaut, und sein Licht lag eine halbe Sekunde auf leerem Grund.
+
+**Abhilfe:** Der Schleier misst nach jedem Bild, das ohnehin entsteht,
+und malt neu, wenn sich ein Loch geändert hat (`_beobachte`); fordert
+selbst kein Bild an, `pumpAndSettle` kommt zur Ruhe. Das Licht ist nie
+heller als die Deckkraft seines Ziels (`_sichtbarkeit`).
+
+**Regel:** Wer etwas zeichnet, das von der Lage **anderer** Widgets
+abhängt, prüft es mit Zwischenbildern über einen Übergang, nicht nur am
+Ende.
+
+## Wer beim Erscheinen wächst, schiebt alles daneben mit
+
+`EinblendLeiste` wuchs beim Hereinfahren von 0 auf ihre Höhe
+(`AnimatedAlign`, `heightFactor`), und `DerReiheNach` liess Elemente 40
+Punkte von unten heranfliegen. Jedes für sich sah gut aus; zusammen
+rutschten Mentor und „Heute“ eine halbe Sekunde lang um 30 Punkte, und
+mit der ersten Gewohnheit sprang der Mentor um 70, weil der erste Screen
+mittig stand und der zweite oben (Frederik, 08.11.2026: „baut sich das
+manchmal komisch auf“).
+
+**Regel:** Im Tutorial hat jedes Element seinen Platz vom ersten Bild an
+und ändert nur die Deckkraft. Wer etwas erscheinen lässt, reserviert den
+Platz vorher.
+
 ## Bilder, die nebenher laden, laufen als Würfel durchs Spiel
 
 `ActionGame.onLoad` lud die Bilder der Grube bewusst ohne `await` und

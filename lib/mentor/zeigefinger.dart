@@ -19,10 +19,14 @@ class Zeigefinger extends ConsumerWidget {
     this.aktiv = true,
     this.radius = 14,
     this.punkt = true,
+    this.eng = false,
     super.key,
   });
 
   final Schritt schritt;
+
+  /// Im Raster: das Licht läuft kürzer aus ([ScheinwerferZiel.eng]).
+  final bool eng;
   final Widget child;
   final bool aktiv;
 
@@ -47,6 +51,7 @@ class Zeigefinger extends ConsumerWidget {
       sichtbar: zeigt,
       radius: radius,
       punkt: punkt,
+      eng: eng,
       child: child,
     );
   }
@@ -62,11 +67,15 @@ class ZeigeRing extends StatelessWidget {
     this.radius = 14,
     this.sichtbar = true,
     this.punkt = true,
+    this.eng = false,
     super.key,
   });
 
   final Widget child;
   final double radius;
+
+  /// Im Raster: das Licht läuft kürzer aus ([ScheinwerferZiel.eng]).
+  final bool eng;
 
   /// Ob der gelbe Punkt dazukommt (siehe [Zeigefinger.punkt]).
   final bool punkt;
@@ -79,26 +88,73 @@ class ZeigeRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScheinwerferZiel(
+    return _InsBild(
       aktiv: sichtbar,
-      radius: radius,
-      child: Stack(
-        // Das Ziel bekommt dieselben Maße, als stünde nichts darüber —
-        // sonst schrumpfte eine Kachel im Raster auf ihren Inhalt.
-        fit: StackFit.passthrough,
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          child,
-          if (sichtbar && punkt)
-            const Positioned(
-              top: -ueberstand,
-              right: -ueberstand,
-              child: _SpaeterPunkt(),
-            ),
-        ],
+      child: ScheinwerferZiel(
+        aktiv: sichtbar,
+        radius: radius,
+        eng: eng,
+        // Das Licht kommt mit dem Punkt, wenn das Ziel steht (08.11.2026).
+        ab: _SpaeterPunkt.warten,
+        child: Stack(
+          // Das Ziel bekommt dieselben Maße, als stünde nichts darüber —
+          // sonst schrumpfte eine Kachel im Raster auf ihren Inhalt.
+          fit: StackFit.passthrough,
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            child,
+            if (sichtbar && punkt)
+              const Positioned(
+                top: -ueberstand,
+                right: -ueberstand,
+                child: _SpaeterPunkt(),
+              ),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// **Was der Mentor zeigt, steht im Bild** (08.11.2026): Liegt das Ziel
+/// in einer Liste unterhalb des Sichtbaren — „Sperren“ ganz unten im
+/// Blatt eines Stücks —, rollt die Liste beim ersten Bild dorthin. Ohne
+/// Gleiten: Es geschieht, bevor man hinsieht, und danach rutscht nichts.
+class _InsBild extends StatefulWidget {
+  const _InsBild({required this.aktiv, required this.child});
+
+  final bool aktiv;
+  final Widget child;
+
+  @override
+  State<_InsBild> createState() => _InsBildState();
+}
+
+class _InsBildState extends State<_InsBild> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.aktiv) _zeige();
+  }
+
+  @override
+  void didUpdateWidget(_InsBild alt) {
+    super.didUpdateWidget(alt);
+    if (widget.aktiv && !alt.aktiv) _zeige();
+  }
+
+  void _zeige() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || Scrollable.maybeOf(context) == null) return;
+      Scrollable.ensureVisible(
+        context,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// **Der Punkt kommt zuletzt** (06.11.2026): erst der Mentor, dann sein
@@ -108,9 +164,11 @@ class _SpaeterPunkt extends StatelessWidget {
 
   static const Duration blende = Duration(milliseconds: 220);
 
+  /// Wann das Ziel steht: erst dann kommen Punkt und Licht.
+  static final Duration warten = DerReiheNach.fertigNach(1);
+
   @override
   Widget build(BuildContext context) {
-    final warten = DerReiheNach.fertigNach(1);
     final gesamt = warten + blende;
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
@@ -118,6 +176,30 @@ class _SpaeterPunkt extends StatelessWidget {
       curve: Interval(warten.inMicroseconds / gesamt.inMicroseconds, 1),
       builder: (context, t, kind) => Opacity(opacity: t, child: kind),
       child: const ZielPunkt(key: Zeigefinger.ringKey),
+    );
+  }
+}
+
+/// **Der Zurück-Pfeil, auf den der Mentor zeigt** (08.11.2026): als
+/// `leading` einer Kopfzeile. Bei [schritt] trägt er den gelben Punkt —
+/// dann ist hier alles getan, und es geht auf der Startseite weiter.
+/// Ohne Weg zurück steht nichts da.
+class ZurueckPfeil extends StatelessWidget {
+  const ZurueckPfeil({required this.schritt, super.key});
+
+  final Schritt schritt;
+
+  static const Key pfeilKey = ValueKey<String>('mentor-zurueck');
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Navigator.of(context).canPop()) return const SizedBox.shrink();
+    return Center(
+      child: Zeigefinger(
+        schritt: schritt,
+        radius: 20,
+        child: const BackButton(key: pfeilKey),
+      ),
     );
   }
 }

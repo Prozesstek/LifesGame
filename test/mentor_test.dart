@@ -189,8 +189,12 @@ void main() {
       for (var i = 1; i < zeilen.length; i++) {
         expect(zeilen[i].top, greaterThan(zeilen[i - 1].bottom), reason: '$i');
       }
-      // Mittig: Die Frage steht nicht oben am Rand — Mentor und Karte
-      // rücken zusammen in die Mitte.
+      // Mittig: Die Frage steht nicht oben am Rand — **am Handy**. Seit
+      // dem 08.11.2026 steht sie von oben, unter dem Platz der oberen
+      // Leiste, damit beim ersten Häkchen nichts springt; im Hochformat
+      // landet das nahe der Mitte.
+      usePhoneView(tester);
+      await tester.pumpAndSettle();
       final karte = tester
           .getRect(find.byType(ErsteGewohnheitKarte))
           .expandToInclude(tester.getRect(find.byType(MentorKasten)));

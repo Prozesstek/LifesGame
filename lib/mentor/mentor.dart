@@ -54,12 +54,13 @@ abstract final class Mentor {
 
   /// Was er im Beute-Dialog des ersten Siegs sagt. Den ersten
   /// Gegenstand legt das Spiel von selbst an (`Loadout._add`); der Satz
-  /// steht deshalb dort und nicht als eigener Schritt. Danach sagt er nur
-  /// noch [gebiete] — also sagt er hier auch, was der Sieg an Plätzen
-  /// gebracht hat (ADR-0093).
-  static const String ersteBeute =
-      'Deine erste Beute! Leg sie an. Und: zwei neue Plätze für '
-      'Gewohnheiten.';
+  /// steht deshalb dort und nicht als eigener Schritt.
+  ///
+  /// **Seit dem 08.11.2026 nur die Beute.** Bis dahin hängte er die zwei
+  /// neuen Plätze für Gewohnheiten an (ADR-0093) — dreizehn Wörter,
+  /// die mit der Beute nichts zu tun hatten. Danach sagt er ohnehin
+  /// [gebiete]: „Leg eine zweite an!“
+  static const String ersteBeute = 'Deine erste Beute! Leg sie an.';
 
   /// **Sein letzter Satz** (Issue #183): Die Gebiete werden am Ende
   /// erklärt, nicht am Anfang — dort stand bis dahin neben jedem
@@ -68,6 +69,10 @@ abstract final class Mentor {
   static const String gebiete =
       'Gewohnheiten füllen ihr Gebiet, jedes stärkt im Kampf. Leg eine '
       'zweite an!';
+
+  /// Was er sagt, wenn der Schritt hier getan ist und der nächste auf
+  /// der Startseite wartet.
+  static const String zurueck = 'Zurück zur Startseite!';
 
   /// Was er sagt, während der Talentpunkt groß in der Mitte steht
   /// (06.11.2026).
@@ -123,6 +128,12 @@ abstract final class Mentor {
       (Schritt.laden, MentorOrt.laden) => const MentorSatz(
         'Das hier ist für dich.',
       ),
+      // **Getan, aber noch hier** (Frederik, 08.11.2026): Nach dem Kauf
+      // und nach dem Sperren schwieg er, und man musste den Weg zurück
+      // selbst finden. Der Zurück-Pfeil trägt dann den Punkt
+      // (`ZurueckPfeil`).
+      (Schritt.sperren, MentorOrt.laden) ||
+      (Schritt.geschenk, MentorOrt.ausruestung) => const MentorSatz(zurueck),
       (Schritt.sperren, MentorOrt.start) => const MentorSatz(
         'Sperr dein Lieblingsstück.',
       ),

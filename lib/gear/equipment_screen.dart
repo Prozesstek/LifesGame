@@ -203,6 +203,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const ZurueckPfeil(schritt: Schritt.geschenk),
         title: const Text('Ausrüstung'),
         backgroundColor: Palette.surface,
         actions: const <Widget>[SammlungKnopf(art: SammelArt.ausruestung)],
@@ -249,6 +250,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                           schritt: Schritt.sperren,
                           aktiv: slot == _erstesAngelegtes(loadout),
                           radius: 10,
+                          eng: true,
                           child: EquipmentSlotTile(
                             slot: slot,
                             equipped: loadout.equippedCopyIn(slot),

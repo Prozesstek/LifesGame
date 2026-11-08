@@ -4,6 +4,7 @@ import 'package:progression/progression.dart';
 
 import '../../action/pit_text.dart';
 import '../../combat/move_icon.dart';
+import '../../mentor/scheinwerfer.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
@@ -38,8 +39,14 @@ class AbilitySlotsRow extends StatelessWidget {
     this.nimmtAn = _nimmtNichts,
     this.onAblegen = _legtNichts,
     this.einladen = false,
+    this.licht,
     super.key,
   });
+
+  /// Der Platz (ab 1), der im Licht des Mentors liegt, oder null
+  /// (08.11.2026). **Nur dieser eine**, nicht die ganze Reihe — sonst
+  /// lagen die gesperrten Plätze mit im Licht.
+  final int? licht;
 
   /// Ob eine freigeschaltete Fähigkeit noch auf keinem Platz liegt. Dann
   /// leuchtet der nächste freie Platz auf — statt des Satzes „unten eine
@@ -90,33 +97,41 @@ class AbilitySlotsRow extends StatelessWidget {
             for (var slot = 1; slot <= AbilitySlots.total; slot++) ...<Widget>[
               if (slot > 1) const SizedBox(width: 8),
               Expanded(
-                child: DragTarget<String>(
-                  onWillAcceptWithDetails: (_) => nimmtAn(slot),
-                  onAcceptWithDetails: (d) => onAblegen(slot, d.data),
-                  builder: (context, kandidaten, _) => PlatzLaedtEin(
-                    aktiv:
-                        einladen &&
-                        slot > 1 &&
-                        slot <= open &&
-                        _moveIn(slot) == null &&
-                        nimmtAn(slot),
-                    child: _Slot(
-                      slot: slot,
-                      isOpen: slot <= open,
-                      isWeaponSlot: slot == 1,
-                      move: _moveIn(slot),
-                      onTap: slot > open ? null : () => onTapSlot(slot),
-                      dragState: gewaehlt == slot
-                          ? SlotDragState.fuer(
-                              zieht: true,
-                              passt: true,
-                              schwebt: true,
-                            )
-                          : SlotDragState.fuer(
-                              zieht: gezogen != null,
-                              passt: nimmtAn(slot),
-                              schwebt: kandidaten.isNotEmpty,
-                            ),
+                // Immer eingehüllt, nur an- und abgeschaltet: Sonst baute
+                // sich der Platz neu, sobald das Licht wechselt
+                // (`gotchas.md`).
+                child: ScheinwerferZiel(
+                  aktiv: licht == slot,
+                  radius: 12,
+                  eng: true,
+                  child: DragTarget<String>(
+                    onWillAcceptWithDetails: (_) => nimmtAn(slot),
+                    onAcceptWithDetails: (d) => onAblegen(slot, d.data),
+                    builder: (context, kandidaten, _) => PlatzLaedtEin(
+                      aktiv:
+                          einladen &&
+                          slot > 1 &&
+                          slot <= open &&
+                          _moveIn(slot) == null &&
+                          nimmtAn(slot),
+                      child: _Slot(
+                        slot: slot,
+                        isOpen: slot <= open,
+                        isWeaponSlot: slot == 1,
+                        move: _moveIn(slot),
+                        onTap: slot > open ? null : () => onTapSlot(slot),
+                        dragState: gewaehlt == slot
+                            ? SlotDragState.fuer(
+                                zieht: true,
+                                passt: true,
+                                schwebt: true,
+                              )
+                            : SlotDragState.fuer(
+                                zieht: gezogen != null,
+                                passt: nimmtAn(slot),
+                                schwebt: kandidaten.isNotEmpty,
+                              ),
+                      ),
                     ),
                   ),
                 ),
