@@ -110,8 +110,8 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Items/Schluessel.png` (Schlüssel zur Beute, ADR-0048) | fc77 |
 
 **Die Zeichen der Kreise** (`UI/Kreis_*.png`, 28.10.2026) legt
-`tool/kreis_zeichen.py` an (der Laden ist seit 08.11. eigen): Fähigkeiten fc326 mit
-blau umgefärbter Kerbe, Charakter fc1911. Rucksack (Ausrüstung) und
+`tool/kreis_zeichen.py` an (Laden und Fähigkeiten sind seit 08.11. eigen):
+Charakter fc1911. Rucksack (Ausrüstung) und
 Balken (Statistik) sind gezeichnet — Raven hat keinen Rucksack.
 Gewohnheiten, Kampf und das Buch der Theorie sind seit dem 04.11.2026
 eigene Zeichnungen unter `tool/pixel/` (pxl).

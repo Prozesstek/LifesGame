@@ -13,7 +13,7 @@ RPGs kennt:
 | Kampf | zwei gekreuzte Schwerter | seit 04.11.2026 `tool/pixel/kreis_kampf.px.js` (pxl), nicht mehr hier |
 | Statistik | Balken mit Pfeil | seit 08.11. in `tool/pixel/kreis_statistik.px.js` |
 | Laden | ein Lederbeutel voller Gold | seit 08.11. in `tool/pixel/kreis_laden.px.js` |
-| Fähigkeiten | ein Runenstein, der blau leuchtet | Raven fc326, umgefärbt |
+| Fähigkeiten | ein Zauberbuch mit Flammensiegel | seit 08.11. in `tool/pixel/kreis_faehigkeiten.px.js` |
 | Ausrüstung | ein Rucksack — das Inventar | gezeichnet, Raven hat keinen |
 | Charakter | ein Helm — der Charakterbogen | Raven fc1911 |
 
@@ -49,22 +49,6 @@ def raven(ordner, nummer):
 
 def gross(bild):
     return bild.resize((SEITE, SEITE), Image.NEAREST)
-
-
-def leuchtend(rune):
-    """Die Kerbe der Rune leuchtet blau wie Mana — ein Stein mit Kraft,
-    nicht bloß ein Stein."""
-    farben = {
-        (52, 55, 51, 255): (120, 210, 255, 255),
-        (82, 84, 81, 255): (64, 140, 214, 255),
-    }
-    bild = rune.copy()
-    for x in range(bild.width):
-        for y in range(bild.height):
-            neu = farben.get(bild.getpixel((x, y)))
-            if neu is not None:
-                bild.putpixel((x, y), neu)
-    return bild
 
 
 class Raster:
@@ -147,7 +131,6 @@ def rucksack():
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Faehigkeiten": leuchtend(raven(ordner, 326)),
         "Kreis_Ausruestung": rucksack(),
         "Kreis_Charakter": raven(ordner, 1911),
     }
