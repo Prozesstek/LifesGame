@@ -21,7 +21,8 @@ abstract final class BereichZeichen {
   /// seit dem 04.11.2026 gezeichnet mit pxl: `tool/pixel/kreis_kampf.px.js`.
   static const String kampf = 'assets/UI/Kreis_Kampf.png';
 
-  /// Drei Balken, die steigen, auf dem Statistik-Kreis.
+  /// Drei Balken, die steigen, und ein goldener Pfeil darüber —
+  /// gezeichnet mit pxl (`tool/pixel/kreis_statistik.px.js`).
   static const String statistik = 'assets/UI/Kreis_Statistik.png';
 
   /// Der Münzbeutel auf dem Laden-Kreis.
@@ -70,7 +71,7 @@ abstract final class BereichZeichen {
     gewohnheiten => 1.31,
     theorie => 1.16,
     kampf => 1.07,
-    statistik => 1.11,
+    statistik => 1.18,
     laden => 1.26,
     faehigkeiten => 1.18,
     ausruestung => 0.96,

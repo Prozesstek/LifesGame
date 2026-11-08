@@ -137,6 +137,17 @@ vom 02.10.
 
 ---
 
+## 08.11.2026: das Statistik-Zeichen
+
+AktivesBrett: „Fangen wir erstmal mit dem Statistik icon an … mit einem
+Wiedererkennungswert von anderen Spielen“. Nach einem Sechseck wie die
+Werte-Übersicht in Sportspielen gewählt: **drei Balken, die steigen, und ein
+goldener Pfeil darüber** (`tool/pixel/kreis_statistik.px.js`). Die Spitze ist
+ein rechter Winkel, Pixel für Pixel gesetzt und spiegelgleich zur Diagonale,
+auf der das letzte Stück des Schafts liegt. `tool/kreis_zeichen.py` zeichnet
+den Kreis nicht mehr; die Reichweite stieg auf 1,18. Abgenommen. **Nicht in
+der laufenden App, nicht am Handy.**
+
 ## 07.11.2026: der Ladebildschirm (#135)
 
 Issue #135 (AktivesBrett): „Ein Bild das sich bewegt und eine Progress

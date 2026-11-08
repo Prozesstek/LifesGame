@@ -11,7 +11,7 @@ RPGs kennt:
 |---|---|---|
 | Gewohnheiten | Schriftrolle mit Haken — die Quest | seit 04.11.2026 `tool/pixel/kreis_gewohnheiten.px.js` (pxl), nicht mehr hier |
 | Kampf | zwei gekreuzte Schwerter | seit 04.11.2026 `tool/pixel/kreis_kampf.px.js` (pxl), nicht mehr hier |
-| Statistik | drei Balken, die steigen | gezeichnet |
+| Statistik | Balken mit Pfeil | seit 08.11. in `tool/pixel/kreis_statistik.px.js` |
 | Laden | ein Münzbeutel | Raven fc158, die Münze fc131 |
 | Fähigkeiten | ein Runenstein, der blau leuchtet | Raven fc326, umgefärbt |
 | Ausrüstung | ein Rucksack — das Inventar | gezeichnet, Raven hat keinen |
@@ -152,27 +152,9 @@ def rucksack():
     return r.bild()
 
 
-def balken():
-    """Drei Balken, die steigen, auf einem Boden — der Verlauf."""
-    gruen = (84, 160, 64, 255)
-    licht = (140, 210, 104, 255)
-    dunkel = (52, 112, 44, 255)
-    boden = (150, 92, 52, 255)
-
-    r = Raster()
-    for x0, oben in ((6, 18), (13, 12), (20, 6)):
-        r.flaeche(x0, oben, x0 + 4, 24, gruen)
-        r.flaeche(x0, oben, x0, 24, licht)
-        r.flaeche(x0 + 4, oben, x0 + 4, 24, dunkel)
-        r.flaeche(x0, oben, x0 + 4, oben, licht)
-    r.flaeche(4, 26, 27, 27, boden)
-    return r.bild()
-
-
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Statistik": balken(),
         "Kreis_Laden": mit_muenze(raven(ordner, 158), raven(ordner, 131)),
         "Kreis_Faehigkeiten": leuchtend(raven(ordner, 326)),
         "Kreis_Ausruestung": rucksack(),
