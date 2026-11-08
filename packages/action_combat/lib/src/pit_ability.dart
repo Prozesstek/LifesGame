@@ -711,7 +711,14 @@ class PitAbility {
     required this.castRange,
     required this.tint,
     this.isUltimate = false,
+    this.fs = 0,
   });
+
+  /// **Wie viel davon Magie ist** (Skalierung, 08.11.2026): der Anteil der
+  /// Fähigkeitsstärke am Schaden, 0 bis 1; der Rest ist Angriffsschaden.
+  /// Bei Heilung und Schutz heisst ein Anteil über 0: Sie werden mit der
+  /// Fähigkeitsstärke stärker. Eingeteilt nach `docs/vorlagen/skalierung.md`.
+  final double fs;
 
   /// Ob sie eine **Ultimate** ist (ADR-0073): kein Mana, keine
   /// Abklingzeit — sie lädt sich im Kampf auf und liegt nur auf ihrem
@@ -812,6 +819,7 @@ abstract final class PitAbilities {
   /// setzt, dass man mitten in der Traube steht.
   static const PitAbility funkenstoss = PitAbility(
     id: 'funkenstoss',
+    fs: 1,
     name: 'Funkenstoß',
     kind: PitKind.angriff,
     manaCost: 12,
@@ -827,6 +835,7 @@ abstract final class PitAbilities {
   /// nicht mehr herauslaufen kann.
   static const PitAbility steinhaut = PitAbility(
     id: 'steinhaut',
+    fs: 1,
     name: 'Steinhaut',
     kind: PitKind.schutz,
     manaCost: 20,
@@ -841,6 +850,7 @@ abstract final class PitAbilities {
   /// Hält die Traube fest, statt sie zu töten.
   static const PitAbility wurzelgriff = PitAbility(
     id: 'wurzelgriff',
+    fs: 1,
     name: 'Wurzelgriff',
     kind: PitKind.angriff,
     manaCost: 15,
@@ -876,6 +886,7 @@ abstract final class PitAbilities {
   /// einzigen Quelle.
   static const PitAbility bluetentau = PitAbility(
     id: 'bluetentau',
+    fs: 1,
     name: 'Blütentau',
     kind: PitKind.schutz,
     manaCost: 30,
@@ -905,6 +916,7 @@ abstract final class PitAbilities {
   /// Das Eisfeld: langsamer und blutend.
   static const PitAbility frostnebel = PitAbility(
     id: 'frostnebel',
+    fs: 1,
     name: 'Frostnebel',
     kind: PitKind.umgebung,
     manaCost: 25,
@@ -922,6 +934,7 @@ abstract final class PitAbilities {
   /// Wer zuschlägt, trifft sich selbst.
   static const PitAbility prismaBarriere = PitAbility(
     id: 'prisma_barriere',
+    fs: 1,
     name: 'Prisma-Barriere',
     kind: PitKind.schutz,
     manaCost: 20,
@@ -939,6 +952,7 @@ abstract final class PitAbilities {
   /// Der härteste Einzeltreffer auf Entfernung.
   static const PitAbility donnerkeil = PitAbility(
     id: 'donnerkeil',
+    fs: 1,
     name: 'Donnerkeil',
     kind: PitKind.angriff,
     manaCost: 25,
@@ -953,6 +967,7 @@ abstract final class PitAbilities {
   /// Der Sturm: weiter und länger als der Frost, aber schwächer im Biss.
   static const PitAbility sandsturm = PitAbility(
     id: 'sandsturm',
+    fs: 1,
     name: 'Sandsturm',
     kind: PitKind.umgebung,
     manaCost: 30,
@@ -971,6 +986,7 @@ abstract final class PitAbilities {
   /// Schaden, der heilt — in voller Höhe, wie im Rundenkampf.
   static const PitAbility seelenraub = PitAbility(
     id: 'seelenraub',
+    fs: 1,
     name: 'Seelenraub',
     kind: PitKind.angriff,
     manaCost: 22,
@@ -987,6 +1003,7 @@ abstract final class PitAbilities {
   /// Der Giftboden: kein Treffer, aber der stärkste Dauerschaden.
   static const PitAbility giftmoor = PitAbility(
     id: 'giftmoor',
+    fs: 1,
     name: 'Giftmoor',
     kind: PitKind.umgebung,
     manaCost: 28,
@@ -1021,6 +1038,7 @@ abstract final class PitAbilities {
   /// Ein Ausbruch mit Nachglühen.
   static const PitAbility vulkanbruch = PitAbility(
     id: 'vulkanbruch',
+    fs: 1,
     name: 'Vulkanbruch',
     kind: PitKind.umgebung,
     manaCost: 38,
@@ -1040,6 +1058,7 @@ abstract final class PitAbilities {
   /// Die einzige legendäre, nur über sechzig Tage Kette.
   static const PitAbility sternenfall = PitAbility(
     id: 'sternenfall',
+    fs: 1,
     name: 'Sternenfall',
     kind: PitKind.angriff,
     manaCost: 40,
@@ -1068,6 +1087,7 @@ abstract final class PitAbilities {
 
   static const PitAbility zehrung = PitAbility(
     id: 'poison_strike',
+    fs: 0.4,
     name: 'Zehrung',
     kind: PitKind.angriff,
     manaCost: 12,
@@ -1085,6 +1105,7 @@ abstract final class PitAbilities {
 
   static const PitAbility sammeln = PitAbility(
     id: 'mend',
+    fs: 1,
     name: 'Sammeln',
     kind: PitKind.schutz,
     manaCost: 25,
@@ -1101,6 +1122,7 @@ abstract final class PitAbilities {
 
   static const PitAbility atemzug = PitAbility(
     id: 'breath',
+    fs: 1,
     name: 'Atemzug',
     kind: PitKind.schutz,
     manaCost: 0,
@@ -1121,6 +1143,7 @@ abstract final class PitAbilities {
   /// Der Aufprall macht nichts, nur die Spur — wer hineinläuft, brennt.
   static const PitAbility glutspur = PitAbility(
     id: 'glutspur',
+    fs: 0.5,
     name: 'Glutspur',
     kind: PitKind.umgebung,
     manaCost: 22,
@@ -1168,6 +1191,7 @@ abstract final class PitAbilities {
   /// nähme in einer knappen Grube niemand mit.
   static const PitAbility glueckstrank = PitAbility(
     id: 'glueckstrank',
+    fs: 1,
     name: 'Glückstrank',
     kind: PitKind.schutz,
     manaCost: 15,
@@ -1268,6 +1292,7 @@ abstract final class PitAbilities {
   /// selbst stellt.
   static const PitAbility steinschlag = PitAbility(
     id: 'steinschlag',
+    fs: 0.6,
     name: 'Steinschlag',
     kind: PitKind.umgebung,
     manaCost: 26,
@@ -1286,6 +1311,7 @@ abstract final class PitAbilities {
   /// Eine Ranke peitscht von links nach rechts.
   static const PitAbility rankenpeitsche = PitAbility(
     id: 'rankenpeitsche',
+    fs: 1,
     name: 'Rankenpeitsche',
     kind: PitKind.angriff,
     manaCost: 16,
@@ -1318,6 +1344,7 @@ abstract final class PitAbilities {
   /// Schlag.
   static const PitAbility eisball = PitAbility(
     id: 'eisball',
+    fs: 1,
     name: 'Eisball',
     kind: PitKind.angriff,
     manaCost: 20,
@@ -1411,6 +1438,7 @@ abstract final class PitAbilities {
   /// Ein Abbild, das mit der eigenen Waffe zuschlägt.
   static const PitAbility spiegelbild = PitAbility(
     id: 'spiegelbild',
+    fs: 1,
     name: 'Spiegelbild',
     kind: PitKind.angriff,
     manaCost: 28,
@@ -1465,6 +1493,7 @@ abstract final class PitAbilities {
   /// Ein Blitz, der weitererzählt wird.
   static const PitAbility kettenblitz = PitAbility(
     id: 'kettenblitz',
+    fs: 1,
     name: 'Kettenblitz',
     kind: PitKind.angriff,
     manaCost: 22,
@@ -1530,6 +1559,7 @@ abstract final class PitAbilities {
   /// Ultimate, die auf Level 15 über den Baum erreichbar ist.
   static const PitAbility wassergrube = PitAbility(
     id: 'wassergrube',
+    fs: 1,
     name: 'Wassergrube',
     kind: PitKind.umgebung,
     manaCost: 0,
@@ -1549,6 +1579,7 @@ abstract final class PitAbilities {
   /// Eine Pflanze bricht aus dem Boden und schnappt zu.
   static const PitAbility fleischfressendePflanze = PitAbility(
     id: 'fleischfressende_pflanze',
+    fs: 1,
     name: 'Fleischfressende Pflanze',
     kind: PitKind.angriff,
     manaCost: 0,

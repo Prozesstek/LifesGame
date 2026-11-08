@@ -62,6 +62,9 @@ abstract final class GearRolls {
       maxHp: wurf(katalog.maxHp),
       defense: wurf(katalog.defense),
       maxEnergy: wurf(katalog.maxEnergy),
+      abilityPower: wurf(katalog.abilityPower),
+      cooldownReduction: wurf(katalog.cooldownReduction),
+      manaRegen: wurf(katalog.manaRegen),
     );
   }
 

@@ -77,7 +77,12 @@ typedef PitStat = ({String label, String value});
 /// die Zahl, die dabei herauskommt — **flach**, ohne Abwehr des Gegners,
 /// ohne Streuung und ohne kritische Treffer. Dieselbe Regel wie beim
 /// alten `move_help.dart`: Was sich ausrechnen lässt, wird ausgerechnet.
-List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
+///
+/// **Seit der Skalierung (08.11.2026) sind es zwei Werte** ([KampfWerte]):
+/// Der Schaden mischt Angriffsschaden und Fähigkeitsstärke nach dem
+/// Anteil der Fähigkeit, und eine Zeile sagt, womit sie skaliert.
+List<PitStat> pitAbilityStats(PitAbility ability, {KampfWerte? werte}) {
+  final attack = werte?.wucht(ability.fs);
   final stats = <PitStat>[
     (
       label: 'Art',
@@ -104,6 +109,8 @@ List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
       (label: 'Abklingzeit', value: '${pitNumber(ability.cooldown)} s'),
     ],
     if (!ability.isPassive) (label: 'Zielen', value: _zielen(ability.aim)),
+    if (_macht(ability.effects))
+      (label: 'Skaliert mit', value: skaliertMit(ability.fs)),
   ];
 
   // **Reichweite und Umkreis stehen einmal oben**, nicht an jeder
@@ -128,9 +135,11 @@ List<PitStat> pitAbilityStats(PitAbility ability, {int? attack}) {
 
 /// Dasselbe für einen Waffenzug — er ist der Grundangriff und hat
 /// deshalb weder Mana noch Abklingzeit.
-List<PitStat> pitWeaponStats(PitWeapon waffe, {int? attack}) {
+List<PitStat> pitWeaponStats(PitWeapon waffe, {KampfWerte? werte}) {
+  final attack = werte?.wucht(waffe.fs);
   return List<PitStat>.unmodifiable(<PitStat>[
     (label: 'Art', value: 'Grundangriff — schlägt von selbst'),
+    (label: 'Skaliert mit', value: skaliertMit(waffe.fs)),
     (label: 'Schaden', value: _schaden(waffe.power, attack)),
     if (waffe.hits > 1) (label: 'Treffer je Schlag', value: '${waffe.hits}'),
     (
@@ -163,6 +172,49 @@ List<PitStat> pitWeaponStats(PitWeapon waffe, {int? attack}) {
 }
 
 /// „×1,2" allein, oder „×1,2 · etwa 34", wenn der Angriff bekannt ist.
+/// Angriffsschaden und Fähigkeitsstärke, mit denen der Spieler gerade in
+/// die Grube geht ([ActionStats.combatAttack],
+/// [ActionStats.combatAbilityPower]).
+typedef KampfWerte = ({int angriff, int faehigkeit});
+
+extension KampfWerteWucht on KampfWerte {
+  /// Der Wert, mit dem eine Fähigkeit mit dem Anteil [fs] rechnet.
+  int wucht(double fs) => ((1 - fs) * angriff + fs * faehigkeit).round();
+}
+
+/// „Angriffsschaden“, „Fähigkeitsstärke“ oder beides mit Anteil.
+String skaliertMit(double fs) {
+  if (fs <= 0) return 'Angriffsschaden';
+  if (fs >= 1) return 'Fähigkeitsstärke';
+  final f = (fs * 100).round();
+  return '${100 - f} % Angriffsschaden, $f % Fähigkeitsstärke';
+}
+
+/// Ob eine der Wirkungen Schaden macht oder schützt — nur dann sagt das
+/// Blatt, womit sie skaliert.
+bool _macht(List<PitEffect> effects) => effects.any(
+  (e) => switch (e) {
+    BoltAtNearest() ||
+    StrikeNearest() ||
+    StrikeAround() ||
+    DamageOverTime() ||
+    FreezeBolt() ||
+    HookNearest() ||
+    Boomerang() ||
+    Trap() ||
+    SweepCone() ||
+    Companion() ||
+    ChainBolt() ||
+    HealSelf() ||
+    ReduceIncoming() ||
+    ReflectIncoming() => true,
+    Dash(:final impactPower, :final trailPerSecond) =>
+      impactPower > 0 || trailPerSecond > 0,
+    RandomOf(:final outcomes) => outcomes.any((o) => _macht(o.effects)),
+    _ => false,
+  },
+);
+
 String _schaden(double power, int? attack) {
   final faktor = '×${pitNumber(power)}';
   if (attack == null) return faktor;

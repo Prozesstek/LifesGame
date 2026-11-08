@@ -544,7 +544,7 @@ void main() {
                       pit: PitAbilities.sternenfall,
                       unlocked: false,
                       currentFreeIndex: null,
-                      attack: 10,
+                      werte: (angriff: 10, faehigkeit: 10),
                     ),
                     freiePlaetze: freiePlaetze,
                   ),

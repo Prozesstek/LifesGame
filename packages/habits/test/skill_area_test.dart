@@ -172,7 +172,7 @@ void main() {
         'Angriff',
         'Leben',
         'Abwehr',
-        'Mana',
+        'Fähigkeitsstärke',
       ]);
     });
 

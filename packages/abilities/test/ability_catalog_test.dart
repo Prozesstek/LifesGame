@@ -38,14 +38,14 @@ void main() {
       }
     });
 
-    test('zehn Waffen, und jede bringt einen anderen Zug mit', () {
+    test('vierzehn Waffen, und jede bringt einen anderen Zug mit', () {
       // ADR-0017 Punkt 2 zählt fünf Waffen auf, ADR-0034 drei dazu,
-      // ADR-0077 noch zwei. Dass es sie im Laden
+      // ADR-0077 noch zwei, die Skalierung (08.11.2026) vier Stäbe. Dass es sie im Laden
       // gibt, kann dieses Package nicht wissen — dass keine zwei
       // denselben Zug tragen, schon.
       final ids = AbilityCatalog.weaponMoves.values.toList();
 
-      expect(ids, hasLength(10));
+      expect(ids, hasLength(14));
       expect(
         ids.toSet(),
         hasLength(ids.length),

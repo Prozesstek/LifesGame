@@ -604,8 +604,8 @@ void main() {
       expect(leuchtet(tester), isNull);
     });
 
-    testWidgets('erst der Mentor, dann fliegen die Zeilen nacheinander '
-        'herein (Issue #183)', (tester) async {
+    testWidgets('erst der Mentor, dann blenden die Zeilen nacheinander '
+        'ein (Issue #183)', (tester) async {
       useTallView(tester);
       final container = ProviderContainer(
         overrides: [
@@ -622,10 +622,13 @@ void main() {
       );
 
       double sichtbar(Finder zeile) => tester
-          .widget<Opacity>(
-            find.ancestor(of: zeile, matching: find.byType(Opacity)).first,
+          .widget<FadeTransition>(
+            find
+                .ancestor(of: zeile, matching: find.byType(FadeTransition))
+                .first,
           )
-          .opacity;
+          .opacity
+          .value;
 
       final erste = find.text(ErsteGewohnheitKarte.vorschlaege.first.name);
       final eigenes = find.byKey(ErsteGewohnheitKarte.eigenesKey);

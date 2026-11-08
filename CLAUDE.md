@@ -90,7 +90,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/statistik.dart` | **die Statistik** ([ADR-0087](docs/decisions/0087-die-statistik.md)): Woche, Monat, Jahr, Gesamt; Quote **erledigt durch fällig nach dem Plan, der damals galt**, Vergleich mit den gleichen Tagen davor, Abschnitte für Balken und Kurve, Wochentage, Mengen, Rekorde, Jahresrückblick (`StatRechnung`) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 140 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 141 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -112,7 +112,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **35 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 406 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 414 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -127,6 +127,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_modifier.dart` | wie **Sets und Kräfte der Ausrüstung** Fähigkeiten verändern — und alle Kräfte selbst (`PitGearPowers`); eine Kraft am Helden kommt als `GrantPassive` (ADR-0077) | nur Dart-SDK |
 | `packages/action_combat/lib/src/boss.dart` | **die vier Wächter** ([ADR-0062](docs/decisions/0062-waechter-und-besetzung-werden-gewuerfelt.md)): was jeder kann, was er ankündigt, Wut | nur Dart-SDK |
+| `packages/action_combat/lib/src/skalierung.dart` | **Angriffsschaden und Fähigkeitsstärke** ([ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md)): rechnet beim Betreten jede Fähigkeit und die Waffe nach ihrem Anteil `fs` um — über die Veränderungen der Sets; dazu die Abklingzeit der Ausrüstung | nur Dart-SDK |
 | `packages/action_combat/lib/src/pit_weapon.dart` | was die **Waffe** aus dem Grundangriff macht — Bogen schiesst, Spalter trifft alle | nur Dart-SDK |
 | `packages/action_combat/lib/src/stage.dart` | die **hundert Stufen** — wie aus einer Stufe ein Faktor wird; die Zahlen gelten für 1 und 30, darüber im selben Schritt weiter ([ADR-0075](docs/decisions/0075-hundert-ebenen.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/room_catalog.dart` | die **Räume**, aus denen jede Grube gesteckt wird — hier wird geschrieben | nur Dart-SDK |
@@ -188,15 +189,15 @@ durch die Grube ersetzt und gelöscht.
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
 | `lib/mentor/mentor.dart` | **der Mentor**: was er bei welchem Schritt an welchem Ort sagt — **eine Tabelle** (`Mentor.satz`), dazu sein Kopf (`Mentor.bild`) aus Frederiks Bild in `assets/Mentor/` — **überall der Kopf im Kreis**, auch beim Abfragen (07.11.2026); die ganze Figur `Mentor.png` liegt ungenutzt dort | Flutter |
 | `lib/mentor/mentor_kasten.dart` | sein Kasten **oben im Fluss** eines Bildschirms (`MentorZeile`, `MentorFlaeche`) — schiebt den Inhalt nach unten, deckt nichts zu, **nimmt keinen Tipp an** (ADR-0096) | Flutter |
-| `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu | Flutter |
-| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; der Rand läuft weich aus; dazu `ZielPunkt`, der gelbe Punkt, und `ScheinwerferLicht`, ein warmer Schein unter einem Ziel | Flutter |
+| `lib/mentor/zeigefinger.dart` | worauf er zeigt (`Zeigefinger`, `ZeigeRing`): **der gelbe Punkt** am Ziel und das Ziel im Licht ([ADR-0095](docs/decisions/0095-tutorial-zeigt-statt-erklaert.md)); **blendet aus, statt wegzufallen**, sonst baut sich sein Ziel neu; **rollt sein Ziel ins Bild**, wenn es in einer Liste unten liegt; `ZurueckPfeil`, der Pfeil mit Punkt, wenn hier alles getan ist (08.11.2026) | Flutter |
+| `lib/mentor/scheinwerfer.dart` | **der Scheinwerfer**: dunkler Schleier über dem Bildschirm, nur angemeldete Ziele (`ScheinwerferZiel`) liegen im Licht, der Kasten des Mentors als **Begleiter** (zieht allein keinen Schleier auf) — **nimmt keinen Tipp an**; der Rand läuft weich aus, im Raster kurz (`eng`); **das Licht folgt seinem Ziel** — wandert mit, wenn es sich bewegt, ist nie heller als das Ziel sichtbar, und kommt mit `ab` erst, wenn es steht (08.11.2026); dazu `ZielPunkt`, der gelbe Punkt, und `ScheinwerferLicht`, ein warmer Schein unter einem Ziel | Flutter |
 | `lib/mentor/buehne.dart` | **die Bühne**: ein neuer Stand des ersten Starts gilt darunter erst, wenn keine Feier in der Mitte steht und kein Blatt darüber liegt — sonst flöge alles hinter Flamme und Errungenschaft herein; überschreibt `ersterStartProvider` in einer eigenen `ProviderScope` | Flutter |
 | `lib/mentor/weiter_tipp.dart` | **ein Tipp irgendwohin führt weiter** (`WeiterTipp`), solange der Mentor etwas sagt, das man nur lesen muss — liegt unter der Feier; dazu im Kasten das Dreieck ▼ (`WeiterZeichen`) | Flutter |
-| `lib/ui/der_reihe_nach.dart` | **im Tutorial baut sich jeder Screen der Reihe nach auf** (`DerReiheNach`): erst der Mentor, dann eins nach dem anderen, zuletzt Licht, Punkt und Pulsieren — ein Takt für alle | Flutter |
+| `lib/ui/der_reihe_nach.dart` | **im Tutorial baut sich jeder Screen der Reihe nach auf** (`DerReiheNach`): erst der Mentor, dann eins nach dem anderen, zuletzt Licht, Punkt und Pulsieren — ein Takt für alle; **nur Deckkraft, kein Weg** (08.11.2026) | Flutter |
 | `lib/ui/pulsieren.dart` | **was man jetzt antippen soll, pulsiert** — golden, ohne Ende, in Tests still (`Pulsieren.pulsiert`) | Flutter |
 | `lib/theory/widgets/talentpunkt_einfuehrung.dart` | **der Talentpunkt vor dem ersten Buch**: groß in der Mitte, der Mentor erklärt, ein Tipp schickt ihn an seinen Platz oben rechts | Flutter |
 | `lib/home/erster_start_provider.dart` | trägt die Zahlen dafür zusammen, **rechnet nichts** | Flutter |
-| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander hereinfliegen ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
+| `lib/home/widgets/erste_gewohnheit.dart` | **die erste Frage** — steht statt „Heute“ **mittig unter dem Mentor**, solange es keine Gewohnheit gibt: **zwei Vorschläge und „Etwas Eigenes“, je eine Zeile mit grünem Plus**, die nach dem Mentor nacheinander einblenden ([ADR-0096](docs/decisions/0096-mentor-oben-gebiete-am-ende.md)) | Flutter |
 | `lib/home/widgets/status_leiste.dart` | **Level und Gold oben rechts**, auf der Startseite links das Haustier: das Abzeichen in einem Ring, der die Erfahrung zeigt (`LevelRing`), daneben das Gold, links davon der Balken des Gebiets (`GebietsBalken`); der Satz zur Erfahrung kommt erst auf Tipp auf den Ring; zeigt, was **angekommen** ist — was noch fliegt, zieht sie ab; **klein in der Titelzeile des Gewohnheiten-Bildschirms** (`klein`, ADR-0092) | Flutter |
 | `lib/home/widgets/hub_circle.dart` | ein Bereich als runder Knopf, samt Sperrgrund | Flutter |
 | `lib/home/widgets/today_card.dart` | **„Heute“** auf der Startseite **als Anschlagtafel**: jede Gewohnheit ein Zettel untereinander, Gekoppeltes eingerückt, erledigte grau mit Stempel; das Schild führt zu den Gewohnheiten — ein Tipp je Häkchen ([ADR-0053](docs/decisions/0053-heute-auf-der-startseite.md)); was am Feuer als Erstes gewählt wurde, trägt eine **Flamme**; rechts das grüne Zeichen des Gebiets | Flutter |
@@ -358,7 +359,7 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1145 Tests
+flutter test             # 1150 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -367,12 +368,13 @@ dart run tool/pit_sim.dart mana        # nur: wie oft ein Platz am Mana hängt
 dart run tool/pit_sim.dart faehigkeiten  # nur: was jede Fähigkeit einzeln trägt
 dart run tool/pit_sim.dart ausruestung   # nur: was jede Kraft der Ausrüstung trägt
 dart run tool/pit_sim.dart beute         # nur: wie viel Ausrüstung je Lauf fällt
+dart run tool/pit_sim.dart skalierung    # nur: Körper mit Klinge gegen Geist mit Stab (ADR-0100)
 dart run tool/runway_sim.dart          # wann einem fleissigen Spieler was ausgeht
 dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je Stufe
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 406 Tests
+dart test                              # 414 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
@@ -383,7 +385,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 58 Tests
-cd packages/gear        ; dart test    # 140 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 141 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog
@@ -618,7 +620,9 @@ zehnmal zu klein.
 
 **Welchen Wert eine Gewohnheit steigert, sagt ihr Gebiet**
 ([ADR-0088](docs/decisions/0088-der-kampfwert-folgt-dem-gebiet.md)):
-Körper → Angriff, Geist → Mana, Wissenschaft → Abwehr, Gesellschaft →
+Körper → Angriff, Geist → **Fähigkeitsstärke** (seit
+[ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md),
+vorher Mana), Wissenschaft → Abwehr, Gesellschaft →
 Leben. Die Zuordnung steht nur in `SkillArea.kampfwert`; `Habit.stat`
 rechnet daraus und wird nie gespeichert, ein Gebiet zählt damit auch
 für jedes alte Häkchen. Wählen lässt sich der Wert nicht mehr, und er
@@ -626,6 +630,19 @@ hat keinen eigenen Namen neben dem im Kampf: Die Bezeichner `staerke`,
 `ausdauer`, `disziplin`, `klarheit` stehen nur noch im Spielstand.
 `CustomHabit.statOhneGebiet` trägt den alten Wert einer Gewohnheit, die
 noch kein Gebiet hat, bis die Startseite einmal gefragt hat.
+
+**Angriffsschaden und Fähigkeitsstärke**
+([ADR-0100](docs/decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md),
+wie in LoL): Jede Fähigkeit trägt einen Anteil `PitAbility.fs`, jede
+Waffe `PitWeapon.fs` — Stäbe schlagen mit dem Geist. Schaden ist
+`power × ((1 − fs) × AS + fs × FS)`, umgerechnet **einmal beim Betreten**
+über die Veränderungen der Sets (`PitSkalierung` in `skalierung.dart`).
+Ohne eigene Fähigkeitsstärke gilt der Angriff, dann bleibt jede Zahl
+gleich. Mana, Nachfluss und Schlagtempo kommen aus dem Level
+(`ActionBalance.energyAt`) und der Ausrüstung, Abklingzeit nur aus der
+Ausrüstung, höchstens 40 %. **Wer an Anteilen, Stäben oder den neuen
+Werten dreht, lässt `dart run tool/pit_sim.dart skalierung` laufen** —
+Körper mit Klinge und Geist mit Stab müssen gleichauf liegen.
 
 **Balance ändern heißt simulieren, nicht raten.** Alle Stellschrauben der
 Grube stehen in `packages/action_combat/lib/src/balance.dart`, die Zahlen
@@ -947,9 +964,13 @@ ohne Antippen, weil er nach dem ersten Sieg für immer schweigt. Sein
 Kasten nimmt keinen Tipp an — der Mentor zeigt, er sperrt nicht.
 
 **Im Tutorial baut sich jeder Screen der Reihe nach auf** (06.11.2026,
-Frederik): erst schiebt sich der Mentor herein, dann fliegt eins nach
-dem anderen herein, was neu ist, zuletzt kommen Licht, gelber Punkt und
-Pulsieren. **Wer etwas Neues ins Tutorial baut, legt es in
+Frederik): erst der Mentor, dann eins nach dem anderen, was neu ist,
+zuletzt kommen Licht, gelber Punkt und Pulsieren. **Seit dem 08.11.2026
+verschiebt sich dabei nichts** (Frederik: „ohne dass Sachen verschoben
+werden oder buggy aussehen“): Jedes Element hat seinen Platz vom ersten
+Bild an — auch die Leisten, wenn sie noch unsichtbar sind —, und es
+ändert sich **nur die Deckkraft**. Kein Gleiten, kein Wachsen, kein
+Nachfedern. **Wer etwas Neues ins Tutorial baut, legt es in
 `DerReiheNach`** (oder gibt `Aufgedeckt`/`EinblendLeiste` eine
 `verzoegerung`), sonst erscheint es als einziges auf einmal. Damit man
 es sieht, steht die Startseite auf einer **Bühne** (`Buehne`): Ein

@@ -27,12 +27,29 @@ class GearBonus {
     this.maxHp = 0,
     this.defense = 0,
     this.maxEnergy = 0,
+    this.abilityPower = 0,
+    this.cooldownReduction = 0,
+    this.manaRegen = 0,
   });
 
   final int attack;
   final int maxHp;
   final int defense;
+
+  /// Seit der Skalierung (08.11.2026) **Mana**: ein Punkt sind so viel
+  /// Mana wie früher ein Punkt Energie. Der Name bleibt, weil er im
+  /// Spielstand steht.
   final int maxEnergy;
+
+  /// **Fähigkeitsstärke** — der magische Teil jeder Fähigkeit
+  /// (`docs/vorlagen/skalierung.md`). Massstab wie [attack].
+  final int abilityPower;
+
+  /// **Abklingzeit**, in Prozent: 10 heisst 10 % kürzer.
+  final int cooldownReduction;
+
+  /// **Manaregeneration**: ein Punkt ist ein Mana je Sekunde mehr.
+  final int manaRegen;
 
   GearBonus operator +(GearBonus other) {
     return GearBonus(
@@ -40,11 +57,32 @@ class GearBonus {
       maxHp: maxHp + other.maxHp,
       defense: defense + other.defense,
       maxEnergy: maxEnergy + other.maxEnergy,
+      abilityPower: abilityPower + other.abilityPower,
+      cooldownReduction: cooldownReduction + other.cooldownReduction,
+      manaRegen: manaRegen + other.manaRegen,
     );
   }
 
   bool get isEmpty =>
-      attack == 0 && maxHp == 0 && defense == 0 && maxEnergy == 0;
+      attack == 0 &&
+      maxHp == 0 &&
+      defense == 0 &&
+      maxEnergy == 0 &&
+      abilityPower == 0 &&
+      cooldownReduction == 0 &&
+      manaRegen == 0;
+
+  /// Ob [other] dieselben Werte trägt (nicht dieselben Zahlen) — beim
+  /// Laden: Hat sich ein Katalogstück geändert, passt ein altes Exemplar
+  /// nicht mehr dazu (`GearCopy.fromJson`).
+  bool sameFields(GearBonus other) =>
+      (attack != 0) == (other.attack != 0) &&
+      (maxHp != 0) == (other.maxHp != 0) &&
+      (defense != 0) == (other.defense != 0) &&
+      (maxEnergy != 0) == (other.maxEnergy != 0) &&
+      (abilityPower != 0) == (other.abilityPower != 0) &&
+      (cooldownReduction != 0) == (other.cooldownReduction != 0) &&
+      (manaRegen != 0) == (other.manaRegen != 0);
 
   /// Wie viel grösser die Zahlen eines Exemplars sind als die des
   /// Katalogs (ADR-0048). **Dieselbe Zahl wie `ActionBalance.powerScale`**
@@ -59,11 +97,21 @@ class GearBonus {
         maxHp: maxHp * combatScale,
         defense: defense * combatScale,
         maxEnergy: maxEnergy * combatScale,
+        abilityPower: abilityPower * combatScale,
+        cooldownReduction: cooldownReduction * combatScale,
+        manaRegen: manaRegen * combatScale,
       );
 
   /// Die Summe der vier Werte — nur zum Vergleichen zweier Würfe
   /// desselben Stücks, nicht zweier verschiedener.
-  int get total => attack + maxHp + defense + maxEnergy;
+  int get total =>
+      attack +
+      maxHp +
+      defense +
+      maxEnergy +
+      abilityPower +
+      cooldownReduction +
+      manaRegen;
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
@@ -71,6 +119,9 @@ class GearBonus {
       if (maxHp != 0) 'h': maxHp,
       if (defense != 0) 'd': defense,
       if (maxEnergy != 0) 'e': maxEnergy,
+      if (abilityPower != 0) 'f': abilityPower,
+      if (cooldownReduction != 0) 'c': cooldownReduction,
+      if (manaRegen != 0) 'r': manaRegen,
     };
   }
 
@@ -86,6 +137,9 @@ class GearBonus {
       maxHp: zahl('h'),
       defense: zahl('d'),
       maxEnergy: zahl('e'),
+      abilityPower: zahl('f'),
+      cooldownReduction: zahl('c'),
+      manaRegen: zahl('r'),
     );
   }
 
@@ -95,10 +149,21 @@ class GearBonus {
       other.attack == attack &&
       other.maxHp == maxHp &&
       other.defense == defense &&
-      other.maxEnergy == maxEnergy;
+      other.maxEnergy == maxEnergy &&
+      other.abilityPower == abilityPower &&
+      other.cooldownReduction == cooldownReduction &&
+      other.manaRegen == manaRegen;
 
   @override
-  int get hashCode => Object.hash(attack, maxHp, defense, maxEnergy);
+  int get hashCode => Object.hash(
+        attack,
+        maxHp,
+        defense,
+        maxEnergy,
+        abilityPower,
+        cooldownReduction,
+        manaRegen,
+      );
 
   /// Die Wirkung als kurze Liste, wie sie auf einer Kachel steht.
   List<String> get labels {
@@ -106,7 +171,10 @@ class GearBonus {
       if (attack != 0) '${_signed(attack)} Angriff',
       if (maxHp != 0) '${_signed(maxHp)} Lebenspunkte',
       if (defense != 0) '${_signed(defense)} Verteidigung',
-      if (maxEnergy != 0) '${_signed(maxEnergy)} Energie',
+      if (maxEnergy != 0) '${_signed(maxEnergy)} Mana',
+      if (abilityPower != 0) '${_signed(abilityPower)} Fähigkeitsstärke',
+      if (cooldownReduction != 0) '${_signed(cooldownReduction)} % Abklingzeit',
+      if (manaRegen != 0) '${_signed(manaRegen)} Manaregeneration',
     ];
   }
 

@@ -202,7 +202,8 @@ class _PowerCard extends ConsumerWidget {
 
     final form = DailyFormText.summary(macht.form);
 
-    // Drei Zahlen mit ihrem Zeichen; die Faktoren dahinter und die
+    // Vier Zahlen mit ihrem Zeichen — seit der Skalierung (08.11.2026)
+    // auch die Fähigkeitsstärke; die Faktoren dahinter und die
     // Tagesform stehen im Tipp, ein Blitz zeigt, dass sie wirkt.
     return Tooltip(
       triggerMode: TooltipTriggerMode.tap,
@@ -219,6 +220,7 @@ class _PowerCard extends ConsumerWidget {
               (HabitStat.staerke, s.combatAttack),
               (HabitStat.ausdauer, s.combatMaxHp),
               (HabitStat.disziplin, s.combatDefense),
+              (HabitStat.klarheit, s.combatAbilityPower),
             ])
               Expanded(
                 child: Row(

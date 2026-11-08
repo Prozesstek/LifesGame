@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 07.11.2026 · Frederik
+**Zuletzt aktualisiert:** 08.11.2026 · Frederik
 
 ---
 
@@ -39,8 +39,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1145, dazu die acht Packages (theory 219, habits 375, gear
-140, action_combat 406, progression 58, abilities 43, identity 25,
+**Tests:** App 1150, dazu die acht Packages (theory 219, habits 375, gear
+141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
@@ -156,6 +156,68 @@ ein rechter Winkel, Pixel für Pixel gesetzt und spiegelgleich zur Diagonale,
 auf der das letzte Stück des Schafts liegt. `tool/kreis_zeichen.py` zeichnet
 den Kreis nicht mehr; die Reichweite stieg auf 1,18. Abgenommen. **Nicht in
 der laufenden App, nicht am Handy.**
+
+## 08.11.2026: Angriffsschaden und Fähigkeitsstärke
+
+Frederik, Level 30: „Jetzt hab ich zwar massig Mana aber keinen
+Schaden.“ Gewünscht: wie das Item-System von LoL. Vorlage
+[`skalierung.md`](../vorlagen/skalierung.md) durchgesprochen und
+abgenommen, gebaut **vor dem Teststart**:
+[ADR-0100](../decisions/0100-angriffsschaden-und-faehigkeitsstaerke.md).
+
+| Was | Wie |
+|---|---|
+| **Geist** | steigert die Fähigkeitsstärke (13 bis 20, wie der Angriff), nicht mehr Mana |
+| **Fähigkeiten** | 13 physisch, 14 Magie, Zehrung/Glutspur/Steinschlag gemischt; Heilung und Schutz wachsen mit der Fähigkeitsstärke |
+| **Mana und Tempo** | aus dem Level und der Ausrüstung |
+| **Ausrüstung** | Fähigkeitsstärke, Manaregeneration, Abklingzeit (nur die teuersten Ringe); Energie heißt Mana |
+| **Zauberwaffen** | ein Stab schlägt mit dem Geist; vier neue, einer je Seltenheit — **Bilder sind umgefärbte Platzhalter** |
+| **Anzeige** | Charakter mit vier Werten, das Blatt sagt „Skaliert mit“ |
+
+Gemessen (`pit_sim skalierung`, Tag 30, Stufe 24): Körper mit Klinge
+75 %, Geist mit Stab und Magie 83 %. **Ohne die Stäbe lag Geist immer
+hinten** — den Lauf entscheidet der Grundangriff.
+
+### Offen
+
+- ~~Eigene Bilder für die vier Stäbe~~ — die Stäbe tragen den **Zauberstab** (`tool/pixel/zauberstab.px.js`), nur der Kristall hat je Seltenheit eine andere Farbe. **Offen:** ihre vier Züge (Fähigkeitsbilder) und die Figur tragen noch umgefärbte Platzhalter des Kriegsstabs.
+- Alte Stände: Wer Körper hat und Magie trägt, wird schwächer.
+- Ob die Grenzen der Heilung (0,75 bis 1,5) passen, ist nicht gespielt.
+- **AktivesBrett hat ADR-0100 nicht gesehen** — seine zwölf Fähigkeiten sind eingeteilt, ohne dass er gefragt wurde.
+- Nicht am Handy.
+
+## 08.11.2026: Tutorial-Feinschliff vor dem Hochladen
+
+Frederik: „ich will das Tutorial heute perfekt haben das wir danach
+hochladen können“. **Ziel 9 hält den 20.11. nicht mehr**: Das Konto
+steht, der geschlossene Test läuft noch nicht — vierzehn Tage Test plus
+Googles Prüfungen ergeben frühestens Anfang Dezember. Ein neues Datum
+steht noch nicht in `ziele.md`. Erst Tutorial, dann Store-Technik.
+
+Das ganze Tutorial Screen für Screen gerendert, Übergänge als
+Zwischenbilder alle 50 ms.
+
+| Was | Wie |
+|---|---|
+| **Nichts verschiebt sich** | jedes Element hat seinen Platz vom ersten Bild an und blendet nur ein — Mentor, Leisten, Kreise, Zeilen; die Leisten reservieren ihren Platz, auch unsichtbar; der erste Screen steht von oben statt mittig, sonst sprang der Mentor um 70 Punkte |
+| **Der Satz wechselt, der Kasten bleibt** | bis dahin verschwand der ganze Kasten des Mentors kurz |
+| **Das Licht folgt seinem Ziel** | wandert mit (die Fähigkeiten nach der ersten Seite standen im Dunkeln), kommt erst, wenn das Ziel steht, ist nie heller als das Ziel sichtbar; der Schleier flackert zwischen zwei Schritten nicht mehr |
+| **Raster** | bei Kacheln läuft das Licht nicht mehr auf die Nachbarn (`eng`); in der Platzreihe der Fähigkeiten liegt nur der eine Platz im Licht |
+| **Dungeon** | der Eingang baut sich der Reihe nach auf, im Tutorial ohne Schlüssel und Blitz; nach dem ersten Sieg keine Schlüsselfrage; der Mentor sagt nur „Deine erste Beute! Leg sie an.“ |
+| **Laden** | der Punkt sitzt auf „Kaufen“, das Angebot bleibt im Licht |
+| **Zurück** | nach dem Kauf und nach dem Sperren: „Zurück zur Startseite!“, der Pfeil trägt den Punkt |
+| **Ins Bild** | was der Mentor zeigt, rollt in einer Liste ins Bild — „Sperren“ stand halb unter dem Rand |
+| **Lagerfeuer** | erst nach dem Tutorial (Frederik) |
+
+App 1146 (vorher 1145). **Nicht am Handy.**
+
+### Offen
+
+- **Neues Datum für Ziel 9.**
+- Die Hand des Geister-Steuerkreuzes wandert im ersten Lauf kurz über den Helden.
+- Im Beute-Dialog bricht „an.“ allein in die zweite Zeile.
+- Das Blatt eines Stücks deckt den Mentor halb zu — so gelassen (Frederik).
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 07.11.2026: der Ladebildschirm (#135)
 

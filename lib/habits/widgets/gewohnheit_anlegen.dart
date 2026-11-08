@@ -601,9 +601,12 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
             children: <Widget>[
               StatIcon(area.kampfwert, size: 14),
               const SizedBox(width: 4),
-              Text(
-                area.kampfwert.label,
-                style: const TextStyle(fontSize: 12, color: Palette.textDim),
+              Flexible(
+                child: Text(
+                  area.kampfwert.label,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: Palette.textDim),
+                ),
               ),
             ],
           ),

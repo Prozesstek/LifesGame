@@ -12,7 +12,6 @@ import '../home/erster_start.dart';
 import '../home/erster_start_provider.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
-import '../mentor/scheinwerfer.dart';
 import '../mentor/zeigefinger.dart';
 import '../sammlung/sammlung.dart';
 import '../sammlung/sammlung_knopf.dart';
@@ -73,7 +72,11 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     final level = ref.watch(playerLevelProvider);
     final chosen = ref.watch(chosenAbilitiesProvider);
     final weaponMove = ref.watch(weaponMoveProvider);
-    final attack = ref.watch(heroPowerProvider).stats.combatAttack;
+    final held = ref.watch(heroPowerProvider).stats;
+    final KampfWerte attack = (
+      angriff: held.combatAttack,
+      faehigkeit: held.combatAbilityPower,
+    );
 
     final offen = <String>{
       for (final ability in ref.watch(unlockedAbilitiesProvider))
@@ -113,36 +116,35 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     // Wohin die neue Fähigkeit soll, liegt mit im Licht
-                    // des Mentors (ADR-0095) — ohne eigenen Punkt.
-                    ScheinwerferZiel(
-                      aktiv: switch (ref.watch(ersterStartProvider).schritt) {
-                        Schritt.faehigkeitAnlegen || Schritt.geschenk => true,
-                        _ => false,
-                      },
-                      radius: 12,
-                      child: AbilitySlotsRow(
-                        einladen: offen.any((id) => !chosen.contains(id)),
-                        level: level.level,
+                    // des Mentors (ADR-0095) — ohne eigenen Punkt, und
+                    // nur dieser eine Platz (08.11.2026).
+                    AbilitySlotsRow(
+                      licht: _lichtPlatz(
+                        ref.watch(ersterStartProvider).schritt,
+                        chosen,
+                        level.level,
+                      ),
+                      einladen: offen.any((id) => !chosen.contains(id)),
+                      level: level.level,
+                      weaponMove: weaponMove,
+                      chosen: chosen,
+                      gezogen: _gezogen,
+                      gewaehlt: _waehlt,
+                      // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
+                      // die belegten plus der nächste leere.
+                      // Eine Ultimate liegt nie auf einem der drei Plätze.
+                      nimmtAn: (slot) =>
+                          !zieheUltimate &&
+                          slot >= 2 &&
+                          slot - 2 < _belegung(chosen, level.level).length,
+                      onAblegen: _lege,
+                      onTapSlot: (slot) => _tippePlatz(
+                        context,
+                        ref,
+                        slot: slot,
                         weaponMove: weaponMove,
-                        chosen: chosen,
-                        gezogen: _gezogen,
-                        gewaehlt: _waehlt,
-                        // Dieselbe Grenze wie bei den Platz-Knöpfen im Blatt:
-                        // die belegten plus der nächste leere.
-                        // Eine Ultimate liegt nie auf einem der drei Plätze.
-                        nimmtAn: (slot) =>
-                            !zieheUltimate &&
-                            slot >= 2 &&
-                            slot - 2 < _belegung(chosen, level.level).length,
-                        onAblegen: _lege,
-                        onTapSlot: (slot) => _tippePlatz(
-                          context,
-                          ref,
-                          slot: slot,
-                          weaponMove: weaponMove,
-                          attack: attack,
-                          offen: offen,
-                        ),
+                        attack: attack,
+                        offen: offen,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -221,7 +223,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     required Set<String> offen,
     required Set<String> offeneUltimates,
     required ChosenAbilities chosen,
-    required int attack,
+    required KampfWerte attack,
   }) {
     final eigene = ordneFaehigkeiten(<Ability>[
       for (final ability in AbilityCatalog.choosable)
@@ -265,6 +267,8 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                     Schritt.geschenk => ability.moveId == geschenkDesMentors,
                     _ => false,
                   },
+              // Im Raster: Das Licht darf nicht auf die Kachel daneben.
+              eng: true,
               // Wird für einen Platz gewählt, wackelt, was dorthin kann.
               child: Wackeln(
                 aktiv:
@@ -339,7 +343,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     BuildContext context,
     WidgetRef ref, {
     required Set<String> offen,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final id = ref.read(chosenAbilitiesProvider).ultimate;
     final ability = id == null ? null : AbilityCatalog.ultimateByMoveId(id);
@@ -374,7 +378,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required Ability ability,
     required bool unlocked,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final pit = PitAbilities.ultimateById(ability.moveId);
     if (pit == null) return;
@@ -388,7 +392,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         ultimateOpen: AbilitySlots.ultimateOpenAt(level),
         onUltimateSlot:
             ref.read(chosenAbilitiesProvider).ultimate == ability.moveId,
-        attack: attack,
+        werte: attack,
       ),
       freiePlaetze: const <String?>[],
     );
@@ -452,7 +456,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required int slot,
     required String weaponMove,
-    required int attack,
+    required KampfWerte attack,
     required Set<String> offen,
   }) async {
     if (slot == 1) {
@@ -460,7 +464,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       if (waffe == null) return;
       await showAbilitySheet(
         context,
-        karte: AbilityCard.waffe(waffe: waffe, attack: attack),
+        karte: AbilityCard.waffe(waffe: waffe, werte: attack),
         freiePlaetze: const <String?>[],
       );
       return;
@@ -502,7 +506,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
     WidgetRef ref, {
     required Ability ability,
     required bool unlocked,
-    required int attack,
+    required KampfWerte attack,
   }) async {
     final pit = PitAbilities.byId(ability.moveId);
     // Eine Fähigkeit, die die Grube nicht kennt, tut dort nichts
@@ -521,7 +525,7 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         pit: pit,
         unlocked: unlocked,
         currentFreeIndex: aktuell,
-        attack: attack,
+        werte: attack,
       ),
       freiePlaetze: _belegung(chosen, level),
     );
@@ -546,6 +550,25 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
       if (chosen.at(i) == moveId) return i;
     }
     return null;
+  }
+
+  /// **Welcher Platz im Licht des Mentors liegt** (08.11.2026): beim
+  /// Anlegen der erste freie, beim Geschenk der von Funkenstoß — dorthin
+  /// soll getauscht werden. Sonst keiner.
+  static int? _lichtPlatz(Schritt? schritt, ChosenAbilities chosen, int level) {
+    final plaetze = _belegung(chosen, level).length;
+    int? platzVon(String? id) {
+      for (var i = 0; i < plaetze; i++) {
+        if (chosen.at(i) == id) return i + 2;
+      }
+      return null;
+    }
+
+    return switch (schritt) {
+      Schritt.faehigkeitAnlegen => platzVon(null),
+      Schritt.geschenk => platzVon('funkenstoss') ?? platzVon(null),
+      _ => null,
+    };
   }
 
   /// Was auf den anbietbaren freien Plätzen liegt.

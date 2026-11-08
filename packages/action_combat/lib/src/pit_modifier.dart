@@ -367,6 +367,16 @@ abstract final class PitGearPowers {
     ],
   );
 
+  /// Die Kraft des Sternenstabs (Skalierung, 08.11.2026).
+  static const PitGearPower sternenglanz = PitGearPower(
+    id: 'legendaer-sternenglanz',
+    name: 'Sternenglanz',
+    description: 'Jede Angriffsfähigkeit trifft ein Fünftel härter.',
+    modifiers: <PitModifier>[
+      ScaleDamage(factor: 1.2, kind: PitKind.angriff),
+    ],
+  );
+
   static const PitGearPower weitblick = PitGearPower(
     id: 'legendaer-weitblick',
     name: 'Weitblick',
@@ -542,6 +552,7 @@ abstract final class PitGearPowers {
 
   static const List<PitGearPower> all = <PitGearPower>[
     sonnenglut,
+    sternenglanz,
     steinerneHaut,
     weitblick,
     beben,

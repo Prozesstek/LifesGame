@@ -473,7 +473,9 @@ void main() {
       const wurf = GearCopy(
         uid: 'beute-3-20000-1',
         itemId: 'gear-uebungsklinge',
-        bonus: GearBonus(attack: 12, defense: 3),
+        // Dieselben Werte wie das Katalogstück, nur anders gewürfelt —
+        // sonst gälte der Wurf beim Laden als veraltet.
+        bonus: GearBonus(attack: 23),
         paid: 0,
       );
       final l = const Loadout.empty()
@@ -488,6 +490,25 @@ void main() {
       expect(gelesen.spentGold, l.spentGold);
       expect(gelesen.equippedCopyIn(GearSlot.waffe)?.bonus, wurf.bonus);
       expect(gelesen.keysConsumed, l.keysConsumed);
+    });
+
+    test(
+        'ein Exemplar eines geänderten Stücks gilt mit 100 % '
+        '(Skalierung, 08.11.2026)', () {
+      // Der Ring der Glut trug Angriff, jetzt Fähigkeitsstärke.
+      final json = <String, Object?>{
+        'copies': <Object?>[
+          <String, Object?>{
+            'u': 'alt',
+            'i': 'gear-ring-der-glut',
+            'b': <String, Object?>{'a': 21, 'h': 77, 'e': 44},
+          },
+        ],
+      };
+      final ring = Loadout.fromJson(json).ownedCopies.single;
+      expect(ring.bonus, GearCatalog.byId('gear-ring-der-glut')!.bonus.scaled);
+      expect(ring.bonus.attack, 0);
+      expect(ring.bonus.abilityPower, greaterThan(0));
     });
 
     test('unbekannte Stücke verschwinden, der Rest bleibt', () {

@@ -20,8 +20,10 @@ enum HabitStat {
   /// Aus dem Gebiet Wissenschaft.
   disziplin('Abwehr'),
 
-  /// Aus dem Gebiet Geist — füllt in der Grube das Mana.
-  klarheit('Mana');
+  /// Aus dem Gebiet Geist — **die Fähigkeitsstärke** (Skalierung,
+  /// 08.11.2026): Sie macht Magie hart, wie der Angriff Schläge. Bis dahin
+  /// füllte Geist das Mana, das jetzt aus Level und Ausrüstung kommt.
+  klarheit('Fähigkeitsstärke');
 
   const HabitStat(this.label);
 

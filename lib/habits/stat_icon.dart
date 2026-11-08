@@ -28,7 +28,9 @@ abstract final class StatIcons {
     HabitStat.staerke => null,
     HabitStat.ausdauer => Icons.favorite_rounded,
     HabitStat.disziplin => Icons.shield_rounded,
-    HabitStat.klarheit => Icons.water_drop_rounded,
+    // Seit der Skalierung Fähigkeitsstärke, nicht mehr Mana: kein Tropfen,
+    // sondern Funken (08.11.2026).
+    HabitStat.klarheit => Icons.auto_awesome,
   };
 
   /// Auf Pergament.

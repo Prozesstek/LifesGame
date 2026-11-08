@@ -61,11 +61,11 @@ class AbilityCard {
     required PitAbility pit,
     required this.unlocked,
     required this.currentFreeIndex,
-    int? attack,
+    KampfWerte? werte,
   }) : moveId = ability.moveId,
        name = pit.name,
        description = pit.description,
-       stats = pitAbilityStats(pit, attack: attack),
+       stats = pitAbilityStats(pit, werte: werte),
        rarityStufe = ability.rarity.index,
        rarityLabel = ability.rarity.label,
        requirement = ability.requirement,
@@ -82,11 +82,11 @@ class AbilityCard {
     required this.unlocked,
     required this.ultimateOpen,
     required this.onUltimateSlot,
-    int? attack,
+    KampfWerte? werte,
   }) : moveId = ability.moveId,
        name = pit.name,
        description = pit.description,
-       stats = pitAbilityStats(pit, attack: attack),
+       stats = pitAbilityStats(pit, werte: werte),
        rarityStufe = null,
        rarityLabel = null,
        requirement = ability.requirement,
@@ -96,13 +96,13 @@ class AbilityCard {
 
   /// Der Waffenzug auf Platz 1. Er wird nicht gewählt, sondern getragen
   /// (ADR-0013) — deshalb ohne Seltenheit und ohne Bedingung.
-  AbilityCard.waffe({required PitWeapon waffe, int? attack})
+  AbilityCard.waffe({required PitWeapon waffe, KampfWerte? werte})
     : moveId = waffe.moveId,
       name = waffe.name,
       description =
           'Der Grundangriff: Was die getragene Waffe aus jedem Schlag '
           'macht.',
-      stats = pitWeaponStats(waffe, attack: attack),
+      stats = pitWeaponStats(waffe, werte: werte),
       rarityStufe = null,
       rarityLabel = null,
       requirement = null,

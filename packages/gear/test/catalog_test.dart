@@ -66,8 +66,11 @@ void main() {
         final offen = alle.where((item) => !item.rarity.isGated);
         final verdient = alle.where((item) => item.rarity.isGated);
 
-        expect(offen, hasLength(6), reason: slot.label);
-        expect(verdient, hasLength(4), reason: slot.label);
+        // Die Waffe hat seit der Skalierung (08.11.2026) vier Stäbe mehr:
+        // zwei offene, zwei verdiente.
+        final mehr = slot == GearSlot.waffe ? 2 : 0;
+        expect(offen, hasLength(6 + mehr), reason: slot.label);
+        expect(verdient, hasLength(4 + mehr), reason: slot.label);
       }
     });
 
@@ -268,7 +271,14 @@ void main() {
 /// Kampf deutlich schwerer als ein Punkt Angriff oder Leben.
 void _teurerIstBesser(List<GearItem> items) {
   int wert(GearBonus bonus) {
-    return bonus.attack + bonus.maxHp + bonus.defense * 8 + bonus.maxEnergy * 8;
+    // Fähigkeitsstärke zählt wie Angriff (Skalierung, 08.11.2026).
+    return bonus.attack +
+        bonus.abilityPower +
+        bonus.maxHp +
+        bonus.defense * 8 +
+        bonus.maxEnergy * 8 +
+        bonus.cooldownReduction * 4 +
+        bonus.manaRegen * 4;
   }
 
   for (var i = 1; i < items.length; i++) {

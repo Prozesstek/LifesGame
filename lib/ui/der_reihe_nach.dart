@@ -39,9 +39,6 @@ class DerReiheNach extends StatelessWidget {
   /// Wie lange eins fliegt.
   static const Duration flug = Duration(milliseconds: 380);
 
-  /// Wie weit es von unten kommt.
-  static const double weg = 40;
-
   /// Wann das [anzahl]-te Element steht — ab dann darf etwas leuchten.
   static Duration fertigNach(int anzahl, {bool nachDemMentor = true}) =>
       (nachDemMentor ? mentor : Duration.zero) +
@@ -61,15 +58,12 @@ class DerReiheNach extends StatelessWidget {
       curve: Interval(
         warten.inMicroseconds / gesamt.inMicroseconds,
         1,
-        curve: Curves.easeOutBack,
+        curve: Curves.easeOut,
       ),
-      builder: (context, t, kind) => Opacity(
-        opacity: t.clamp(0.0, 1.0),
-        child: Transform.translate(
-          offset: Offset(0, weg * (1 - t)),
-          child: kind,
-        ),
-      ),
+      // **Nur Deckkraft, kein Weg** (08.11.2026, Frederik: „ohne dass
+      // Sachen verschoben werden“): Der Platz steht vom ersten Bild an,
+      // das Element blendet darin ein.
+      builder: (context, t, kind) => Opacity(opacity: t, child: kind),
       child: child,
     );
   }

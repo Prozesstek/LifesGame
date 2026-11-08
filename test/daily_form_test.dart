@@ -85,7 +85,11 @@ void main() {
     expect(form.isInForm, isTrue);
     final nachher = c.read(heroPowerProvider).stats;
     expect(nachher.combatDefense, greaterThan(vorher.combatDefense));
-    expect(nachher.maxMana, greaterThan(vorher.maxMana));
+    // Geist hebt seit der Skalierung die Fähigkeitsstärke, nicht Mana.
+    expect(
+      nachher.combatAbilityPower,
+      greaterThan(vorher.combatAbilityPower),
+    );
   });
 
   test('am nächsten Tag ist die Form weg', () {

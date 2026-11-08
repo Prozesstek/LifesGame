@@ -46,7 +46,7 @@ abstract final class CopyText {
       ('Angriff', copy.bonus.attack, vergleich?.bonus.attack ?? 0),
       ('Lebenspunkte', copy.bonus.maxHp, vergleich?.bonus.maxHp ?? 0),
       ('Verteidigung', copy.bonus.defense, vergleich?.bonus.defense ?? 0),
-      ('Energie', copy.bonus.maxEnergy, vergleich?.bonus.maxEnergy ?? 0),
+      ('Mana', copy.bonus.maxEnergy, vergleich?.bonus.maxEnergy ?? 0),
     ];
     return <StatLine>[
       for (final (label, neu, alt) in werte)

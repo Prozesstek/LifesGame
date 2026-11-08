@@ -438,7 +438,10 @@ class ErsterStart {
       LevelExtra.lagerfeuer: (
         // Tagesaufgaben und Truhe mit dem ersten Häkchen, wie die
         // Theorie — vorher stünden dort drei Aufgaben ohne Gewohnheit.
-        theorie,
+        // **Und erst nach dem Tutorial** (Frederik, 08.11.2026): Level 3
+        // kommt mitten im Rundgang, und dort erklärt es niemand. Wer
+        // schon am Feuer war, behält es.
+        theorie && (schritt == null || s.warAmFeuer),
         LevelExtra.lagerfeuer.offenAuf(s.level) || s.warAmFeuer,
       ),
       LevelExtra.tagesdungeon: (

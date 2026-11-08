@@ -135,6 +135,13 @@ abstract final class GearPrices {
 
   static const int langspeer = 580;
   static const int blutsichel = 960;
+
+  // --- Die Stäbe (Skalierung, 08.11.2026): je über dem Teuersten ihrer
+  // Seltenheit, damit „teurer ist besser“ hält ---
+  static const int eichenstab = 200;
+  static const int wanderstab = 620;
+  static const int runenstab = 1000;
+  static const int sternenstab = 1260;
   static const int flickenmantel = 640;
   static const int nachtmantel = 1010;
   static const int falkenhaube = 420;

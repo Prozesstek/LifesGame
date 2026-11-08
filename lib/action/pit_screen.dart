@@ -273,7 +273,10 @@ class _PitScreenState extends ConsumerState<PitScreen> {
         usedKey: false,
         mentor: true,
       );
-      if (!mounted) return;
+      // **Im Tutorial keine Frage nach dem Schlüssel** (08.11.2026): Nach
+      // Siegerblatt und erster Beute wäre sie das dritte Fenster, und
+      // was ein Schlüssel ist, hat niemand erklärt. Er bleibt liegen.
+      return;
     }
 
     final schluessel = ref.read(availableKeysProvider);
