@@ -137,6 +137,15 @@ vom 02.10.
 
 ---
 
+## 10.11.2026, danach: das Charakter-Zeichen
+
+AktivesBrett schickte ein Profilbild als Vorbild, dann: „nicht den
+charakter so zeichnen, einfach nur die silhouette“. Kopf und Schultern als
+**goldene Silhouette** mit rundem Glanz oben links
+(`tool/pixel/kreis_charakter.px.js`), statt des Helms aus Raven. **Damit
+ist kein Kreis der Startseite mehr fremd**; `tool/kreis_zeichen.py` ist
+gelöscht. Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
 ## 10.11.2026: das Ausrüstungs-Zeichen, die Kreise ohne Namen
 
 AktivesBrett: „mach als nächstes ausrüstung neu“, gewählt aus vier

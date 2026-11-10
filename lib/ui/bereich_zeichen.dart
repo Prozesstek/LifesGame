@@ -8,9 +8,9 @@ abstract final class BereichZeichen {
   // Frederik: „passendere Icons wählen, vielleicht gucken, was der
   // Spieler aus anderen Spielen gelernt hat“): die Quest-Rolle, die
   // gekreuzten Schwerter, den Münzbeutel, den Harnisch für die Ausrüstung,
-  // den Helm für den Charakterbogen. Gezeichnet im Pixelstil wie Holz
-  // und Figuren, nicht als Systemzeichen; woher jedes kommt, steht in
-  // `tool/kreis_zeichen.py`. Das Systemzeichen bleibt nur Ersatz.
+  // die Silhouette für den Charakter. Gezeichnet im Pixelstil wie Holz
+  // und Figuren, nicht als Systemzeichen; seit dem 10.11.2026 alle mit
+  // pxl unter `tool/pixel/`. Das Systemzeichen bleibt nur Ersatz.
 
   /// Die Schriftrolle mit Haken auf dem Gewohnheiten-Kreis — die Quest.
   /// Seit dem 04.11.2026 gezeichnet mit pxl:
@@ -40,8 +40,9 @@ abstract final class BereichZeichen {
   /// Vom 28.10. bis 10.11. ein Rucksack.
   static const String ausruestung = 'assets/UI/Kreis_Ausruestung.png';
 
-  /// Der Helm auf dem Charakter-Kreis — der Charakterbogen. Bis zum
-  /// 28.10. ein Profil-Männchen wie in einer App.
+  /// Kopf und Schultern als goldene Silhouette auf dem Charakter-Kreis —
+  /// gezeichnet mit pxl (`tool/pixel/kreis_charakter.px.js`). Bis zum 28.10.
+  /// ein Profil-Männchen wie in einer App, bis zum 10.11. ein Helm aus Raven.
   static const String charakter = 'assets/UI/Kreis_Charakter.png';
 
   /// Das Buch auf dem Theorie-Kreis — ein Foliant mit dem Talentbaum,
@@ -78,7 +79,7 @@ abstract final class BereichZeichen {
     laden => 1.26,
     faehigkeiten => 1.25,
     ausruestung => 1.0,
-    charakter => 0.84,
+    charakter => 1.25,
     _ => 1.42,
   };
 }
