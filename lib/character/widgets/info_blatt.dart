@@ -23,7 +23,7 @@ const String datenschutzText =
     'Den Spielstand als Text und das Ergebnis der Tagesgrube gibst du nur '
     'weiter, wenn du sie selbst kopierst und einfügst.\n\n'
     'Verantwortlich: Frederik Leckebusch (FRENO Studios), Geraer Straße 21, '
-    '99099 Erfurt.\n\n'
+    '99099 Erfurt, lifesgamestudios@gmail.com.\n\n'
     'Die ganze Erklärung steht unter $datenschutzAdresse';
 
 const String gesundheitsText =

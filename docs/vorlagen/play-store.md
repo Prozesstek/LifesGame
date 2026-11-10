@@ -85,9 +85,13 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 
 ### Rechner *(Mensch)*
 
-- [ ] Android Studio → SDK Manager → „Android SDK Command-line Tools“.
-      `flutter doctor` meldet sie als fehlend.
-- [ ] `flutter doctor --android-licenses`
+- [x] Android Studio → SDK Manager → „Android SDK Command-line Tools“
+      (10.11.).
+- [x] `flutter doctor --android-licenses` (10.11.): Die neuen Tools
+      melden „--licenses option is no longer needed“, `flutter doctor`
+      zeigt deshalb weiter „license status unknown“. Harmlos: Der
+      Release-Build läuft durch, ohne die Meldung zu den Debug-Symbolen
+      (58,7 MB, noch mit dem Debug-Schlüssel signiert).
 - [ ] USB-Debugging am Handy, `flutter run --release` aufs eigene Gerät.
       Auf diesem Rechner wurde noch nie ein Android-Build gebaut.
 
@@ -96,8 +100,12 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 - [x] Release-`signingConfig` in `android/app/build.gradle.kts` (19.10.):
       liest `android/key.properties`, ohne die Datei weiter der
       Debug-Schlüssel.
-- [ ] *(Mensch)* Upload-Schlüssel erzeugen und `android/key.properties`
+- [x] *(Mensch)* Upload-Schlüssel erzeugen und `android/key.properties`
       ausfüllen — Befehl und Felder in `android/key.properties.example`.
+      (10.11.: `C:\Users\frekk\upload-keystore.jks`, Alias `upload`; der
+      Release-Build ist damit signiert, geprüft mit `keytool -printcert`.
+      In `key.properties` den Pfad mit `/` und ohne Anführungszeichen
+      schreiben.)
 - [ ] *(Mensch)* Schlüssel und Passwort an zwei Orten sichern. `*.jks` und
       `key.properties` sind gitignored, das bleibt so.
 - [x] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
@@ -124,7 +132,9 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       HERKUNFT-Dateien.
 - [ ] Mit jedem Upload die Zahl nach dem `+` in `pubspec.yaml` erhöhen
       (`version: 0.1.0+1`).
-- [ ] `flutter build appbundle --release` — Play nimmt nur `.aab`. Am
+- [x] `flutter build appbundle --release` (10.11.: 58,7 MB, mit dem
+      Upload-Schlüssel signiert, ohne Meldung zu den Debug-Symbolen).
+      Früher: Play nimmt nur `.aab`. Am
       19.10. zum ersten Mal gebaut (57 MB), aber mit „failed to strip
       debug symbols“: Dafür braucht Flutter die cmdline-tools. Nach deren
       Installation und mit dem Upload-Schlüssel neu bauen.
@@ -146,7 +156,8 @@ Ein geschlossener Test mit Fremden ist schon eine Verbreitung.
       liefert ohnehin aus. (10.11.: `web/datenschutz.html` und
       `web/impressum.html`, nach dem Merge unter
       `prozesstek.de/LifesGame/datenschutz.html`. Ort „99099 Erfurt“
-      bestätigt (10.11.). **Offen:** E-Mail eintragen, vor der Veröffentlichung von
+      bestätigt, E-Mail `lifesgamestudios@gmail.com` eingetragen (10.11.).
+      **Offen:** vor der Veröffentlichung von
       einer Rechtsberatung oder einem Generator gegenlesen lassen.)
 - [ ] *(Mensch)* Impressum und Kontakt klären — Frederik ist gewerblich
       tätig.

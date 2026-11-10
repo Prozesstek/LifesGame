@@ -147,15 +147,16 @@ Datum steht noch aus (frühestens Mitte Dezember öffentlich).
 |---|---|
 | **Konto** | Zahlung, Identität und Händlerstatus erledigt (Frederik) |
 | **Startsymbol** | Frederiks Bild (ChatGPT) zugeschnitten: adaptives Icon in allen Dichten, `docs/store/icon_512.png`, erzeugt mit `tool/app_icon.py` |
-| **Impressum, Datenschutz** | `web/impressum.html`, `web/datenschutz.html` — **E-Mail fehlt noch**, 99099 Erfurt bestätigt, Gegenlesen steht aus |
+| **Impressum, Datenschutz** | `web/impressum.html`, `web/datenschutz.html` — mit Adresse und E-Mail, Gegenlesen steht aus |
 | **Info-Blatt** | Zeichen oben im Charakter: Datenschutz, Gesundheit, Lizenzen (`info_blatt.dart`) |
 
 **Regel von Frederik:** Das Prüfen am Handy läuft bei jeder Änderung und
 wird nicht mehr in `state.md` vermerkt.
 
 App 1154 (vorher 1150 laut Kopf, `test/info_blatt_test.dart` bringt 4).
-**Offen:** Upload-Schlüssel, `cmdline-tools`, Tester, App-Name, Erinnerung
-ja oder nein; Herkunft des ChatGPT-Icons in die HERKUNFT-Dateien.
+**Danach am selben Tag:** `cmdline-tools` installiert, Upload-Schlüssel
+erzeugt, der Release-Build (`.aab`, 58,7 MB) ist damit signiert.
+**Offen:** Tester, App-Name, Play-Console-Eintrag, Erinnerung ja oder nein; Herkunft des ChatGPT-Icons in die HERKUNFT-Dateien.
 
 ## 08.11.2026, danach: das Laden-Zeichen
 
