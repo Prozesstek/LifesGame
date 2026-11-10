@@ -66,9 +66,10 @@ class HomeScreen extends ConsumerWidget {
 
   /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
-  /// Ausrüstung, Charakter. Seit dem 29.10.2026 50 statt 64, damit die
-  /// Holzleiste ein Fünftel niedriger wird.
-  static const double bottomCircleSize = 50;
+  /// Ausrüstung, Charakter. Am 29.10.2026 50 statt 64, damit die
+  /// Holzleiste ein Fünftel niedriger wird; seit dem 10.11.2026 ohne
+  /// Namen darunter wieder 64.
+  static const double bottomCircleSize = 64;
 
   /// Die Bereiche der unteren Leiste.
   static const List<Bereich> untereBereiche = <Bereich>[

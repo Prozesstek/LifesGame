@@ -26,7 +26,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | Bereich | Stand | Wo nachlesen |
 |---|---|---|
 | **Gewohnheiten** | **oben die vier Gebiete, auf der Kachel nur Ertrag und Kette**, **neue über einen grünen Plus-Knopf, eine Frage nach der anderen**, **Skills je Gebiet, die nur wachsen — die Erfahrung fliegt zum Level und zum Gebiet**, **ein Häkchen, das aufspringt, klingt und Münzen wirft**, **das erste des Tages lässt die Flamme groß in der Mitte einen Tag höher ticken**, **das Lagerfeuer am Abend mit Truhe, Aufgaben, Rückfrage und „Morgen zuerst“**, Vorlagen und eigene, **Wochenplan je Gewohnheit**, **Koppeln zu Stapeln**, Streaks, **die fallen statt zu reißen**, **Tageskette**, Streak-Eis, Tagesform, Tagestruhe, **Tagesaufgaben**, Wochenrückblick, Auslöser „Wann machst du das?“, **Belohnung danach**, **Zeitziele als Timer**, Startvorlage | ADR-0028, -0036, -0043, -0044, -0052, -0055, -0064, -0065, -0066, -0067, -0085, -0089, -0092 |
-| **Startseite** | **vor dem Berg**, acht Kreise mit Namen in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
+| **Startseite** | **vor dem Berg**, acht Kreise **ohne Namen** in zwei Holzrahmen, **die nach und nach erscheinen**, **ein Mentor, der durch den ersten Start führt**, Level-Abzeichen und Gold in einer Zeile, „Heute“ zum Abhaken, **darunter das Lagerfeuer**, **am Anfang die Frage nach der ersten Gewohnheit** | ADR-0049, -0053, -0057, -0058, -0068, -0076, -0079, -0087 |
 | **Wissensbaum** | **jede Seite eine Spielrunde wie bei Duolingo**, **gelesen wird in einem Buch, das sich umblättern lässt**, vier Wurzeln, Zwischenebenen, 63 Knoten, 15 angekündigte Überschriften, ein Punkt je Knoten, **ein Startpunkt, einer je Aufstieg**, **das Handbuch als fünf Knoten unter Gewohnheiten**, **direkt zur nächsten Seite**, Rückfrage des Tages, **falsche Antworten kommen noch einmal**, **Ring und Zähler an jedem Knoten, Gebietsbalken, „Weiterlesen“** | ADR-0019, -0045, -0050, -0051, -0055, -0056, -0061, -0070, -0078 |
 | **Kampf** | die Grube: Echtzeit, 30 Stufen, **nur ein Sieg zahlt, eine Niederlage nimmt zurück und zeigt drei Wege**, gesteckte Räume, **elf Gegnerarten in gewürfelter Besetzung**, **vier Wächter, je Lauf gewürfelt**, Tor und Auftritt, Uhr, Beute je Gegner, **zwei Zeichen im ersten Lauf**, **die Tagesgrube: eine für alle, ein Versuch am Tag** | ADR-0039, -0041, -0046, -0062, -0063, -0069, -0072 |
 | **Level** | **eine Roadmap auf dem Level-Ring**, die Feier nennt das nächste Ziel; Lagerfeuer, Tagesdungeon, Haustier, Statistik und Sammlung **warten auf ein Level** | ADR-0098 |
@@ -136,6 +136,33 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 10.11.2026, danach: das Charakter-Zeichen
+
+AktivesBrett schickte ein Profilbild als Vorbild, dann: „nicht den
+charakter so zeichnen, einfach nur die silhouette“. Kopf und Schultern als
+**goldene Silhouette** mit rundem Glanz oben links
+(`tool/pixel/kreis_charakter.px.js`), statt des Helms aus Raven. **Damit
+ist kein Kreis der Startseite mehr fremd**; `tool/kreis_zeichen.py` ist
+gelöscht. Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
+## 10.11.2026: das Ausrüstungs-Zeichen, die Kreise ohne Namen
+
+AktivesBrett: „mach als nächstes ausrüstung neu“, gewählt aus vier
+Vorschlägen: ein **Plattenharnisch** von vorn mit Goldwappen und rotem
+Stein, Gürtel, Schurz und Schultern aus drei abfallenden Lagen
+(`tool/pixel/kreis_ausruestung.px.js`). Die ersten Schultern („wie
+Turbinen“) waren verworfen. Er ersetzt den Rucksack;
+`tool/kreis_zeichen.py` zeichnet nur noch den Helm.
+
+Danach: „mach den Text bei den icons weg und mach die bitte größer“. Die
+acht Kreise der Startseite tragen **keinen Namen mehr**, nur der Vorleser
+hört ihn; dafür sind sie größer — oben 72 statt 56, unten 64 statt 50.
+**Das nimmt den Entscheid vom 24.10. zurück** (Namen wieder ein, wegen der
+Intuitivität); ob Neue die Kreise ohne Wort erkennen, ist nicht geprüft.
+Im Browser werden die großen Kreise jetzt auch bei einfacher Dichte hart
+gezeichnet. App-Tests grün (ein Test prüft jetzt, dass kein Name mehr
+unter dem Kreis steht). **Nicht gerendert, nicht am Handy.**
 
 ## 08.11.2026, zuletzt: das Fähigkeiten-Zeichen
 

@@ -59,16 +59,18 @@ void main() {
     }
   });
 
-  test('was in die Ecken reicht, wird kleiner, der Helm bleibt groß', () {
+  test('was in die Ecken reicht, wird kleiner, der Harnisch bleibt groß', () {
     // Bis zum 04.11.2026 waren es die Schwerter von Raven; die eigenen
     // reichen nicht mehr so weit. Am weitesten reicht jetzt die Rolle.
+    // Bis zum 10.11. blieb der Helm des Charakters groß, die Silhouette
+    // reicht mit den Schultern weiter in die Ecken.
     const size = HubCircle.diameter;
     expect(
       HubCircle.symbolSideFor(BereichZeichen.gewohnheiten, size),
-      lessThan(HubCircle.symbolSideFor(BereichZeichen.charakter, size)),
+      lessThan(HubCircle.symbolSideFor(BereichZeichen.ausruestung, size)),
     );
     expect(
-      HubCircle.symbolSideFor(BereichZeichen.charakter, size),
+      HubCircle.symbolSideFor(BereichZeichen.ausruestung, size),
       closeTo(size * HubCircle.symbolAnteil, 0.001),
     );
   });
