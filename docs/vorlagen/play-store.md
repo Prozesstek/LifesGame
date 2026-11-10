@@ -59,10 +59,10 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       Studios“ — und überall gleich führen: Play Console,
       Datenschutzseite, Impressum.
 - [x] *(Mensch)* Konto angelegt (19.10.).
-- [ ] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
-      ein Android-Gerät mit der Play-Console-App. Dauert Tage.
-- [ ] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
-      Händler stehen Adresse und Telefon öffentlich im Store.
+- [x] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
+      ein Android-Gerät mit der Play-Console-App. Dauert Tage. (10.11.)
+- [x] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
+      Händler stehen Adresse und Telefon öffentlich im Store. (10.11.)
 - [ ] **Name und Paket-Id endgültig.** `dev.prozesstek.lifes_game` lässt
       sich nach dem ersten Upload nie mehr ändern. „Lifes Game“ oder
       „Life's Game“? Im Store nach gleichen Namen suchen.
@@ -100,8 +100,12 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       ausfüllen — Befehl und Felder in `android/key.properties.example`.
 - [ ] *(Mensch)* Schlüssel und Passwort an zwei Orten sichern. `*.jks` und
       `key.properties` sind gitignored, das bleibt so.
-- [ ] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
-      allen Dichten, dazu 512 × 512 für den Store.
+- [x] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
+      allen Dichten, dazu 512 × 512 für den Store (10.11.). Quelle:
+      Frederiks Bild aus ChatGPT (`tool/app_icon/quelle.png`), erzeugt mit
+      `tool/app_icon.py`, Store-Datei `docs/store/icon_512.png`.
+      **Herkunft:** KI-Bild, Nutzungsbedingungen von ChatGPT für
+      kommerzielle Nutzung noch in die HERKUNFT-Dateien eintragen.
 - [x] Startbild in der Lederfarbe (19.10.). Bisher steht dort der helle
       Standardhintergrund (`launch_background.xml`), beim Start blitzt
       Weiß auf.
@@ -113,8 +117,11 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       und aufgeklappten Faltbaren das Hochformat nicht mehr ein.
       `PhoneFrame` dort einschalten oder Tablets in der Play Console
       ausschließen.
-- [ ] Lizenzseite (`showLicensePage`) und die Namen der Asset-Pakete
-      erreichbar machen, ohne Satz auf dem Bildschirm (ADR-0060).
+- [x] Lizenzseite (`showLicensePage`) erreichbar (10.11.): Info-Zeichen
+      oben im Charakter → Blatt mit Datenschutz, Gesundheit, Lizenzen
+      (`lib/character/widgets/info_blatt.dart`). **Offen:** Die Namen der
+      Asset-Pakete stehen noch nicht darin, sie hängen an den
+      HERKUNFT-Dateien.
 - [ ] Mit jedem Upload die Zahl nach dem `+` in `pubspec.yaml` erhöhen
       (`version: 0.1.0+1`).
 - [ ] `flutter build appbundle --release` — Play nimmt nur `.aab`. Am
@@ -132,9 +139,15 @@ Ein geschlossener Test mit Fremden ist schon eine Verbreitung.
 - [ ] `Success.mp3`, `Win.mp3`, `Win_2.mp3`, `Win_3.mp3`: Herkunft
       unbekannt. Nachweisen oder durch gerechnete ersetzen
       (`tool/haekchen_klaenge.py` zeigt, wie).
-- [ ] Hinweis „keine medizinische Beratung“ bei den Gesundheitsseiten.
-- [ ] Datenschutzerklärung als Seite mit fester Adresse; GitHub Pages
-      liefert ohnehin aus.
+- [x] Hinweis „keine medizinische Beratung“ (10.11.): im Info-Blatt des
+      Charakters und in der Datenschutzerklärung. **Offen:** Bei den
+      Seiten im Wissensbaum selbst steht er noch nicht.
+- [x] Datenschutzerklärung als Seite mit fester Adresse; GitHub Pages
+      liefert ohnehin aus. (10.11.: `web/datenschutz.html` und
+      `web/impressum.html`, nach dem Merge unter
+      `prozesstek.de/LifesGame/datenschutz.html`. Ort „99099 Erfurt“
+      bestätigt (10.11.). **Offen:** E-Mail eintragen, vor der Veröffentlichung von
+      einer Rechtsberatung oder einem Generator gegenlesen lassen.)
 - [ ] *(Mensch)* Impressum und Kontakt klären — Frederik ist gewerblich
       tätig.
 

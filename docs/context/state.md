@@ -137,6 +137,26 @@ vom 02.10.
 
 ---
 
+## 10.11.2026: Play-Store-Vorbereitung beginnt
+
+Ziel 9 wird jetzt abgearbeitet ([`play-store.md`](../vorlagen/play-store.md)).
+Der geschlossene Test mit zwölf Testern ist der erste Schritt; ein neues
+Datum steht noch aus (frühestens Mitte Dezember öffentlich).
+
+| Was | Wie |
+|---|---|
+| **Konto** | Zahlung, Identität und Händlerstatus erledigt (Frederik) |
+| **Startsymbol** | Frederiks Bild (ChatGPT) zugeschnitten: adaptives Icon in allen Dichten, `docs/store/icon_512.png`, erzeugt mit `tool/app_icon.py` |
+| **Impressum, Datenschutz** | `web/impressum.html`, `web/datenschutz.html` — **E-Mail fehlt noch**, 99099 Erfurt bestätigt, Gegenlesen steht aus |
+| **Info-Blatt** | Zeichen oben im Charakter: Datenschutz, Gesundheit, Lizenzen (`info_blatt.dart`) |
+
+**Regel von Frederik:** Das Prüfen am Handy läuft bei jeder Änderung und
+wird nicht mehr in `state.md` vermerkt.
+
+App 1154 (vorher 1150 laut Kopf, `test/info_blatt_test.dart` bringt 4).
+**Offen:** Upload-Schlüssel, `cmdline-tools`, Tester, App-Name, Erinnerung
+ja oder nein; Herkunft des ChatGPT-Icons in die HERKUNFT-Dateien.
+
 ## 08.11.2026, danach: das Laden-Zeichen
 
 Ein praller Lederbeutel voller Gold mit goldener Kordel, davor eine
