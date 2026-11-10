@@ -14,7 +14,7 @@ RPGs kennt:
 | Statistik | Balken mit Pfeil | seit 08.11. in `tool/pixel/kreis_statistik.px.js` |
 | Laden | ein Lederbeutel voller Gold | seit 08.11. in `tool/pixel/kreis_laden.px.js` |
 | Fähigkeiten | ein Zauberbuch mit Flammensiegel | seit 08.11. in `tool/pixel/kreis_faehigkeiten.px.js` |
-| Ausrüstung | ein Rucksack — das Inventar | gezeichnet, Raven hat keinen |
+| Ausrüstung | ein Plattenharnisch mit Goldbeschlag | seit 10.11. in `tool/pixel/kreis_ausruestung.px.js` |
 | Charakter | ein Helm — der Charakterbogen | Raven fc1911 |
 
 Die Theorie behält Frederiks Buch (`assets/UI/Buch.png`).
@@ -39,10 +39,6 @@ RAVEN = Path.home() / (
 )
 SEITE = 256
 
-# Die Kontur der Raven-Bilder, ein dunkles Braunrot.
-KONTUR = (40, 22, 24, 255)
-
-
 def raven(ordner, nummer):
     return Image.open(ordner / f"fc{nummer}.png").convert("RGBA")
 
@@ -51,87 +47,9 @@ def gross(bild):
     return bild.resize((SEITE, SEITE), Image.NEAREST)
 
 
-class Raster:
-    """Ein 32er-Raster zum Zeichnen: Flächen setzen, dann rundherum die
-    Kontur — dieselbe Machart wie `tool/item_icons.py`."""
-
-    def __init__(self):
-        self.punkte = {}
-
-    def flaeche(self, x0, y0, x1, y1, farbe):
-        for x in range(x0, x1 + 1):
-            for y in range(y0, y1 + 1):
-                self.punkte[(x, y)] = farbe
-
-    def punkt(self, x, y, farbe):
-        self.punkte[(x, y)] = farbe
-
-    def ohne(self, *orte):
-        for ort in orte:
-            self.punkte.pop(ort, None)
-
-    def bild(self):
-        bild = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-        for (x, y), farbe in self.punkte.items():
-            bild.putpixel((x, y), farbe)
-        # Die Kontur: jeder leere Punkt neben einem gesetzten.
-        for x in range(32):
-            for y in range(32):
-                if (x, y) in self.punkte:
-                    continue
-                nachbarn = ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))
-                if any(n in self.punkte for n in nachbarn):
-                    bild.putpixel((x, y), KONTUR)
-        return bild
-
-
-def rucksack():
-    """Ein Lederrucksack: Griff oben, Klappe mit goldener Schnalle,
-    vorn eine Tasche, links Licht, rechts Schatten."""
-    leder = (150, 92, 52, 255)
-    licht = (190, 128, 76, 255)
-    schatten = (110, 64, 36, 255)
-    klappe = (124, 72, 40, 255)
-    klappe_licht = (160, 100, 58, 255)
-    gold = (236, 186, 76, 255)
-    gold_schatten = (170, 118, 40, 255)
-
-    r = Raster()
-    # Der Griff: ein Bogen über der Klappe.
-    for x in range(13, 19):
-        r.punkt(x, 3, schatten)
-    r.punkt(12, 4, schatten)
-    r.punkt(19, 4, schatten)
-    r.punkt(12, 5, schatten)
-    r.punkt(19, 5, schatten)
-    # Der Körper, unten und oben abgerundet.
-    r.flaeche(7, 8, 24, 27, leder)
-    r.ohne((7, 8), (24, 8), (7, 27), (24, 27))
-    r.flaeche(7, 9, 8, 26, licht)
-    r.flaeche(23, 9, 24, 26, schatten)
-    # Die Klappe, unten rund, mit Licht an der Kante.
-    r.flaeche(8, 7, 23, 15, klappe)
-    r.ohne((8, 7), (23, 7))
-    r.flaeche(9, 16, 22, 16, klappe)
-    r.flaeche(9, 8, 22, 8, klappe_licht)
-    # Die Schnalle mitten auf der Klappe.
-    r.flaeche(14, 13, 17, 17, gold)
-    r.flaeche(15, 14, 16, 16, KONTUR)
-    r.punkt(17, 17, gold_schatten)
-    r.punkt(14, 17, gold_schatten)
-    # Die Tasche vorn: dunkler, mit Naht.
-    r.flaeche(10, 19, 21, 25, schatten)
-    r.flaeche(10, 19, 21, 19, KONTUR)
-    r.flaeche(11, 20, 20, 20, leder)
-    for x in range(11, 21, 2):
-        r.punkt(x, 24, klappe_licht)
-    return r.bild()
-
-
 def main():
     ordner = Path(sys.argv[1]) if len(sys.argv) > 1 else RAVEN
     zeichen = {
-        "Kreis_Ausruestung": rucksack(),
         "Kreis_Charakter": raven(ordner, 1911),
     }
     ZIEL.mkdir(parents=True, exist_ok=True)

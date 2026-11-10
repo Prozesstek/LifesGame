@@ -220,7 +220,8 @@ neuen Eintrag dort.
 - Zwölf Fähigkeiten von AktivesBrett, Speerstich und Sichelhieb
   (`tool/faehigkeit_icons.py`, `tool/item_icons.py`)
 - Die zwölf Stücke aus ADR-0077 und ihre sechs Bilder auf der Figur
-- Kreis Ausrüstung (Rucksack)
+- Kreis Ausrüstung — Plattenharnisch, seit 10.11. mit pxl
+  (`tool/pixel/kreis_ausruestung.px.js`); davor ein gezeichneter Rucksack
 - Kreis Statistik — Balken und goldener Pfeil, seit 08.11. neu mit pxl
   (`tool/pixel/kreis_statistik.px.js`)
 - Das Dorf (`tool/dorf_kacheln.py`)

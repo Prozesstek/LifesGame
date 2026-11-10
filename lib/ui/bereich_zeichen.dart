@@ -7,7 +7,7 @@ abstract final class BereichZeichen {
   // **Jeder Kreis trägt, was ein Spieler aus RPGs kennt** (28.10.2026,
   // Frederik: „passendere Icons wählen, vielleicht gucken, was der
   // Spieler aus anderen Spielen gelernt hat“): die Quest-Rolle, die
-  // gekreuzten Schwerter, den Münzbeutel, den Rucksack fürs Inventar,
+  // gekreuzten Schwerter, den Münzbeutel, den Harnisch für die Ausrüstung,
   // den Helm für den Charakterbogen. Gezeichnet im Pixelstil wie Holz
   // und Figuren, nicht als Systemzeichen; woher jedes kommt, steht in
   // `tool/kreis_zeichen.py`. Das Systemzeichen bleibt nur Ersatz.
@@ -35,8 +35,9 @@ abstract final class BereichZeichen {
   /// Sternenfall, bis zum 08.11. ein Runenstein aus Raven.
   static const String faehigkeiten = 'assets/UI/Kreis_Faehigkeiten.png';
 
-  /// Der Rucksack auf dem Ausrüstungs-Kreis (ADR-0057) — das Inventar,
-  /// wie in fast jedem Spiel. Bis zum 28.10. der Plattenharnisch.
+  /// Ein Plattenharnisch mit Goldbeschlag auf dem Ausrüstungs-Kreis
+  /// (ADR-0057) — gezeichnet mit pxl (`tool/pixel/kreis_ausruestung.px.js`).
+  /// Vom 28.10. bis 10.11. ein Rucksack.
   static const String ausruestung = 'assets/UI/Kreis_Ausruestung.png';
 
   /// Der Helm auf dem Charakter-Kreis — der Charakterbogen. Bis zum
@@ -76,7 +77,7 @@ abstract final class BereichZeichen {
     statistik => 1.18,
     laden => 1.26,
     faehigkeiten => 1.25,
-    ausruestung => 0.96,
+    ausruestung => 1.0,
     charakter => 0.84,
     _ => 1.42,
   };
