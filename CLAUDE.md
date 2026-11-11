@@ -184,6 +184,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
+| `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Zauberbuch, Harnisch, Silhouette; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
@@ -272,6 +273,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/item_icons.py` | **zeichnet** sieben der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset und der Frostreif stehen in `tool/pixel/` | Python |
 | `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): **alle Zeichen der Kreise** (seit 10.11.2026), das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
+| `tool/pixel/mittig.js` | **rückt ein Kreis-Zeichen in die Mitte** seines Bildes, in ganzen Bildpunkten — nach `vergroessern.js` laufen lassen; danach `BereichZeichen.reichweite` neu messen | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme, die Glocken, wenn die große Flamme einen Tag höher tickt (`KetteSteigt`) — mit den Helfern aus `kampf_klaenge.py` | Python |
@@ -358,7 +360,8 @@ Packages.
 # App
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
-flutter test             # 1150 Tests
+flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
+flutter test             # 1159 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

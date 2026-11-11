@@ -68,8 +68,9 @@ class HomeScreen extends ConsumerWidget {
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
   /// Ausrüstung, Charakter. Am 29.10.2026 50 statt 64, damit die
   /// Holzleiste ein Fünftel niedriger wird; seit dem 10.11.2026 ohne
-  /// Namen darunter wieder 64.
-  static const double bottomCircleSize = 64;
+  /// Namen darunter wieder 64, seit dem 11.11.2026 70 — im Innenabstand
+  /// der Leiste, die dafür nicht höher wird.
+  static const double bottomCircleSize = 70;
 
   /// Die Bereiche der unteren Leiste.
   static const List<Bereich> untereBereiche = <Bereich>[
@@ -83,7 +84,10 @@ class HomeScreen extends ConsumerWidget {
   static const double lichtRadius = 26;
 
   /// Der Innenabstand der Leisten — knapper als der von [HolzGruppe].
-  static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 5, 4, 2);
+  /// Seit dem 11.11.2026 fast null: Die Kreise sind um genau so viel
+  /// gewachsen (oben 72 → 78, unten 64 → 70), die Leisten blieben gleich
+  /// hoch.
+  static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 1, 4, 0);
 
   /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
   static const String hintergrund = 'assets/UI/Berg.jpg';

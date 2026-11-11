@@ -3,6 +3,26 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Die Release-APK kommt ohne `INTERNET` nicht ins Netz
+
+Flutter setzt `android.permission.INTERNET` nur in
+`android/app/src/debug/AndroidManifest.xml`. Im Debug-Build geht jede
+Anfrage, die Release-APK scheitert still — bis zum Feedback (11.11.2026)
+brauchte die App kein Netz, und niemand merkte es.
+
+**Regel:** Wer etwas ins Netz schickt, prüft
+`android/app/src/main/AndroidManifest.xml`.
+
+## Was über den Rand eines `Stack` ragt, nimmt keinen Tipp an
+
+Das X auf der Vorschau im Feedback-Blatt saß mit `Positioned(top: -10)`
+halb außerhalb — sichtbar, aber Flutter prüft Tipps nur innerhalb der
+Fläche des Elternteils. Dazu hatte die Vorschau keine Größe, solange das
+Bild dekodierte. Gefunden hat es ein Widget-Test.
+
+**Regel:** Tippflächen ganz in ihren Stapel legen und Bildern eine feste
+Fläche geben.
+
 ## Ein Maler, der nur bei eigenen Anlässen neu malt, verpasst ein Ziel, das wandert
 
 Der Schleier des Scheinwerfers misst seine Löcher beim Malen aus — gemalt
