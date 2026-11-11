@@ -16,6 +16,7 @@ import 'package:lifes_game/ui/anschlagtafel.dart';
 
 import 'test_view.dart';
 import 'tutorial_helfer.dart';
+import 'truhe_helfer.dart';
 
 /// „Heute" auf der Startseite (ADR-0053).
 ///
@@ -152,6 +153,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(DailyChestCard.oeffnenKey));
     await tester.pumpAndSettle();
+    await tippeTruheAuf(tester);
 
     expect(container.read(habitTrackerProvider).hasOpenedChest(heute), isTrue);
     await tester.tap(find.byKey(DailyChestCard.einsackenKey));

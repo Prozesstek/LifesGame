@@ -264,13 +264,16 @@ abstract final class StatCurve {
 /// der Laden ausgelegt ist (`packages/gear`). Wer daran dreht, lässt
 /// `daily_chest_test.dart` laufen; dort steht die Spanne als Test.
 enum ChestTier {
-  schlicht('Schlicht', weight: 70, goldMin: 5, goldMax: 10),
-  gut('Gut gefüllt', weight: 20, goldMin: 15, goldMax: 25),
+  // **Die Namen sind Seltenheiten** (11.11.2026, Frederik): Die Truhe
+  // springt in der Farbe ihrer Stufe auf, wie in Clash Royale. Gewicht
+  // und Gold sind dieselben wie vorher.
+  schlicht('Gewöhnlich', weight: 70, goldMin: 5, goldMax: 10),
+  gut('Selten', weight: 20, goldMin: 15, goldMax: 25),
 
   /// **Die Quelle des Streak-Eises** (Issue #46): gut zwei im Monat für
   /// jemanden, der jeden Tag alles erledigt.
-  eis('Streak-Eis', weight: 8, goldMin: 5, goldMax: 5, freezes: 1),
-  schatz('Schatz', weight: 2, goldMin: 60, goldMax: 60);
+  eis('Episch', weight: 8, goldMin: 5, goldMax: 5, freezes: 1),
+  schatz('Legendär', weight: 2, goldMin: 60, goldMax: 60);
 
   const ChestTier(
     this.label, {

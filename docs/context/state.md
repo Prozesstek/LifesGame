@@ -16,6 +16,28 @@
 
 ---
 
+## 11.11.2026: die Tagestruhe kommt von selbst
+
+Frederik: „Tagestruhe kommt automatisch wenn man alles abgehakt hat mit
+Seltenheit wie bei DuoLingo oder Clash Royale durch Tippen.“ Vier Fragen,
+alle wie empfohlen: [ADR-0102](../decisions/0102-die-tagestruhe-kommt-von-selbst.md).
+
+| Was | Wie |
+|---|---|
+| **Wann** | nach dem letzten Häkchen, nach Flamme und Konfetti, vor Errungenschaften und „Morgen zuerst“ — ab Level 3, nicht im Tutorial |
+| **Tippen** | drei Mal: wackelt, leuchtet, klingt höher; drei Punkte darunter zählen mit |
+| **Aufgehen** | Strahlen und Funken in der Farbe der Seltenheit, ihr Name darunter, das Gold zählt hoch, das Eis springt heraus |
+| **Seltenheit** | Gewöhnlich, Selten, Episch, Legendär — Gewicht und Gold wie vorher |
+| **Weggetippt** | gebucht wird erst beim dritten Tipp; sonst wartet sie am Feuer und geht dort genauso auf |
+
+Vier Momente in 390 × 844 gerendert und angesehen. App 1165 (vorher
+1159), habits 375 unverändert.
+
+### Offen
+
+- Die Klänge sind Platzhalter; das Gold fliegt nicht zur Leiste.
+- **AktivesBrett hat ADR-0102 nicht gesehen.**
+
 ## 11.11.2026: das Level steht ganz rechts
 
 Frederik: „Level nach rechts beim Startscreen“. Der Ring stand nicht am
@@ -48,7 +70,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1159, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1165, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

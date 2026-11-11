@@ -236,6 +236,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/anlegen_teile.dart` | seine Bausteine: Kopf mit Strichen, große Wahl, Feld, Vorschläge | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
+| `lib/habits/widgets/truhe_oeffnen.dart` | **die Tagestruhe kommt von selbst** ([ADR-0102](docs/decisions/0102-die-tagestruhe-kommt-von-selbst.md)): nach dem letzten Häkchen groß in der Mitte, drei Tipps, dann springt sie in der Farbe ihrer Seltenheit auf (`TruhenSeltenheit`, eine Tabelle); **kennt keine Provider** — gebucht wird in `zeigeTagestruhe` (`habit_check_flow.dart`), erst beim dritten Tipp | Flutter |
 | `lib/habits/widgets/aufgaben_streifen.dart` | **die Tagesaufgaben kommen kurz von unten**: was ein Häkchen oder eine Rückfrage voranbringt, fährt herein, füllt seinen Balken und fährt hinaus — nimmt keinen Tipp an; ausgelöst über `zeigeAufgabenFortschritt` in `habit_check_flow.dart` | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** zum **Ändern** einer laufenden Gewohnheit (beim Anlegen fragt seit ADR-0089 das Blatt) — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser **auf der Startseite** steht — Satz oder „Nach: …“; die Kachel der Gewohnheiten zeigt nur den Satz | Flutter |
@@ -361,7 +362,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1159 Tests
+flutter test             # 1165 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
