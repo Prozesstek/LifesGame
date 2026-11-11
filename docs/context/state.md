@@ -16,6 +16,24 @@
 
 ---
 
+## 11.11.2026: die Rückfrage kommt als Dialog, das Fragezeichen steht fest
+
+Frederik: „Rückfrage öffnet sich mittig wenn man Theorie öffnet –
+verschwindet dann komplett“ und „Fragezeichen rechts immer an gleicher
+Stelle“.
+
+| Was | Wie |
+|---|---|
+| **Rückfrage** | offen kommt sie beim Betreten der Theorie als Dialog in die Mitte; nach der Antwort bleibt die Auflösung, ein Tipp schließt, **oben steht danach nichts mehr**; unbeantwortet weggetippt, öffnet eine Zeile sie wieder (`ReviewSection.alsDialog`) |
+| **Lagerfeuer** | dort bleibt sie die Karte, die aufklappt |
+| **Fragezeichen** | immer am rechten Rand — es wanderte mit der Länge des Gebietsnamens (420, 441, 549), weil `Spacer` neben zwei `Flexible` den Rest nicht ganz verteilt |
+
+**Ohne Rückfrage entschieden:** Im Tutorial springt der Dialog nicht von
+selbst auf — fällig ist die Rückfrage schon am Tag der ersten Seite, und
+der Mentor führt dann woandershin. Dort steht nur die Zeile.
+
+App 1166 (vorher 1165). Dialog und Baum in 390 × 844 gerendert.
+
 ## 11.11.2026: die Tagestruhe kommt von selbst
 
 Frederik: „Tagestruhe kommt automatisch wenn man alles abgehakt hat mit
@@ -70,7 +88,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1165, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1166, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

@@ -19,8 +19,12 @@ class ReviewCard extends StatelessWidget {
     required this.daysUntilNext,
     required this.onAnswer,
     this.onZuklappen,
+    this.zuklappenZeichen = Icons.expand_less,
     super.key,
   });
+
+  /// Das Zeichen dafür — im Dialog ein Kreuz.
+  final IconData zuklappenZeichen;
 
   final ReviewQuestion question;
 
@@ -101,10 +105,10 @@ class ReviewCard extends StatelessWidget {
                       key: zuklappenKey,
                       onTap: zu,
                       borderRadius: BorderRadius.circular(12),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 6),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 6),
                         child: Icon(
-                          Icons.expand_less,
+                          zuklappenZeichen,
                           size: 20,
                           color: Palette.muted,
                         ),
