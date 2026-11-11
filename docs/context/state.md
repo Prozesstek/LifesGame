@@ -137,6 +137,13 @@ vom 02.10.
 
 ---
 
+## 11.11.2026, zuletzt: Vollbild am Handy
+
+AktivesBrett: „ich will das game in full screen auf dem Handy haben“.
+Statusleiste und Navigationsleiste sind weg (`SystemUiMode.immersiveSticky`
+in `main.dart`); ein Wisch vom Rand holt sie kurz zurück. Build 3.
+**Nicht am Handy geprüft.**
+
 ## 11.11.2026, danach: Feedback an Discord
 
 AktivesBrett: eine Feedback-Funktion für die Testphase, „am besten
