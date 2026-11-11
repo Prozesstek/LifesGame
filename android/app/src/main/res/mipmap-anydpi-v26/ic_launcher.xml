@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Das Startsymbol ab Android 8: der Launcher schneidet es in seine
+     Form (Kreis, Squircle). Gezeichnet in tool/pixel/app_icon.px.js,
+     abgelegt mit tool/pixel/app_icon.js. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>

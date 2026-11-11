@@ -5,4 +5,6 @@
          blitzt beim Start Weiß auf. Wer die Palette ändert, zieht diese
          Zahl nach. -->
     <color name="leder">#FF17110A</color>
+    <!-- Hinter dem Startsymbol: das dunkle Holz seines Rahmens. -->
+    <color name="ic_launcher_background">#FF3B2416</color>
 </resources>

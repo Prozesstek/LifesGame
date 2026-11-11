@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 08.11.2026 · Frederik
+**Zuletzt aktualisiert:** 11.11.2026 · AktivesBrett
 
 ---
 
@@ -136,6 +136,22 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 11.11.2026, ganz zuletzt: das eigene Startsymbol
+
+AktivesBrett schickte seine Vorlage (Wappen mit „LG“, darunter „LIFES
+GAME“) und wollte es „gemütlicher … mit mehr Liebe und mehr Details“.
+Mit pxl gezeichnet (`tool/pixel/app_icon.px.js`): Holzrahmen,
+Abendhimmel mit Mond und Sternen, der Berg der Startseite, zwei Tannen,
+das rote Wappen mit Goldrand, „LIFES GAME“ cremefarben auf einem
+Holzschild, Gras mit Blumen. Ein Stern an der Spitze war verworfen.
+
+`tool/pixel/app_icon.js` legt es ab: Android klassisch und **adaptiv**
+(ab Android 8 schneidet der Launcher es in seine Form, dahinter dunkles
+Holz), Web samt „maskable“, Favicon und 512 × 512 für den Store in
+`docs/store/`. Damit ist das Flutter-Logo weg. Build 4.
+**Nicht am Handy geprüft**; ob der Kreis eines Launchers die Ecken des
+Schilds schneidet, zeigt nur das Gerät.
 
 ## 11.11.2026, zuletzt: Vollbild am Handy
 
@@ -330,8 +346,7 @@ Ladebildschirm verschwindet. **Nicht am Handy.**
 
 ### Offen
 
-- Android zeigt beim Start das Systembild mit dem Flutter-Logo — kommt
-  mit dem eigenen Startsymbol (Ziel 9).
+- ~~Android zeigt beim Start das Systembild mit dem Flutter-Logo~~ — das Startsymbol steht seit dem 11.11.; ob das Startbild es zeigt, ist nicht geprüft.
 - **AktivesBrett hat es nicht gesehen.**
 
 ## 07.11.2026, danach: der Rundgang am Ende des Tutorials
