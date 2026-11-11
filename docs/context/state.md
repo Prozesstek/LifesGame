@@ -137,6 +137,21 @@ vom 02.10.
 
 ---
 
+## 11.11.2026: Kreise und Zeichen fast bis an den Rand
+
+AktivesBrett: „die bilder in den icons noch größer … ohne dabei die kästen
+wo sie drinn sind auch zu vergrößern … fast bis an den Rand … die bilder
+darin zu zentrieren“.
+
+| Was | Wie |
+|---|---|
+| **Kreise** | oben 78 statt 72, unten 70 statt 64 — genau um den Innenabstand der Holzleisten, die **gleich hoch bleiben** (`_leisteInnen` 5/2 → 1/0) |
+| **Zeichen** | bis 80 % des Kreises statt 64 %, höchstens bis 0,85 der halben Breite (vorher 0,78; das Pergament endet bei 0,875) |
+| **Mitte** | Statistik, Laden, Fähigkeiten, Ausrüstung und Charakter waren um 1 bis 4 Bildpunkte versetzt und sind jetzt mittig (`tool/pixel/mittig.js`); die Reichweiten neu gemessen |
+
+App-Tests grün. Startseite in 390 × 844 gerendert und angesehen (Ersatzschrift).
+**Nicht am Handy.**
+
 ## 10.11.2026, danach: das Charakter-Zeichen
 
 AktivesBrett schickte ein Profilbild als Vorbild, dann: „nicht den

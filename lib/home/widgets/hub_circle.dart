@@ -66,14 +66,15 @@ class HubCircle extends StatelessWidget {
   /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
   final String? symbol;
 
-  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt —
-  /// 46 von 72 Punkten, wie seit dem Buch.
-  static const double symbolAnteil = 46 / 72;
+  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt.
+  /// Bis zum 11.11.2026 46 von 72 Punkten; seither fast bis an den Rand
+  /// (AktivesBrett: „das sie fast an bis an den Rand gehen“).
+  static const double symbolAnteil = 0.8;
 
   /// Wie weit eine Figur von der Mitte reichen darf, in halben
   /// Kreisbreiten. Die Pergamentfläche von `ButtonBG.png` endet bei
-  /// 0,875; der Rest ist Luft bis zum Rand.
-  static const double symbolInnen = 0.78;
+  /// 0,875; bis zum 11.11.2026 blieben 0,78, seither knapp davor.
+  static const double symbolInnen = 0.85;
 
   /// Wie groß das Systemzeichen im Verhältnis zum Kreis steht.
   static const double _iconAnteil = 30 / 72;
@@ -130,8 +131,10 @@ class HubCircle extends StatelessWidget {
   /// Pixeln Breite nebeneinander. Bis zum 29.10.2026 waren es 72, dann 56,
   /// damit die Holzleisten ein Fünftel niedriger werden; seit dem
   /// 10.11.2026 wieder 72 — ohne Namen darunter bleibt die Leiste dabei
-  /// fast so niedrig, und das Zeichen ist größer zu erkennen.
-  static const double diameter = 72;
+  /// fast so niedrig, und das Zeichen ist größer zu erkennen. Seit dem
+  /// 11.11.2026 78: Der Kreis nimmt den Innenabstand der Leiste ein,
+  /// die Leiste selbst bleibt so hoch wie vorher.
+  static const double diameter = 78;
 
   /// Wie ein Test einen Kreis findet, auch wenn sein Name ein zweites
   /// Mal auf dem Bildschirm steht.

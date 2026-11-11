@@ -75,11 +75,11 @@ abstract final class BereichZeichen {
     gewohnheiten => 1.31,
     theorie => 1.16,
     kampf => 1.07,
-    statistik => 1.18,
-    laden => 1.26,
-    faehigkeiten => 1.25,
-    ausruestung => 1.0,
-    charakter => 1.25,
+    statistik => 1.22,
+    laden => 1.18,
+    faehigkeiten => 1.16,
+    ausruestung => 0.89,
+    charakter => 1.18,
     _ => 1.42,
   };
 }

@@ -272,6 +272,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/item_icons.py` | **zeichnet** sieben der zwölf Stücke aus ADR-0077, ihre zwei Grundangriffe und ihre drei Bilder auf der Figur — Rüstung und Helm als umgefärbter Umriss von Lederwams und Lederkappe (nur Standardbibliothek); das Vampirset und der Frostreif stehen in `tool/pixel/` | Python |
 | `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): **alle Zeichen der Kreise** (seit 10.11.2026), das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
+| `tool/pixel/mittig.js` | **rückt ein Kreis-Zeichen in die Mitte** seines Bildes, in ganzen Bildpunkten — nach `vergroessern.js` laufen lassen; danach `BereichZeichen.reichweite` neu messen | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme, die Glocken, wenn die große Flamme einen Tag höher tickt (`KetteSteigt`) — mit den Helfern aus `kampf_klaenge.py` | Python |
