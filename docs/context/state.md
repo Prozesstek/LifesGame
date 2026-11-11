@@ -158,8 +158,8 @@ Blatt in 390 × 844 gerendert. **Nicht am Handy, nicht an Discord gesendet**
 
 ### Offen
 
-- Webhook anlegen und als `feedback.json` ablegen (Vorlage
-  `feedback.example.json`); die CI baut die Web-Fassung ohne.
+- ~~Webhook anlegen~~ — liegt bei AktivesBrett als `feedback.json`; ein Feedback aus der APK ist im Discord angekommen (11.11.). **Frederik braucht die Datei auch**, das Repo hat sie nicht.
+- **Die Web-Fassung bleibt ohne** (AktivesBrett, 11.11.): Dort läge die URL offen in der Seite; der Knopf meldet „nicht eingerichtet“.
 - Datenschutzerklärung für den Store: Gerät, Name, Level und Screenshot
   gehen an Discord.
 
