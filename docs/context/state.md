@@ -16,6 +16,36 @@
 
 ---
 
+## 11.11.2026: ein gelber Punkt für Neues
+
+Frederik: „Immer wo es etwas Neues gibt wird ein gelber Punkt angezeigt
+(z.B. Rückfrage offen bei Theorie, neue Fähigkeiten oder Items etc)“. In
+einer Fragerunde entschieden: [ADR-0103](../decisions/0103-gelber-punkt-fuer-neues.md).
+
+| Ort | Punkt, wenn |
+|---|---|
+| Theorie | die Rückfrage offen ist oder ein Talentpunkt frei |
+| Kampf | der Tagesdungeon heute offen ist |
+| Fähigkeiten | eine Fähigkeit neu ist |
+| Laden | jeden Tag, bis man reinschaut |
+| Ausrüstung | ein neues Stück im Rucksack liegt |
+| Lagerfeuer | dort etwas wartet |
+
+Am Kreis geht er beim Öffnen weg; innen tragen neue Fähigkeiten und
+Stücke einen kleinen Punkt, bis sie angetippt sind. Der Spielstand merkt
+sich, was gesehen ist (`SaveData.neu`); **ein alter Stand hat alles
+schon gesehen**.
+
+**Ohne Rückfrage entschieden:** im Tutorial kein Punkt; ein freier
+Fähigkeitsplatz trägt keinen.
+
+App 1173 (vorher 1166). Startseite in 390 × 844 gerendert.
+
+### Offen
+
+- Ob Laden und Kampf mit einem Punkt fast jeden Tag zu viel sind.
+- **AktivesBrett hat ADR-0103 nicht gesehen.**
+
 ## 11.11.2026: die Rückfrage kommt als Dialog, das Fragezeichen steht fest
 
 Frederik: „Rückfrage öffnet sich mittig wenn man Theorie öffnet –
@@ -88,7 +118,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1166, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1173, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

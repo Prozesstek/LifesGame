@@ -9,6 +9,7 @@ import 'package:identity/identity.dart';
 import 'package:theory/theory.dart';
 
 import '../dev/debug_grants.dart';
+import '../neu/neu_gesehen.dart';
 
 /// Der komplette Spielstand als ein Wert.
 ///
@@ -33,6 +34,7 @@ class SaveData {
     this.reviews = const ReviewLog.empty(),
     this.dailyPit = const DailyPitLog.empty(),
     this.haustier = const HaustierStand.leer(),
+    this.neu,
   });
 
   const SaveData.empty() : this();
@@ -79,6 +81,11 @@ class SaveData {
   /// das folgt aus den Häkchen.
   final HaustierStand haustier;
 
+  /// Was für den gelben Punkt schon gesehen ist (11.11.2026). **Null:**
+  /// Der Stand ist älter — dann gilt alles, was er schon hat, als gesehen
+  /// (`neuGesehenProvider`), sonst stünden nach dem Update überall Punkte.
+  final NeuGesehen? neu;
+
   bool get isEmpty {
     return theory.totalXp == 0 &&
         habits.totalChecks == 0 &&
@@ -108,6 +115,7 @@ class SaveData {
       // sieht aus wie vor ADR-0072.
       if (!dailyPit.isEmpty) 'dailyPit': dailyPit.toJson(),
       if (!haustier.isEmpty) 'haustier': haustier.toJson(),
+      if (neu case final NeuGesehen n) 'neu': n.toJson(),
     };
   }
 
@@ -127,6 +135,7 @@ class SaveData {
     final reviews = json['reviews'];
     final dailyPit = json['dailyPit'];
     final haustier = json['haustier'];
+    final neu = json['neu'];
 
     return SaveData(
       theory: theory is Map<String, Object?>
@@ -159,6 +168,7 @@ class SaveData {
       haustier: haustier is Map<String, Object?>
           ? HaustierStand.fromJson(haustier)
           : const HaustierStand.leer(),
+      neu: neu is Map ? NeuGesehen.fromJson(neu) : null,
     );
   }
 
@@ -213,6 +223,7 @@ class SaveData {
     ReviewLog? reviews,
     DailyPitLog? dailyPit,
     HaustierStand? haustier,
+    NeuGesehen? neu,
   }) {
     return SaveData(
       theory: theory ?? this.theory,
@@ -225,6 +236,7 @@ class SaveData {
       reviews: reviews ?? this.reviews,
       dailyPit: dailyPit ?? this.dailyPit,
       haustier: haustier ?? this.haustier,
+      neu: neu ?? this.neu,
     );
   }
 }

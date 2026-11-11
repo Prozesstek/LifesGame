@@ -12,6 +12,7 @@ import '../habits/habits_controller.dart';
 import '../habits/habits_screen.dart';
 import '../progression/level_provider.dart';
 import '../statistik/statistik_screen.dart' deferred as statistik;
+import '../neu/neu_provider.dart';
 import '../ui/spaeter_laden.dart';
 import '../theory/skill_tree_screen.dart';
 import '../ui/aufstieg.dart';
@@ -153,6 +154,11 @@ class HomeScreen extends ConsumerWidget {
             bereich == Bereich.kampf ||
             bereich == Bereich.theorie);
 
+    // **Der gelbe Punkt für Neues** (11.11.2026): steht, bis der Kreis
+    // geöffnet ist.
+    bool neu(NeuOrt ort) => ref.watch(neuAmOrtProvider(ort));
+    void sieh(NeuOrt ort) => ref.read(neuGesehenProvider.notifier).sieh(ort);
+
     // Ein Kreis an seinem Platz: versteckt, bis er dran ist. Ist er der
     // nächste, liegt er im Licht des Mentors (ADR-0095).
     // **Der Reihe nach** (06.11.2026): erst der Mentor, dann die Kreise
@@ -239,7 +245,11 @@ class HomeScreen extends ConsumerWidget {
                         image: HubCircleImage.plain,
                         symbol: BereichZeichen.theorie,
                         leuchtet: leuchtet,
-                        onTap: () => _open(context, const SkillTreeScreen()),
+                        neu: neu(NeuOrt.theorie),
+                        onTap: () {
+                          sieh(NeuOrt.theorie);
+                          _open(context, const SkillTreeScreen());
+                        },
                       ),
                     ),
                     // **Nie gesperrt** (ADR-0068): Stufe 1 ist mit der
@@ -254,7 +264,11 @@ class HomeScreen extends ConsumerWidget {
                         image: HubCircleImage.plain,
                         symbol: BereichZeichen.kampf,
                         leuchtet: leuchtet,
-                        onTap: () => _open(context, const LadderScreen()),
+                        neu: neu(NeuOrt.kampf),
+                        onTap: () {
+                          sieh(NeuOrt.kampf);
+                          _open(context, const LadderScreen());
+                        },
                       ),
                     ),
                     // **Die Statistik** (ADR-0087) oben, neben dem, was
@@ -423,10 +437,14 @@ class HomeScreen extends ConsumerWidget {
                                           ),
                                           child: LagerfeuerKarte(
                                             amFeuer: ref.watch(amFeuerProvider),
-                                            onOpen: () => _open(
-                                              context,
-                                              const LagerfeuerScreen(),
-                                            ),
+                                            neu: neu(NeuOrt.feuer),
+                                            onOpen: () {
+                                              sieh(NeuOrt.feuer);
+                                              _open(
+                                                context,
+                                                const LagerfeuerScreen(),
+                                              );
+                                            },
                                           ),
                                         ),
                                       ],
@@ -472,7 +490,11 @@ class HomeScreen extends ConsumerWidget {
                         image: HubCircleImage.plain,
                         symbol: BereichZeichen.laden,
                         size: bottomCircleSize,
-                        onTap: () => _open(context, const ShopScreen()),
+                        neu: neu(NeuOrt.laden),
+                        onTap: () {
+                          sieh(NeuOrt.laden);
+                          _open(context, const ShopScreen());
+                        },
                       ),
                     ),
                     kreis(
@@ -485,7 +507,11 @@ class HomeScreen extends ConsumerWidget {
                         size: bottomCircleSize,
                         symbol: BereichZeichen.faehigkeiten,
                         leuchtet: leuchtet,
-                        onTap: () => _open(context, const AbilitiesScreen()),
+                        neu: neu(NeuOrt.faehigkeiten),
+                        onTap: () {
+                          sieh(NeuOrt.faehigkeiten);
+                          _open(context, const AbilitiesScreen());
+                        },
                       ),
                     ),
                     kreis(
@@ -497,7 +523,11 @@ class HomeScreen extends ConsumerWidget {
                         image: HubCircleImage.plain,
                         size: bottomCircleSize,
                         symbol: BereichZeichen.ausruestung,
-                        onTap: () => _open(context, const EquipmentScreen()),
+                        neu: neu(NeuOrt.ausruestung),
+                        onTap: () {
+                          sieh(NeuOrt.ausruestung);
+                          _open(context, const EquipmentScreen());
+                        },
                       ),
                     ),
                     Column(

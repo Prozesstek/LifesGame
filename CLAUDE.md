@@ -210,6 +210,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen; dazu `CharacterKopf`, ihr Kopf im Kreis samt Helm — wo der Mentor abfragt | Flutter |
+| `lib/neu/neu_provider.dart` | **der gelbe Punkt für Neues** ([ADR-0103](docs/decisions/0103-gelber-punkt-fuer-neues.md)): welche Marken es je Ort gibt (`neuMarkenProvider`), ob ein Kreis oder ein Stück innen den Punkt trägt — **nicht im Tutorial**; beim Öffnen eines Kreises `sieh`, beim Antippen innen `tippe` | Flutter |
+| `lib/neu/neu_gesehen.dart` | was gesehen ist — gespeichert in `SaveData.neu`, nur was es noch gibt; **fehlt es, gilt alles Vorhandene als gesehen** | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
@@ -362,7 +364,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1166 Tests
+flutter test             # 1173 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -1241,7 +1243,7 @@ gehört deshalb in die Tabelle und nicht in den Dateinamen.
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen
-achten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
+zwölften Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
 gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
 (`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
 nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).
