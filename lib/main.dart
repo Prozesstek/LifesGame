@@ -31,6 +31,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _lockPortrait();
+  await _vollbild();
 
   final prefs = await _openPrefs();
   final slot = prefs == null ? SaveSlot.real : await SaveSlotStore.read(prefs);
@@ -147,6 +148,19 @@ Future<void> _lockPortrait() async {
     // Eine App, die nicht startet, weil sich der Bildschirm nicht drehen
     // lässt, ist schlimmer als eine, die sich drehen lässt.
     debugPrint('Hochformat konnte nicht festgelegt werden: $error');
+  }
+}
+
+/// **Vollbild am Handy** (11.11.2026, AktivesBrett): Statusleiste oben und
+/// Navigationsleiste unten verschwinden. Ein Wisch vom Rand holt sie kurz
+/// zurück, dann gehen sie von selbst wieder (`immersiveSticky`). Im Web
+/// gibt es keine Leisten, dort wird nicht gefragt.
+Future<void> _vollbild() async {
+  if (kIsWeb) return;
+  try {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  } on PlatformException catch (error) {
+    debugPrint('Vollbild ging nicht: $error');
   }
 }
 
