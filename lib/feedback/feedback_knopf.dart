@@ -126,8 +126,8 @@ class _FeedbackHuelleState extends ConsumerState<FeedbackHuelle> {
         RepaintBoundary(key: _flaeche, child: widget.child),
         if (!_offen)
           Positioned(
-            top: oben + 2,
-            right: 2,
+            top: oben + 1,
+            right: 1,
             child: _Blase(onTap: _oeffnen),
           ),
       ],
@@ -154,17 +154,26 @@ class _Blase extends StatelessWidget {
             customBorder: const CircleBorder(),
             onTap: onTap,
             child: Container(
-              width: 30,
-              height: 30,
+              // **Golden und mit Schatten** (11.11.2026): dunkel auf dem
+              // dunklen Holzrahmen hat sie am Handy niemand gesehen.
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: Palette.background.withValues(alpha: 0.85),
+                color: Palette.goldOnDark,
                 shape: BoxShape.circle,
-                border: Border.all(color: Palette.goldOnDark, width: 1.5),
+                border: Border.all(color: Palette.background, width: 2),
+                boxShadow: const <BoxShadow>[
+                  BoxShadow(
+                    color: Color(0x99000000),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Icon(
-                Icons.chat_bubble_outline,
-                size: 16,
-                color: Palette.goldOnDark,
+                Icons.chat_bubble,
+                size: 17,
+                color: Palette.background,
               ),
             ),
           ),
