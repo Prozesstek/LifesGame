@@ -60,14 +60,15 @@ void main() {
           findsOneWidget,
           reason: title,
         );
-        // Ein Zeichen allein sagt nicht, wohin es führt (ADR-0060).
+        // Seit dem 10.11.2026 steht kein Name mehr darunter, nur der
+        // Vorleser hört ihn.
         expect(
           find.descendant(
             of: find.byKey(HubCircle.keyFor(title)),
             matching: find.text(title),
           ),
-          findsOneWidget,
-          reason: '$title steht unter seinem Kreis',
+          findsNothing,
+          reason: '$title steht nicht mehr unter seinem Kreis',
         );
       }
     });
@@ -366,7 +367,7 @@ void main() {
         'Charakter',
       ]);
       expect(
-        4 * HubCircle.labelWidth(HomeScreen.bottomCircleSize),
+        4 * HubCircle.slotWidth(HomeScreen.bottomCircleSize),
         lessThanOrEqualTo(335),
       );
     });

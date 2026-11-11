@@ -58,3 +58,8 @@ Thumbs.db
 
 # Python legt beim Import von tool/kampf_klaenge.py einen Zwischenspeicher an.
 __pycache__/
+
+# ---- Feedback ----
+# Die Webhook-URL für das Feedback der Testphase. Vorlage:
+# feedback.example.json. Gebaut wird mit --dart-define-from-file=feedback.json
+feedback.json

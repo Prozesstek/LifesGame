@@ -109,12 +109,9 @@ sucht die Nummer im Paket und legt `fcN.png` vergrößert an dieselbe Stelle.
 | `Items/Truhe.png` (Tagestruhe, ADR-0044) | fc6 |
 | `Items/Schluessel.png` (Schlüssel zur Beute, ADR-0048) | fc77 |
 
-**Die Zeichen der Kreise** (`UI/Kreis_*.png`, 28.10.2026) legt
-`tool/kreis_zeichen.py` an (der Laden ist seit 08.11. eigen): Fähigkeiten fc326 mit
-blau umgefärbter Kerbe, Charakter fc1911. Rucksack (Ausrüstung) und
-Balken (Statistik) sind gezeichnet — Raven hat keinen Rucksack.
-Gewohnheiten, Kampf und das Buch der Theorie sind seit dem 04.11.2026
-eigene Zeichnungen unter `tool/pixel/` (pxl).
+**Die Zeichen der Kreise** (`UI/Kreis_*.png`) kommen seit dem 10.11.2026
+nicht mehr aus Raven: alle acht sind eigene Zeichnungen unter
+`tool/pixel/` (pxl), `tool/kreis_zeichen.py` ist gelöscht.
 
 **Nicht aus dem Paket** sind die zwölf Bilder zu AktivesBretts
 Fähigkeiten (ADR-0074): Zinseszins, Schattenschritt, Kampfrausch,

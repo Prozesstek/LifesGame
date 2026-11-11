@@ -8,6 +8,7 @@ import 'audio/sound_effects.dart';
 import 'dev/dev_controller.dart';
 import 'dev/dev_screen.dart';
 import 'dev/save_slot.dart';
+import 'feedback/feedback_knopf.dart';
 import 'habits/day_watcher.dart';
 import 'home/home_screen.dart';
 import 'save/save_data.dart';
@@ -180,8 +181,22 @@ Future<SaveStore> _openStore(SharedPreferences? prefs, SaveSlot slot) async {
   return SharedPreferencesSaveStore(prefs, key: slot.storageKey);
 }
 
-class LifesGameApp extends StatelessWidget {
+class LifesGameApp extends StatefulWidget {
   const LifesGameApp({super.key});
+
+  /// Das Theme der App — siehe [_LifesGameAppState.theme].
+  static ThemeData theme() => _LifesGameAppState.theme();
+
+  @override
+  State<LifesGameApp> createState() => _LifesGameAppState();
+}
+
+class _LifesGameAppState extends State<LifesGameApp> {
+  /// Für das Feedback (11.11.2026): Das Blatt öffnet über dem Navigator,
+  /// die Bestätigung kommt über den Messenger.
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<ScaffoldMessengerState> messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
@@ -189,17 +204,28 @@ class LifesGameApp extends StatelessWidget {
       title: 'Lifes Game',
       debugShowCheckedModeBanner: false,
       theme: theme(),
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: messengerKey,
       home: const HomeScreen(),
-      // Die Entwicklerfassung sieht man ihr an — sonst hält man am Handy
-      // den eigenen Spielstand für verloren, weil man im falschen Fenster
-      // ist.
-      builder: isDevBuild
-          ? (context, child) => Banner(
-              message: 'DEV',
-              location: BannerLocation.topEnd,
-              child: child ?? const SizedBox.shrink(),
-            )
-          : null,
+      builder: (context, child) {
+        // **Feedback von jedem Screen** (11.11.2026): die Sprechblase oben
+        // rechts über der ganzen App.
+        final app = FeedbackHuelle(
+          navigatorKey: navigatorKey,
+          messengerKey: messengerKey,
+          child: child ?? const SizedBox.shrink(),
+        );
+        // Die Entwicklerfassung sieht man ihr an — sonst hält man am Handy
+        // den eigenen Spielstand für verloren, weil man im falschen Fenster
+        // ist.
+        return isDevBuild
+            ? Banner(
+                message: 'DEV',
+                location: BannerLocation.topEnd,
+                child: app,
+              )
+            : app;
+      },
     );
   }
 

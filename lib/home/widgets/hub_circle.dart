@@ -66,14 +66,15 @@ class HubCircle extends StatelessWidget {
   /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
   final String? symbol;
 
-  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt —
-  /// 46 von 72 Punkten, wie seit dem Buch.
-  static const double symbolAnteil = 46 / 72;
+  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt.
+  /// Bis zum 11.11.2026 46 von 72 Punkten; seither fast bis an den Rand
+  /// (AktivesBrett: „das sie fast an bis an den Rand gehen“).
+  static const double symbolAnteil = 0.8;
 
   /// Wie weit eine Figur von der Mitte reichen darf, in halben
   /// Kreisbreiten. Die Pergamentfläche von `ButtonBG.png` endet bei
-  /// 0,875; der Rest ist Luft bis zum Rand.
-  static const double symbolInnen = 0.78;
+  /// 0,875; bis zum 11.11.2026 blieben 0,78, seither knapp davor.
+  static const double symbolInnen = 0.85;
 
   /// Wie groß das Systemzeichen im Verhältnis zum Kreis steht.
   static const double _iconAnteil = 30 / 72;
@@ -102,7 +103,10 @@ class HubCircle extends StatelessWidget {
   /// fällt das [icon] aus. Zwei Figuren übereinander wären eine zu viel.
   final HubCircleImage? image;
 
-  /// Der Name des Bereichs — steht unter dem Kreis.
+  /// Der Name des Bereichs — **nur noch für den Vorleser und die Tests**.
+  /// Seit dem 10.11.2026 steht er nicht mehr unter dem Kreis
+  /// (AktivesBrett: „mach den Text bei den icons weg und mach die bitte
+  /// größer“); das Zeichen trägt allein.
   final String label;
 
   /// Wird gerufen, wenn der Bereich offen ist.
@@ -124,22 +128,20 @@ class HubCircle extends StatelessWidget {
   static const Key leuchtKey = ValueKey<String>('hub-leuchtet');
 
   /// Kantenlänge des Kreises. Vier davon plus Abstand passen bei 390
-  /// Pixeln Breite nebeneinander, und 56 liegt über den 48 Pixeln, die
-  /// eine Tippfläche mindestens braucht. Bis zum 29.10.2026 waren es 72;
-  /// die Holzleisten sollten ein Fünftel niedriger werden.
-  static const double diameter = 56;
+  /// Pixeln Breite nebeneinander. Bis zum 29.10.2026 waren es 72, dann 56,
+  /// damit die Holzleisten ein Fünftel niedriger werden; seit dem
+  /// 10.11.2026 wieder 72 — ohne Namen darunter bleibt die Leiste dabei
+  /// fast so niedrig, und das Zeichen ist größer zu erkennen. Seit dem
+  /// 11.11.2026 78: Der Kreis nimmt den Innenabstand der Leiste ein,
+  /// die Leiste selbst bleibt so hoch wie vorher.
+  static const double diameter = 78;
 
   /// Wie ein Test einen Kreis findet, auch wenn sein Name ein zweites
   /// Mal auf dem Bildschirm steht.
   static Key keyFor(String label) => ValueKey<String>('kreis-$label');
 
-  /// Wie hoch der Name unter dem Kreis samt Abstand steht — so viel
-  /// rechnet die Startseite für eine Reihe dazu.
-  static const double labelHeight = 20;
-
-  /// Wie breit der Name unter einem Kreis werden darf — breiter als
-  /// der Kreis, sonst passt „Gewohnheiten“ unter 56 Punkte nicht.
-  static double labelWidth(double size) => size + 30;
+  /// Wie viel Breite ein Kreis in seiner Reihe braucht — samt Ring.
+  static double slotWidth(double size) => size + 2 * _ringAbstand;
 
   /// Wie weit der Fortschrittsring aussen um den Kreis liegt.
   static const double _ringAbstand = 5;
@@ -259,24 +261,6 @@ class HubCircle extends StatelessWidget {
                         ),
                       ),
                   ],
-                ),
-                const SizedBox(height: 5),
-                SizedBox(
-                  width: labelWidth(size),
-                  // Der Vorleser hat den Namen schon am Knopf.
-                  child: ExcludeSemantics(
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isLocked ? Palette.muted : Palette.textOnDark,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),

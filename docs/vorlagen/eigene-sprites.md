@@ -21,7 +21,7 @@
 
 | Bereich | fremd | ersetzt |
 |---|---|---|
-| Kreise der Startseite | 5 | 3 |
+| Kreise der Startseite | 5 | 5 |
 | Items (Truhe, Schlüssel) | 2 | 0 |
 | Waffen | 8 | 1 |
 | Rüstung, Helme, Schuhe, Ringe, Talismane | 40 | 0 |
@@ -29,7 +29,7 @@
 | Ausrüstung auf der Figur | 24 | 0 |
 | Holz-Oberfläche | 6 | 6 |
 | Dungeon: Held, Gegner, Bosse | 15 Figuren (25 Dateien) | 0 |
-| **Summe** | **139** | **10** |
+| **Summe** | **139** | **12** |
 
 Die Zahlen werden beim Abhaken nachgezogen.
 
@@ -37,14 +37,14 @@ Die Zahlen werden beim Abhaken nachgezogen.
 
 ## 1. Kreise der Startseite (`assets/UI/`)
 
-Am meisten gesehen — zuerst. Erzeugt bisher von `tool/kreis_zeichen.py`;
-ein ersetztes Zeichen kommt dort heraus.
+Am meisten gesehen — zuerst. Seit dem 10.11.2026 alle eigen, mit pxl
+unter `tool/pixel/`; `tool/kreis_zeichen.py` ist gelöscht.
 
 - [x] Gewohnheiten — Quest-Rolle (`tool/pixel/kreis_gewohnheiten.px.js`, PR #189)
 - [x] Kampf — gekreuzte Schwerter (`tool/pixel/kreis_kampf.px.js`)
 - [x] Laden — Lederbeutel voller Gold (`tool/pixel/kreis_laden.px.js`)
-- [ ] Fähigkeiten — Runenstein (Raven fc326)
-- [ ] Charakter — Helm (Raven fc1911)
+- [x] Fähigkeiten — Zauberbuch mit Flammensiegel (`tool/pixel/kreis_faehigkeiten.px.js`)
+- [x] Charakter — Silhouette in Gold (`tool/pixel/kreis_charakter.px.js`)
 
 ## 2. Items (`assets/Items/`)
 
@@ -220,7 +220,8 @@ neuen Eintrag dort.
 - Zwölf Fähigkeiten von AktivesBrett, Speerstich und Sichelhieb
   (`tool/faehigkeit_icons.py`, `tool/item_icons.py`)
 - Die zwölf Stücke aus ADR-0077 und ihre sechs Bilder auf der Figur
-- Kreis Ausrüstung (Rucksack)
+- Kreis Ausrüstung — Plattenharnisch, seit 10.11. mit pxl
+  (`tool/pixel/kreis_ausruestung.px.js`); davor ein gezeichneter Rucksack
 - Kreis Statistik — Balken und goldener Pfeil, seit 08.11. neu mit pxl
   (`tool/pixel/kreis_statistik.px.js`)
 - Das Dorf (`tool/dorf_kacheln.py`)
