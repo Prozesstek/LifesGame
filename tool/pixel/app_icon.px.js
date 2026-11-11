@@ -41,14 +41,25 @@ const berg = (x, y) => {
 
 const himmel = (y) => (y < 9 ? "1" : y < 15 ? "2" : y < 21 ? "3" : y < 27 ? "4" : y < 32 ? "5" : "6")
 
-const bild = () => [(c) => {
-  for (let x = 0; x < S; x++) for (let y = 0; y < S; y++) {
+// Versatz: zeichnet um o Bildpunkte verschoben, für die adaptive Fassung
+const versetzt = (c, o) => ({
+  px: (x, y, k) => c.px(x + o, y + o, k),
+  circ: (x, y, r, k) => c.circ(x + o, y + o, r, k),
+  rect: (x, y, w, h, k) => c.rect(x + o, y + o, w, h, k),
+})
+
+// der Hintergrund; ohne Rahmen läuft er o Bildpunkte über jeden Rand
+const bild = (rahmen = true, o = 0) => [(c0) => {
+  const c = versetzt(c0, o)
+  for (let x = -o; x < S + o; x++) for (let y = -o; y < S + o; y++) {
+    if (rahmen) {
     if (!feld(x, y, 0)) continue
     // Holzrahmen: Umriss, Holz mit Licht oben links, innen dunkel
     if (!feld(x, y, 1)) { c.px(x, y, "k"); continue }
     if (!feld(x, y, 2)) { c.px(x, y, x + y < 60 ? "f" : "e"); continue }
     if (!feld(x, y, 3)) { c.px(x, y, (x * 7 + y * 3) % 11 === 0 ? "b" : "c"); continue }
     if (!feld(x, y, 4)) { c.px(x, y, "a"); continue }
+    }
     // Himmel mit gerasterten Übergängen: zwei Zeilen je Wechsel
     let h = himmel(y)
     const grenze = [9, 15, 21, 27, 32].find((g) => y >= g && y < g + 2)
@@ -98,7 +109,8 @@ const wappen = (x, y, e) => {
   return true
 }
 
-const schild = () => [(c) => {
+const schild = (o = 0) => [(c0) => {
+  const c = versetzt(c0, o)
   for (let x = 0; x < S; x++) for (let y = 0; y < S; y++) {
     if (!wappen(x, y, 0)) continue
     if (!wappen(x, y, 1)) { c.px(x, y, "k"); continue }
@@ -133,7 +145,8 @@ sprite("_tanne", { w: 11, h: 18, outline: "k" }, (c) => {
 })
 
 // das Holzschild unten, zwei Bretter mit Maserung und Nägeln
-const brett = () => [(c) => {
+const brett = (o = 0) => [(c0) => {
+  const c = versetzt(c0, o)
   const x0 = 7, x1 = 56, y0 = 34, y1 = 58
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
     if (x === x0 || x === x1 || y === y0 || y === y1) { c.px(x, y, "k"); continue }
@@ -180,4 +193,18 @@ sprite("app_icon", { w: S, h: S },
   stamp("_lg", 25, 9),
   ...brett(),
   stamp("_lifes", 15, 35), stamp("_game", 16, 47),
+)
+
+// Für Android ab Version 8 in zwei Ebenen, je 96 × 96 (108 dp, die
+// mittleren 64 sind die 72 dp, die man sieht): hinten Himmel, Berg und
+// Wiese bis an jeden Rand, vorn Tannen, Wappen und Schild. Die Form
+// schneidet der Launcher, deshalb ohne eigenen Rahmen.
+const A = 16
+sprite("app_icon_hinten", { w: S + 2 * A, h: S + 2 * A }, ...bild(false, A))
+sprite("app_icon_vorn", { w: S + 2 * A, h: S + 2 * A },
+  stamp("_tanne", 7 + A, 16 + A), stamp("_tanne", 46 + A, 16 + A, { flip: "x" }),
+  ...schild(A),
+  stamp("_lg", 25 + A, 9 + A),
+  ...brett(A),
+  stamp("_lifes", 15 + A, 35 + A), stamp("_game", 16 + A, 47 + A),
 )

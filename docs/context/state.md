@@ -146,10 +146,16 @@ Abendhimmel mit Mond und Sternen, der Berg der Startseite, zwei Tannen,
 das rote Wappen mit Goldrand, „LIFES GAME“ cremefarben auf einem
 Holzschild, Gras mit Blumen. Ein Stern an der Spitze war verworfen.
 
+**Am Samsung schnitt die Form die Ecken ab**: Ein adaptives Symbol zeigt nur die
+Mitte, und sicher ist laut Google nur ein Kreis von 66 dp. Jetzt liegt es in
+**zwei Ebenen** (`app_icon_hinten`, `app_icon_vorn`): Himmel, Berg und Wiese
+laufen bis an jeden Rand, Wappen und Schild stehen etwas kleiner in der
+Mitte (88 %). Die Form des Launchers ist damit der Rahmen. `app_icon.js
+--vorschau` zeigt Squircle und Kreis. Build 5.
+
 `tool/pixel/app_icon.js` legt es ab: Android klassisch und **adaptiv**
-(ab Android 8 schneidet der Launcher es in seine Form, dahinter dunkles
-Holz), Web samt „maskable“, Favicon und 512 × 512 für den Store in
-`docs/store/`. Damit ist das Flutter-Logo weg. Build 4.
+(ab Android 8 schneidet der Launcher es in seine Form), Web samt „maskable“, Favicon und 512 × 512 für den Store in
+`docs/store/`. Damit ist das Flutter-Logo weg.
 **Nicht am Handy geprüft**; ob der Kreis eines Launchers die Ecken des
 Schilds schneidet, zeigt nur das Gerät.
 

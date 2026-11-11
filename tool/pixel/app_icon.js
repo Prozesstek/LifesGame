@@ -1,6 +1,6 @@
 // Legt das Startsymbol (`app_icon.px.js`) in alle Größen, die Android und
 // die Web-Fassung brauchen. Erst pxl bauen, dann:
-//   node tool/pixel/app_icon.js tool/pixel/out/sprites/app_icon.png
+//   node tool/pixel/app_icon.js [tool/pixel/out/sprites]
 //
 // Verkleinert und vergrößert wird über Unterabtastung (4 × 4 Proben je
 // Bildpunkt, hart aus dem Original): ganze Vielfache bleiben scharf,
@@ -67,7 +67,13 @@ const bild = (src, seite, innen, grund = [0, 0, 0, 0], voll = false) => {
   return px;
 };
 
-const quelle = lies(process.argv[2] || "tool/pixel/out/sprites/app_icon.png");
+const ordnerSprites = process.argv[2] || "tool/pixel/out/sprites";
+const quelle = lies(`${ordnerSprites}/app_icon.png`);
+const hinten = lies(`${ordnerSprites}/app_icon_hinten.png`);
+const vorn = lies(`${ordnerSprites}/app_icon_vorn.png`);
+// Wie groß der Vordergrund in seinen 108 dp liegt: etwas kleiner als das
+// Bild, damit die Ecken des Schilds auch in Samsungs runder Form bleiben.
+const VORN = 0.88;
 const res = "android/app/src/main/res";
 // Der Grund hinter dem Symbol: das dunkle Holz des Rahmens
 const HOLZ = [0x3b, 0x24, 0x16, 255];
@@ -76,9 +82,11 @@ for (const [ordner, f] of [["mdpi", 1], ["hdpi", 1.5], ["xhdpi", 2], ["xxhdpi", 
   // klassisch: das ganze Symbol auf 48 dp
   const s = 48 * f;
   schreibe(`${res}/mipmap-${ordner}/ic_launcher.png`, s, s, bild(quelle, s, s));
-  // adaptiv (ab Android 8): 108 dp, sichtbar sind die mittleren 72
+  // adaptiv (ab Android 8): zwei Ebenen zu 108 dp, sichtbar sind die
+  // mittleren 72, und wie viel davon, entscheidet die Form des Launchers
   const v = 108 * f;
-  schreibe(`${res}/mipmap-${ordner}/ic_launcher_foreground.png`, v, v, bild(quelle, v, 72 * f, [0, 0, 0, 0], true));
+  schreibe(`${res}/mipmap-${ordner}/ic_launcher_background.png`, v, v, bild(hinten, v, Math.round(v * VORN)));
+  schreibe(`${res}/mipmap-${ordner}/ic_launcher_foreground.png`, v, v, bild(vorn, v, Math.round(v * VORN)));
 }
 
 // Web: normal und „maskable“ (Inhalt in den mittleren 80 %)
@@ -90,3 +98,23 @@ schreibe("web/favicon.png", 32, 32, bild(quelle, 32, 32));
 // für den Play Store: 512 × 512, ohne Durchsichtiges
 schreibe("docs/store/app_icon_512.png", 512, 512, bild(quelle, 512, 512, HOLZ, true));
 console.log("Startsymbol in allen Größen abgelegt.");
+
+// Vorschau: wie Samsung (Squircle) und ein runder Launcher es schneiden
+if (process.argv.includes("--vorschau")) {
+  const v = 432, h = bild(hinten, v, Math.round(v * VORN)), f = bild(vorn, v, Math.round(v * VORN));
+  for (const [name, inForm] of [
+    ["squircle", (u, w) => Math.abs(u) ** 4 + Math.abs(w) ** 4 <= 1],
+    ["kreis", (u, w) => u * u + w * w <= 1],
+  ]) {
+    const px = Buffer.alloc(v * v * 4);
+    for (let y = 0; y < v; y++) for (let x = 0; x < v; x++) {
+      // sichtbar: die mittleren 72 von 108 dp
+      const u = (x + 0.5 - v / 2) / (v / 3), w = (y + 0.5 - v / 2) / (v / 3);
+      if (!inForm(u, w)) continue;
+      const o = (y * v + x) * 4, a = f[o + 3] / 255;
+      for (let k = 0; k < 3; k++) px[o + k] = Math.round(f[o + k] * a + h[o + k] * (1 - a));
+      px[o + 3] = 255;
+    }
+    schreibe(`${process.env.VORSCHAU || "."}/vorschau_${name}.png`, v, v, px);
+  }
+}
