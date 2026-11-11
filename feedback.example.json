@@ -1,0 +1,3 @@
+{
+  "FEEDBACK_WEBHOOK": "https://discord.com/api/webhooks/<id>/<token>"
+}

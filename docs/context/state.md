@@ -39,7 +39,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1150, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1159, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -136,6 +136,32 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 11.11.2026, danach: Feedback an Discord
+
+AktivesBrett: eine Feedback-Funktion für die Testphase, „am besten
+irgendwie bei uns auf dem Discord“. In einer Fragerunde entschieden:
+[ADR-0101](../decisions/0101-feedback-an-discord.md).
+
+| Was | Wie |
+|---|---|
+| **Einstieg** | eine kleine Sprechblase oben rechts, schwebend über **jeder** Seite, auch im Dungeon und im Tutorial |
+| **Ablauf** | Tipp → Bild des Screens (ohne die Blase) → Blatt: 🐞 Bug / 💡 Idee / 🤔 Unklar/nervt, „Was ist passiert?“, Vorschau mit X, Hinweis, „Senden“ erst mit Kategorie und Text |
+| **Danach** | Blatt zu, „Danke, ist angekommen 🙌“; bei Fehler bleibt es offen samt Text |
+| **Mit** | App-Version und Build, Gerät, Android-Version, Screen, Spielername, Level, Zeit |
+| **Wohin** | Discord-Webhook, Embed plus Bild; URL aus `feedback.json` (gitignored) |
+
+Drei neue Pakete: `http`, `device_info_plus`, `package_info_plus`. Die
+Release-APK bekommt `INTERNET`. App 1159 (vorher 1150), Startseite und
+Blatt in 390 × 844 gerendert. **Nicht am Handy, nicht an Discord gesendet**
+— dafür fehlt noch die Webhook-URL.
+
+### Offen
+
+- Webhook anlegen und als `feedback.json` ablegen (Vorlage
+  `feedback.example.json`); die CI baut die Web-Fassung ohne.
+- Datenschutzerklärung für den Store: Gerät, Name, Level und Screenshot
+  gehen an Discord.
 
 ## 11.11.2026: Kreise und Zeichen fast bis an den Rand
 
