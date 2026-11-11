@@ -16,6 +16,15 @@
 
 ---
 
+## 11.11.2026: das Level steht ganz rechts
+
+Frederik: „Level nach rechts beim Startscreen“. Der Ring stand nicht am
+Rand, weil rechts daneben das Gold seinen Platz frei hielt, auch wenn es
+nicht zu sehen war. Auf der Startseite erscheint das Gold jetzt kurz
+**links** neben dem Ring; in der Titelzeile der Gewohnheiten bleibt die
+Reihenfolge (`StatusLeiste.klein`). In 390 × 844 gerendert und
+abgenommen. App-Tests unverändert.
+
 ## Übersicht: was steht
 
 **Phase:** Testlauf (Ziel 7, 21.09.–20.10.2026). Alle Bauziele 1–6 und 8
