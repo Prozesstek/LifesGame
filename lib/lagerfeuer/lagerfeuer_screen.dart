@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habits/habits.dart';
@@ -57,7 +59,7 @@ class LagerfeuerScreen extends ConsumerWidget {
           opened: tracker.hasOpenedChest(today)
               ? DailyChest.forDay(today)
               : null,
-          onOpen: () => openDailyChest(context, ref),
+          onOpen: () => unawaited(zeigeTagestruhe(context, ref)),
         ),
       if (zeigtAufgaben)
         DailyQuestsCard(

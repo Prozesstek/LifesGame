@@ -184,7 +184,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
-| `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
+| `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), **die nach links ausweicht, wenn sie etwas verdeckt** (`BlasenPlatz`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Zauberbuch, Harnisch, Silhouette; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
@@ -210,6 +210,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen; dazu `CharacterKopf`, ihr Kopf im Kreis samt Helm — wo der Mentor abfragt | Flutter |
+| `lib/neu/neu_provider.dart` | **der gelbe Punkt für Neues** ([ADR-0103](docs/decisions/0103-gelber-punkt-fuer-neues.md)): welche Marken es je Ort gibt (`neuMarkenProvider`), ob ein Kreis oder ein Stück innen den Punkt trägt — **nicht im Tutorial**; beim Öffnen eines Kreises `sieh`, beim Antippen innen `tippe` | Flutter |
+| `lib/neu/neu_gesehen.dart` | was gesehen ist — gespeichert in `SaveData.neu`, nur was es noch gibt; **fehlt es, gilt alles Vorhandene als gesehen** | Flutter |
 | `lib/save/save_data.dart` | der ganze Spielstand als ein Wert | Flutter |
 | `lib/save/save_store.dart` | der Anschluss, hinter dem die Speichertechnik liegt | Flutter |
 | `lib/save/save_watcher.dart` | **die einzige Stelle, die schreibt** — und `currentSave`, was geschrieben und exportiert wird | Flutter |
@@ -236,6 +238,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/anlegen_teile.dart` | seine Bausteine: Kopf mit Strichen, große Wahl, Feld, Vorschläge | Flutter |
 | `lib/habits/daily_quests_provider.dart` | die Aufgaben von heute — setzt nur die Rückfrage ein, **rechnet nichts** | Flutter |
 | `lib/habits/widgets/daily_quests_card.dart` | die Aufgaben **als Anschlagtafel**, jede ein Steckbrief: Zeichen, Satz, Kästchen, Schlüssel; ein Tipp aufs Blatt holt ab — **am Lagerfeuer** (ADR-0076) | Flutter |
+| `lib/habits/widgets/truhe_oeffnen.dart` | **die Tagestruhe kommt von selbst** ([ADR-0102](docs/decisions/0102-die-tagestruhe-kommt-von-selbst.md)): nach dem letzten Häkchen groß in der Mitte, drei Tipps, dann springt sie in der Farbe ihrer Seltenheit auf (`TruhenSeltenheit`, eine Tabelle); **kennt keine Provider** — gebucht wird in `zeigeTagestruhe` (`habit_check_flow.dart`), erst beim dritten Tipp | Flutter |
 | `lib/habits/widgets/aufgaben_streifen.dart` | **die Tagesaufgaben kommen kurz von unten**: was ein Häkchen oder eine Rückfrage voranbringt, fährt herein, füllt seinen Balken und fährt hinaus — nimmt keinen Tipp an; ausgelöst über `zeigeAufgabenFortschritt` in `habit_check_flow.dart` | Flutter |
 | `lib/habits/widgets/cue_dialog.dart` | **„Wann machst du das?“** zum **Ändern** einer laufenden Gewohnheit (beim Anlegen fragt seit ADR-0089 das Blatt) — der Auslöser einer Gewohnheit ([ADR-0052](docs/decisions/0052-ausloeser-und-startvorlage.md)) **, ihre Wochentage, woran sie gekoppelt ist und was es danach gibt** ([ADR-0066](docs/decisions/0066-versuchungsbuendel.md)) | Flutter |
 | `lib/habits/cue_text.dart` | wie der Auslöser **auf der Startseite** steht — Satz oder „Nach: …“; die Kachel der Gewohnheiten zeigt nur den Satz | Flutter |
@@ -274,6 +277,8 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pixel/*.px.js` | **gezeichnet mit pxl** (`github.com/crsolver/claude-pxl`, liegt nicht im Repo): **alle Zeichen der Kreise** (seit 10.11.2026), das Vampirset (Haube, Mantel, Stiefel, Sichel), der Frostreif | pxl |
 | `tool/pixel/vergroessern.js` | legt ein Bild aus pxl als Asset ab: 64 × 64 hart auf 256 × 256 — pxl vergrößert nur seine Vorschau | Node |
 | `tool/pixel/mittig.js` | **rückt ein Kreis-Zeichen in die Mitte** seines Bildes, in ganzen Bildpunkten — nach `vergroessern.js` laufen lassen; danach `BereichZeichen.reichweite` neu messen | Node |
+| `tool/pixel/app_icon.px.js` | **das Startsymbol** der App: Wappen mit „LG“ über dem Berg in der Dämmerung, Tannen, Holzschild „LIFES GAME“ im Holzrahmen | pxl |
+| `tool/pixel/app_icon.js` | legt es in alle Größen: Android klassisch und adaptiv in zwei Ebenen (`ic_launcher_background`/`_foreground`, ohne Rahmen, Vordergrund auf 88 % — **die Form des Launchers schneidet**, `--vorschau` zeigt Squircle und Kreis), Web, Favicon, 512 für den Store (`docs/store/`) | Node |
 | `tool/faehigkeit_icons.py` | **zeichnet** die zwölf Bilder zu AktivesBretts Fähigkeiten nach `assets/Faehigkeiten/` — aus Formen, nicht aus dem Raven-Paket (nur Standardbibliothek) | Python |
 | `tool/kampf_klaenge.py` | **rechnet** die zehn Klänge der Grube nach `assets/Sound/` — Platzhalter, die dem Projekt gehören (nur Standardbibliothek) | Python |
 | `tool/haekchen_klaenge.py` | **rechnet** die **Tonleiter des Tages**: fünf Stufen, der Akkord, wenn der Tag geschafft ist, das Fauchen der Flamme, die Glocken, wenn die große Flamme einen Tag höher tickt (`KetteSteigt`) — mit den Helfern aus `kampf_klaenge.py` | Python |
@@ -361,7 +366,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1163 Tests
+flutter test             # 1180 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -1240,7 +1245,7 @@ gehört deshalb in die Tabelle und nicht in den Dateinamen.
 
 **Fortschritt überlebt einen Neustart, aber nur über eine Stelle.**
 Geschrieben wird ausschließlich in `lib/save/save_watcher.dart`. Wer einen
-achten Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
+zwölften Bereich baut, trägt ihn dort ein — sonst funktioniert alles, nur
 gespeichert wird nichts. Serialisierung gehört ins jeweilige Package
 (`toJson`/`fromJson`), nicht nach `lib/`. Alle `fromJson` sind bewusst
 nachsichtig: Unbekanntes wird übersprungen, nie geworfen ([ADR-0010](docs/decisions/0010-persistenz-hinter-einem-anschluss.md)).

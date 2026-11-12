@@ -12,9 +12,88 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 08.11.2026 · Frederik
+**Zuletzt aktualisiert:** 12.11.2026 · AktivesBrett
 
 ---
+
+## 11.11.2026: ein gelber Punkt für Neues
+
+Frederik: „Immer wo es etwas Neues gibt wird ein gelber Punkt angezeigt
+(z.B. Rückfrage offen bei Theorie, neue Fähigkeiten oder Items etc)“. In
+einer Fragerunde entschieden: [ADR-0103](../decisions/0103-gelber-punkt-fuer-neues.md).
+
+| Ort | Punkt, wenn |
+|---|---|
+| Theorie | die Rückfrage offen ist oder ein Talentpunkt frei |
+| Kampf | der Tagesdungeon heute offen ist |
+| Fähigkeiten | eine Fähigkeit neu ist |
+| Laden | jeden Tag, bis man reinschaut |
+| Ausrüstung | ein neues Stück im Rucksack liegt |
+| Lagerfeuer | dort etwas wartet |
+
+Am Kreis geht er beim Öffnen weg; innen tragen neue Fähigkeiten und
+Stücke einen kleinen Punkt, bis sie angetippt sind. Der Spielstand merkt
+sich, was gesehen ist (`SaveData.neu`); **ein alter Stand hat alles
+schon gesehen**.
+
+**Ohne Rückfrage entschieden:** im Tutorial kein Punkt; ein freier
+Fähigkeitsplatz trägt keinen.
+
+App 1173 (vorher 1166). Startseite in 390 × 844 gerendert.
+
+### Offen
+
+- Ob Laden und Kampf mit einem Punkt fast jeden Tag zu viel sind.
+- **AktivesBrett hat ADR-0103 nicht gesehen.**
+
+## 11.11.2026: die Rückfrage kommt als Dialog, das Fragezeichen steht fest
+
+Frederik: „Rückfrage öffnet sich mittig wenn man Theorie öffnet –
+verschwindet dann komplett“ und „Fragezeichen rechts immer an gleicher
+Stelle“.
+
+| Was | Wie |
+|---|---|
+| **Rückfrage** | offen kommt sie beim Betreten der Theorie als Dialog in die Mitte; nach der Antwort bleibt die Auflösung, ein Tipp schließt, **oben steht danach nichts mehr**; unbeantwortet weggetippt, öffnet eine Zeile sie wieder (`ReviewSection.alsDialog`) |
+| **Lagerfeuer** | dort bleibt sie die Karte, die aufklappt |
+| **Fragezeichen** | immer am rechten Rand — es wanderte mit der Länge des Gebietsnamens (420, 441, 549), weil `Spacer` neben zwei `Flexible` den Rest nicht ganz verteilt |
+
+**Ohne Rückfrage entschieden:** Im Tutorial springt der Dialog nicht von
+selbst auf — fällig ist die Rückfrage schon am Tag der ersten Seite, und
+der Mentor führt dann woandershin. Dort steht nur die Zeile.
+
+App 1166 (vorher 1165). Dialog und Baum in 390 × 844 gerendert.
+
+## 11.11.2026: die Tagestruhe kommt von selbst
+
+Frederik: „Tagestruhe kommt automatisch wenn man alles abgehakt hat mit
+Seltenheit wie bei DuoLingo oder Clash Royale durch Tippen.“ Vier Fragen,
+alle wie empfohlen: [ADR-0102](../decisions/0102-die-tagestruhe-kommt-von-selbst.md).
+
+| Was | Wie |
+|---|---|
+| **Wann** | nach dem letzten Häkchen, nach Flamme und Konfetti, vor Errungenschaften und „Morgen zuerst“ — ab Level 3, nicht im Tutorial |
+| **Tippen** | drei Mal: wackelt, leuchtet, klingt höher; drei Punkte darunter zählen mit |
+| **Aufgehen** | Strahlen und Funken in der Farbe der Seltenheit, ihr Name darunter, das Gold zählt hoch, das Eis springt heraus |
+| **Seltenheit** | Gewöhnlich, Selten, Episch, Legendär — Gewicht und Gold wie vorher |
+| **Weggetippt** | gebucht wird erst beim dritten Tipp; sonst wartet sie am Feuer und geht dort genauso auf |
+
+Vier Momente in 390 × 844 gerendert und angesehen. App 1165 (vorher
+1159), habits 375 unverändert.
+
+### Offen
+
+- Die Klänge sind Platzhalter; das Gold fliegt nicht zur Leiste.
+- **AktivesBrett hat ADR-0102 nicht gesehen.**
+
+## 11.11.2026: das Level steht ganz rechts
+
+Frederik: „Level nach rechts beim Startscreen“. Der Ring stand nicht am
+Rand, weil rechts daneben das Gold seinen Platz frei hielt, auch wenn es
+nicht zu sehen war. Auf der Startseite erscheint das Gold jetzt kurz
+**links** neben dem Ring; in der Titelzeile der Gewohnheiten bleibt die
+Reihenfolge (`StatusLeiste.klein`). In 390 × 844 gerendert und
+abgenommen. App-Tests unverändert.
 
 ## Übersicht: was steht
 
@@ -39,7 +118,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1163, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1180, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -137,6 +216,57 @@ vom 02.10.
 
 ---
 
+## 12.11.2026: die Feedback-Blase weicht aus
+
+AktivesBrett: Die Blase oben rechts soll nichts verdecken, „wenn er etwas
+verdecken sollte dann ist er eben weiter links“. Sie lag in vielen
+Titelzeilen über einem Knopf (Sammlung, Gold, Talentpunkte).
+
+Jetzt fragt die Hülle alle 0,4 s, was unter der Blase läge
+(`BlasenPlatz` in `feedback_knopf.dart`): Text, ein Zeichen, ein Bild
+oder ein Knopf bis 160 Punkte zählt, ein Hintergrund nicht. Ist etwas
+darunter, rückt sie 40 Punkte nach links, höchstens bis zur Mitte, dann
+eine Reihe tiefer; ist nirgends Platz, bleibt sie in der Ecke.
+
+Gerendert in 390 × 844: Start, Gewohnheiten, Charakter, Eingang bleiben
+in der Ecke; Talentbaum, Laden und Sammlung rücken nach links,
+Fähigkeiten und Ausrüstung eine Reihe tiefer. App 1162 (vorher 1159).
+**Nicht am Handy**, keine neue APK.
+
+### Offen
+
+- Was keinen Tipp annimmt (`IgnorePointer`, etwa der Kasten des
+  Mentors), sieht sie nicht und kann es noch verdecken.
+
+## 11.11.2026, ganz zuletzt: das eigene Startsymbol
+
+AktivesBrett schickte seine Vorlage (Wappen mit „LG“, darunter „LIFES
+GAME“) und wollte es „gemütlicher … mit mehr Liebe und mehr Details“.
+Mit pxl gezeichnet (`tool/pixel/app_icon.px.js`): Holzrahmen,
+Abendhimmel mit Mond und Sternen, der Berg der Startseite, zwei Tannen,
+das rote Wappen mit Goldrand, „LIFES GAME“ cremefarben auf einem
+Holzschild, Gras mit Blumen. Ein Stern an der Spitze war verworfen.
+
+**Am Samsung schnitt die Form die Ecken ab**: Ein adaptives Symbol zeigt nur die
+Mitte, und sicher ist laut Google nur ein Kreis von 66 dp. Jetzt liegt es in
+**zwei Ebenen** (`app_icon_hinten`, `app_icon_vorn`): Himmel, Berg und Wiese
+laufen bis an jeden Rand, Wappen und Schild stehen etwas kleiner in der
+Mitte (88 %). Die Form des Launchers ist damit der Rahmen. `app_icon.js
+--vorschau` zeigt Squircle und Kreis. Build 5.
+
+`tool/pixel/app_icon.js` legt es ab: Android klassisch und **adaptiv**
+(ab Android 8 schneidet der Launcher es in seine Form), Web samt „maskable“, Favicon und 512 × 512 für den Store in
+`docs/store/`. Damit ist das Flutter-Logo weg.
+**Nicht am Handy geprüft**; ob der Kreis eines Launchers die Ecken des
+Schilds schneidet, zeigt nur das Gerät.
+
+## 11.11.2026, zuletzt: Vollbild am Handy
+
+AktivesBrett: „ich will das game in full screen auf dem Handy haben“.
+Statusleiste und Navigationsleiste sind weg (`SystemUiMode.immersiveSticky`
+in `main.dart`); ein Wisch vom Rand holt sie kurz zurück. Build 3.
+**Nicht am Handy geprüft.**
+
 ## 11.11.2026, danach: Feedback an Discord
 
 AktivesBrett: eine Feedback-Funktion für die Testphase, „am besten
@@ -158,8 +288,8 @@ Blatt in 390 × 844 gerendert. **Nicht am Handy, nicht an Discord gesendet**
 
 ### Offen
 
-- Webhook anlegen und als `feedback.json` ablegen (Vorlage
-  `feedback.example.json`); die CI baut die Web-Fassung ohne.
+- ~~Webhook anlegen~~ — liegt bei AktivesBrett als `feedback.json`; ein Feedback aus der APK ist im Discord angekommen (11.11.). **Frederik braucht die Datei auch**, das Repo hat sie nicht.
+- **Die Web-Fassung bleibt ohne** (AktivesBrett, 11.11.): Dort läge die URL offen in der Seite; der Knopf meldet „nicht eingerichtet“.
 - Datenschutzerklärung für den Store: Gerät, Name, Level und Screenshot
   gehen an Discord.
 
@@ -225,7 +355,7 @@ Datum steht noch aus (frühestens Mitte Dezember öffentlich).
 | Was | Wie |
 |---|---|
 | **Konto** | Zahlung, Identität und Händlerstatus erledigt (Frederik) |
-| **Startsymbol** | Frederiks Bild (ChatGPT) zugeschnitten: adaptives Icon in allen Dichten, `docs/store/icon_512.png`, erzeugt mit `tool/app_icon.py` |
+| **Startsymbol** | ~~Frederiks Bild (ChatGPT)~~ — am 12.11. verworfen, es gilt AktivesBretts Zeichnung mit pxl (Eintrag vom 11.11.) |
 | **Impressum, Datenschutz** | `web/impressum.html`, `web/datenschutz.html` — mit Adresse und E-Mail, Gegenlesen steht aus |
 | **Info-Blatt** | Zeichen oben im Charakter: Datenschutz, Gesundheit, Lizenzen (`info_blatt.dart`) |
 
@@ -235,7 +365,7 @@ wird nicht mehr in `state.md` vermerkt.
 App 1154 (vorher 1150 laut Kopf, `test/info_blatt_test.dart` bringt 4).
 **Danach am selben Tag:** `cmdline-tools` installiert, Upload-Schlüssel
 erzeugt, der Release-Build (`.aab`, 58,7 MB) ist damit signiert.
-**Offen:** Tester, App-Name, Play-Console-Eintrag, Erinnerung ja oder nein; Herkunft des ChatGPT-Icons in die HERKUNFT-Dateien.
+**Offen:** Tester, App-Name, Play-Console-Eintrag, Erinnerung ja oder nein.
 
 ## 08.11.2026, danach: das Laden-Zeichen
 
@@ -344,8 +474,7 @@ Ladebildschirm verschwindet. **Nicht am Handy.**
 
 ### Offen
 
-- Android zeigt beim Start das Systembild mit dem Flutter-Logo — kommt
-  mit dem eigenen Startsymbol (Ziel 9).
+- ~~Android zeigt beim Start das Systembild mit dem Flutter-Logo~~ — das Startsymbol steht seit dem 11.11.; ob das Startbild es zeigt, ist nicht geprüft.
 - **AktivesBrett hat es nicht gesehen.**
 
 ## 07.11.2026, danach: der Rundgang am Ende des Tutorials

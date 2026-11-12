@@ -109,11 +109,10 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 - [ ] *(Mensch)* Schlüssel und Passwort an zwei Orten sichern. `*.jks` und
       `key.properties` sind gitignored, das bleibt so.
 - [x] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
-      allen Dichten, dazu 512 × 512 für den Store (10.11.). Quelle:
-      Frederiks Bild aus ChatGPT (`tool/app_icon/quelle.png`), erzeugt mit
-      `tool/app_icon.py`, Store-Datei `docs/store/icon_512.png`.
-      **Herkunft:** KI-Bild, Nutzungsbedingungen von ChatGPT für
-      kommerzielle Nutzung noch in die HERKUNFT-Dateien eintragen.
+      allen Dichten, dazu 512 × 512 für den Store (11.11.). AktivesBretts
+      Zeichnung mit pxl (`tool/pixel/app_icon.px.js`), abgelegt mit
+      `tool/pixel/app_icon.js`, Store-Datei `docs/store/app_icon_512.png`.
+      Gehört dem Projekt. Frederiks ChatGPT-Bild ist dafür verworfen (12.11.).
 - [x] Startbild in der Lederfarbe (19.10.). Bisher steht dort der helle
       Standardhintergrund (`launch_background.xml`), beim Start blitzt
       Weiß auf.

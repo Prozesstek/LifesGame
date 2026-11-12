@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../habits/widgets/daily_chest_card.dart';
+import '../../mentor/scheinwerfer.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/on_dark.dart';
@@ -19,11 +20,18 @@ class LagerfeuerKarte extends StatelessWidget {
   const LagerfeuerKarte({
     required this.amFeuer,
     required this.onOpen,
+    this.neu = false,
     super.key,
   });
 
   final AmFeuer amFeuer;
   final VoidCallback onOpen;
+
+  /// **Hier wartet etwas Neues** (11.11.2026): der gelbe Punkt oben
+  /// rechts, bis die Karte geöffnet ist.
+  final bool neu;
+
+  static const Key neuKey = ValueKey<String>('lagerfeuer-neu');
 
   static const Key oeffnenKey = ValueKey<String>('lagerfeuer-oeffnen');
 
@@ -42,59 +50,72 @@ class LagerfeuerKarte extends StatelessWidget {
           key: oeffnenKey,
           behavior: HitTestBehavior.opaque,
           onTap: onOpen,
-          child: HolzKarte(
-            color: Palette.backgroundRaised,
-            edgeColor: amFeuer.brennt ? Palette.tintLava : Holz.kante,
-            padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
-            child: OnDark(
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: CustomPaint(
-                      painter: FeuerMaler(
-                        brennt: amFeuer.brennt,
-                        zeit: 1.8,
-                        himmel: false,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              HolzKarte(
+                color: Palette.backgroundRaised,
+                edgeColor: amFeuer.brennt ? Palette.tintLava : Holz.kante,
+                padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
+                child: OnDark(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: CustomPaint(
+                          painter: FeuerMaler(
+                            brennt: amFeuer.brennt,
+                            zeit: 1.8,
+                            himmel: false,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Lagerfeuer',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Lagerfeuer',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  if (amFeuer.rueckfrageOffen)
-                    const _Wartet(zeichen: Icon(Icons.quiz_outlined, size: 18)),
-                  if (amFeuer.truheWartet)
-                    const _Wartet(
-                      zeichen: PixelArt(
-                        assetPath: truhenBild,
-                        side: 22,
-                        fallback: Icon(Icons.inventory_2, size: 18),
+                      if (amFeuer.rueckfrageOffen)
+                        const _Wartet(
+                          zeichen: Icon(Icons.quiz_outlined, size: 18),
+                        ),
+                      if (amFeuer.truheWartet)
+                        const _Wartet(
+                          zeichen: PixelArt(
+                            assetPath: truhenBild,
+                            side: 22,
+                            fallback: Icon(Icons.inventory_2, size: 18),
+                          ),
+                        ),
+                      if (amFeuer.aufgabenAbholbar > 0)
+                        _Wartet(
+                          zeichen: const Icon(Icons.flag_rounded, size: 18),
+                          zahl: amFeuer.aufgabenAbholbar,
+                        ),
+                      const SizedBox(width: 2),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: Palette.textOnDarkDim,
                       ),
-                    ),
-                  if (amFeuer.aufgabenAbholbar > 0)
-                    _Wartet(
-                      zeichen: const Icon(Icons.flag_rounded, size: 18),
-                      zahl: amFeuer.aufgabenAbholbar,
-                    ),
-                  const SizedBox(width: 2),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: Palette.textOnDarkDim,
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              if (neu)
+                const Positioned(
+                  right: -4,
+                  top: -4,
+                  child: ZielPunkt(key: neuKey, groesse: 18),
+                ),
+            ],
           ),
         ),
       ),

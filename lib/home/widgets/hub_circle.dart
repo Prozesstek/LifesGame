@@ -41,6 +41,7 @@ class HubCircle extends StatelessWidget {
     this.symbol,
     this.size = diameter,
     this.leuchtet = false,
+    this.neu = false,
     super.key,
   });
 
@@ -52,6 +53,13 @@ class HubCircle extends StatelessWidget {
   /// statt des Punkts sähe aus wie der Fortschritt der Gewohnheiten
   /// daneben.
   final bool leuchtet;
+
+  /// **Hier gibt es etwas Neues** (11.11.2026): derselbe gelbe Punkt wie
+  /// beim Mentor, aber ohne den Ring — der heißt „als Nächstes dran“.
+  final bool neu;
+
+  /// Der Punkt für Neues, zum Finden in Tests.
+  static const Key neuKey = ValueKey<String>('hub-neu');
 
   /// Wie gross dieser Kreis gezeichnet wird. Standard ist [diameter].
   ///
@@ -242,6 +250,12 @@ class HubCircle extends StatelessWidget {
                         top: -5,
                         // **Der gelbe Punkt** (ADR-0095): Hier geht es hin.
                         child: const ZielPunkt(key: leuchtKey, groesse: 18),
+                      )
+                    else if (neu && !isLocked)
+                      const Positioned(
+                        right: -5,
+                        top: -5,
+                        child: ZielPunkt(key: neuKey, groesse: 18),
                       ),
                     if (isLocked)
                       Positioned(

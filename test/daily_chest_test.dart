@@ -4,12 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/widgets/daily_chest_card.dart';
+import 'package:lifes_game/habits/widgets/truhe_oeffnen.dart';
 import 'package:lifes_game/lagerfeuer/lagerfeuer_screen.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
+import 'truhe_helfer.dart';
 
 /// Die Tagestruhe auf dem ganzen Weg (ADR-0044): alles erledigt → Karte
 /// → Öffnen → Enthüllung → Gold im Goldstand. Seit dem 18.10. wartet sie
@@ -66,10 +68,11 @@ void main() {
 
     await tester.tap(find.byKey(DailyChestCard.oeffnenKey));
     await tester.pumpAndSettle();
+    await tippeTruheAuf(tester);
 
     expect(
       find.descendant(
-        of: find.byType(AlertDialog),
+        of: find.byType(TruheOeffnen),
         matching: find.text('+${inhalt.gold}'),
       ),
       findsOneWidget,

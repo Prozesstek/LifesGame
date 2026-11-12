@@ -13,6 +13,7 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 
 import 'test_view.dart';
+import 'truhe_helfer.dart';
 
 /// **„Morgen zuerst“ nach dem geschafften Tag** (29.10.2026): Wer die
 /// letzte Gewohnheit abhakt, wird gefeiert und dann gefragt, was morgen
@@ -76,6 +77,9 @@ void main() {
     final c = await startseite(tester, fastGeschafft());
 
     await hakeAb(tester, b);
+    // Erst die Truhe, dann die Frage (ADR-0102).
+    expect(frage, findsNothing);
+    await nimmTruhe(tester);
     expect(frage, findsOneWidget);
 
     await tester.tap(find.byKey(MorgenZuerst.knopfKey(b.id)));
@@ -91,6 +95,7 @@ void main() {
   testWidgets('„Später“ schließt, ohne zu wählen', (tester) async {
     final c = await startseite(tester, fastGeschafft());
     await hakeAb(tester, b);
+    await nimmTruhe(tester);
 
     await tester.tap(find.byKey(MorgenZuerstFrage.spaeterKey));
     await tester.pumpAndSettle();

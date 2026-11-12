@@ -207,6 +207,69 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.byKey(FeedbackHuelle.knopfKey), findsOneWidget);
   });
+
+  group('Die Blase weicht aus', () {
+    Future<Rect> blase(WidgetTester tester, Widget seite) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final nav = GlobalKey<NavigatorState>();
+      final msg = GlobalKey<ScaffoldMessengerState>();
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            navigatorKey: nav,
+            scaffoldMessengerKey: msg,
+            builder: (context, child) => FeedbackHuelle(
+              navigatorKey: nav,
+              messengerKey: msg,
+              dienst: _FakeDienst(),
+              child: child!,
+            ),
+            home: seite,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(FeedbackHuelle.nachsehen);
+      return tester.getRect(find.byKey(FeedbackHuelle.knopfKey));
+    }
+
+    testWidgets('ist nichts oben rechts, bleibt sie in der Ecke', (
+      tester,
+    ) async {
+      final r = await blase(tester, const Scaffold(body: SizedBox.expand()));
+      expect(r.right, closeTo(390 - BlasenPlatz.rand, 1));
+      expect(r.top, closeTo(BlasenPlatz.rand, 1));
+    });
+
+    testWidgets('liegt dort ein Knopf, rückt sie nach links', (tester) async {
+      final r = await blase(
+        tester,
+        Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.star), onPressed: () {}),
+            ],
+          ),
+          body: const SizedBox.expand(),
+        ),
+      );
+      final knopf = tester.getRect(find.byIcon(Icons.star));
+      expect(r.overlaps(knopf), isFalse, reason: '$r über $knopf');
+      expect(r.right, lessThan(390 - BlasenPlatz.rand));
+    });
+
+    testWidgets('ein großer Hintergrund zählt nicht', (tester) async {
+      final r = await blase(
+        tester,
+        const Scaffold(
+          body: SizedBox.expand(child: ColoredBox(color: Colors.brown)),
+        ),
+      );
+      expect(r.right, closeTo(390 - BlasenPlatz.rand, 1));
+    });
+  });
 }
 
 /// Ein 1 × 1-PNG, damit `Image.memory` etwas zu zeigen hat.

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
+import '../neu/neu_provider.dart';
+import '../mentor/scheinwerfer.dart';
 import '../character/widgets/equipment_slot_tile.dart';
 import '../character/widgets/set_card.dart';
 import '../ui/druck.dart';
@@ -435,9 +437,18 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                   gesperrt: loadout.isLocked(copy.uid),
                   ausgeblendet: _gezogen?.uid == copy.uid,
                   ausgewaehlt: _waehlen ? auswahl.contains(copy.uid) : null,
+                  // **Neu, bis angetippt** (11.11.2026).
+                  neu:
+                      !loadout.isEquipped(copy.uid) &&
+                      ref.watch(neuInnenProvider(stueckMarke(copy.uid))),
                   onTap: _waehlen
                       ? () => _hake(copy, loadout)
-                      : () => showGearSheet(context, item, exemplar: copy),
+                      : () {
+                          ref
+                              .read(neuGesehenProvider.notifier)
+                              .tippe(stueckMarke(copy.uid));
+                          showGearSheet(context, item, exemplar: copy);
+                        },
                 ),
               ),
         ],
@@ -652,10 +663,17 @@ class ExemplarKachel extends StatelessWidget {
     required this.onTap,
     this.ausgeblendet = false,
     this.ausgewaehlt,
+    this.neu = false,
     super.key,
   });
 
   final GearCopy copy;
+
+  /// Der gelbe Punkt: Es ist neu und noch nicht angetippt (11.11.2026).
+  final bool neu;
+
+  /// Der Punkt, zum Finden in Tests.
+  static const Key neuKey = ValueKey<String>('stueck-neu');
   final GearVergleich vergleich;
   final bool gesperrt;
   final VoidCallback onTap;
@@ -766,6 +784,12 @@ class ExemplarKachel extends StatelessWidget {
                         color: farbe,
                       ),
                     ),
+                    if (neu && !gesperrt)
+                      const Positioned(
+                        left: -5,
+                        top: -6,
+                        child: ZielPunkt(key: neuKey, groesse: 12),
+                      ),
                     if (gesperrt)
                       const Positioned(
                         left: -1,
