@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,7 @@ import 'save/save_data.dart';
 import 'save/save_providers.dart';
 import 'save/save_store.dart';
 import 'save/save_watcher.dart';
+import 'theory/silbentrennung.dart';
 import 'ui/druck.dart';
 import 'ui/holz.dart';
 import 'ui/palette.dart';
@@ -32,6 +35,9 @@ Future<void> main() async {
 
   await _lockPortrait();
   await _vollbild();
+  // Die Trennmuster des Lernbuchs laden nebenher; bis sie da sind, steht
+  // der Blocksatz ohne Trennung (`Silbentrennung`).
+  unawaited(Silbentrennung.ladeDeutsch());
 
   final prefs = await _openPrefs();
   final slot = prefs == null ? SaveSlot.real : await SaveSlotStore.read(prefs);

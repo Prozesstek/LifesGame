@@ -3,6 +3,31 @@
 > Dinge, die überraschend waren oder Zeit gekostet haben. Ein Eintrag hier spart
 > dem anderen im Team denselben Abend. Neueste oben.
 
+## Ein weicher Trennstrich bricht um, wird aber nicht gezeichnet
+
+Flutter (3.44, Skia/SkParagraph) behandelt U+00AD als Umbruchstelle —
+und zeichnet am Zeilenende **keinen** Strich: „trai / niert“ steht dann
+ohne Hinweis untereinander (12.11.2026 gerendert). `hyphens: auto` gibt
+es nicht.
+
+**Abhilfe:** `Blocksatz` (`lib/theory/widgets/blocksatz.dart`) legt den
+Absatz zur Probe an und setzt an jeder Zeile, die an einem weichen Strich
+endet, einen echten. Wo die Trennung erlaubt ist, rechnet
+`Silbentrennung`.
+
+## Wer zur Probe misst, darf nicht anders zeichnen
+
+`Blocksatz` misst mit einem `TextPainter` ohne geerbten Stil. Das Bild
+erbte über `DefaultTextStyle` den Buchstabenabstand des Themes und brach
+anders um: Striche standen mitten in der Zeile, und neben der Initiale
+fehlten ganze Wörter, weil die Teilung an der gemessenen Stelle lag
+(12.11.2026, nur in der Vorschau zu sehen).
+
+**Regel:** Wer mit `TextPainter` vorausrechnet, wo umbrochen wird, legt
+um das Bild ein `DefaultTextStyle(style: TextStyle())` — oder misst mit
+genau dem Stil, den das Bild erbt. `test/blocksatz_test.dart` gibt dem
+Theme absichtlich einen Buchstabenabstand.
+
 ## Die Release-APK kommt ohne `INTERNET` nicht ins Netz
 
 Flutter setzt `android.permission.INTERNET` nur in

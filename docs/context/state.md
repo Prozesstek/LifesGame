@@ -12,9 +12,55 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 12.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 12.11.2026 · Frederik
 
 ---
+
+## 12.11.2026: die Theorie als Seite aus einem Lernbuch
+
+Frederik: die Buchseite soll „wie eine echte Seite aus einem Lernbuch
+aussehen“ — nur die Optik, Papier, Stapel, Einband, Eselsohr und
+Blättern bleiben.
+
+| Was | Wie |
+|---|---|
+| **Schrift** | Lora 17 für den Text, Cormorant Garamond für Überschriften, Sepia, Zeilenhöhe 1,55, **Blocksatz mit Trennung** |
+| **Kolumnentitel** | „KAPITEL 1 · KRAFT & MUSKULATUR“, klein, gesperrt, mit Linie — ein Abschnitt ist ein Kapitel |
+| **Initiale** | der erste Buchstabe jedes Kapitels über drei Zeilen in der Farbe des Gebiets; der große erste Satz ist weg |
+| **Betonung** | `*kursiv*` für Betonung, `**fett**` nur für Fachbegriffe, in Tinte statt in Farbe |
+| **Kästen** | „Merke“, „Definition“ (mit Begriff), „Beispiel“ — dunkleres Papier, Rahmen, Balken links |
+| **Abbildung, Zier** | Bild im Pixelstil mit „Abb. 1: …“, am Ende jedes Kapitels ein ❦ |
+| **Seitenzahl** | „— 1 —“ unten auf dem Blatt; „1 / 3“ unter dem Buch ist weg |
+| **Papier** | Bundschatten statt hellem Streifen, vergilbte Ränder, innen schmaler als außen; das Eselsohr zeigt Papier statt Einband |
+
+Die Zeichen fürs Schreiben stehen in `lesetext.dart`. **„Ein Muskel passt
+sich an“ ist die Probe**: Definition „Progressive Überlastung“, ein
+Beispiel und eine Abbildung.
+
+**Ohne Rückfrage entschieden:**
+
+- **Akzent ist die Farbe des Gebiets** (ADR-0090), nicht überall Rostrot —
+  unter Körper ist es das Rostrot.
+- **Die Zusammenfassung steht nicht mehr auf Seite 1**; ihr Platz ist der
+  Kolumnentitel.
+- **Silbentrennung selbst gerechnet**: Flutter bricht am weichen Strich
+  um, zeichnet ihn aber nicht. `hyphenatorx` hätte 14 MB Quelltext
+  mitgebracht; die deutschen TeX-Muster sind ein 270-KB-Asset.
+- Schriften lokal, nicht über Google Fonts: Die App bleibt offline.
+  Cormorant ist 1,2 MB groß.
+
+App 1186 (vorher 1180), theory 223 (vorher 219). Zwei Kapitel in
+390 × 844 gerendert und angesehen, mit echten Schriften und Trennung.
+
+### Offen
+
+- **Gegenlesen:** Definition, Beispiel und Bildunterschrift auf „Ein Muskel
+  passt sich an“ sind Claudes Text.
+- **Die Abbildung ist ein Platzhalter** (`Bestform.png`); ein eigenes Bild
+  wäre ein Auftrag für `/lifesgame-pixel`.
+- Die übrigen Seiten tragen ihre Betonungen weiter fett — kursiv wird
+  erst, wer sie anfasst.
+- **AktivesBrett hat es nicht gesehen** — die Buchseite vom 23.10. war seine.
 
 ## 11.11.2026: ein gelber Punkt für Neues
 
@@ -118,7 +164,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1180, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1186, dazu die acht Packages (theory 223, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

@@ -85,7 +85,7 @@ void main() {
     expect(find.text(_kopf(0)), findsOneWidget);
     expect(
       tester.widget<Text>(find.byKey(LeseHaeppchen.seitenKey)).data,
-      '1 / ${_seite.sections.length}',
+      '— 1 —',
     );
     // Kein Knopf, kein Balken: Wohin es geht, zeigt das Eselsohr.
     expect(find.text('Weiter'), findsNothing);
@@ -112,7 +112,7 @@ void main() {
     expect(mitschrift.gespielt, <SoundEffect>[SoundEffect.blaettern]);
     expect(
       tester.widget<Text>(find.byKey(LeseHaeppchen.seitenKey)).data,
-      '2 / ${_seite.sections.length}',
+      '— 2 —',
     );
 
     // Zurück geht es nur per Wisch: Links unten liegt der Rücken, dort

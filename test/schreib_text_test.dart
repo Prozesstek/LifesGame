@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/theory/widgets/buch_stil.dart';
 import 'package:lifes_game/theory/widgets/schreib_text.dart';
 
 /// Ein Abschnitt schreibt sich Wort für Wort — und steht dabei von Anfang
 /// an ganz im Layout, nur durchsichtig.
 void main() {
   const body =
-      'Ein Muskel wächst unter **Spannung**. Das ist alles.\n\n'
+      'Ein Muskel wächst unter **Spannung**. Das ist *alles*.\n\n'
       '==Das Signal ist die Spannung.==';
+
+  /// Was nicht mitschreibt: das Label des Kastens und die Zier.
+  const fest = <String>{'MERKE', BuchStil.zier};
 
   Future<void> zeige(
     WidgetTester tester, {
@@ -37,7 +41,8 @@ void main() {
   List<double> deckkraft(WidgetTester tester) {
     final werte = <double>[];
     for (final text in tester.widgetList<RichText>(find.byType(RichText))) {
-      if (text.text.toPlainText() == 'Spannung ist das Signal') continue;
+      final klar = text.text.toPlainText();
+      if (klar == 'Spannung ist das Signal' || fest.contains(klar)) continue;
       text.text.visitChildren((span) {
         if (span is TextSpan && (span.text ?? '').trim().isNotEmpty) {
           werte.add(span.style?.color?.a ?? 1);
@@ -55,11 +60,18 @@ void main() {
 
     expect(find.textContaining('**'), findsNothing);
     expect(find.textContaining('=='), findsNothing);
+    expect(find.textContaining('*'), findsNothing);
+    // Der erste Buchstabe steht als Initiale, der Vorleser hört den Satz.
     expect(
-      find.text('Ein Muskel wächst unter Spannung. Das ist alles.'),
+      find.bySemanticsLabel('Ein Muskel wächst unter Spannung. Das ist alles.'),
       findsOneWidget,
     );
-    expect(find.text('Das Signal ist die Spannung.'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Das Signal ist die Spannung.'),
+      findsOneWidget,
+    );
+    expect(find.text('MERKE'), findsOneWidget);
+    expect(find.byKey(SchreibText.zierKey), findsOneWidget);
   });
 
   testWidgets('am Anfang ist nichts zu sehen, am Ende alles', (tester) async {
@@ -101,27 +113,31 @@ void main() {
     expect(deckkraft(tester).every((a) => a == 1), isTrue);
   });
 
-  testWidgets('der erste Satz ist größer, der Merksatz am größten', (
+  testWidgets('Initiale groß, Fließtext ab 17, fett und kursiv gesetzt', (
     tester,
   ) async {
     await zeige(tester, sofort: true);
 
-    double groesse(String wort) {
+    TextStyle stil(String wort) {
       for (final text in tester.widgetList<RichText>(find.byType(RichText))) {
-        double? gefunden;
+        TextStyle? gefunden;
         text.text.visitChildren((span) {
           if (span is TextSpan && span.text == wort) {
-            gefunden = span.style?.fontSize;
+            gefunden = span.style;
             return false;
           }
           return true;
         });
-        if (gefunden != null) return gefunden!;
+        final g = gefunden;
+        if (g != null) return g;
       }
       fail('„$wort“ nicht gefunden');
     }
 
-    expect(groesse('Muskel'), greaterThan(groesse('alles.')));
-    expect(groesse('Signal'), greaterThan(groesse('Muskel')));
+    expect(stil('E').fontSize, BuchStil.initialeGroesse);
+    expect(stil('in').fontSize, greaterThanOrEqualTo(17));
+    expect(stil('Spannung').fontVariations?.single.value, 700);
+    expect(stil('alles').fontStyle, FontStyle.italic);
+    expect(stil('Muskel').fontStyle, isNot(FontStyle.italic));
   });
 }

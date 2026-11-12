@@ -52,7 +52,7 @@ durch die Grube ersetzt und gelöscht.
 
 | Pfad | Inhalt | Braucht |
 |---|---|---|
-| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 219 Tests | nur Dart-SDK |
+| `packages/theory/` | Skillbaum-Graph, Inhalte, Lernfortschritt, reines Dart, 223 Tests | nur Dart-SDK |
 | `packages/theory/lib/src/vorschlag.dart` | **Vorschläge für das nächste Kapitel** ([ADR-0091](docs/decisions/0091-vorschlaege-fuers-naechste-kapitel.md)): bis zu drei, jeder mit Grund — offen, Grundlagen, weiter, wo du warst, passt zu deinen Gewohnheiten, neues Gebiet; der erste ist `suggestedStep` | nur Dart-SDK |
 | `packages/theory/lib/src/review.dart` | die **Rückfrage des Tages**: welche Seite fällig ist, und in welchem Abstand sie wiederkommt ([ADR-0045](docs/decisions/0045-rueckfrage-des-tages.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/` | die Lektionen selbst — hier wird geschrieben | nur Dart-SDK |
@@ -64,7 +64,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/theory/lib/src/content/gewohnheiten_pages.dart` | **Gewohnheiten** unter Selbstentwicklung: Überkapitel → vier Regeln → je Regel eine Seite (bisher: offensichtlich, attraktiv), **aus dem Gelesenen** ([ADR-0061](docs/decisions/0061-der-baum-waechst-aus-dem-gelesenen.md)) | nur Dart-SDK |
 | `packages/theory/lib/src/content/habits_lessons.dart` | die fünf Seiten des **früheren Handbuchs** — seit [ADR-0070](docs/decisions/0070-das-handbuch-steht-im-baum.md) Knoten unter Gewohnheiten, „Zwei Minuten reichen“ als Regel 3 | nur Dart-SDK |
 | `packages/theory/lib/src/content/psychologie_pages.dart` | **Psychologie**: fünf Themen an Experimenten — Asch, Milgram, Bystander, Loftus, Gefühle | nur Dart-SDK |
-| `packages/theory/lib/src/lesetext.dart` | **wie ein Abschnitt gesetzt wird**: `**betont**` und ein Absatz in `==…==` als Merksatz, mehr Zeichen gibt es nicht; jede Seite wird auf offene Zeichen geprüft | nur Dart-SDK |
+| `packages/theory/lib/src/lesetext.dart` | **wie ein Abschnitt gesetzt wird**: `*kursiv*`, `**Fachbegriff**`, ein Absatz in `==…==` als Merksatz, dazu am Absatzanfang `[[merke]]`, `[[definition: Begriff]]`, `[[beispiel]]` (Kästen), `[[bild: assets/… | Unterschrift]]` und `[[zier]]` (12.11.2026); jede Seite wird auf offene und falsche Zeichen geprüft | nur Dart-SDK |
 | `packages/theory/lib/src/placeholder.dart` | eine Überschrift **ohne Seite** — grau, „Inhalt folgt", nicht zu öffnen | nur Dart-SDK |
 | `packages/theory/lib/src/node_graph.dart` | Struktur des Graphen, `canOpen`, Gesundheitsprüfung | nur Dart-SDK |
 | `packages/theory/lib/src/skill_tree.dart` | die alten flachen Zweige — nur noch Behälter der Lektionen, **gezählt wird der Graph** | nur Dart-SDK |
@@ -337,11 +337,14 @@ durch die Grube ersetzt und gelöscht.
 | `lib/theory/widgets/node_state.dart` | in welchem Zustand ein Knoten ist — eine Stelle | Flutter |
 | `lib/theory/lesson_screen.dart` | **in der Bibliothek**: Rätsel beim Mentor → Buch → der Mentor fragt ab → Ergebnis → **direkt zur nächsten Seite** ([ADR-0097](docs/decisions/0097-theorie-in-der-bibliothek.md)); Klang und Vibration je Antwort, Konfetti bei drei von drei, **gefeiert wird, wenn gezählt ist** | Flutter |
 | `lib/theory/antwort_klang.dart` | **wie eine Antwort klingt**: richtig klettert die Tonleiter, eine Stufe je Antwort in Folge; falsch klingt dumpf — reine Rechnung | Flutter |
-| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, **das Buch klappt auf und zu** (Deckel mit Titel und Zeichen), darunter „1 / 3“ — **kein Knopf „Weiter“**; `schliessen` klappt es vor dem Zurück zu | Flutter |
+| `lib/theory/widgets/lese_haeppchen.dart` | der Text **in Häppchen**: ein Abschnitt je Blatt, **das Buch klappt auf und zu** (Deckel mit Titel und Zeichen); **jede Seite eine Seite aus einem Lernbuch**: oben der Kolumnentitel „KAPITEL 1 · THEMA“, unten „— 1 —“ — **kein Knopf „Weiter“**; `schliessen` klappt es vor dem Zurück zu | Flutter |
 | `lib/theory/widgets/bibliothek.dart` | **die Bibliothek** hinter Baum und Seite (`assets/UI/Bibliothek.jpg`, Frederiks Bild), mit Schleier | Flutter |
-| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern und Falz (`BuchPapier`) in einem Ledereinband; **am Rand die Kanten des Gelesenen links und des Restes rechts**, das Blatt dreht sich am Rücken um, der Finger zieht es mit, **ein Eselsohr unten zeigt die Richtung** und blättert auf Tipp; über die letzte Seite hinaus `onSchluss` (`Umblaettern`); der Deckel (`BuchDeckel`); jede Seite behält beim Wandern ihren Zustand | Flutter |
+| `lib/theory/widgets/umblaettern.dart` | **die Seite als aufgeschlagenes Buch** (23.10.): Buchpapier mit Fasern, **Bundschatten** und vergilbten Rändern (`BuchPapier`) in einem Ledereinband; **am Rand die Kanten des Gelesenen links und des Restes rechts**, das Blatt dreht sich am Rücken um, der Finger zieht es mit, **ein Eselsohr unten zeigt die Richtung** (darunter die nächste Seite, kein Einband) und blättert auf Tipp; über die letzte Seite hinaus `onSchluss` (`Umblaettern`); der Deckel (`BuchDeckel`); jede Seite behält beim Wandern ihren Zustand | Flutter |
 | `lib/theory/widgets/seiten_farbe.dart` | **die Farbe der Seite** — die ihres Gebiets, von oben gereicht: betonte Wörter, Merksatz, Striche, Balken; ob eine Antwort sitzt, bleibt grün und rot | Flutter |
-| `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; erster Satz groß, Merksatz am größten | Flutter |
+| `lib/theory/widgets/schreib_text.dart` | **ein Abschnitt schreibt sich**: Überschrift fällt herein, dann Wort für Wort, ein Tipp zeigt alles; **gesetzt wie ein Lernbuch**: Initiale über drei Zeilen, Merkkästen, Abbildungen „Abb. 1: …“, am Ende ein ❦ | Flutter |
+| `lib/theory/widgets/buch_stil.dart` | **wie das Lernbuch aussieht — eine Stelle**: Tinte, Papiertöne, Schriften (Lora, Cormorant Garamond), Größen, Ränder; die Akzentfarbe bleibt die des Gebiets | Flutter |
+| `lib/theory/widgets/blocksatz.dart` | **Blocksatz mit sichtbarem Trennstrich** und Text neben der Initiale — Flutter zeichnet am weichen Strich keinen (`gotchas.md`); **erbt keinen Stil**, sonst bräche das Bild anders um als die Probe | Flutter |
+| `lib/theory/silbentrennung.dart` | **deutsche Silbentrennung** nach Liang mit den TeX-Mustern aus `assets/Silbentrennung/` (MIT); geladen in `main.dart`, bis dahin ohne Trennung | Flutter |
 | `lib/theory/widgets/mentor_dialog.dart` | **der Mentor fragt ab** (ADR-0097): oben er mit der Frage, darunter die Antworten als Holzknöpfe; **ein Tipp wählt, erst „Antworten“ zählt**, dann sagt die eigene Figur samt Ausrüstung die Antwort und der Mentor antwortet mit Urteil und Erklärung — **rechnet nichts** | Flutter |
 | `lib/theory/widgets/review_section.dart` | die **Rückfrage des Tages** oben in der Theorie — eine Zeile, die aufklappt | Flutter |
 | `lib/theory/vorschlag_flow.dart` | **was ein Tipp auf einen Vorschlag tut**: öffnen, falls nötig, dann lesen — eine Stelle für Baum und Aufstieg | Flutter |
@@ -366,7 +369,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1180 Tests
+flutter test             # 1186 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -390,7 +393,7 @@ dart test                              # 375 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
-cd packages/theory      ; dart test    # 219 Tests, prüft auch den Inhalt
+cd packages/theory      ; dart test    # 223 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 58 Tests
 cd packages/gear        ; dart test    # 141 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
