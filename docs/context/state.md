@@ -118,7 +118,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1176, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1180, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -345,6 +345,27 @@ Seitenblock; in der Mitte ein Goldsiegel mit Flamme, von Ranken gehalten
 (`tool/pixel/kreis_faehigkeiten.px.js`). Runenstein und Hand mit Feuerball
 waren verworfen. `tool/kreis_zeichen.py` zeichnet den Kreis nicht mehr.
 Abgenommen. **Nicht in der laufenden App, nicht am Handy.**
+
+## 10.11.2026: Play-Store-Vorbereitung beginnt
+
+Ziel 9 wird jetzt abgearbeitet ([`play-store.md`](../vorlagen/play-store.md)).
+Der geschlossene Test mit zwölf Testern ist der erste Schritt; ein neues
+Datum steht noch aus (frühestens Mitte Dezember öffentlich).
+
+| Was | Wie |
+|---|---|
+| **Konto** | Zahlung, Identität und Händlerstatus erledigt (Frederik) |
+| **Startsymbol** | ~~Frederiks Bild (ChatGPT)~~ — am 12.11. verworfen, es gilt AktivesBretts Zeichnung mit pxl (Eintrag vom 11.11.) |
+| **Impressum, Datenschutz** | `web/impressum.html`, `web/datenschutz.html` — mit Adresse und E-Mail, Gegenlesen steht aus |
+| **Info-Blatt** | Zeichen oben im Charakter: Datenschutz, Gesundheit, Lizenzen (`info_blatt.dart`) |
+
+**Regel von Frederik:** Das Prüfen am Handy läuft bei jeder Änderung und
+wird nicht mehr in `state.md` vermerkt.
+
+App 1154 (vorher 1150 laut Kopf, `test/info_blatt_test.dart` bringt 4).
+**Danach am selben Tag:** `cmdline-tools` installiert, Upload-Schlüssel
+erzeugt, der Release-Build (`.aab`, 58,7 MB) ist damit signiert.
+**Offen:** Tester, App-Name, Play-Console-Eintrag, Erinnerung ja oder nein.
 
 ## 08.11.2026, danach: das Laden-Zeichen
 

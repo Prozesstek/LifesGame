@@ -21,6 +21,7 @@ import 'abilities_screen.dart';
 import 'identity_controller.dart';
 import 'widgets/consistency_card.dart';
 import 'widgets/identity_card.dart';
+import 'widgets/info_blatt.dart';
 import 'widgets/name_dialog.dart';
 import 'widgets/title_dialog.dart';
 import '../habits/daily_form_text.dart';
@@ -58,6 +59,16 @@ class CharacterScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Charakter'),
         backgroundColor: Palette.surface,
+        actions: <Widget>[
+          // Datenschutz, Gesundheit, Lizenzen — nur ein Zeichen, der Text
+          // steht erst im Blatt (ADR-0060, Play Store).
+          IconButton(
+            key: const Key('info-knopf'),
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Info',
+            onPressed: () => showInfoBlatt(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(

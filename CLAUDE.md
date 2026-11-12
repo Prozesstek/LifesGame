@@ -366,7 +366,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1176 Tests
+flutter test             # 1180 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

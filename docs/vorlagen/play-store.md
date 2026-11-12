@@ -59,10 +59,10 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       Studios“ — und überall gleich führen: Play Console,
       Datenschutzseite, Impressum.
 - [x] *(Mensch)* Konto angelegt (19.10.).
-- [ ] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
-      ein Android-Gerät mit der Play-Console-App. Dauert Tage.
-- [ ] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
-      Händler stehen Adresse und Telefon öffentlich im Store.
+- [x] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
+      ein Android-Gerät mit der Play-Console-App. Dauert Tage. (10.11.)
+- [x] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
+      Händler stehen Adresse und Telefon öffentlich im Store. (10.11.)
 - [ ] **Name und Paket-Id endgültig.** `dev.prozesstek.lifes_game` lässt
       sich nach dem ersten Upload nie mehr ändern. „Lifes Game“ oder
       „Life's Game“? Im Store nach gleichen Namen suchen.
@@ -85,9 +85,13 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 
 ### Rechner *(Mensch)*
 
-- [ ] Android Studio → SDK Manager → „Android SDK Command-line Tools“.
-      `flutter doctor` meldet sie als fehlend.
-- [ ] `flutter doctor --android-licenses`
+- [x] Android Studio → SDK Manager → „Android SDK Command-line Tools“
+      (10.11.).
+- [x] `flutter doctor --android-licenses` (10.11.): Die neuen Tools
+      melden „--licenses option is no longer needed“, `flutter doctor`
+      zeigt deshalb weiter „license status unknown“. Harmlos: Der
+      Release-Build läuft durch, ohne die Meldung zu den Debug-Symbolen
+      (58,7 MB, noch mit dem Debug-Schlüssel signiert).
 - [ ] USB-Debugging am Handy, `flutter run --release` aufs eigene Gerät.
       Auf diesem Rechner wurde noch nie ein Android-Build gebaut.
 
@@ -96,12 +100,19 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
 - [x] Release-`signingConfig` in `android/app/build.gradle.kts` (19.10.):
       liest `android/key.properties`, ohne die Datei weiter der
       Debug-Schlüssel.
-- [ ] *(Mensch)* Upload-Schlüssel erzeugen und `android/key.properties`
+- [x] *(Mensch)* Upload-Schlüssel erzeugen und `android/key.properties`
       ausfüllen — Befehl und Felder in `android/key.properties.example`.
+      (10.11.: `C:\Users\frekk\upload-keystore.jks`, Alias `upload`; der
+      Release-Build ist damit signiert, geprüft mit `keytool -printcert`.
+      In `key.properties` den Pfad mit `/` und ohne Anführungszeichen
+      schreiben.)
 - [ ] *(Mensch)* Schlüssel und Passwort an zwei Orten sichern. `*.jks` und
       `key.properties` sind gitignored, das bleibt so.
-- [ ] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
-      allen Dichten, dazu 512 × 512 für den Store.
+- [x] Eigenes Startsymbol statt des Flutter-Logos: adaptives Icon in
+      allen Dichten, dazu 512 × 512 für den Store (11.11.). AktivesBretts
+      Zeichnung mit pxl (`tool/pixel/app_icon.px.js`), abgelegt mit
+      `tool/pixel/app_icon.js`, Store-Datei `docs/store/app_icon_512.png`.
+      Gehört dem Projekt. Frederiks ChatGPT-Bild ist dafür verworfen (12.11.).
 - [x] Startbild in der Lederfarbe (19.10.). Bisher steht dort der helle
       Standardhintergrund (`launch_background.xml`), beim Start blitzt
       Weiß auf.
@@ -113,11 +124,16 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       und aufgeklappten Faltbaren das Hochformat nicht mehr ein.
       `PhoneFrame` dort einschalten oder Tablets in der Play Console
       ausschließen.
-- [ ] Lizenzseite (`showLicensePage`) und die Namen der Asset-Pakete
-      erreichbar machen, ohne Satz auf dem Bildschirm (ADR-0060).
+- [x] Lizenzseite (`showLicensePage`) erreichbar (10.11.): Info-Zeichen
+      oben im Charakter → Blatt mit Datenschutz, Gesundheit, Lizenzen
+      (`lib/character/widgets/info_blatt.dart`). **Offen:** Die Namen der
+      Asset-Pakete stehen noch nicht darin, sie hängen an den
+      HERKUNFT-Dateien.
 - [ ] Mit jedem Upload die Zahl nach dem `+` in `pubspec.yaml` erhöhen
       (`version: 0.1.0+1`).
-- [ ] `flutter build appbundle --release` — Play nimmt nur `.aab`. Am
+- [x] `flutter build appbundle --release` (10.11.: 58,7 MB, mit dem
+      Upload-Schlüssel signiert, ohne Meldung zu den Debug-Symbolen).
+      Früher: Play nimmt nur `.aab`. Am
       19.10. zum ersten Mal gebaut (57 MB), aber mit „failed to strip
       debug symbols“: Dafür braucht Flutter die cmdline-tools. Nach deren
       Installation und mit dem Upload-Schlüssel neu bauen.
@@ -132,9 +148,16 @@ Ein geschlossener Test mit Fremden ist schon eine Verbreitung.
 - [ ] `Success.mp3`, `Win.mp3`, `Win_2.mp3`, `Win_3.mp3`: Herkunft
       unbekannt. Nachweisen oder durch gerechnete ersetzen
       (`tool/haekchen_klaenge.py` zeigt, wie).
-- [ ] Hinweis „keine medizinische Beratung“ bei den Gesundheitsseiten.
-- [ ] Datenschutzerklärung als Seite mit fester Adresse; GitHub Pages
-      liefert ohnehin aus.
+- [x] Hinweis „keine medizinische Beratung“ (10.11.): im Info-Blatt des
+      Charakters und in der Datenschutzerklärung. **Offen:** Bei den
+      Seiten im Wissensbaum selbst steht er noch nicht.
+- [x] Datenschutzerklärung als Seite mit fester Adresse; GitHub Pages
+      liefert ohnehin aus. (10.11.: `web/datenschutz.html` und
+      `web/impressum.html`, nach dem Merge unter
+      `prozesstek.de/LifesGame/datenschutz.html`. Ort „99099 Erfurt“
+      bestätigt, E-Mail `lifesgamestudios@gmail.com` eingetragen (10.11.).
+      **Offen:** vor der Veröffentlichung von
+      einer Rechtsberatung oder einem Generator gegenlesen lassen.)
 - [ ] *(Mensch)* Impressum und Kontakt klären — Frederik ist gewerblich
       tätig.
 
