@@ -238,6 +238,28 @@ Fähigkeiten und Ausrüstung eine Reihe tiefer. App 1162 (vorher 1159).
 - Was keinen Tipp annimmt (`IgnorePointer`, etwa der Kasten des
   Mentors), sieht sie nicht und kann es noch verdecken.
 
+## 11.11.2026, ganz zuletzt: das eigene Startsymbol
+
+AktivesBrett schickte seine Vorlage (Wappen mit „LG“, darunter „LIFES
+GAME“) und wollte es „gemütlicher … mit mehr Liebe und mehr Details“.
+Mit pxl gezeichnet (`tool/pixel/app_icon.px.js`): Holzrahmen,
+Abendhimmel mit Mond und Sternen, der Berg der Startseite, zwei Tannen,
+das rote Wappen mit Goldrand, „LIFES GAME“ cremefarben auf einem
+Holzschild, Gras mit Blumen. Ein Stern an der Spitze war verworfen.
+
+**Am Samsung schnitt die Form die Ecken ab**: Ein adaptives Symbol zeigt nur die
+Mitte, und sicher ist laut Google nur ein Kreis von 66 dp. Jetzt liegt es in
+**zwei Ebenen** (`app_icon_hinten`, `app_icon_vorn`): Himmel, Berg und Wiese
+laufen bis an jeden Rand, Wappen und Schild stehen etwas kleiner in der
+Mitte (88 %). Die Form des Launchers ist damit der Rahmen. `app_icon.js
+--vorschau` zeigt Squircle und Kreis. Build 5.
+
+`tool/pixel/app_icon.js` legt es ab: Android klassisch und **adaptiv**
+(ab Android 8 schneidet der Launcher es in seine Form), Web samt „maskable“, Favicon und 512 × 512 für den Store in
+`docs/store/`. Damit ist das Flutter-Logo weg.
+**Nicht am Handy geprüft**; ob der Kreis eines Launchers die Ecken des
+Schilds schneidet, zeigt nur das Gerät.
+
 ## 11.11.2026, zuletzt: Vollbild am Handy
 
 AktivesBrett: „ich will das game in full screen auf dem Handy haben“.
@@ -431,8 +453,7 @@ Ladebildschirm verschwindet. **Nicht am Handy.**
 
 ### Offen
 
-- Android zeigt beim Start das Systembild mit dem Flutter-Logo — kommt
-  mit dem eigenen Startsymbol (Ziel 9).
+- ~~Android zeigt beim Start das Systembild mit dem Flutter-Logo~~ — das Startsymbol steht seit dem 11.11.; ob das Startbild es zeigt, ist nicht geprüft.
 - **AktivesBrett hat es nicht gesehen.**
 
 ## 07.11.2026, danach: der Rundgang am Ende des Tutorials
