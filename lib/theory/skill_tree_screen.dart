@@ -166,7 +166,7 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                       // `OnDark`: Ihre Karte ist Pergament.
                       const Padding(
                         padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-                        child: ReviewSection(),
+                        child: ReviewSection(alsDialog: true),
                       ),
                       Expanded(
                         child: OnDark(
@@ -391,47 +391,55 @@ class _Header extends StatelessWidget {
           // und im Widget-Test, wo jede Glyphe quadratisch ist — passen
           // die vollen Sätze sonst nicht nebeneinander.
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
             children: <Widget>[
-              Flexible(
-                flex: 3,
-                child: Text(
-                  area?.name ?? '',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Palette.textOnDark,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
+              // **Das Fragezeichen steht immer am rechten Rand** (11.11.2026,
+              // Frederik): Mit `Spacer` neben zwei `Flexible` wanderte es mit
+              // der Länge des Namens — der Rest wurde nicht ganz verteilt.
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: <Widget>[
+                    Flexible(
+                      flex: 3,
+                      child: Text(
+                        area?.name ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Palette.textOnDark,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (gebiet != null) ...<Widget>[
+                      const SizedBox(width: 8),
+                      SkillAbzeichen(
+                        area: gebiet,
+                        skill: skills.of(gebiet),
+                        aufDunkel: true,
+                      ),
+                    ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        '${stand.passed} / ${stand.total}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: farbe,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    // „gesamt 17 von 59“ steht nicht mehr da: Die vier Balken
+                    // darunter sagen es schon, je Gebiet.
+                  ],
                 ),
               ),
-              if (gebiet != null) ...<Widget>[
-                const SizedBox(width: 8),
-                SkillAbzeichen(
-                  area: gebiet,
-                  skill: skills.of(gebiet),
-                  aufDunkel: true,
-                ),
-              ],
-              const SizedBox(width: 8),
-              Flexible(
-                flex: 2,
-                child: Text(
-                  '${stand.passed} / ${stand.total}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: farbe,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              // „gesamt 17 von 59“ steht nicht mehr da: Die vier Balken
-              // darunter sagen es schon, je Gebiet.
-              const Spacer(),
               _LegendKnopf(farbe: farbe),
             ],
           ),

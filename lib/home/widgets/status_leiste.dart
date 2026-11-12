@@ -14,7 +14,8 @@ import '../../ui/palette.dart';
 
 /// **Level oben rechts, das Gold nur kurz** — das Abzeichen mit einem Ring darum,
 /// der die Erfahrung bis zum nächsten Level zeigt, daneben das Gold
-/// (Frederik, 22.10.2026).
+/// (Frederik, 22.10.2026); auf der Startseite links davon, damit der Ring
+/// am Rand steht (11.11.2026).
 ///
 /// **Bis dahin eine Karte zwischen den Kreisen und „Heute“**, mit einem
 /// geraden Balken. Oben rechts steht es, wo man es in Spielen sucht, und
@@ -80,6 +81,11 @@ class StatusLeiste extends StatelessWidget {
   }
 
   Widget _leiste(PlayerLevel level, int gold, int goldUnterwegs) {
+    final goldAnzeige = KurzesGold(
+      gold: gold,
+      unterwegs: goldUnterwegs,
+      klein: klein,
+    );
     return Row(
       mainAxisSize: klein ? MainAxisSize.min : MainAxisSize.max,
       children: <Widget>[
@@ -92,6 +98,10 @@ class StatusLeiste extends StatelessWidget {
               child: GebietsBalken(aufDunkel: true),
             ),
           ),
+        // **Auf der Startseite steht das Level ganz rechts** (11.11.2026,
+        // Frederik), das Gold kurz links davon — rechts neben dem Ring
+        // hielt es seinen Platz frei, auch wenn es nicht zu sehen war.
+        if (!klein) ...<Widget>[goldAnzeige, const SizedBox(width: 10)],
         // **Ein Tipp öffnet die Roadmap** (ADR-0098): wie viel fehlt, und
         // was die nächsten Level bringen. Bis dahin stand hier nur der
         // Satz zur Erfahrung als Tooltip.
@@ -116,8 +126,7 @@ class StatusLeiste extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10),
-        KurzesGold(gold: gold, unterwegs: goldUnterwegs, klein: klein),
+        if (klein) ...<Widget>[const SizedBox(width: 10), goldAnzeige],
       ],
     );
   }

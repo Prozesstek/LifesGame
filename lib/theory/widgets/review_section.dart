@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habits/habits.dart';
 import 'package:theory/theory.dart';
 
 import '../../combat/ladder_controller.dart';
 import '../../habits/habits_controller.dart';
+import '../../home/erster_start_provider.dart';
 import '../../skills/gebiet_farbe.dart';
+import '../../ui/aufstieg.dart';
 import '../../ui/druck.dart';
 import '../../ui/palette.dart';
 import '../review_controller.dart';
@@ -22,8 +27,20 @@ import '../../ui/gold_icon.dart';
 /// ein Drittel der Höhe, und der Baum darunter wird eng. Beantwortet beginnt
 /// sie als eine Zeile, die ein Tipp aufklappt. Ohne fällige Frage steht
 /// hier nichts.
+///
+/// **In der Theorie als Dialog** ([alsDialog], 11.11.2026, Frederik:
+/// „Rückfrage öffnet sich mittig wenn man Theorie öffnet – verschwindet
+/// dann komplett“): Offen kommt sie beim Betreten groß in die Mitte.
+/// Beantwortet steht oben nichts mehr; wer sie vorher wegtippt, findet
+/// sie als Zeile, die sie wieder öffnet. Am Lagerfeuer bleibt sie die
+/// Karte, die aufklappt.
 class ReviewSection extends ConsumerStatefulWidget {
-  const ReviewSection({super.key});
+  const ReviewSection({this.alsDialog = false, super.key});
+
+  final bool alsDialog;
+
+  /// Findet den Dialog in Tests.
+  static const Key dialogKey = Key('rueckfrage-dialog');
 
   @override
   ConsumerState<ReviewSection> createState() => _ReviewSectionState();
@@ -38,7 +55,35 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
   @override
   void initState() {
     super.initState();
-    _aufgeklappt = ref.read(todaysReviewAnswerProvider) == null;
+    final offen =
+        ref.read(todaysReviewProvider) != null &&
+        ref.read(todaysReviewAnswerProvider) == null;
+    _aufgeklappt = !widget.alsDialog && offen;
+    // **Nicht mitten im Tutorial**: Fällig ist sie schon am Tag der ersten
+    // Seite, und der Mentor führt dann gerade woandershin. Dort steht nur
+    // die Zeile.
+    final tutorial = ref.read(ersterStartProvider).schritt != null;
+    if (widget.alsDialog && offen && !tutorial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _zeigeDialog();
+      });
+    }
+  }
+
+  Future<void> _zeigeDialog() {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        key: ReviewSection.dialogKey,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        // Erfahrung und Gold steigen im Dialog auf, wo getippt wurde.
+        child: AufstiegHost(
+          child: _ImDialog(onZu: () => Navigator.of(dialogContext).pop()),
+        ),
+      ),
+    );
   }
 
   @override
@@ -46,19 +91,22 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
     final frage = ref.watch(todaysReviewProvider);
     if (frage == null) return const SizedBox.shrink();
     final antwort = ref.watch(todaysReviewAnswerProvider);
+    if (widget.alsDialog) {
+      // Beantwortet: weg. Offen: eine Zeile, die den Dialog wieder öffnet.
+      if (antwort != null) return const SizedBox.shrink();
+      return _Zeile(
+        richtig: null,
+        offenFarbe: _offenFarbe(frage),
+        tage: null,
+        onTap: () => unawaited(_zeigeDialog()),
+      );
+    }
     final today = ref.watch(todayProvider);
-    // Die Rückfrage stammt von einer Seite und trägt deren Farbe.
-    final gebiet = gebietDerSeite(
-      ref.watch(theoryGraphProvider),
-      frage.lesson.id,
-    );
 
     if (!_aufgeklappt) {
       return _Zeile(
         richtig: antwort?.correct,
-        offenFarbe: gebiet == null
-            ? Palette.accentOnDark
-            : GebietFarbe.leder(gebiet),
+        offenFarbe: _offenFarbe(frage),
         tage: antwort == null ? null : daysUntilReview(ref, frage, today),
         onTap: () => setState(() => _aufgeklappt = true),
       );
@@ -70,14 +118,77 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
       onTap: antwort == null
           ? null
           : () => setState(() => _aufgeklappt = false),
-      child: ReviewCard(
-        question: frage,
-        farbe: gebiet == null ? Palette.accent : GebietFarbe.pergament(gebiet),
-        answer: antwort,
-        day: dayNumberOf(today),
-        daysUntilNext: daysUntilReview(ref, frage, today),
-        onAnswer: (wahl) => answerReview(context, ref, frage, wahl),
-        onZuklappen: () => setState(() => _aufgeklappt = false),
+      child: _karte(
+        context,
+        ref,
+        frage,
+        antwort,
+        today,
+        onZu: () {
+          setState(() => _aufgeklappt = false);
+        },
+      ),
+    );
+  }
+
+  Color _offenFarbe(ReviewQuestion frage) {
+    final gebiet = _gebiet(ref, frage);
+    return gebiet == null ? Palette.accentOnDark : GebietFarbe.leder(gebiet);
+  }
+}
+
+/// Die Rückfrage stammt von einer Seite und trägt deren Farbe.
+SkillArea? _gebiet(WidgetRef ref, ReviewQuestion frage) =>
+    gebietDerSeite(ref.watch(theoryGraphProvider), frage.lesson.id);
+
+Widget _karte(
+  BuildContext context,
+  WidgetRef ref,
+  ReviewQuestion frage,
+  ReviewAnswer? antwort,
+  Day today, {
+  required VoidCallback onZu,
+  IconData zuZeichen = Icons.expand_less,
+}) {
+  final gebiet = _gebiet(ref, frage);
+  return ReviewCard(
+    question: frage,
+    farbe: gebiet == null ? Palette.accent : GebietFarbe.pergament(gebiet),
+    answer: antwort,
+    day: dayNumberOf(today),
+    daysUntilNext: daysUntilReview(ref, frage, today),
+    onAnswer: (wahl) => answerReview(context, ref, frage, wahl),
+    onZuklappen: onZu,
+    zuklappenZeichen: zuZeichen,
+  );
+}
+
+/// Die Karte im Dialog: Nach der Antwort bleibt die Auflösung stehen, ein
+/// Tipp schließt.
+class _ImDialog extends ConsumerWidget {
+  const _ImDialog({required this.onZu});
+
+  final VoidCallback onZu;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final frage = ref.watch(todaysReviewProvider);
+    if (frage == null) return const SizedBox.shrink();
+    final antwort = ref.watch(todaysReviewAnswerProvider);
+    // Die Holzkarte füllt jede Höhe, die man ihr gibt; die Rolle gibt ihr
+    // keine, und so ist sie nur so hoch wie ihre Frage.
+    return SingleChildScrollView(
+      child: GestureDetector(
+        onTap: antwort == null ? null : onZu,
+        child: _karte(
+          context,
+          ref,
+          frage,
+          antwort,
+          ref.watch(todayProvider),
+          onZu: onZu,
+          zuZeichen: Icons.close_rounded,
+        ),
       ),
     );
   }

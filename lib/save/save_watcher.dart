@@ -11,6 +11,7 @@ import '../dev/dev_controller.dart';
 import '../gear/gear_controller.dart';
 import '../habits/habits_controller.dart';
 import '../haustier/haustier_controller.dart';
+import '../neu/neu_provider.dart';
 import '../theory/theory_controller.dart';
 import 'save_data.dart';
 import 'save_providers.dart';
@@ -47,6 +48,7 @@ SaveData currentSave(WidgetRef ref) {
     reviews: ref.read(reviewLogProvider),
     dailyPit: ref.read(dailyPitProvider),
     haustier: ref.read(haustierProvider),
+    neu: ref.read(neuGesehenProvider),
   );
 }
 
@@ -57,7 +59,7 @@ class SaveWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Zehn Bereiche, zehn Zeilen. Kommt ein elfter dazu, gehört er
+    // Elf Bereiche, elf Zeilen. Kommt ein zwölfter dazu, gehört er
     // hier dazu — sonst überlebt er keinen Neustart.
     ref.listen(theoryProgressProvider, (_, _) => _save(ref));
     ref.listen(habitTrackerProvider, (_, _) => _save(ref));
@@ -69,6 +71,8 @@ class SaveWatcher extends ConsumerWidget {
     ref.listen(reviewLogProvider, (_, _) => _save(ref));
     ref.listen(dailyPitProvider, (_, _) => _save(ref));
     ref.listen(haustierProvider, (_, _) => _save(ref));
+    // Was für den gelben Punkt gesehen ist (11.11.2026).
+    ref.listen(neuGesehenProvider, (_, _) => _save(ref));
 
     return child;
   }
