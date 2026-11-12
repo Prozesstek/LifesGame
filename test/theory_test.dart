@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifes_game/audio/sound_effects.dart';
 import 'package:lifes_game/theory/antwort_klang.dart';
+import 'package:lifes_game/theory/widgets/review_card.dart';
 import 'package:lifes_game/theory/widgets/review_section.dart';
 import 'package:lifes_game/theory/widgets/mentor_dialog.dart';
 import 'package:lifes_game/ui/aufstieg.dart';
@@ -76,6 +77,13 @@ Future<void> _pumpTree(WidgetTester tester, ProviderContainer container) async {
     ),
   );
   await tester.pump();
+  // Ist eine Rückfrage fällig, kommt sie als Dialog (11.11.2026) — die
+  // Tests hier prüfen den Baum dahinter.
+  await tester.pump();
+  if (find.byKey(ReviewSection.dialogKey).evaluate().isNotEmpty) {
+    await tester.tap(find.byKey(ReviewCard.zuklappenKey));
+    await tester.pumpAndSettle();
+  }
 }
 
 void main() {
@@ -596,6 +604,35 @@ void main() {
         find.byIcon(Icons.auto_awesome),
         findsNWidgets(inDerRueckfrage.evaluate().length),
       );
+    });
+
+    testWidgets('das Fragezeichen steht in jedem Gebiet am rechten Rand', (
+      tester,
+    ) async {
+      useTallView(tester);
+      final container = _containerAtLevel(3);
+      addTearDown(container.dispose);
+      await pumpTree(tester, container);
+
+      final breite =
+          tester.view.physicalSize.width / tester.view.devicePixelRatio;
+      final stellen = <double>{};
+      for (var i = 0; i < theoryRootIds.length; i++) {
+        final rechts = tester
+            .getRect(find.byIcon(Icons.help_outline_rounded))
+            .right;
+        stellen.add(rechts.roundToDouble());
+        if (i < theoryRootIds.length - 1) {
+          await tester.fling(
+            find.byType(PageView),
+            const Offset(-600, 0),
+            2000,
+          );
+          await tester.pumpAndSettle();
+        }
+      }
+      expect(stellen, hasLength(1), reason: 'immer an derselben Stelle');
+      expect(stellen.single, greaterThan(breite - 40));
     });
 
     testWidgets('eine bestandene Seite bietet keinen Knopf mehr an', (

@@ -9,10 +9,13 @@ import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/save/save_store.dart';
 import 'package:lifes_game/save/save_watcher.dart';
+import 'package:lifes_game/home/erster_start.dart';
+import 'package:lifes_game/home/erster_start_provider.dart';
 import 'package:lifes_game/theory/review_controller.dart';
 import 'package:lifes_game/theory/skill_tree_screen.dart';
 import 'package:lifes_game/theory/theory_controller.dart';
 import 'package:lifes_game/theory/widgets/review_card.dart';
+import 'package:lifes_game/theory/widgets/review_section.dart';
 import 'package:theory/theory.dart';
 
 import 'test_view.dart';
@@ -24,7 +27,11 @@ const Day _heute = Day(2026, 9, 23);
 
 ProviderContainer _container({bool handbuch = true}) {
   final c = ProviderContainer(
-    overrides: [todayProvider.overrideWithValue(_heute)],
+    overrides: [
+      todayProvider.overrideWithValue(_heute),
+      // Nach dem Tutorial: Dort kommt sie als Dialog (11.11.2026).
+      ersterStartProvider.overrideWithValue(ErsterStart.allesOffen),
+    ],
   );
   addTearDown(c.dispose);
   if (handbuch) {
@@ -103,30 +110,33 @@ void main() {
   });
 
   testWidgets(
-    'nach dem Antworten bleibt die Auflösung, beim nächsten Mal eine Zeile',
+    'nach dem Antworten bleibt die Auflösung, danach ist sie ganz weg',
     (tester) async {
       final c = _container();
       await _pump(tester, c);
       final frage = c.read(todaysReviewProvider)!;
+      expect(find.byKey(ReviewSection.dialogKey), findsOneWidget);
       await _antworte(tester, frage, frage.question.correctIndex);
       await tester.pumpAndSettle();
       expect(find.byType(ReviewCard), findsOneWidget, reason: 'Auflösung');
 
-      // Die Theorie verlassen und wieder öffnen.
-      await tester.pumpWidget(const SizedBox());
-      await _pump(tester, c);
-
+      // Ein Tipp schließt, und oben steht nichts mehr (11.11.2026).
+      await tester.tap(find.byType(ReviewCard));
+      await tester.pumpAndSettle();
       expect(find.byType(ReviewCard), findsNothing);
       expect(
-        find.bySemanticsLabel(RegExp('Rückfrage des Tages: richtig')),
-        findsOneWidget,
+        find.bySemanticsLabel(RegExp('Rückfrage des Tages')),
+        findsNothing,
       );
 
-      await tester.tap(
-        find.bySemanticsLabel(RegExp('Rückfrage des Tages: richtig')),
+      // Die Theorie verlassen und wieder öffnen: kein Dialog mehr.
+      await tester.pumpWidget(const SizedBox());
+      await _pump(tester, c);
+      expect(find.byKey(ReviewSection.dialogKey), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp('Rückfrage des Tages')),
+        findsNothing,
       );
-      await tester.pumpAndSettle();
-      expect(find.byType(ReviewCard), findsOneWidget);
     },
   );
 

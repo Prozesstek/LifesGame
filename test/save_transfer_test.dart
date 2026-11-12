@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,6 +84,11 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
+    // Was für den gelben Punkt gesehen ist, schreibt der Stand beim
+    // Kopieren mit (11.11.2026) — verglichen wird der Rest.
+    Map<String, Object?> ohneNeu(String? text) =>
+        (jsonDecode(text ?? '{}') as Map<String, Object?>)..remove('neu');
+
     Future<List<SaveData>> karte(WidgetTester tester, SaveData stand) async {
       useTallView(tester);
       final eingefuegt = <SaveData>[];
@@ -107,7 +114,7 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Kopieren'));
       await tester.pump();
 
-      expect(zwischenablage, stand.encode());
+      expect(ohneNeu(zwischenablage), ohneNeu(stand.encode()));
     });
 
     testWidgets('Einfügen fragt nach und ersetzt dann', (tester) async {
@@ -129,8 +136,8 @@ void main() {
 
       expect(eingefuegt.single.encode(), neu.encode());
       expect(
-        zwischenablage,
-        alt.encode(),
+        ohneNeu(zwischenablage),
+        ohneNeu(alt.encode()),
         reason: 'der alte Stand liegt danach in der Zwischenablage',
       );
     });

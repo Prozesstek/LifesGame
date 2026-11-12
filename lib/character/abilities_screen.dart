@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:progression/progression.dart';
 
+import '../mentor/scheinwerfer.dart';
+import '../neu/neu_provider.dart';
 import '../action/hero_power.dart';
 import '../action/pit_text.dart';
 import '../gear/widgets/rarity_badge.dart';
@@ -279,7 +281,17 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
                   unlocked: true,
                   imEinsatz: chosen.contains(ability.moveId),
                   ausgeblendet: _gezogen == ability.moveId,
+                  // **Neu, bis angetippt** (11.11.2026) — Angelegtes kennt
+                  // man.
+                  neu:
+                      !chosen.contains(ability.moveId) &&
+                      ref.watch(
+                        neuInnenProvider(faehigkeitMarke(ability.moveId)),
+                      ),
                   onTap: () {
+                    ref
+                        .read(neuGesehenProvider.notifier)
+                        .tippe(faehigkeitMarke(ability.moveId));
                     final platz = _waehlt;
                     if (platz != null) {
                       _lege(platz, ability.moveId);
@@ -652,7 +664,15 @@ class _Kachel extends StatelessWidget {
     required this.onTap,
     this.ausgeblendet = false,
     this.ohneRand = false,
+    this.neu = false,
   });
+
+  /// Der gelbe Punkt: Sie ist neu und noch nicht angetippt.
+  final bool neu;
+
+  /// Der Punkt, zum Finden in Tests.
+  static Key neuKey(String moveId) =>
+      ValueKey<String>('faehigkeit-neu-$moveId');
 
   /// Ohne eigenen Rand — wenn ihn schon der Doppelrand der Ultimate trägt.
   final bool ohneRand;
@@ -721,6 +741,15 @@ class _Kachel extends StatelessWidget {
                       clipBehavior: Clip.none,
                       children: <Widget>[
                         bild,
+                        if (neu)
+                          Positioned(
+                            right: -6,
+                            top: -6,
+                            child: ZielPunkt(
+                              key: neuKey(ability.moveId),
+                              groesse: 12,
+                            ),
+                          ),
                         if (!unlocked)
                           const Positioned(
                             right: -2,
