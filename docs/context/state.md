@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 08.11.2026 · Frederik
+**Zuletzt aktualisiert:** 12.11.2026 · AktivesBrett
 
 ---
 
@@ -118,7 +118,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1173, dazu die acht Packages (theory 219, habits 375, gear
+**Tests:** App 1176, dazu die acht Packages (theory 219, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
@@ -215,6 +215,28 @@ vom 02.10.
 (APK oder Web-Push) und die Identität im Wochenrückblick.
 
 ---
+
+## 12.11.2026: die Feedback-Blase weicht aus
+
+AktivesBrett: Die Blase oben rechts soll nichts verdecken, „wenn er etwas
+verdecken sollte dann ist er eben weiter links“. Sie lag in vielen
+Titelzeilen über einem Knopf (Sammlung, Gold, Talentpunkte).
+
+Jetzt fragt die Hülle alle 0,4 s, was unter der Blase läge
+(`BlasenPlatz` in `feedback_knopf.dart`): Text, ein Zeichen, ein Bild
+oder ein Knopf bis 160 Punkte zählt, ein Hintergrund nicht. Ist etwas
+darunter, rückt sie 40 Punkte nach links, höchstens bis zur Mitte, dann
+eine Reihe tiefer; ist nirgends Platz, bleibt sie in der Ecke.
+
+Gerendert in 390 × 844: Start, Gewohnheiten, Charakter, Eingang bleiben
+in der Ecke; Talentbaum, Laden und Sammlung rücken nach links,
+Fähigkeiten und Ausrüstung eine Reihe tiefer. App 1162 (vorher 1159).
+**Nicht am Handy**, keine neue APK.
+
+### Offen
+
+- Was keinen Tipp annimmt (`IgnorePointer`, etwa der Kasten des
+  Mentors), sieht sie nicht und kann es noch verdecken.
 
 ## 11.11.2026, zuletzt: Vollbild am Handy
 

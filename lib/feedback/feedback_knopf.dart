@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart' show HitTestTarget;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,12 @@ import 'feedback_dienst.dart';
 /// Liegt im `builder` von `MaterialApp` um den Navigator. Die Blase
 /// selbst steht **außerhalb** der aufgenommenen Fläche und ist deshalb
 /// nie auf dem Bild.
+///
+/// **Sie weicht aus** (12.11.2026): Oben rechts liegen in vielen
+/// Titelzeilen Knöpfe — Sammlung, Gold, Talentpunkte. Ein paar Mal je
+/// Sekunde fragt die Hülle, was unter der Blase läge ([BlasenPlatz]),
+/// und rückt sie nach links, dann eine Reihe tiefer, bis nichts darunter
+/// liegt. Was keinen Tipp annimmt (`IgnorePointer`), sieht sie nicht.
 class FeedbackHuelle extends ConsumerStatefulWidget {
   const FeedbackHuelle({
     required this.navigatorKey,
@@ -44,6 +52,9 @@ class FeedbackHuelle extends ConsumerStatefulWidget {
   /// klein genug für einen schnellen Upload, groß genug zum Lesen.
   static const double bildBreite = 540;
 
+  /// Wie oft nachgesehen wird, ob die Blase etwas verdeckt.
+  static const Duration nachsehen = Duration(milliseconds: 400);
+
   @override
   ConsumerState<FeedbackHuelle> createState() => _FeedbackHuelleState();
 }
@@ -52,6 +63,35 @@ class _FeedbackHuelleState extends ConsumerState<FeedbackHuelle> {
   final GlobalKey _flaeche = GlobalKey();
   late final FeedbackDienst _dienst = widget.dienst ?? DiscordFeedbackDienst();
   bool _offen = false;
+  Offset _platz = Offset.zero; // von rechts oben, in Punkten
+  Timer? _takt;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _rueckeAus());
+    _takt = Timer.periodic(FeedbackHuelle.nachsehen, (_) => _rueckeAus());
+  }
+
+  @override
+  void dispose() {
+    _takt?.cancel();
+    super.dispose();
+  }
+
+  /// Sucht den ersten Platz, an dem die Blase nichts verdeckt.
+  void _rueckeAus() {
+    if (!mounted || _offen) return;
+    final grenze = _flaeche.currentContext?.findRenderObject();
+    if (grenze is! RenderBox || !grenze.hasSize) return;
+    final oben = MediaQuery.paddingOf(context).top;
+    final neu = BlasenPlatz.waehle(
+      breite: grenze.size.width,
+      oben: oben,
+      belegt: (rect) => BlasenPlatz.liegtEtwasUnter(grenze, rect),
+    );
+    if (neu != _platz) setState(() => _platz = neu);
+  }
 
   Future<Uint8List?> _aufnehmen() async {
     final grenze = _flaeche.currentContext?.findRenderObject();
@@ -126,12 +166,89 @@ class _FeedbackHuelleState extends ConsumerState<FeedbackHuelle> {
         RepaintBoundary(key: _flaeche, child: widget.child),
         if (!_offen)
           Positioned(
-            top: oben + 1,
-            right: 1,
+            top: oben + BlasenPlatz.rand + _platz.dy,
+            right: BlasenPlatz.rand + _platz.dx,
             child: _Blase(onTap: _oeffnen),
           ),
       ],
     );
+  }
+}
+
+/// **Wohin die Blase rückt**, wenn oben rechts etwas liegt — reine
+/// Rechnung, damit sie sich ohne Bildschirm prüfen lässt.
+abstract final class BlasenPlatz {
+  /// Kantenlänge der Blase.
+  static const double seite = 32;
+
+  /// Abstand zum Rand des Bildschirms.
+  static const double rand = 1;
+
+  /// Schritt zum nächsten Platz, nach links und nach unten.
+  static const double schritt = 40;
+
+  /// Wie viele Plätze je Reihe, in wie vielen Reihen.
+  static const int jeReihe = 5;
+  static const int reihen = 2;
+
+  /// Was größer ist, gilt als Hintergrund, nicht als Knopf: ein Holzrahmen
+  /// über die ganze Breite, ein Bild hinter allem, eine Fläche, die jeden
+  /// Tipp nimmt.
+  static const double groesster = 160;
+
+  /// Der erste freie Platz, als Versatz von rechts oben. Ist keiner frei,
+  /// bleibt sie in der Ecke.
+  static Offset waehle({
+    required double breite,
+    required double oben,
+    required bool Function(Rect) belegt,
+  }) {
+    for (var r = 0; r < reihen; r++) {
+      for (var i = 0; i < jeReihe; i++) {
+        final versatz = Offset(i * schritt, r * schritt);
+        final rechts = breite - rand - versatz.dx;
+        final rect = Rect.fromLTWH(
+          rechts - seite,
+          oben + rand + versatz.dy,
+          seite,
+          seite,
+        );
+        if (rect.left < breite / 2) break;
+        if (!belegt(rect)) return versatz;
+      }
+    }
+    return Offset.zero;
+  }
+
+  /// Ob unter [rect] etwas liegt, das man sehen oder antippen will: Text,
+  /// ein Zeichen, ein Bild oder ein Knopf. Gefragt wird an neun Punkten.
+  static bool liegtEtwasUnter(RenderBox wurzel, Rect rect) {
+    for (final fx in const <double>[0.1, 0.5, 0.9]) {
+      for (final fy in const <double>[0.1, 0.5, 0.9]) {
+        final punkt = Offset(
+          rect.left + rect.width * fx,
+          rect.top + rect.height * fy,
+        );
+        final ergebnis = BoxHitTestResult();
+        wurzel.hitTest(ergebnis, position: punkt);
+        for (final eintrag in ergebnis.path) {
+          if (zaehlt(eintrag.target)) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /// Was die Blase nicht verdecken soll.
+  static bool zaehlt(HitTestTarget ziel) {
+    if (ziel is RenderParagraph) return true;
+    if (ziel is! RenderBox || !ziel.hasSize) return false;
+    final klein = ziel.size.width <= groesster && ziel.size.height <= groesster;
+    if (!klein) return false;
+    return ziel is RenderImage ||
+        ziel is RenderCustomPaint ||
+        ziel is RenderPointerListener ||
+        ziel is RenderDecoratedBox;
   }
 }
 
@@ -156,8 +273,8 @@ class _Blase extends StatelessWidget {
             child: Container(
               // **Golden und mit Schatten** (11.11.2026): dunkel auf dem
               // dunklen Holzrahmen hat sie am Handy niemand gesehen.
-              width: 32,
-              height: 32,
+              width: BlasenPlatz.seite,
+              height: BlasenPlatz.seite,
               decoration: BoxDecoration(
                 color: Palette.goldOnDark,
                 shape: BoxShape.circle,
