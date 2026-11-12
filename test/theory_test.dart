@@ -1317,7 +1317,10 @@ void main() {
         );
         // An der Stelle der gelesenen Seite, nicht darüber.
         expect(find.byType(LessonScreen), findsOneWidget);
-        expect(find.text(schleife.summary), findsOneWidget);
+        expect(
+          find.text(schleife.lesson.sections.first.heading),
+          findsOneWidget,
+        );
       });
 
       testWidgets('ist sie schon offen, kostet der Tipp nichts', (
@@ -1345,7 +1348,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(container.read(spentTheoryPointsProvider), vorher);
-        expect(find.text(schleife.summary), findsOneWidget);
+        expect(
+          find.text(schleife.lesson.sections.first.heading),
+          findsOneWidget,
+        );
       });
 
       testWidgets('ohne Punkt und ohne offene Seite bleibt es bei „Weiter“', (

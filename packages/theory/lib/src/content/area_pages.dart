@@ -21,19 +21,27 @@ const Lesson kraftPage = Lesson(
   sections: <LessonSection>[
     LessonSection(
       heading: 'Ein Muskel passt sich an',
+      // Die Probe für das Lernbuch (12.11.2026): Definition, Beispiel
+      // und Abbildung — so legt man sie an (`Lesetext`).
       body:
           'Muskeln wachsen nicht, weil man trainiert, sondern weil sie etwas '
-          'gefordert hat, das sie **noch nicht gewohnt** waren. Bleibt die '
+          'gefordert hat, das sie *noch nicht gewohnt* waren. Bleibt die '
           'Last immer gleich, gibt es keinen Grund zur Anpassung. Deshalb '
           'steigert gutes Training die Anforderung langsam — mehr Gewicht, '
-          'mehr Wiederholungen oder mehr Sätze. Das heißt **progressive '
-          'Überlastung**.',
+          'mehr Wiederholungen oder mehr Sätze.\n\n'
+          '[[definition: Progressive Überlastung]] Die Anforderung an den '
+          'Muskel wird Schritt für Schritt gesteigert, damit er immer wieder '
+          'einen Grund hat, sich anzupassen.\n\n'
+          '[[beispiel]] Wer diese Woche dreimal zehn Liegestütze schafft, '
+          'versucht nächste Woche dreimal elf.\n\n'
+          '[[bild: assets/Faehigkeiten/Bestform.png | Mehr Last als gewohnt '
+          '– der Muskel antwortet.]]',
     ),
     LessonSection(
       heading: 'Gewachsen wird in der Pause',
       body:
           'Das Training selbst ermüdet den Muskel und macht ihn kurzfristig '
-          'schwächer. Stärker wird er danach, **wenn er sich erholt** und '
+          'schwächer. Stärker wird er danach, *wenn er sich erholt* und '
           'dabei etwas über den alten Stand hinaus aufbaut. Wer die Pause '
           'weglässt, trainiert nur die Ermüdung. Schlaf und Eiweiß gehören '
           'deshalb genauso zum Training wie die Hantel.\n\n'

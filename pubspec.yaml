@@ -138,3 +138,21 @@ flutter:
     # gezeichnet von `tool/dorf_kacheln.py`. Welches Bild zu welchem Ort
     # gehört, entscheidet `DorfBilder` in `lib/village/village_game.dart`.
     - assets/Dorf/
+
+    # Die deutschen Trennmuster fuer den Blocksatz im Lernbuch
+    # (`lib/theory/silbentrennung.dart`, Herkunft daneben).
+    - assets/Silbentrennung/hyph-de-1996.pat.txt
+
+  # Die Schriften des Lernbuchs (lib/theory/widgets/buch_stil.dart):
+  # Lora für den Fließtext, Cormorant Garamond für Überschriften und
+  # Initiale. Beide variabel, das Gewicht setzt `FontVariation('wght')`.
+  # Lizenz: SIL Open Font License, liegt daneben in assets/fonts/.
+  fonts:
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora.ttf
+        - asset: assets/fonts/Lora-Italic.ttf
+          style: italic
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond.ttf

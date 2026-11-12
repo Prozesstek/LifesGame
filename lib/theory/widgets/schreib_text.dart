@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:theory/theory.dart';
 
-import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
+import '../silbentrennung.dart';
+import 'blocksatz.dart';
+import 'buch_stil.dart';
 import 'seiten_farbe.dart';
 
 /// **Ein Abschnitt schreibt sich**: die Überschrift fällt herein, dann
@@ -16,15 +19,18 @@ import 'seiten_farbe.dart';
 /// springt, wenn ein Wort dazukommt, und der Vorleser bekommt den ganzen
 /// Satz.
 ///
-/// Gesetzt wird in drei Größen: der **erste Satz** groß, der Rest
-/// gewöhnlich, ein **Merksatz** am größten auf eigener Fläche. Betont ist,
-/// was im Inhalt in `**` steht (`Lesetext`).
+/// **Gesetzt wie in einem Lernbuch** (12.11.2026, [BuchStil]): Serifen,
+/// Sepia, Blocksatz mit Trennung, der erste Buchstabe als Initiale über
+/// drei Zeilen. `*kursiv*` betont, `**fett**` ist ein Fachbegriff, Kästen,
+/// Abbildungen und Zier kommen aus dem Inhalt (`Lesetext`). Am Ende steht
+/// ein Zierelement.
 class SchreibText extends StatefulWidget {
   const SchreibText({
     required this.heading,
     required this.body,
     this.aktiv = true,
     this.sofort = false,
+    this.ersteAbbildung = 1,
     super.key,
   });
 
@@ -32,11 +38,15 @@ class SchreibText extends StatefulWidget {
   final String body;
 
   /// Ob der Abschnitt zu sehen ist. Erst dann beginnt er zu schreiben —
-  /// der `PageView` baut die Nachbarseite schon beim Wischen.
+  /// das Buch baut die Nachbarseite schon beim Blättern.
   final bool aktiv;
 
   /// Ganz zeigen, ohne zu schreiben: schon gelesen.
   final bool sofort;
+
+  /// Die Nummer der ersten Abbildung dieses Abschnitts („Abb. 2“) — die
+  /// Abbildungen zählen über die ganze Lektion.
+  final int ersteAbbildung;
 
   /// So lange braucht ein Wort.
   static const Duration jeWort = Duration(milliseconds: 40);
@@ -46,6 +56,11 @@ class SchreibText extends StatefulWidget {
 
   /// Wie lange ein Wort vom Unsichtbaren ins Volle braucht, in Wörtern.
   static const double einblenden = 3;
+
+  /// So groß steht eine Abbildung auf der Seite.
+  static const double abbildungSeite = 112;
+
+  static const Key zierKey = ValueKey<String>('buch-zier-ende');
 
   @override
   State<SchreibText> createState() => _SchreibTextState();
@@ -67,6 +82,7 @@ class _SchreibTextState extends State<SchreibText>
     } else if (widget.aktiv) {
       _zeit.forward();
     }
+    Silbentrennung.deutsch.addListener(_neuGetrennt);
   }
 
   @override
@@ -92,8 +108,13 @@ class _SchreibTextState extends State<SchreibText>
 
   @override
   void dispose() {
+    Silbentrennung.deutsch.removeListener(_neuGetrennt);
     _zeit.dispose();
     super.dispose();
+  }
+
+  void _neuGetrennt() {
+    if (mounted) setState(() {});
   }
 
   void _lesen() {
@@ -140,64 +161,111 @@ class _SchreibTextState extends State<SchreibText>
   Widget _bild() {
     final stand = _stand;
     final oben = Curves.easeOutCubic.transform(_ueberschriftStand);
+    final akzent = SeitenFarbe.of(context);
+    final trennung = Silbentrennung.deutsch.value;
     var wort = 0;
-    var ersterSatzOffen = true;
+    var abbildung = widget.ersteAbbildung;
+    var initialeOffen = true;
+
     final kinder = <Widget>[
       Opacity(
         opacity: oben,
         child: Transform.translate(
           offset: Offset(0, 14 * (1 - oben)),
-          child: Text(
-            widget.heading,
-            style: const TextStyle(
-              fontSize: 22,
-              height: 1.25,
-              fontWeight: FontWeight.w800,
-              color: Palette.text,
-            ),
-          ),
+          child: Text(widget.heading, style: BuchStil.titel),
         ),
       ),
-      const SizedBox(height: 14),
+      const SizedBox(height: 16),
     ];
 
-    for (final absatz in _absaetze) {
-      final erstes = wort;
-      final spans = <InlineSpan>[];
+    /// Die Wörter eines Absatzes als Stücke, jedes mit seiner Deckkraft.
+    /// Getrennt wird nur im Blocksatz — eine zentrierte Unterschrift
+    /// bräche sonst ohne Strich um.
+    List<SatzStueck> stuecke(
+      Absatz absatz, {
+      TextStyle? basis,
+      bool trennen = true,
+    }) {
+      final liste = <SatzStueck>[];
       for (final lauf in absatz.laeufe) {
         for (final stueck in _worteIn(lauf.text)) {
           final leer = stueck.trim().isEmpty;
-          final sicht = leer
-              ? 1.0
-              : ((stand - wort) / SchreibText.einblenden + 1 / 3).clamp(
-                  0.0,
-                  1.0,
-                );
-          final gross = absatz is Fliesstext && ersterSatzOffen;
-          spans.add(
-            TextSpan(
-              text: stueck,
-              style: _stil(
-                betont: lauf.betont,
-                gross: gross,
-                merksatz: absatz is Merksatz,
-                sicht: sicht,
+          final sicht = leer ? 1.0 : _sicht(stand, wort);
+          final text = leer || trennung == null || !trennen
+              ? stueck
+              : trennung.trenne(stueck);
+          liste.add(SatzStueck(text, _stil(lauf, sicht, basis: basis)));
+          if (!leer) wort++;
+        }
+      }
+      return liste;
+    }
+
+    for (final absatz in _absaetze) {
+      final erstes = wort;
+      switch (absatz) {
+        case Fliesstext():
+          final teile = stuecke(absatz);
+          Text? initiale;
+          if (initialeOffen) {
+            initialeOffen = false;
+            initiale = _initiale(teile, akzent);
+          }
+          kinder.add(
+            Blocksatz(
+              stuecke: teile,
+              initiale: initiale,
+              semantik: absatz.klartext,
+            ),
+          );
+        case Kasten():
+          kinder.add(
+            _Merkkasten(
+              sichtbar: stand >= erstes,
+              label: absatz.label,
+              titel: absatz.titel,
+              akzent: akzent,
+              child: Blocksatz(
+                stuecke: stuecke(absatz),
+                semantik: absatz.klartext,
               ),
             ),
           );
-          if (!leer) wort++;
-          if (gross && _endetSatz(stueck)) ersterSatzOffen = false;
-        }
+        case Abbildung():
+          final nummer = abbildung++;
+          final unterschrift = stuecke(
+            absatz,
+            basis: BuchStil.unterschrift,
+            trennen: false,
+          );
+          kinder.add(
+            _Abbildung(
+              pfad: absatz.pfad,
+              sichtbar: stand >= erstes,
+              unterschrift: TextSpan(
+                children: <InlineSpan>[
+                  TextSpan(
+                    text: 'Abb. $nummer: ',
+                    style: BuchStil.unterschrift.copyWith(
+                      color: _mitSicht(
+                        BuchStil.tinteBlass,
+                        _sicht(stand, erstes),
+                      ),
+                    ),
+                  ),
+                  for (final s in unterschrift)
+                    TextSpan(text: s.text, style: s.stil),
+                ],
+              ),
+            ),
+          );
+        case Zier():
+          kinder.add(_Zier(sichtbar: stand >= erstes));
       }
-      kinder.add(switch (absatz) {
-        Merksatz() => _MerksatzFlaeche(
-          sichtbar: stand >= erstes,
-          child: Text.rich(TextSpan(children: spans)),
-        ),
-        Fliesstext() => Text.rich(TextSpan(children: spans)),
-      });
-      kinder.add(const SizedBox(height: 14));
+      kinder.add(const SizedBox(height: BuchStil.absatz));
     }
+    // Am Ende des Abschnitts ein Zierelement, wenn alles geschrieben ist.
+    kinder.add(_Zier(key: SchreibText.zierKey, sichtbar: stand >= _woerter));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -205,20 +273,40 @@ class _SchreibTextState extends State<SchreibText>
     );
   }
 
-  TextStyle _stil({
-    required bool betont,
-    required bool gross,
-    required bool merksatz,
-    required double sicht,
-  }) {
-    final farbe = betont ? SeitenFarbe.of(context) : Palette.text;
-    return TextStyle(
-      fontSize: merksatz ? 20 : (gross ? 18 : 16),
-      height: merksatz ? 1.35 : 1.55,
-      fontWeight: merksatz || betont
-          ? FontWeight.w700
-          : (gross ? FontWeight.w600 : FontWeight.w400),
-      color: farbe.withValues(alpha: farbe.a * sicht),
+  /// Nimmt den ersten Buchstaben aus dem ersten Wort und gibt ihn als
+  /// Initiale zurück — nur, wenn der Absatz mit einem Buchstaben beginnt.
+  Text? _initiale(List<SatzStueck> teile, Color akzent) {
+    if (teile.isEmpty) return null;
+    final erstes = teile.first;
+    final ohneStrich = erstes.text.replaceAll(Silbentrennung.weich, '');
+    if (ohneStrich.isEmpty ||
+        !RegExp(r'\p{L}', unicode: true).hasMatch(ohneStrich[0])) {
+      return null;
+    }
+    // Ein weicher Strich direkt hinter der Initiale fällt mit weg.
+    var rest = erstes.text.substring(1);
+    if (rest.startsWith(Silbentrennung.weich)) rest = rest.substring(1);
+    teile[0] = SatzStueck(rest, erstes.stil);
+    final sicht = (erstes.stil.color?.a ?? 1) / BuchStil.tinte.a;
+    return Text(
+      ohneStrich[0],
+      style: BuchStil.initiale.copyWith(color: _mitSicht(akzent, sicht)),
+    );
+  }
+
+  static double _sicht(double stand, int wort) =>
+      ((stand - wort) / SchreibText.einblenden + 1 / 3).clamp(0.0, 1.0);
+
+  static Color _mitSicht(Color farbe, double sicht) =>
+      farbe.withValues(alpha: farbe.a * sicht);
+
+  TextStyle _stil(TextLauf lauf, double sicht, {TextStyle? basis}) {
+    final grund = basis ?? BuchStil.fliess;
+    final farbe = grund.color ?? BuchStil.tinte;
+    return grund.copyWith(
+      color: _mitSicht(farbe, sicht),
+      fontStyle: lauf.kursiv ? FontStyle.italic : grund.fontStyle,
+      fontVariations: lauf.betont ? BuchStil.gewicht(700) : null,
     );
   }
 }
@@ -228,25 +316,9 @@ class _SchreibTextState extends State<SchreibText>
 List<String> _worteIn(String text) =>
     RegExp(r'\s+|[^\s]+').allMatches(text).map((m) => m.group(0)!).toList();
 
-/// Endet hier ein Satz? Ein Punkt hinter einer Abkürzung („z.“, „ca.“)
-/// zählt nicht, sonst wäre der erste Satz oft nur zwei Wörter lang. Ein
-/// Punkt allein schon — er folgt einem betonten Wort („**Spannung**.“).
-bool _endetSatz(String wort) {
-  final w = wort.trim();
-  if (w.endsWith('!') || w.endsWith('?')) return true;
-  if (!w.endsWith('.')) return false;
-  return !_abkuerzungen.contains(w.substring(0, w.length - 1));
-}
-
-const Set<String> _abkuerzungen = <String>{
-  'z', 'B', 'ca', 'bzw', 'd', 'h', 'u', 'a', 'ggf', 'evtl', 'inkl', //
-  'vgl', 'Nr', 'S', 'etc',
-};
-
-/// Die Fläche eines Merksatzes: springt auf, sobald sein erstes Wort
-/// kommt, mit einem Balken in der Farbe der Seite ([SeitenFarbe]).
-class _MerksatzFlaeche extends StatelessWidget {
-  const _MerksatzFlaeche({required this.sichtbar, required this.child});
+/// Springt auf, sobald sein erstes Wort kommt.
+class _Aufspringen extends StatelessWidget {
+  const _Aufspringen({required this.sichtbar, required this.child});
 
   final bool sichtbar;
   final Widget child;
@@ -254,23 +326,127 @@ class _MerksatzFlaeche extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedScale(
-      scale: sichtbar ? 1 : 0.92,
+      scale: sichtbar ? 1 : 0.94,
       duration: const Duration(milliseconds: 360),
       curve: Curves.easeOutBack,
       child: AnimatedOpacity(
         opacity: sichtbar ? 1 : 0,
-        duration: const Duration(milliseconds: 200),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Palette.surfaceRaised,
-            border: Border(
-              left: BorderSide(color: SeitenFarbe.of(context), width: 5),
+        duration: const Duration(milliseconds: 220),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// **Der Merkkasten**: etwas dunkleres Papier, ein dünner Rahmen, links
+/// ein Balken in der Farbe der Seite, oben das Label in Kapitälchen —
+/// „MERKE“, „DEFINITION“, „BEISPIEL“.
+class _Merkkasten extends StatelessWidget {
+  const _Merkkasten({
+    required this.sichtbar,
+    required this.label,
+    required this.titel,
+    required this.akzent,
+    required this.child,
+  });
+
+  final bool sichtbar;
+  final String label;
+  final String? titel;
+  final Color akzent;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = titel;
+    return _Aufspringen(
+      sichtbar: sichtbar,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: BuchStil.kastenGrund,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: BuchStil.kastenRand, width: 0.8),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(5),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: akzent, width: 4)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    label.toUpperCase(),
+                    style: BuchStil.label.copyWith(color: akzent),
+                  ),
+                  if (t != null) ...<Widget>[
+                    const SizedBox(height: 2),
+                    Text(t, style: BuchStil.titel.copyWith(fontSize: 21)),
+                  ],
+                  const SizedBox(height: 6),
+                  child,
+                ],
+              ),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
-            child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// **Eine Abbildung**: das Bild im Pixelstil, hart skaliert, darunter
+/// „Abb. 1: …“ kursiv.
+class _Abbildung extends StatelessWidget {
+  const _Abbildung({
+    required this.pfad,
+    required this.sichtbar,
+    required this.unterschrift,
+  });
+
+  final String pfad;
+  final bool sichtbar;
+  final TextSpan unterschrift;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        _Aufspringen(
+          sichtbar: sichtbar,
+          child: PixelArt(
+            assetPath: pfad,
+            side: SchreibText.abbildungSeite,
+            fallback: const SizedBox.square(
+              dimension: SchreibText.abbildungSeite,
+            ),
           ),
+        ),
+        const SizedBox(height: 6),
+        Text.rich(unterschrift, textAlign: TextAlign.center),
+      ],
+    );
+  }
+}
+
+/// **Ein Zierelement**: ein Fleuron in der Mitte.
+class _Zier extends StatelessWidget {
+  const _Zier({required this.sichtbar, super.key});
+
+  final bool sichtbar;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: AnimatedOpacity(
+        opacity: sichtbar ? 1 : 0,
+        duration: const Duration(milliseconds: 400),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Center(child: Text(BuchStil.zier, style: BuchStil.zierStil)),
         ),
       ),
     );

@@ -50,4 +50,61 @@ void main() {
     expect(Lesetext.fehler('Mitten ==im== Satz.'), hasLength(1));
     expect(Lesetext.fehler('====\n\nText.'), isNotEmpty);
   });
+
+  test('* setzt kursiv, ** bleibt fett', () {
+    final laeufe = Lesetext.aus(
+      'Das ist *wichtig*, die **Überlastung** auch.',
+    ).single.laeufe;
+
+    expect(laeufe, const <TextLauf>[
+      TextLauf('Das ist '),
+      TextLauf('wichtig', kursiv: true),
+      TextLauf(', die '),
+      TextLauf('Überlastung', betont: true),
+      TextLauf(' auch.'),
+    ]);
+  });
+
+  test('Kästen: Merke, Definition mit Begriff, Beispiel', () {
+    final absaetze = Lesetext.aus(
+      '[[merke]] Erst die Last.\n\n'
+      '[[definition: Progressive Überlastung]] Die Last steigt.\n\n'
+      '[[beispiel]] Jede Woche ein Kilo mehr.',
+    );
+
+    expect(absaetze.map((a) => a.runtimeType), <Type>[
+      Merksatz,
+      Definition,
+      Beispiel,
+    ]);
+    final definition = absaetze[1] as Definition;
+    expect(definition.label, 'Definition');
+    expect(definition.titel, 'Progressive Überlastung');
+    expect(definition.klartext, 'Progressive Überlastung: Die Last steigt.');
+    expect((absaetze[2] as Kasten).label, 'Beispiel');
+  });
+
+  test('Bild und Zier stehen allein, die Unterschrift bleibt im Klartext', () {
+    const text = 'Vorher.\n\n'
+        '[[bild: assets/Faehigkeiten/Bestform.png | Der Muskel antwortet]]'
+        '\n\n[[zier]]';
+    final absaetze = Lesetext.aus(text);
+
+    final bild = absaetze[1] as Abbildung;
+    expect(bild.pfad, 'assets/Faehigkeiten/Bestform.png');
+    expect(bild.klartext, 'Der Muskel antwortet');
+    expect(absaetze[2], isA<Zier>());
+    expect(Lesetext.klartext(text), 'Vorher.\n\nDer Muskel antwortet');
+    expect(Lesetext.fehler(text), isEmpty);
+  });
+
+  test('falsch gesetzte neue Zeichen werden gemeldet', () {
+    expect(Lesetext.fehler('Ein *offenes Wort.'), hasLength(1));
+    expect(Lesetext.fehler('[[kasten]] Gibt es nicht.'), isNotEmpty);
+    expect(Lesetext.fehler('[[definition]] Ohne Begriff.'), isNotEmpty);
+    expect(Lesetext.fehler('[[merke]]'), isNotEmpty);
+    expect(Lesetext.fehler('[[bild: assets/a.png]]'), isNotEmpty);
+    expect(Lesetext.fehler('[[zier]] mit Text'), isNotEmpty);
+    expect(Lesetext.fehler('Mitten [[zier]] im Satz.'), isNotEmpty);
+  });
 }

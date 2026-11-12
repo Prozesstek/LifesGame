@@ -3,13 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../ui/palette.dart';
+import 'buch_stil.dart';
 
 /// **Ein Blatt Buchpapier** — worauf eine Seite im Wissensbaum steht.
 ///
 /// Altes, cremefarbenes Papier ([Palette.papier]), heller als das
 /// Pergament der App, mit Fasern und ein paar Flecken. Links wölbt es
-/// sich in den Buchrücken (die Falz), zu den Rändern hin ist es
-/// abgegriffen. Den Einband und den Stapel darunter malt [Umblaettern].
+/// sich in den Buchrücken: **ein Bundschatten**, an der Bindung dunkel,
+/// nach [BuchStil.bundAnteil] der Breite ausgelaufen (12.11.2026). Zu den
+/// Rändern hin ist es vergilbt. Den Einband und den Stapel darunter malt
+/// [Umblaettern].
 ///
 /// Die Struktur ist **gesät**: Jedes Blatt hat dieselben Fasern, und
 /// sie stehen still, wenn es umgeschlagen wird.
@@ -18,9 +21,8 @@ class BuchPapier extends StatelessWidget {
 
   final Widget? child;
 
-  /// So breit wölbt sich das Blatt in den Rücken. Text rückt mindestens
-  /// so weit ein.
-  static const double falz = 22;
+  /// So weit rückt Text mindestens von der Bindung ab.
+  static const double falz = BuchStil.randInnen;
 
   @override
   Widget build(BuildContext context) {
@@ -100,28 +102,64 @@ class _PapierMaler extends CustomPainter {
           radius: 1.05,
           colors: <Color>[
             Palette.papierFaser.withValues(alpha: 0),
-            Palette.papierFaser.withValues(alpha: 0.45),
+            Palette.papierFaser.withValues(alpha: 0.35),
           ],
           stops: const <double>[0.6, 1],
         ).createShader(flaeche),
     );
 
-    // Die Falz: Das Blatt wölbt sich in den Rücken — ganz innen
-    // dunkel, dann ein heller Rücken der Wölbung, dann flach.
-    final falz = Rect.fromLTWH(0, 0, BuchPapier.falz * 1.6, size.height);
+    // Vergilbt: ein schmaler innerer Schatten an jeder freien Kante.
+    const rand = 14.0;
+    final vergilbt = Palette.papierFaser.withValues(alpha: 0.32);
+    final klar = Palette.papierFaser.withValues(alpha: 0);
+    for (final (streifen, von, bis) in <(Rect, Alignment, Alignment)>[
+      (
+        Rect.fromLTWH(0, 0, size.width, rand),
+        Alignment.topCenter,
+        Alignment.bottomCenter,
+      ),
+      (
+        Rect.fromLTWH(0, size.height - rand, size.width, rand),
+        Alignment.bottomCenter,
+        Alignment.topCenter,
+      ),
+      (
+        Rect.fromLTWH(size.width - rand, 0, rand, size.height),
+        Alignment.centerRight,
+        Alignment.centerLeft,
+      ),
+    ]) {
+      canvas.drawRect(
+        streifen,
+        Paint()
+          ..shader = LinearGradient(
+            begin: von,
+            end: bis,
+            colors: <Color>[vergilbt, klar],
+          ).createShader(streifen),
+      );
+    }
+
+    // Der Bundschatten: An der Bindung wölbt sich das Blatt weg — ganz
+    // innen dunkel, nach gut einem Achtel der Breite flach.
+    final bund = Rect.fromLTWH(
+      0,
+      0,
+      size.width * BuchStil.bundAnteil,
+      size.height,
+    );
     canvas.drawRect(
-      falz,
+      bund,
       Paint()
         ..shader = LinearGradient(
           colors: <Color>[
-            Palette.einbandDunkel.withValues(alpha: 0.55),
-            Palette.einbandDunkel.withValues(alpha: 0.18),
-            Colors.white.withValues(alpha: 0.18),
-            Palette.einbandDunkel.withValues(alpha: 0.06),
-            Palette.einbandDunkel.withValues(alpha: 0),
+            BuchStil.bund.withValues(alpha: 0.42),
+            BuchStil.bund.withValues(alpha: 0.16),
+            BuchStil.bund.withValues(alpha: 0.05),
+            BuchStil.bund.withValues(alpha: 0),
           ],
-          stops: const <double>[0, 0.18, 0.38, 0.6, 1],
-        ).createShader(falz),
+          stops: const <double>[0, 0.22, 0.55, 1],
+        ).createShader(bund),
     );
 
     // Die Schnittkante oben, rechts und unten.
@@ -669,28 +707,43 @@ class _OhrMaler extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    // Die Ecke, die fehlt: dort sieht man den Einband.
+    // Die Ecke, die fehlt: dort sieht man die Seite darunter (12.11.:
+    // Papier statt Einband).
     final ecke = Path()
       ..moveTo(w, 0)
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
-    canvas.drawPath(ecke, Paint()..color = Palette.einbandDunkel);
-    // Der umgeknickte Teil: die Rückseite des Papiers, etwas dunkler,
-    // mit Schatten darunter.
+    canvas.drawPath(ecke, Paint()..color = BuchStil.papierDarunter);
+    // Der Knick wirft einen weichen Schatten auf die Seite darunter.
+    final schatten = Path()
+      ..moveTo(w, 0)
+      ..lineTo(0, h)
+      ..lineTo(w * 0.32, h)
+      ..lineTo(w, h * 0.32)
+      ..close();
+    canvas.save();
+    canvas.clipPath(ecke);
+    canvas.drawPath(
+      schatten,
+      Paint()
+        ..color = BuchStil.bund.withValues(alpha: 0.22)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+    canvas.restore();
+    // Der umgeknickte Teil: die Rückseite des Papiers, etwas dunkler.
     final knick = Path()
       ..moveTo(w, 0)
       ..lineTo(0, h)
       ..lineTo(0, 0)
       ..close();
-    canvas.drawShadow(knick, Colors.black, 3, false);
     canvas.drawPath(
       knick,
       Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[Palette.papier, Palette.papierFaser],
+          colors: <Color>[Palette.papier, BuchStil.papierRueckseite],
         ).createShader(Offset.zero & size),
     );
     canvas.drawPath(
@@ -698,7 +751,7 @@ class _OhrMaler extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.8
-        ..color = Palette.papierFaser,
+        ..color = Palette.papierFaser.withValues(alpha: 0.7),
     );
   }
 

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:theory/theory.dart';
 
 import '../../audio/sound_effects.dart';
-import '../../ui/palette.dart';
+import 'buch_stil.dart';
 import 'schreib_text.dart';
 import 'umblaettern.dart';
 
@@ -17,8 +17,11 @@ import 'umblaettern.dart';
 /// Seite öffnete, sah zuerst, wie lang sie ist. **Seit dem 23.10. ein
 /// Buch** ([Umblaettern]), **seit dem 03.11. ein ganzes**: Es liegt
 /// geschlossen da und schlägt seinen Deckel auf, geblättert wird mit dem
-/// Finger oder am Eselsohr, unter dem Buch steht „1 / 3“, und am Rand
-/// sieht man, wie viel gelesen ist und wie viel noch kommt. Einen Knopf
+/// Finger oder am Eselsohr, und am Rand
+/// sieht man, wie viel gelesen ist und wie viel noch kommt.
+/// **Seit dem 12.11. eine Seite aus einem Lernbuch** ([BuchStil]):
+/// Kolumnentitel oben, Seitenzahl „— 1 —“ unten auf dem Blatt; die
+/// Zeile „1 / 3“ unter dem Buch ist weg. Einen Knopf
 /// „Weiter“ gibt es nicht mehr. Über die letzte Seite hinaus klappt das
 /// Buch zu, dann kommt [onStart]. Der Text schreibt sich weiter Wort für
 /// Wort, sobald das Blatt liegt und das Buch offen ist.
@@ -48,7 +51,6 @@ class LeseHaeppchen extends ConsumerStatefulWidget {
 class LeseHaeppchenState extends ConsumerState<LeseHaeppchen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<UmblaetternState> _buch = GlobalKey<UmblaetternState>();
-  int _hier = 0;
 
   /// Der weiteste Abschnitt, der schon zu sehen war. Was davor liegt, ist
   /// gelesen und schreibt sich beim Zurückblättern nicht noch einmal.
@@ -142,14 +144,20 @@ class LeseHaeppchenState extends ConsumerState<LeseHaeppchen>
                 onRascheln: _rascheln,
                 onSchluss: () => schliessen(widget.onStart),
                 onGeblaettert: (i) => setState(() {
-                  _hier = i;
                   if (i > _weitester) _weitester = i;
                 }),
                 seite: (context, i, aktiv) => _Abschnitt(
-                  zusammenfassung: i == 0 ? _lesson.summary : null,
+                  kolumnentitel: _kolumnentitel(i),
+                  zusammenfassung: _lesson.sections.isEmpty
+                      ? _lesson.summary
+                      : null,
                   abschnitt: i < _lesson.sections.length
                       ? _lesson.sections[i]
                       : null,
+                  ersteAbbildung: _ersteAbbildung(i),
+                  seite: i,
+                  anzahl: _anzahl,
+                  oben: aktiv,
                   aktiv: aktiv && _offen,
                   gelesen: i < _weitester,
                 ),
@@ -157,12 +165,25 @@ class LeseHaeppchenState extends ConsumerState<LeseHaeppchen>
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 2, 20, 18),
-          child: _Seitenzahl(hier: _hier, anzahl: _anzahl),
-        ),
+        const SizedBox(height: 14),
       ],
     );
+  }
+
+  /// „KAPITEL 2 · KRAFT & MUSKULATUR“ — ein Abschnitt ist ein Kapitel,
+  /// das Thema ist die Lektion.
+  String _kolumnentitel(int i) =>
+      'Kapitel ${i + 1} · ${_lesson.title}'.toUpperCase();
+
+  /// Die Abbildungen zählen über die ganze Lektion.
+  int _ersteAbbildung(int i) {
+    var nummer = 1;
+    for (var k = 0; k < i && k < _lesson.sections.length; k++) {
+      nummer += Lesetext.aus(
+        _lesson.sections[k].body,
+      ).whereType<Abbildung>().length;
+    }
+    return nummer;
   }
 }
 
@@ -188,35 +209,74 @@ class _Deckel extends StatelessWidget {
   }
 }
 
-/// **Wo man ist, unter dem Buch**: „1 / 3“, daneben ein Zeichen, dass
-/// sich wischen lässt.
-class _Seitenzahl extends StatelessWidget {
-  const _Seitenzahl({required this.hier, required this.anzahl});
+/// **Eine Seite im Buch**: oben der Kolumnentitel mit feiner Linie,
+/// darunter der Abschnitt, unten die Seitenzahl „— 1 —“. Die Ränder
+/// stehen in [BuchStil]: innen an der Bindung schmaler als außen.
+class _Abschnitt extends StatelessWidget {
+  const _Abschnitt({
+    required this.kolumnentitel,
+    required this.zusammenfassung,
+    required this.abschnitt,
+    required this.ersteAbbildung,
+    required this.seite,
+    required this.anzahl,
+    required this.oben,
+    required this.aktiv,
+    required this.gelesen,
+  });
 
-  final int hier;
+  final String kolumnentitel;
+  final String? zusammenfassung;
+  final LessonSection? abschnitt;
+  final int ersteAbbildung;
+  final int seite;
   final int anzahl;
+
+  /// Liegt oben — nur dann trägt die Seitenzahl ihren Schlüssel.
+  final bool oben;
+  final bool aktiv;
+  final bool gelesen;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Seite ${hier + 1} von $anzahl, zum Blättern wischen',
-      excludeSemantics: true,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    final rest = zusammenfassung;
+    final teil = abschnitt;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        BuchStil.randInnen,
+        BuchStil.randOben,
+        BuchStil.randAussen,
+        BuchStil.randUnten,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          const Icon(
-            Icons.swipe_left_rounded,
-            size: 20,
-            color: Palette.textOnDarkDim,
+          _Kolumnentitel(kolumnentitel),
+          const SizedBox(height: 14),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 8),
+              children: <Widget>[
+                if (rest != null) Text(rest, style: BuchStil.fliess),
+                if (teil != null)
+                  SchreibText(
+                    heading: teil.heading,
+                    body: teil.body,
+                    ersteAbbildung: ersteAbbildung,
+                    aktiv: aktiv,
+                    sofort: gelesen,
+                  ),
+              ],
+            ),
           ),
-          const SizedBox(width: 10),
-          Text(
-            '${hier + 1} / $anzahl',
-            key: LeseHaeppchen.seitenKey,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Palette.textOnDark,
+          Semantics(
+            label: 'Seite ${seite + 1} von $anzahl, zum Blättern wischen',
+            excludeSemantics: true,
+            child: Text(
+              '— ${seite + 1} —',
+              key: oben ? LeseHaeppchen.seitenKey : null,
+              textAlign: TextAlign.center,
+              style: BuchStil.seitenzahl,
             ),
           ),
         ],
@@ -225,45 +285,27 @@ class _Seitenzahl extends StatelessWidget {
   }
 }
 
-class _Abschnitt extends StatelessWidget {
-  const _Abschnitt({
-    required this.zusammenfassung,
-    required this.abschnitt,
-    required this.aktiv,
-    required this.gelesen,
-  });
+/// **Der Kolumnentitel**: klein, gesperrt, in Versalien, gedämpft, mit
+/// einer feinen Linie darunter.
+class _Kolumnentitel extends StatelessWidget {
+  const _Kolumnentitel(this.text);
 
-  final String? zusammenfassung;
-  final LessonSection? abschnitt;
-  final bool aktiv;
-  final bool gelesen;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final oben = zusammenfassung;
-    final teil = abschnitt;
-    return ListView(
-      // Links weicht der Text der Falz aus, rechts dem Stapel.
-      padding: const EdgeInsets.fromLTRB(BuchPapier.falz + 6, 18, 18, 20),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (oben != null) ...<Widget>[
-          Text(
-            oben,
-            style: const TextStyle(
-              fontSize: 15,
-              height: 1.4,
-              color: Palette.textDim,
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-        if (teil != null)
-          SchreibText(
-            heading: teil.heading,
-            body: teil.body,
-            aktiv: aktiv,
-            sofort: gelesen,
-          ),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: BuchStil.kolumnentitel,
+        ),
+        const SizedBox(height: 6),
+        const Divider(height: 1, thickness: 0.6, color: BuchStil.tinteBlass),
       ],
     );
   }
