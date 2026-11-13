@@ -81,6 +81,11 @@ class GearSheet extends ConsumerWidget {
     final kampf = itemAbilityText(item);
     final pfad = GearIcons.forItemId(item.id);
     final angelegt = dieses != null && loadout.isEquipped(dieses.uid);
+    // **Gegen das Getragene**, je Wert einzeln (AktivesBrett, 13.11.2026)
+    // — nur bei einem Exemplar, das nicht selbst angelegt ist.
+    final vergleich = dieses != null && !angelegt
+        ? loadout.equippedCopyIn(item.slot)
+        : null;
 
     return HolzBlatt(
       child: SafeArea(
@@ -169,10 +174,14 @@ class GearSheet extends ConsumerWidget {
               ),
               const SizedBox(height: 14),
               // **Die Werte dieses Exemplars**, sonst die des Katalogs mit
-              // 100 %. Ohne Vergleich mit dem Getragenen — den zeigt der
-              // Rucksack mit seinem Pfeil (13.11.2026: „ganz raus“).
-              for (final zeile in CopyText.lines(dieses ?? _katalog(item)))
-                _Zeile(label: zeile.label, wert: zeile.zahlText),
+              // 100 % — und daneben, um wie viel besser oder schlechter
+              // als das Getragene. Den Kasten „Angelegt“ gibt es nicht
+              // mehr (13.11.2026), der Unterschied steht in der Zeile.
+              for (final zeile in CopyText.lines(
+                dieses ?? _katalog(item),
+                worn: vergleich,
+              ))
+                _WertZeile(zeile: zeile),
               if (kampf != null) _Kampf(text: kampf),
               if (set != null) ...<Widget>[
                 const SizedBox(height: 6),
@@ -340,6 +349,63 @@ class _Zeile extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: Palette.text,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ein Wert des Exemplars: Name, Zahl und — gegen das Getragene — der
+/// Unterschied, grün besser, rot schlechter.
+class _WertZeile extends StatelessWidget {
+  const _WertZeile({required this.zeile});
+
+  final StatLine zeile;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = zeile.diff;
+    final farbe = switch (d) {
+      null || 0 => Palette.muted,
+      > 0 => Palette.success,
+      _ => Palette.enemy,
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: Text(
+              zeile.label,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, color: Palette.textDim),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              zeile.zahlText,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Palette.text,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              zeile.diffZahl,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: farbe,
               ),
             ),
           ),

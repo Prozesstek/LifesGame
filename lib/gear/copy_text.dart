@@ -34,6 +34,15 @@ class StatLine {
   /// „+11 Angriffsschaden", „+0,8/s Manaregeneration".
   String get valueText => '$zahlText $label';
 
+  /// „+2“, „−3“, „±0“ — der Unterschied ohne Klammern, für das Blatt.
+  /// Leer ohne Vergleich.
+  String get diffZahl {
+    final d = diff;
+    if (d == null) return '';
+    if (d == 0) return '±0';
+    return '${_signed(d)}$einheit';
+  }
+
   /// „(+2)", „(−3)", „(±0)" — oder leer ohne Vergleich.
   String get diffText {
     final d = diff;

@@ -37,8 +37,11 @@ verständlich werden. In vier Fragen geklärt, alle wie empfohlen.
 noch einmal etwa eine Stufe härter an der Kante (Tag 30+F: Stufe 9 von
 50 % auf 17 %; T60+G+F: 27 auf 8 %, 28 von 50 % auf 0 %).
 
-**Ohne Rückfrage entschieden:** Das Blatt zeigt die Werte des
-angetippten Exemplars ohne Vergleich — den zeigt der Pfeil im Rucksack.
+**Danach** (AktivesBrett, mit Skizze): Ein Exemplar, das nicht angelegt
+ist, zeigt neben jedem Wert den Unterschied zum Getragenen, grün besser,
+rot schlechter (`StatLine.diffZahl`).
+
+**Ohne Rückfrage entschieden:**
 Die Seltenheit der Waffe heißt „Schaden“, weil sie Angriffsschaden
 **und** Fähigkeitsstärke vervielfacht. Ein Ring mit +1 Manaregeneration
 verdoppelt sie jetzt auf Level 1.

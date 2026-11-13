@@ -13,6 +13,7 @@ import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/gear/widgets/gear_sheet.dart';
 import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
+import 'package:lifes_game/ui/palette.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
@@ -603,6 +604,22 @@ void main() {
       expect(find.text('Angelegt'), findsNothing);
       expect(find.text('Anlegen'), findsOneWidget);
       expect(find.textContaining('Qualität'), findsOneWidget);
+      // Gegen das Getragene, je Wert (13.11.2026): b hat 2 Abwehr mehr,
+      // alles andere gleich.
+      final imBlatt = find.descendant(
+        of: find.byType(GearSheet),
+        matching: find.text('+2'),
+      );
+      expect(
+        tester
+            .widgetList<Text>(imBlatt)
+            .any((t) => t.style?.color == Palette.success),
+        isTrue,
+      );
+      expect(
+        find.descendant(of: find.byType(GearSheet), matching: find.text('±0')),
+        findsWidgets,
+      );
       expect(
         find.byKey(const ValueKey<String>('schloss-test-a')),
         findsNothing,
