@@ -148,18 +148,30 @@ class SilentSoundPlayer implements SoundPlayer {
 ///
 /// **Ein Player je Klang.** Mit einem gemeinsamen schnitte ein Häkchen
 /// die Fanfare einer Errungenschaft ab, die im selben Augenblick kommt.
+///
+/// **Die Lautstärke wird bei jedem Klang gefragt** (13.11.2026, die
+/// Einstellungen): Ein Regler, der erst beim nächsten Start wirkt, fühlt
+/// sich kaputt an. Stumm spielt er gar nichts.
 class AssetSoundPlayer implements SoundPlayer {
+  AssetSoundPlayer({double Function()? lautstaerke})
+    : _lautstaerke = lautstaerke ?? _voll;
+
+  static double _voll() => 1;
+
+  final double Function() _lautstaerke;
   final Map<SoundEffect, AudioPlayer> _players = <SoundEffect, AudioPlayer>{};
 
   @override
   void play(SoundEffect effect) {
+    final laut = _lautstaerke().clamp(0.0, 1.0);
+    if (laut <= 0) return;
     final player = _players.putIfAbsent(effect, AudioPlayer.new);
     // **Ein fehlender Klang hält nichts auf.** Das Spiel funktioniert
     // ohne Ton vollständig; ein Fehler beim Abspielen wird gemeldet,
     // aber nie bis zum Bildschirm durchgereicht.
     unawaited(
       player
-          .play(AssetSource(effect.asset))
+          .play(AssetSource(effect.asset), volume: laut)
           .catchError(
             (Object fehler) => debugPrint('Klang ${effect.name}: $fehler'),
           ),

@@ -79,7 +79,9 @@ void main() {
       final danach = welt.mana;
       expect(danach, welt.maxMana - PitAbilities.steinhaut.manaCost);
 
-      for (var i = 0; i < 60; i++) {
+      // Zwei Sekunden: Bei 1 Mana je Sekunde landet genau eine knapp
+      // unter dem nächsten ganzen Punkt.
+      for (var i = 0; i < 120; i++) {
         welt.step(Vec2.zero);
       }
       expect(welt.mana, greaterThan(danach));

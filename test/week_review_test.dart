@@ -127,7 +127,7 @@ void main() {
       expect(find.text('3 von 7 Tagen'), findsOneWidget);
       expect(find.text('${woche.checks}'), findsOneWidget);
       expect(find.text('${woche.xp}'), findsOneWidget);
-      expect(find.text('+1 Angriff'), findsOneWidget);
+      expect(find.text('+1 Angriffsschaden'), findsOneWidget);
       expect(find.text('Ein solides Stück Weg.'), findsOneWidget);
       // Die Vorwoche hatte vier Tage, diese bis Mittwoch drei. Die Woche
       // läuft noch, also kein Urteil, nur der Stand.

@@ -56,7 +56,7 @@ void main() {
     test('verkauft bleibt besessen', () {
       final item = ersterAuf(GearSlot.helm);
       var loadout = mitBesitz(<String>[item.id]);
-      loadout = loadout.sell('k-${item.id}');
+      loadout = loadout.unequip(item.slot).sell('k-${item.id}');
 
       expect(loadout.ownsItem(item.id), isFalse);
       expect(loadout.ownedCopies, isEmpty);
@@ -68,9 +68,9 @@ void main() {
     test('zweimal kaufen und verkaufen zählt einmal als Besitz', () {
       final item = ersterAuf(GearSlot.ring);
       var loadout = mitBesitz(<String>[item.id]);
-      loadout = loadout.sell('k-${item.id}');
+      loadout = loadout.unequip(item.slot).sell('k-${item.id}');
       loadout = loadout.addFree(kopie(item.id, uid: 'zweites'));
-      loadout = loadout.sell('zweites');
+      loadout = loadout.unequip(item.slot).sell('zweites');
 
       // Zwei Exemplare desselben Stücks sind ein Katalogstück.
       expect(loadout.everOwnedCount, 1);
@@ -149,7 +149,7 @@ void main() {
     test('ein verkauftes Teil nimmt das Set nicht zurück', () {
       final teile = teileVon(GearSets.all.first.id);
       var loadout = mitBesitz(<String>[for (final item in teile) item.id]);
-      loadout = loadout.sell('k-${teile.first.id}');
+      loadout = loadout.unequip(teile.first.slot).sell('k-${teile.first.id}');
 
       expect(loadout.completeSetsEverOwned, 1);
     });
@@ -170,7 +170,7 @@ void main() {
       final teile =
           GearCatalog.all.where((i) => i.setId == GearSets.all.first.id);
       var loadout = mitBesitz(<String>[for (final item in teile) item.id]);
-      loadout = loadout.sell('k-${teile.first.id}');
+      loadout = loadout.unequip(teile.first.slot).sell('k-${teile.first.id}');
 
       final geladen = Loadout.fromJson(loadout.toJson());
 

@@ -12,7 +12,7 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 12.11.2026 · Frederik
+**Zuletzt aktualisiert:** 13.11.2026 · AktivesBrett
 
 ---
 
@@ -25,6 +25,75 @@ jeder Fund 0,45 s, bevor er gleitet oder sich einsammeln lässt
 Beute des Bosses kommt weiter sofort, mit ihm endet der Lauf.
 
 action_combat 415 (vorher 414). **Nicht gespielt, nicht am Handy.**
+## 13.11.2026, danach: 1 Mana, Angelegtes bleibt, das Blatt eines Stücks neu
+
+AktivesBrett: „1 mana pro sekunde … 2 ist immernoch viel zu viel“,
+Angelegtes darf nie mitverkauft werden, und das Blatt eines Stücks soll
+verständlich werden. In vier Fragen geklärt, alle wie empfohlen.
+
+| Was | Wie |
+|---|---|
+| **Mana** | 1 je Sekunde auf Level 1, 1,25 ab Level 41 (`manaRegenBase` 0,5, `manaRegenPerEnergy` 0,0625) |
+| **Verkauf** | `Loadout.sellAll` und `canSell` lassen Getragenes liegen; im Blatt hat es keinen Knopf. Die Sammelverkäufe ließen es schon vorher liegen — einzeln über das Blatt ging es |
+| **Weg** | Beschreibung, Preis, „Im Besitz“, der Kasten mit dem Vergleich, „Wurf 85 bis 115 %“, „Seltenheit ×1,15“ |
+| **Namen** | überall Angriffsschaden, Fähigkeitsstärke, Leben, Abwehr — auch im Charakter und beim Häkchen („+1 Angriffsschaden“); Sets sagen „Mana günstiger“ |
+| **Neu im Blatt** | „Qualität 107 %“ beim Namen; Fähigkeitsstärke, Manaregeneration und kürzere Abklingzeit standen bis dahin gar nicht da |
+| **Kampf** | in Sätzen: „Trifft 2-mal pro Schlag, jeder Treffer mit 60 % deines Angriffsschadens. Rund 2 Schläge pro Sekunde.“, dazu „Ungewöhnlich: +15 % Schaden im Kampf“ |
+| **Verkauf** | ganz unten |
+| **Dropchancen** | ein Knopf im Eingang (◇ %): je Seltenheit für Gegner und Boss auf der nächsten Etage, dazu wie oft etwas fällt (`GearRolls.chancesFor`) |
+
+**Gemessen** (`pit_sim`, gegen 2 je Sekunde): ohne Form gleich; mit Form
+noch einmal etwa eine Stufe härter an der Kante (Tag 30+F: Stufe 9 von
+50 % auf 17 %; T60+G+F: 27 auf 8 %, 28 von 50 % auf 0 %).
+
+**Danach** (AktivesBrett, mit Skizze): Ein Exemplar, das nicht angelegt
+ist, zeigt neben jedem Wert den Unterschied zum Getragenen, grün besser,
+rot schlechter (`StatLine.diffZahl`).
+
+**Ohne Rückfrage entschieden:**
+Die Seltenheit der Waffe heißt „Schaden“, weil sie Angriffsschaden
+**und** Fähigkeitsstärke vervielfacht. Ein Ring mit +1 Manaregeneration
+verdoppelt sie jetzt auf Level 1.
+
+App 1195 (vorher 1191), gear 144 (vorher 141), action_combat 414 (zwei
+Tests warten jetzt zwei Sekunden aufs Mana). Blatt und Dialog in 390 × 844
+gerendert. **Gesehen dabei:** In der Testvorschau ist jeder `HolzDialog`
+bildschirmhoch, auch ein leerer — nicht geprüft, ob das am Handy so ist.
+
+### Offen
+
+- Ob 1 Mana je Sekunde zu wenig ist — der Bot spielt dumm.
+- **Frederik hat es nicht gesehen.**
+
+## 13.11.2026: weniger Mana, und ein Einstellungsmenü
+
+AktivesBrett: „beim Kampf ist die Mana Regeneration viel zu stark“, dazu
+die Fähigkeiten wahlweise links und die Lautstärke einstellbar. In einer
+Fragerunde: **2 Mana je Sekunde**, das Zahnrad **nur auf der Startseite**.
+
+| Was | Wie |
+|---|---|
+| **Mana** | 2 je Sekunde auf Level 1, 2,5 ab Level 41 (vorher 6 bis 7); Manaregeneration der Ausrüstung legt weiter drauf (`manaRegenBase` 1, `manaRegenPerEnergy` 0,125) |
+| **Zahnrad** | links über „Heute“, von Anfang an da, auch im Tutorial |
+| **Ton** | ein Regler 0–100 %, gilt sofort für jeden Klang; beim Loslassen klingt eine Probe |
+| **Fähigkeiten** | rechts oder links — links liegt alles gespiegelt, die Ultimate unten links |
+
+**Gemessen** (`pit_sim`): ohne Tagesform unverändert; mit Form etwa eine
+Stufe härter an der Kante (Tag 30+F: Stufe 9 von 75 % auf 50 %, 10 von
+58 % auf 0 %; Tag 60+G+F: 28 von 67 % auf 50 %).
+
+**Ohne Rückfrage entschieden:** Die Einstellungen gehören dem **Gerät**,
+nicht dem Spielstand — eigener Schlüssel in `shared_preferences`, sie
+reisen beim Sichern als Text nicht mit und gehen beim Einfügen nicht
+verloren.
+
+App 1191 (vorher 1186). Startseite und Einstellungen in 390 × 844
+gerendert.
+
+### Offen
+
+- Ob 2 Mana je Sekunde sich am Handy gut anfühlt — der Bot spielt dumm.
+- **Frederik hat es nicht gesehen.**
 
 ## 12.11.2026: die Theorie als Seite aus einem Lernbuch
 
@@ -174,8 +243,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1186, dazu die acht Packages (theory 223, habits 375, gear
-141, action_combat 414, progression 58, abilities 43, identity 25,
+**Tests:** App 1195, dazu die acht Packages (theory 223, habits 375, gear
+144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 

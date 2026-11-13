@@ -657,9 +657,9 @@ void main() {
       controller.advance(habit.id, _heute);
       await tester.pump();
 
-      // Die Prosa ist weg: kein „+1 Angriff", kein „2 Tage am Stück".
+      // Die Prosa ist weg: kein „+1 Angriffsschaden", kein „2 Tage am Stück".
       expect(find.textContaining('am Stück'), findsNothing);
-      expect(find.textContaining('+1 Angriff'), findsNothing);
+      expect(find.textContaining('+1 Angriffsschaden'), findsNothing);
 
       // Die Zahlen sind geblieben -- die Kette als Marke, das Tagesziel
       // unter dem Namen. Ohne sie waere aus einer
@@ -815,11 +815,15 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(SnackBar),
-          matching: find.textContaining('+1 Angriff'),
+          matching: find.textContaining('+1 Angriffsschaden'),
         ),
         findsOneWidget,
       );
-      expect(find.text('+1 Angriff'), findsOneWidget, reason: 'aufsteigend');
+      expect(
+        find.text('+1 Angriffsschaden'),
+        findsOneWidget,
+        reason: 'aufsteigend',
+      );
     });
   });
 

@@ -119,6 +119,24 @@ abstract final class GearRolls {
     return slotWeights.keys.first;
   }
 
+  /// Wie wahrscheinlich jede Seltenheit auf [stage] ist, als Anteil von 1
+  /// — für die Anzeige im Eingang (13.11.2026). Beim [boss] eine Stufe
+  /// höher ([oneUp]), wie `GearLoot.cascade` würfelt; dieselbe Stelle,
+  /// damit Anzeige und Wurf nie auseinanderlaufen.
+  static Map<GearRarity, double> chancesFor(int stage, {bool boss = false}) {
+    final gewichte = weightsFor(stage);
+    final summe = gewichte.values.fold<int>(0, (a, b) => a + b);
+    final ergebnis = <GearRarity, double>{};
+    for (final MapEntry(key: rarity, value: gewicht) in gewichte.entries) {
+      final ziel = boss ? oneUp(rarity, stage) : rarity;
+      ergebnis[ziel] = (ergebnis[ziel] ?? 0) + gewicht / summe;
+    }
+    return <GearRarity, double>{
+      for (final r in GearRarity.values)
+        if (ergebnis[r] case final anteil?) r: anteil,
+    };
+  }
+
   /// [rarity] eine Stufe seltener — aber nur, wenn es die auf [stage]
   /// überhaupt gibt (ADR-0034): Der Wächter von Ebene 5 wirft kein
   /// Episches.

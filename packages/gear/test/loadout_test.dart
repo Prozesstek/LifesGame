@@ -221,19 +221,40 @@ void main() {
       expect(Loadout.refundFor(klinge), (klinge.price * 0.25).floor());
     });
 
-    test('verkauft heisst: nicht mehr im Besitz, nicht mehr getragen', () {
+    test('verkauft heisst: nicht mehr im Besitz', () {
       final angebot = _angebot(klinge.id);
       final l = const Loadout.empty()
           .buy(angebot, availableGold: _viel)
+          .unequip(GearSlot.waffe)
           .sell(angebot.uid);
       expect(l.owns(angebot.uid), isFalse);
-      expect(l.equippedIn(GearSlot.waffe), isNull);
       expect(l.spentGold, klinge.price - Loadout.refundFor(klinge));
+    });
+
+    test('Angelegtes wird nie verkauft, auch nicht im Bündel', () {
+      // AktivesBrett, 13.11.2026: „alle grünen weg“ darf das Getragene
+      // nicht mitnehmen — egal, wer es hereinreicht.
+      final an = _angebot(klinge.id, uid: 'an');
+      final aus = _angebot(klinge.id, uid: 'aus');
+      final l = const Loadout.empty()
+          .buy(an, availableGold: _viel)
+          .equip('an')
+          .addFree(aus);
+      expect(l.isEquipped('an'), isTrue);
+      expect(l.canSell('an'), isFalse);
+      expect(l.sell('an'), same(l));
+      final nachher = l.sellAll(<String>['an', 'aus']);
+      expect(nachher.owns('an'), isTrue);
+      expect(nachher.isEquipped('an'), isTrue);
+      expect(nachher.owns('aus'), isFalse);
     });
 
     test('Beute zu verkaufen bringt Gold', () {
       final beute = _angebot(klinge.id);
-      final l = const Loadout.empty().addFree(beute).sell(beute.uid);
+      final l = const Loadout.empty()
+          .addFree(beute)
+          .unequip(GearSlot.waffe)
+          .sell(beute.uid);
       expect(l.spentGold, -Loadout.refundFor(klinge));
     });
 
@@ -247,6 +268,7 @@ void main() {
       final angebot = _angebot(klinge.id);
       final einmal = const Loadout.empty()
           .buy(angebot, availableGold: _viel)
+          .unequip(GearSlot.waffe)
           .sell(angebot.uid);
       expect(einmal.sell(angebot.uid), same(einmal));
     });
@@ -257,6 +279,7 @@ void main() {
       final a = _angebot(klinge.id, uid: 'a');
       final l = const Loadout.empty()
           .buy(a, availableGold: _viel)
+          .unequip(GearSlot.waffe)
           .sell('a')
           .useKey(earned: 3)
           .buy(_angebot(bogen.id), availableGold: _viel)
@@ -443,8 +466,11 @@ void main() {
     });
 
     test('ein gesperrter, aber verkaufter Eintrag fällt beim Lesen weg', () {
-      final json =
-          const Loadout.empty().buy(a, availableGold: _viel).sell('a').toJson();
+      final json = const Loadout.empty()
+          .buy(a, availableGold: _viel)
+          .unequip(GearSlot.waffe)
+          .sell('a')
+          .toJson();
       json['locked'] = <String>['a', 'fremd'];
 
       final l = Loadout.fromJson(json);

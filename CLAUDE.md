@@ -90,7 +90,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/habits/lib/src/statistik.dart` | **die Statistik** ([ADR-0087](docs/decisions/0087-die-statistik.md)): Woche, Monat, Jahr, Gesamt; Quote **erledigt durch fällig nach dem Plan, der damals galt**, Vergleich mit den gleichen Tagen davor, Abschnitte für Balken und Kurve, Wochentage, Mengen, Rekorde, Jahresrückblick (`StatRechnung`) | nur Dart-SDK |
 | `packages/habits/lib/src/streak_freeze.dart` | das **Streak-Eis** und wie viele es davon gibt | nur Dart-SDK |
 | `packages/habits/example/curve_sim.dart` | 90 Tage Ertrag und Werte durchspielen | nur Dart-SDK |
-| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 141 Tests | nur Dart-SDK |
+| `packages/gear/` | Ausrüstung, Preise, Inventar aus **Exemplaren**, Tagesladen, Beute samt **Kaskade** (ADR-0083), **Vergleich und Schloss**, reines Dart, 144 Tests | nur Dart-SDK |
 | `packages/gear/lib/src/catalog.dart` | die Ausrüstungsstücke selbst | nur Dart-SDK |
 | `packages/gear/lib/src/prices.dart` | alle Preise | nur Dart-SDK |
 | `packages/gear/lib/src/set_catalog.dart` | die **vier Sets** und ihre Wirkung — drei offene, dazu das verdiente **Vampirset** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)) | nur Dart-SDK |
@@ -184,6 +184,7 @@ durch die Grube ersetzt und gelöscht.
 | `tool/pit_sim.dart` | prüft die **Grube**: Stufe für Stufe gegen den echten Werte-Pfad, bis keine Spalte mehr gewinnt | nur Dart-SDK |
 | `tool/tagesgrube_sim.dart` | misst die **sieben Sätze der Tagesgrube**: auf welcher Stufe jeder gleich schwer ist, ohne Form und in Form | nur Dart-SDK |
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
+| `lib/einstellungen/` | **die Einstellungen** (13.11.2026): Lautstärke und Fähigkeiten links oder rechts — **gehören dem Gerät**, eigener Schlüssel in `shared_preferences` (`EinstellungenInPrefs`), nicht im Spielstand; geöffnet nur über das Zahnrad auf der Startseite (`EinstellungenScreen`) | Flutter |
 | `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), **die nach links ausweicht, wenn sie etwas verdeckt** (`BlasenPlatz`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
 | `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Zauberbuch, Harnisch, Silhouette; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
@@ -247,7 +248,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen**; im Rundgang zeigt der Mentor aufs Sperren | Flutter |
-| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: alle Werte, **nur das angetippte Exemplar** (26.10.) — anlegen, ablegen, verkaufen, **sperren** — alle vier als Holzplanke; verkauft, geht es zu | Flutter |
+| `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: **nur das angetippte Exemplar** (26.10.), seine Werte **mit dem Unterschied zum Getragenen je Wert**, „Qualität“ beim Namen, **„Kampf“ in ganzen Sätzen** (`weaponKampfText`, `rarityKampfText` in `weapon_ability_line.dart`), darunter Knöpfe nebeneinander, ganz unten der Verkauf (13.11.2026); **Angelegtes hat keinen Verkaufen-Knopf** — `Loadout.sellAll` verkauft es nie | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
 | `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
@@ -317,6 +318,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/schwerter_zeichen.dart` | **die gekreuzten Schwerter** auf „Hinab“ im Eingang und in der Tagesgrube — nachgezeichnet, aus Linien gerechnet, in der Farbe der Zeichen um sie herum | Flutter |
 | `lib/combat/widgets/eingangs_glut.dart` | **der Schlund im Eingang**: glüht in der Farbe dessen, was unten fällt — Feuer, ab 10 episch, ab 20 legendär, über 30 blutrot (`GlutStufe`); atmet in Tests nicht (`test/flutter_test_config.dart`) | Flutter |
 | `lib/combat/daily_pit_controller.dart` | Riverpod-Brücke Tagesgrube ↔ UI, **enthält keine Regeln**; `dailyConditionProvider` sagt, in welcher Verfassung es heute hinabginge | Flutter |
+| `lib/combat/widgets/dropchancen.dart` | **was auf der nächsten Etage fällt**: ein Knopf im Eingang neben Schlüsseln und Blitz, der Dialog je Seltenheit für Gegner und Boss — rechnet nichts (`GearRolls.chancesFor`) | Flutter |
 | `lib/combat/widgets/tagesgrube_karte.dart` | die Tagesgrube im Eingang: Satz des Tages, Verfassung, „Hinab“ — **trägt den Versuch ein, bevor der Lauf beginnt**; danach Ergebnis und Teilen | Flutter |
 | `lib/combat/widgets/tagesgrube_ergebnis.dart` | das Blatt am Ende der Tagesgrube: Raumzeile, Zeit, Verfassung, Tageskette, Ruhm, Teilen | Flutter |
 | `lib/combat/widgets/raumzeile.dart` | die Raumzeile als Bild — gezeichnet, nicht als Emoji; dieselben Felder wie im Text | Flutter |
@@ -369,7 +371,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1186 Tests
+flutter test             # 1195 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -395,7 +397,7 @@ dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
 cd packages/theory      ; dart test    # 223 Tests, prüft auch den Inhalt
 cd packages/progression ; dart test    # 58 Tests
-cd packages/gear        ; dart test    # 141 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
+cd packages/gear        ; dart test    # 144 Tests, prüft Preise, Sets, Würfel, Laden, Beute, Vergleich, Schloss und Übernahme
 cd packages/abilities   ; dart test    # 43 Tests
 cd packages/identity    ; dart test    # 25 Tests, prüft nur noch den Wortlaut
 cd packages/achievements; dart test    # 25 Tests, prüft den ganzen Katalog

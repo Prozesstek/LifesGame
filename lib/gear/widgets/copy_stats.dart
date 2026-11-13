@@ -6,7 +6,8 @@ import '../copy_text.dart';
 
 /// Die Werte eines Exemplars **untereinander**, jeder mit dem
 /// Unterschied zum getragenen Stück in Klammern — grün mehr, rot weniger.
-/// Darunter die Güte des Wurfs.
+/// Darunter die Qualität des Wurfs — ausser [mitQualitaet] ist aus, weil
+/// sie schon beim Namen steht (das Blatt eines Stücks).
 ///
 /// Eine Stelle für Laden, Inventar, Beute und das Auswahlblatt am
 /// Charakter; gerechnet wird in [CopyText.lines].
@@ -15,6 +16,7 @@ class CopyStats extends StatelessWidget {
     required this.copy,
     this.worn,
     this.center = false,
+    this.mitQualitaet = true,
     super.key,
   });
 
@@ -25,6 +27,8 @@ class CopyStats extends StatelessWidget {
 
   /// Zentriert statt linksbündig — im Beute-Blatt.
   final bool center;
+
+  final bool mitQualitaet;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +68,15 @@ class CopyStats extends StatelessWidget {
             ),
             style: const TextStyle(fontSize: 12, height: 1.3),
           ),
-        Text(
-          'Wurf ${CopyText.quality(copy)}',
-          style: TextStyle(
-            fontSize: 11,
-            color: gut ? Palette.accent : Palette.muted,
-            fontWeight: gut ? FontWeight.bold : FontWeight.normal,
+        if (mitQualitaet)
+          Text(
+            CopyText.qualitaet(copy),
+            style: TextStyle(
+              fontSize: 11,
+              color: gut ? Palette.accent : Palette.muted,
+              fontWeight: gut ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-        ),
       ],
     );
   }

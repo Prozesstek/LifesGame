@@ -230,9 +230,9 @@ void main() {
       }
 
       expect(erste.read(loadoutProvider.notifier).buy(angebot(itemId)), isNull);
-      final erloes = erste
-          .read(loadoutProvider.notifier)
-          .sell(angebot(itemId).uid);
+      final erloes = (erste.read(
+        loadoutProvider.notifier,
+      )..unequip(GearCatalog.byId(itemId)!.slot)).sell(angebot(itemId).uid);
       expect(erloes, isNotNull);
 
       final goldVorher = erste.read(goldProvider);

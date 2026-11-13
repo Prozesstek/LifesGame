@@ -13,6 +13,7 @@ import 'package:lifes_game/gear/widgets/character_figure.dart';
 import 'package:lifes_game/gear/widgets/gear_sheet.dart';
 import 'package:lifes_game/gear/widgets/rarity_badge.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
+import 'package:lifes_game/ui/palette.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/ui/pixel_art.dart';
@@ -160,13 +161,15 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(appMit(mitAllenWaffen()));
 
-      final angelegt = GearCatalog.forSlot(GearSlot.waffe).first;
       await tester.tap(aufDenPlaetzen('Waffe'));
       await tester.pumpAndSettle();
 
       expect(find.byType(GearSheet), findsOneWidget);
-      expect(find.text(angelegt.why), findsOneWidget);
+      expect(find.textContaining('Grundangriff'), findsOneWidget);
       expect(find.text('Angelegt'), findsOneWidget);
+      // Angelegtes lässt sich nicht verkaufen (13.11.2026).
+      expect(find.widgetWithText(FilledButton, 'Verkaufen'), findsNothing);
+      expect(find.text('Ablegen'), findsOneWidget);
     });
 
     testWidgets('ein leerer Platz sagt, wie er sich füllt', (tester) async {
@@ -536,7 +539,7 @@ void main() {
   });
 
   group('Das Blatt', () {
-    testWidgets('ein fremdes Stück nennt Werte, Preis und Herkunft', (
+    testWidgets('ein fremdes Stück nennt Werte, Verkauf und Herkunft', (
       tester,
     ) async {
       final item = GearCatalog.all.firstWhere(
@@ -545,9 +548,10 @@ void main() {
       await blattVon(tester, item);
 
       expect(find.byType(GearSheet), findsOneWidget);
-      expect(find.text(item.why), findsOneWidget);
-      expect(find.text('${item.price} Gold'), findsOneWidget);
-      expect(find.text('Wurf'), findsOneWidget);
+      // Seit dem 13.11.2026 ohne Beschreibung, Preis und „Wurf“.
+      expect(find.text(item.why), findsNothing);
+      expect(find.text('Preis'), findsNothing);
+      expect(find.text('${Loadout.refundFor(item)} Gold'), findsOneWidget);
       expect(find.textContaining('Noch nicht im Besitz'), findsOneWidget);
       // Nichts zum Anlegen, man hat es ja nicht.
       expect(find.text('Anlegen'), findsNothing);
@@ -595,10 +599,27 @@ void main() {
       await tester.tap(kachelVon('test-b'));
       await tester.pumpAndSettle();
 
-      // Das angelegte steht nicht mit im Blatt (26.10.), die Zahl schon.
+      // Das angelegte steht nicht mit im Blatt (26.10.), die Qualität
+      // des angetippten beim Namen (13.11.2026).
       expect(find.text('Angelegt'), findsNothing);
       expect(find.text('Anlegen'), findsOneWidget);
-      expect(find.text('2 Mal im Besitz.'), findsOneWidget);
+      expect(find.textContaining('Qualität'), findsOneWidget);
+      // Gegen das Getragene, je Wert (13.11.2026): b hat 2 Abwehr mehr,
+      // alles andere gleich.
+      final imBlatt = find.descendant(
+        of: find.byType(GearSheet),
+        matching: find.text('+2'),
+      );
+      expect(
+        tester
+            .widgetList<Text>(imBlatt)
+            .any((t) => t.style?.color == Palette.success),
+        isTrue,
+      );
+      expect(
+        find.descendant(of: find.byType(GearSheet), matching: find.text('±0')),
+        findsWidgets,
+      );
       expect(
         find.byKey(const ValueKey<String>('schloss-test-a')),
         findsNothing,
