@@ -16,6 +16,46 @@
 
 ---
 
+## 13.11.2026, danach: 1 Mana, Angelegtes bleibt, das Blatt eines Stücks neu
+
+AktivesBrett: „1 mana pro sekunde … 2 ist immernoch viel zu viel“,
+Angelegtes darf nie mitverkauft werden, und das Blatt eines Stücks soll
+verständlich werden. In vier Fragen geklärt, alle wie empfohlen.
+
+| Was | Wie |
+|---|---|
+| **Mana** | 1 je Sekunde auf Level 1, 1,25 ab Level 41 (`manaRegenBase` 0,5, `manaRegenPerEnergy` 0,0625) |
+| **Verkauf** | `Loadout.sellAll` und `canSell` lassen Getragenes liegen; im Blatt hat es keinen Knopf. Die Sammelverkäufe ließen es schon vorher liegen — einzeln über das Blatt ging es |
+| **Weg** | Beschreibung, Preis, „Im Besitz“, der Kasten mit dem Vergleich, „Wurf 85 bis 115 %“, „Seltenheit ×1,15“ |
+| **Namen** | überall Angriffsschaden, Fähigkeitsstärke, Leben, Abwehr — auch im Charakter und beim Häkchen („+1 Angriffsschaden“); Sets sagen „Mana günstiger“ |
+| **Neu im Blatt** | „Qualität 107 %“ beim Namen; Fähigkeitsstärke, Manaregeneration und kürzere Abklingzeit standen bis dahin gar nicht da |
+| **Kampf** | in Sätzen: „Trifft 2-mal pro Schlag, jeder Treffer mit 60 % deines Angriffsschadens. Rund 2 Schläge pro Sekunde.“, dazu „Ungewöhnlich: +15 % Schaden im Kampf“ |
+| **Verkauf** | ganz unten |
+| **Dropchancen** | ein Knopf im Eingang (◇ %): je Seltenheit für Gegner und Boss auf der nächsten Etage, dazu wie oft etwas fällt (`GearRolls.chancesFor`) |
+
+**Gemessen** (`pit_sim`, gegen 2 je Sekunde): ohne Form gleich; mit Form
+noch einmal etwa eine Stufe härter an der Kante (Tag 30+F: Stufe 9 von
+50 % auf 17 %; T60+G+F: 27 auf 8 %, 28 von 50 % auf 0 %).
+
+**Danach** (AktivesBrett, mit Skizze): Ein Exemplar, das nicht angelegt
+ist, zeigt neben jedem Wert den Unterschied zum Getragenen, grün besser,
+rot schlechter (`StatLine.diffZahl`).
+
+**Ohne Rückfrage entschieden:**
+Die Seltenheit der Waffe heißt „Schaden“, weil sie Angriffsschaden
+**und** Fähigkeitsstärke vervielfacht. Ein Ring mit +1 Manaregeneration
+verdoppelt sie jetzt auf Level 1.
+
+App 1195 (vorher 1191), gear 144 (vorher 141), action_combat 414 (zwei
+Tests warten jetzt zwei Sekunden aufs Mana). Blatt und Dialog in 390 × 844
+gerendert. **Gesehen dabei:** In der Testvorschau ist jeder `HolzDialog`
+bildschirmhoch, auch ein leerer — nicht geprüft, ob das am Handy so ist.
+
+### Offen
+
+- Ob 1 Mana je Sekunde zu wenig ist — der Bot spielt dumm.
+- **Frederik hat es nicht gesehen.**
+
 ## 13.11.2026: weniger Mana, und ein Einstellungsmenü
 
 AktivesBrett: „beim Kampf ist die Mana Regeneration viel zu stark“, dazu
@@ -194,8 +234,8 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1191, dazu die acht Packages (theory 223, habits 375, gear
-141, action_combat 414, progression 58, abilities 43, identity 25,
+**Tests:** App 1195, dazu die acht Packages (theory 223, habits 375, gear
+144, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 

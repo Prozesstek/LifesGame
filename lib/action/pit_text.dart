@@ -331,7 +331,7 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
       :final moveSpeed,
     ):
       final teile = <String>[
-        if (attack != 1) 'Angriff +${((attack - 1) * 100).round()} %',
+        if (attack != 1) 'Angriffsschaden +${((attack - 1) * 100).round()} %',
         if (haste != 1) 'Schlagtempo +${((haste - 1) * 100).round()} %',
         if (moveSpeed != 1) 'Lauftempo +${((moveSpeed - 1) * 100).round()} %',
       ];

@@ -134,6 +134,8 @@ void main() {
       container.read(loadoutProvider.notifier).buy(angebot(klinge));
       expect(container.read(goldProvider), zufluss - preis + ersterKauf);
 
+      // Angelegtes verkauft sich nicht (13.11.2026) — erst ablegen.
+      container.read(loadoutProvider.notifier).unequip(GearSlot.waffe);
       expect(
         container.read(loadoutProvider.notifier).sell(angebot(klinge).uid),
         erloes,
@@ -159,7 +161,9 @@ void main() {
       container.read(loadoutProvider.notifier).buy(angebot(klinge));
       expect(container.read(equippedStatsProvider).attack, greaterThan(vorher));
 
-      container.read(loadoutProvider.notifier).sell(angebot(klinge).uid);
+      container.read(loadoutProvider.notifier)
+        ..unequip(GearSlot.waffe)
+        ..sell(angebot(klinge).uid);
 
       expect(container.read(equippedStatsProvider).attack, vorher);
       expect(container.read(loadoutProvider).ownsItem(klinge), isFalse);
@@ -177,9 +181,9 @@ void main() {
       }
       expect(container.read(activeSetsProvider), hasLength(1));
 
-      container
-          .read(loadoutProvider.notifier)
-          .sell(angebot(teile.first.id).uid);
+      container.read(loadoutProvider.notifier)
+        ..unequip(teile.first.slot)
+        ..sell(angebot(teile.first.id).uid);
 
       expect(container.read(activeSetsProvider), isEmpty);
     });
@@ -248,14 +252,18 @@ void main() {
       // Die Übungsklinge schlägt in der Grube den Hieb mit ×1,25
       // (`PitWeapons`, ADR-0039). Steht die Zahl hier falsch, steht sie
       // im Laden falsch.
-      expect(zeile, 'Grundangriff: Hieb — ×1,25 Schaden');
+      expect(
+        zeile,
+        'Grundangriff: Hieb. Trifft mit 125 % deines Angriffsschadens. '
+        'Rund 1,8 Schläge pro Sekunde.',
+      );
     });
 
     test('ein Bogen sagt, dass er schiesst', () {
       final bogen = GearCatalog.forSlot(
         GearSlot.waffe,
       ).firstWhere((w) => AbilityCatalog.weaponMoveFor(w.id) == 'basic_attack');
-      expect(weaponAbilityLine(bogen), contains('schießt'));
+      expect(weaponAbilityLine(bogen), contains('Schießt'));
     });
 
     test('jedes Stück mit einer Kraft nennt sie, jedes Legendäre hat eine', () {

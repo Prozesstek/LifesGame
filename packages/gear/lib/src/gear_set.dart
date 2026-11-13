@@ -78,7 +78,7 @@ class SetPerk {
   List<String> get labels {
     return <String>[
       if (damageFactor != 1.0) '+${_prozent(damageFactor)} Schaden',
-      if (energyDiscount != 0) '$energyDiscount Energie günstiger',
+      if (energyDiscount != 0) '$energyDiscount Mana günstiger',
       if (protectionFactor != 1.0)
         'Schutz und Heilung ${_prozent(protectionFactor)} stärker',
     ];
