@@ -149,6 +149,39 @@ void main() {
       fail('kein Startwert mit Fund');
     }
 
+    test('ein Fund liegt erst einen Augenblick, dann lässt er sich holen', () {
+      // AktivesBrett, 13.11.2026: Neben dem Helden wurde ein Fund sofort
+      // eingesaugt, und man sah nie, was es war.
+      ActionWorld? welt;
+      for (var seed = 0; seed < 300 && welt == null; seed++) {
+        final w = _welt(_dicht, seed: seed);
+        if (_bisZumKill(w).whereType<ItemDropped>().isNotEmpty) welt = w;
+      }
+      if (welt == null) fail('kein Startwert mit Fund');
+
+      // Gleich hinlaufen und darauf stehen bleiben: Es bleibt trotzdem
+      // liegen, bis der Augenblick vorbei ist.
+      final fund = welt.itemDrops.single;
+      final kurz = ActionBalance.itemPickupDelay * 0.9;
+      for (var i = 0; i < (kurz / ActionBalance.stepSeconds).floor(); i++) {
+        final weg = fund.position - welt.heroView.position;
+        welt.step(weg.length < 2 ? Vec2.zero : weg.normalized);
+        welt.drainEvents();
+      }
+      expect(
+        (fund.position - welt.heroView.position).length,
+        lessThan(ActionBalance.itemRadius + 16),
+        reason: 'der Held steht auf dem Fund',
+      );
+      expect(welt.collectedItems, isEmpty, reason: 'noch zu sehen');
+
+      for (var i = 0; i < _schritte(3) && welt.collectedItems.isEmpty; i++) {
+        welt.step((fund.position - welt.heroView.position).normalized);
+        welt.drainEvents();
+      }
+      expect(welt.collectedItems, hasLength(1), reason: 'danach eingesammelt');
+    });
+
     test('was weit weg liegt, holt sich nicht von selbst', () {
       final welt = schuetzeMitFund();
       _laufe(welt, _schritte(2));
