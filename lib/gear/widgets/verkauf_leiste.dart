@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
+import '../../ui/pixel_art.dart';
 
 /// **Die Leiste zum Verkaufen mit Häkchen** (ADR-0083) — eine Stelle für
 /// Siegerblatt und Rucksack.
@@ -39,6 +40,10 @@ class VerkaufLeiste extends StatelessWidget {
   static const Key umschaltenKey = ValueKey<String>('auswahl-umschalten');
   static const Key verkaufenKey = ValueKey<String>('auswahl-verkaufen');
 
+  /// Das Zeichen für „mehrere verkaufen“
+  /// (`tool/pixel/mehrere_verkaufen.px.js`).
+  static const String beutelPfad = 'assets/UI/Verkaufen.png';
+
   @override
   Widget build(BuildContext context) {
     final farbe = aufDunkel ? Palette.textOnDark : Palette.text;
@@ -56,13 +61,23 @@ class VerkaufLeiste extends StatelessWidget {
             foregroundColor: farbe,
             side: BorderSide(color: farbe.withValues(alpha: 0.6)),
           ),
-          child: Icon(
-            waehlen ? Icons.close_rounded : Icons.checklist_rounded,
-            size: 20,
-            semanticLabel: waehlen
-                ? 'Auswahl beenden'
-                : 'Stücke zum Verkaufen auswählen',
-          ),
+          // **Ein Beutel voller Münzen** statt Haken und Strichen
+          // (AktivesBrett, 13.11.2026); ist die Auswahl an, ein Kreuz.
+          child: waehlen
+              ? const Icon(
+                  Icons.close_rounded,
+                  size: 20,
+                  semanticLabel: 'Auswahl beenden',
+                )
+              : Semantics(
+                  label: 'Stücke zum Verkaufen auswählen',
+                  excludeSemantics: true,
+                  child: PixelArt(
+                    assetPath: beutelPfad,
+                    side: 24,
+                    fallback: const Icon(Icons.checklist_rounded, size: 20),
+                  ),
+                ),
         ),
         if (waehlen)
           FilledButton(
