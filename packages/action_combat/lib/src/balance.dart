@@ -756,4 +756,8 @@ abstract final class ActionBalance {
   static const double itemRadius = 8;
   static const double itemMagnetRange = 30;
   static const double itemMagnetSpeed = 160;
+
+  /// So lange liegt ein Fund, bevor er gleitet oder eingesammelt wird —
+  /// Zeit, Umriss und Farbe der Seltenheit zu sehen (13.11.2026).
+  static const double itemPickupDelay = 0.45;
 }
