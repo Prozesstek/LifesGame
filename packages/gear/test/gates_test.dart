@@ -144,9 +144,10 @@ void main() {
         highestRung: GearGates.epicRung,
       );
       final uid = angebot(episch).uid;
+      final abgelegt = mit.unequip(episch.slot);
 
-      expect(mit.canSell(uid), isTrue);
-      expect(mit.sell(uid).ownsItem(episch.id), isFalse);
+      expect(abgelegt.canSell(uid), isTrue);
+      expect(abgelegt.sell(uid).ownsItem(episch.id), isFalse);
     });
   });
 }

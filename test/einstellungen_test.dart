@@ -135,8 +135,8 @@ void main() {
     });
   });
 
-  test('2 Mana je Sekunde auf Level 1', () {
+  test('1 Mana je Sekunde auf Level 1', () {
     const stats = ActionStats.frisch; // Energie 8, wie Level 1
-    expect(stats.manaRegen, closeTo(2, 1e-9));
+    expect(stats.manaRegen, closeTo(1, 1e-9));
   });
 }

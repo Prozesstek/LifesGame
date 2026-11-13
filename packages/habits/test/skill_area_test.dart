@@ -169,7 +169,7 @@ void main() {
 
     test('heißt, was er in der Grube tut', () {
       expect(HabitStat.values.map((s) => s.label), <String>[
-        'Angriff',
+        'Angriffsschaden',
         'Leben',
         'Abwehr',
         'Fähigkeitsstärke',

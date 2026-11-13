@@ -384,27 +384,26 @@ class Loadout {
     return (item.price * GearPrices.refundShare).floor();
   }
 
-  bool canSell(String uid) => owns(uid) && !isLocked(uid);
+  bool canSell(String uid) => owns(uid) && !isLocked(uid) && !isEquipped(uid);
 
-  /// Verkauft ein Exemplar. Ein getragenes wird dabei abgelegt, ein
-  /// gesperrtes nicht verkauft.
+  /// Verkauft ein Exemplar — weder ein gesperrtes noch ein getragenes.
   Loadout sell(String uid) => sellAll(<String>[uid]);
 
   /// Verkauft mehrere auf einmal — für „alles Schlechtere verkaufen".
-  /// **Gesperrtes bleibt**, egal wer es hereinreicht.
+  /// **Gesperrtes und Getragenes bleiben**, egal wer es hereinreicht
+  /// (AktivesBrett, 13.11.2026: „Angelegte Items immer geschützt“). Bis
+  /// dahin wurde ein getragenes Stück beim Verkaufen abgelegt.
   Loadout sellAll(Iterable<String> uids) {
     final sold = <String, int>{..._sold};
-    final equipped = <GearSlot, String>{..._equipped};
     for (final uid in uids) {
       final copy = copyByUid(uid);
       final item = copy?.item;
       if (copy == null || item == null || sold.containsKey(uid)) continue;
-      if (isLocked(uid)) continue;
+      if (isLocked(uid) || isEquipped(uid)) continue;
       sold[uid] = refundFor(item);
-      if (equipped[item.slot] == uid) equipped.remove(item.slot);
     }
     if (sold.length == _sold.length) return this;
-    return _copyWith(sold: sold, equipped: equipped);
+    return _copyWith(sold: sold);
   }
 
   /// Was sich verkaufen lässt, ohne etwas zu verlieren: nicht getragen,

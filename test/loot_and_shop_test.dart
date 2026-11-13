@@ -122,8 +122,8 @@ void main() {
     test('ohne Getragenes: nur die Werte, keine Klammern', () {
       final zeilen = CopyText.lines(neu);
       expect(zeilen.map((z) => z.valueText), <String>[
-        '+12 Angriff',
-        '+30 Lebenspunkte',
+        '+12 Angriffsschaden',
+        '+30 Leben',
       ]);
       expect(zeilen.every((z) => z.diffText.isEmpty), isTrue);
     });
@@ -136,8 +136,8 @@ void main() {
 
     test('was nur das Getragene hat, steht als Verlust da', () {
       final zeilen = CopyText.lines(neu, worn: alt);
-      final abwehr = zeilen.firstWhere((z) => z.label == 'Verteidigung');
-      expect(abwehr.valueText, '+0 Verteidigung');
+      final abwehr = zeilen.firstWhere((z) => z.label == 'Abwehr');
+      expect(abwehr.valueText, '+0 Abwehr');
       expect(abwehr.diffText, '(−3)');
     });
 

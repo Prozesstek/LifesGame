@@ -4,6 +4,29 @@ import 'package:test/test.dart';
 /// Würfel, Tagesladen, Beute und Schlüssel (ADR-0048).
 void main() {
   group('Die Tabelle', () {
+    test('die Chancen der Anzeige summieren sich zu eins', () {
+      for (var stufe = 0; stufe <= 30; stufe++) {
+        for (final boss in <bool>[false, true]) {
+          final summe = GearRolls.chancesFor(
+            stufe,
+            boss: boss,
+          ).values.fold<double>(0, (a, b) => a + b);
+          expect(summe, closeTo(1, 1e-9), reason: 'Stufe ');
+        }
+      }
+    });
+
+    test('der Boss wirft eine Stufe seltener, soweit es sie gibt', () {
+      final gegner = GearRolls.chancesFor(1);
+      final boss = GearRolls.chancesFor(1, boss: true);
+      expect(gegner[GearRarity.common], closeTo(0.7, 1e-9));
+      expect(boss.containsKey(GearRarity.common), isFalse);
+      expect(boss[GearRarity.uncommon], closeTo(0.7, 1e-9));
+      // Selten ist auf Stufe 1 das Höchste: 25 + 5.
+      expect(boss[GearRarity.rare], closeTo(0.3, 1e-9));
+      expect(boss.containsKey(GearRarity.epic), isFalse);
+    });
+
     test('Episch erst ab seiner Stufe, Legendär erst ab seiner', () {
       for (var stufe = 0; stufe <= 30; stufe++) {
         final w = GearRolls.weightsFor(stufe);

@@ -431,10 +431,11 @@ void main() {
           ),
         );
         // Erst eine Weile still, dann ein Funke ins Leere, damit Mana
-        // fehlt — und eine Sekunde zum Nachfliessen.
+        // fehlt — und zwei Sekunden zum Nachfliessen (seit 1 Mana je
+        // Sekunde reicht eine nicht für einen ganzen Punkt Unterschied).
         _laufe(welt, _schritte(2));
         welt.castAt('funkenstoss', welt.heroView.position + const Vec2(0, 1));
-        _laufe(welt, _schritte(1));
+        _laufe(welt, _schritte(2));
         return welt;
       }
 
