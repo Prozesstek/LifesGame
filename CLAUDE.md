@@ -112,7 +112,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/achievements/lib/src/catalog.dart` | die **35 Meilensteine und 8 Entdeckungen** samt Bedingungen — „Erste Seite“ bringt jedem Funkenstoß ([ADR-0079](docs/decisions/0079-der-mentor.md)), je Gebiet drei Titel bei 10, 25 und 50 ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)), jeder mit der Id seines Gebiets (`skillAreaId`, für die Farbe) | nur Dart-SDK |
 | `packages/achievements/lib/src/rewards.dart` | was eine Stufe einbringt — Erfahrung, Gold, Ruhm | nur Dart-SDK |
 | `packages/achievements/lib/src/stats.dart` | die Zahlen, die hereingereicht werden — **jede darf nur steigen** | nur Dart-SDK |
-| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 414 Tests | nur Dart-SDK |
+| `packages/action_combat/` | **die Grube — der Kampf des Spiels** ([ADR-0039](docs/decisions/0039-die-grube-ersetzt-den-rundenkampf.md)), Echtzeit, reines Dart, 415 Tests | nur Dart-SDK |
 | `packages/action_combat/lib/src/ladder.dart` | wie weit jemand gekommen ist, und was eine Stufe einbringt | nur Dart-SDK |
 | `packages/action_combat/lib/src/bestiarium.dart` | **wie oft welche Art und welcher Wächter fiel** — die Gegner der Sammlung, in Stufen (1, 10, 100; Wächter 1, 5, 25), gespeichert in der Reihe ([ADR-0080](docs/decisions/0080-die-sammlung.md)) | nur Dart-SDK |
 | `packages/action_combat/lib/src/balance.dart` | alle Stellschrauben der Grube, Fähigkeiten und Stufen eingeschlossen | nur Dart-SDK |
@@ -121,7 +121,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/action_combat/lib/src/summons.dart` | was der Held in die Welt setzt: Fallen, der Begleiter (auch das **Spiegelbild**), der Fels | nur Dart-SDK |
 | `packages/action_combat/lib/src/hero_states.dart` | **was am Helden abläuft** ([ADR-0074](docs/decisions/0074-aktivesbretts-faehigkeiten.md)): Rage, Ruhepuls, zweiter Atem, Unsichtbarkeit, Parade, Bestform, Stacking, Kettenblitz, Blink, Rückspulen — und **die Grenze des Grundangriffs** (`_heroFactor`) | nur Dart-SDK |
 | `packages/action_combat/lib/src/gear_powers.dart` | **was die Ausrüstung am Helden tut** ([ADR-0077](docs/decisions/0077-ausruestung-mit-kraeften.md)): Lebensraub und Blutpakt, Frostreif, Irrlichter, Flickwerk, Falkenblick, Hasenlauf, Seelenernte, Echo — und die Grundangriffe Speer und Sichel | nur Dart-SDK |
-| `packages/action_combat/lib/src/item_drops.dart` | **Beute in der Grube** ([ADR-0083](docs/decisions/0083-beute-in-der-grube.md)): die erste Stufe der Kaskade — *ob* ein Gegner etwas fallen lässt —, am Boden liegen, hinlaufen, einsammeln. Was es ist, weiß die Grube nicht | nur Dart-SDK |
+| `packages/action_combat/lib/src/item_drops.dart` | **Beute in der Grube** ([ADR-0083](docs/decisions/0083-beute-in-der-grube.md)): die erste Stufe der Kaskade — *ob* ein Gegner etwas fallen lässt —, am Boden liegen — **erst 0,45 s, damit man sieht, was es ist** —, hinlaufen, einsammeln. Was es ist, weiß die Grube nicht | nur Dart-SDK |
 | `packages/action_combat/lib/src/entwickler.dart` | **nur Entwicklermodus**: Gegner beschwören und Funde legen, auf dem Weg des Spiels (`EntwicklerWerkzeug`) — der Wächter ist ausgenommen | nur Dart-SDK |
 | `packages/action_combat/lib/src/daily_pit.dart` | **die Tagesgrube** ([ADR-0072](docs/decisions/0072-die-tagesgrube.md)): Startwert aus dem Datum, sieben Sätze je Wochentag, Raumzeile, die Versuche als Historie, Ruhm | nur Dart-SDK |
 | `packages/action_combat/lib/src/aim.dart` | **wohin eine Fähigkeit wirkt** — Selbstzielen, Skillshot, abgesetzte Flächen, Vorschau | nur Dart-SDK |
@@ -384,7 +384,7 @@ dart run tool/tagesgrube_sim.dart      # die sieben Sätze der Tagesgrube, je St
 
 # Die Grube allein, ohne Flutter
 cd packages/action_combat
-dart test                              # 414 Tests
+dart test                              # 415 Tests
 dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
