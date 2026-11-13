@@ -234,7 +234,7 @@ neuen Eintrag dort.
 Nicht in einer HERKUNFT-Datei, vermutlich eigen — **bitte bestätigen**:
 
 - [ ] `character/Charakter.png` — die Grundfigur (seit 10.09.)
-- [ ] `Items/Gold.png` — die Goldmünze (seit 09.09.)
+- [x] `Items/Gold.png` — die Goldmünze, seit 13.11.2026 neu mit pxl (`tool/pixel/goldmuenze.px.js`): gerändelt, leise geprägte Krone
 - [ ] `UI/ButtonBG.png` — der Grund der Kreise (seit 09.09.)
 - [ ] `UI/Berg.jpg`, `UI/Bibliothek.jpg` — „Frederiks Bild“; selbst gemacht, erzeugt oder geladen?
 - [ ] `Mentor/Mentor.png`, `Mentor/Mentor_Kopf.png` — ebenso
