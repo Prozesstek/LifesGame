@@ -17,6 +17,7 @@ import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
 import 'ladder_controller.dart';
+import 'widgets/dropchancen.dart';
 import 'widgets/eingangs_glut.dart';
 import 'widgets/schwerter_zeichen.dart';
 import 'widgets/tagesform_kreis.dart';
@@ -91,12 +92,15 @@ class LadderScreen extends ConsumerWidget {
                       // Der Blitz schrumpft, die Schlüssel nicht: Sein Text
                       // kann lang werden („Angriff +10 %, Leben +10 %, …“).
                       if (!imTutorial)
-                        const Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            _Schluessel(),
-                            SizedBox(width: 16),
-                            Flexible(child: TagesformKreis()),
+                            const _Schluessel(),
+                            const SizedBox(width: 16),
+                            const Flexible(child: TagesformKreis()),
+                            const SizedBox(width: 16),
+                            // Was unten fällt, je Seltenheit (13.11.2026).
+                            DropchancenKnopf(etage: stufe),
                           ],
                         ),
                       const SizedBox(height: 10),

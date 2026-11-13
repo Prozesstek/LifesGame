@@ -30,9 +30,14 @@ import '../ui/pixel_art.dart';
 /// vom Knopf weg ist Richtung und Weite, Loslassen wirkt. Heilung,
 /// Schutz und Mana haben nichts zu zielen und wirken beim Drücken.
 class AbilityButtons extends StatelessWidget {
-  const AbilityButtons({required this.game, super.key});
+  const AbilityButtons({required this.game, this.links = false, super.key});
 
   final ActionGame game;
+
+  /// **Gespiegelt für die linke Seite** (Einstellungen, 13.11.2026): Die
+  /// Ultimate sitzt dann unten links, der erste Platz liegt wieder der
+  /// Mitte am nächsten, wo der Daumen hinkommt.
+  final bool links;
 
   ActionWorld get world => game.sim;
 
@@ -57,6 +62,7 @@ class AbilityButtons extends StatelessWidget {
     if (world.slots.isEmpty) return const SizedBox.shrink();
     return Row(
       mainAxisSize: MainAxisSize.min,
+      textDirection: links ? TextDirection.rtl : TextDirection.ltr,
       children: <Widget>[
         for (final ability in world.slots) ...<Widget>[
           _platz(ability, slotSize),
@@ -68,6 +74,10 @@ class AbilityButtons extends StatelessWidget {
 }
 
 extension on AbilityButtons {
+  /// Links gespiegelt: dieselbe Lage von der anderen Seite gemessen.
+  double _gespiegelt(double left, double breite) =>
+      links ? AbilityButtons.arcExtent - left - breite : left;
+
   /// Ein Platz im Kampf. **Ein Passiv hat keinen Knopf** (ADR-0073): Sein
   /// Bild steht da, damit man sieht, was wirkt, nimmt aber keinen Tipp
   /// an und hat nichts zu zielen.
@@ -103,10 +113,12 @@ extension on AbilityButtons {
         children: <Widget>[
           for (var i = 0; i < world.slots.length && i < winkel.length; i++)
             Positioned(
-              left:
-                  mitte +
-                  math.cos(winkel[i]) * AbilityButtons._bogen -
-                  AbilityButtons.arcSlotSize / 2,
+              left: _gespiegelt(
+                mitte +
+                    math.cos(winkel[i]) * AbilityButtons._bogen -
+                    AbilityButtons.arcSlotSize / 2,
+                AbilityButtons.arcSlotSize,
+              ),
               top:
                   mitte +
                   math.sin(winkel[i]) * AbilityButtons._bogen -
@@ -118,7 +130,8 @@ extension on AbilityButtons {
               ),
             ),
           Positioned(
-            right: 0,
+            left: links ? 0 : null,
+            right: links ? null : 0,
             bottom: 0,
             child: _AimGesture(
               key: const Key('ultimate-knopf'),

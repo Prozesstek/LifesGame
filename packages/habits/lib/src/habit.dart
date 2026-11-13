@@ -12,7 +12,7 @@ import 'skill_area.dart';
 /// was er tut; die Bezeichner bleiben, weil sie im Spielstand stehen.
 enum HabitStat {
   /// Aus dem Gebiet Körper.
-  staerke('Angriff'),
+  staerke('Angriffsschaden'),
 
   /// Aus dem Gebiet Gesellschaft.
   ausdauer('Leben'),

@@ -22,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
-import '../../action/pit_text.dart';
 import '../../combat/ladder_controller.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
@@ -31,7 +30,7 @@ import '../gear_controller.dart';
 import '../gear_icon.dart';
 import '../sell_flow.dart';
 import '../weapon_ability_line.dart';
-import 'copy_stats.dart';
+import '../copy_text.dart';
 import 'rarity_badge.dart';
 import '../../home/erster_start.dart';
 import '../../mentor/zeigefinger.dart';
@@ -68,7 +67,6 @@ class GearSheet extends ConsumerWidget {
     final loadout = ref.watch(loadoutProvider);
     final rung = ref.watch(ladderProvider).highestDefeated;
     final heute = ref.watch(dailyOffersProvider);
-    final getragen = loadout.equippedCopyIn(item.slot);
     final eigene = <GearCopy>[
       for (final copy in loadout.copiesIn(item.slot))
         if (copy.itemId == item.id) copy,
@@ -80,8 +78,14 @@ class GearSheet extends ConsumerWidget {
     final offen = GearGates.isOpen(item.rarity, highestRung: rung);
     final imLaden = heute.any((c) => c.itemId == item.id);
     final set = GearSets.byId(item.setId);
-    final faehigkeit = itemAbilityText(item);
+    final kampf = itemAbilityText(item);
     final pfad = GearIcons.forItemId(item.id);
+    final angelegt = dieses != null && loadout.isEquipped(dieses.uid);
+    // **Gegen das Getragene**, je Wert einzeln (AktivesBrett, 13.11.2026)
+    // — nur bei einem Exemplar, das nicht selbst angelegt ist.
+    final vergleich = dieses != null && !angelegt
+        ? loadout.equippedCopyIn(item.slot)
+        : null;
 
     return HolzBlatt(
       child: SafeArea(
@@ -148,6 +152,19 @@ class GearSheet extends ConsumerWidget {
                                 color: Palette.textDim,
                               ),
                             ),
+                            // **Der Wurf steht beim Namen** (13.11.2026):
+                            // Er gehört zu diesem einen Exemplar, wie die
+                            // Seltenheit zum Stück.
+                            if (dieses != null) _Qualitaet(copy: dieses),
+                            if (angelegt)
+                              const Text(
+                                'Angelegt',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Palette.accent,
+                                ),
+                              ),
                           ],
                         ),
                       ],
@@ -155,20 +172,20 @@ class GearSheet extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                item.why,
-                style: const TextStyle(
-                  fontSize: 13,
-                  height: 1.35,
-                  color: Palette.textDim,
+              const SizedBox(height: 14),
+              // **Die Werte dieses Exemplars**, sonst die des Katalogs mit
+              // 100 % — und daneben, um wie viel besser oder schlechter
+              // als das Getragene. Den Kasten „Angelegt“ gibt es nicht
+              // mehr (13.11.2026), der Unterschied steht in der Zeile.
+              _Werte(
+                zeilen: CopyText.lines(
+                  dieses ?? _katalog(item),
+                  worn: vergleich,
                 ),
               ),
-              const SizedBox(height: 14),
-              for (final (label, wert) in _werte(item))
-                _Zeile(label: label, wert: wert),
-              if (faehigkeit != null) _Zeile(label: 'Kampf', wert: faehigkeit),
+              if (kampf != null) _Kampf(text: kampf),
               if (set != null) ...<Widget>[
+                const SizedBox(height: 6),
                 _Zeile(label: 'Set', wert: '„${set.name}"'),
                 _Zeile(
                   label: '${GearSet.smallSize} Teile',
@@ -185,21 +202,21 @@ class GearSheet extends ConsumerWidget {
                       '${GearSet.fullSize}',
                 ),
               ],
-              _Zeile(label: 'Preis', wert: '${item.price} Gold'),
-              _Zeile(label: 'Verkauf', wert: '${Loadout.refundFor(item)} Gold'),
-              const SizedBox(height: 12),
-              _Herkunft(
-                besessen: eigene.length,
-                offen: offen,
-                sprosse: GearGates.rungFor(item.rarity),
-                imLaden: imLaden,
-              ),
+              // Wer es hat, weiss, dass er es hat. Gesagt wird nur, woher
+              // ein Stück kommt, das man nicht hat.
+              if (eigene.isEmpty) ...<Widget>[
+                const SizedBox(height: 12),
+                _Herkunft(
+                  offen: offen,
+                  sprosse: GearGates.rungFor(item.rarity),
+                  imLaden: imLaden,
+                ),
+              ],
               if (dieses != null) ...<Widget>[
                 const SizedBox(height: 16),
-                _Exemplar(
+                _Knoepfe(
                   copy: dieses,
-                  worn: getragen,
-                  istAngelegt: loadout.isEquipped(dieses.uid),
+                  istAngelegt: angelegt,
                   slot: item.slot,
                   // **Über das Blatt, nicht über das Exemplar**: Verkauft,
                   // verschwindet das Exemplar samt seinem Kontext, und mit
@@ -213,6 +230,9 @@ class GearSheet extends ConsumerWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: 10),
+              // Ganz unten, was es beim Händler bringt (13.11.2026).
+              _Zeile(label: 'Verkauf', wert: '${Loadout.refundFor(item)} Gold'),
             ],
           ),
         ),
@@ -227,30 +247,72 @@ class GearSheet extends ConsumerWidget {
     );
   }
 
-  /// Die Grundwerte des Katalogs, im Kampfmassstab, und was die
-  /// Seltenheit vervielfacht.
-  ///
-  /// **„Grundwert", weil jedes Exemplar anders würfelt** (85–115 %,
-  /// ADR-0048). Was ein bestimmtes Stück bringt, steht darunter beim
-  /// Exemplar; hier steht, womit man bei diesem Stück rechnen kann.
-  static List<(String, String)> _werte(GearItem item) {
-    final grund = item.bonus.scaled;
-    return <(String, String)>[
-      if (grund.attack != 0) ('Angriff', '+${grund.attack}'),
-      if (grund.maxHp != 0) ('Lebenspunkte', '+${grund.maxHp}'),
-      if (grund.defense != 0) ('Verteidigung', '+${grund.defense}'),
-      if (grund.maxEnergy != 0) ('Mana', '+${grund.maxEnergy}'),
-      ('Wurf', '85 bis 115 % dieser Werte'),
-      // Nur Waffe und Rüstung vervielfachen (ADR-0042), und nur, wenn
-      // die Seltenheit es überhaupt tut: Gewöhnlich ist ×1.
-      if (item.rarity.powerFactor != 1 && item.slot == GearSlot.waffe)
-        (
-          'Seltenheit',
-          'Angriff im Kampf ×${pitNumber(item.rarity.powerFactor)}',
+  /// Das Stück, wie es im Katalog steht: ein Exemplar mit genau 100 %.
+  static GearCopy _katalog(GearItem item) =>
+      GearCopy(uid: '', itemId: item.id, bonus: item.bonus.scaled, paid: 0);
+}
+
+/// „Qualität 108 %" beim Namen — golden, wenn der Wurf gut ist; ein Tipp
+/// sagt, was das heisst.
+class _Qualitaet extends StatelessWidget {
+  const _Qualitaet({required this.copy});
+
+  final GearCopy copy;
+
+  @override
+  Widget build(BuildContext context) {
+    final gut = CopyText.isGoodRoll(copy);
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      message:
+          'Jedes Exemplar würfelt seine Werte: 85 bis 115 % des Stücks im '
+          'Katalog.',
+      child: Text(
+        CopyText.qualitaet(copy),
+        style: TextStyle(
+          fontSize: 12,
+          color: gut ? Palette.accent : Palette.textDim,
+          fontWeight: gut ? FontWeight.bold : FontWeight.normal,
         ),
-      if (item.rarity.powerFactor != 1 && item.slot == GearSlot.ruestung)
-        ('Seltenheit', 'Leben im Kampf ×${pitNumber(item.rarity.powerFactor)}'),
-    ];
+      ),
+    );
+  }
+}
+
+/// Was das Stück im Kampf tut, in ganzen Sätzen — Grundangriff, Kraft und
+/// was die Seltenheit vervielfacht (`itemAbilityText`).
+class _Kampf extends StatelessWidget {
+  const _Kampf({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            'Kampf',
+            style: TextStyle(fontSize: 13, color: Palette.textDim),
+          ),
+          for (final zeile in text.split('\n'))
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                zeile,
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  color: Palette.text,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 
@@ -271,6 +333,7 @@ class _Zeile extends StatelessWidget {
           // Beide dürfen schrumpfen (`gotchas.md`, zwei Texte in einer
           // Row). Eine Set-Wirkung ist lang.
           Flexible(
+            flex: 3,
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
@@ -279,7 +342,7 @@ class _Zeile extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Flexible(
-            flex: 2,
+            flex: 4,
             child: Text(
               wert,
               textAlign: TextAlign.right,
@@ -296,16 +359,80 @@ class _Zeile extends StatelessWidget {
   }
 }
 
-/// Ob man es hat, und wenn nicht, woher es kommt.
+/// Die Werte des Exemplars als Tabelle: Name, Zahl und — gegen das
+/// Getragene — der Unterschied, grün besser, rot schlechter.
+///
+/// **So breit wie ihr Inhalt** (AktivesBrett, 13.11.2026: „sehr weit weg
+/// voneinander“): Über die ganze Breite verteilt, stand die Zahl am
+/// rechten Rand, weit vom Namen.
+class _Werte extends StatelessWidget {
+  const _Werte({required this.zeilen});
+
+  final List<StatLine> zeilen;
+
+  static const TextStyle _name = TextStyle(
+    fontSize: 13,
+    color: Palette.textDim,
+  );
+  static const TextStyle _zahl = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: Palette.text,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: <TableRow>[
+          for (final zeile in zeilen)
+            TableRow(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text(zeile.label, style: _name),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    zeile.zahlText,
+                    textAlign: TextAlign.right,
+                    style: _zahl,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text(
+                    zeile.diffZahl,
+                    textAlign: TextAlign.right,
+                    style: _zahl.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: switch (zeile.diff) {
+                        null || 0 => Palette.muted,
+                        > 0 => Palette.success,
+                        _ => Palette.enemy,
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Woher ein Stück kommt, das man nicht hat.
 class _Herkunft extends StatelessWidget {
   const _Herkunft({
-    required this.besessen,
     required this.offen,
     required this.sprosse,
     required this.imLaden,
   });
-
-  final int besessen;
 
   /// Ob die Seltenheit schon kaufbar ist (`GearGates`).
   final bool offen;
@@ -318,24 +445,19 @@ class _Herkunft extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (IconData zeichen, Color farbe, String text) = switch (besessen) {
-      > 0 => (
-        Icons.check_circle_outline,
-        Palette.success,
-        besessen == 1 ? 'Im Besitz.' : '$besessen Mal im Besitz.',
-      ),
-      _ when !offen => (
+    final (IconData zeichen, Color farbe, String text) = switch (offen) {
+      false => (
         Icons.lock_outline,
         Palette.gold,
         'Verdient ab Etage $sprosse im Dungeon. Danach im Tagesladen und '
             'als Beute des Bosses.',
       ),
-      _ when imLaden => (
+      true when imLaden => (
         Icons.storefront_outlined,
         Palette.accent,
         'Noch nicht im Besitz. Heute im Tagesladen!',
       ),
-      _ => (
+      true => (
         Icons.help_outline,
         Palette.gold,
         'Noch nicht im Besitz. Kommt aus dem Tagesladen und als Beute des '
@@ -363,130 +485,78 @@ class _Herkunft extends StatelessWidget {
   }
 }
 
-/// Ein eigenes Exemplar: sein Wurf gegen das Getragene, und was man damit
-/// tun kann.
-class _Exemplar extends ConsumerWidget {
-  const _Exemplar({
+/// Was man mit dem Exemplar tun kann: anlegen oder ablegen, verkaufen,
+/// sperren — **nebeneinander, alle vier als Holzplanke** (AktivesBrett,
+/// 26.10.). Bis zum 13.11.2026 standen sie neben einem Kasten mit den
+/// Werten gegen das Getragene; den gibt es nicht mehr.
+class _Knoepfe extends ConsumerWidget {
+  const _Knoepfe({
     required this.copy,
-    required this.worn,
     required this.istAngelegt,
     required this.slot,
     required this.onVerkaufen,
   });
 
   final GearCopy copy;
+  final bool istAngelegt;
   final GearSlot slot;
   final VoidCallback onVerkaufen;
 
-  /// So breit steht die Spalte der Knöpfe — genug für „Verkaufen“ und
-  /// „Gesperrt“ samt Schloss auf einer Planke.
-  static const double _knopfBreite = 124;
-
-  /// **Alle vier Knöpfe sind Planken** (AktivesBrett, 26.10.): Bis dahin
-  /// war nur „Anlegen“ aus Holz, die übrigen standen als bloßer Text
-  /// darunter. Schmaler eingerückt als sonst, damit das Wort auf die
-  /// Planke passt.
+  /// Schmaler eingerückt als sonst, damit das Wort auf die Planke passt.
   static final ButtonStyle _planke = FilledButton.styleFrom(
     padding: const EdgeInsets.symmetric(horizontal: 8),
   );
-  final GearCopy? worn;
-  final bool istAngelegt;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gesperrt = ref.watch(loadoutProvider).isLocked(copy.uid);
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Palette.surfaceRaised,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: istAngelegt ? Palette.accent : Palette.surfaceSunken,
-          width: istAngelegt ? 1.5 : 1,
+    final knoepfe = <Widget>[
+      if (istAngelegt)
+        FilledButton(
+          style: _planke,
+          onPressed: () => ref.read(loadoutProvider.notifier).unequip(slot),
+          child: const Text('Ablegen'),
+        )
+      else
+        FilledButton(
+          style: _planke,
+          onPressed: () => ref.read(loadoutProvider.notifier).equip(copy.uid),
+          child: const Text('Anlegen'),
+        ),
+      // **Gesperrtes und Angelegtes lässt sich nicht verkaufen** (Issue
+      // #137; AktivesBrett, 13.11.2026). Der Knopf steht erst wieder da,
+      // wenn es frei und abgelegt ist.
+      if (!gesperrt && !istAngelegt)
+        FilledButton(
+          style: _planke,
+          onPressed: onVerkaufen,
+          child: const Text('Verkaufen'),
+        ),
+      // Im Rundgang zeigt der Mentor auf das Schloss (07.11.2026).
+      Zeigefinger(
+        schritt: Schritt.sperren,
+        aktiv: !gesperrt,
+        radius: 8,
+        child: FilledButton.icon(
+          style: _planke,
+          key: ValueKey<String>('schloss-${copy.uid}'),
+          onPressed: () =>
+              ref.read(loadoutProvider.notifier).toggleLock(copy.uid),
+          icon: Icon(
+            gesperrt ? Icons.lock : Icons.lock_open_outlined,
+            size: 16,
+          ),
+          label: Text(gesperrt ? 'Gesperrt' : 'Sperren'),
         ),
       ),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                if (istAngelegt)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      'Angelegt',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.accent,
-                      ),
-                    ),
-                  ),
-                // Der Vergleich zeigt, was dieser Wurf gegen das
-                // Getragene bringt, beim angelegten selbst gibt es
-                // nichts zu vergleichen.
-                CopyStats(copy: copy, worn: istAngelegt ? null : worn),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // **Feste Breite**, damit „Anlegen“ und „Verkaufen“ gleich breit
-          // untereinanderstehen. Ohne sie hätte die Spalte in der Zeile
-          // keine Breite, an der sie sich strecken könnte.
-          SizedBox(
-            width: _knopfBreite,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (istAngelegt)
-                  FilledButton(
-                    style: _planke,
-                    onPressed: () =>
-                        ref.read(loadoutProvider.notifier).unequip(slot),
-                    child: const Text('Ablegen'),
-                  )
-                else
-                  FilledButton(
-                    style: _planke,
-                    onPressed: () =>
-                        ref.read(loadoutProvider.notifier).equip(copy.uid),
-                    child: const Text('Anlegen'),
-                  ),
-                const SizedBox(height: 6),
-                // **Gesperrtes lässt sich nicht verkaufen** (Issue #137),
-                // also steht der Knopf erst wieder da, wenn es frei ist.
-                if (!gesperrt) ...<Widget>[
-                  FilledButton(
-                    style: _planke,
-                    onPressed: onVerkaufen,
-                    child: const Text('Verkaufen'),
-                  ),
-                  const SizedBox(height: 6),
-                ],
-                // Im Rundgang zeigt der Mentor auf das Schloss (07.11.2026).
-                Zeigefinger(
-                  schritt: Schritt.sperren,
-                  aktiv: !gesperrt,
-                  radius: 8,
-                  child: FilledButton.icon(
-                    style: _planke,
-                    key: ValueKey<String>('schloss-${copy.uid}'),
-                    onPressed: () =>
-                        ref.read(loadoutProvider.notifier).toggleLock(copy.uid),
-                    icon: Icon(
-                      gesperrt ? Icons.lock : Icons.lock_open_outlined,
-                      size: 16,
-                    ),
-                    label: Text(gesperrt ? 'Gesperrt' : 'Sperren'),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    ];
+    return Row(
+      children: <Widget>[
+        for (final (i, knopf) in knoepfe.indexed) ...<Widget>[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(child: knopf),
         ],
-      ),
+      ],
     );
   }
 }

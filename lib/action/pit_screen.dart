@@ -4,6 +4,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../einstellungen/einstellungen.dart';
 import '../progression/level_provider.dart';
 import '../progression/show_level_up.dart';
 
@@ -425,7 +426,13 @@ class _PitScreenState extends ConsumerState<PitScreen> {
             Positioned.fill(
               // Ein neuer Schlüssel je Lauf: Sonst behielte die Ansicht
               // den alten Fokus und die alten gedrückten Tasten.
-              child: PitRunView(key: ObjectKey(_game), game: _game),
+              child: PitRunView(
+                key: ObjectKey(_game),
+                game: _game,
+                faehigkeitenLinks: ref.watch(
+                  einstellungenProvider.select((e) => e.faehigkeitenLinks),
+                ),
+              ),
             ),
             if (_verloren)
               ColoredBox(
