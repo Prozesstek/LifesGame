@@ -22,9 +22,17 @@ import 'lauf_zeichen_view.dart';
 /// Steuerung zweimal da, liefe eine Taste irgendwann nur noch in einem
 /// von beiden (`gotchas.md`, zwei Stellen für eine Frage).
 class PitRunView extends StatefulWidget {
-  const PitRunView({super.key, required this.game});
+  const PitRunView({
+    super.key,
+    required this.game,
+    this.faehigkeitenLinks = false,
+  });
 
   final ActionGame game;
+
+  /// Ob die Fähigkeiten links liegen statt rechts — aus den Einstellungen,
+  /// hereingereicht, damit der Lauf keinen Provider kennen muss.
+  final bool faehigkeitenLinks;
 
   @override
   State<PitRunView> createState() => _PitRunViewState();
@@ -184,11 +192,13 @@ class _PitRunViewState extends State<PitRunView> {
               ),
             ),
             Positioned(
-              right: 16,
+              left: widget.faehigkeitenLinks ? 16 : null,
+              right: widget.faehigkeitenLinks ? null : 16,
               bottom: 24,
               child: ValueListenableBuilder<int>(
                 valueListenable: game.anzeige,
-                builder: (context, _, _) => AbilityButtons(game: game),
+                builder: (context, _, _) =>
+                    AbilityButtons(game: game, links: widget.faehigkeitenLinks),
               ),
             ),
           ],

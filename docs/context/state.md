@@ -12,9 +12,39 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 12.11.2026 · Frederik
+**Zuletzt aktualisiert:** 13.11.2026 · AktivesBrett
 
 ---
+
+## 13.11.2026: weniger Mana, und ein Einstellungsmenü
+
+AktivesBrett: „beim Kampf ist die Mana Regeneration viel zu stark“, dazu
+die Fähigkeiten wahlweise links und die Lautstärke einstellbar. In einer
+Fragerunde: **2 Mana je Sekunde**, das Zahnrad **nur auf der Startseite**.
+
+| Was | Wie |
+|---|---|
+| **Mana** | 2 je Sekunde auf Level 1, 2,5 ab Level 41 (vorher 6 bis 7); Manaregeneration der Ausrüstung legt weiter drauf (`manaRegenBase` 1, `manaRegenPerEnergy` 0,125) |
+| **Zahnrad** | links über „Heute“, von Anfang an da, auch im Tutorial |
+| **Ton** | ein Regler 0–100 %, gilt sofort für jeden Klang; beim Loslassen klingt eine Probe |
+| **Fähigkeiten** | rechts oder links — links liegt alles gespiegelt, die Ultimate unten links |
+
+**Gemessen** (`pit_sim`): ohne Tagesform unverändert; mit Form etwa eine
+Stufe härter an der Kante (Tag 30+F: Stufe 9 von 75 % auf 50 %, 10 von
+58 % auf 0 %; Tag 60+G+F: 28 von 67 % auf 50 %).
+
+**Ohne Rückfrage entschieden:** Die Einstellungen gehören dem **Gerät**,
+nicht dem Spielstand — eigener Schlüssel in `shared_preferences`, sie
+reisen beim Sichern als Text nicht mit und gehen beim Einfügen nicht
+verloren.
+
+App 1191 (vorher 1186). Startseite und Einstellungen in 390 × 844
+gerendert.
+
+### Offen
+
+- Ob 2 Mana je Sekunde sich am Handy gut anfühlt — der Bot spielt dumm.
+- **Frederik hat es nicht gesehen.**
 
 ## 12.11.2026: die Theorie als Seite aus einem Lernbuch
 
@@ -164,7 +194,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1186, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1191, dazu die acht Packages (theory 223, habits 375, gear
 141, action_combat 414, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

@@ -83,11 +83,17 @@ abstract final class ActionBalance {
   static const int manaPerEnergy = 5;
 
   /// Mana je Sekunde, unabhängig von der Energie.
-  static const double manaRegenBase = 4;
+  ///
+  /// **Seit dem 13.11.2026 ein Drittel** (AktivesBrett: „viel zu stark“):
+  /// Bis dahin kamen 6 je Sekunde zurück, eine Fähigkeit für 20 Mana war
+  /// nach gut drei Sekunden bezahlt, und Mana bremste nichts. Jetzt sind
+  /// es auf Level 1 genau 2 — eine solche Fähigkeit braucht zehn Sekunden.
+  /// Manaregeneration der Ausrüstung legt weiter drauf.
+  static const double manaRegenBase = 1;
 
-  /// Mana je Sekunde zusätzlich, je Punkt Energie. Bei 8 Energie sind das
-  /// 2 — zusammen 6 je Sekunde.
-  static const double manaRegenPerEnergy = 0.25;
+  /// Mana je Sekunde zusätzlich, je Punkt Energie. Bei 8 Energie (Level 1)
+  /// ist das 1 — zusammen 2 je Sekunde; bei 12 (ab Level 41) 2,5.
+  static const double manaRegenPerEnergy = 0.125;
 
   /// Wie viele Fähigkeitsplätze ein Lauf höchstens mitnimmt — die drei
   /// freien des Charakters (ADR-0016). Der Waffenplatz ist der

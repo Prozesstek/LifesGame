@@ -2,6 +2,7 @@ import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../einstellungen/einstellungen.dart';
 import '../audio/sound_effects.dart';
 import '../combat/daily_pit_controller.dart';
 import '../combat/ladder_controller.dart';
@@ -152,7 +153,14 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
           backgroundColor: Palette.backgroundRaised,
           foregroundColor: Palette.textOnDark,
         ),
-        body: OnDark(child: PitRunView(game: _game)),
+        body: OnDark(
+          child: PitRunView(
+            game: _game,
+            faehigkeitenLinks: ref.watch(
+              einstellungenProvider.select((e) => e.faehigkeitenLinks),
+            ),
+          ),
+        ),
       ),
     );
   }

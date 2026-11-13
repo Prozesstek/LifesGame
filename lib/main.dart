@@ -10,6 +10,7 @@ import 'audio/sound_effects.dart';
 import 'dev/dev_controller.dart';
 import 'dev/dev_screen.dart';
 import 'dev/save_slot.dart';
+import 'einstellungen/einstellungen.dart';
 import 'feedback/feedback_knopf.dart';
 import 'habits/day_watcher.dart';
 import 'home/home_screen.dart';
@@ -52,8 +53,18 @@ Future<void> main() async {
       overrides: [
         saveStoreProvider.overrideWithValue(store),
         activeSlotProvider.overrideWithValue(slot),
-        // Der einzige Ort mit echtem Ton — Tests bleiben still.
-        soundPlayerProvider.overrideWithValue(AssetSoundPlayer()),
+        // Der einzige Ort mit echtem Ton — Tests bleiben still. Wie laut,
+        // fragt er bei jedem Klang die Einstellungen.
+        soundPlayerProvider.overrideWith(
+          (ref) => AssetSoundPlayer(
+            lautstaerke: () => ref.read(einstellungenProvider).lautstaerke,
+          ),
+        ),
+        // Die Einstellungen gehören dem Gerät, nicht dem Spielstand.
+        if (prefs != null)
+          einstellungenSpeicherProvider.overrideWithValue(
+            EinstellungenInPrefs(prefs),
+          ),
         // Ohne Typangabe: Riverpod 3 exportiert `Override` nicht
         // (`gotchas.md`). Der Typ wird korrekt abgeleitet.
         if (prefs != null) ...[

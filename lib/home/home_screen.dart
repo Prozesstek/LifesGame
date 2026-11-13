@@ -6,6 +6,7 @@ import '../gear/equipment_screen.dart';
 import '../character/character_screen.dart';
 import '../dev/dev_controller.dart';
 import '../dev/dev_screen.dart';
+import '../einstellungen/einstellungen_screen.dart';
 import '../combat/ladder_screen.dart';
 import '../gear/shop_screen.dart';
 import '../habits/habits_controller.dart';
@@ -72,6 +73,9 @@ class HomeScreen extends ConsumerWidget {
   /// Namen darunter wieder 64, seit dem 11.11.2026 70 — im Innenabstand
   /// der Leiste, die dafür nicht höher wird.
   static const double bottomCircleSize = 70;
+
+  /// Das Zahnrad zu den Einstellungen — damit Tests es finden.
+  static const Key einstellungenKey = ValueKey<String>('einstellungen-knopf');
 
   /// Die Bereiche der unteren Leiste.
   static const List<Bereich> untereBereiche = <Bereich>[
@@ -317,18 +321,33 @@ class HomeScreen extends ConsumerWidget {
                           // dem oberen Rahmen.
                           // **Das Haustier links daneben** (24.10.2026),
                           // ohne Rahmen — erst, wenn es geschlüpft ist.
-                          EinblendLeiste(
-                            sichtbar: !start.zeigtWenig,
-                            verzoegerung:
-                                DerReiheNach.mentor + DerReiheNach.abstand,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: StatusLeiste(
-                                xp: xp,
-                                gold: gold,
-                                links: zeigtTier ? const HaustierKarte() : null,
+                          // **Das Zahnrad links** (13.11.2026): die
+                          // Einstellungen, von Anfang an da — auch im
+                          // Tutorial will mancher den Ton leiser.
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const _ZahnradKnopf(),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: EinblendLeiste(
+                                  sichtbar: !start.zeigtWenig,
+                                  verzoegerung:
+                                      DerReiheNach.mentor +
+                                      DerReiheNach.abstand,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: StatusLeiste(
+                                      xp: xp,
+                                      gold: gold,
+                                      links: zeigtTier
+                                          ? const HaustierKarte()
+                                          : null,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                           // **Heute** (ADR-0053) bekommt, was übrig
                           // bleibt. Eine lange Liste rollt, statt
@@ -691,6 +710,51 @@ class EinblendLeiste extends StatelessWidget {
 /// Er sitzt bewusst abseits der fünf Bereiche und ist kleiner als sie:
 /// Der Entwicklermodus ist kein Teil des Spiels, sondern ein Werkzeug —
 /// und er arbeitet auf einem eigenen Spielstand (ADR-0021).
+/// **Das Zahnrad zu den Einstellungen** (13.11.2026) — klein, links über
+/// „Heute“, auf dem Berg. Der einzige Weg hinein.
+class _ZahnradKnopf extends StatelessWidget {
+  const _ZahnradKnopf();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Semantics(
+        button: true,
+        label: 'Einstellungen',
+        child: Druck(
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: HomeScreen.einstellungenKey,
+              customBorder: const CircleBorder(),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const EinstellungenScreen(),
+                ),
+              ),
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: Palette.background.withValues(alpha: 0.75),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Palette.goldOnDark),
+                ),
+                child: const Icon(
+                  Icons.settings,
+                  size: 19,
+                  color: Palette.goldOnDark,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _DevKnopf extends ConsumerWidget {
   const _DevKnopf();
 
