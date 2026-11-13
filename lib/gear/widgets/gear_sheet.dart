@@ -177,11 +177,12 @@ class GearSheet extends ConsumerWidget {
               // 100 % — und daneben, um wie viel besser oder schlechter
               // als das Getragene. Den Kasten „Angelegt“ gibt es nicht
               // mehr (13.11.2026), der Unterschied steht in der Zeile.
-              for (final zeile in CopyText.lines(
-                dieses ?? _katalog(item),
-                worn: vergleich,
-              ))
-                _WertZeile(zeile: zeile),
+              _Werte(
+                zeilen: CopyText.lines(
+                  dieses ?? _katalog(item),
+                  worn: vergleich,
+                ),
+              ),
               if (kampf != null) _Kampf(text: kampf),
               if (set != null) ...<Widget>[
                 const SizedBox(height: 6),
@@ -358,57 +359,67 @@ class _Zeile extends StatelessWidget {
   }
 }
 
-/// Ein Wert des Exemplars: Name, Zahl und — gegen das Getragene — der
-/// Unterschied, grün besser, rot schlechter.
-class _WertZeile extends StatelessWidget {
-  const _WertZeile({required this.zeile});
+/// Die Werte des Exemplars als Tabelle: Name, Zahl und — gegen das
+/// Getragene — der Unterschied, grün besser, rot schlechter.
+///
+/// **So breit wie ihr Inhalt** (AktivesBrett, 13.11.2026: „sehr weit weg
+/// voneinander“): Über die ganze Breite verteilt, stand die Zahl am
+/// rechten Rand, weit vom Namen.
+class _Werte extends StatelessWidget {
+  const _Werte({required this.zeilen});
 
-  final StatLine zeile;
+  final List<StatLine> zeilen;
+
+  static const TextStyle _name = TextStyle(
+    fontSize: 13,
+    color: Palette.textDim,
+  );
+  static const TextStyle _zahl = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: Palette.text,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final d = zeile.diff;
-    final farbe = switch (d) {
-      null || 0 => Palette.muted,
-      > 0 => Palette.success,
-      _ => Palette.enemy,
-    };
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            flex: 5,
-            child: Text(
-              zeile.label,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Palette.textDim),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: <TableRow>[
+          for (final zeile in zeilen)
+            TableRow(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text(zeile.label, style: _name),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    zeile.zahlText,
+                    textAlign: TextAlign.right,
+                    style: _zahl,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text(
+                    zeile.diffZahl,
+                    textAlign: TextAlign.right,
+                    style: _zahl.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: switch (zeile.diff) {
+                        null || 0 => Palette.muted,
+                        > 0 => Palette.success,
+                        _ => Palette.enemy,
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              zeile.zahlText,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Palette.text,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              zeile.diffZahl,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: farbe,
-              ),
-            ),
-          ),
         ],
       ),
     );
