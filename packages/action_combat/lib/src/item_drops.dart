@@ -26,6 +26,10 @@ class _ItemDrop {
   final bool boss;
   Vec2 position;
   bool taken = false;
+
+  /// Wie lange es schon liegt — bis [ActionBalance.itemPickupDelay]
+  /// bleibt es liegen, auch wenn der Held danebensteht.
+  double alter = 0;
 }
 
 /// Ein Fund am Boden, wie der Renderer ihn sieht.
@@ -79,10 +83,14 @@ extension _ItemDrops on ActionWorld {
   }
 
   /// Gleitet zum Helden, wenn er nah ist, und wird eingesammelt, wenn er
-  /// ihn berührt.
+  /// ihn berührt — **erst nach einem Augenblick** (AktivesBrett,
+  /// 13.11.2026): Bis dahin wurde ein Fund neben dem Helden sofort
+  /// eingesaugt, und man sah nie, was es war und welche Seltenheit.
   void _moveItems(double dt) {
     for (final fund in _items) {
       if (fund.taken) continue;
+      fund.alter += dt;
+      if (fund.alter < ActionBalance.itemPickupDelay) continue;
       final zumHelden = _hero.position - fund.position;
       final abstand = zumHelden.length;
       if (abstand <= ActionBalance.itemRadius + _hero.radius) {

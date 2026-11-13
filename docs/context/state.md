@@ -16,6 +16,15 @@
 
 ---
 
+## 13.11.2026: Beute bleibt einen Augenblick liegen
+
+AktivesBrett: Ein Fund im Dungeon wurde sofort in den Helden gesaugt,
+„man erkennt garnicht“, was es ist und welche Seltenheit. Jetzt liegt
+jeder Fund 0,45 s, bevor er gleitet oder sich einsammeln lässt
+(`ActionBalance.itemPickupDelay`), auch wenn der Held danebensteht. Die
+Beute des Bosses kommt weiter sofort, mit ihm endet der Lauf.
+
+action_combat 415 (vorher 414). **Nicht gespielt, nicht am Handy.**
 ## 13.11.2026, danach: 1 Mana, Angelegtes bleibt, das Blatt eines Stücks neu
 
 AktivesBrett: „1 mana pro sekunde … 2 ist immernoch viel zu viel“,
@@ -235,7 +244,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
 **Tests:** App 1195, dazu die acht Packages (theory 223, habits 375, gear
-144, action_combat 414, progression 58, abilities 43, identity 25,
+144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
 
