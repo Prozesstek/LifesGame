@@ -26,6 +26,13 @@ Ersetzt `assets/Items/Gold.png` und steht damit überall, wo `GoldIcon`
 steht. **Nicht in der laufenden App angesehen, nicht am Handy** — bei 18
 Punkten bleibt von der Krone wenig.
 
+**Danach:** Der Knopf „mehrere verkaufen“ (Rucksack, Siegerblatt) trägt statt
+Haken und Strichen einen **braunen Lederbeutel voller Münzen**, unten
+flach, oben zugeschnürt, davor die neue Münze
+(`tool/pixel/mehrere_verkaufen.px.js`, `assets/UI/Verkaufen.png`); ein
+erster Entwurf in Türkis und rund war verworfen. Im Knopf in 24 Punkten
+gerendert.
+
 ## 12.11.2026: die Theorie als Seite aus einem Lernbuch
 
 Frederik: die Buchseite soll „wie eine echte Seite aus einem Lernbuch
