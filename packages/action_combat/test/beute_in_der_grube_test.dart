@@ -162,7 +162,7 @@ void main() {
       // Gleich hinlaufen und darauf stehen bleiben: Es bleibt trotzdem
       // liegen, bis der Augenblick vorbei ist.
       final fund = welt.itemDrops.single;
-      final kurz = ActionBalance.itemPickupDelay * 0.9;
+      const kurz = ActionBalance.itemPickupDelay * 0.9;
       for (var i = 0; i < (kurz / ActionBalance.stepSeconds).floor(); i++) {
         final weg = fund.position - welt.heroView.position;
         welt.step(weg.length < 2 ? Vec2.zero : weg.normalized);
