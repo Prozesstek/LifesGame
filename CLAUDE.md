@@ -209,6 +209,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/lagerfeuer/am_feuer_provider.dart` | trägt das zusammen, **rechnet nichts** | Flutter |
 | `lib/lagerfeuer/widgets/feuer_bild.dart` | Himmel, Scheite, Flammen, Funken; brennt oder glimmt; **flackert in Tests nicht** (`test/flutter_test_config.dart`) | Flutter |
 | `lib/lagerfeuer/widgets/lagerfeuer_karte.dart` | das Feuer auf der Startseite, unter „Heute“: was wartet, als Zeichen mit Zahl | Flutter |
+| `lib/lagerfeuer/widgets/karten_feuer.dart` | **das Feuer auf der Karte lebt** (16.11.2026): flackert, Funken, ein warmer Schein über der Karte — höchstens 12 Bilder je Sekunde in eigener Ebene, baut nichts neu; in Tests still (`FeuerBild.flackert`) | Flutter |
 | `lib/lagerfeuer/widgets/morgen_zuerst.dart` | was morgen zuerst drankommt — Knöpfe in der Reihenfolge **ohne** Vorsatz, damit nichts springt | Flutter |
 | `lib/lagerfeuer/morgen_zuerst_frage.dart` | **dieselbe Frage gleich nach dem geschafften Tag**: nach der Feier des letzten Häkchens ein Dialog mit dem Feuer — nur, wenn morgen mindestens zwei fällig sind und noch nichts gewählt ist; dazu `morgenFaellig`, eine Stelle für Feuer und Dialog | Flutter |
 | `lib/gear/widgets/character_figure.dart` | die Figur — **samt Rüstung, Schuhen, Waffe und Helm** (`overlays`, von den Schuhen bisher nur die Schattenstiefel, deckungsgleich auf 256 × 256), im Ausrüstungs-Bildschirm zwischen den Plätzen; dazu `CharacterKopf`, ihr Kopf im Kreis samt Helm — wo der Mentor abfragt | Flutter |
@@ -305,6 +306,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/palette.dart` | alle Farben der App — **zwei Untergründe, zwei Sätze** | Flutter |
 | `lib/ui/level_abzeichen.dart` | das Level als Abzeichen; **welcher Rahmen zu welchem Level gehört** (`LevelRahmen`, je zehn Level einer) | Flutter |
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
+| `lib/ui/tafel_wind.dart` | **ein Windstoß über der Anschlagtafel** (16.11.2026): alle 6 bis 13 s flattern die Zettel kurz an der Reißzwecke, von oben nach unten (`TafelWind.winkel`, reine Rechnung); zwischen zwei Stößen läuft kein Takt, im Stoß dreht sich nur eine fertige Ebene; in Tests still (`TafelWind.weht`) | Flutter |
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
@@ -372,7 +374,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1199 Tests
+flutter test             # 1207 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
