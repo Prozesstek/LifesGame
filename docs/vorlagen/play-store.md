@@ -55,19 +55,21 @@ Wochen dauern. Für den 20.11. trägt das nur, wenn die Nummer schon da ist.
       gibt. Eine Websuche fand keinen anderen Träger des Namens.
 - [ ] *(Mensch)* „Freno“ als Marke prüfen (DPMA, TMview, Klassen 9 und
       41): Das Wort heißt italienisch und spanisch „Bremse“.
-- [ ] *(Mensch)* Schreibweise festlegen — „FRENO Studios“ oder „Freno
-      Studios“ — und überall gleich führen: Play Console,
-      Datenschutzseite, Impressum.
+- [x] *(Mensch)* Schreibweise: **„FRENO Studios“** (16.11., Frederik) —
+      überall gleich führen: Play Console, Datenschutzseite, Impressum.
 - [x] *(Mensch)* Konto angelegt (19.10.).
 - [x] *(Mensch)* 25 $ zahlen und die Identität bestätigen; dazu gehört
       ein Android-Gerät mit der Play-Console-App. Dauert Tage. (10.11.)
 - [x] *(Mensch)* Händlerstatus angeben (Gesetz über digitale Dienste). Als
       Händler stehen Adresse und Telefon öffentlich im Store. (10.11.)
-- [ ] **Name und Paket-Id endgültig.** `dev.prozesstek.lifes_game` lässt
-      sich nach dem ersten Upload nie mehr ändern. „Lifes Game“ oder
-      „Life's Game“? Im Store nach gleichen Namen suchen.
-- [ ] Spiel oder App, und welche Kategorie (Rollenspiel, Gesundheit &
-      Fitness, Produktivität)?
+- [x] **Name und Paket-Id endgültig** (16.11., Frederik): Titel
+      **„Lifes Game“**, Paket-Id **`com.frenostudios.lifesgame`** (vorher
+      `dev.prozesstek.lifes_game`, nie hochgeladen). Lässt sich nach dem
+      ersten Upload nie mehr ändern. Eine Websuche fand keinen
+      Habit-Tracker gleichen Namens; nah dran sind „Life is a Game“ (eine
+      Lebenssimulation) und „Life Game“ (noch nicht im Store).
+- [x] **App, Gesundheit & Fitness** (16.11.) — lässt sich in der Play
+      Console jederzeit ändern, auch zwischen App und Spiel.
 - [ ] **Erinnerung ja oder nein** (seit 27.09. zurückgestellt). Empfehlung:
       ja, eine tägliche lokale Benachrichtigung — sonst misst der Test,
       wer die App vergisst, nicht wer sich langweilt. Darf als Update im
@@ -238,7 +240,7 @@ Bisher steht bei fast jedem Block in `state.md` „nicht am Handy“.
 
 Geprüft am 19.10.:
 
-- `applicationId` und `namespace` `dev.prozesstek.lifes_game`, der Name
+- `applicationId` und `namespace` (seit 16.11. `com.frenostudios.lifesgame`), der Name
   „Lifes Game“, das Hochformat im Manifest.
 - **targetSdk 36** über den Standard von Flutter — seit dem 31.08.2026
   Pflicht für neue Apps.
