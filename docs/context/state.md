@@ -16,6 +16,29 @@
 
 ---
 
+## 16.11.2026, danach: das Lagerfeuer brennt, der Wind geht über „Heute“
+
+Frederik, weiter mit „mach mal geiler“: „Gerne Lagerfeuer und Heute, es
+darf aber nicht so viel Leistung ziehen“.
+
+| Was | Wie |
+|---|---|
+| **Lagerfeuer-Karte** | das kleine Feuer flackert, Funken steigen, ein warmer Schein liegt über der Karte und atmet mit; glimmt es nur, atmet die Glut (`KartenFeuer`) |
+| **„Heute“** | alle 6 bis 13 s geht ein Windstoß über die Tafel: die Zettel flattern nacheinander an der Reißzwecke, von oben nach unten, und hängen nach 1,5 s wieder still (`TafelWind`) |
+| **Leistung** | Feuer höchstens 12 Bilder je Sekunde in eigener Ebene, ohne Neubau; der Wind läuft nur im Stoß und dreht fertige Ebenen — Text und Bretter werden nicht neu gemalt; ein Test zählt, dass der Nachbar nicht mitmalt |
+
+**Ohne Rückfrage entschieden:** wie stark und wie oft der Wind weht
+(`TafelWind.ausschlag`, `pauseMin`/`pauseMax`); wer am Gerät Bewegung
+abgeschaltet hat, sieht beides still.
+
+App 1207 (vorher 1199). Startseite und Karte gerendert und angesehen; das
+Flattern nur als Standbild.
+
+### Offen
+
+- Ob der Wind am Handy zu viel oder zu wenig ist.
+- **AktivesBrett hat es nicht gesehen.**
+
 ## 16.11.2026: der Berg lebt
 
 Frederik: „mach mal geiler“ — gemeint war die Startseite. Sie war sauber,
@@ -289,7 +312,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1199, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1207, dazu die acht Packages (theory 223, habits 375, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

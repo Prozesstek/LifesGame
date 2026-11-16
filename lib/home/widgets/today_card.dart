@@ -17,6 +17,7 @@ import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
 import '../../ui/pulsieren.dart';
+import '../../ui/tafel_wind.dart';
 import '../erster_start.dart';
 import '../erster_start_provider.dart';
 
@@ -79,6 +80,23 @@ class TodayCard extends ConsumerWidget {
     // **Ohne Schild** (06.11.2026, Frederik): Zu den Gewohnheiten führt
     // jederzeit ihr Kreis. Mit dem Schild ging die kleine Flamme der
     // Tageskette — die Kette zeigt die große Feier beim ersten Häkchen.
+    // **Ein Windstoß geht ab und zu über die Tafel** (16.11.2026) — in
+    // eigener Ebene, damit dabei nicht die Seite darum neu gemalt wird.
+    return RepaintBoundary(
+      child: TafelWind(
+        child: _tafel(context, ref, tracker, today, liste, hervorheben),
+      ),
+    );
+  }
+
+  Widget _tafel(
+    BuildContext context,
+    WidgetRef ref,
+    HabitTracker tracker,
+    Day today,
+    List<StackedHabit> liste,
+    bool hervorheben,
+  ) {
     return Anschlagtafel(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -97,7 +115,7 @@ class TodayCard extends ConsumerWidget {
               label: 'Ruhetag — heute ist nichts fällig',
             )
           else
-            for (final eintrag in liste)
+            for (final (platz, eintrag) in liste.indexed)
               _Zettel(
                 key: ValueKey<String>(eintrag.habit.id),
                 habit: eintrag.habit,
@@ -105,6 +123,8 @@ class TodayCard extends ConsumerWidget {
                 cue: CueText.lineFor(tracker, eintrag.habit.id),
                 treat: tracker.treatFor(eintrag.habit.id),
                 depth: eintrag.depth,
+                // Der Wind kommt von oben nach unten an.
+                windVersatz: liste.length < 2 ? 0 : platz / (liste.length - 1),
                 cued: eintrag.isCued,
                 timed: tracker.hasTimer(eintrag.habit.id),
                 zuerst: tracker.firstUpOn(today) == eintrag.habit.id,
@@ -136,6 +156,7 @@ class _Zettel extends StatelessWidget {
     required this.onTap,
     this.treat,
     this.depth = 0,
+    this.windVersatz = 0,
     this.cued = false,
     this.timed = false,
     this.zuerst = false,
@@ -162,6 +183,9 @@ class _Zettel extends StatelessWidget {
 
   /// Wie tief die Gewohnheit unter ihrem Anker hängt (ADR-0065).
   final int depth;
+
+  /// Wie spät ein Windstoß bei diesem Zettel ankommt (`TafelWind`).
+  final double windVersatz;
 
   /// Ob sie jetzt dran ist, weil ihr Anker abgehakt wurde.
   final bool cued;
@@ -214,6 +238,7 @@ class _Zettel extends StatelessWidget {
               child: Steckbrief(
                 neigung: neigungFuer(habit.id),
                 saat: habit.id.hashCode,
+                windVersatz: windVersatz,
                 abgestempelt: done,
                 innen: innen,
                 stempelGroesse: _stempel,
