@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:lifes_game/combat/widgets/eingangs_glut.dart';
 import 'package:lifes_game/haustier/widgets/haustier_bild.dart';
+import 'package:lifes_game/home/widgets/berg_himmel.dart';
 import 'package:lifes_game/lagerfeuer/widgets/feuer_bild.dart';
 import 'package:lifes_game/ui/ladebildschirm.dart';
 import 'package:lifes_game/ui/pulsieren.dart';
@@ -19,6 +20,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   EingangsGlut.atmet = false;
   FeuerBild.flackert = false;
   HaustierBild.lebt = false;
+  // Wolken und Schnee hinter der Startseite ziehen ohne Ende.
+  BergHimmel.lebt = false;
   Pulsieren.pulsiert = false;
   // Bilder werden in Widget-Tests nie fertig entpackt; der Ladebildschirm
   // wartete sonst bis zu seiner Grenze, und die Figur liefe endlos.

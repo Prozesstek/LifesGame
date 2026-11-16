@@ -12,9 +12,39 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 13.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 16.11.2026 · Frederik
 
 ---
+
+## 16.11.2026: der Berg lebt
+
+Frederik: „mach mal geiler“ — gemeint war die Startseite. Sie war sauber,
+aber starr. Jetzt bewegt sich der Hintergrund (`BergHimmel`).
+
+| Was | Wie |
+|---|---|
+| **Licht** | folgt der Uhr des Geräts: Morgenrot, klarer Tag wie bisher, Abendglut, nachts dunkelblau |
+| **Nacht** | Sterne funkeln über dem Grat, rechts vom Gipfel eine Mondsichel |
+| **Wolken** | acht grobe Pixelwolken ziehen nach links, in der Farbe der Tageszeit |
+| **Schnee** | ein paar Flocken am Gipfel, weiter unten tauen sie weg |
+
+Nur Darstellung, hinter Karten und Leisten; eigene Ebene, höchstens 20
+Bilder je Sekunde. Vier Tageszeiten in 390 × 844 gerendert.
+
+**Ohne Rückfrage entschieden:** was „geiler“ heißt. Die Uhrzeit färbt
+nur; es schneit zu jeder Jahreszeit.
+
+App 1199 (vorher 1195). **Die Bewegung hat niemand gesehen**, nur
+Standbilder; wie viel sie am Handy kostet, ist nicht gemessen.
+
+### Offen
+
+- Nachts kann eine Wolke quer vor dem Mond stehen; er sitzt knapp neben
+  dem Level-Ring.
+- Sichtbar ist es vor allem im Streifen zwischen oberer Leiste und
+  „Heute“. Statusleiste und die dunkle Lagerfeuer-Karte wirken daneben
+  am leblosesten — der nächste Block, wenn es gefällt.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 13.11.2026: Beute bleibt einen Augenblick liegen
 
@@ -259,7 +289,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1195, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1199, dazu die acht Packages (theory 223, habits 375, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
