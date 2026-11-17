@@ -35,18 +35,22 @@ def freistellen(im, toleranz=38):
     rand = [px[x, 0] for x in range(w)] + [px[x, h - 1] for x in range(w)]
     grund = tuple(sorted(c[i] for c in rand)[len(rand) // 2] for i in range(3))
 
-    def hintergrund(c):
+    def hintergrund(c, y):
         # nah am Grund, oder hell und farblos (Schatten, Verlauf)
         if sum(abs(c[i] - grund[i]) for i in range(3)) < toleranz:
             return True
-        return max(c[:3]) - min(c[:3]) < 14 and sum(c[:3]) > 3 * 120
+        farblos = max(c[:3]) - min(c[:3]) < 14
+        # Im unteren Fünftel liegt der Schatten unter den Füßen: Dort zählt
+        # auch Dunkleres, solange es farblos ist und am Grund hängt
+        return farblos and (sum(c[:3]) > 3 * 120
+                            or (y > h * 0.8 and sum(c[:3]) > 3 * 40))
 
     weg = [[False] * h for _ in range(w)]
     q = deque((x, y) for x in range(w) for y in (0, h - 1))
     q.extend((x, y) for y in range(h) for x in (0, w - 1))
     while q:
         x, y = q.popleft()
-        if weg[x][y] or not hintergrund(px[x, y]):
+        if weg[x][y] or not hintergrund(px[x, y], y):
             continue
         weg[x][y] = True
         for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
