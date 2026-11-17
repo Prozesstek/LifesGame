@@ -21,6 +21,7 @@ import '../ui/bereich_zeichen.dart';
 import '../ui/palette.dart';
 import 'erster_start.dart';
 import 'erster_start_provider.dart';
+import 'widgets/berg_himmel.dart';
 import 'widgets/erste_gewohnheit.dart';
 import 'widgets/hub_circle.dart';
 import 'widgets/status_leiste.dart';
@@ -95,7 +96,7 @@ class HomeScreen extends ConsumerWidget {
   static const EdgeInsets _leisteInnen = EdgeInsets.fromLTRB(4, 1, 4, 0);
 
   /// **Der Berg hinter der Startseite** (23.10.2026, Frederiks Bild).
-  static const String hintergrund = 'assets/UI/Berg.jpg';
+  static const String hintergrund = BergHimmel.bild;
 
   /// Wie stark das Leder über dem Berg liegt — 0 der Berg in voller
   /// Farbe, 1 nur Leder. Eine Spur, damit Holz und Pergament davor
@@ -107,18 +108,11 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       // Über „Heute" steigen die Zahlen eines Häkchens auf, wie auf dem
       // Gewohnheiten-Bildschirm (`AufstiegHost.maybeOf`).
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Palette.background,
-          image: DecorationImage(
-            image: const AssetImage(hintergrund),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Palette.background.withValues(alpha: bergSchleier),
-              BlendMode.srcATop,
-            ),
-          ),
-        ),
+      // **Der Berg lebt** (16.11.2026): Wolken, Schnee und das Licht
+      // der Tageszeit — `BergHimmel`.
+      body: BergHimmel(
+        schleier: bergSchleier,
+        schleierFarbe: Palette.background,
         child: AufstiegHost(
           // **Die Bühne** (06.11.2026): Ein neuer Schritt des Mentors
           // gilt hier erst, wenn keine Feier mehr darüber liegt — dann

@@ -8,7 +8,7 @@ import '../../ui/on_dark.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import '../am_feuer.dart';
-import 'feuer_bild.dart';
+import 'karten_feuer.dart';
 
 /// **Das Lagerfeuer auf der Startseite** (ADR-0076) — an der Stelle, wo
 /// bis zum 18.10. Truhe und Tagesaufgaben als zwei Karten standen.
@@ -56,54 +56,25 @@ class LagerfeuerKarte extends StatelessWidget {
               HolzKarte(
                 color: Palette.backgroundRaised,
                 edgeColor: amFeuer.brennt ? Palette.tintLava : Holz.kante,
-                padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
+                // Ohne Rand: Der Schein des Feuers reicht bis an die Kante.
+                padding: EdgeInsets.zero,
                 child: OnDark(
-                  child: Row(
+                  child: Stack(
+                    fit: StackFit.passthrough,
                     children: <Widget>[
-                      SizedBox(
-                        width: 56,
-                        height: 56,
-                        child: CustomPaint(
-                          painter: FeuerMaler(
-                            brennt: amFeuer.brennt,
-                            zeit: 1.8,
-                            himmel: false,
-                          ),
-                        ),
+                      // **Das Feuer lebt** (16.11.2026) — sparsam, in
+                      // eigener Ebene (`KartenFeuer`).
+                      Positioned.fill(
+                        child: KartenFeuer(brennt: amFeuer.brennt),
                       ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Lagerfeuer',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          KartenFeuer.links,
+                          6,
+                          14,
+                          6,
                         ),
-                      ),
-                      if (amFeuer.rueckfrageOffen)
-                        const _Wartet(
-                          zeichen: Icon(Icons.quiz_outlined, size: 18),
-                        ),
-                      if (amFeuer.truheWartet)
-                        const _Wartet(
-                          zeichen: PixelArt(
-                            assetPath: truhenBild,
-                            side: 22,
-                            fallback: Icon(Icons.inventory_2, size: 18),
-                          ),
-                        ),
-                      if (amFeuer.aufgabenAbholbar > 0)
-                        _Wartet(
-                          zeichen: const Icon(Icons.flag_rounded, size: 18),
-                          zahl: amFeuer.aufgabenAbholbar,
-                        ),
-                      const SizedBox(width: 2),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: Palette.textOnDarkDim,
+                        child: _zeile(),
                       ),
                     ],
                   ),
@@ -119,6 +90,41 @@ class LagerfeuerKarte extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _zeile() {
+    return Row(
+      children: <Widget>[
+        // Hier malt `KartenFeuer` das Feuer.
+        const SizedBox.square(dimension: KartenFeuer.seite),
+        const SizedBox(width: 8),
+        const Expanded(
+          child: Text(
+            'Lagerfeuer',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+        ),
+        if (amFeuer.rueckfrageOffen)
+          const _Wartet(zeichen: Icon(Icons.quiz_outlined, size: 18)),
+        if (amFeuer.truheWartet)
+          const _Wartet(
+            zeichen: PixelArt(
+              assetPath: truhenBild,
+              side: 22,
+              fallback: Icon(Icons.inventory_2, size: 18),
+            ),
+          ),
+        if (amFeuer.aufgabenAbholbar > 0)
+          _Wartet(
+            zeichen: const Icon(Icons.flag_rounded, size: 18),
+            zahl: amFeuer.aufgabenAbholbar,
+          ),
+        const SizedBox(width: 2),
+        const Icon(Icons.chevron_right_rounded, color: Palette.textOnDarkDim),
+      ],
     );
   }
 }

@@ -1,4 +1,4 @@
-package dev.prozesstek.lifes_game
+package com.frenostudios.lifesgame
 
 import io.flutter.embedding.android.FlutterActivity
 

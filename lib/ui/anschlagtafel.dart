@@ -7,6 +7,7 @@ import 'gehrung.dart';
 import 'holz.dart';
 import 'holz_teile.dart';
 import 'palette.dart';
+import 'tafel_wind.dart';
 
 /// Eine **Anschlagtafel** wie am Gemeindehaus: dunkle Bretter im
 /// Holzrahmen, oben ein Schild (Wunsch vom 23.10.2026: „Dailies als
@@ -62,18 +63,29 @@ class Anschlagtafel extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border.all(color: Holz.kante, width: 1.5),
                 ),
-                child: CustomPaint(
-                  painter: const _Bretter(),
-                  child: Padding(
-                    // Oben bleibt die untere Hälfte des Schilds frei.
-                    padding: EdgeInsets.fromLTRB(
-                      6,
-                      schild == null ? 14 : schildUeberstand + 8,
-                      6,
-                      18,
+                // **Die Bretter in eigener Ebene** (16.11.2026): Flattert
+                // ein Zettel im Wind (`TafelWind`), werden sie nicht neu
+                // gemalt. `passthrough`, sonst schrumpfte der Inhalt
+                // (`gotchas.md`).
+                child: Stack(
+                  fit: StackFit.passthrough,
+                  children: <Widget>[
+                    const Positioned.fill(
+                      child: RepaintBoundary(
+                        child: CustomPaint(painter: _Bretter()),
+                      ),
                     ),
-                    child: child,
-                  ),
+                    Padding(
+                      // Oben bleibt die untere Hälfte des Schilds frei.
+                      padding: EdgeInsets.fromLTRB(
+                        6,
+                        schild == null ? 14 : schildUeberstand + 8,
+                        6,
+                        18,
+                      ),
+                      child: child,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -252,10 +264,15 @@ class Steckbrief extends StatefulWidget {
     this.stempelGroesse = 50,
     this.stempelText,
     this.streifen,
+    this.windVersatz = 0,
     super.key,
   });
 
   final Widget child;
+
+  /// Wie spät ein Windstoß bei diesem Blatt ankommt, 0 bis 1
+  /// (`TafelWind`) — ohne Wind über der Tafel ohne Wirkung.
+  final double windVersatz;
 
   /// Ein Streifen am linken Rand, bis an den Riss: die Farbe des Gebiets
   /// einer Gewohnheit auf „Heute“ (ADR-0090). Ohne keiner.
@@ -339,6 +356,23 @@ class _SteckbriefState extends State<Steckbrief>
         ? Palette.surfaceRaised
         : Palette.surface;
 
+    // **Die Hülle steht immer** (`gotchas.md`), auch ohne Wind: Sonst
+    // baute sich das Blatt neu, und der Stempel schlüge nicht auf.
+    final wind = TafelWind.maybeOf(context) ?? kAlwaysDismissedAnimation;
+    return AnimatedBuilder(
+      animation: wind,
+      // Um die Reißzwecke, nicht um die Mitte.
+      builder: (context, blatt) => Transform.rotate(
+        angle: TafelWind.winkel(wind.value, versatz: widget.windVersatz),
+        alignment: Alignment.topCenter,
+        child: blatt,
+      ),
+      // Eine fertige Ebene: Im Wind dreht sie sich nur, gemalt wird nichts.
+      child: RepaintBoundary(child: _blatt(papier)),
+    );
+  }
+
+  Widget _blatt(Color papier) {
     return Transform.rotate(
       angle: widget.neigung,
       child: Stack(
