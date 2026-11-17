@@ -12,9 +12,30 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 13.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 17.11.2026 · AktivesBrett
 
 ---
+
+## 17.11.2026: Sprites aus der KI, erster Versuch
+
+AktivesBrett, nach einem Vorschlag aus seinem Freundeskreis: eigene
+Sprites mit einer KI erzeugen statt zeichnen. Geplant in sechs Etappen;
+fertig sind die ersten drei.
+
+| Etappe | Stand |
+|---|---|
+| **1. ComfyUI** | lokal bei AktivesBrett, **nicht im Repo**: SDXL Base 1.0 (OpenRAIL++) und die LoRA `nerijs/pixel-art-xl` (CreativeML OpenRAIL-M) — beide erlauben kommerzielle Nutzung; RTX 3060, etwa 20 s je Bild |
+| **2. Prompt** | 16 Bilder eines Waldläufers mit Bogen; Sprite-Bögen kommen mit „game sprite“ und lassen sich im Negativ-Prompt verbieten. Gewählt: **A4**, schräg von vorn — **ins Profil dreht sich keiner** |
+| **3. Verpixeln** | `tool/sprite_verpixeln.py`: freistellen, 64 × 64, 24 Farben, Umriss — abgenommen an A4 |
+
+**Nichts davon ist im Spiel.** Was dort hinkommt, entscheiden beide.
+
+### Offen
+
+- **Etappe 4**: IP-Adapter und ControlNet mit Pose-Vorlage, damit dieselbe
+  Figur in festen Posen und im Profil kommt — braucht einige GB Download.
+- Der Bogen nimmt viel Breite: Der Körper ist nur gut 40 Bildpunkte hoch.
+- **Frederik hat es nicht gesehen.**
 
 ## 13.11.2026: Beute bleibt einen Augenblick liegen
 
