@@ -35,9 +35,21 @@ sonst drückten Ei und Feuer die Tafel auf null.
 App 1209 (vorher 1207). 390 × 844 mit drei und fünf Gewohnheiten und
 360 × 640 gerendert und angesehen.
 
+**Danach** (Frederik: „Sobald was abgehakt ist wird es nach unten
+geschoben unabhängig davon ob es an etwas hängt“): Erledigtes rutscht
+sofort nach unten, auch aus einem Stapel — auf der Startseite und im
+Gewohnheiten-Bildschirm (`HabitStacks.order`). **Das nimmt einen Teil
+von ADR-0065 zurück**: Dort blieb ein Stapel zusammen, bis jedes Glied
+erledigt war. Eingerückt bleibt, wessen Anker in derselben Hälfte steht;
+die offene Folge eines abgehakten Ankers steht ohne Einrückung oben und
+ist „jetzt dran“. habits 377 (vorher 375).
+
 ### Offen
 
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
+- Woran eine offene Folge hängt, sieht man nicht mehr, sobald ihr Anker
+  abgehakt ist.
+- **AktivesBrett hat es nicht gesehen.**
 - Die Ei-Wahl nimmt viel Platz, solange es kein Tier gibt.
 
 ## 16.11.2026, danach: das Lagerfeuer brennt, der Wind geht über „Heute“
@@ -336,7 +348,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1209, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1209, dazu die acht Packages (theory 223, habits 377, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

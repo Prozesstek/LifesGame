@@ -51,18 +51,22 @@ abstract final class HabitStacks {
   ///
   /// [habits] kommt schon in der Reihenfolge, die ohne Kopplung gälte.
   /// Sie bleibt für die Wurzeln und für Geschwister unter demselben Anker
-  /// erhalten. **Ein Stapel bleibt zusammen**: Er steht oben, solange
-  /// irgendein Glied offen ist, und wandert als Ganzes nach unten, wenn
-  /// alles erledigt ist — sonst rutschte ein abgehakter Anker von seiner
-  /// offenen Folge weg, und genau die soll man dann sehen.
+  /// erhalten.
+  ///
+  /// **Was erledigt ist, wandert nach unten — auch aus einem Stapel**
+  /// (19.11.2026, Frederik: „unabhängig davon ob es an etwas hängt“).
+  /// Bis dahin blieb ein Stapel zusammen, bis jedes Glied erledigt war
+  /// (ADR-0065). Oben steht jetzt nur, was noch zu tun ist. Eingerückt
+  /// bleibt, wessen Anker in derselben Hälfte steht; die offene Folge
+  /// eines abgehakten Ankers ist „jetzt dran“ ([StackedHabit.isCued]).
   ///
   /// Ein Anker, der nicht in [habits] steht (gestoppt, heute nicht
   /// fällig), zählt nicht: Die Gewohnheit ist dann selbst eine Wurzel.
   ///
   /// [zuerst] ist der Vorsatz vom Lagerfeuer (ADR-0076): **sein Stapel**
   /// steht vor allen anderen offenen — als Ganzes, denn ein Glied allein
-  /// nach oben zu ziehen risse es von seinem Anker. Ist er erledigt,
-  /// wandert er nach unten wie jeder andere.
+  /// nach oben zu ziehen risse es von seinem Anker. Was davon erledigt
+  /// ist, wandert nach unten wie jedes andere.
   static List<StackedHabit> order(
     List<Habit> habits,
     Map<String, String> anchors, {
@@ -93,22 +97,31 @@ abstract final class HabitStacks {
     }
 
     final vorn = <StackedHabit>[];
-    final offen = <StackedHabit>[];
-    final fertig = <StackedHabit>[];
+    final rest = <StackedHabit>[];
     for (final wurzel in wurzeln) {
       final glieder = stapel(wurzel, 0, cued: false);
-      final alleErledigt = glieder.every((g) => isDone(g.habit));
       final vorgenommen = glieder.any((g) => g.habit.id == zuerst);
-      if (alleErledigt) {
-        fertig.addAll(glieder);
-      } else if (vorgenommen) {
-        vorn.addAll(glieder);
-      } else {
-        offen.addAll(glieder);
-      }
+      (vorgenommen ? vorn : rest).addAll(glieder);
+    }
+
+    // Erledigtes nach unten, die Reihenfolge der Stapel bleibt in jeder
+    // Hälfte. Eingerückt wird nur unter einem Anker derselben Hälfte —
+    // er steht dort immer davor, weil ein Stapel von oben gelesen wird.
+    final offen = <StackedHabit>[];
+    final fertig = <StackedHabit>[];
+    final tiefe = <String, int>{};
+    for (final g in <StackedHabit>[...vorn, ...rest]) {
+      final erledigt = isDone(g.habit);
+      final anker = g.depth == 0 ? null : anchors[g.habit.id];
+      final ankerTiefe = anker == null ? null : tiefe[anker];
+      final ankerGleich = anker != null && isDone(aufListe[anker]!) == erledigt;
+      final depth = ankerGleich && ankerTiefe != null ? ankerTiefe + 1 : 0;
+      tiefe[g.habit.id] = depth;
+      (erledigt ? fertig : offen).add(
+        StackedHabit(habit: g.habit, depth: depth, isCued: g.isCued),
+      );
     }
     return List<StackedHabit>.unmodifiable(<StackedHabit>[
-      ...vorn,
       ...offen,
       ...fertig,
     ]);

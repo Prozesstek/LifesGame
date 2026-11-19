@@ -138,13 +138,31 @@ void main() {
       expect(dran(t), <String>[c]);
     });
 
-    test('der abgehakte Anker bleibt über seiner offenen Folge stehen', () {
-      // Sonst rutschte er nach unten, und man sähe nicht mehr, woran die
-      // Folge hängt.
+    test('der abgehakte Anker wandert nach unten, seine Folge ist dran', () {
+      // 19.11.2026: Erledigtes nach unten, auch aus einem Stapel.
       final t =
           laufen(<String>[a, b, c]).setAnchor(b, a).check(a, heute).tracker;
 
-      expect(liste(t), <String>[a, b, c]);
+      expect(liste(t), <String>[b, c, a]);
+      expect(tiefen(t), <int>[0, 0, 0]);
+      expect(dran(t), <String>[b]);
+    });
+
+    test('ein abgehaktes Glied mitten im Stapel wandert nach unten', () {
+      var t = laufen(<String>[a, b, c]).setAnchor(b, a).setAnchor(c, b);
+      t = t.check(b, heute).tracker;
+
+      expect(liste(t), <String>[a, c, b]);
+      expect(tiefen(t), <int>[0, 0, 0]);
+    });
+
+    test('unten bleibt eingerückt, wessen Anker auch erledigt ist', () {
+      var t = laufen(<String>[a, b, c, d]).setAnchor(b, a).setAnchor(c, b);
+      t = t.check(a, heute).tracker.check(b, heute).tracker;
+
+      expect(liste(t), <String>[c, d, a, b]);
+      expect(tiefen(t), <int>[0, 0, 0, 1]);
+      expect(dran(t), <String>[c]);
     });
 
     test('ein ganz erledigter Stapel wandert als Ganzes nach unten', () {

@@ -75,7 +75,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 375 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 377 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -394,7 +394,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 375 Tests
+dart test                              # 377 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -749,7 +749,7 @@ stehen und dort bleiben müssen:
 | Wie viele eigene darf jemand anlegen? | `HabitRewards.customSlotsFor` — ein Platz je freigeschalteter Vorlage, **zwei dazu nach dem ersten Sieg** ([ADR-0093](docs/decisions/0093-drei-gewohnheiten-nach-dem-mentor.md)) |
 | Was ändert der Schwierigkeitsgrad? | `HabitDifficulty.xpFactor` — nur Erfahrung, nie Gold |
 | Was darf sich nachträglich ändern? | `CustomHabit.editable` — nur, was keine Zahl erzeugt |
-| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **Stapel** mit Offenem oben, ganz erledigte unten, je nach Priorität |
+| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **alles Erledigte unten, auch aus einem Stapel** (19.11.2026), je nach Priorität |
 | Woran hängt eine Gewohnheit? | `HabitTracker.anchorFor` — höchstens ein Anker, nie im Kreis (`canAnchor`); **Satz oder Anker**, `setAnchor` und `setCue` ersetzen einander ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) |
 | Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
 | Was kommt heute zuerst? | `HabitTracker.firstUpOn` — am Abend davor am Lagerfeuer gewählt; sein **Stapel** steht vor allen offenen, erzeugt keine Zahl ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)) |
