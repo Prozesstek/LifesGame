@@ -206,14 +206,25 @@ class _Zettel extends StatelessWidget {
   final bool haengtOben;
   final bool traegtUnten;
 
-  /// Der Abstand über einem Zettel — über einem gekoppelten keiner, die
-  /// Ketten überbrücken nur den Platz der Reißzwecke.
+  /// Der Abstand über einem Zettel.
   static const double _abstand = 2;
 
-  /// Wo die Ösen sitzen: oben unter dem Platz der Reißzwecke, unten über
-  /// der Risskante, je mitten im Papierrand.
-  static const double _oseOben = Steckbrief.zwecke / 2 + 6;
-  static const double _oseUnten = Steckbrief.riss + 6;
+  /// Wo die Ösen sitzen: auf dem Papier, oben knapp unter der Kante,
+  /// unten über der Risskante — nicht auf den Zacken. Ein Zettel an
+  /// Ketten hat oben keinen Platz für eine Reißzwecke.
+  static const double _oseOben = 11;
+  static const double _oseUnten = Steckbrief.riss + 10;
+
+  /// So viel mehr Papier an einer Kante mit Ösen.
+  static const double _oesenPlatz = 16;
+
+  /// Über einem gekoppelten Zettel so viel, dass die Kette ganz zu sehen
+  /// ist.
+  static final double _luecke = SchildKette.lueckeFuer(
+    glieder: 3,
+    oseOben: _oseOben,
+    oseUnten: _oseUnten,
+  );
 
   /// Wie spät ein Windstoß bei diesem Zettel ankommt (`TafelWind`).
   final double windVersatz;
@@ -250,14 +261,13 @@ class _Zettel extends StatelessWidget {
     // **Zwei Ketten statt der Einrückung** (19.11.2026): Gekoppeltes
     // hängt unter dem Zettel darüber wie ein Schild.
     return SchildKette(
-      oseOben: _oseOben,
+      oseOben: haengtOben ? _luecke + _oseOben : _oseOben,
       oseUnten: _oseUnten,
-      luecke: 0,
       haengtOben: haengtOben,
       traegtUnten: traegtUnten,
       ausgegraut: done,
       child: Padding(
-        padding: EdgeInsets.only(top: haengtOben ? 0 : _abstand),
+        padding: EdgeInsets.only(top: haengtOben ? _luecke : _abstand),
         child: Semantics(
           button: true,
           label: done
@@ -281,7 +291,12 @@ class _Zettel extends StatelessWidget {
                   saat: habit.id.hashCode,
                   windVersatz: windVersatz,
                   abgestempelt: done,
-                  innen: innen,
+                  // Wo Ösen sitzen, braucht das Papier Platz für sie —
+                  // sonst lägen sie auf dem Text.
+                  innen: innen.copyWith(
+                    top: innen.top + (haengtOben ? _oesenPlatz : 0),
+                    bottom: innen.bottom + (traegtUnten ? _oesenPlatz : 0),
+                  ),
                   stempelGroesse: _stempel,
                   // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
                   // auf der Kachel; erledigt blass.

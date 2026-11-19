@@ -391,7 +391,9 @@ class _SteckbriefState extends State<Steckbrief>
         clipBehavior: Clip.none,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(top: Steckbrief.zwecke / 2),
+            padding: EdgeInsets.only(
+              top: widget.mitZwecke ? Steckbrief.zwecke / 2 : 0,
+            ),
             child: CustomPaint(
               painter: _Blatt(
                 saat: widget.saat,

@@ -52,8 +52,9 @@ void main() {
 
   Finder alle(Key key) => find.byKey(key);
 
-  /// Jede Kette endet oben in der Mitte einer unteren Öse und unten in der
-  /// Mitte einer oberen Öse, und steht mittig darüber.
+  /// Jede Kette greift oben durch eine untere Öse und unten durch eine
+  /// obere — um den Überstand über die Mitte hinaus — und steht mittig
+  /// darüber.
   void ohneVersatz(WidgetTester tester) {
     for (final seite in <int>[0, 1]) {
       final ketten = alle(SchildKette.ketteKey(seite)).evaluate().toList();
@@ -68,8 +69,9 @@ void main() {
         final u = tester.getRect(find.byWidget(unten[i].widget));
         expect(k.center.dx, closeTo(o.center.dx, 0.01));
         expect(k.center.dx, closeTo(u.center.dx, 0.01));
-        expect(k.top, closeTo(u.center.dy, 0.01));
-        expect(k.bottom, closeTo(o.center.dy, 0.01));
+        final ueber = (SchildKette.ueberstand * SchildKette.faktor).toDouble();
+        expect(k.top, closeTo(u.center.dy - ueber, 0.01));
+        expect(k.bottom, closeTo(o.center.dy + ueber, 0.01));
       }
     }
   }
@@ -103,7 +105,11 @@ void main() {
     final links = tester.getRect(find.byKey(SchildKette.ketteKey(0)).first);
     final rechts = tester.getRect(find.byKey(SchildKette.ketteKey(1)).first);
     expect(links.center.dx - karte.left, closeTo(karte.width * 0.15, 0.5));
-    expect(karte.right - rechts.center.dx, closeTo(karte.width * 0.15, 0.5));
+    // Exakt spiegelgleich.
+    expect(
+      karte.right - rechts.center.dx,
+      closeTo(links.center.dx - karte.left, 0.001),
+    );
   });
 
   testWidgets('ohne Kopplung keine Ösen und keine Ketten', (tester) async {
@@ -117,7 +123,7 @@ void main() {
     expect(alle(SchildKette.oeseUntenKey(0)), findsNothing);
   });
 
-  testWidgets('gekoppelte stehen näher beieinander als ungekoppelte', (
+  testWidgets('die Lücke zwischen gekoppelten ist so lang wie die Kette', (
     tester,
   ) async {
     await zeige(tester, const HabitsScreen(), const Size(390, 900));
@@ -126,7 +132,17 @@ void main() {
     final b = tester.getRect(ketten.at(1));
     final c = tester.getRect(ketten.at(2));
     final d = tester.getRect(ketten.at(3));
-    expect(b.top - a.bottom, lessThan(d.top - c.bottom));
+    // Von Ösenmitte zu Ösenmitte, die Ösen mitten im Holz (12).
+    expect(b.top - a.bottom, closeTo(SchildKette.laenge(3) - 12, 0.01));
+    // Ohne Kopplung der gewohnte Abstand.
+    expect(d.top - c.bottom, closeTo(8, 0.01));
+  });
+
+  test('auf „Heute“ reicht die Kette von Öse zu Öse', () {
+    expect(
+      SchildKette.lueckeFuer(glieder: 3, oseOben: 11, oseUnten: 16),
+      greaterThanOrEqualTo(0),
+    );
   });
 
   testWidgets('wird die Kopplung gelöst, verschwinden Ketten und Ösen', (

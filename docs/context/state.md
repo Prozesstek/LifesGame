@@ -67,20 +67,32 @@ und unten. Auf „Heute“ hängen gekoppelte Zettel still (keine Neigung,
 kein Wind), der untere ohne Reißzwecke. Die einzelne Kette
 (`AnDerKette`) ist weg; `KettenZeichen` bleibt in den Chips.
 
-**Platzhalter:** `assets/UI/Kette/chain_segment.png` (4 × 8, kachelt
-senkrecht) und `eyelet.png` (6 × 6), dunkelgrau, doppelt groß ohne
-Glättung. Andere Maße trägt man in `SchildKette` ein.
+**Danach, Korrekturen** (Frederik): Die Kette ist **Messing** wie die
+Reißzwecke, aus **drei Gliedern**, abwechselnd seitlich und von vorn;
+die seitlichen Enden greifen durch die Öse, deren vorderer Rand über
+ihnen liegt. Die **Öse** ist ein Messingring mit dunklem Loch, auf
+„Heute“ auf dem Papier über der Risskante, und gekoppelte Zettel haben
+dort mehr Papier, damit nichts auf dem Text liegt. Die **Lücke** folgt
+jetzt aus der Kette (`SchildKette.lueckeFuer`) — im Gewohnheiten-
+Bildschirm 16 statt 8 Punkte, damit die Kette ganz zu sehen ist; das
+nimmt „kürzer als ungekoppelt“ von vorhin zurück. Links und rechts
+exakt gleich weit vom Rand.
+
+**Die Bilder** liegen in `assets/UI/Kette/`: `chain_link_front.png`
+(6 × 10), `chain_link_side.png` (4 × 10), `eyelet.png` (10 × 10),
+`eyelet_lip.png` (der vordere Rand der Öse) — gezeichnet in Python,
+nicht mit pxl; andere Maße trägt man in `SchildKette` ein.
 
 **Beim Bauen gefunden:** Die Öse saß ohne feste Größe 6 Punkte neben
 ihrer Kette, solange ihr Bild nicht geladen war. Und bei 320 Punkten
 Breite läuft die obere Leiste der Startseite über — vorher schon.
 
-App 1220 (vorher 1209): `schild_kette_test.dart` misst bei 360, 390 und
-700 Punkten, dass jede Kette in der Mitte beider Ösen endet.
+App 1221 (vorher 1209): `schild_kette_test.dart` misst bei 360, 390 und
+700 Punkten, dass jede Kette durch beide Ösen greift.
 
 ### Offen
 
-- **Echte Grafiken** für Kette und Öse.
+- Ob Kette und Öse so bleiben oder mit pxl neu gezeichnet werden.
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
 - Auf der Startseite steht unter einer gekoppelten weiter „Nach: …“ —
   neben den Ketten doppelt?
@@ -388,7 +400,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1220, dazu die acht Packages (theory 223, habits 377, gear
+**Tests:** App 1221, dazu die acht Packages (theory 223, habits 377, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

@@ -309,7 +309,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/tafel_wind.dart` | **ein Windstoß über der Anschlagtafel** (16.11.2026): alle 6 bis 13 s flattern die Zettel kurz an der Reißzwecke, von oben nach unten (`TafelWind.winkel`, reine Rechnung); zwischen zwei Stößen läuft kein Takt, im Stoß dreht sich nur eine fertige Ebene; in Tests still (`TafelWind.weht`) | Flutter |
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
 | `lib/ui/ketten_zeichen.dart` | **die Kette** (19.11.2026, `tool/pixel/kette.px.js`): das Zeichen für gekoppelte Gewohnheiten (`KettenZeichen`) in „Wann machst du das?“ und beim Anlegen | Flutter |
-| `lib/ui/schild_kette.dart` | **zwei Ketten zwischen gekoppelten Karten** (19.11.2026): Ösen an Unter- und Oberkante, 15 % vom Rand, die Kette von Öse zu Öse über beiden Rahmen, mit Schatten; erledigt blasser. **Die Länge ist gerechnet** (`oseOben + luecke + oseUnten`), die Lage quer aus der Breite; Bilder ganzzahlig, ohne Glättung. **Platzhalter** in `assets/UI/Kette/` (`chain_segment.png`, `eyelet.png`) — für Startseite und Gewohnheiten | Flutter |
+| `lib/ui/schild_kette.dart` | **zwei Messingketten zwischen gekoppelten Karten** (19.11.2026): Ösen an Unter- und Oberkante, links und rechts gleich weit vom Rand (15 %), drei Glieder abwechselnd seitlich und von vorn, die Enden greifen durch die Öse (ihr vorderer Rand liegt darüber), Schatten; erledigt blasser. **Die Länge folgt aus den Gliedern** (`laenge`), die Lücke daraus (`lueckeFuer`); Bilder ganzzahlig, ohne Glättung, in `assets/UI/Kette/` — für Startseite und Gewohnheiten | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Schwert, Herz, Schild, Tropfen, das Schwert gezeichnet (`StatIcon`); **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)), **in der Farbe seines Gebiets** (ADR-0090) | Flutter |
@@ -376,7 +376,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1220 Tests
+flutter test             # 1221 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

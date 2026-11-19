@@ -401,13 +401,19 @@ class _ImStapel extends StatelessWidget {
     super.key,
   });
 
-  /// Der Abstand zwischen zwei Kacheln — und zwischen gekoppelten der
-  /// kürzere, damit sie wie ein Schild wirken.
+  /// Der Abstand zwischen zwei Kacheln.
   static const double abstand = 8;
-  static const double luecke = 2;
 
   /// Die Ösen sitzen mitten im Holz des Rahmens.
   static const double _oese = Holz.kartenRand / 2;
+
+  /// Zwischen gekoppelten so viel, dass die Kette ganz zu sehen ist:
+  /// gerechnet aus ihren Gliedern und der Lage der Ösen.
+  static final double luecke = SchildKette.lueckeFuer(
+    glieder: 3,
+    oseOben: _oese,
+    oseUnten: _oese,
+  );
 
   final bool haengtOben;
   final bool traegtUnten;
@@ -420,7 +426,6 @@ class _ImStapel extends StatelessWidget {
     return SchildKette(
       oseOben: _oese,
       oseUnten: _oese,
-      luecke: luecke,
       haengtOben: haengtOben,
       traegtUnten: traegtUnten,
       ausgegraut: erledigt,
