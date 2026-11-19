@@ -10,6 +10,7 @@ import 'package:lifes_game/home/home_screen.dart';
 import 'package:lifes_game/home/widgets/today_card.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
+import 'package:lifes_game/ui/ketten_zeichen.dart';
 
 import 'test_view.dart';
 
@@ -76,8 +77,8 @@ void main() {
       expect(find.byKey(cueAnchorKey(folge.id)), findsNothing);
     });
 
-    testWidgets('eine gewählte landet als Anker im Stand und rückt die Kachel '
-        'ein, ohne Text', (tester) async {
+    testWidgets('eine gewählte landet als Anker im Stand und hängt an der '
+        'Kette, ohne Text', (tester) async {
       final c = container(laufen());
       await zeige(tester, c, const HabitsScreen());
       await oeffneDialog(tester, folge);
@@ -90,13 +91,11 @@ void main() {
       final tracker = c.read(habitTrackerProvider);
       expect(tracker.anchorFor(folge.id), anker.id);
       expect(tracker.cueFor(folge.id), isNull);
-      expect(
-        tester.getTopLeft(kachel(folge)).dx,
-        greaterThan(tester.getTopLeft(kachel(anker)).dx),
-      );
+      // Die Kette statt der Einrückung (19.11.2026).
+      expect(find.byKey(AnDerKette.kettenKey), findsOneWidget);
       expect(find.textContaining('Nach:'), findsNothing);
       expect(find.byIcon(Icons.link_rounded), findsNothing);
-      // Der Vorleser sieht nicht, was eingerückt ist.
+      // Der Vorleser sieht die Kette nicht.
       expect(
         find.bySemanticsLabel(RegExp('${folge.name}, nach ${anker.name}')),
         findsOneWidget,
@@ -168,7 +167,7 @@ void main() {
     double oben(WidgetTester tester, HabitTemplate habit) =>
         tester.getTopLeft(kachel(habit)).dy;
 
-    testWidgets('die Folge steht eingerückt direkt unter ihrem Anker', (
+    testWidgets('die Folge hängt an der Kette direkt unter ihrem Anker', (
       tester,
     ) async {
       await zeige(tester, container(gekoppelt()), const HabitsScreen());
@@ -177,8 +176,18 @@ void main() {
       // Kopplung zieht die Folge vor die Dritte.
       expect(oben(tester, anker), lessThan(oben(tester, folge)));
       expect(oben(tester, folge), lessThan(oben(tester, dritte)));
-      expect(links(tester, folge), greaterThan(links(tester, anker)));
+      // Die Kette statt der Einrückung (19.11.2026).
+      expect(links(tester, folge), links(tester, anker));
       expect(links(tester, dritte), links(tester, anker));
+      expect(
+        find.ancestor(
+          of: find.byKey(AnDerKette.kettenKey),
+          matching: find.byWidgetPredicate(
+            (w) => w is AnDerKette && w.gekoppelt,
+          ),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('nach dem Häkchen am Anker ist die Folge dran', (tester) async {
@@ -196,9 +205,9 @@ void main() {
         findsOneWidget,
       );
       // Der abgehakte Anker wandert nach unten (19.11.2026), die Folge
-      // steht nicht mehr eingerückt.
+      // hängt an keiner Kette mehr.
       expect(oben(tester, anker), greaterThan(oben(tester, folge)));
-      expect(links(tester, folge), links(tester, anker));
+      expect(find.byKey(AnDerKette.kettenKey), findsNothing);
     });
 
     testWidgets('die Folge lässt sich auch zuerst abhaken', (tester) async {
@@ -222,8 +231,11 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(zeile(folge)).dx,
-        greaterThan(tester.getTopLeft(zeile(anker)).dx),
+        find.descendant(
+          of: find.byType(TodayCard),
+          matching: find.byKey(AnDerKette.kettenKey),
+        ),
+        findsOneWidget,
       );
       expect(
         find.descendant(

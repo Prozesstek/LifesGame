@@ -44,9 +44,25 @@ erledigt war. Eingerückt bleibt, wessen Anker in derselben Hälfte steht;
 die offene Folge eines abgehakten Ankers steht ohne Einrückung oben und
 ist „jetzt dran“. habits 377 (vorher 375).
 
+**Und die Kette** (Frederik: „ein Pixel art von einer Kette die für die
+gekoppelten Gewohnheiten“): zwei Glieder aus Stahl, senkrecht
+ineinander, beide von vorn (`tool/pixel/kette.px.js`,
+`assets/UI/Kette.png`). Eine zur Seite gedrehte Fassung lag daneben;
+Frederik wählte die flache. Sie steht **statt der Einrückung** — „dafür
+brauchen wir ja dann eigentlich die einrückung nicht mehr“: Eine
+gekoppelte Gewohnheit steht bündig unter der darüber, die Kette hängt
+über die Lücke (`AnDerKette`), auf der Startseite und im
+Gewohnheiten-Bildschirm. In „Wann machst du das?“ und beim Anlegen
+ersetzt sie `Icons.link_rounded`. Beide Bildschirme in 390 × 844
+gerendert.
+
 ### Offen
 
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
+- Auf der Startseite steht unter einer gekoppelten weiter „Nach: …“ —
+  neben der Kette doppelt?
+- Hängen zwei an derselben Gewohnheit, hängt die zweite an der Kette
+  unter der ersten, nicht unter ihrem Anker.
 - Woran eine offene Folge hängt, sieht man nicht mehr, sobald ihr Anker
   abgehakt ist.
 - **AktivesBrett hat es nicht gesehen.**

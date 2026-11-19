@@ -15,6 +15,7 @@ import '../../ui/anschlagtafel.dart';
 import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
+import '../../ui/ketten_zeichen.dart';
 import '../../ui/palette.dart';
 import '../../ui/pulsieren.dart';
 import '../../ui/tafel_wind.dart';
@@ -188,10 +189,6 @@ class _Zettel extends StatelessWidget {
   /// der offene Zettel (06.11.2026).
   final bool hervorheben;
 
-  /// Je Stufe im Stapel so weit nach rechts, höchstens drei Stufen.
-  static const double _schritt = 14;
-  static const int _hoechstens = 3;
-
   final Habit habit;
   final bool done;
   final String? cue;
@@ -234,45 +231,49 @@ class _Zettel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = done ? null : cue;
-    final stufen = depth > _hoechstens ? _hoechstens : depth;
 
+    // **Die Kette statt der Einrückung** (19.11.2026): Gekoppeltes
+    // hängt an einer Kette unter dem Zettel darüber.
     return Padding(
-      padding: EdgeInsets.only(left: _schritt * stufen, top: 2),
-      child: Semantics(
-        button: true,
-        label: done
-            ? '${habit.name} erledigt'
-            : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
-                  '${cued ? ', jetzt dran' : ''}'
-                  '${zuerst ? ', heute zuerst' : ''}',
-        child: Druck(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap,
-            child: Pulsieren(
-              key: TodayCard.pulsKey(habit.id),
-              aktiv: hervorheben && !done,
-              // Erst, wenn die Tafel hereingeflogen ist.
-              verzoegerung: DerReiheNach.fertigNach(1),
-              child: Steckbrief(
-                neigung: neigungFuer(habit.id),
-                saat: habit.id.hashCode,
-                windVersatz: windVersatz,
-                abgestempelt: done,
-                innen: innen,
-                stempelGroesse: _stempel,
-                // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
-                // auf der Kachel; erledigt blass.
-                streifen: switch (habit.area) {
-                  final SkillArea gebiet => GebietFarbe.pergament(
-                    gebiet,
-                  ).withValues(alpha: done ? 0.4 : 1),
-                  null => null,
-                },
-                child: PlatzLaedtEin(
-                  aktiv: cued,
-                  radius: 6,
-                  child: _zeile(text, done ? null : treat),
+      padding: const EdgeInsets.only(top: 2),
+      child: AnDerKette(
+        gekoppelt: depth > 0,
+        child: Semantics(
+          button: true,
+          label: done
+              ? '${habit.name} erledigt'
+              : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
+                    '${cued ? ', jetzt dran' : ''}'
+                    '${zuerst ? ', heute zuerst' : ''}',
+          child: Druck(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              child: Pulsieren(
+                key: TodayCard.pulsKey(habit.id),
+                aktiv: hervorheben && !done,
+                // Erst, wenn die Tafel hereingeflogen ist.
+                verzoegerung: DerReiheNach.fertigNach(1),
+                child: Steckbrief(
+                  neigung: neigungFuer(habit.id),
+                  saat: habit.id.hashCode,
+                  windVersatz: windVersatz,
+                  abgestempelt: done,
+                  innen: innen,
+                  stempelGroesse: _stempel,
+                  // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
+                  // auf der Kachel; erledigt blass.
+                  streifen: switch (habit.area) {
+                    final SkillArea gebiet => GebietFarbe.pergament(
+                      gebiet,
+                    ).withValues(alpha: done ? 0.4 : 1),
+                    null => null,
+                  },
+                  child: PlatzLaedtEin(
+                    aktiv: cued,
+                    radius: 6,
+                    child: _zeile(text, done ? null : treat),
+                  ),
                 ),
               ),
             ),

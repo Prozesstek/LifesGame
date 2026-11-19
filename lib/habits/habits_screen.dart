@@ -20,6 +20,7 @@ import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
+import '../ui/ketten_zeichen.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, sehen, was nicht heute
 /// dran ist, und über den grünen Plus-Knopf eine neue Gewohnheit
@@ -371,8 +372,9 @@ class _PlusKnopf extends StatelessWidget {
   }
 }
 
-/// Rückt eine Kachel unter ihren Anker und lässt sie aufleuchten, wenn
-/// sie **jetzt dran** ist (ADR-0065).
+/// Hängt eine Kachel an einer Kette unter die darüber und lässt sie
+/// aufleuchten, wenn sie **jetzt dran** ist (ADR-0065). **Die Kette
+/// statt der Einrückung** (19.11.2026, Frederik).
 class _ImStapel extends StatelessWidget {
   const _ImStapel({
     required this.depth,
@@ -381,20 +383,15 @@ class _ImStapel extends StatelessWidget {
     super.key,
   });
 
-  /// Je Stufe so weit nach rechts — und nie weiter als drei Stufen: Ein
-  /// Stapel aus fünf Gliedern ließe der letzten Kachel sonst keine Breite.
-  static const double _schritt = 14;
-  static const int _hoechstens = 3;
-
   final int depth;
   final bool cued;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final stufen = depth > _hoechstens ? _hoechstens : depth;
-    return Padding(
-      padding: EdgeInsets.only(left: _schritt * stufen),
+    return AnDerKette(
+      gekoppelt: depth > 0,
+      links: 10,
       child: PlatzLaedtEin(aktiv: cued, child: child),
     );
   }
