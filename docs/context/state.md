@@ -44,61 +44,17 @@ erledigt war. Eingerückt bleibt, wessen Anker in derselben Hälfte steht;
 die offene Folge eines abgehakten Ankers steht ohne Einrückung oben und
 ist „jetzt dran“. habits 377 (vorher 375).
 
-**Und die Kette** (Frederik: „ein Pixel art von einer Kette die für die
-gekoppelten Gewohnheiten“): zwei Glieder aus Stahl, senkrecht
-ineinander, beide von vorn (`tool/pixel/kette.px.js`,
-`assets/UI/Kette.png`). Eine zur Seite gedrehte Fassung lag daneben;
-Frederik wählte die flache. Sie steht **statt der Einrückung** — „dafür
-brauchen wir ja dann eigentlich die einrückung nicht mehr“: Eine
-gekoppelte Gewohnheit steht bündig unter der darüber, die Kette hängt
-über die Lücke (`AnDerKette`), auf der Startseite und im
-Gewohnheiten-Bildschirm. In „Wann machst du das?“ und beim Anlegen
-ersetzt sie `Icons.link_rounded`. Beide Bildschirme in 390 × 844
-gerendert.
-
-**Zwei Ketten statt einer** (Frederik, ausführlicher Auftrag, „auf
-jedem screen“): Gekoppelte Karten hängen wie zwei Schilder an **zwei
-Ketten**, links und rechts 15 % vom Rand, von einer **Öse** an der
-Unterkante der oberen zu einer Öse an der Oberkante der unteren
-(`SchildKette`, `lib/ui/schild_kette.dart`). Gemalt: Rahmen, Öse,
-Kette mit kleinem Schatten; erledigt blasser. Gekoppelte stehen näher
-(Gewohnheiten 2 statt 8 Punkte); A → B → C hat in der Mitte Ösen oben
-und unten. Auf „Heute“ hängen gekoppelte Zettel still (keine Neigung,
-kein Wind), der untere ohne Reißzwecke. Die einzelne Kette
-(`AnDerKette`) ist weg; `KettenZeichen` bleibt in den Chips.
-
-**Danach, Korrekturen** (Frederik): Die Kette ist **Messing** wie die
-Reißzwecke, aus **drei Gliedern**, abwechselnd seitlich und von vorn;
-die seitlichen Enden greifen durch die Öse, deren vorderer Rand über
-ihnen liegt. Die **Öse** ist ein Messingring mit dunklem Loch, auf
-„Heute“ auf dem Papier über der Risskante, und gekoppelte Zettel haben
-dort mehr Papier, damit nichts auf dem Text liegt. Die **Lücke** folgt
-jetzt aus der Kette (`SchildKette.lueckeFuer`) — im Gewohnheiten-
-Bildschirm 16 statt 8 Punkte, damit die Kette ganz zu sehen ist; das
-nimmt „kürzer als ungekoppelt“ von vorhin zurück. Links und rechts
-exakt gleich weit vom Rand.
-
-**Die Bilder** liegen in `assets/UI/Kette/`: `chain_link_front.png`
-(6 × 10), `chain_link_side.png` (4 × 10), `eyelet.png` (10 × 10),
-`eyelet_lip.png` (der vordere Rand der Öse) — gezeichnet in Python,
-nicht mit pxl; andere Maße trägt man in `SchildKette` ein.
-
-**Beim Bauen gefunden:** Die Öse saß ohne feste Größe 6 Punkte neben
-ihrer Kette, solange ihr Bild nicht geladen war. Und bei 320 Punkten
-Breite läuft die obere Leiste der Startseite über — vorher schon.
-
-App 1221 (vorher 1209): `schild_kette_test.dart` misst bei 360, 390 und
-700 Punkten, dass jede Kette durch beide Ösen greift.
+**Ketten zwischen gekoppelten Gewohnheiten — versucht und
+zurückgenommen.** Erst ein Ketten-Zeichen statt der Einrückung, dann
+zwei Ketten mit Ösen wie an Schildern, dann in Messing. Frederik: „das
+sieht wirklich schrecklich aus … da muss ich mir vorher nochmal was
+überlegen“. Alles ist per `git revert` wieder heraus; Gekoppeltes steht
+wie vorher eingerückt.
 
 ### Offen
 
-- Ob Kette und Öse so bleiben oder mit pxl neu gezeichnet werden.
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
-- Auf der Startseite steht unter einer gekoppelten weiter „Nach: …“ —
-  neben den Ketten doppelt?
-- Hängen zwei an derselben Gewohnheit, hängt die zweite an der Karte
-  darüber, nicht an ihrem Anker.
-- Die obere Leiste der Startseite läuft bei 320 Punkten Breite über.
+- **Wie gekoppelte Gewohnheiten aussehen sollen** — Frederik überlegt.
 - Woran eine offene Folge hängt, sieht man nicht mehr, sobald ihr Anker
   abgehakt ist.
 - **AktivesBrett hat es nicht gesehen.**
@@ -400,7 +356,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1221, dazu die acht Packages (theory 223, habits 377, gear
+**Tests:** App 1209, dazu die acht Packages (theory 223, habits 377, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

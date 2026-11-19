@@ -15,7 +15,6 @@ import '../../ui/anschlagtafel.dart';
 import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
-import '../../ui/schild_kette.dart';
 import '../../ui/palette.dart';
 import '../../ui/pulsieren.dart';
 import '../../ui/tafel_wind.dart';
@@ -136,10 +135,7 @@ class TodayCard extends ConsumerWidget {
                         done: tracker.isChecked(eintrag.habit.id, today),
                         cue: CueText.lineFor(tracker, eintrag.habit.id),
                         treat: tracker.treatFor(eintrag.habit.id),
-                        haengtOben: platz > 0 && eintrag.depth > 0,
-                        traegtUnten:
-                            platz + 1 < liste.length &&
-                            liste[platz + 1].depth > 0,
+                        depth: eintrag.depth,
                         // Der Wind kommt von oben nach unten an.
                         windVersatz: liste.length < 2
                             ? 0
@@ -178,8 +174,7 @@ class _Zettel extends StatelessWidget {
     required this.cue,
     required this.onTap,
     this.treat,
-    this.haengtOben = false,
-    this.traegtUnten = false,
+    this.depth = 0,
     this.windVersatz = 0,
     this.cued = false,
     this.timed = false,
@@ -193,6 +188,10 @@ class _Zettel extends StatelessWidget {
   /// der offene Zettel (06.11.2026).
   final bool hervorheben;
 
+  /// Je Stufe im Stapel so weit nach rechts, höchstens drei Stufen.
+  static const double _schritt = 14;
+  static const int _hoechstens = 3;
+
   final Habit habit;
   final bool done;
   final String? cue;
@@ -201,30 +200,8 @@ class _Zettel extends StatelessWidget {
   final String? treat;
   final VoidCallback onTap;
 
-  /// Ob der Zettel an zwei Ketten unter dem darüber hängt (ADR-0065,
-  /// 19.11.2026) — und ob einer an ihm hängt.
-  final bool haengtOben;
-  final bool traegtUnten;
-
-  /// Der Abstand über einem Zettel.
-  static const double _abstand = 2;
-
-  /// Wo die Ösen sitzen: auf dem Papier, oben knapp unter der Kante,
-  /// unten über der Risskante — nicht auf den Zacken. Ein Zettel an
-  /// Ketten hat oben keinen Platz für eine Reißzwecke.
-  static const double _oseOben = 11;
-  static const double _oseUnten = Steckbrief.riss + 10;
-
-  /// So viel mehr Papier an einer Kante mit Ösen.
-  static const double _oesenPlatz = 16;
-
-  /// Über einem gekoppelten Zettel so viel, dass die Kette ganz zu sehen
-  /// ist.
-  static final double _luecke = SchildKette.lueckeFuer(
-    glieder: 3,
-    oseOben: _oseOben,
-    oseUnten: _oseUnten,
-  );
+  /// Wie tief die Gewohnheit unter ihrem Anker hängt (ADR-0065).
+  final int depth;
 
   /// Wie spät ein Windstoß bei diesem Zettel ankommt (`TafelWind`).
   final double windVersatz;
@@ -257,60 +234,45 @@ class _Zettel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = done ? null : cue;
+    final stufen = depth > _hoechstens ? _hoechstens : depth;
 
-    // **Zwei Ketten statt der Einrückung** (19.11.2026): Gekoppeltes
-    // hängt unter dem Zettel darüber wie ein Schild.
-    return SchildKette(
-      oseOben: haengtOben ? _luecke + _oseOben : _oseOben,
-      oseUnten: _oseUnten,
-      haengtOben: haengtOben,
-      traegtUnten: traegtUnten,
-      ausgegraut: done,
-      child: Padding(
-        padding: EdgeInsets.only(top: haengtOben ? _luecke : _abstand),
-        child: Semantics(
-          button: true,
-          label: done
-              ? '${habit.name} erledigt'
-              : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
-                    '${cued ? ', jetzt dran' : ''}'
-                    '${zuerst ? ', heute zuerst' : ''}',
-          child: Druck(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap,
-              child: Pulsieren(
-                key: TodayCard.pulsKey(habit.id),
-                aktiv: hervorheben && !done,
-                // Erst, wenn die Tafel hereingeflogen ist.
-                verzoegerung: DerReiheNach.fertigNach(1),
-                child: Steckbrief(
-                  neigung: neigungFuer(habit.id),
-                  still: haengtOben || traegtUnten,
-                  mitZwecke: !haengtOben,
-                  saat: habit.id.hashCode,
-                  windVersatz: windVersatz,
-                  abgestempelt: done,
-                  // Wo Ösen sitzen, braucht das Papier Platz für sie —
-                  // sonst lägen sie auf dem Text.
-                  innen: innen.copyWith(
-                    top: innen.top + (haengtOben ? _oesenPlatz : 0),
-                    bottom: innen.bottom + (traegtUnten ? _oesenPlatz : 0),
-                  ),
-                  stempelGroesse: _stempel,
-                  // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
-                  // auf der Kachel; erledigt blass.
-                  streifen: switch (habit.area) {
-                    final SkillArea gebiet => GebietFarbe.pergament(
-                      gebiet,
-                    ).withValues(alpha: done ? 0.4 : 1),
-                    null => null,
-                  },
-                  child: PlatzLaedtEin(
-                    aktiv: cued,
-                    radius: 6,
-                    child: _zeile(text, done ? null : treat),
-                  ),
+    return Padding(
+      padding: EdgeInsets.only(left: _schritt * stufen, top: 2),
+      child: Semantics(
+        button: true,
+        label: done
+            ? '${habit.name} erledigt'
+            : '${habit.name} ${timed ? 'Timer öffnen' : 'abhaken'}'
+                  '${cued ? ', jetzt dran' : ''}'
+                  '${zuerst ? ', heute zuerst' : ''}',
+        child: Druck(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Pulsieren(
+              key: TodayCard.pulsKey(habit.id),
+              aktiv: hervorheben && !done,
+              // Erst, wenn die Tafel hereingeflogen ist.
+              verzoegerung: DerReiheNach.fertigNach(1),
+              child: Steckbrief(
+                neigung: neigungFuer(habit.id),
+                saat: habit.id.hashCode,
+                windVersatz: windVersatz,
+                abgestempelt: done,
+                innen: innen,
+                stempelGroesse: _stempel,
+                // Die Farbe ihres Gebiets am linken Rand (ADR-0090), wie
+                // auf der Kachel; erledigt blass.
+                streifen: switch (habit.area) {
+                  final SkillArea gebiet => GebietFarbe.pergament(
+                    gebiet,
+                  ).withValues(alpha: done ? 0.4 : 1),
+                  null => null,
+                },
+                child: PlatzLaedtEin(
+                  aktiv: cued,
+                  radius: 6,
+                  child: _zeile(text, done ? null : treat),
                 ),
               ),
             ),

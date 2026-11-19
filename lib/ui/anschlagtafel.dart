@@ -265,20 +265,10 @@ class Steckbrief extends StatefulWidget {
     this.stempelText,
     this.streifen,
     this.windVersatz = 0,
-    this.still = false,
-    this.mitZwecke = true,
     super.key,
   });
 
   final Widget child;
-
-  /// Hängt das Blatt an Ketten (`SchildKette`, 19.11.2026), steht es
-  /// gerade und rührt sich im Wind nicht — sonst verrutschten die Ösen.
-  final bool still;
-
-  /// Ob oben eine Reißzwecke steckt. Ein Blatt, das an Ketten unter
-  /// einem anderen hängt, braucht keine.
-  final bool mitZwecke;
 
   /// Wie spät ein Windstoß bei diesem Blatt ankommt, 0 bis 1
   /// (`TafelWind`) — ohne Wind über der Tafel ohne Wirkung.
@@ -373,9 +363,7 @@ class _SteckbriefState extends State<Steckbrief>
       animation: wind,
       // Um die Reißzwecke, nicht um die Mitte.
       builder: (context, blatt) => Transform.rotate(
-        angle: widget.still
-            ? 0
-            : TafelWind.winkel(wind.value, versatz: widget.windVersatz),
+        angle: TafelWind.winkel(wind.value, versatz: widget.windVersatz),
         alignment: Alignment.topCenter,
         child: blatt,
       ),
@@ -386,14 +374,12 @@ class _SteckbriefState extends State<Steckbrief>
 
   Widget _blatt(Color papier) {
     return Transform.rotate(
-      angle: widget.still ? 0 : widget.neigung,
+      angle: widget.neigung,
       child: Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(
-              top: widget.mitZwecke ? Steckbrief.zwecke / 2 : 0,
-            ),
+            padding: const EdgeInsets.only(top: Steckbrief.zwecke / 2),
             child: CustomPaint(
               painter: _Blatt(
                 saat: widget.saat,
@@ -421,13 +407,12 @@ class _SteckbriefState extends State<Steckbrief>
               ),
             ),
           ),
-          if (widget.mitZwecke)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Center(child: _Zwecke()),
-            ),
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Center(child: _Zwecke()),
+          ),
         ],
       ),
     );

@@ -11,7 +11,6 @@ import 'anlegen_ergebnis.dart';
 import 'anlegen_teile.dart';
 import 'cue_dialog.dart';
 import 'weekday_picker.dart';
-import '../../ui/ketten_zeichen.dart';
 
 export 'anlegen_ergebnis.dart';
 
@@ -761,7 +760,13 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
                     key: cueAnchorKey(habit.id),
                     showCheckmark: false,
                     selectedColor: Palette.accent,
-                    avatar: const KettenZeichen(),
+                    avatar: Icon(
+                      Icons.link_rounded,
+                      size: 16,
+                      color: _anker == habit.id
+                          ? Palette.surface
+                          : Palette.textDim,
+                    ),
                     label: Text(
                       habit.name,
                       overflow: TextOverflow.ellipsis,

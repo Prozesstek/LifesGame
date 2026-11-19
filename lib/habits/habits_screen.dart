@@ -20,7 +20,6 @@ import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
-import '../ui/schild_kette.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, sehen, was nicht heute
 /// dran ist, und über den grünen Plus-Knopf eine neue Gewohnheit
@@ -111,28 +110,13 @@ class HabitsScreen extends ConsumerWidget {
                             // Der Schlüssel hält den Sprung des Häkchens
                             // an der Gewohnheit, wenn die Kachel die Reihe
                             // wechselt.
-                            // Gekoppeltes hängt an zwei Ketten unter seinem
-                            // Anker, näher als der Rest (19.11.2026), und
-                            // leuchtet auf, sobald der abgehakt ist
+                            // Gekoppeltes steht eingerückt unter seinem Anker
+                            // und leuchtet auf, sobald der abgehakt ist
                             // (ADR-0065). Die Ordnung kommt aus `stackOn`.
-                            for (final (i, eintrag)
-                                in active.indexed) ...<Widget>[
-                              if (i > 0)
-                                SizedBox(
-                                  height: eintrag.depth > 0
-                                      ? _ImStapel.luecke
-                                      : _ImStapel.abstand,
-                                ),
+                            for (final eintrag in active) ...<Widget>[
                               _ImStapel(
                                 key: ValueKey<String>(eintrag.habit.id),
-                                haengtOben: i > 0 && eintrag.depth > 0,
-                                traegtUnten:
-                                    i + 1 < active.length &&
-                                    active[i + 1].depth > 0,
-                                erledigt: tracker.isChecked(
-                                  eintrag.habit.id,
-                                  today,
-                                ),
+                                depth: eintrag.depth,
                                 cued: eintrag.isCued,
                                 child: _kachel(
                                   context,
@@ -142,9 +126,8 @@ class HabitsScreen extends ConsumerWidget {
                                   eintrag,
                                 ),
                               ),
+                              const SizedBox(height: 8),
                             ],
-                            if (active.isNotEmpty)
-                              const SizedBox(height: _ImStapel.abstand),
                             if (nichtHeute.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 8),
                               const Align(
@@ -388,47 +371,30 @@ class _PlusKnopf extends StatelessWidget {
   }
 }
 
-/// Hängt eine Kachel an zwei Ketten unter die darüber ([SchildKette],
-/// 19.11.2026) und lässt sie aufleuchten, wenn sie **jetzt dran** ist
-/// (ADR-0065).
+/// Rückt eine Kachel unter ihren Anker und lässt sie aufleuchten, wenn
+/// sie **jetzt dran** ist (ADR-0065).
 class _ImStapel extends StatelessWidget {
   const _ImStapel({
-    required this.haengtOben,
-    required this.traegtUnten,
-    required this.erledigt,
+    required this.depth,
     required this.cued,
     required this.child,
     super.key,
   });
 
-  /// Der Abstand zwischen zwei Kacheln.
-  static const double abstand = 8;
+  /// Je Stufe so weit nach rechts — und nie weiter als drei Stufen: Ein
+  /// Stapel aus fünf Gliedern ließe der letzten Kachel sonst keine Breite.
+  static const double _schritt = 14;
+  static const int _hoechstens = 3;
 
-  /// Die Ösen sitzen mitten im Holz des Rahmens.
-  static const double _oese = Holz.kartenRand / 2;
-
-  /// Zwischen gekoppelten so viel, dass die Kette ganz zu sehen ist:
-  /// gerechnet aus ihren Gliedern und der Lage der Ösen.
-  static final double luecke = SchildKette.lueckeFuer(
-    glieder: 3,
-    oseOben: _oese,
-    oseUnten: _oese,
-  );
-
-  final bool haengtOben;
-  final bool traegtUnten;
-  final bool erledigt;
+  final int depth;
   final bool cued;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return SchildKette(
-      oseOben: _oese,
-      oseUnten: _oese,
-      haengtOben: haengtOben,
-      traegtUnten: traegtUnten,
-      ausgegraut: erledigt,
+    final stufen = depth > _hoechstens ? _hoechstens : depth;
+    return Padding(
+      padding: EdgeInsets.only(left: _schritt * stufen),
       child: PlatzLaedtEin(aktiv: cued, child: child),
     );
   }

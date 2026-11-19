@@ -5,7 +5,6 @@ import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import 'weekday_picker.dart';
-import '../../ui/ketten_zeichen.dart';
 
 /// Was im Dialog gewählt wurde: der Auslöser, die Wochentage und die
 /// Belohnung danach.
@@ -254,7 +253,13 @@ class _CueDialogState extends State<_CueDialog> {
                         // Material für „gewählt" mitbringt.
                         showCheckmark: false,
                         selectedColor: Palette.accent,
-                        avatar: const KettenZeichen(),
+                        avatar: Icon(
+                          Icons.link_rounded,
+                          size: 16,
+                          color: _anchorId == habit.id
+                              ? Palette.surface
+                              : Palette.textDim,
+                        ),
                         label: Text(
                           habit.name,
                           overflow: TextOverflow.ellipsis,
