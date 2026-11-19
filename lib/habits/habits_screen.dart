@@ -20,7 +20,7 @@ import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
-import '../ui/ketten_zeichen.dart';
+import '../ui/schild_kette.dart';
 
 /// Der Tracker-Teil des Spiels: heute abhaken, sehen, was nicht heute
 /// dran ist, und über den grünen Plus-Knopf eine neue Gewohnheit
@@ -111,13 +111,28 @@ class HabitsScreen extends ConsumerWidget {
                             // Der Schlüssel hält den Sprung des Häkchens
                             // an der Gewohnheit, wenn die Kachel die Reihe
                             // wechselt.
-                            // Gekoppeltes steht eingerückt unter seinem Anker
-                            // und leuchtet auf, sobald der abgehakt ist
+                            // Gekoppeltes hängt an zwei Ketten unter seinem
+                            // Anker, näher als der Rest (19.11.2026), und
+                            // leuchtet auf, sobald der abgehakt ist
                             // (ADR-0065). Die Ordnung kommt aus `stackOn`.
-                            for (final eintrag in active) ...<Widget>[
+                            for (final (i, eintrag)
+                                in active.indexed) ...<Widget>[
+                              if (i > 0)
+                                SizedBox(
+                                  height: eintrag.depth > 0
+                                      ? _ImStapel.luecke
+                                      : _ImStapel.abstand,
+                                ),
                               _ImStapel(
                                 key: ValueKey<String>(eintrag.habit.id),
-                                depth: eintrag.depth,
+                                haengtOben: i > 0 && eintrag.depth > 0,
+                                traegtUnten:
+                                    i + 1 < active.length &&
+                                    active[i + 1].depth > 0,
+                                erledigt: tracker.isChecked(
+                                  eintrag.habit.id,
+                                  today,
+                                ),
                                 cued: eintrag.isCued,
                                 child: _kachel(
                                   context,
@@ -127,8 +142,9 @@ class HabitsScreen extends ConsumerWidget {
                                   eintrag,
                                 ),
                               ),
-                              const SizedBox(height: 8),
                             ],
+                            if (active.isNotEmpty)
+                              const SizedBox(height: _ImStapel.abstand),
                             if (nichtHeute.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 8),
                               const Align(
@@ -372,26 +388,42 @@ class _PlusKnopf extends StatelessWidget {
   }
 }
 
-/// Hängt eine Kachel an einer Kette unter die darüber und lässt sie
-/// aufleuchten, wenn sie **jetzt dran** ist (ADR-0065). **Die Kette
-/// statt der Einrückung** (19.11.2026, Frederik).
+/// Hängt eine Kachel an zwei Ketten unter die darüber ([SchildKette],
+/// 19.11.2026) und lässt sie aufleuchten, wenn sie **jetzt dran** ist
+/// (ADR-0065).
 class _ImStapel extends StatelessWidget {
   const _ImStapel({
-    required this.depth,
+    required this.haengtOben,
+    required this.traegtUnten,
+    required this.erledigt,
     required this.cued,
     required this.child,
     super.key,
   });
 
-  final int depth;
+  /// Der Abstand zwischen zwei Kacheln — und zwischen gekoppelten der
+  /// kürzere, damit sie wie ein Schild wirken.
+  static const double abstand = 8;
+  static const double luecke = 2;
+
+  /// Die Ösen sitzen mitten im Holz des Rahmens.
+  static const double _oese = Holz.kartenRand / 2;
+
+  final bool haengtOben;
+  final bool traegtUnten;
+  final bool erledigt;
   final bool cued;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return AnDerKette(
-      gekoppelt: depth > 0,
-      links: 10,
+    return SchildKette(
+      oseOben: _oese,
+      oseUnten: _oese,
+      luecke: luecke,
+      haengtOben: haengtOben,
+      traegtUnten: traegtUnten,
+      ausgegraut: erledigt,
       child: PlatzLaedtEin(aktiv: cued, child: child),
     );
   }

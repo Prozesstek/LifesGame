@@ -56,13 +56,37 @@ Gewohnheiten-Bildschirm. In „Wann machst du das?“ und beim Anlegen
 ersetzt sie `Icons.link_rounded`. Beide Bildschirme in 390 × 844
 gerendert.
 
+**Zwei Ketten statt einer** (Frederik, ausführlicher Auftrag, „auf
+jedem screen“): Gekoppelte Karten hängen wie zwei Schilder an **zwei
+Ketten**, links und rechts 15 % vom Rand, von einer **Öse** an der
+Unterkante der oberen zu einer Öse an der Oberkante der unteren
+(`SchildKette`, `lib/ui/schild_kette.dart`). Gemalt: Rahmen, Öse,
+Kette mit kleinem Schatten; erledigt blasser. Gekoppelte stehen näher
+(Gewohnheiten 2 statt 8 Punkte); A → B → C hat in der Mitte Ösen oben
+und unten. Auf „Heute“ hängen gekoppelte Zettel still (keine Neigung,
+kein Wind), der untere ohne Reißzwecke. Die einzelne Kette
+(`AnDerKette`) ist weg; `KettenZeichen` bleibt in den Chips.
+
+**Platzhalter:** `assets/UI/Kette/chain_segment.png` (4 × 8, kachelt
+senkrecht) und `eyelet.png` (6 × 6), dunkelgrau, doppelt groß ohne
+Glättung. Andere Maße trägt man in `SchildKette` ein.
+
+**Beim Bauen gefunden:** Die Öse saß ohne feste Größe 6 Punkte neben
+ihrer Kette, solange ihr Bild nicht geladen war. Und bei 320 Punkten
+Breite läuft die obere Leiste der Startseite über — vorher schon.
+
+App 1220 (vorher 1209): `schild_kette_test.dart` misst bei 360, 390 und
+700 Punkten, dass jede Kette in der Mitte beider Ösen endet.
+
 ### Offen
 
+- **Echte Grafiken** für Kette und Öse.
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
 - Auf der Startseite steht unter einer gekoppelten weiter „Nach: …“ —
-  neben der Kette doppelt?
-- Hängen zwei an derselben Gewohnheit, hängt die zweite an der Kette
-  unter der ersten, nicht unter ihrem Anker.
+  neben den Ketten doppelt?
+- Hängen zwei an derselben Gewohnheit, hängt die zweite an der Karte
+  darüber, nicht an ihrem Anker.
+- Die obere Leiste der Startseite läuft bei 320 Punkten Breite über.
 - Woran eine offene Folge hängt, sieht man nicht mehr, sobald ihr Anker
   abgehakt ist.
 - **AktivesBrett hat es nicht gesehen.**
@@ -364,7 +388,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1209, dazu die acht Packages (theory 223, habits 377, gear
+**Tests:** App 1220, dazu die acht Packages (theory 223, habits 377, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

@@ -122,6 +122,7 @@ flutter:
     # Flaechen, auf denen die Oberflaeche selbst steht -- der runde Knopf
     # des Startbildschirms und seine Charakter-Fassung.
     - assets/UI/
+    - assets/UI/Kette/
     # Der Mentor (ADR-0079): Figur und Kopf, aus Frederiks Bild vom 03.11.
     - assets/Mentor/
 

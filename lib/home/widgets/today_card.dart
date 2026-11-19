@@ -15,7 +15,7 @@ import '../../ui/anschlagtafel.dart';
 import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
-import '../../ui/ketten_zeichen.dart';
+import '../../ui/schild_kette.dart';
 import '../../ui/palette.dart';
 import '../../ui/pulsieren.dart';
 import '../../ui/tafel_wind.dart';
@@ -136,7 +136,10 @@ class TodayCard extends ConsumerWidget {
                         done: tracker.isChecked(eintrag.habit.id, today),
                         cue: CueText.lineFor(tracker, eintrag.habit.id),
                         treat: tracker.treatFor(eintrag.habit.id),
-                        depth: eintrag.depth,
+                        haengtOben: platz > 0 && eintrag.depth > 0,
+                        traegtUnten:
+                            platz + 1 < liste.length &&
+                            liste[platz + 1].depth > 0,
                         // Der Wind kommt von oben nach unten an.
                         windVersatz: liste.length < 2
                             ? 0
@@ -175,7 +178,8 @@ class _Zettel extends StatelessWidget {
     required this.cue,
     required this.onTap,
     this.treat,
-    this.depth = 0,
+    this.haengtOben = false,
+    this.traegtUnten = false,
     this.windVersatz = 0,
     this.cued = false,
     this.timed = false,
@@ -197,8 +201,19 @@ class _Zettel extends StatelessWidget {
   final String? treat;
   final VoidCallback onTap;
 
-  /// Wie tief die Gewohnheit unter ihrem Anker hängt (ADR-0065).
-  final int depth;
+  /// Ob der Zettel an zwei Ketten unter dem darüber hängt (ADR-0065,
+  /// 19.11.2026) — und ob einer an ihm hängt.
+  final bool haengtOben;
+  final bool traegtUnten;
+
+  /// Der Abstand über einem Zettel — über einem gekoppelten keiner, die
+  /// Ketten überbrücken nur den Platz der Reißzwecke.
+  static const double _abstand = 2;
+
+  /// Wo die Ösen sitzen: oben unter dem Platz der Reißzwecke, unten über
+  /// der Risskante, je mitten im Papierrand.
+  static const double _oseOben = Steckbrief.zwecke / 2 + 6;
+  static const double _oseUnten = Steckbrief.riss + 6;
 
   /// Wie spät ein Windstoß bei diesem Zettel ankommt (`TafelWind`).
   final double windVersatz;
@@ -232,12 +247,17 @@ class _Zettel extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = done ? null : cue;
 
-    // **Die Kette statt der Einrückung** (19.11.2026): Gekoppeltes
-    // hängt an einer Kette unter dem Zettel darüber.
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: AnDerKette(
-        gekoppelt: depth > 0,
+    // **Zwei Ketten statt der Einrückung** (19.11.2026): Gekoppeltes
+    // hängt unter dem Zettel darüber wie ein Schild.
+    return SchildKette(
+      oseOben: _oseOben,
+      oseUnten: _oseUnten,
+      luecke: 0,
+      haengtOben: haengtOben,
+      traegtUnten: traegtUnten,
+      ausgegraut: done,
+      child: Padding(
+        padding: EdgeInsets.only(top: haengtOben ? 0 : _abstand),
         child: Semantics(
           button: true,
           label: done
@@ -256,6 +276,8 @@ class _Zettel extends StatelessWidget {
                 verzoegerung: DerReiheNach.fertigNach(1),
                 child: Steckbrief(
                   neigung: neigungFuer(habit.id),
+                  still: haengtOben || traegtUnten,
+                  mitZwecke: !haengtOben,
                   saat: habit.id.hashCode,
                   windVersatz: windVersatz,
                   abgestempelt: done,
