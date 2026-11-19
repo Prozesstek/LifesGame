@@ -75,13 +75,10 @@ class HomeScreen extends ConsumerWidget {
   /// So hoch wird „Heute“ höchstens, wenn die Seite rollt.
   static const double _heuteEng = 280;
 
-  /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
-  /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
-  /// Ausrüstung, Charakter. Am 29.10.2026 50 statt 64, damit die
-  /// Holzleiste ein Fünftel niedriger wird; seit dem 10.11.2026 ohne
-  /// Namen darunter wieder 64, seit dem 11.11.2026 70 — im Innenabstand
-  /// der Leiste, die dafür nicht höher wird.
-  static const double bottomCircleSize = 70;
+  /// Wie gross die Kreise der unteren Reihe sind. **Seit dem 19.11.2026
+  /// so groß wie oben** (Frederik): Bis dahin waren sie kleiner, zuletzt
+  /// 70 gegen 78.
+  static const double bottomCircleSize = HubCircle.diameter;
 
   /// Das Zahnrad zu den Einstellungen — damit Tests es finden.
   static const Key einstellungenKey = ValueKey<String>('einstellungen-knopf');
@@ -224,8 +221,10 @@ class HomeScreen extends ConsumerWidget {
               verzoegerung: DerReiheNach.mentor,
               child: _Leiste(
                 oben: true,
+                // **Gleiche Abstände in beiden Leisten** (19.11.2026):
+                // zwischen den Kreisen und zum Rand gleich viel.
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     // Immer da; im Licht nur, wenn der Mentor die Gebiete
                     // erklärt (Issue #183).
@@ -517,7 +516,7 @@ class HomeScreen extends ConsumerWidget {
               child: _Leiste(
                 oben: false,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     kreis(

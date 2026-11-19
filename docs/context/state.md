@@ -51,6 +51,17 @@ sieht wirklich schrecklich aus … da muss ich mir vorher nochmal was
 überlegen“. Alles ist per `git revert` wieder heraus; Gekoppeltes steht
 wie vorher eingerückt.
 
+**Die Kreise gleich groß** (Frederik: „wirklich alle gleich groß mit
+gleichen Abständen?“). Gemessen: oben 78, unten 70; oben eng mit viel
+Rand, unten weit mit wenig Rand; die Figuren nahmen 62 bis 66 % ihres
+Kreises ein. Jetzt sind alle acht 74 Punkte, beide Leisten verteilen
+gleich (`spaceEvenly`), und jede Figur nimmt **genau 61 %** ein — dafür
+steht je Bild, wie viel es füllt (`BereichZeichen.anteil`, ein Test
+misst nach). 61 % ist das Größte, bei dem die Silhouette des
+Charakters auf dem Pergament bleibt; die Figuren sind damit etwas
+kleiner als vorher. In 390 und 360 Punkten Breite gemessen: oben und
+unten stehen die Kreise deckungsgleich. App 1210.
+
 ### Offen
 
 - Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
@@ -356,7 +367,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1209, dazu die acht Packages (theory 223, habits 377, gear
+**Tests:** App 1210, dazu die acht Packages (theory 223, habits 377, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

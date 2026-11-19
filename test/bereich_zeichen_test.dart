@@ -59,19 +59,41 @@ void main() {
     }
   });
 
-  test('was in die Ecken reicht, wird kleiner, der Harnisch bleibt groß', () {
-    // Bis zum 04.11.2026 waren es die Schwerter von Raven; die eigenen
-    // reichen nicht mehr so weit. Am weitesten reicht jetzt die Rolle.
-    // Bis zum 10.11. blieb der Helm des Charakters groß, die Silhouette
-    // reicht mit den Schultern weiter in die Ecken.
+  test('jede Figur steht gleich groß in ihrem Kreis (19.11.2026)', () {
     const size = HubCircle.diameter;
-    expect(
-      HubCircle.symbolSideFor(BereichZeichen.gewohnheiten, size),
-      lessThan(HubCircle.symbolSideFor(BereichZeichen.ausruestung, size)),
-    );
-    expect(
-      HubCircle.symbolSideFor(BereichZeichen.ausruestung, size),
-      closeTo(size * HubCircle.symbolAnteil, 0.001),
-    );
+    for (final pfad in BereichZeichen.alle) {
+      final sichtbar =
+          HubCircle.symbolSideFor(pfad, size) * BereichZeichen.anteil(pfad);
+      expect(
+        sichtbar,
+        closeTo(size * HubCircle.symbolAnteil, 0.001),
+        reason: pfad,
+      );
+    }
+  });
+
+  test('der Anteil jeder Figur ist am Bild gemessen', () async {
+    for (final pfad in BereichZeichen.alle) {
+      final daten = await rootBundle.load(pfad);
+      final codec = await ui.instantiateImageCodec(daten.buffer.asUint8List());
+      final bild = (await codec.getNextFrame()).image;
+      final rgba = (await bild.toByteData())!;
+      var x0 = bild.width, y0 = bild.height, x1 = -1, y1 = -1;
+      for (var y = 0; y < bild.height; y++) {
+        for (var x = 0; x < bild.width; x++) {
+          if (rgba.getUint8((y * bild.width + x) * 4 + 3) == 0) continue;
+          if (x < x0) x0 = x;
+          if (y < y0) y0 = y;
+          if (x > x1) x1 = x;
+          if (y > y1) y1 = y;
+        }
+      }
+      final gemessen = math.max(x1 - x0 + 1, y1 - y0 + 1) / bild.width;
+      expect(
+        BereichZeichen.anteil(pfad),
+        closeTo(gemessen, 0.002),
+        reason: pfad,
+      );
+    }
   });
 }

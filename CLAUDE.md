@@ -186,7 +186,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/einstellungen/` | **die Einstellungen** (13.11.2026): Lautstärke und Fähigkeiten links oder rechts — **gehören dem Gerät**, eigener Schlüssel in `shared_preferences` (`EinstellungenInPrefs`), nicht im Spielstand; geöffnet nur über das Zahnrad auf der Startseite (`EinstellungenScreen`) | Flutter |
 | `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), **die nach links ausweicht, wenn sie etwas verdeckt** (`BlasenPlatz`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier, **alle gleich groß und gleich verteilt** (19.11.2026) —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/widgets/berg_himmel.dart` | **der Berg lebt** (16.11.2026): hinter der Startseite ziehen Wolken, am Gipfel rieselt Schnee, das Licht folgt der Uhr (`Tageslicht`, eine Tabelle) — nachts Sterne und Mond; alles auf dem Raster des Bildes, in eigener Ebene, höchstens 20 Bilder je Sekunde; **nur Darstellung**, in Tests still (`BergHimmel.lebt`), die Uhr überschreibbar (`BergHimmel.uhr`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Zauberbuch, Harnisch, Silhouette; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
@@ -374,7 +374,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1209 Tests
+flutter test             # 1210 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
