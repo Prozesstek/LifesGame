@@ -220,7 +220,7 @@ class HabitsScreen extends ConsumerWidget {
           .read(unlockedHabitsProvider)
           .where((t) => !tracker.isActive(t.id))
           .toList(growable: false),
-      ruhende: tracker.customHabits
+      ruhende: tracker.visibleCustomHabits
           .where((h) => !tracker.isActive(h.id))
           .toList(growable: false),
       eigeneFrei: ref.read(customSlotsLeftProvider),
@@ -230,7 +230,10 @@ class HabitsScreen extends ConsumerWidget {
           : tracker.anchorCandidatesFor(id),
       hatAusloeser: (id) =>
           tracker.cueFor(id) != null || tracker.anchorFor(id) != null,
-      tageFuer: tracker.weekdaysFor,
+      onLoeschen: (id) =>
+          ref.read(habitTrackerProvider.notifier).archiveCustom(id),
+      onUmbenennen: (id, name) =>
+          ref.read(habitTrackerProvider.notifier).editCustom(id, name: name),
     );
     if (wahl == null || !context.mounted) return;
 

@@ -14,6 +14,7 @@ import 'package:lifes_game/combat/ladder_screen.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/weekday_picker.dart';
 import 'package:lifes_game/habits/widgets/cue_dialog.dart';
 import 'package:lifes_game/habits/widgets/gewohnheit_anlegen.dart';
 import 'package:lifes_game/home/home_screen.dart';
@@ -271,6 +272,7 @@ void main() {
       );
       await tester.pump();
       await tippe(GewohnheitAnlegen.weiterKey);
+      await tippe(WeekdayPicker.keyFor(1));
       await tippe(GewohnheitAnlegen.weiterKey);
       await tester.enterText(
         find.byKey(cueTreatFieldKey),

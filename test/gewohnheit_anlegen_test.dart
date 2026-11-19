@@ -60,6 +60,15 @@ Future<void> _bisZumGebiet(WidgetTester tester, String name) async {
   await _tippe(tester, GewohnheitAnlegen.weiterKey);
 }
 
+/// Wählt im Schritt „Tage“ alle sieben — am Anfang ist keiner gewählt
+/// (19.11.2026).
+Future<void> _alleTage(WidgetTester tester) async {
+  for (final tag in Wochentage.alle) {
+    await tester.tap(find.byKey(WeekdayPicker.keyFor(tag)));
+    await tester.pump();
+  }
+}
+
 void main() {
   testWidgets('der Plus-Knopf ist da, die Reiter nicht', (tester) async {
     await _zeige(tester, _container());
@@ -100,7 +109,20 @@ void main() {
     await _tippe(tester, GewohnheitAnlegen.weiterKey);
 
     expect(find.text('An welchen Tagen?'), findsOneWidget);
-    await _tippe(tester, WeekdayPicker.keyFor(6));
+    // Am Anfang ist kein Tag gewählt, und ohne Tag geht es nicht weiter.
+    expect(find.byKey(WeekdayPicker.hakenKey(1)), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(GewohnheitAnlegen.weiterKey))
+          .onPressed,
+      isNull,
+    );
+    for (final tag in <int>[1, 2, 3, 4, 5, 7]) {
+      await _tippe(tester, WeekdayPicker.keyFor(tag));
+    }
+    // Ein gewählter Tag trägt einen Haken.
+    expect(find.byKey(WeekdayPicker.hakenKey(1)), findsOneWidget);
+    expect(find.byKey(WeekdayPicker.hakenKey(6)), findsNothing);
     await _tippe(tester, GewohnheitAnlegen.weiterKey);
 
     expect(find.text('Und danach gönnst du dir?'), findsOneWidget);
@@ -179,6 +201,7 @@ void main() {
     expect(find.text('Wann machst du das?'), findsOneWidget);
     expect(find.text('„${vorlage.name}“'), findsOneWidget);
     await _tippe(tester, GewohnheitAnlegen.ohneKey);
+    await _alleTage(tester);
     await _tippe(tester, GewohnheitAnlegen.weiterKey);
     await _tippe(tester, GewohnheitAnlegen.ohneKey);
 
@@ -203,6 +226,7 @@ void main() {
     await tester.pump();
     await _tippe(tester, cueAnchorKey(HabitCatalog.starterId));
     await _tippe(tester, GewohnheitAnlegen.weiterKey);
+    await _alleTage(tester);
     await _tippe(tester, GewohnheitAnlegen.weiterKey);
     await _tippe(tester, GewohnheitAnlegen.ohneKey);
 
