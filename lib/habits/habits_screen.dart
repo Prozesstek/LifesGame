@@ -200,7 +200,7 @@ class HabitsScreen extends ConsumerWidget {
       cue: tracker.cueFor(habit.id),
       anker: ankerId == null ? null : tracker.definitionFor(ankerId)?.name,
       treat: tracker.treatFor(habit.id),
-      days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
+      days: Wochentage.text(tracker.weekdaysFor(habit.id)),
       cued: eintrag.isCued,
       onEditCue: () => _editCue(context, ref, habit),
     );

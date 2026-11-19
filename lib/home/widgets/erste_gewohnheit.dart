@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../../habits/habits_controller.dart';
 import '../../skills/gebiet_farbe.dart';
 import '../../skills/gebiet_zeichen.dart';
+import '../../skills/widgets/gebiet_erklaerung.dart';
 import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
@@ -72,12 +73,7 @@ class ErsteGewohnheitKarte extends ConsumerStatefulWidget {
 
   /// Was unter jedem Gebiet steht: Dinge, die man kennt. Sie erklären das
   /// Gebiet nebenbei; was es im Kampf bringt, sagt der Mentor am Ende.
-  static const Map<SkillArea, String> beispiele = <SkillArea, String>{
-    SkillArea.koerper: 'Sport, Schlaf, Essen',
-    SkillArea.geist: 'Lesen, Meditieren, Tagebuch',
-    SkillArea.wissenschaft: 'Lernen, Sprachen, Forschen',
-    SkillArea.gesellschaft: 'Freunde, Familie, Helfen',
-  };
+  static const Map<SkillArea, String> beispiele = GebietErklaerung.beispiele;
 
   /// Die Zeile „Etwas Eigenes“ — ein Tipp öffnet das Feld.
   static const Key eigenesKey = ValueKey<String>('erste-gewohnheit-eigenes');

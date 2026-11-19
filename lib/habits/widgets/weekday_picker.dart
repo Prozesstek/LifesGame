@@ -33,6 +33,11 @@ abstract final class Wochentage {
 
   static String lang(int tag) => _lang[tag] ?? '?';
 
+  /// „Mo Mi Fr" — oder „Täglich", wenn jeder Tag gewählt ist. **Steht
+  /// immer auf der Kachel** (19.11.2026, Frederik: „Tage wo man es macht
+  /// muss erkennbar sein“).
+  static String text(Set<int> tage) => zeile(tage) ?? 'Täglich';
+
   /// „Mo Mi Fr" — oder null, wenn jeder Tag gewählt ist. Jeden Tag ist
   /// der Normalfall, und der braucht keine Zeile.
   static String? zeile(Set<int> tage) {

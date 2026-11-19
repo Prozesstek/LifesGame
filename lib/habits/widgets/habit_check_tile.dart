@@ -113,7 +113,10 @@ class HabitCheckTile extends StatelessWidget {
 
   HabitGoal? get _goal => habit.goal;
 
-  bool get _hatZeile => cue != null || days != null || treat != null;
+  bool get _hatZeile => cue != null || treat != null;
+
+  /// Woran ein Test die Zeile mit den Tagen findet.
+  static Key tageKey(String habitId) => ValueKey<String>('tage-$habitId');
 
   @override
   Widget build(BuildContext context) {
@@ -197,13 +200,23 @@ class HabitCheckTile extends StatelessWidget {
                                 semanticLabel: goal.label,
                               ),
                             ],
+                            // **Die Tage stehen immer da** (19.11.2026):
+                            // „Täglich“ oder „Mo Mi Fr“, auch erledigt.
+                            if (days case final tage?) ...<Widget>[
+                              const SizedBox(height: 3),
+                              _TageZeile(
+                                key: tageKey(habit.id),
+                                text: tage,
+                                blass: isChecked,
+                              ),
+                            ],
                             if (!isChecked &&
                                 onEditCue != null &&
                                 _hatZeile) ...<Widget>[
                               const SizedBox(height: 4),
                               _CueLine(
                                 cue: cue,
-                                days: days,
+                                days: null,
                                 treat: treat,
                                 onTap: onEditCue!,
                               ),
@@ -297,6 +310,37 @@ class MitEntfernenKreuz extends StatelessWidget {
 /// Eine eigene Tippfläche in der Kachel: Wer sie antippt, will den Satz
 /// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
 /// Kachel darum bleibt stehen.
+/// Die Tage einer Gewohnheit, mit einem kleinen Kalender davor.
+class _TageZeile extends StatelessWidget {
+  const _TageZeile({required this.text, required this.blass, super.key});
+
+  final String text;
+  final bool blass;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = blass ? Palette.muted : Palette.textDim;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(Icons.calendar_month_rounded, size: 13, color: farbe),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: farbe,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _CueLine extends StatelessWidget {
   const _CueLine({
     required this.cue,
