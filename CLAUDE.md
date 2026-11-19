@@ -75,7 +75,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 377 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 381 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -176,6 +176,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
 | `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
 | `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke, im Kopf des Baums | Flutter |
+| `lib/skills/widgets/gebiet_erklaerung.dart` | **ein Tipp auf ein Gebiet erklärt es** (19.11.2026): was hineingehört (`beispiele`, auch für die erste Gewohnheit), welchen Kampfwert es steigert, wie weit der Skill ist | Flutter |
 | `lib/skills/widgets/gebiets_kacheln.dart` | **die vier Gebiete oben auf dem Gewohnheiten-Bildschirm** ([ADR-0092](docs/decisions/0092-gewohnheiten-aufgeraeumt.md)): Zeichen, Stufe, Name, Balken in ihrer Farbe; die Funken eines Häkchens fliegen in die Kachel seines Gebiets | Flutter |
 | `lib/skills/widgets/gebiet_streifen.dart` | **der Streifen am linken Rand** einer Gewohnheit in der Farbe ihres Gebiets (ADR-0090) — Kachel; der Zettel auf „Heute“ malt ihn über `Steckbrief.streifen` | Flutter |
 | `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** auf der Startseite: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
@@ -308,6 +309,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
 | `lib/ui/tafel_wind.dart` | **ein Windstoß über der Anschlagtafel** (16.11.2026): alle 6 bis 13 s flattern die Zettel kurz an der Reißzwecke, von oben nach unten (`TafelWind.winkel`, reine Rechnung); zwischen zwei Stößen läuft kein Takt, im Stoß dreht sich nur eine fertige Ebene; in Tests still (`TafelWind.weht`) | Flutter |
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
+| `lib/ui/menue_leiste.dart` | **die Menüleiste jedes Bereichs** (19.11.2026): Pergament, unten ein gemalter Holzbalken (`MenueLeistenRand`), der Titel in Cormorant Garamond — **über das Theme** (`appBarTheme`), kein Bildschirm muss es wissen | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Schwert, Herz, Schild, Tropfen, das Schwert gezeichnet (`StatIcon`); **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)), **in der Farbe seines Gebiets** (ADR-0090) | Flutter |
@@ -374,7 +376,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1210 Tests
+flutter test             # 1211 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -394,7 +396,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 377 Tests
+dart test                              # 381 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter

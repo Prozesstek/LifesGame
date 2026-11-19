@@ -4,7 +4,7 @@ import 'package:habits/habits.dart';
 import '../../skills/widgets/gebiet_streifen.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
-import '../../ui/holz.dart';
+import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
 import 'haekchen_kreis.dart';
 import 'habit_countdown.dart';
@@ -125,15 +125,17 @@ class HabitCheckTile extends StatelessWidget {
     final timer = hatZeitziel && !isChecked;
     final zeigtMenge = goal != null && !isChecked && !hatZeitziel;
 
+    // **Ein Zettel an der Tafel** (19.11.2026, Frederik: „Zettel-Optik
+    // für Gewohnheiten“) — wie auf „Heute“: Reißzwecke, Risskante, leicht
+    // schief, erledigt mit Stempel. Bis dahin eine Holzkarte.
     return Druck(
-      child: HolzKarte(
-        padding: EdgeInsets.zero,
-        color: isChecked ? Palette.surfaceRaised : Palette.surface,
-        // Grün, wenn erledigt; in der Akzentfarbe, solange sie dran ist
-        // — das Aufleuchten vergeht, die Kante bleibt.
-        edgeColor: isChecked
-            ? Palette.success
-            : (cued ? Palette.accent : Holz.kante),
+      child: Steckbrief(
+        neigung: Steckbrief.neigungFuer(habit.id),
+        saat: habit.id.hashCode,
+        abgestempelt: isChecked,
+        // Oben rechts steht das Kreuz; erledigt zeigt der grüne Haken.
+        mitStempel: false,
+        innen: EdgeInsets.zero,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
