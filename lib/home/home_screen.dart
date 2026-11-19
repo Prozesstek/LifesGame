@@ -67,6 +67,14 @@ class HomeScreen extends ConsumerWidget {
 
   static const double _maxWidth = 560;
 
+  /// Unter dieser Höhe für die Mitte rollt doch die ganze Seite
+  /// (19.11.2026) — auf einem kleinen Handy mit Ei-Wahl und Lagerfeuer
+  /// bliebe für „Heute“ sonst kein Platz.
+  static const double _engUnter = 480;
+
+  /// So hoch wird „Heute“ höchstens, wenn die Seite rollt.
+  static const double _heuteEng = 280;
+
   /// Wie gross die Kreise der unteren Reihe sind. **Kleiner als oben**,
   /// weil dort seit ADR-0057 vier stehen: Laden, Fähigkeiten,
   /// Ausrüstung, Charakter. Am 29.10.2026 50 statt 64, damit die
@@ -351,79 +359,94 @@ class HomeScreen extends ConsumerWidget {
                           // **Die erste Frage steht in der Mitte**
                           // (03.11.2026): Sonst ist die Seite noch leer,
                           // und oben am Rand sähe sie aus wie Nebensache.
+                          // **Die Seite rollt nicht** (19.11.2026,
+                          // Frederik): Nur die Zettel in „Heute“ rollen,
+                          // wenn es mehr werden, als Platz ist. Nur auf
+                          // sehr kleinen Handys rollt doch die Seite,
+                          // sonst bliebe für „Heute“ nichts (`_engUnter`).
                           Expanded(
                             child: LayoutBuilder(
-                              builder: (context, platz) => SingleChildScrollView(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: platz.maxHeight,
-                                  ),
-                                  child: Column(
-                                    // **Immer von oben** (08.11.2026): Bis
-                                    // dahin stand der erste Screen mittig,
-                                    // und mit der ersten Gewohnheit sprang
-                                    // der Mentor um 70 Punkte.
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: <Widget>[
-                                      // **Der Mentor über dem, worum
-                                      // es geht** (Issue #183): Man
-                                      // liest von oben nach unten. Er
-                                      // steht in derselben Spalte wie
-                                      // die erste Frage, damit er mit
-                                      // ihr in die Mitte rückt.
-                                      const MentorZeile(
-                                        ort: MentorOrt.start,
-                                        rand: 0,
-                                      ),
-                                      // **Einmal** (ADR-0085): Eigene Gewohnheiten
-                                      // von vor den Skills fragen nach ihrem
-                                      // Gebiet. Sonst steht hier nichts.
-                                      if (tracker
-                                          .customWithoutArea
-                                          .isNotEmpty) ...<Widget>[
-                                        const GebietFrageKarte(),
-                                        const SizedBox(height: 10),
-                                      ],
-                                      // **Die Wahl des Eis** (ADR-0086) — über
-                                      // „Heute“. Erst wenn es eine Gewohnheit
-                                      // gibt: Vorher fragt die Startseite nach
-                                      // ihr, und das Ei wartet. Ist es gewählt,
-                                      // steht das Tier oben in der Leiste.
-                                      // Seit ADR-0098 erst auf Level 5 —
-                                      // darunter mit Schloss zu sehen.
-                                      if ((start.zeigtHaustier ||
-                                              start.istGesperrt(
-                                                LevelExtra.haustier,
-                                              )) &&
-                                          !hatTier &&
-                                          !start.zeigtWenig) ...<Widget>[
-                                        GesperrtBisLevel(
-                                          level: LevelExtra.haustier.level,
-                                          aktiv: start.istGesperrt(
-                                            LevelExtra.haustier,
-                                          ),
-                                          child: const HaustierKarte(),
+                              builder: (context, platz) {
+                                final eng = platz.maxHeight < _engUnter;
+                                final mitte = Column(
+                                  // **Immer von oben** (08.11.2026): Bis
+                                  // dahin stand der erste Screen mittig,
+                                  // und mit der ersten Gewohnheit sprang
+                                  // der Mentor um 70 Punkte.
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: <Widget>[
+                                    // **Der Mentor über dem, worum
+                                    // es geht** (Issue #183): Man
+                                    // liest von oben nach unten. Er
+                                    // steht in derselben Spalte wie
+                                    // die erste Frage, damit er mit
+                                    // ihr in die Mitte rückt.
+                                    const MentorZeile(
+                                      ort: MentorOrt.start,
+                                      rand: 0,
+                                    ),
+                                    // **Einmal** (ADR-0085): Eigene Gewohnheiten
+                                    // von vor den Skills fragen nach ihrem
+                                    // Gebiet. Sonst steht hier nichts.
+                                    if (tracker
+                                        .customWithoutArea
+                                        .isNotEmpty) ...<Widget>[
+                                      const GebietFrageKarte(),
+                                      const SizedBox(height: 10),
+                                    ],
+                                    // **Die Wahl des Eis** (ADR-0086) — über
+                                    // „Heute“. Erst wenn es eine Gewohnheit
+                                    // gibt: Vorher fragt die Startseite nach
+                                    // ihr, und das Ei wartet. Ist es gewählt,
+                                    // steht das Tier oben in der Leiste.
+                                    // Seit ADR-0098 erst auf Level 5 —
+                                    // darunter mit Schloss zu sehen.
+                                    if ((start.zeigtHaustier ||
+                                            start.istGesperrt(
+                                              LevelExtra.haustier,
+                                            )) &&
+                                        !hatTier &&
+                                        !start.zeigtWenig) ...<Widget>[
+                                      GesperrtBisLevel(
+                                        level: LevelExtra.haustier.level,
+                                        aktiv: start.istGesperrt(
+                                          LevelExtra.haustier,
                                         ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                      // Ohne Gewohnheit ist „Heute“ die erste
-                                      // Frage, keine leere Liste.
-                                      if (start.fragtNachGewohnheit)
-                                        const Zeigefinger(
-                                          schritt: Schritt.gewohnheit,
-                                          child: ErsteGewohnheitKarte(),
-                                        )
-                                      else
-                                        // **Mit Schlüssel**: Nach dem ersten
-                                        // Häkchen erscheint das Ei davor —
-                                        // ohne ihn baute sich „Heute“ neu, und
-                                        // der Stempel schlüge nicht auf
-                                        // (`gotchas.md`).
-                                        // Auf Screen 2 fliegt sie nach dem Mentor herein
-                                        // (06.11.2026).
-                                        DerReiheNach(
+                                        child: const HaustierKarte(),
+                                      ),
+                                      const SizedBox(height: 10),
+                                    ],
+                                    // Ohne Gewohnheit ist „Heute“ die erste
+                                    // Frage, keine leere Liste.
+                                    // Die erste Frage rollt in sich,
+                                    // falls die Tastatur sie eng macht.
+                                    if (start.fragtNachGewohnheit)
+                                      eng
+                                          ? const Zeigefinger(
+                                              schritt: Schritt.gewohnheit,
+                                              child: ErsteGewohnheitKarte(),
+                                            )
+                                          : const Flexible(
+                                              child: SingleChildScrollView(
+                                                child: Zeigefinger(
+                                                  schritt: Schritt.gewohnheit,
+                                                  child: ErsteGewohnheitKarte(),
+                                                ),
+                                              ),
+                                            )
+                                    else
+                                      // **Mit Schlüssel**: Nach dem ersten
+                                      // Häkchen erscheint das Ei davor —
+                                      // ohne ihn baute sich „Heute“ neu, und
+                                      // der Stempel schlüge nicht auf
+                                      // (`gotchas.md`).
+                                      // Auf Screen 2 fliegt sie nach dem Mentor herein
+                                      // (06.11.2026).
+                                      _fuelle(
+                                        eng: eng,
+                                        child: DerReiheNach(
                                           key: const ValueKey<String>('heute'),
                                           nr: 0,
                                           aktiv: start.nurMentor,
@@ -432,39 +455,42 @@ class HomeScreen extends ConsumerWidget {
                                             child: TodayCard(),
                                           ),
                                         ),
-                                      // **Das Lagerfeuer** (ADR-0076) direkt darunter:
-                                      // Truhe und Tagesaufgaben standen hier bis zum
-                                      // 18.10. als zwei Karten, jetzt warten sie dort,
-                                      // zusammen mit der Rückfrage.
-                                      // Ab Level 3, darunter mit Schloss.
-                                      if ((start.zeigtTagesaufgaben ||
-                                              start.istGesperrt(
-                                                LevelExtra.lagerfeuer,
-                                              )) &&
-                                          !start.zeigtWenig) ...<Widget>[
-                                        const SizedBox(height: 10),
-                                        GesperrtBisLevel(
-                                          level: LevelExtra.lagerfeuer.level,
-                                          aktiv: start.istGesperrt(
-                                            LevelExtra.lagerfeuer,
-                                          ),
-                                          child: LagerfeuerKarte(
-                                            amFeuer: ref.watch(amFeuerProvider),
-                                            neu: neu(NeuOrt.feuer),
-                                            onOpen: () {
-                                              sieh(NeuOrt.feuer);
-                                              _open(
-                                                context,
-                                                const LagerfeuerScreen(),
-                                              );
-                                            },
-                                          ),
+                                      ),
+                                    // **Das Lagerfeuer** (ADR-0076) direkt darunter:
+                                    // Truhe und Tagesaufgaben standen hier bis zum
+                                    // 18.10. als zwei Karten, jetzt warten sie dort,
+                                    // zusammen mit der Rückfrage.
+                                    // Ab Level 3, darunter mit Schloss.
+                                    if ((start.zeigtTagesaufgaben ||
+                                            start.istGesperrt(
+                                              LevelExtra.lagerfeuer,
+                                            )) &&
+                                        !start.zeigtWenig) ...<Widget>[
+                                      const SizedBox(height: 10),
+                                      GesperrtBisLevel(
+                                        level: LevelExtra.lagerfeuer.level,
+                                        aktiv: start.istGesperrt(
+                                          LevelExtra.lagerfeuer,
                                         ),
-                                      ],
+                                        child: LagerfeuerKarte(
+                                          amFeuer: ref.watch(amFeuerProvider),
+                                          neu: neu(NeuOrt.feuer),
+                                          onOpen: () {
+                                            sieh(NeuOrt.feuer);
+                                            _open(
+                                              context,
+                                              const LagerfeuerScreen(),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ],
-                                  ),
-                                ),
-                              ),
+                                  ],
+                                );
+                                return eng
+                                    ? SingleChildScrollView(child: mitte)
+                                    : mitte;
+                              },
                             ),
                           ),
                         ],
@@ -783,4 +809,16 @@ class _DevKnopf extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// „Heute“ nimmt, was übrig bleibt — rollt die Seite, eine feste Höhe,
+/// damit die Zettel darin weiter in sich rollen können.
+Widget _fuelle({required bool eng, required Widget child}) {
+  if (eng) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: HomeScreen._heuteEng),
+      child: child,
+    );
+  }
+  return Flexible(child: child);
 }

@@ -55,6 +55,9 @@ class TodayCard extends ConsumerWidget {
   /// (ADR-0076).
   static const Key flammeKey = ValueKey<String>('heute-zuerst');
 
+  /// Die Liste der Zettel, die in sich rollt (19.11.2026).
+  static const Key listeKey = ValueKey<String>('heute-liste');
+
   /// Der Schein um den Zettel von [habitId], der beim ersten Häkchen
   /// pulsiert (06.11.2026).
   static Key pulsKey(String habitId) {
@@ -115,24 +118,40 @@ class TodayCard extends ConsumerWidget {
               label: 'Ruhetag — heute ist nichts fällig',
             )
           else
-            for (final (platz, eintrag) in liste.indexed)
-              _Zettel(
-                key: ValueKey<String>(eintrag.habit.id),
-                habit: eintrag.habit,
-                done: tracker.isChecked(eintrag.habit.id, today),
-                cue: CueText.lineFor(tracker, eintrag.habit.id),
-                treat: tracker.treatFor(eintrag.habit.id),
-                depth: eintrag.depth,
-                // Der Wind kommt von oben nach unten an.
-                windVersatz: liste.length < 2 ? 0 : platz / (liste.length - 1),
-                cued: eintrag.isCued,
-                timed: tracker.hasTimer(eintrag.habit.id),
-                zuerst: tracker.firstUpOn(today) == eintrag.habit.id,
-                hervorheben: hervorheben,
-                onTap: () => tapHabit(context, ref, eintrag.habit),
-                onTimerDone: () =>
-                    finishHabitTimer(context, ref, eintrag.habit),
+            // **Nur die Zettel rollen** (19.11.2026, Frederik): Die
+            // Startseite selbst steht still; kommen mehr Gewohnheiten,
+            // als Platz ist, rollt die Tafel in sich.
+            Flexible(
+              child: SingleChildScrollView(
+                key: listeKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    for (final (platz, eintrag) in liste.indexed)
+                      _Zettel(
+                        key: ValueKey<String>(eintrag.habit.id),
+                        habit: eintrag.habit,
+                        done: tracker.isChecked(eintrag.habit.id, today),
+                        cue: CueText.lineFor(tracker, eintrag.habit.id),
+                        treat: tracker.treatFor(eintrag.habit.id),
+                        depth: eintrag.depth,
+                        // Der Wind kommt von oben nach unten an.
+                        windVersatz: liste.length < 2
+                            ? 0
+                            : platz / (liste.length - 1),
+                        cued: eintrag.isCued,
+                        timed: tracker.hasTimer(eintrag.habit.id),
+                        zuerst: tracker.firstUpOn(today) == eintrag.habit.id,
+                        hervorheben: hervorheben,
+                        onTap: () => tapHabit(context, ref, eintrag.habit),
+                        onTimerDone: () =>
+                            finishHabitTimer(context, ref, eintrag.habit),
+                      ),
+                  ],
+                ),
               ),
+            ),
         ],
       ),
     );

@@ -12,9 +12,33 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 16.11.2026 · Frederik
+**Zuletzt aktualisiert:** 19.11.2026 · Frederik
 
 ---
+
+## 19.11.2026: die Startseite steht still
+
+Frederik: „der startscreen an sich [sollte] nicht scrollbar sein. jedoch
+sollte es die möglichkeit geben bei den gewohnheiten zu scrollen falls
+noch mehr kommen.“
+
+Die Seite rollt nicht mehr; „Heute“ nimmt, was zwischen Ei, Lagerfeuer
+und den Leisten übrig bleibt, und **nur die Zettel rollen in der Tafel**
+(`TodayCard.listeKey`). Die erste Frage rollt ebenso in sich, falls die
+Tastatur sie eng macht.
+
+**Ohne Rückfrage entschieden:** Ist die Mitte niedriger als 480 Punkte
+(`HomeScreen._engUnter`, etwa 360 × 640 mit Ei-Wahl und Lagerfeuer),
+rollt **doch die ganze Seite**, und „Heute“ ist höchstens 280 hoch —
+sonst drückten Ei und Feuer die Tafel auf null.
+
+App 1209 (vorher 1207). 390 × 844 mit drei und fünf Gewohnheiten und
+360 × 640 gerendert und angesehen.
+
+### Offen
+
+- Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
+- Die Ei-Wahl nimmt viel Platz, solange es kein Tier gibt.
 
 ## 16.11.2026, danach: das Lagerfeuer brennt, der Wind geht über „Heute“
 
@@ -312,7 +336,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1207, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1209, dazu die acht Packages (theory 223, habits 375, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
