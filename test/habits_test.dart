@@ -6,6 +6,7 @@ import 'package:habits/habits.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/habits_screen.dart';
+import 'package:lifes_game/habits/widgets/weekday_picker.dart';
 import 'package:lifes_game/habits/widgets/cue_dialog.dart';
 import 'package:lifes_game/habits/widgets/habit_check_tile.dart';
 import 'package:lifes_game/habits/widgets/streak_freeze_card.dart';
@@ -62,15 +63,26 @@ Future<void> _vorlageStarten(WidgetTester tester) async {
   await _ohneEinrichtung(tester);
 }
 
-/// Wann → „Ohne", Tage → „Weiter", Danach → „Ohne" — falls gefragt wird.
+/// Wann → „Ohne", Tage → alle sieben und „Weiter", Danach → „Ohne" —
+/// falls gefragt wird. Seit dem 19.11.2026 ist am Anfang kein Tag
+/// gewählt.
 Future<void> _ohneEinrichtung(WidgetTester tester) async {
   if (find.byKey(GewohnheitAnlegen.ohneKey).evaluate().isEmpty) return;
   await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));
   await tester.pumpAndSettle();
+  await _alleTage(tester);
   await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
   await tester.pumpAndSettle();
   await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));
   await tester.pumpAndSettle();
+}
+
+/// Wählt im Schritt „Tage“ alle sieben.
+Future<void> _alleTage(WidgetTester tester) async {
+  for (final tag in Wochentage.alle) {
+    await tester.tap(find.byKey(WeekdayPicker.keyFor(tag)));
+    await tester.pump();
+  }
 }
 
 Future<void> _pumpScreen(
@@ -307,6 +319,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
       await tester.pumpAndSettle();
+      await _alleTage(tester);
       await tester.tap(find.byKey(GewohnheitAnlegen.weiterKey));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(GewohnheitAnlegen.ohneKey));

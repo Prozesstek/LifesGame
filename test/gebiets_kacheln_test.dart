@@ -9,6 +9,7 @@ import 'package:lifes_game/home/widgets/status_leiste.dart';
 import 'package:lifes_game/save/save_data.dart';
 import 'package:lifes_game/save/save_providers.dart';
 import 'package:lifes_game/skills/widgets/gebiets_balken.dart';
+import 'package:lifes_game/skills/widgets/gebiet_erklaerung.dart';
 import 'package:lifes_game/skills/widgets/gebiets_kacheln.dart';
 import 'package:lifes_game/ui/beute_flug.dart';
 import 'package:lifes_game/ui/palette.dart';
@@ -164,5 +165,21 @@ void main() {
     final mitte = tester.getCenter(kreuz);
     expect(mitte.dx, greaterThan(flaeche.center.dx));
     expect(mitte.dy, lessThan(flaeche.center.dy));
+  });
+
+  testWidgets('ein Tipp auf ein Gebiet erklärt es (19.11.2026)', (
+    tester,
+  ) async {
+    await bildschirm(tester, zwei);
+
+    await tester.tap(find.byKey(GebietsKacheln.keyFor(SkillArea.koerper)));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(GebietErklaerung.karteKey), findsOneWidget);
+    expect(find.text('Sport, Schlaf, Essen'), findsOneWidget);
+    expect(
+      find.text('Angriffsschaden steigt mit jedem Häkchen hier.'),
+      findsOneWidget,
+    );
   });
 }

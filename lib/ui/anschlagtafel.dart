@@ -72,7 +72,7 @@ class Anschlagtafel extends StatelessWidget {
                   children: <Widget>[
                     const Positioned.fill(
                       child: RepaintBoundary(
-                        child: CustomPaint(painter: _Bretter()),
+                        child: CustomPaint(painter: TafelBretter()),
                       ),
                     ),
                     Padding(
@@ -155,8 +155,8 @@ class _Schild extends StatelessWidget {
 ///
 /// **Gesät, nicht zufällig**: Dieselbe Tafel sieht bei jedem Neubau
 /// gleich aus. Die Bretter hängen nur an der Breite.
-class _Bretter extends CustomPainter {
-  const _Bretter();
+class TafelBretter extends CustomPainter {
+  const TafelBretter();
 
   /// Wie breit ein Brett ungefähr ist, in Bildpunkten.
   static const int _brett = 22;
@@ -245,7 +245,7 @@ class _Bretter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_Bretter alt) => false;
+  bool shouldRepaint(TafelBretter alt) => false;
 }
 
 /// Ein Blatt an der [Anschlagtafel]: Pergament mit gerissener
@@ -265,10 +265,15 @@ class Steckbrief extends StatefulWidget {
     this.stempelText,
     this.streifen,
     this.windVersatz = 0,
+    this.mitStempel = true,
     super.key,
   });
 
   final Widget child;
+
+  /// Ob ein abgestempeltes Blatt den Stempel trägt. Ohne wird nur das
+  /// Papier dunkler — wo oben rechts schon etwas steht (19.11.2026).
+  final bool mitStempel;
 
   /// Wie spät ein Windstoß bei diesem Blatt ankommt, 0 bis 1
   /// (`TafelWind`) — ohne Wind über der Tafel ohne Wirkung.
@@ -301,6 +306,10 @@ class Steckbrief extends StatefulWidget {
 
   /// Woran Tests den Stempel finden.
   static const Key stempelKey = ValueKey<String>('steckbrief-stempel');
+
+  /// Wie schief ein Zettel hängt — **aus der Id, nicht aus dem Platz**:
+  /// Ein abgehakter wandert nach unten und soll dabei nicht umkippen.
+  static double neigungFuer(String id) => (id.hashCode % 5 - 2) * 0.005;
 
   /// Wie groß die Reißzwecke ist; sie ragt zur Hälfte über das Blatt.
   static const double zwecke = 14;
@@ -396,7 +405,7 @@ class _SteckbriefState extends State<Steckbrief>
                     widget.child,
                     // **Über dem Bild, nicht über dem Satz**: Abgeholt
                     // bleibt lesbar, was es war.
-                    if (widget.abgestempelt)
+                    if (widget.abgestempelt && widget.mitStempel)
                       Positioned(
                         top: -_Stempel.ueberstand,
                         right: -_Stempel.ueberstand,

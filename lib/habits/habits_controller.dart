@@ -230,6 +230,12 @@ class HabitsController extends Notifier<HabitTracker> {
       priority: priority,
     );
   }
+
+  /// Löscht eine eigene, die gerade nicht läuft — ihre Häkchen zählen
+  /// weiter ([HabitTracker.archiveCustom], 19.11.2026).
+  void archiveCustom(String habitId) {
+    state = state.archiveCustom(habitId);
+  }
 }
 
 final habitTrackerProvider = NotifierProvider<HabitsController, HabitTracker>(
@@ -276,9 +282,10 @@ final customSlotsProvider = Provider<int>((ref) {
 
 /// Wie viele Plätze davon noch frei sind.
 final customSlotsLeftProvider = Provider<int>((ref) {
+  // Gelöschte geben ihren Platz frei (19.11.2026).
   final frei =
       ref.watch(customSlotsProvider) -
-      ref.watch(habitTrackerProvider).customCount;
+      ref.watch(habitTrackerProvider).visibleCustomHabits.length;
   return frei < 0 ? 0 : frei;
 });
 

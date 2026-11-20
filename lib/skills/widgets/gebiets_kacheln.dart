@@ -13,6 +13,7 @@ import '../../ui/palette.dart';
 import '../gebiet_farbe.dart';
 import '../gebiet_zeichen.dart';
 import '../skills_provider.dart';
+import 'gebiet_erklaerung.dart';
 
 /// **Die vier Gebiete oben auf dem Gewohnheiten-Bildschirm**, jedes in
 /// seiner Farbe: Zeichen, Stufe, Name, Balken (ADR-0092). Ein Tipp sagt,
@@ -76,13 +77,12 @@ class _Kachel extends StatelessWidget {
     final farbe = GebietFarbe.leder(area);
     final stand = unterwegs;
 
-    return Tooltip(
-      triggerMode: TooltipTriggerMode.tap,
-      message: skill.isMaxLevel
-          ? '${area.label}: höchste Stufe'
-          : '${area.label}: noch ${skill.xpToNextLevel} Erfahrung bis '
-                'Stufe ${skill.level + 1}',
-      child: Druck(
+    // **Ein Tipp erklärt das Gebiet** (19.11.2026) — vorher stand dort
+    // nur, wie viel Erfahrung bis zur nächsten Stufe fehlt.
+    return Druck(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => GebietErklaerung.zeige(context, area: area, skill: skill),
         child: FlugZielMarke(
           ziel: FlugZiel.gebiet,
           fuer: area,

@@ -16,6 +16,46 @@
 
 ---
 
+## 19.11.2026, danach: der Gewohnheiten-Bildschirm
+
+Frederik und AktivesBrett hatten eine Liste („Hintergrund ändern und
+Menüleiste designen, neue Schriftart · Erklärkarte für die Gebiete ·
+Zettel-Optik · Vorlage löschen und bearbeiten · Tage erkennbar · am
+Anfang alle nicht angewählt + Haken“). Claude hat sie ausgelegt,
+Frederik: „mach alles so wie ich gesagt hab. die tage können als text da
+stehen“.
+
+| Was | Wie |
+|---|---|
+| **Menüleiste, jedes Menü** | Pergament wie bisher, unten ein gemalter Holzbalken, der Titel in **Cormorant Garamond** — über das Theme (`MenueLeiste`) |
+| **Hintergrund** | Gewohnheiten liegen auf den Brettern der Anschlagtafel (`TafelBretter`) |
+| **Zettel** | jede Gewohnheit ein Zettel wie auf „Heute“: Reißzwecke, Risskante, leicht schief; erledigt dunkler, **ohne Stempel** (oben rechts steht das Kreuz) |
+| **Gebiete** | ein Tipp öffnet eine Karte: Beispiele, welcher Kampfwert steigt, Erfahrung bis zur nächsten Stufe (`GebietErklaerung`) |
+| **Tage** | immer unter dem Namen, mit Kalender: „Täglich“ oder „Mo Mi Fr“, auch erledigt |
+| **Anlegen, Tage** | am Anfang keiner gewählt, gewählte mit grünem Haken, „Weiter“ erst ab einem Tag — auch bei Vorlagen |
+| **Deine** | eigene pausierte lassen sich umbenennen und löschen |
+
+**Löschen nimmt nichts zurück** (`HabitTracker.archiveCustom`): Die
+Gewohnheit verschwindet aus jeder Liste und gibt ihren Platz frei, ihre
+Häkchen zählen weiter — sonst fiele das Level. Sie bleibt im Spielstand
+(`archived`).
+
+**Ohne Rückfrage entschieden:** Schrift nur für Titel, nicht für den
+Fließtext; der Hintergrund ist die Tafel, kein neues Bild; die übrigen
+Bereiche bekommen bisher nur die Menüleiste, keinen eigenen
+Hintergrund.
+
+App 1211 (vorher 1210), habits 381 (vorher 377). Gewohnheiten, Gebietskarte,
+Laden, „Deine“ und der Schritt „Tage“ in 390 × 844 gerendert.
+
+### Offen
+
+- **Eigene Hintergründe für die anderen Bereiche** — „in jedem Menü“ ist
+  bisher nur die Leiste.
+- Bearbeiten heißt nur umbenennen; Gebiet, Schwierigkeit und Ziel bleiben
+  fest (ADR-0028).
+- **AktivesBrett hat es nicht gesehen.**
+
 ## 19.11.2026: die Startseite steht still
 
 Frederik: „der startscreen an sich [sollte] nicht scrollbar sein. jedoch
@@ -367,7 +407,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1210, dazu die acht Packages (theory 223, habits 377, gear
+**Tests:** App 1211, dazu die acht Packages (theory 223, habits 381, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

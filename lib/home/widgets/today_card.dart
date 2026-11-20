@@ -229,7 +229,7 @@ class _Zettel extends StatelessWidget {
 
   /// Wie schief ein Zettel hängt — **aus der Id, nicht aus dem Platz**:
   /// Ein abgehakter wandert nach unten und soll dabei nicht umkippen.
-  static double neigungFuer(String id) => (id.hashCode % 5 - 2) * 0.005;
+  static double neigungFuer(String id) => Steckbrief.neigungFuer(id);
 
   @override
   Widget build(BuildContext context) {
