@@ -21,6 +21,7 @@ import 'save/save_watcher.dart';
 import 'theory/silbentrennung.dart';
 import 'ui/druck.dart';
 import 'ui/holz.dart';
+import 'ui/menue_leiste.dart';
 import 'ui/palette.dart';
 import 'ui/phone_frame.dart';
 
@@ -300,9 +301,13 @@ class _LifesGameAppState extends State<LifesGameApp> {
       // Die Kopfzeile ist selbst eine Pergamentfläche. Ohne diese beiden
       // Zeilen bliebe ihr Titel in der Standardfarbe des Schemas und
       // stünde je nach Bildschirm hell auf hell.
+      // **Die Menüleiste** (19.11.2026): unten ein Holzbalken, der Titel
+      // in Cormorant Garamond (`lib/ui/menue_leiste.dart`).
       appBarTheme: const AppBarTheme(
         backgroundColor: Palette.surface,
         foregroundColor: Palette.text,
+        titleTextStyle: MenueLeiste.titel,
+        shape: MenueLeistenRand(),
         // Die Symbole stehen auf dem Holzknopf, nicht auf Pergament —
         // deshalb hell, auch wenn der Titel daneben Tinte ist.
         iconTheme: IconThemeData(color: Palette.textOnDark),

@@ -62,6 +62,24 @@ abstract final class BereichZeichen {
     charakter,
   ];
 
+  /// **Wie viel seines Bildes eine Figur füllt** — ihre sichtbare Breite
+  /// oder Höhe, was größer ist, als Anteil der Bildbreite (19.11.2026).
+  /// Danach werden die Bilder so skaliert, dass jede Figur gleich groß
+  /// im Kreis steht (`HubCircle.symbolSideFor`). Gemessen am Bild;
+  /// `test/bereich_zeichen_test.dart` misst nach. Ein unbekanntes Bild
+  /// gilt als ganz gefüllt.
+  static double anteil(String pfad) => switch (pfad) {
+    gewohnheiten => 1.0,
+    theorie => 0.906,
+    kampf => 0.812,
+    statistik => 0.906,
+    laden => 0.922,
+    faehigkeiten => 0.906,
+    ausruestung => 0.812,
+    charakter => 0.859,
+    _ => 1.0,
+  };
+
   /// **Wie weit ein Zeichen von seiner Mitte reicht** — der äußerste
   /// gezeichnete Bildpunkt, gemessen in halben Bildbreiten: 1 berührt
   /// die Mitte jeder Kante, √2 reicht bis in die Ecken (29.10.2026).

@@ -33,6 +33,11 @@ abstract final class Wochentage {
 
   static String lang(int tag) => _lang[tag] ?? '?';
 
+  /// „Mo Mi Fr" — oder „Täglich", wenn jeder Tag gewählt ist. **Steht
+  /// immer auf der Kachel** (19.11.2026, Frederik: „Tage wo man es macht
+  /// muss erkennbar sein“).
+  static String text(Set<int> tage) => zeile(tage) ?? 'Täglich';
+
   /// „Mo Mi Fr" — oder null, wenn jeder Tag gewählt ist. Jeden Tag ist
   /// der Normalfall, und der braucht keine Zeile.
   static String? zeile(Set<int> tage) {
@@ -47,13 +52,24 @@ abstract final class Wochentage {
 /// Sieben Kreise, Montag bis Sonntag, zum An- und Abwählen (ADR-0064).
 ///
 /// **Der letzte Tag lässt sich nicht abwählen.** Eine Gewohnheit ohne
-/// fälligen Tag wäre keine — wer sie nicht mehr will, stoppt sie.
+/// fälligen Tag wäre keine — wer sie nicht mehr will, stoppt sie. Beim
+/// Anlegen beginnt die Wahl dagegen leer ([leerErlaubt], 19.11.2026), und
+/// erst ein gewählter Tag führt weiter.
+///
+/// **Ein gewählter Tag trägt einen Haken** (19.11.2026, Frederik).
 class WeekdayPicker extends StatelessWidget {
   const WeekdayPicker({
     required this.selected,
     required this.onChanged,
+    this.leerErlaubt = false,
     super.key,
   });
+
+  /// Ob sich auch der letzte Tag abwählen lässt.
+  final bool leerErlaubt;
+
+  /// Woran ein Test den Haken eines gewählten Tags findet.
+  static Key hakenKey(int tag) => ValueKey<String>('wochentag-haken-$tag');
 
   /// Woran ein Test den Kreis eines Wochentags findet.
   static Key keyFor(int tag) => ValueKey<String>('wochentag-$tag');
@@ -64,7 +80,7 @@ class WeekdayPicker extends StatelessWidget {
   void _tippe(int tag) {
     final next = <int>{...selected};
     if (!next.remove(tag)) next.add(tag);
-    if (next.isEmpty) return;
+    if (next.isEmpty && !leerErlaubt) return;
     onChanged(next);
   }
 
@@ -113,28 +129,61 @@ class _Tag extends StatelessWidget {
             selected: gewaehlt,
             label: Wochentage.lang(tag),
             excludeSemantics: true,
-            child: Druck(
-              child: Material(
-                color: gewaehlt ? Palette.accent : Palette.surfaceSunken,
-                shape: const CircleBorder(),
-                child: InkWell(
-                  onTap: onTap,
-                  customBorder: const CircleBorder(),
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        Wochentage.kurz(tag),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: gewaehlt ? Palette.surface : Palette.textDim,
+            child: Stack(
+              clipBehavior: Clip.none,
+              fit: StackFit.passthrough,
+              children: <Widget>[
+                Druck(
+                  child: Material(
+                    color: gewaehlt ? Palette.accent : Palette.surfaceSunken,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: onTap,
+                      customBorder: const CircleBorder(),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            Wochentage.kurz(tag),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: gewaehlt
+                                  ? Palette.surface
+                                  : Palette.textDim,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                if (gewaehlt)
+                  Positioned(
+                    right: -3,
+                    bottom: -3,
+                    child: IgnorePointer(
+                      child: Container(
+                        key: WeekdayPicker.hakenKey(tag),
+                        width: 15,
+                        height: 15,
+                        decoration: BoxDecoration(
+                          color: Palette.success,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Palette.surface,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          size: 11,
+                          color: Palette.surface,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

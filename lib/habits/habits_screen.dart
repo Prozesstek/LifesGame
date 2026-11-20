@@ -16,6 +16,7 @@ import 'widgets/habit_check_tile.dart';
 import 'widgets/gewohnheit_anlegen.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/weekday_picker.dart';
+import '../ui/anschlagtafel.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
@@ -79,94 +80,100 @@ class HabitsScreen extends ConsumerWidget {
             floatingActionButton: _PlusKnopf(
               onTap: () => _neueGewohnheit(context, ref),
             ),
-            body: SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxWidth),
-                  child: Column(
-                    children: <Widget>[
-                      // **Die vier Gebiete stehen fest über der Liste**:
-                      // Die Funken eines Häkchens fliegen hinein, also
-                      // dürfen sie nicht mit weggerollt sein.
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
-                        child: GebietsKacheln(),
-                      ),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
-                          children: <Widget>[
-                            if (zuRetten != null) ...<Widget>[
-                              StreakFreezeCard(
-                                streakAtRisk: tracker.currentBestStreak(
-                                  zuRetten,
-                                ),
-                                freezesLeft: tracker.freezesLeft,
-                                onUse: () => _useFreeze(context, ref, zuRetten),
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                            // Offene oben, erledigte unten (`dailyListOn`).
-                            // Der Schlüssel hält den Sprung des Häkchens
-                            // an der Gewohnheit, wenn die Kachel die Reihe
-                            // wechselt.
-                            // Gekoppeltes steht eingerückt unter seinem Anker
-                            // und leuchtet auf, sobald der abgehakt ist
-                            // (ADR-0065). Die Ordnung kommt aus `stackOn`.
-                            for (final eintrag in active) ...<Widget>[
-                              _ImStapel(
-                                key: ValueKey<String>(eintrag.habit.id),
-                                depth: eintrag.depth,
-                                cued: eintrag.isCued,
-                                child: _kachel(
-                                  context,
-                                  ref,
-                                  tracker,
-                                  today,
-                                  eintrag,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
-                            if (nichtHeute.isNotEmpty) ...<Widget>[
-                              const SizedBox(height: 8),
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: Icon(
-                                  Icons.event_busy_rounded,
-                                  size: 20,
-                                  color: Palette.textOnDarkDim,
-                                  semanticLabel: 'Heute nicht fällig',
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              for (final habit in nichtHeute) ...<Widget>[
-                                _NichtHeuteTile(
-                                  key: ValueKey<String>(
-                                    'nicht-heute-${habit.id}',
+            // **Der Hintergrund: die Anschlagtafel** (19.11.2026) — die
+            // Gewohnheiten hängen als Zettel daran, wie auf „Heute“.
+            body: CustomPaint(
+              painter: const TafelBretter(),
+              child: SafeArea(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxWidth),
+                    child: Column(
+                      children: <Widget>[
+                        // **Die vier Gebiete stehen fest über der Liste**:
+                        // Die Funken eines Häkchens fliegen hinein, also
+                        // dürfen sie nicht mit weggerollt sein.
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+                          child: GebietsKacheln(),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+                            children: <Widget>[
+                              if (zuRetten != null) ...<Widget>[
+                                StreakFreezeCard(
+                                  streakAtRisk: tracker.currentBestStreak(
+                                    zuRetten,
                                   ),
-                                  habit: habit,
-                                  weekdays: tracker.weekdaysFor(habit.id),
-                                  streak: tracker.currentStreak(
-                                    habit.id,
+                                  freezesLeft: tracker.freezesLeft,
+                                  onUse: () =>
+                                      _useFreeze(context, ref, zuRetten),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              // Offene oben, erledigte unten (`dailyListOn`).
+                              // Der Schlüssel hält den Sprung des Häkchens
+                              // an der Gewohnheit, wenn die Kachel die Reihe
+                              // wechselt.
+                              // Gekoppeltes steht eingerückt unter seinem Anker
+                              // und leuchtet auf, sobald der abgehakt ist
+                              // (ADR-0065). Die Ordnung kommt aus `stackOn`.
+                              for (final eintrag in active) ...<Widget>[
+                                _ImStapel(
+                                  key: ValueKey<String>(eintrag.habit.id),
+                                  depth: eintrag.depth,
+                                  cued: eintrag.isCued,
+                                  child: _kachel(
+                                    context,
+                                    ref,
+                                    tracker,
                                     today,
+                                    eintrag,
                                   ),
-                                  onEdit: () => _editCue(context, ref, habit),
-                                  onStop: () => ref
-                                      .read(habitTrackerProvider.notifier)
-                                      .deactivate(habit.id),
                                 ),
                                 const SizedBox(height: 8),
                               ],
+                              if (nichtHeute.isNotEmpty) ...<Widget>[
+                                const SizedBox(height: 8),
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(
+                                    Icons.event_busy_rounded,
+                                    size: 20,
+                                    color: Palette.textOnDarkDim,
+                                    semanticLabel: 'Heute nicht fällig',
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                for (final habit in nichtHeute) ...<Widget>[
+                                  _NichtHeuteTile(
+                                    key: ValueKey<String>(
+                                      'nicht-heute-${habit.id}',
+                                    ),
+                                    habit: habit,
+                                    weekdays: tracker.weekdaysFor(habit.id),
+                                    streak: tracker.currentStreak(
+                                      habit.id,
+                                      today,
+                                    ),
+                                    onEdit: () => _editCue(context, ref, habit),
+                                    onStop: () => ref
+                                        .read(habitTrackerProvider.notifier)
+                                        .deactivate(habit.id),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              ],
+                              // Die Truhe stand bis zum 18.10. hier; sie wartet
+                              // jetzt am Lagerfeuer (ADR-0076). Anlegen und die
+                              // Vorlagen stehen seit ADR-0089 hinter dem
+                              // Plus-Knopf.
                             ],
-                            // Die Truhe stand bis zum 18.10. hier; sie wartet
-                            // jetzt am Lagerfeuer (ADR-0076). Anlegen und die
-                            // Vorlagen stehen seit ADR-0089 hinter dem
-                            // Plus-Knopf.
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -200,7 +207,7 @@ class HabitsScreen extends ConsumerWidget {
       cue: tracker.cueFor(habit.id),
       anker: ankerId == null ? null : tracker.definitionFor(ankerId)?.name,
       treat: tracker.treatFor(habit.id),
-      days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
+      days: Wochentage.text(tracker.weekdaysFor(habit.id)),
       cued: eintrag.isCued,
       onEditCue: () => _editCue(context, ref, habit),
     );
@@ -220,7 +227,7 @@ class HabitsScreen extends ConsumerWidget {
           .read(unlockedHabitsProvider)
           .where((t) => !tracker.isActive(t.id))
           .toList(growable: false),
-      ruhende: tracker.customHabits
+      ruhende: tracker.visibleCustomHabits
           .where((h) => !tracker.isActive(h.id))
           .toList(growable: false),
       eigeneFrei: ref.read(customSlotsLeftProvider),
@@ -230,7 +237,10 @@ class HabitsScreen extends ConsumerWidget {
           : tracker.anchorCandidatesFor(id),
       hatAusloeser: (id) =>
           tracker.cueFor(id) != null || tracker.anchorFor(id) != null,
-      tageFuer: tracker.weekdaysFor,
+      onLoeschen: (id) =>
+          ref.read(habitTrackerProvider.notifier).archiveCustom(id),
+      onUmbenennen: (id, name) =>
+          ref.read(habitTrackerProvider.notifier).editCustom(id, name: name),
     );
     if (wahl == null || !context.mounted) return;
 

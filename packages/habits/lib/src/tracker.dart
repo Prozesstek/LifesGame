@@ -90,6 +90,7 @@ class HabitTracker {
     Map<String, String> anchors = const <String, String>{},
     Map<String, String> treats = const <String, String>{},
     Map<Day, String> firstUp = const <Day, String>{},
+    Set<String> archived = const <String>{},
     HabitTimer? timer,
   })  : _activeIds = List<String>.unmodifiable(activeIds),
         _checks = _frozenChecks(checks),
@@ -109,6 +110,7 @@ class HabitTracker {
         _anchors = Map<String, String>.unmodifiable(anchors),
         _treats = Map<String, String>.unmodifiable(treats),
         _firstUp = Map<Day, String>.unmodifiable(firstUp),
+        _archived = Set<String>.unmodifiable(archived),
         _timer = timer;
 
   const HabitTracker.empty()
@@ -124,6 +126,7 @@ class HabitTracker {
         _anchors = const <String, String>{},
         _treats = const <String, String>{},
         _firstUp = const <Day, String>{},
+        _archived = const <String>{},
         _timer = null;
 
   /// Liest einen gespeicherten Stand.
@@ -344,6 +347,15 @@ class HabitTracker {
 
     final uhr = HabitTimer.fromJson(json['timer']);
 
+    // Gelöschte eigene Gewohnheiten (19.11.2026) — nur, was es gibt.
+    final archiviert = <String>{};
+    final rawArchived = json['archived'];
+    if (rawArchived is List) {
+      for (final id in rawArchived) {
+        if (id is String && custom.any((h) => h.id == id)) archiviert.add(id);
+      }
+    }
+
     return HabitTracker(
       activeIds: begrenzt,
       checks: checks,
@@ -357,6 +369,7 @@ class HabitTracker {
       anchors: anker,
       treats: belohnungen,
       firstUp: vorsaetze,
+      archived: archiviert,
       timer: uhr != null && bekannt(uhr.habitId) ? uhr : null,
     );
   }
@@ -429,6 +442,10 @@ class HabitTracker {
   /// nicht den von heute überschreibt.
   final Map<Day, String> _firstUp;
 
+  /// Eigene Gewohnheiten, die gelöscht wurden (19.11.2026) — siehe
+  /// [archiveCustom].
+  final Set<String> _archived;
+
   /// Der eine Timer, der läuft oder angehalten ist (ADR-0067) — oder
   /// keiner. Ganze Minuten stehen in [_progress], hier nur der Rest.
   final HabitTimer? _timer;
@@ -482,6 +499,7 @@ class HabitTracker {
             day.toString(): _firstUp[day],
         },
       if (_timer case final uhr?) 'timer': uhr.toJson(),
+      if (_archived.isNotEmpty) 'archived': (_archived.toList()..sort()),
       if (_plans.isNotEmpty)
         'plans': <String, Object?>{
           for (final entry in _plans.entries) entry.key: entry.value.toJson(),
@@ -529,8 +547,34 @@ class HabitTracker {
   /// Wie viele eigene Gewohnheiten es schon gibt.
   int get customCount => _custom.length;
 
-  /// Ob bei [slots] verfügbaren Plätzen noch eine dazu darf.
-  bool canAddCustom(int slots) => _custom.length < slots;
+  /// Ob bei [slots] verfügbaren Plätzen noch eine dazu darf. Gelöschte
+  /// geben ihren Platz frei.
+  bool canAddCustom(int slots) =>
+      _custom.where((h) => !_archived.contains(h.id)).length < slots;
+
+  /// Die eigenen Gewohnheiten, die man noch sieht — ohne gelöschte.
+  List<CustomHabit> get visibleCustomHabits => List<CustomHabit>.unmodifiable(
+        _custom.where((h) => !_archived.contains(h.id)),
+      );
+
+  /// Ob [habitId] eine gelöschte eigene Gewohnheit ist.
+  bool isArchived(String habitId) => _archived.contains(habitId);
+
+  /// **Löscht eine eigene Gewohnheit, die gerade nicht läuft**
+  /// (19.11.2026, Frederik: „Vorlage löschen“).
+  ///
+  /// Sie verschwindet aus jeder Liste und gibt ihren Platz frei — **ihre
+  /// Häkchen zählen weiter**. Erfahrung, Gold, Skills und Errungenschaften
+  /// werden aus der Historie gerechnet; nähme man sie heraus, fiele das
+  /// Level nachträglich. Deshalb bleibt sie im Stand, nur versteckt.
+  /// Eine laufende, eine Vorlage der App oder eine Unbekannte ändert
+  /// nichts.
+  HabitTracker archiveCustom(String habitId) {
+    if (_activeIds.contains(habitId)) return this;
+    if (!_custom.any((h) => h.id == habitId)) return this;
+    if (_archived.contains(habitId)) return this;
+    return _copyWith(archived: <String>{..._archived, habitId});
+  }
 
   /// Legt eine eigene Gewohnheit an.
   ///
@@ -797,6 +841,8 @@ class HabitTracker {
   bool canActivate(String habitId) {
     if (isActive(habitId)) return false;
     if (isFull) return false;
+    // Gelöscht ist gelöscht (19.11.2026).
+    if (_archived.contains(habitId)) return false;
     return definitionFor(habitId) != null;
   }
 
@@ -1315,6 +1361,7 @@ class HabitTracker {
     Map<String, String>? anchors,
     Map<String, String>? treats,
     Map<Day, String>? firstUp,
+    Set<String>? archived,
     HabitTimer? timer,
     bool clearTimer = false,
   }) {
@@ -1331,6 +1378,7 @@ class HabitTracker {
       anchors: anchors ?? _anchors,
       treats: treats ?? _treats,
       firstUp: firstUp ?? _firstUp,
+      archived: archived ?? _archived,
       timer: clearTimer ? null : (timer ?? _timer),
     );
   }
