@@ -21,6 +21,7 @@ import 'dev_controller.dart';
 import 'save_slot.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
+import '../ui/schild_leiste.dart';
 import '../ui/spaeter_laden.dart';
 import '../village/village_screen.dart' deferred as dorf;
 
@@ -41,10 +42,7 @@ class DevScreen extends ConsumerWidget {
     final actions = DevActions(ref);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Entwicklermodus'),
-        backgroundColor: Palette.surface,
-      ),
+      appBar: SchildLeiste(titel: 'Entwicklermodus'),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

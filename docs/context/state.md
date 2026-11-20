@@ -12,9 +12,46 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 19.11.2026 · Frederik
+**Zuletzt aktualisiert:** 20.11.2026 · Frederik
 
 ---
+
+## 20.11.2026: die Titel hängen als Holzschild an Ketten
+
+Frederik: „Von oben hängt ein Holzschild mit Ketten wie in einer alten
+Bar das Namensschild … Das Schild muss sich an die Länge des Wortes
+anpassen und ein angenehmes Padding haben“. Vorher in einer Fragerunde
+geklärt, danach zwei Standbilder abgenommen.
+
+| Was | Wie |
+|---|---|
+| **Schild** | Holz wie die Kartenrahmen, auf Gehrung, zwei Messingösen; gemalt auf dem Raster, nicht gedehnt (`SchildLeiste`) |
+| **Ketten** | zwei Eisenketten vom oberen Rand, Glieder abwechselnd von vorn und von der Seite |
+| **Schrift** | Cormorant Garamond, **hell wie auf den Holzknöpfen** mit dunklem Rand — erst dunkel eingebrannt, Frederik wollte sie weiß |
+| **Breite** | Wort plus 24 Punkte je Seite; reicht der Platz zwischen den Knöpfen nicht, wird die Schrift kleiner |
+| **Inhalt** | beginnt unter dem Schild — die Leiste ist 80 statt 56 hoch; **sie ist durchsichtig**, ein Hintergrund liegt auch hinter dem Schild |
+| **Bewegung** | schwingt beim Öffnen zweieinhalb Mal gedämpft ein, nicht bei abgeschalteter Bewegung |
+| **Wo** | alle 17 Bildschirme mit Titel; das Lesebuch hat keinen und behält seinen Pfeil |
+
+Die Pergamentleiste vom 19.11. ist weg. **Die Anschlagtafel hinter den
+Gewohnheiten auch** (Frederik: „wir setzen da ein Bild ein wie bei
+Theorie … aber erstmal kann der Hintergrund weg“); auf „Heute“ bleibt sie.
+
+**Ohne Rückfrage entschieden:** Die Knöpfe rechts (Level, Gold,
+Sammlung, Info) bleiben, wie sie waren — Frederik: „lass es erstmal wie
+es ist“. Lagerfeuer und Dungeon behalten ihren Grund (Nachthimmel, Fels).
+
+App 1217 (vorher 1211). Gewohnheiten, Theorie, Laden, Charakter,
+Lagerfeuer, Dungeon, Sammlung, Fähigkeiten und ein langer Titel in 360
+Breite gerendert. **Das Schwingen hat niemand gesehen**, nur Standbilder.
+
+### Offen
+
+- **Was rechts steht, ist auf Pergament abgestimmt** und auf dem dunklen
+  Grund teils blass: das Gold im Laden, „0 %“ an der Sammlung.
+- Ein Bild als Hintergrund für Gewohnheiten.
+- Die Ketten sind kurz (22 Punkte), weil die App im Vollbild läuft.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 19.11.2026, danach: der Gewohnheiten-Bildschirm
 
@@ -407,7 +444,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1211, dazu die acht Packages (theory 223, habits 381, gear
+**Tests:** App 1217, dazu die acht Packages (theory 223, habits 381, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

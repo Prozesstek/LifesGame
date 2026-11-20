@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../ui/gold_icon.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'habits_controller.dart';
 
 /// **Der Wochenrückblick** — was eine Woche gebracht hat, auf einen Blick.
@@ -30,8 +31,8 @@ class WeekReviewScreen extends ConsumerWidget {
     final laeuft = !(woche.end < heute);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(laeuft ? 'Deine Woche' : 'Deine letzte Woche'),
+      appBar: SchildLeiste(
+        titel: laeuft ? 'Deine Woche' : 'Deine letzte Woche',
       ),
       body: SafeArea(
         child: Center(

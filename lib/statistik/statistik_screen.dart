@@ -12,6 +12,7 @@ import 'widgets/kalender_raster.dart';
 import 'widgets/statistik_graphen.dart';
 import 'widgets/statistik_karten.dart';
 import '../ui/gehrung.dart';
+import '../ui/schild_leiste.dart';
 
 /// **Die Statistik** (ADR-0087): wie die Gewohnheiten laufen — als Woche,
 /// Monat, Jahr oder alles seit dem ersten Häkchen, mit Blättern.
@@ -67,7 +68,7 @@ class _StatistikScreenState extends ConsumerState<StatistikScreen> {
       child: StatTon(
         erledigt: ton,
         child: Scaffold(
-          appBar: AppBar(title: Text(habit?.name ?? 'Statistik')),
+          appBar: SchildLeiste(titel: habit?.name ?? 'Statistik'),
           body: SafeArea(
             child: Align(
               alignment: Alignment.topCenter,

@@ -9,6 +9,7 @@ import '../home/widgets/status_leiste.dart';
 import '../progression/level_provider.dart';
 import '../skills/widgets/gebiets_kacheln.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
 import 'widgets/cue_dialog.dart';
@@ -16,7 +17,6 @@ import 'widgets/habit_check_tile.dart';
 import 'widgets/gewohnheit_anlegen.dart';
 import 'widgets/streak_freeze_card.dart';
 import 'widgets/weekday_picker.dart';
-import '../ui/anschlagtafel.dart';
 import '../ui/aufstieg.dart';
 import '../ui/holz.dart';
 import '../ui/druck.dart';
@@ -64,8 +64,8 @@ class HabitsScreen extends ConsumerWidget {
         // darüber Zahlen aufsteigen (`AufstiegHost.maybeOf`).
         child: Builder(
           builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Gewohnheiten'),
+            appBar: SchildLeiste(
+              titel: 'Gewohnheiten',
               actions: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(right: 14),
@@ -80,100 +80,96 @@ class HabitsScreen extends ConsumerWidget {
             floatingActionButton: _PlusKnopf(
               onTap: () => _neueGewohnheit(context, ref),
             ),
-            // **Der Hintergrund: die Anschlagtafel** (19.11.2026) — die
-            // Gewohnheiten hängen als Zettel daran, wie auf „Heute“.
-            body: CustomPaint(
-              painter: const TafelBretter(),
-              child: SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: _maxWidth),
-                    child: Column(
-                      children: <Widget>[
-                        // **Die vier Gebiete stehen fest über der Liste**:
-                        // Die Funken eines Häkchens fliegen hinein, also
-                        // dürfen sie nicht mit weggerollt sein.
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
-                          child: GebietsKacheln(),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
-                            children: <Widget>[
-                              if (zuRetten != null) ...<Widget>[
-                                StreakFreezeCard(
-                                  streakAtRisk: tracker.currentBestStreak(
-                                    zuRetten,
-                                  ),
-                                  freezesLeft: tracker.freezesLeft,
-                                  onUse: () =>
-                                      _useFreeze(context, ref, zuRetten),
+            // Kein eigener Hintergrund (20.11.2026, Frederik): Hier kommt
+            // später ein Bild über die ganze Seite, wie bei der Theorie.
+            body: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxWidth),
+                  child: Column(
+                    children: <Widget>[
+                      // **Die vier Gebiete stehen fest über der Liste**:
+                      // Die Funken eines Häkchens fliegen hinein, also
+                      // dürfen sie nicht mit weggerollt sein.
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+                        child: GebietsKacheln(),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+                          children: <Widget>[
+                            if (zuRetten != null) ...<Widget>[
+                              StreakFreezeCard(
+                                streakAtRisk: tracker.currentBestStreak(
+                                  zuRetten,
                                 ),
-                                const SizedBox(height: 16),
-                              ],
-                              // Offene oben, erledigte unten (`dailyListOn`).
-                              // Der Schlüssel hält den Sprung des Häkchens
-                              // an der Gewohnheit, wenn die Kachel die Reihe
-                              // wechselt.
-                              // Gekoppeltes steht eingerückt unter seinem Anker
-                              // und leuchtet auf, sobald der abgehakt ist
-                              // (ADR-0065). Die Ordnung kommt aus `stackOn`.
-                              for (final eintrag in active) ...<Widget>[
-                                _ImStapel(
-                                  key: ValueKey<String>(eintrag.habit.id),
-                                  depth: eintrag.depth,
-                                  cued: eintrag.isCued,
-                                  child: _kachel(
-                                    context,
-                                    ref,
-                                    tracker,
-                                    today,
-                                    eintrag,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                              if (nichtHeute.isNotEmpty) ...<Widget>[
-                                const SizedBox(height: 8),
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Icon(
-                                    Icons.event_busy_rounded,
-                                    size: 20,
-                                    color: Palette.textOnDarkDim,
-                                    semanticLabel: 'Heute nicht fällig',
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                for (final habit in nichtHeute) ...<Widget>[
-                                  _NichtHeuteTile(
-                                    key: ValueKey<String>(
-                                      'nicht-heute-${habit.id}',
-                                    ),
-                                    habit: habit,
-                                    weekdays: tracker.weekdaysFor(habit.id),
-                                    streak: tracker.currentStreak(
-                                      habit.id,
-                                      today,
-                                    ),
-                                    onEdit: () => _editCue(context, ref, habit),
-                                    onStop: () => ref
-                                        .read(habitTrackerProvider.notifier)
-                                        .deactivate(habit.id),
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ],
-                              // Die Truhe stand bis zum 18.10. hier; sie wartet
-                              // jetzt am Lagerfeuer (ADR-0076). Anlegen und die
-                              // Vorlagen stehen seit ADR-0089 hinter dem
-                              // Plus-Knopf.
+                                freezesLeft: tracker.freezesLeft,
+                                onUse: () => _useFreeze(context, ref, zuRetten),
+                              ),
+                              const SizedBox(height: 16),
                             ],
-                          ),
+                            // Offene oben, erledigte unten (`dailyListOn`).
+                            // Der Schlüssel hält den Sprung des Häkchens
+                            // an der Gewohnheit, wenn die Kachel die Reihe
+                            // wechselt.
+                            // Gekoppeltes steht eingerückt unter seinem Anker
+                            // und leuchtet auf, sobald der abgehakt ist
+                            // (ADR-0065). Die Ordnung kommt aus `stackOn`.
+                            for (final eintrag in active) ...<Widget>[
+                              _ImStapel(
+                                key: ValueKey<String>(eintrag.habit.id),
+                                depth: eintrag.depth,
+                                cued: eintrag.isCued,
+                                child: _kachel(
+                                  context,
+                                  ref,
+                                  tracker,
+                                  today,
+                                  eintrag,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            if (nichtHeute.isNotEmpty) ...<Widget>[
+                              const SizedBox(height: 8),
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Icon(
+                                  Icons.event_busy_rounded,
+                                  size: 20,
+                                  color: Palette.textOnDarkDim,
+                                  semanticLabel: 'Heute nicht fällig',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              for (final habit in nichtHeute) ...<Widget>[
+                                _NichtHeuteTile(
+                                  key: ValueKey<String>(
+                                    'nicht-heute-${habit.id}',
+                                  ),
+                                  habit: habit,
+                                  weekdays: tracker.weekdaysFor(habit.id),
+                                  streak: tracker.currentStreak(
+                                    habit.id,
+                                    today,
+                                  ),
+                                  onEdit: () => _editCue(context, ref, habit),
+                                  onStop: () => ref
+                                      .read(habitTrackerProvider.notifier)
+                                      .deactivate(habit.id),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ],
+                            // Die Truhe stand bis zum 18.10. hier; sie wartet
+                            // jetzt am Lagerfeuer (ADR-0076). Anlegen und die
+                            // Vorlagen stehen seit ADR-0089 hinter dem
+                            // Plus-Knopf.
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

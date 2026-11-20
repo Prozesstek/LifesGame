@@ -17,6 +17,7 @@ import '../progression/level_provider.dart';
 import '../progression/show_level_up.dart';
 import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'gear_controller.dart';
 import 'weapon_ability_line.dart';
 import 'widgets/shop_item_cell.dart';
@@ -53,10 +54,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final gold = ref.watch(goldProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: SchildLeiste(
         leading: const ZurueckPfeil(schritt: Schritt.sperren),
-        title: const Text('Laden'),
-        backgroundColor: Palette.surface,
+        titel: 'Laden',
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 16),

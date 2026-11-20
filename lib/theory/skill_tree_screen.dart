@@ -17,6 +17,7 @@ import '../ui/der_reihe_nach.dart';
 import '../ui/druck.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'lesson_screen.dart';
 import 'theory_controller.dart';
 import 'vorschlag_flow.dart';
@@ -130,13 +131,8 @@ class _AreaPagerState extends ConsumerState<_AreaPager> {
                 ref.read(hinweiseProvider.notifier).weiter(Hinweis.talentpunkt),
             child: Scaffold(
               backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                title: const Text('Theorie'),
-                // Wie im Kampf: Die Kopfzeile geht in die Fläche über, statt
-                // als Pergamentleiste darüber zu liegen.
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                foregroundColor: Palette.textOnDark,
+              appBar: SchildLeiste(
+                titel: 'Theorie',
                 actions: <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(right: 12),

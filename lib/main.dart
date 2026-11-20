@@ -303,11 +303,14 @@ class _LifesGameAppState extends State<LifesGameApp> {
       // stünde je nach Bildschirm hell auf hell.
       // **Die Menüleiste** (19.11.2026): unten ein Holzbalken, der Titel
       // in Cormorant Garamond (`lib/ui/menue_leiste.dart`).
+      // **Kopfzeilen sind Holzschilder** (`SchildLeiste`, 20.11.2026); eine
+      // `AppBar`, die es noch gibt (das Lesebuch), liegt durchsichtig auf
+      // dem Grund wie das Schild.
       appBarTheme: const AppBarTheme(
-        backgroundColor: Palette.surface,
-        foregroundColor: Palette.text,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: Palette.textOnDark,
         titleTextStyle: MenueLeiste.titel,
-        shape: MenueLeistenRand(),
         // Die Symbole stehen auf dem Holzknopf, nicht auf Pergament —
         // deshalb hell, auch wenn der Titel daneben Tinte ist.
         iconTheme: IconThemeData(color: Palette.textOnDark),

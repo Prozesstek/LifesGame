@@ -9,6 +9,7 @@ import 'action_game.dart';
 import 'hero_power.dart';
 import 'pit_run_view.dart';
 import '../ui/druck.dart';
+import '../ui/schild_leiste.dart';
 
 /// **Prototyp.** Echtzeit-Kampf in einer Halle voller Gegner.
 ///
@@ -74,10 +75,9 @@ class _ActionPrototypeScreenState extends ConsumerState<ActionPrototypeScreen> {
 
     return Scaffold(
       backgroundColor: Palette.background,
-      appBar: AppBar(
-        title: const Text('Prototyp: Die Grube'),
-        backgroundColor: Palette.backgroundRaised,
-        foregroundColor: Palette.textOnDark,
+      appBar: SchildLeiste(
+        titel: 'Prototyp: Die Grube',
+        hintergrund: Palette.backgroundRaised,
       ),
       body: OnDark(
         child: Stack(

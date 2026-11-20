@@ -31,6 +31,7 @@ import '../habits/stat_icon.dart';
 import '../skills/gebiet_farbe.dart';
 import '../skills/gebiet_zeichen.dart';
 import '../skills/widgets/skill_karte.dart';
+import '../ui/schild_leiste.dart';
 
 /// Der Charakterbildschirm: Werte und ihre Herkunft. Ausrüstung und
 /// Fähigkeiten haben eigene Bildschirme (ADR-0049, ADR-0057).
@@ -56,9 +57,8 @@ class CharacterScreen extends ConsumerWidget {
     final today = ref.watch(todayProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Charakter'),
-        backgroundColor: Palette.surface,
+      appBar: SchildLeiste(
+        titel: 'Charakter',
         actions: <Widget>[
           // Datenschutz, Gesundheit, Lizenzen — nur ein Zeichen, der Text
           // steht erst im Blatt (ADR-0060, Play Store).
