@@ -4,6 +4,7 @@ import 'package:achievements/achievements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/ui/schild_leiste.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/habits/stat_icon.dart';
@@ -331,7 +332,7 @@ void main() {
         ),
       );
       await tester.pump();
-      return StatTon.of(tester.element(find.byType(AppBar)));
+      return StatTon.of(tester.element(find.byType(SchildLeiste)));
     }
 
     testWidgets(

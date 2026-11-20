@@ -28,6 +28,7 @@ import '../home/erster_start.dart';
 import '../mentor/mentor.dart';
 import '../mentor/mentor_kasten.dart';
 import '../mentor/zeigefinger.dart';
+import '../ui/schild_leiste.dart';
 
 /// Der Ausrüstungs-Bildschirm: sechs Plätze oben, darunter der Rucksack
 /// (ADR-0057, Issue #137).
@@ -204,10 +205,9 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     final auswahl = VerkaufAuswahl.bereinigt(loadout, _auswahl);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: SchildLeiste(
         leading: const ZurueckPfeil(schritt: Schritt.geschenk),
-        title: const Text('Ausrüstung'),
-        backgroundColor: Palette.surface,
+        titel: 'Ausrüstung',
         actions: const <Widget>[SammlungKnopf(art: SammelArt.ausruestung)],
       ),
       body: MentorFlaeche(

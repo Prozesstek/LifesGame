@@ -10,6 +10,7 @@ import 'statistik_text.dart';
 import 'widgets/kalender_raster.dart';
 import 'widgets/statistik_karten.dart';
 import '../ui/gehrung.dart';
+import '../ui/schild_leiste.dart';
 
 /// **Der Jahresrückblick** (ADR-0087): ein Kalenderjahr der Gewohnheiten
 /// in Zahlen, das sich aufbaut wie der Wochenrückblick.
@@ -57,7 +58,7 @@ class JahresrueckblickScreen extends ConsumerWidget {
     return RahmenOrt(
       art: RahmenArt.ranken,
       child: Scaffold(
-        appBar: AppBar(title: Text('$jahr')),
+        appBar: SchildLeiste(titel: '$jahr'),
         body: SafeArea(
           child: Align(
             alignment: Alignment.topCenter,

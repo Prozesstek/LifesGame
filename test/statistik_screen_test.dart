@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/ui/schild_leiste.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -146,7 +147,13 @@ void main() {
     await tester.tap(ring);
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(AppBar, a.name), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(HaengeSchild),
+        matching: find.text(a.name),
+      ),
+      findsOneWidget,
+    );
     expect(tester.widget<Text>(find.byKey(QuoteKarte.quoteKey)).data, '100 %');
     expect(find.byKey(GewohnheitRing.keyFuer(b.id)), findsNothing);
   });

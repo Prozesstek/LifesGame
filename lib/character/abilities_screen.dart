@@ -22,6 +22,7 @@ import '../ui/ausgegraut.dart';
 import '../ui/druck.dart';
 import '../ui/halten_und_ziehen.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import '../ui/wackeln.dart';
 import 'abilities_controller.dart';
 import 'faehigkeit_ordnung.dart';
@@ -93,9 +94,8 @@ class _AbilitiesScreenState extends ConsumerState<AbilitiesScreen> {
         gezogen != null && AbilityCatalog.ultimateByMoveId(gezogen) != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fähigkeiten'),
-        backgroundColor: Palette.surface,
+      appBar: SchildLeiste(
+        titel: 'Fähigkeiten',
         actions: const <Widget>[SammlungKnopf(art: SammelArt.faehigkeiten)],
       ),
       body: MentorFlaeche(

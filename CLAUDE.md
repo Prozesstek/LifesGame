@@ -309,7 +309,8 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
 | `lib/ui/tafel_wind.dart` | **ein Windstoß über der Anschlagtafel** (16.11.2026): alle 6 bis 13 s flattern die Zettel kurz an der Reißzwecke, von oben nach unten (`TafelWind.winkel`, reine Rechnung); zwischen zwei Stößen läuft kein Takt, im Stoß dreht sich nur eine fertige Ebene; in Tests still (`TafelWind.weht`) | Flutter |
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
-| `lib/ui/menue_leiste.dart` | **die Menüleiste jedes Bereichs** (19.11.2026): Pergament, unten ein gemalter Holzbalken (`MenueLeistenRand`), der Titel in Cormorant Garamond — **über das Theme** (`appBarTheme`), kein Bildschirm muss es wissen | Flutter |
+| `lib/ui/schild_leiste.dart` | **die Kopfzeile jedes Bereichs** (20.11.2026): ein Holzschild an zwei Eisenketten von oben, Titel hell wie auf den Holzknöpfen — **wächst mit dem Wort**, wird zu eng, wird die Schrift kleiner; schwingt beim Öffnen ein (in Tests still, `SchildLeiste.schwingt`); **die Leiste ist durchsichtig**, ein Hintergrund des Bildschirms liegt also auch hinter dem Schild, **der Inhalt beginnt darunter**. Jeder Bildschirm nimmt `SchildLeiste` statt `AppBar` — außer dem Lesebuch, das keinen Titel hat | Flutter |
+| `lib/ui/menue_leiste.dart` | nur noch **die Schrift der Titel** (Cormorant Garamond); die Pergamentleiste vom 19.11. ist seit dem 20.11. das Schild | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Schwert, Herz, Schild, Tropfen, das Schwert gezeichnet (`StatIcon`); **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)), **in der Farbe seines Gebiets** (ADR-0090) | Flutter |
@@ -376,7 +377,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1211 Tests
+flutter test             # 1217 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

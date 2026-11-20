@@ -15,6 +15,7 @@ import '../ui/druck.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
+import '../ui/schild_leiste.dart';
 import 'figur_bild.dart';
 import 'sammlung.dart';
 import 'sammlung_provider.dart';
@@ -47,9 +48,8 @@ class _SammlungScreenState extends ConsumerState<SammlungScreen> {
     final gesamt = ref.watch(sammelGesamtProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sammlung'),
-        backgroundColor: Palette.surface,
+      appBar: SchildLeiste(
+        titel: 'Sammlung',
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 16),
