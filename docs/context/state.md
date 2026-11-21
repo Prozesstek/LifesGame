@@ -40,9 +40,18 @@ Talentbaum in 390 × 844 mit echter Schrift gerendert. **Nicht am Handy.**
 
 ### Offen
 
-- **Alegreya Sans läuft rund 10 % kleiner** als Roboto bei gleicher
-  Größe. Kleine Zahlen (Preise im Laden, „35 / 125“, „2 / 7“) sind
-  merklich kleiner geworden; die Größen sind nicht angepasst.
+- ~~Kleine Zahlen sind kleiner geworden~~ — behoben, siehe unten.
+
+**Danach** (Frederik: „mach die kleinen Zahlen etwas größer“): Der Grund
+war nicht die Größe, sondern die Ziffern. Alegreya Sans setzt von sich
+aus **Mediävalziffern**, so hoch wie ein „x“, die 3, 5 und 9 hängen
+unter die Linie. Jetzt stehen überall **Ziffern in Versalhöhe**
+(`lnum`, `Schrift.ziffern`), gesetzt im Theme auf jedem Stil — rund
+40 % höher, ohne eine Schriftgröße zu ändern. Wo ein Stil selbst
+`fontFeatures` setzt (Timer, Zähler), steht `Schrift.tabelle`. Dazu
+Preis und Qualität im Laden 12 statt 10, „35 / 125“ im Charakter 13
+statt 11, und die Zahl im Level-Ring füllt ihn wieder (die hohen Ober-
+und Unterlängen der Schrift ließen die `FittedBox` sie schrumpfen).
 - **AktivesBrett hat es nicht gesehen.**
 
 ## 20.11.2026: die Titel hängen als Holzschild an Ketten

@@ -297,6 +297,7 @@ void _zahl(Canvas canvas, Rect ding, String text) {
       text: text,
       style: const TextStyle(
         fontFamily: Schrift.app,
+        fontFeatures: Schrift.ziffern,
         fontSize: 10,
         fontWeight: FontWeight.bold,
         color: Palette.textOnDark,

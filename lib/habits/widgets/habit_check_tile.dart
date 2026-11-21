@@ -4,6 +4,7 @@ import 'package:habits/habits.dart';
 import '../../skills/widgets/gebiet_streifen.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
+import '../../ui/schrift.dart';
 import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
 import 'haekchen_kreis.dart';
@@ -608,7 +609,7 @@ class _ZielStand extends StatelessWidget {
         fontSize: 13,
         fontWeight: laeuft ? FontWeight.bold : FontWeight.w600,
         color: laeuft ? Palette.accent : Palette.textDim,
-        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        fontFeatures: Schrift.tabelle,
       ),
     );
   }

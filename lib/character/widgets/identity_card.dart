@@ -145,7 +145,7 @@ class _LevelBar extends StatelessWidget {
           semanticsLabel:
               '${level.xpIntoLevel} von ${level.xpForLevel} Erfahrung bis '
               'Level ${level.level + 1}',
-          style: const TextStyle(fontSize: 11, color: Palette.textDim),
+          style: const TextStyle(fontSize: 13, color: Palette.textDim),
         ),
       ],
     );
