@@ -1,20 +1,23 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:gear/gear.dart';
 
 import '../../ui/druck.dart';
+import '../../ui/gehrung.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
 import '../gear_icon.dart';
-import 'laden_bild.dart';
 import 'rarity_badge.dart';
 
 /// **Ein Fach im Tresen des Händlers** (AktivesBrett, 21.11.2026): im
-/// dunklen Inneren das Stück und sein Name, auf der Planke der Preis.
+/// dunklen Inneren das Stück und sein Name, darunter der Preis.
 ///
-/// Rahmen, Inneres und Planke sind ein gemaltes Fach (`LadenBild.fach`),
-/// auf die Größe gedehnt, die der Tresen ihm gibt — nur das dunkle Innere
-/// wächst. Das Fach legt darüber, was sich ändert.
+/// Der Rahmen ist **derselbe Holzrahmen wie überall** (`GehrungsMaler`,
+/// AktivesBrett, 22.11.2026), gemalt für die Größe, die der Tresen dem
+/// Fach gibt. Der Rand der Seltenheit ist hier etwas dicker als sonst
+/// ([seltenheitsRand]).
 class LadenFach extends StatelessWidget {
   const LadenFach({
     required this.angebot,
@@ -43,6 +46,13 @@ class LadenFach extends StatelessWidget {
   /// Wie blass ein Stück steht, das man nicht kaufen kann.
   static const double ausserReichweite = 0.4;
 
+  /// Wie dick der Rand der Seltenheit im Laden ist — dicker als sonst
+  /// (`RarityBadge.rahmenBreite`), damit man sie im Tresen erkennt.
+  static const double seltenheitsRand = 3;
+
+  /// Das dunkle Innere eines Fachs.
+  static const Color innenFarbe = Color(0xFF241811);
+
   bool get isOutOfReach =>
       block == PurchaseBlock.gesperrt || block == PurchaseBlock.zuWenigGold;
 
@@ -57,18 +67,21 @@ class LadenFach extends StatelessWidget {
   }
 
   Widget _fach(GearItem item, Rect r) {
-    const rand = LadenBild.fachRand;
+    // Innerhalb des Holzes: oben das Stück im Rand seiner Seltenheit,
+    // darunter der Preis.
+    final holz = r.deflate(GehrungsMaler.breite + 3);
+    final preisHoehe = math.min(20.0, holz.height * 0.18);
     final innen = Rect.fromLTRB(
-      r.left + rand,
-      r.top + LadenBild.fachOben,
-      r.right - rand,
-      r.bottom - LadenBild.plankeOben - 2,
+      holz.left,
+      holz.top,
+      holz.right,
+      holz.bottom - preisHoehe - 2,
     );
     final planke = Rect.fromLTRB(
-      r.left + rand,
-      r.bottom - LadenBild.plankeOben,
-      r.right - rand,
-      r.bottom - LadenBild.plankeUnten,
+      holz.left,
+      holz.bottom - preisHoehe,
+      holz.right,
+      holz.bottom,
     );
     final pfad = GearIcons.forItemId(item.id);
     final seite = (innen.shortestSide * 0.62).floorToDouble();
@@ -86,14 +99,9 @@ class LadenFach extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
-              // Das gemalte Fach, gedehnt nur in seiner Mitte.
+              // Derselbe Holzrahmen wie überall, innen dunkel.
               const Positioned.fill(
-                child: Image(
-                  image: AssetImage(LadenBild.fach),
-                  centerSlice: LadenBild.fachMitte,
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.medium,
-                ),
+                child: CustomPaint(painter: GehrungsMaler(mitte: innenFarbe)),
               ),
               // Im Inneren: der Rand der Seltenheit, das Stück, der Name.
               Positioned.fromRect(
@@ -102,10 +110,8 @@ class LadenFach extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
                     border: Border.all(
-                      color: RarityBadge.rahmenOf(
-                        item.rarity,
-                      ).withValues(alpha: 0.85),
-                      width: RarityBadge.rahmenBreite,
+                      color: RarityBadge.rahmenOf(item.rarity),
+                      width: seltenheitsRand,
                     ),
                   ),
                   child: Column(
@@ -143,7 +149,7 @@ class LadenFach extends StatelessWidget {
                   ),
                 ),
               ),
-              // Auf der Planke: der Preis — oder ein Haken, wenn gekauft.
+              // Darunter der Preis — oder ein Haken, wenn gekauft.
               Positioned.fromRect(
                 rect: planke,
                 child: Center(child: _preis(gekauft, blass, planke.height)),
@@ -170,7 +176,7 @@ class LadenFach extends StatelessWidget {
     );
   }
 
-  /// Der Preis passt in die Planke: Schrift und Münze richten sich nach
+  /// Der Preis passt in seine Zeile: Schrift und Münze richten sich nach
   /// ihrer Höhe, nicht umgekehrt.
   Widget _preis(bool gekauft, double blass, double hoehe) {
     final groesse = (hoehe * 0.95).clamp(9.0, 15.0);

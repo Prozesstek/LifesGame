@@ -12,7 +12,26 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 22.11.2026 · AktivesBrett
+
+---
+
+## 22.11.2026: die Fächer im Laden tragen den Holzrahmen
+
+AktivesBrett, mit Screenshot: „im shop bitte den Holz rahmen wie den den
+wir überall haben rein packen und den farbigen rahmen um die items …
+ein klein wenig dicker“.
+
+| Was | Wie |
+|---|---|
+| **Rahmen** | jedes Fach liegt im Holzrahmen der App (`GehrungsMaler`), innen dunkel; das ausgeschnittene Fach `Laden_Fach.png` ist gelöscht |
+| **Seltenheit** | der Rand ums Stück ist im Laden 3 statt 2 Punkte dick und nicht mehr halb durchsichtig (`LadenFach.seltenheitsRand`) |
+| **Preis** | steht unter dem Stück im Inneren, nicht mehr auf einer Planke |
+
+**Ohne Rückfrage entschieden:** Nur der Laden bekommt den dickeren Rand;
+Rucksack, Blatt und Siegerblatt bleiben bei 2.
+
+App 1219. In 390 × 844 gerendert. **Frederik hat es nicht gesehen.**
 
 ---
 

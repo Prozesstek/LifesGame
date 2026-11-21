@@ -250,9 +250,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
 | `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); **ein gemaltes Bild** (21.11.2026): oben links die Tafel, rechts der Händler, darunter sein Tresen mit sechs Fächern — ein Tipp auf ein Fach schreibt es auf die Tafel, dort steht „Kaufen“; im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
-| `lib/gear/widgets/laden_bild.dart` | **wo im Ladenbild was liegt** — Bild bis zur Tresenkante (`assets/UI/Laden.jpg`, 432 × 312, **beginnt ganz oben**, das Schild hängt in den Dachbalken), die Tafel darin, dazu das **eine** Fach (`Laden_Fach.png`) und die Pfosten des Tresens, den die App darunter baut; wer das Bild tauscht, misst hier neu | Flutter |
+| `lib/gear/widgets/laden_bild.dart` | **wo im Ladenbild was liegt** — Bild bis zur Tresenkante (`assets/UI/Laden.jpg`, 432 × 312, **beginnt ganz oben**, das Schild hängt in den Dachbalken), die Tafel darin, dazu die Pfosten des Tresens, den die App darunter baut; wer das Bild tauscht, misst hier neu | Flutter |
 | `lib/gear/widgets/laden_tafel.dart` | **die Tafel**: Bild, Name, Seltenheit, Wurf, Werte gegen das Getragene, Kampf, „Kaufen“ oder warum nicht — feste Größe, rollt innen; rechnet nichts (`Loadout.blockFor`) | Flutter |
-| `lib/gear/widgets/laden_fach.dart` | **ein Fach im Tresen**, alle sechs gleich groß: das gemalte Fach, gedehnt nur im Inneren, Stück und Name darin, Preis auf der Planke, weiße Winkel, wenn es auf der Tafel steht, das Zeichen der Sammlung | Flutter |
+| `lib/gear/widgets/laden_fach.dart` | **ein Fach im Tresen**, alle sechs gleich groß: **der Holzrahmen der App** (`GehrungsMaler`), darin das Stück im Rand seiner Seltenheit — **im Laden 3 statt 2 Punkte dick** —, Name und Preis, weiße Winkel, wenn es auf der Tafel steht, das Zeichen der Sammlung | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen**; im Rundgang zeigt der Mentor aufs Sperren | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: **nur das angetippte Exemplar** (26.10.), seine Werte **mit dem Unterschied zum Getragenen je Wert**, „Qualität“ beim Namen, **„Kampf“ in ganzen Sätzen** (`weaponKampfText`, `rarityKampfText` in `weapon_ability_line.dart`), darunter Knöpfe nebeneinander, ganz unten der Verkauf (13.11.2026); **Angelegtes hat keinen Verkaufen-Knopf** — `Loadout.sellAll` verkauft es nie | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
@@ -381,7 +381,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1221 Tests
+flutter test             # 1219 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
