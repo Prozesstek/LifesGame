@@ -318,6 +318,7 @@ class VillageGame extends Game {
           text: key.label,
           style: const TextStyle(
             fontFamily: Schrift.app,
+            fontFeatures: Schrift.ziffern,
             fontSize: 11,
             fontWeight: FontWeight.bold,
             color: Palette.textOnDark,

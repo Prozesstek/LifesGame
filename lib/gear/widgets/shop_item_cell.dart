@@ -220,7 +220,7 @@ class ShopItemCell extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
           color: Palette.muted,
         ),
@@ -237,7 +237,7 @@ class ShopItemCell extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        const GoldIcon(size: 12),
+        const GoldIcon(size: 14),
         const SizedBox(width: 3),
         Flexible(
           child: Text(
@@ -246,7 +246,7 @@ class ShopItemCell extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               color: isOutOfReach ? Palette.muted : Palette.gold,
             ),

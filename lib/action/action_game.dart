@@ -1449,6 +1449,7 @@ class ActionGame extends Game {
           text: popup.text,
           style: TextStyle(
             fontFamily: Schrift.app,
+            fontFeatures: Schrift.ziffern,
             fontSize: 13 * popup.size,
             fontWeight: FontWeight.bold,
             color: popup.color.withValues(alpha: popup.opacity),

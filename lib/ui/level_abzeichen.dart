@@ -66,7 +66,15 @@ class LevelAbzeichen extends StatelessWidget {
               child: FittedBox(
                 child: Text(
                   '$level',
+                  // Nur die Ziffer zählt, nicht der Raum über und unter ihr:
+                  // Alegreya Sans hat hohe Ober- und Unterlängen, und die
+                  // `FittedBox` schrumpfte sonst die ganze Zeile in den Ring.
+                  textHeightBehavior: const TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                    applyHeightToLastDescent: false,
+                  ),
                   style: const TextStyle(
+                    height: 0.8,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Palette.textOnDark,

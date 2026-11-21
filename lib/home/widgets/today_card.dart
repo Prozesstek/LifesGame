@@ -16,6 +16,7 @@ import '../../ui/der_reihe_nach.dart';
 import '../../ui/druck.dart';
 import '../../ui/halten_und_ziehen.dart';
 import '../../ui/palette.dart';
+import '../../ui/schrift.dart';
 import '../../ui/pulsieren.dart';
 import '../../ui/tafel_wind.dart';
 import '../erster_start.dart';
@@ -393,7 +394,7 @@ class _Restzeit extends StatelessWidget {
             fontSize: 12,
             fontWeight: uhr.isRunning ? FontWeight.bold : FontWeight.w600,
             color: farbe,
-            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+            fontFeatures: Schrift.tabelle,
           ),
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:habits/habits.dart';
 import '../../ui/druck.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
+import '../../ui/schrift.dart';
 import '../habits_controller.dart';
 import 'habit_countdown.dart';
 
@@ -179,9 +180,7 @@ class _Ring extends StatelessWidget {
                   color: uhr.isRunning ? Palette.text : Palette.textDim,
                   // Gleich breite Ziffern, sonst zittert die Zahl bei
                   // jedem Sekundenwechsel.
-                  fontFeatures: const <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
+                  fontFeatures: Schrift.tabelle,
                 ),
               ),
             ),

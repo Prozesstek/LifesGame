@@ -294,7 +294,7 @@ class _LifesGameAppState extends State<LifesGameApp> {
           outline: Palette.surfaceRaised,
         );
 
-    return ThemeData(
+    final basis = ThemeData(
       colorScheme: scheme,
       // **Die Schrift der App** (21.11.2026, Frederik): Alegreya Sans für
       // alles, was keine eigene Schrift nennt. Das Lernbuch (`BuchStil`)
@@ -354,6 +354,32 @@ class _LifesGameAppState extends State<LifesGameApp> {
 
       dividerTheme: const DividerThemeData(color: Palette.surfaceRaised),
       iconTheme: const IconThemeData(color: Palette.text),
+    );
+    // **Ziffern in Versalhöhe** auf jedem Stil (`Schrift.ziffern`): Ein
+    // `Text` mit eigenem Stil erbt sie über `DefaultTextStyle`.
+    const ziffern = TextStyle(fontFeatures: Schrift.ziffern);
+    TextTheme mitZiffern(TextTheme t) => t.merge(
+      const TextTheme(
+        displayLarge: ziffern,
+        displayMedium: ziffern,
+        displaySmall: ziffern,
+        headlineLarge: ziffern,
+        headlineMedium: ziffern,
+        headlineSmall: ziffern,
+        titleLarge: ziffern,
+        titleMedium: ziffern,
+        titleSmall: ziffern,
+        bodyLarge: ziffern,
+        bodyMedium: ziffern,
+        bodySmall: ziffern,
+        labelLarge: ziffern,
+        labelMedium: ziffern,
+        labelSmall: ziffern,
+      ),
+    );
+    return basis.copyWith(
+      textTheme: mitZiffern(basis.textTheme),
+      primaryTextTheme: mitZiffern(basis.primaryTextTheme),
     );
   }
 }
