@@ -12,9 +12,38 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 20.11.2026 · Frederik
+**Zuletzt aktualisiert:** 21.11.2026 · Frederik
 
 ---
+
+## 21.11.2026: Alegreya Sans für die ganze App
+
+Frederik: „eine neue Schriftart ausprobieren bei den Gewohnheiten,
+Item-Beschreibungen etc. Eigentlich überall außer bei Theorie und den
+Titeln“. Drei Kandidaten neben Roboto gerendert (Gewohnheiten und das
+Blatt eines Stücks): Alegreya Sans, Pixelify Sans, Nunito. Gewählt:
+**Alegreya Sans**. Pixelify fiel durch, weil seine 5 wie ein S aussieht.
+
+| Was | Wie |
+|---|---|
+| **Wo** | im Theme (`fontFamily`), also jedes `Text` ohne eigene Schrift |
+| **Ausgenommen** | das Lernbuch (`BuchStil`: Lora, Cormorant) und die Titel auf dem Schild (`MenueLeiste`) — sie nennen ihre Schrift selbst |
+| **Maler** | die Schadenszahlen der Grube und die Schilder im Dorf malen mit eigenem `TextPainter` und nennen sie über `Schrift.app` |
+| **Dateien** | Regular, Italic, Medium, Bold lokal unter `assets/fonts/`, Lizenz `OFL-AlegreyaSans.txt` |
+
+**Ohne Rückfrage entschieden:** „außer Theorie“ heißt der Buchtext. Der
+Talentbaum und der Mentor beim Abfragen tragen die neue Schrift, wie
+jeder andere Bildschirm.
+
+App 1219 (vorher 1217). Startseite, Gewohnheiten, Laden, Charakter und
+Talentbaum in 390 × 844 mit echter Schrift gerendert. **Nicht am Handy.**
+
+### Offen
+
+- **Alegreya Sans läuft rund 10 % kleiner** als Roboto bei gleicher
+  Größe. Kleine Zahlen (Preise im Laden, „35 / 125“, „2 / 7“) sind
+  merklich kleiner geworden; die Größen sind nicht angepasst.
+- **AktivesBrett hat es nicht gesehen.**
 
 ## 20.11.2026: die Titel hängen als Holzschild an Ketten
 
@@ -444,7 +473,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1217, dazu die acht Packages (theory 223, habits 381, gear
+**Tests:** App 1219, dazu die acht Packages (theory 223, habits 381, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).
