@@ -111,38 +111,22 @@ void main() {
     });
   });
 
-  group('Tafel und Fächer liegen im Ladenbild', () {
+  group('Tafel und Fach im Ladenbild', () {
     const bild = Rect.fromLTWH(0, 0, LadenBild.breite, LadenBild.hoehe);
 
-    test('alles liegt innerhalb des Bildes', () {
+    test('die Tafel liegt innerhalb des Bildes', () {
       expect(bild.contains(LadenBild.tafel.topLeft), isTrue);
       expect(bild.contains(LadenBild.tafel.bottomRight), isTrue);
-      for (final fach in LadenBild.faecher) {
-        expect(fach.rahmen.left, greaterThanOrEqualTo(0));
-        expect(fach.rahmen.right, lessThanOrEqualTo(LadenBild.breite));
-        expect(fach.rahmen.bottom, lessThanOrEqualTo(LadenBild.hoehe));
-        // Inneres und Planke liegen im Rahmen, die Planke darunter.
-        expect(fach.rahmen.contains(fach.innen.center), isTrue);
-        expect(fach.planke.top, greaterThanOrEqualTo(fach.innen.bottom));
-      }
     });
 
-    test('sechs Fächer, keine zwei überlappen, keins unter der Tafel', () {
-      expect(LadenBild.faecher, hasLength(6));
-      for (final (i, a) in LadenBild.faecher.indexed) {
-        expect(a.rahmen.overlaps(LadenBild.tafel), isFalse);
-        for (final b in LadenBild.faecher.skip(i + 1)) {
-          expect(a.rahmen.overlaps(b.rahmen), isFalse);
-        }
-      }
-    });
-
-    test('ein Fach bleibt auf dem Handy bedienbar', () {
-      // 390 Punkte Bildschirm: Unter 44 ist eine Tippfläche unzuverlässig.
-      const skala = 390 / LadenBild.breite;
-      for (final fach in LadenBild.faecher) {
-        expect(fach.rahmen.width * skala, greaterThan(44));
-      }
+    test('beim Dehnen wächst nur das Innere, Rand und Planke bleiben', () {
+      // Das gemalte Fach ist 124 x 100; die Mitte liegt ganz darin, und
+      // die Planke unten liegt außerhalb der Mitte.
+      const fach = Rect.fromLTWH(0, 0, 124, 100);
+      const mitte = LadenBild.fachMitte;
+      expect(fach.contains(mitte.topLeft), isTrue);
+      expect(fach.contains(mitte.bottomRight), isTrue);
+      expect(100 - LadenBild.plankeOben, greaterThanOrEqualTo(mitte.bottom));
     });
   });
 }

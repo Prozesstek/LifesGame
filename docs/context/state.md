@@ -42,6 +42,14 @@ daneben Zurück-Pfeil und Gold (`extendBodyBehindAppBar`). Das neue Bild
 weggerechnet und liegen unter den echten. Die Preise richten ihre Größe
 nach der Planke.
 
+**Und** (AktivesBrett: „die Items sind nicht symmetrisch, mach die
+Boxen etwas größer und mehr nach unten“): Die Fächer sind nicht mehr Teil
+des Bildes — im gemalten Tresen war die rechte Spalte schmaler. Das Bild
+endet an der Tresenkante (432 × 312); darunter baut die App den Tresen
+selbst: zwei Pfosten aus dem Bild, dunkle Rückwand, sechs **gleich große**
+Fächer aus einem ausgeschnittenen Fach (`Laden_Fach.png`, gedehnt nur im
+dunklen Inneren), so groß wie Platz ist und **mittig im Tresen**.
+
 App 1221. In 390 × 844 gerendert.
 
 ### Offen

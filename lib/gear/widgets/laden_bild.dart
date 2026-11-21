@@ -1,53 +1,47 @@
 import 'dart:ui';
 
 /// **Wo im Ladenbild was liegt** (AktivesBrett, 21.11.2026) — eine
-/// Stelle für alle Rechtecke, in Bildpunkten des Bildes.
+/// Stelle für Bild, Tafel und Fächer.
 ///
-/// Das Bild (`assets/UI/Laden.jpg`, 432 × 530) beginnt ganz oben am
+/// Das Bild (`assets/UI/Laden.jpg`, 432 × 312) beginnt ganz oben am
 /// Bildschirm: zuerst die Dachbalken, in denen das Schild „Laden“ hängt,
-/// darunter links die Tafel, rechts der Händler, unten sein Tresen mit
-/// sechs Fächern. Tafel und Fächer sind leer gemalt; was darauf steht,
-/// legt die App darüber.
-/// Wer das Bild austauscht, misst die Rechtecke hier neu.
+/// darunter links die Tafel, rechts der Händler, unten die Kante seines
+/// Tresens. Die Tafel ist leer gemalt; was darauf steht, legt die App
+/// darüber. Wer das Bild austauscht, misst hier neu.
+///
+/// **Die Fächer sind nicht im Bild** (AktivesBrett, 21.11.2026: „die Items
+/// sind nicht symmetrisch“): Im gemalten Tresen war die rechte Spalte
+/// schmaler. Jetzt ist es **ein** Fach, aus dem Bild geschnitten
+/// (`Laden_Fach.png`), sechsmal gleich groß gelegt — gedehnt wird nur sein
+/// dunkles Inneres ([fachMitte]), Holzrand und Planke bleiben, wie sie sind.
 abstract final class LadenBild {
   static const String pfad = 'assets/UI/Laden.jpg';
 
   static const double breite = 432;
-  static const double hoehe = 530;
+  static const double hoehe = 312;
 
   /// Das dunkle Innere der Tafel.
   static const Rect tafel = Rect.fromLTRB(16, 103, 202, 266);
 
-  /// Die sechs Fächer, Zeile für Zeile von links.
-  static final List<LadenFachBild> faecher = <LadenFachBild>[
-    LadenFachBild.bei(18, 142, 316),
-    LadenFachBild.bei(158, 282, 316),
-    LadenFachBild.bei(298, 412, 316),
-    LadenFachBild.bei(18, 142, 422),
-    LadenFachBild.bei(158, 282, 422),
-    LadenFachBild.bei(298, 412, 422),
-  ];
+  /// Ein leeres Fach: Holzrand, dunkles Inneres, unten die Planke.
+  static const String fach = 'assets/UI/Laden_Fach.png';
 
-  /// Die Farbe des Tresens am unteren Bildrand — der Grund darunter.
-  static const Color tresen = Color(0xFF6A4426);
-}
+  /// Was beim Dehnen eines Fachs mitwächst — das dunkle Innere. Alles
+  /// außen herum (Rand, Planke) bleibt so groß wie im Bild.
+  static const Rect fachMitte = Rect.fromLTRB(10, 9, 114, 72);
 
-/// Ein Fach: der Holzrahmen, darin das dunkle Innere fürs Bild und den
-/// Namen, darunter die Planke für den Preis.
-class LadenFachBild {
-  const LadenFachBild({
-    required this.rahmen,
-    required this.innen,
-    required this.planke,
-  });
+  /// Wie weit das dunkle Innere vom Rand des Fachs absteht, und wie hoch
+  /// die Planke unten ist — in Bildpunkten, im Fach gleich Punkten.
+  static const double fachRand = 8;
+  static const double fachOben = 7;
+  static const double plankeOben = 24;
+  static const double plankeUnten = 10;
 
-  /// Aus dem Rahmen gemessen: Alle sechs Fächer sind gleich gebaut.
-  LadenFachBild.bei(double links, double rechts, double oben)
-    : rahmen = Rect.fromLTRB(links, oben, rechts, oben + 100),
-      innen = Rect.fromLTRB(links + 8, oben + 7, rechts - 8, oben + 74),
-      planke = Rect.fromLTRB(links + 8, oben + 76, rechts - 8, oben + 90);
+  /// Die Pfosten links und rechts am Tresen.
+  static const String pfostenLinks = 'assets/UI/Laden_Pfosten_links.png';
+  static const String pfostenRechts = 'assets/UI/Laden_Pfosten_rechts.png';
+  static const double pfostenBreite = 12;
 
-  final Rect rahmen;
-  final Rect innen;
-  final Rect planke;
+  /// Die Rückwand des Tresens, zwischen den Fächern.
+  static const Color tresen = Color(0xFF3E2918);
 }

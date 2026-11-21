@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: ShopScreen.maxWidth),
-              child: SingleChildScrollView(child: _heute(gold)),
+              child: _heute(gold),
             ),
           ),
         ),
@@ -122,67 +123,89 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     PurchaseBlock? blockFor(GearCopy c) =>
         loadout.blockFor(c, availableGold: gold, highestRung: rung);
 
-    return AspectRatio(
-      aspectRatio: LadenBild.breite / LadenBild.hoehe,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final skala = constraints.maxWidth / LadenBild.breite;
-          Rect skaliert(Rect r) => Rect.fromLTRB(
-            r.left * skala,
-            r.top * skala,
-            r.right * skala,
-            r.bottom * skala,
-          );
-          return Stack(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final breite = constraints.maxWidth;
+        final skala = breite / LadenBild.breite;
+        final obenHoehe = LadenBild.hoehe * skala;
+        // Was unter dem Bild bleibt, gehört dem Tresen — aber nie so wenig,
+        // dass ein Fach unbedienbar klein würde; dann rollt der Laden.
+        final tresenHoehe = math.max(
+          constraints.maxHeight - obenHoehe,
+          _Tresen.mindestHoehe,
+        );
+        final tafel = LadenBild.tafel;
+
+        return SingleChildScrollView(
+          child: Column(
             children: <Widget>[
-              const Positioned.fill(
-                child: Image(
-                  image: AssetImage(LadenBild.pfad),
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.medium,
-                ),
-              ),
-              Positioned.fromRect(
-                rect: skaliert(LadenBild.tafel),
-                child: LadenTafel(
-                  key: ValueKey<String>('tafel-${gewaehlt.uid}'),
-                  angebot: gewaehlt,
-                  block: blockFor(gewaehlt),
-                  fehlendesGold: gewaehlt.paid - gold,
-                  getragen: gewaehlt.item == null
-                      ? null
-                      : loadout.equippedCopyIn(gewaehlt.item!.slot),
-                  onKaufen: () => _buy(context, ref, gewaehlt),
-                ),
-              ),
-              for (final (i, angebot) in angebote.take(6).indexed)
-                Positioned.fromRect(
-                  rect: skaliert(LadenBild.faecher[i].rahmen),
-                  // Der Mentor zeigt im Rundgang auf sein Angebot; steht
-                  // es auf der Tafel, sitzt der Punkt auf „Kaufen“.
-                  child: Zeigefinger(
-                    schritt: Schritt.laden,
-                    aktiv: angebot.uid.endsWith('-mentor'),
-                    punkt: angebot.uid != gewaehlt.uid,
-                    eng: true,
-                    radius: 8,
-                    child: LadenFach(
-                      angebot: angebot,
-                      bild: LadenBild.faecher[i],
-                      skala: skala,
-                      block: blockFor(angebot),
-                      gewaehlt: angebot.uid == gewaehlt.uid,
-                      // Ob es schon in der Sammlung steht: je besessen,
-                      // auch verkauft.
-                      gesammelt: loadout.everOwnedIds.contains(angebot.itemId),
-                      onTap: () => setState(() => _gewaehlt = angebot.uid),
+              SizedBox(
+                width: breite,
+                height: obenHoehe,
+                child: Stack(
+                  children: <Widget>[
+                    const Positioned.fill(
+                      child: Image(
+                        image: AssetImage(LadenBild.pfad),
+                        fit: BoxFit.fill,
+                        filterQuality: FilterQuality.medium,
+                      ),
                     ),
-                  ),
+                    Positioned.fromRect(
+                      rect: Rect.fromLTRB(
+                        tafel.left * skala,
+                        tafel.top * skala,
+                        tafel.right * skala,
+                        tafel.bottom * skala,
+                      ),
+                      child: LadenTafel(
+                        key: ValueKey<String>('tafel-${gewaehlt.uid}'),
+                        angebot: gewaehlt,
+                        block: blockFor(gewaehlt),
+                        fehlendesGold: gewaehlt.paid - gold,
+                        getragen: gewaehlt.item == null
+                            ? null
+                            : loadout.equippedCopyIn(gewaehlt.item!.slot),
+                        onKaufen: () => _buy(context, ref, gewaehlt),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              SizedBox(
+                width: breite,
+                height: tresenHoehe,
+                child: _Tresen(
+                  faecher: <Widget>[
+                    for (final angebot in angebote.take(6))
+                      // Der Mentor zeigt im Rundgang auf sein Angebot;
+                      // steht es auf der Tafel, sitzt der Punkt auf
+                      // „Kaufen“.
+                      Zeigefinger(
+                        schritt: Schritt.laden,
+                        aktiv: angebot.uid.endsWith('-mentor'),
+                        punkt: angebot.uid != gewaehlt.uid,
+                        eng: true,
+                        radius: 8,
+                        child: LadenFach(
+                          angebot: angebot,
+                          block: blockFor(angebot),
+                          gewaehlt: angebot.uid == gewaehlt.uid,
+                          // Ob es schon in der Sammlung steht: je besessen,
+                          // auch verkauft.
+                          gesammelt: loadout.everOwnedIds.contains(
+                            angebot.itemId,
+                          ),
+                          onTap: () => setState(() => _gewaehlt = angebot.uid),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -238,5 +261,103 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       ..showSnackBar(
         SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
       );
+  }
+}
+
+/// **Der Tresen des Händlers** unter dem Bild (AktivesBrett, 21.11.2026):
+/// links und rechts ein Pfosten, dazwischen die Rückwand, darauf drei mal
+/// zwei Fächer, **alle gleich groß** — so groß, wie Platz ist, und mit
+/// gleichem Abstand nach allen Seiten.
+class _Tresen extends StatelessWidget {
+  const _Tresen({required this.faecher});
+
+  final List<Widget> faecher;
+
+  /// Darunter würde ein Fach zu klein; dann rollt der Laden.
+  static const double mindestHoehe = 260;
+
+  static const int spalten = 3;
+  static const double abstand = 12;
+
+  /// Ein Fach ist höchstens so viel höher als breit.
+  static const double hoechstensHoch = 1.45;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const pfosten = LadenBild.pfostenBreite;
+        final innenBreite = constraints.maxWidth - 2 * pfosten;
+        final fachBreite = (innenBreite - (spalten + 1) * abstand) / spalten;
+        final reihen = (faecher.length / spalten).ceil();
+        final fachHoehe = math.min(
+          fachBreite * hoechstensHoch,
+          (constraints.maxHeight - (reihen + 1) * abstand) / reihen,
+        );
+        return ColoredBox(
+          color: LadenBild.tresen,
+          child: Stack(
+            children: <Widget>[
+              const Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: pfosten,
+                child: Image(
+                  image: AssetImage(LadenBild.pfostenLinks),
+                  repeat: ImageRepeat.repeatY,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              const Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: pfosten,
+                child: Image(
+                  image: AssetImage(LadenBild.pfostenRechts),
+                  repeat: ImageRepeat.repeatY,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  pfosten + abstand,
+                  abstand,
+                  pfosten + abstand,
+                  abstand,
+                ),
+                // Mittig im Tresen: Unter dem Bild ist auf hohen Handys
+                // viel Platz, und oben angeklebt stünden die Fächer gedrängt.
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    for (var r = 0; r < reihen; r++) ...<Widget>[
+                      if (r > 0) const SizedBox(height: abstand),
+                      Row(
+                        children: <Widget>[
+                          for (var c = 0; c < spalten; c++) ...<Widget>[
+                            if (c > 0) const SizedBox(width: abstand),
+                            SizedBox(
+                              width: fachBreite,
+                              height: fachHoehe,
+                              child: r * spalten + c < faecher.length
+                                  ? faecher[r * spalten + c]
+                                  : null,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

@@ -12,13 +12,12 @@ import 'rarity_badge.dart';
 /// **Ein Fach im Tresen des Händlers** (AktivesBrett, 21.11.2026): im
 /// dunklen Inneren das Stück und sein Name, auf der Planke der Preis.
 ///
-/// Rahmen, Inneres und Planke sind gemalt (`LadenBild`); das Fach legt
-/// nur darüber, was sich ändert. [skala] rechnet Bildpunkte in Punkte.
+/// Rahmen, Inneres und Planke sind ein gemaltes Fach (`LadenBild.fach`),
+/// auf die Größe gedehnt, die der Tresen ihm gibt — nur das dunkle Innere
+/// wächst. Das Fach legt darüber, was sich ändert.
 class LadenFach extends StatelessWidget {
   const LadenFach({
     required this.angebot,
-    required this.bild,
-    required this.skala,
     required this.block,
     required this.gewaehlt,
     required this.gesammelt,
@@ -27,8 +26,6 @@ class LadenFach extends StatelessWidget {
   });
 
   final GearCopy angebot;
-  final LadenFachBild bild;
-  final double skala;
 
   /// Ob es sich kaufen lässt — dieselbe Antwort wie auf der Tafel.
   final PurchaseBlock? block;
@@ -53,9 +50,26 @@ class LadenFach extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = angebot.item;
     if (item == null) return const SizedBox.shrink();
-    final rahmen = _skaliert(bild.rahmen);
-    final innen = _skaliert(bild.innen).shift(-rahmen.topLeft);
-    final planke = _skaliert(bild.planke).shift(-rahmen.topLeft);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _fach(item, Offset.zero & constraints.biggest),
+    );
+  }
+
+  Widget _fach(GearItem item, Rect r) {
+    const rand = LadenBild.fachRand;
+    final innen = Rect.fromLTRB(
+      r.left + rand,
+      r.top + LadenBild.fachOben,
+      r.right - rand,
+      r.bottom - LadenBild.plankeOben - 2,
+    );
+    final planke = Rect.fromLTRB(
+      r.left + rand,
+      r.bottom - LadenBild.plankeOben,
+      r.right - rand,
+      r.bottom - LadenBild.plankeUnten,
+    );
     final pfad = GearIcons.forItemId(item.id);
     final seite = (innen.shortestSide * 0.62).floorToDouble();
     final blass = isOutOfReach ? ausserReichweite : 1.0;
@@ -72,6 +86,15 @@ class LadenFach extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
+              // Das gemalte Fach, gedehnt nur in seiner Mitte.
+              const Positioned.fill(
+                child: Image(
+                  image: AssetImage(LadenBild.fach),
+                  centerSlice: LadenBild.fachMitte,
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
               // Im Inneren: der Rand der Seltenheit, das Stück, der Name.
               Positioned.fromRect(
                 rect: innen,
@@ -109,7 +132,7 @@ class LadenFach extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: RarityBadge.colorOnDarkOf(item.rarity),
                             shadows: _schatten,
@@ -189,13 +212,6 @@ class LadenFach extends StatelessWidget {
     GearIcons.fallbackFor(item.slot),
     size: seite,
     color: Palette.textOnDark,
-  );
-
-  Rect _skaliert(Rect r) => Rect.fromLTRB(
-    r.left * skala,
-    r.top * skala,
-    r.right * skala,
-    r.bottom * skala,
   );
 
   static const List<Shadow> _schatten = <Shadow>[
