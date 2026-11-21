@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifes_game/ui/schild_leiste.dart';
 import 'package:habits/habits.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/home/erster_start_provider.dart';
@@ -53,7 +54,7 @@ void main() {
 
   final punkt = find.byKey(TalentpunktEinfuehrung.punktKey);
   final platz = find.descendant(
-    of: find.byType(AppBar),
+    of: find.byType(SchildLeiste),
     matching: find.byType(PointsChip),
   );
 

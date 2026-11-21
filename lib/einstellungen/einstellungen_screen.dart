@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../audio/sound_effects.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'einstellungen.dart';
 
 /// **Die Einstellungen** (13.11.2026): Lautstärke und die Seite der
@@ -22,10 +23,7 @@ class EinstellungenScreen extends ConsumerWidget {
     final steuer = ref.read(einstellungenProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Einstellungen'),
-        backgroundColor: Palette.surface,
-      ),
+      appBar: SchildLeiste(titel: 'Einstellungen'),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

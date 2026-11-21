@@ -28,6 +28,7 @@ import '../ui/bereich_zeichen.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
 import '../ui/pixel_art.dart';
+import '../ui/schild_leiste.dart';
 import 'action_game.dart';
 import 'hero_power.dart';
 import 'lauf_verlassen.dart';
@@ -400,10 +401,9 @@ class _PitScreenState extends ConsumerState<PitScreen> {
   Widget _seite(bool zeigtWeg) {
     return Scaffold(
       backgroundColor: Palette.background,
-      appBar: AppBar(
-        title: Text('Dungeon · Etage ${widget.stage.number}'),
-        backgroundColor: Palette.backgroundRaised,
-        foregroundColor: Palette.textOnDark,
+      appBar: SchildLeiste(
+        titel: 'Dungeon · Etage ${widget.stage.number}',
+        hintergrund: Palette.backgroundRaised,
         actions: <Widget>[
           // Die Werkbank: Funde und Gegner von Hand — nur im
           // Entwicklermodus und nur auf dem Dev-Stand, damit der echte

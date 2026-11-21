@@ -6,6 +6,7 @@ import 'package:lifes_game/home/widgets/berg_himmel.dart';
 import 'package:lifes_game/lagerfeuer/widgets/feuer_bild.dart';
 import 'package:lifes_game/ui/ladebildschirm.dart';
 import 'package:lifes_game/ui/pulsieren.dart';
+import 'package:lifes_game/ui/schild_leiste.dart';
 import 'package:lifes_game/ui/spaeter_laden.dart';
 import 'package:lifes_game/ui/tafel_wind.dart';
 
@@ -24,6 +25,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // Wolken und Schnee hinter der Startseite ziehen ohne Ende.
   BergHimmel.lebt = false;
   Pulsieren.pulsiert = false;
+  // Das Schild der Kopfzeile schwingt beim Öffnen ein.
+  SchildLeiste.schwingt = false;
   // Der Wind über der Anschlagtafel käme alle paar Sekunden wieder.
   TafelWind.weht = false;
   // Bilder werden in Widget-Tests nie fertig entpackt; der Ladebildschirm

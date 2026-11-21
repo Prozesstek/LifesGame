@@ -4,7 +4,8 @@ import 'package:habits/habits.dart';
 import '../../skills/widgets/gebiet_streifen.dart';
 import '../../ui/gold_icon.dart';
 import '../../ui/palette.dart';
-import '../../ui/holz.dart';
+import '../../ui/schrift.dart';
+import '../../ui/anschlagtafel.dart';
 import '../../ui/druck.dart';
 import 'haekchen_kreis.dart';
 import 'habit_countdown.dart';
@@ -113,7 +114,10 @@ class HabitCheckTile extends StatelessWidget {
 
   HabitGoal? get _goal => habit.goal;
 
-  bool get _hatZeile => cue != null || days != null || treat != null;
+  bool get _hatZeile => cue != null || treat != null;
+
+  /// Woran ein Test die Zeile mit den Tagen findet.
+  static Key tageKey(String habitId) => ValueKey<String>('tage-$habitId');
 
   @override
   Widget build(BuildContext context) {
@@ -122,15 +126,17 @@ class HabitCheckTile extends StatelessWidget {
     final timer = hatZeitziel && !isChecked;
     final zeigtMenge = goal != null && !isChecked && !hatZeitziel;
 
+    // **Ein Zettel an der Tafel** (19.11.2026, Frederik: „Zettel-Optik
+    // für Gewohnheiten“) — wie auf „Heute“: Reißzwecke, Risskante, leicht
+    // schief, erledigt mit Stempel. Bis dahin eine Holzkarte.
     return Druck(
-      child: HolzKarte(
-        padding: EdgeInsets.zero,
-        color: isChecked ? Palette.surfaceRaised : Palette.surface,
-        // Grün, wenn erledigt; in der Akzentfarbe, solange sie dran ist
-        // — das Aufleuchten vergeht, die Kante bleibt.
-        edgeColor: isChecked
-            ? Palette.success
-            : (cued ? Palette.accent : Holz.kante),
+      child: Steckbrief(
+        neigung: Steckbrief.neigungFuer(habit.id),
+        saat: habit.id.hashCode,
+        abgestempelt: isChecked,
+        // Oben rechts steht das Kreuz; erledigt zeigt der grüne Haken.
+        mitStempel: false,
+        innen: EdgeInsets.zero,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -197,13 +203,23 @@ class HabitCheckTile extends StatelessWidget {
                                 semanticLabel: goal.label,
                               ),
                             ],
+                            // **Die Tage stehen immer da** (19.11.2026):
+                            // „Täglich“ oder „Mo Mi Fr“, auch erledigt.
+                            if (days case final tage?) ...<Widget>[
+                              const SizedBox(height: 3),
+                              _TageZeile(
+                                key: tageKey(habit.id),
+                                text: tage,
+                                blass: isChecked,
+                              ),
+                            ],
                             if (!isChecked &&
                                 onEditCue != null &&
                                 _hatZeile) ...<Widget>[
                               const SizedBox(height: 4),
                               _CueLine(
                                 cue: cue,
-                                days: days,
+                                days: null,
                                 treat: treat,
                                 onTap: onEditCue!,
                               ),
@@ -297,6 +313,37 @@ class MitEntfernenKreuz extends StatelessWidget {
 /// Eine eigene Tippfläche in der Kachel: Wer sie antippt, will den Satz
 /// ändern, nicht abhaken. Ihr eigener [Druck] gewinnt als innerster, die
 /// Kachel darum bleibt stehen.
+/// Die Tage einer Gewohnheit, mit einem kleinen Kalender davor.
+class _TageZeile extends StatelessWidget {
+  const _TageZeile({required this.text, required this.blass, super.key});
+
+  final String text;
+  final bool blass;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = blass ? Palette.muted : Palette.textDim;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(Icons.calendar_month_rounded, size: 13, color: farbe),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: farbe,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _CueLine extends StatelessWidget {
   const _CueLine({
     required this.cue,
@@ -562,7 +609,7 @@ class _ZielStand extends StatelessWidget {
         fontSize: 13,
         fontWeight: laeuft ? FontWeight.bold : FontWeight.w600,
         color: laeuft ? Palette.accent : Palette.textDim,
-        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        fontFeatures: Schrift.tabelle,
       ),
     );
   }

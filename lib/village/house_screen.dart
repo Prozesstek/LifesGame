@@ -16,6 +16,7 @@ import '../gear/gear_icon.dart';
 import '../habits/habits_controller.dart';
 import '../ui/holz.dart';
 import '../ui/palette.dart';
+import '../ui/schrift.dart';
 import 'village_game.dart';
 import 'village_map.dart';
 import 'village_screen.dart';
@@ -295,6 +296,8 @@ void _zahl(Canvas canvas, Rect ding, String text) {
     text: TextSpan(
       text: text,
       style: const TextStyle(
+        fontFamily: Schrift.app,
+        fontFeatures: Schrift.ziffern,
         fontSize: 10,
         fontWeight: FontWeight.bold,
         color: Palette.textOnDark,

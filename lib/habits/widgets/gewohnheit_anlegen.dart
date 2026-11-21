@@ -36,7 +36,8 @@ class GewohnheitAnlegen extends StatefulWidget {
     required this.listeVoll,
     required this.ankerFuer,
     required this.hatAusloeser,
-    required this.tageFuer,
+    required this.onLoeschen,
+    required this.onUmbenennen,
     super.key,
   });
 
@@ -52,6 +53,18 @@ class GewohnheitAnlegen extends StatefulWidget {
   static Key vorlageEintrag(String habitId) {
     return ValueKey<String>('anlegen-vorlage-$habitId');
   }
+
+  /// Bearbeiten und Löschen an einer eigenen unter „Deine“.
+  static Key bearbeitenKey(String habitId) {
+    return ValueKey<String>('anlegen-bearbeiten-$habitId');
+  }
+
+  static Key loeschenKey(String habitId) {
+    return ValueKey<String>('anlegen-loeschen-$habitId');
+  }
+
+  static const Key umbenennenFeldKey = ValueKey<String>('anlegen-umbenennen');
+  static const Key bestaetigenKey = ValueKey<String>('anlegen-bestaetigen');
 
   static Key gebietKey(SkillArea area) {
     return ValueKey<String>('anlegen-gebiet-${area.name}');
@@ -85,8 +98,12 @@ class GewohnheitAnlegen extends StatefulWidget {
   /// nicht noch einmal gefragt.
   final bool Function(String habitId) hatAusloeser;
 
-  /// Welche Tage eine pausierte zuletzt hatte.
-  final Set<int> Function(String habitId) tageFuer;
+  /// Löscht eine eigene unter „Deine“ — ihre Häkchen zählen weiter
+  /// (19.11.2026).
+  final void Function(String habitId) onLoeschen;
+
+  /// Gibt einer eigenen unter „Deine“ einen neuen Namen.
+  final void Function(String habitId, String name) onUmbenennen;
 
   /// Öffnet das Blatt. Null, wenn abgebrochen wurde.
   static Future<Angelegt?> show(
@@ -97,7 +114,8 @@ class GewohnheitAnlegen extends StatefulWidget {
     required bool listeVoll,
     required List<Habit> Function(String? habitId) ankerFuer,
     required bool Function(String habitId) hatAusloeser,
-    required Set<int> Function(String habitId) tageFuer,
+    required void Function(String habitId) onLoeschen,
+    required void Function(String habitId, String name) onUmbenennen,
   }) {
     return showModalBottomSheet<Angelegt>(
       context: context,
@@ -112,7 +130,8 @@ class GewohnheitAnlegen extends StatefulWidget {
           listeVoll: listeVoll,
           ankerFuer: ankerFuer,
           hatAusloeser: hatAusloeser,
-          tageFuer: tageFuer,
+          onLoeschen: onLoeschen,
+          onUmbenennen: onUmbenennen,
         ),
       ),
     );
@@ -140,7 +159,14 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
   SkillArea? _gebiet;
   HabitDifficulty _grad = HabitDifficulty.mittel;
   ZielArt? _ziel;
-  Set<int> _tage = <int>{...Wochentage.alle};
+
+  /// **Am Anfang ist kein Tag gewählt** (19.11.2026, Frederik): Wer
+  /// wählt, entscheidet — vorher standen alle sieben schon da.
+  Set<int> _tage = <int>{};
+
+  /// Die eigenen unter „Deine“ — hier, damit Löschen und Umbenennen
+  /// sofort zu sehen sind.
+  late List<CustomHabit> _ruhende = <CustomHabit>[...widget.ruhende];
   String? _anker;
 
   @override
@@ -273,7 +299,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
     }
     setState(() {
       _vorlage = habit;
-      _tage = widget.tageFuer(habit.id);
+      _tage = <int>{};
     });
     _weiter();
   }
@@ -419,6 +445,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
       _Schritt.wann => _wann(),
       _Schritt.tage => WeekdayPicker(
         selected: _tage,
+        leerErlaubt: true,
         onChanged: (tage) => setState(() => _tage = tage),
       ),
       _Schritt.danach => Column(
@@ -458,7 +485,11 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
       _Schritt.art || _Schritt.gebiet || _Schritt.grad => false,
     };
     if (!mitKnopf) return null;
-    final bereit = _schritt != _Schritt.name || _name.text.trim().isNotEmpty;
+    final bereit = switch (_schritt) {
+      _Schritt.name => _name.text.trim().isNotEmpty,
+      _Schritt.tage => _tage.isNotEmpty,
+      _ => true,
+    };
 
     return Row(
       children: <Widget>[
@@ -504,7 +535,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
           key: GewohnheitAnlegen.vorlageKey,
           icon: Icons.auto_stories_rounded,
           titel: 'Vorlage',
-          zeile: '${widget.vorlagen.length + widget.ruhende.length} da',
+          zeile: '${widget.vorlagen.length + _ruhende.length} da',
           gewaehlt: offen,
           ende: AnimatedRotation(
             turns: offen ? 0.5 : 0,
@@ -525,7 +556,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
   }
 
   Widget _vorlagenListe() {
-    if (widget.vorlagen.isEmpty && widget.ruhende.isEmpty) {
+    if (widget.vorlagen.isEmpty && _ruhende.isEmpty) {
       return const Padding(
         padding: EdgeInsets.fromLTRB(8, 12, 8, 0),
         child: Text(
@@ -539,9 +570,9 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (widget.ruhende.isNotEmpty) ...<Widget>[
+          if (_ruhende.isNotEmpty) ...<Widget>[
             const AnlegenGruppe('Deine'),
-            for (final habit in widget.ruhende) _eintrag(habit),
+            for (final habit in _ruhende) _eintrag(habit, eigene: true),
           ],
           if (widget.vorlagen.isNotEmpty) ...<Widget>[
             const AnlegenGruppe('Von der App'),
@@ -552,7 +583,7 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
     );
   }
 
-  Widget _eintrag(Habit habit) {
+  Widget _eintrag(Habit habit, {bool eigene = false}) {
     return Opacity(
       opacity: widget.listeVoll ? 0.5 : 1,
       child: Druck(
@@ -572,6 +603,38 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
                     style: const TextStyle(fontSize: 14, color: Palette.text),
                   ),
                 ),
+                // **Eigene lassen sich bearbeiten und löschen**
+                // (19.11.2026, Frederik); die der App nicht.
+                if (eigene)
+                  DruckSperre(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          key: GewohnheitAnlegen.bearbeitenKey(habit.id),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Umbenennen',
+                          icon: const Icon(
+                            Icons.edit_rounded,
+                            size: 18,
+                            color: Palette.textDim,
+                          ),
+                          onPressed: () => _umbenennen(habit),
+                        ),
+                        IconButton(
+                          key: GewohnheitAnlegen.loeschenKey(habit.id),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Löschen',
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 18,
+                            color: Palette.enemy,
+                          ),
+                          onPressed: () => _loeschen(habit),
+                        ),
+                      ],
+                    ),
+                  ),
                 const Icon(
                   Icons.add_circle_outline,
                   size: 20,
@@ -583,6 +646,101 @@ class _GewohnheitAnlegenState extends State<GewohnheitAnlegen> {
         ),
       ),
     );
+  }
+
+  /// Fragt nach einem neuen Namen. Was eine Zahl erzeugt — Gebiet,
+  /// Schwierigkeit, Ziel —, bleibt, wie es ist (ADR-0028).
+  Future<void> _umbenennen(Habit habit) async {
+    final feld = TextEditingController(text: habit.name);
+    final neu = await showDialog<String>(
+      context: context,
+      builder: (context) => HolzDialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            AnlegenFeld(
+              key: GewohnheitAnlegen.umbenennenFeldKey,
+              controller: feld,
+              hint: habit.name,
+              maxLength: 60,
+              autofocus: true,
+              onSubmitted: () => Navigator.of(context).pop(feld.text.trim()),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              key: GewohnheitAnlegen.bestaetigenKey,
+              onPressed: () => Navigator.of(context).pop(feld.text.trim()),
+              child: const Text('Speichern'),
+            ),
+          ],
+        ),
+      ),
+    );
+    feld.dispose();
+    if (neu == null || neu.isEmpty || neu == habit.name || !mounted) return;
+    widget.onUmbenennen(habit.id, neu);
+    setState(() {
+      _ruhende = <CustomHabit>[
+        for (final h in _ruhende) h.id == habit.id ? h.editable(name: neu) : h,
+      ];
+    });
+  }
+
+  /// Fragt nach und löscht. **Was sie schon gebracht hat, bleibt** —
+  /// das sagt der Dialog auch.
+  Future<void> _loeschen(Habit habit) async {
+    final ja = await showDialog<bool>(
+      context: context,
+      builder: (context) => HolzDialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              '„${habit.name}“ löschen?',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Palette.text,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Was sie schon gebracht hat, bleibt.',
+              style: TextStyle(fontSize: 13, color: Palette.textDim),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Behalten'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton(
+                    key: GewohnheitAnlegen.bestaetigenKey,
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Löschen'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (ja != true || !mounted) return;
+    widget.onLoeschen(habit.id);
+    setState(() {
+      _ruhende = <CustomHabit>[
+        for (final h in _ruhende)
+          if (h.id != habit.id) h,
+      ];
+    });
   }
 
   Widget _gebiete() {

@@ -21,8 +21,10 @@ import 'save/save_watcher.dart';
 import 'theory/silbentrennung.dart';
 import 'ui/druck.dart';
 import 'ui/holz.dart';
+import 'ui/menue_leiste.dart';
 import 'ui/palette.dart';
 import 'ui/phone_frame.dart';
+import 'ui/schrift.dart';
 
 /// Startet die App, nachdem der Spielstand gelesen ist.
 ///
@@ -292,17 +294,28 @@ class _LifesGameAppState extends State<LifesGameApp> {
           outline: Palette.surfaceRaised,
         );
 
-    return ThemeData(
+    final basis = ThemeData(
       colorScheme: scheme,
+      // **Die Schrift der App** (21.11.2026, Frederik): Alegreya Sans für
+      // alles, was keine eigene Schrift nennt. Das Lernbuch (`BuchStil`)
+      // und die Titel (`MenueLeiste`) setzen ihre selbst und bleiben.
+      fontFamily: Schrift.app,
       scaffoldBackgroundColor: Palette.background,
       useMaterial3: true,
 
       // Die Kopfzeile ist selbst eine Pergamentfläche. Ohne diese beiden
       // Zeilen bliebe ihr Titel in der Standardfarbe des Schemas und
       // stünde je nach Bildschirm hell auf hell.
+      // **Die Menüleiste** (19.11.2026): unten ein Holzbalken, der Titel
+      // in Cormorant Garamond (`lib/ui/menue_leiste.dart`).
+      // **Kopfzeilen sind Holzschilder** (`SchildLeiste`, 20.11.2026); eine
+      // `AppBar`, die es noch gibt (das Lesebuch), liegt durchsichtig auf
+      // dem Grund wie das Schild.
       appBarTheme: const AppBarTheme(
-        backgroundColor: Palette.surface,
-        foregroundColor: Palette.text,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: Palette.textOnDark,
+        titleTextStyle: MenueLeiste.titel,
         // Die Symbole stehen auf dem Holzknopf, nicht auf Pergament —
         // deshalb hell, auch wenn der Titel daneben Tinte ist.
         iconTheme: IconThemeData(color: Palette.textOnDark),
@@ -341,6 +354,32 @@ class _LifesGameAppState extends State<LifesGameApp> {
 
       dividerTheme: const DividerThemeData(color: Palette.surfaceRaised),
       iconTheme: const IconThemeData(color: Palette.text),
+    );
+    // **Ziffern in Versalhöhe** auf jedem Stil (`Schrift.ziffern`): Ein
+    // `Text` mit eigenem Stil erbt sie über `DefaultTextStyle`.
+    const ziffern = TextStyle(fontFeatures: Schrift.ziffern);
+    TextTheme mitZiffern(TextTheme t) => t.merge(
+      const TextTheme(
+        displayLarge: ziffern,
+        displayMedium: ziffern,
+        displaySmall: ziffern,
+        headlineLarge: ziffern,
+        headlineMedium: ziffern,
+        headlineSmall: ziffern,
+        titleLarge: ziffern,
+        titleMedium: ziffern,
+        titleSmall: ziffern,
+        bodyLarge: ziffern,
+        bodyMedium: ziffern,
+        bodySmall: ziffern,
+        labelLarge: ziffern,
+        labelMedium: ziffern,
+        labelSmall: ziffern,
+      ),
+    );
+    return basis.copyWith(
+      textTheme: mitZiffern(basis.textTheme),
+      primaryTextTheme: mitZiffern(basis.primaryTextTheme),
     );
   }
 }

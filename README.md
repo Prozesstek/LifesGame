@@ -47,7 +47,7 @@ dart test                          # 406 Tests
 dart run example/headless_run.dart # eine Halle ohne Bildschirm
 
 cd packages/habits
-dart test                          # 375 Tests
+dart test                          # 381 Tests
 dart run example/curve_sim.dart    # 90 Tage Gewohnheiten durchspielen
 
 cd packages/gear

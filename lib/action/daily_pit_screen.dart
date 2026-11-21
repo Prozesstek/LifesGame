@@ -11,6 +11,7 @@ import '../habits/habits_controller.dart';
 import '../home/erster_start_provider.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'action_game.dart';
 import 'lauf_verlassen.dart';
 import 'lauf_zeichen.dart';
@@ -148,10 +149,9 @@ class _DailyPitScreenState extends ConsumerState<DailyPitScreen> {
       },
       child: Scaffold(
         backgroundColor: Palette.background,
-        appBar: AppBar(
-          title: Text('Tagesdungeon #${DailyPit.numberFor(widget.day)}'),
-          backgroundColor: Palette.backgroundRaised,
-          foregroundColor: Palette.textOnDark,
+        appBar: SchildLeiste(
+          titel: 'Tagesdungeon #${DailyPit.numberFor(widget.day)}',
+          hintergrund: Palette.backgroundRaised,
         ),
         body: OnDark(
           child: PitRunView(

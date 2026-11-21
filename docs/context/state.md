@@ -12,9 +12,227 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 17.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 21.11.2026 · AktivesBrett
 
 ---
+
+## 21.11.2026: der Laden ist ein Laden
+
+AktivesBrett schickte ein Bild (ein Laden mit Händler, Tafel und Tresen)
+und eine Skizze: „mach den Shop bitte so … kannst einfach das Bild so
+benutzen, musst nur die einzelnen Elemente anpassen“.
+
+| Was | Wie |
+|---|---|
+| **Bild** | `assets/UI/Laden.jpg` (494 × 648), aus seinem Bild: Tafel und Fächer leer gemalt, die eingemalten Gegenstände und der englische Text weg, die App-Knöpfe oben rechts weggerechnet, die Leiste unten (Gold, BUY, LEAVE) abgeschnitten |
+| **Tafel** | oben links: Bild, Name in der Farbe der Seltenheit, Wurf, Werte gegen das Getragene, Kampf, „Kaufen“ — oder warum nicht; feste Größe, rollt innen |
+| **Fächer** | sechs im Tresen: Stück und Name im Inneren, Preis auf der Planke; was auf der Tafel steht, trägt weiße Winkel |
+| **Lage** | alle Rechtecke an einer Stelle (`LadenBild`) |
+| **Weg** | `ShopItemCell`, `ShopItemTile`; PR #241 (das Blatt im Laden) ist damit überholt |
+
+**Ohne Rückfrage entschieden:** „Kaufen“ steht ohne Preis auf der Tafel,
+der Preis steht auf der Planke des Fachs. Die Seltenheit hat eine dritte
+Farbspalte für dunklen Grund (`RarityBadge.colorOnDarkOf`). Unter dem
+Bild ist der Grund in der Farbe des Tresens.
+
+**Danach** (AktivesBrett, mit einem zweiten Bild): **Das Bild beginnt
+ganz oben**, das Schild „Laden“ hängt in seinen Dachbalken über der Tafel,
+daneben Zurück-Pfeil und Gold (`extendBodyBehindAppBar`). Das neue Bild
+(432 × 530) hatte Schild, Pfeil, Sprechblase und Gold eingemalt — sie sind
+weggerechnet und liegen unter den echten. Die Preise richten ihre Größe
+nach der Planke.
+
+**Und** (AktivesBrett: „die Items sind nicht symmetrisch, mach die
+Boxen etwas größer und mehr nach unten“): Die Fächer sind nicht mehr Teil
+des Bildes — im gemalten Tresen war die rechte Spalte schmaler. Das Bild
+endet an der Tresenkante (432 × 312); darunter baut die App den Tresen
+selbst: zwei Pfosten aus dem Bild, dunkle Rückwand, sechs **gleich große**
+Fächer aus einem ausgeschnittenen Fach (`Laden_Fach.png`, gedehnt nur im
+dunklen Inneren), so groß wie Platz ist und **mittig im Tresen**.
+
+App 1221. In 390 × 844 gerendert.
+
+### Offen
+
+- **Woher das Bild stammt**, ist nicht geklärt — es sieht nach einem
+  KI-Bild aus (oben rechts waren Knöpfe einer App mit abfotografiert).
+  **Vor dem Store klären**; bis dahin steht es nicht in einer
+  HERKUNFT-Datei.
+- Oben, wo Schild, Pfeil und Gold eingemalt waren, ist das Bild verwischt — verdeckt von den echten.
+- Das Bild ist nicht im Pixelstil der übrigen App gemalt.
+- **Frederik hat es nicht gesehen.**
+
+---
+
+## 21.11.2026: Alegreya Sans für die ganze App
+
+Frederik: „eine neue Schriftart ausprobieren bei den Gewohnheiten,
+Item-Beschreibungen etc. Eigentlich überall außer bei Theorie und den
+Titeln“. Drei Kandidaten neben Roboto gerendert (Gewohnheiten und das
+Blatt eines Stücks): Alegreya Sans, Pixelify Sans, Nunito. Gewählt:
+**Alegreya Sans**. Pixelify fiel durch, weil seine 5 wie ein S aussieht.
+
+| Was | Wie |
+|---|---|
+| **Wo** | im Theme (`fontFamily`), also jedes `Text` ohne eigene Schrift |
+| **Ausgenommen** | das Lernbuch (`BuchStil`: Lora, Cormorant) und die Titel auf dem Schild (`MenueLeiste`) — sie nennen ihre Schrift selbst |
+| **Maler** | die Schadenszahlen der Grube und die Schilder im Dorf malen mit eigenem `TextPainter` und nennen sie über `Schrift.app` |
+| **Dateien** | Regular, Italic, Medium, Bold lokal unter `assets/fonts/`, Lizenz `OFL-AlegreyaSans.txt` |
+
+**Ohne Rückfrage entschieden:** „außer Theorie“ heißt der Buchtext. Der
+Talentbaum und der Mentor beim Abfragen tragen die neue Schrift, wie
+jeder andere Bildschirm.
+
+App 1219 (vorher 1217). Startseite, Gewohnheiten, Laden, Charakter und
+Talentbaum in 390 × 844 mit echter Schrift gerendert. **Nicht am Handy.**
+
+### Offen
+
+- ~~Kleine Zahlen sind kleiner geworden~~ — behoben, siehe unten.
+
+**Danach** (Frederik: „mach die kleinen Zahlen etwas größer“): Der Grund
+war nicht die Größe, sondern die Ziffern. Alegreya Sans setzt von sich
+aus **Mediävalziffern**, so hoch wie ein „x“, die 3, 5 und 9 hängen
+unter die Linie. Jetzt stehen überall **Ziffern in Versalhöhe**
+(`lnum`, `Schrift.ziffern`), gesetzt im Theme auf jedem Stil — rund
+40 % höher, ohne eine Schriftgröße zu ändern. Wo ein Stil selbst
+`fontFeatures` setzt (Timer, Zähler), steht `Schrift.tabelle`. Dazu
+Preis und Qualität im Laden 12 statt 10, „35 / 125“ im Charakter 13
+statt 11, und die Zahl im Level-Ring füllt ihn wieder (die hohen Ober-
+und Unterlängen der Schrift ließen die `FittedBox` sie schrumpfen).
+- **AktivesBrett hat es nicht gesehen.**
+
+## 20.11.2026: die Titel hängen als Holzschild an Ketten
+
+Frederik: „Von oben hängt ein Holzschild mit Ketten wie in einer alten
+Bar das Namensschild … Das Schild muss sich an die Länge des Wortes
+anpassen und ein angenehmes Padding haben“. Vorher in einer Fragerunde
+geklärt, danach zwei Standbilder abgenommen.
+
+| Was | Wie |
+|---|---|
+| **Schild** | Holz wie die Kartenrahmen, auf Gehrung, zwei Messingösen; gemalt auf dem Raster, nicht gedehnt (`SchildLeiste`) |
+| **Ketten** | zwei Eisenketten vom oberen Rand, Glieder abwechselnd von vorn und von der Seite |
+| **Schrift** | Cormorant Garamond, **hell wie auf den Holzknöpfen** mit dunklem Rand — erst dunkel eingebrannt, Frederik wollte sie weiß |
+| **Breite** | Wort plus 24 Punkte je Seite; reicht der Platz zwischen den Knöpfen nicht, wird die Schrift kleiner |
+| **Inhalt** | beginnt unter dem Schild — die Leiste ist 80 statt 56 hoch; **sie ist durchsichtig**, ein Hintergrund liegt auch hinter dem Schild |
+| **Bewegung** | schwingt beim Öffnen zweieinhalb Mal gedämpft ein, nicht bei abgeschalteter Bewegung |
+| **Wo** | alle 17 Bildschirme mit Titel; das Lesebuch hat keinen und behält seinen Pfeil |
+
+Die Pergamentleiste vom 19.11. ist weg. **Die Anschlagtafel hinter den
+Gewohnheiten auch** (Frederik: „wir setzen da ein Bild ein wie bei
+Theorie … aber erstmal kann der Hintergrund weg“); auf „Heute“ bleibt sie.
+
+**Ohne Rückfrage entschieden:** Die Knöpfe rechts (Level, Gold,
+Sammlung, Info) bleiben, wie sie waren — Frederik: „lass es erstmal wie
+es ist“. Lagerfeuer und Dungeon behalten ihren Grund (Nachthimmel, Fels).
+
+App 1217 (vorher 1211). Gewohnheiten, Theorie, Laden, Charakter,
+Lagerfeuer, Dungeon, Sammlung, Fähigkeiten und ein langer Titel in 360
+Breite gerendert. **Das Schwingen hat niemand gesehen**, nur Standbilder.
+
+### Offen
+
+- **Was rechts steht, ist auf Pergament abgestimmt** und auf dem dunklen
+  Grund teils blass: das Gold im Laden, „0 %“ an der Sammlung.
+- Ein Bild als Hintergrund für Gewohnheiten.
+- Die Ketten sind kurz (22 Punkte), weil die App im Vollbild läuft.
+- **AktivesBrett hat es nicht gesehen.**
+
+## 19.11.2026, danach: der Gewohnheiten-Bildschirm
+
+Frederik und AktivesBrett hatten eine Liste („Hintergrund ändern und
+Menüleiste designen, neue Schriftart · Erklärkarte für die Gebiete ·
+Zettel-Optik · Vorlage löschen und bearbeiten · Tage erkennbar · am
+Anfang alle nicht angewählt + Haken“). Claude hat sie ausgelegt,
+Frederik: „mach alles so wie ich gesagt hab. die tage können als text da
+stehen“.
+
+| Was | Wie |
+|---|---|
+| **Menüleiste, jedes Menü** | Pergament wie bisher, unten ein gemalter Holzbalken, der Titel in **Cormorant Garamond** — über das Theme (`MenueLeiste`) |
+| **Hintergrund** | Gewohnheiten liegen auf den Brettern der Anschlagtafel (`TafelBretter`) |
+| **Zettel** | jede Gewohnheit ein Zettel wie auf „Heute“: Reißzwecke, Risskante, leicht schief; erledigt dunkler, **ohne Stempel** (oben rechts steht das Kreuz) |
+| **Gebiete** | ein Tipp öffnet eine Karte: Beispiele, welcher Kampfwert steigt, Erfahrung bis zur nächsten Stufe (`GebietErklaerung`) |
+| **Tage** | immer unter dem Namen, mit Kalender: „Täglich“ oder „Mo Mi Fr“, auch erledigt |
+| **Anlegen, Tage** | am Anfang keiner gewählt, gewählte mit grünem Haken, „Weiter“ erst ab einem Tag — auch bei Vorlagen |
+| **Deine** | eigene pausierte lassen sich umbenennen und löschen |
+
+**Löschen nimmt nichts zurück** (`HabitTracker.archiveCustom`): Die
+Gewohnheit verschwindet aus jeder Liste und gibt ihren Platz frei, ihre
+Häkchen zählen weiter — sonst fiele das Level. Sie bleibt im Spielstand
+(`archived`).
+
+**Ohne Rückfrage entschieden:** Schrift nur für Titel, nicht für den
+Fließtext; der Hintergrund ist die Tafel, kein neues Bild; die übrigen
+Bereiche bekommen bisher nur die Menüleiste, keinen eigenen
+Hintergrund.
+
+App 1211 (vorher 1210), habits 381 (vorher 377). Gewohnheiten, Gebietskarte,
+Laden, „Deine“ und der Schritt „Tage“ in 390 × 844 gerendert.
+
+### Offen
+
+- **Eigene Hintergründe für die anderen Bereiche** — „in jedem Menü“ ist
+  bisher nur die Leiste.
+- Bearbeiten heißt nur umbenennen; Gebiet, Schwierigkeit und Ziel bleiben
+  fest (ADR-0028).
+- **AktivesBrett hat es nicht gesehen.**
+
+## 19.11.2026: die Startseite steht still
+
+Frederik: „der startscreen an sich [sollte] nicht scrollbar sein. jedoch
+sollte es die möglichkeit geben bei den gewohnheiten zu scrollen falls
+noch mehr kommen.“
+
+Die Seite rollt nicht mehr; „Heute“ nimmt, was zwischen Ei, Lagerfeuer
+und den Leisten übrig bleibt, und **nur die Zettel rollen in der Tafel**
+(`TodayCard.listeKey`). Die erste Frage rollt ebenso in sich, falls die
+Tastatur sie eng macht.
+
+**Ohne Rückfrage entschieden:** Ist die Mitte niedriger als 480 Punkte
+(`HomeScreen._engUnter`, etwa 360 × 640 mit Ei-Wahl und Lagerfeuer),
+rollt **doch die ganze Seite**, und „Heute“ ist höchstens 280 hoch —
+sonst drückten Ei und Feuer die Tafel auf null.
+
+App 1209 (vorher 1207). 390 × 844 mit drei und fünf Gewohnheiten und
+360 × 640 gerendert und angesehen.
+
+**Danach** (Frederik: „Sobald was abgehakt ist wird es nach unten
+geschoben unabhängig davon ob es an etwas hängt“): Erledigtes rutscht
+sofort nach unten, auch aus einem Stapel — auf der Startseite und im
+Gewohnheiten-Bildschirm (`HabitStacks.order`). **Das nimmt einen Teil
+von ADR-0065 zurück**: Dort blieb ein Stapel zusammen, bis jedes Glied
+erledigt war. Eingerückt bleibt, wessen Anker in derselben Hälfte steht;
+die offene Folge eines abgehakten Ankers steht ohne Einrückung oben und
+ist „jetzt dran“. habits 377 (vorher 375).
+
+**Ketten zwischen gekoppelten Gewohnheiten — versucht und
+zurückgenommen.** Erst ein Ketten-Zeichen statt der Einrückung, dann
+zwei Ketten mit Ösen wie an Schildern, dann in Messing. Frederik: „das
+sieht wirklich schrecklich aus … da muss ich mir vorher nochmal was
+überlegen“. Alles ist per `git revert` wieder heraus; Gekoppeltes steht
+wie vorher eingerückt.
+
+**Die Kreise gleich groß** (Frederik: „wirklich alle gleich groß mit
+gleichen Abständen?“). Gemessen: oben 78, unten 70; oben eng mit viel
+Rand, unten weit mit wenig Rand; die Figuren nahmen 62 bis 66 % ihres
+Kreises ein. Jetzt sind alle acht 74 Punkte, beide Leisten verteilen
+gleich (`spaceEvenly`), und jede Figur nimmt **genau 61 %** ein — dafür
+steht je Bild, wie viel es füllt (`BereichZeichen.anteil`, ein Test
+misst nach). 61 % ist das Größte, bei dem die Silhouette des
+Charakters auf dem Pergament bleibt; die Figuren sind damit etwas
+kleiner als vorher. In 390 und 360 Punkten Breite gemessen: oben und
+unten stehen die Kreise deckungsgleich. App 1210.
+
+### Offen
+
+- Dass die Tafel rollt, zeigt nur der angeschnittene letzte Zettel.
+- **Wie gekoppelte Gewohnheiten aussehen sollen** — Frederik überlegt.
+- Woran eine offene Folge hängt, sieht man nicht mehr, sobald ihr Anker
+  abgehakt ist.
+- **AktivesBrett hat es nicht gesehen.**
+- Die Ei-Wahl nimmt viel Platz, solange es kein Tier gibt.
 
 ## 17.11.2026: Sprites aus der KI, erster Versuch
 
@@ -333,7 +551,7 @@ die zählt, ist der 26.10. (zwölf Tester im geschlossenen Test).
 | **Statistik** | Woche, Monat, Jahr, Gesamt mit Blättern; Raster, Balken, Kurve, Wochentage, je Gewohnheit, Rekorde, Jahresrückblick — **nur Gewohnheiten** | ADR-0087 |
 | **Prototyp** | das Dorf, nur im Entwicklermodus | — |
 
-**Tests:** App 1207, dazu die acht Packages (theory 223, habits 375, gear
+**Tests:** App 1219, dazu die acht Packages (theory 223, habits 381, gear
 144, action_combat 415, progression 58, abilities 43, identity 25,
 achievements 25) und der Prototyp `haustier` (21). **In der CI laufen nur die App-Tests** — der Umbau,
 der alle prüft, wartet auf den `workflow`-Scope (`verlauf.md`, 27.09.).

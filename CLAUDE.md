@@ -75,7 +75,7 @@ durch die Grube ersetzt und gelöscht.
 | `packages/progression/lib/src/power_curve.dart` | was ein Level im Kampf **vervielfacht** ([ADR-0042](docs/decisions/0042-macht-vervielfacht.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/theory_points.dart` | ein Theoriepunkt je Aufstieg ([ADR-0035](docs/decisions/0035-ein-theoriepunkt-je-level.md)), **einer zum Start** ([ADR-0078](docs/decisions/0078-ein-startpunkt.md)) | nur Dart-SDK |
 | `packages/progression/lib/src/skill_curve.dart` | die Kurve der **Skills** ([ADR-0085](docs/decisions/0085-skills-je-gebiet.md)): 1 bis 100, Stufe 2 kostet 100, jede weitere 8 mehr; das Gesamtlevel | nur Dart-SDK |
-| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 375 Tests | nur Dart-SDK |
+| `packages/habits/` | Gewohnheiten, Streaks, Kampfwerte, **Statistik**, reines Dart, 381 Tests | nur Dart-SDK |
 | `packages/habits/lib/src/catalog.dart` | die Vorlagen selbst — verknüpft mit Lektion und Stat | nur Dart-SDK |
 | `packages/habits/lib/src/habit.dart` | `Habit`, Vorlage und **eigene** Gewohnheit, Grad, Ziel | nur Dart-SDK |
 | `packages/habits/lib/src/plan.dart` | der **Wochenplan** einer Gewohnheit: an welchen Wochentagen sie fällig ist, **als Historie** — und wann sie pausiert ([ADR-0064](docs/decisions/0064-wochenplan-und-kette-die-faellt.md)) | nur Dart-SDK |
@@ -103,7 +103,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
-| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; zwei Spalten: Schriftton (`colorOf`, Marke und Name) und Rahmenton (`rahmenOf`, der Rand um ein Stück) | Flutter |
+| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; drei Spalten: Schriftton (`colorOf`, Marke und Name), Rahmenton (`rahmenOf`, der Rand um ein Stück) und Schrift auf dunklem Grund (`colorOnDarkOf`, Tafel und Fächer im Laden) | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 43 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen — und die **Ultimates** (`ultimates`), die nie unter den wählbaren stehen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
@@ -176,6 +176,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/skills/skill_text.dart` | der Text zum Teilen: Name, Gesamtlevel, vier Skills, längste Kette — reine Rechnung | Flutter |
 | `lib/skills/widgets/skill_karte.dart` | die Skills im Charakter, **über** der Kette, mit Teilen-Knopf | Flutter |
 | `lib/skills/widgets/skill_abzeichen.dart` | ein Skill als kleine Marke, im Kopf des Baums | Flutter |
+| `lib/skills/widgets/gebiet_erklaerung.dart` | **ein Tipp auf ein Gebiet erklärt es** (19.11.2026): was hineingehört (`beispiele`, auch für die erste Gewohnheit), welchen Kampfwert es steigert, wie weit der Skill ist | Flutter |
 | `lib/skills/widgets/gebiets_kacheln.dart` | **die vier Gebiete oben auf dem Gewohnheiten-Bildschirm** ([ADR-0092](docs/decisions/0092-gewohnheiten-aufgeraeumt.md)): Zeichen, Stufe, Name, Balken in ihrer Farbe; die Funken eines Häkchens fliegen in die Kachel seines Gebiets | Flutter |
 | `lib/skills/widgets/gebiet_streifen.dart` | **der Streifen am linken Rand** einer Gewohnheit in der Farbe ihres Gebiets (ADR-0090) — Kachel; der Zettel auf „Heute“ malt ihn über `Steckbrief.streifen` | Flutter |
 | `lib/skills/widgets/gebiets_balken.dart` | **der zweite Balken** auf der Startseite: blendet ein, wenn ein Häkchen seine grünen Funken wirft — dieselbe Erfahrung zählt fürs Level und fürs Gebiet; liegt immer da, damit die Funken ein Ziel haben | Flutter |
@@ -186,7 +187,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/main.dart` | App-Shell, Theme, lädt den Spielstand vor `runApp` | Flutter |
 | `lib/einstellungen/` | **die Einstellungen** (13.11.2026): Lautstärke und Fähigkeiten links oder rechts — **gehören dem Gerät**, eigener Schlüssel in `shared_preferences` (`EinstellungenInPrefs`), nicht im Spielstand; geöffnet nur über das Zahnrad auf der Startseite (`EinstellungenScreen`) | Flutter |
 | `lib/feedback/` | **Feedback der Testphase** ([ADR-0101](docs/decisions/0101-feedback-an-discord.md)): die Sprechblase oben rechts über jeder Seite (`FeedbackHuelle`, im `builder` von `MaterialApp`), **die nach links ausweicht, wenn sie etwas verdeckt** (`BlasenPlatz`), das Blatt mit Kategorie, Text und Screenshot (`FeedbackBlatt`), der Versand hinter einer Naht (`FeedbackDienst`, heute `DiscordFeedbackDienst`); die Webhook-URL kommt aus `feedback.json` (gitignored) per `--dart-define-from-file` | Flutter |
-| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier kleinere —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
+| `lib/home/home_screen.dart` | Startbildschirm **vor dem Berg** (`assets/UI/Berg.jpg`): **acht** Kreise in zwei Holzrahmen — oben vier samt der Statistik (ADR-0087), unten vier, **alle gleich groß und gleich verteilt** (19.11.2026) —, dazwischen Statusleiste und „Heute“ ([ADR-0058](docs/decisions/0058-figur-in-die-ausruestung.md)); **die Kreise kommen nach und nach** (`Aufgedeckt`) | Flutter |
 | `lib/home/widgets/berg_himmel.dart` | **der Berg lebt** (16.11.2026): hinter der Startseite ziehen Wolken, am Gipfel rieselt Schnee, das Licht folgt der Uhr (`Tageslicht`, eine Tabelle) — nachts Sterne und Mond; alles auf dem Raster des Bildes, in eigener Ebene, höchstens 20 Bilder je Sekunde; **nur Darstellung**, in Tests still (`BergHimmel.lebt`), die Uhr überschreibbar (`BergHimmel.uhr`) | Flutter |
 | `lib/ui/bereich_zeichen.dart` | **das Zeichen jedes Bereichs** im Pixelstil, was Spieler aus RPGs kennen — Quest-Rolle, Buch, gekreuzte Schwerter, Balken, Münzbeutel, Zauberbuch, Harnisch, Silhouette; **eine Tabelle** für Kreise, Tipps nach einer Niederlage und Wege im Charakter | Flutter |
 | `lib/home/erster_start.dart` | **der erste Start**: welcher Kreis wann erscheint, welcher leuchtet und **bei welchem Schritt der Mentor steht** (`Schritt`) — reine Rechnung aus Zahlen, die nur wachsen ([ADR-0068](docs/decisions/0068-erster-start-deckt-die-bereiche-auf.md), [ADR-0079](docs/decisions/0079-der-mentor.md)) | Flutter |
@@ -248,14 +249,16 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); **ein gemaltes Bild** (21.11.2026): oben links die Tafel, rechts der Händler, darunter sein Tresen mit sechs Fächern — ein Tipp auf ein Fach schreibt es auf die Tafel, dort steht „Kaufen“; im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
+| `lib/gear/widgets/laden_bild.dart` | **wo im Ladenbild was liegt** — Bild bis zur Tresenkante (`assets/UI/Laden.jpg`, 432 × 312, **beginnt ganz oben**, das Schild hängt in den Dachbalken), die Tafel darin, dazu das **eine** Fach (`Laden_Fach.png`) und die Pfosten des Tresens, den die App darunter baut; wer das Bild tauscht, misst hier neu | Flutter |
+| `lib/gear/widgets/laden_tafel.dart` | **die Tafel**: Bild, Name, Seltenheit, Wurf, Werte gegen das Getragene, Kampf, „Kaufen“ oder warum nicht — feste Größe, rollt innen; rechnet nichts (`Loadout.blockFor`) | Flutter |
+| `lib/gear/widgets/laden_fach.dart` | **ein Fach im Tresen**, alle sechs gleich groß: das gemalte Fach, gedehnt nur im Inneren, Stück und Name darin, Preis auf der Planke, weiße Winkel, wenn es auf der Tafel steht, das Zeichen der Sammlung | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen**; im Rundgang zeigt der Mentor aufs Sperren | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: **nur das angetippte Exemplar** (26.10.), seine Werte **mit dem Unterschied zum Getragenen je Wert**, „Qualität“ beim Namen, **„Kampf“ in ganzen Sätzen** (`weaponKampfText`, `rarityKampfText` in `weapon_ability_line.dart`), darunter Knöpfe nebeneinander, ganz unten der Verkauf (13.11.2026); **Angelegtes hat keinen Verkaufen-Knopf** — `Loadout.sellAll` verkauft es nie | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
 | `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
 | `lib/gear/widgets/verkauf_leiste.dart` | Auswahl an/aus — **der Knopf ein Beutel voller Münzen** (`assets/UI/Verkaufen.png`) und „Verkaufen“ mit Anzahl und Gold | Flutter |
-| `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht; im Laden mit dem Zeichen der Sammlung, wenn man das Stück schon einmal hatte | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
 | `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter **nur die eigenen** ([ADR-0082](docs/decisions/0082-nur-eigene-faehigkeiten.md)), **ein Raster ohne Überschriften** in drei Ordnungen; **Platz antippen, dann eine Fähigkeit** — oder ziehen | Flutter |
@@ -309,6 +312,9 @@ durch die Grube ersetzt und gelöscht.
 | `lib/ui/ausgegraut.dart` | wie „noch nicht“ aussieht: eine Stelle für Fähigkeiten und Ausrüstung | Flutter |
 | `lib/ui/tafel_wind.dart` | **ein Windstoß über der Anschlagtafel** (16.11.2026): alle 6 bis 13 s flattern die Zettel kurz an der Reißzwecke, von oben nach unten (`TafelWind.winkel`, reine Rechnung); zwischen zwei Stößen läuft kein Takt, im Stoß dreht sich nur eine fertige Ebene; in Tests still (`TafelWind.weht`) | Flutter |
 | `lib/ui/anschlagtafel.dart` | **die Anschlagtafel**: dunkle Bretter im Holzrahmen, oben ein Schild — gezeichnet auf dem Raster der Bildpunkte; dazu der `Steckbrief` mit Reißzwecke, Risskante und Stempel, der **nur beim Wechsel aufschlägt** — für die Tagesaufgaben und „Heute“ | Flutter |
+| `lib/ui/schild_leiste.dart` | **die Kopfzeile jedes Bereichs** (20.11.2026): ein Holzschild an zwei Eisenketten von oben, Titel hell wie auf den Holzknöpfen — **wächst mit dem Wort**, wird zu eng, wird die Schrift kleiner; schwingt beim Öffnen ein (in Tests still, `SchildLeiste.schwingt`); **die Leiste ist durchsichtig**, ein Hintergrund des Bildschirms liegt also auch hinter dem Schild, **der Inhalt beginnt darunter**. Jeder Bildschirm nimmt `SchildLeiste` statt `AppBar` — außer dem Lesebuch, das keinen Titel hat | Flutter |
+| `lib/ui/schrift.dart` | **die Schrift der App** (21.11.2026): Alegreya Sans, gesetzt im Theme — außer Lernbuch und Titeln; wer mit eigenem `TextPainter` malt, nimmt `Schrift.app` | Flutter |
+| `lib/ui/menue_leiste.dart` | nur noch **die Schrift der Titel** (Cormorant Garamond); die Pergamentleiste vom 19.11. ist seit dem 20.11. das Schild | Flutter |
 | `lib/ui/wackeln.dart` | **was sich gerade wählen lässt, wackelt kurz** und behält einen goldenen Rand (Issue #138) — endet von selbst | Flutter |
 | `lib/ui/halten_und_ziehen.dart` | **Halten und Ziehen** wie beim Deckbau: Zustand eines Platzes, Bild unter dem Finger, Hochrollen, **Aufleuchten** eines freien Platzes (`PlatzLaedtEin`). Eine Stelle für Ausrüstung und Fähigkeiten | Flutter |
 | `lib/habits/stat_icon.dart` | welches **Zeichen** zu welchem Wert gehört — Schwert, Herz, Schild, Tropfen, das Schwert gezeichnet (`StatIcon`); **eine Tabelle** ([ADR-0060](docs/decisions/0060-die-app-geht-ohne-lesen.md)), **in der Farbe seines Gebiets** (ADR-0090) | Flutter |
@@ -375,7 +381,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1207 Tests
+flutter test             # 1221 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation
@@ -395,7 +401,7 @@ dart run example/headless_run.dart     # eine Halle ohne Bildschirm
 
 # Gewohnheiten allein, ohne Flutter
 cd packages/habits
-dart test                              # 375 Tests
+dart test                              # 381 Tests
 dart run example/curve_sim.dart        # 90 Tage Ertrag und Werte
 
 # Theorie, Levelkurve, Ausrüstung allein, ohne Flutter
@@ -750,7 +756,7 @@ stehen und dort bleiben müssen:
 | Wie viele eigene darf jemand anlegen? | `HabitRewards.customSlotsFor` — ein Platz je freigeschalteter Vorlage, **zwei dazu nach dem ersten Sieg** ([ADR-0093](docs/decisions/0093-drei-gewohnheiten-nach-dem-mentor.md)) |
 | Was ändert der Schwierigkeitsgrad? | `HabitDifficulty.xpFactor` — nur Erfahrung, nie Gold |
 | Was darf sich nachträglich ändern? | `CustomHabit.editable` — nur, was keine Zahl erzeugt |
-| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **Stapel** mit Offenem oben, ganz erledigte unten, je nach Priorität |
+| In welcher Reihenfolge steht die Tagesliste? | `HabitTracker.stackOn` → `HabitStacks.order` — Gekoppeltes unter seinem Anker; **alles Erledigte unten, auch aus einem Stapel** (19.11.2026), je nach Priorität |
 | Woran hängt eine Gewohnheit? | `HabitTracker.anchorFor` — höchstens ein Anker, nie im Kreis (`canAnchor`); **Satz oder Anker**, `setAnchor` und `setCue` ersetzen einander ([ADR-0065](docs/decisions/0065-gewohnheiten-koppeln.md)) |
 | Was ist jetzt dran? | `StackedHabit.isCued` — selbst offen, der Anker abgehakt; erzeugt keine Zahl und sperrt nichts |
 | Was kommt heute zuerst? | `HabitTracker.firstUpOn` — am Abend davor am Lagerfeuer gewählt; sein **Stapel** steht vor allen offenen, erzeugt keine Zahl ([ADR-0076](docs/decisions/0076-das-lagerfeuer.md)) |

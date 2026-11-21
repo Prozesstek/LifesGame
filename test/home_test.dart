@@ -348,27 +348,25 @@ void main() {
       expect(daten.lengthInBytes, greaterThan(100));
     });
 
-    testWidgets('unten stehen vier kleinere Kreise', (tester) async {
-      // **Vier passen nur kleiner** (ADR-0057): Bei 72 Punkten bräuchten
-      // sie mit Namen 352 Punkte, ein Handy hat nach dem Rand 335.
+    testWidgets('alle acht Kreise sind gleich groß, vier passen unten', (
+      tester,
+    ) async {
+      // Seit dem 19.11.2026 oben wie unten (vorher unten kleiner,
+      // ADR-0057). Die Leiste geht über die ganze Breite: Auf einem Handy
+      // mit 360 Punkten bleiben nach ihrem Innenrand 352.
       useTallView(tester);
       await tester.pumpWidget(const ProviderScope(child: LifesGameApp()));
       await tester.pump();
 
-      final unten = tester
+      final groessen = tester
           .widgetList<HubCircle>(find.byType(HubCircle))
-          .where((k) => k.size == HomeScreen.bottomCircleSize)
-          .map((k) => k.label)
-          .toList();
-      expect(unten, <String>[
-        'Laden',
-        'Fähigkeiten',
-        'Ausrüstung',
-        'Charakter',
-      ]);
+          .map((k) => k.size)
+          .toSet();
+      expect(groessen, <double>{HubCircle.diameter});
+      expect(HomeScreen.bottomCircleSize, HubCircle.diameter);
       expect(
         4 * HubCircle.slotWidth(HomeScreen.bottomCircleSize),
-        lessThanOrEqualTo(335),
+        lessThanOrEqualTo(352),
       );
     });
 

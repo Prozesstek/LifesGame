@@ -195,8 +195,10 @@ void main() {
         find.bySemanticsLabel(RegExp('${folge.name}, jetzt dran')),
         findsOneWidget,
       );
-      // Der abgehakte Anker bleibt darüber stehen.
-      expect(oben(tester, anker), lessThan(oben(tester, folge)));
+      // Der abgehakte Anker wandert nach unten (19.11.2026), die Folge
+      // steht nicht mehr eingerückt.
+      expect(oben(tester, anker), greaterThan(oben(tester, folge)));
+      expect(links(tester, folge), links(tester, anker));
     });
 
     testWidgets('die Folge lässt sich auch zuerst abhaken', (tester) async {

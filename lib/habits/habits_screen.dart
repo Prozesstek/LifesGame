@@ -9,6 +9,7 @@ import '../home/widgets/status_leiste.dart';
 import '../progression/level_provider.dart';
 import '../skills/widgets/gebiets_kacheln.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'habit_check_flow.dart';
 import 'habits_controller.dart';
 import 'widgets/cue_dialog.dart';
@@ -63,8 +64,8 @@ class HabitsScreen extends ConsumerWidget {
         // darüber Zahlen aufsteigen (`AufstiegHost.maybeOf`).
         child: Builder(
           builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Gewohnheiten'),
+            appBar: SchildLeiste(
+              titel: 'Gewohnheiten',
               actions: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(right: 14),
@@ -79,6 +80,8 @@ class HabitsScreen extends ConsumerWidget {
             floatingActionButton: _PlusKnopf(
               onTap: () => _neueGewohnheit(context, ref),
             ),
+            // Kein eigener Hintergrund (20.11.2026, Frederik): Hier kommt
+            // später ein Bild über die ganze Seite, wie bei der Theorie.
             body: SafeArea(
               child: Center(
                 child: ConstrainedBox(
@@ -200,7 +203,7 @@ class HabitsScreen extends ConsumerWidget {
       cue: tracker.cueFor(habit.id),
       anker: ankerId == null ? null : tracker.definitionFor(ankerId)?.name,
       treat: tracker.treatFor(habit.id),
-      days: Wochentage.zeile(tracker.weekdaysFor(habit.id)),
+      days: Wochentage.text(tracker.weekdaysFor(habit.id)),
       cued: eintrag.isCued,
       onEditCue: () => _editCue(context, ref, habit),
     );
@@ -220,7 +223,7 @@ class HabitsScreen extends ConsumerWidget {
           .read(unlockedHabitsProvider)
           .where((t) => !tracker.isActive(t.id))
           .toList(growable: false),
-      ruhende: tracker.customHabits
+      ruhende: tracker.visibleCustomHabits
           .where((h) => !tracker.isActive(h.id))
           .toList(growable: false),
       eigeneFrei: ref.read(customSlotsLeftProvider),
@@ -230,7 +233,10 @@ class HabitsScreen extends ConsumerWidget {
           : tracker.anchorCandidatesFor(id),
       hatAusloeser: (id) =>
           tracker.cueFor(id) != null || tracker.anchorFor(id) != null,
-      tageFuer: tracker.weekdaysFor,
+      onLoeschen: (id) =>
+          ref.read(habitTrackerProvider.notifier).archiveCustom(id),
+      onUmbenennen: (id, name) =>
+          ref.read(habitTrackerProvider.notifier).editCustom(id, name: name),
     );
     if (wahl == null || !context.mounted) return;
 

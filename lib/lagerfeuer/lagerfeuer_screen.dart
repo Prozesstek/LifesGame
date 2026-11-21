@@ -16,6 +16,7 @@ import '../theory/widgets/review_section.dart';
 import '../ui/aufstieg.dart';
 import '../ui/on_dark.dart';
 import '../ui/palette.dart';
+import '../ui/schild_leiste.dart';
 import 'am_feuer_provider.dart';
 import 'morgen_zuerst_frage.dart';
 import 'widgets/feuer_bild.dart';
@@ -82,15 +83,11 @@ class LagerfeuerScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lagerfeuer'),
+      appBar: SchildLeiste(
+        titel: 'Lagerfeuer',
         // Derselbe Himmel wie oben im Bild — der Balken ist ein Stück
         // Nacht, keine Leiste aus Leder darüber.
-        backgroundColor: FeuerBild.nachtOben,
-        // Der Titel stand in Tinte auf dem Nachthimmel und war kaum zu
-        // sehen (gefunden am 23.10. beim Ansehen der Tafel).
-        foregroundColor: Palette.textOnDark,
-        surfaceTintColor: Colors.transparent,
+        hintergrund: FeuerBild.nachtOben,
       ),
       body: AufstiegHost(
         child: OnDark(

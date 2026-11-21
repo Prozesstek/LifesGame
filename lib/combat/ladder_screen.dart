@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../action/pit_screen.dart' deferred as grube;
+import '../ui/schild_leiste.dart';
 import '../ui/spaeter_laden.dart';
 import '../gear/gear_controller.dart';
 import '../gear/gear_icon.dart';
@@ -60,7 +61,7 @@ class LadderScreen extends ConsumerWidget {
     return RahmenOrt(
       art: RahmenArt.eisen,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Dungeon')),
+        appBar: SchildLeiste(titel: 'Dungeon'),
         body: MentorFlaeche(
           ort: MentorOrt.eingang,
           child: SafeArea(

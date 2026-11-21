@@ -74,10 +74,12 @@ class HubCircle extends StatelessWidget {
   /// das Buch auf der Theorie. Fehlt die Datei, steht wieder das [icon] da.
   final String? symbol;
 
-  /// Wie viel des Kreises eine gezeichnete Figur höchstens einnimmt.
-  /// Bis zum 11.11.2026 46 von 72 Punkten; seither fast bis an den Rand
-  /// (AktivesBrett: „das sie fast an bis an den Rand gehen“).
-  static const double symbolAnteil = 0.8;
+  /// **Wie viel des Kreises jede Figur einnimmt** — ihre sichtbare
+  /// Breite oder Höhe, was größer ist, **bei allen gleich** (19.11.2026,
+  /// Frederik: „exakt angleichen“). Vorher war das Bild gleich groß und
+  /// die Figur darin verschieden (62 bis 66 %). 0,61 ist das Größte,
+  /// bei dem die Charakter-Silhouette noch auf dem Pergament bleibt.
+  static const double symbolAnteil = 0.61;
 
   /// Wie weit eine Figur von der Mitte reichen darf, in halben
   /// Kreisbreiten. Die Pergamentfläche von `ButtonBG.png` endet bei
@@ -87,12 +89,14 @@ class HubCircle extends StatelessWidget {
   /// Wie groß das Systemzeichen im Verhältnis zum Kreis steht.
   static const double _iconAnteil = 30 / 72;
 
-  /// Kantenlänge der gezeichneten Figur [pfad] in einem Kreis der Größe
-  /// [size]: so groß wie [symbolAnteil] erlaubt, aber nie über den Rand
-  /// der Fläche hinaus (`BereichZeichen.reichweite`).
+  /// Kantenlänge des Bildes [pfad] in einem Kreis der Größe [size]: so,
+  /// dass die Figur darin [symbolAnteil] des Kreises einnimmt
+  /// (`BereichZeichen.anteil`), aber nie über den Rand der Fläche hinaus
+  /// (`BereichZeichen.reichweite`).
   static double symbolSideFor(String pfad, double size) {
     final passt = symbolInnen / BereichZeichen.reichweite(pfad);
-    return size * math.min(symbolAnteil, passt);
+    final gleich = symbolAnteil / BereichZeichen.anteil(pfad);
+    return size * math.min(gleich, passt);
   }
 
   /// Der Tagesfortschritt als Ring um den Kreis — oder `null` für keinen.
@@ -141,8 +145,10 @@ class HubCircle extends StatelessWidget {
   /// 10.11.2026 wieder 72 — ohne Namen darunter bleibt die Leiste dabei
   /// fast so niedrig, und das Zeichen ist größer zu erkennen. Seit dem
   /// 11.11.2026 78: Der Kreis nimmt den Innenabstand der Leiste ein,
-  /// die Leiste selbst bleibt so hoch wie vorher.
-  static const double diameter = 78;
+  /// die Leiste selbst bleibt so hoch wie vorher. **Seit dem 19.11.2026
+  /// 74, oben wie unten** (Frederik: „wirklich alle gleich groß mit
+  /// gleichen Abständen?“) — vorher oben 78, unten 70.
+  static const double diameter = 74;
 
   /// Wie ein Test einen Kreis findet, auch wenn sein Name ein zweites
   /// Mal auf dem Bildschirm steht.

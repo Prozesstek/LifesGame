@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../action/action_sprites.dart';
 import '../ui/palette.dart';
+import '../ui/schrift.dart';
 import 'village_map.dart';
 
 /// Die Bilder des Dorfs und des Hauses — grob gezeichnet von
@@ -316,6 +317,8 @@ class VillageGame extends Game {
         text: TextSpan(
           text: key.label,
           style: const TextStyle(
+            fontFamily: Schrift.app,
+            fontFeatures: Schrift.ziffern,
             fontSize: 11,
             fontWeight: FontWeight.bold,
             color: Palette.textOnDark,

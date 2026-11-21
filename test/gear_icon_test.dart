@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
-import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
+import 'package:lifes_game/gear/widgets/laden_bild.dart';
 
 /// Die Bilder auf den Item-Kacheln im Laden.
 ///
@@ -111,24 +111,22 @@ void main() {
     });
   });
 
-  group('Das Raster teilt die Breite', () {
-    // 390 Pixel Bildschirm minus 16 Rand je Seite.
-    const breite = 358.0;
+  group('Tafel und Fach im Ladenbild', () {
+    const bild = Rect.fromLTWH(0, 0, LadenBild.breite, LadenBild.hoehe);
 
-    test('drei Kacheln füllen eine Reihe ganz aus', () {
-      final seite = ShopItemCell.sideFor(breite);
-
-      expect(
-        seite * ShopItemCell.columns +
-            ShopItemCell.gap * (ShopItemCell.columns - 1),
-        closeTo(breite, 0.01),
-      );
+    test('die Tafel liegt innerhalb des Bildes', () {
+      expect(bild.contains(LadenBild.tafel.topLeft), isTrue);
+      expect(bild.contains(LadenBild.tafel.bottomRight), isTrue);
     });
 
-    test('eine Kachel bleibt auf dem Handy bedienbar', () {
-      // Unter 44 Pixeln ist eine Tippfläche auf einem Handy unzuverlässig
-      // — und ein Name in zwei Zeilen passt dort ohnehin nicht mehr.
-      expect(ShopItemCell.sideFor(breite), greaterThan(44));
+    test('beim Dehnen wächst nur das Innere, Rand und Planke bleiben', () {
+      // Das gemalte Fach ist 124 x 100; die Mitte liegt ganz darin, und
+      // die Planke unten liegt außerhalb der Mitte.
+      const fach = Rect.fromLTWH(0, 0, 124, 100);
+      const mitte = LadenBild.fachMitte;
+      expect(fach.contains(mitte.topLeft), isTrue);
+      expect(fach.contains(mitte.bottomRight), isTrue);
+      expect(100 - LadenBild.plankeOben, greaterThanOrEqualTo(mitte.bottom));
     });
   });
 }

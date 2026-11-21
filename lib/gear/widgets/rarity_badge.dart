@@ -82,6 +82,20 @@ class RarityBadge extends StatelessWidget {
     Color(0xFFD9900A),
   ];
 
+  /// Dieselben fünf Stufen **für dunklen Grund** — die Tafel und die
+  /// Fächer im Laden (21.11.2026). Der Schriftton für Pergament wäre auf
+  /// der Schiefertafel kaum zu lesen.
+  static const List<Color> _aufDunkel = <Color>[
+    Color(0xFFCFC6B4),
+    Color(0xFF74D27E),
+    Color(0xFF79AEF2),
+    Color(0xFFC495F2),
+    Color(0xFFF2BE4A),
+  ];
+
+  /// Der Schriftton einer Stufe auf dunklem Grund.
+  static Color colorOnDarkOf(GearRarity rarity) => _aufDunkel[rarity.index];
+
   /// Wie breit der Rahmen eines Stücks ist — überall derselbe.
   static const double rahmenBreite = 2;
 
