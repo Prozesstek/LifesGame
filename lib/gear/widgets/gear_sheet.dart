@@ -13,6 +13,13 @@
 /// Antippen nichts sagt, ist eine Sackgasse, eines mit Werten, Preis
 /// und Sperre ist ein Ziel.
 ///
+/// **Auch der Laden öffnet es** (AktivesBrett, 21.11.2026: „mach die
+/// Info beim Shop so wie beim Inventar“). Mit [GearSheet.angebot] steht
+/// das Angebot des Tages darin — sein Wurf, der Unterschied zum
+/// Getragenen —, und statt Anlegen, Verkaufen und Sperren ein Knopf
+/// „Kaufen“ mit dem Preis. Ob gekauft werden kann, fragt es dieselbe
+/// Stelle wie die Kachel (`Loadout.blockFor`).
+///
 /// **Es liest den Spielstand selbst** (`ConsumerWidget`), statt ihn beim
 /// Öffnen mitzubekommen. Wer im Blatt anlegt oder verkauft, sieht die
 /// Änderung sofort darin, ohne es schließen zu müssen.
@@ -23,6 +30,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear/gear.dart';
 
 import '../../combat/ladder_controller.dart';
+import '../../progression/level_provider.dart';
+import '../../ui/gold_icon.dart';
 import '../../ui/holz.dart';
 import '../../ui/palette.dart';
 import '../../ui/pixel_art.dart';
@@ -37,28 +46,53 @@ import '../../mentor/zeigefinger.dart';
 
 /// Zeigt das Blatt zu [item] — mit [exemplar], wenn ein bestimmtes
 /// angetippt wurde.
+///
+/// Mit [angebot] und [onKaufen] ist es das Blatt des Ladens: Ein Tipp auf
+/// „Kaufen“ schließt es und ruft [onKaufen].
 Future<void> showGearSheet(
   BuildContext context,
   GearItem item, {
   GearCopy? exemplar,
+  GearCopy? angebot,
+  VoidCallback? onKaufen,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     elevation: 0,
     isScrollControlled: true,
-    builder: (_) => GearSheet(item: item, exemplar: exemplar),
+    builder: (_) => GearSheet(
+      item: item,
+      exemplar: exemplar,
+      angebot: angebot,
+      onKaufen: onKaufen,
+    ),
   );
 }
 
 class GearSheet extends ConsumerWidget {
-  const GearSheet({required this.item, this.exemplar, super.key});
+  const GearSheet({
+    required this.item,
+    this.exemplar,
+    this.angebot,
+    this.onKaufen,
+    super.key,
+  });
 
   final GearItem item;
 
   /// Das angetippte Exemplar. Nur dieses steht im Blatt, und nur solange
   /// es noch da ist.
   final GearCopy? exemplar;
+
+  /// Ein Angebot des Ladens: Dann steht es im Blatt, mit „Kaufen“.
+  final GearCopy? angebot;
+
+  /// Was „Kaufen“ tut — kauft und feiert im Laden, nicht hier.
+  final VoidCallback? onKaufen;
+
+  /// Der Knopf „Kaufen“, damit Tests ihn finden.
+  static const Key kaufenKey = ValueKey<String>('laden-kaufen');
 
   static const double _bildSeite = 52;
 
@@ -81,9 +115,11 @@ class GearSheet extends ConsumerWidget {
     final kampf = itemAbilityText(item);
     final pfad = GearIcons.forItemId(item.id);
     final angelegt = dieses != null && loadout.isEquipped(dieses.uid);
+    // Im Laden steht das Angebot, wo sonst das eigene Exemplar steht.
+    final gezeigt = dieses ?? angebot;
     // **Gegen das Getragene**, je Wert einzeln (AktivesBrett, 13.11.2026)
     // — nur bei einem Exemplar, das nicht selbst angelegt ist.
-    final vergleich = dieses != null && !angelegt
+    final vergleich = gezeigt != null && !angelegt
         ? loadout.equippedCopyIn(item.slot)
         : null;
 
@@ -155,7 +191,7 @@ class GearSheet extends ConsumerWidget {
                             // **Der Wurf steht beim Namen** (13.11.2026):
                             // Er gehört zu diesem einen Exemplar, wie die
                             // Seltenheit zum Stück.
-                            if (dieses != null) _Qualitaet(copy: dieses),
+                            if (gezeigt != null) _Qualitaet(copy: gezeigt),
                             if (angelegt)
                               const Text(
                                 'Angelegt',
@@ -179,7 +215,7 @@ class GearSheet extends ConsumerWidget {
               // mehr (13.11.2026), der Unterschied steht in der Zeile.
               _Werte(
                 zeilen: CopyText.lines(
-                  dieses ?? _katalog(item),
+                  gezeigt ?? _katalog(item),
                   worn: vergleich,
                 ),
               ),
@@ -204,7 +240,7 @@ class GearSheet extends ConsumerWidget {
               ],
               // Wer es hat, weiss, dass er es hat. Gesagt wird nur, woher
               // ein Stück kommt, das man nicht hat.
-              if (eigene.isEmpty) ...<Widget>[
+              if (eigene.isEmpty && angebot == null) ...<Widget>[
                 const SizedBox(height: 12),
                 _Herkunft(
                   offen: offen,
@@ -212,7 +248,24 @@ class GearSheet extends ConsumerWidget {
                   imLaden: imLaden,
                 ),
               ],
-              if (dieses != null) ...<Widget>[
+              if (angebot case final GearCopy offer) ...<Widget>[
+                const SizedBox(height: 16),
+                _KaufKnopf(
+                  angebot: offer,
+                  block: loadout.blockFor(
+                    offer,
+                    availableGold: ref.watch(goldProvider),
+                    highestRung: rung,
+                  ),
+                  fehlendesGold: offer.paid - ref.watch(goldProvider),
+                  // Erst zu, dann kaufen: `pop` ist sofort, `maybePop` erst
+                  // später — dann schlösse es die Feier statt des Blatts.
+                  onKaufen: () {
+                    Navigator.of(context).pop();
+                    onKaufen?.call();
+                  },
+                ),
+              ] else if (dieses != null) ...<Widget>[
                 const SizedBox(height: 16),
                 _Knoepfe(
                   copy: dieses,
@@ -556,6 +609,82 @@ class _Knoepfe extends ConsumerWidget {
           if (i > 0) const SizedBox(width: 8),
           Expanded(child: knopf),
         ],
+      ],
+    );
+  }
+}
+
+/// Der Knopf des Ladens: „Kaufen“ mit Münze und Preis — oder, warum es
+/// nicht geht. Ein grauer Knopf ohne Grund wäre eine Sackgasse.
+class _KaufKnopf extends StatelessWidget {
+  const _KaufKnopf({
+    required this.angebot,
+    required this.block,
+    required this.fehlendesGold,
+    required this.onKaufen,
+  });
+
+  final GearCopy angebot;
+  final PurchaseBlock? block;
+  final int fehlendesGold;
+  final VoidCallback onKaufen;
+
+  @override
+  Widget build(BuildContext context) {
+    final grund = switch (block) {
+      null || PurchaseBlock.unbekannt || PurchaseBlock.bereitsGekauft => null,
+      PurchaseBlock.zuWenigGold => 'Noch $fehlendesGold Gold.',
+      PurchaseBlock.gesperrt =>
+        'Verdient ab Etage ${GearGates.rungFor(angebot.item!.rarity)} im '
+            'Dungeon.',
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        // Im Rundgang sitzt der Punkt des Mentors auf „Kaufen“.
+        Zeigefinger(
+          schritt: Schritt.laden,
+          aktiv: angebot.uid.endsWith('-mentor') && block == null,
+          radius: 8,
+          child: FilledButton(
+            key: GearSheet.kaufenKey,
+            onPressed: block == null ? onKaufen : null,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (block == PurchaseBlock.bereitsGekauft) ...<Widget>[
+                  const Icon(Icons.check_circle, size: 18),
+                  const SizedBox(width: 8),
+                  const Text('Gekauft'),
+                ] else ...<Widget>[
+                  const Text('Kaufen'),
+                  const SizedBox(width: 10),
+                  const GoldIcon(size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${angebot.paid}',
+                    semanticsLabel: 'für ${angebot.paid} Gold',
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        if (grund != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              grund,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: block == PurchaseBlock.zuWenigGold
+                    ? Palette.enemy
+                    : Palette.muted,
+              ),
+            ),
+          ),
       ],
     );
   }

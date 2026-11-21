@@ -12,7 +12,31 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.11.2026 · Frederik
+**Zuletzt aktualisiert:** 21.11.2026 · AktivesBrett
+
+---
+
+## 21.11.2026: der Laden zeigt das Blatt der Ausrüstung
+
+AktivesBrett, mit Screenshot vom Blatt in der Ausrüstung: „mach die Info
+beim Shop so wie beim Inventar“.
+
+| Was | Wie |
+|---|---|
+| **Tipp auf ein Angebot** | öffnet dasselbe Blatt wie in der Ausrüstung (`GearSheet`): Bild im Rahmen der Seltenheit, Name, Seltenheit, Platz, Qualität des Wurfs, Werte mit dem Unterschied zum Getragenen, Kampf, Set, Verkaufswert |
+| **Statt Anlegen, Verkaufen, Sperren** | ein Knopf „Kaufen“ mit Münze und Preis; geht es nicht, steht darunter warum („Noch 80 Gold.“, „Verdient ab Etage 10 im Dungeon.“), gekauft heißt er „Gekauft“ |
+| **Unter dem Raster** | nichts mehr — die eigene Detailfläche (`ShopItemTile`) ist gelöscht, gewählt wird keine Kachel |
+| **Rundgang** | der Mentor zeigt auf sein Angebot, im Blatt sitzt sein Punkt auf „Kaufen“ |
+
+**Ohne Rückfrage entschieden:** Die Zeile „Verkauf … Gold“ steht auch im
+Laden — dort heißt sie, was das Stück später beim Händler bringt. Das
+Blatt geht beim Kauf zu, die Feiern laufen auf dem Laden.
+
+App 1219. Blatt in 390 × 844 gerendert (ohne die Schrift der Planken).
+
+### Offen
+
+- **Frederik hat es nicht gesehen.**
 
 ---
 

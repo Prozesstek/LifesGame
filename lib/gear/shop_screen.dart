@@ -19,9 +19,8 @@ import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/schild_leiste.dart';
 import 'gear_controller.dart';
-import 'weapon_ability_line.dart';
+import 'widgets/gear_sheet.dart';
 import 'widgets/shop_item_cell.dart';
-import 'widgets/shop_item_tile.dart';
 
 /// Der Laden — seit ADR-0048 ein **Tagesladen**.
 ///
@@ -34,9 +33,11 @@ import 'widgets/shop_item_tile.dart';
 /// der Ausrüstungs-Bildschirm kann (ADR-0057). Alles Besessene steht
 /// jetzt dort, auch „Alles Schlechtere verkaufen“.
 ///
-/// **Die Detailfläche ist nie leer.** Beim Wechsel rückt die Wahl auf das
-/// erste Stück. Ein leeres Feld mit „bitte wählen" wäre ein zweiter
-/// Schritt für etwas, das ohnehin nur eine Antwort hat.
+/// **Ein Tipp öffnet das Blatt des Stücks** (AktivesBrett, 21.11.2026):
+/// dasselbe wie in der Ausrüstung (`GearSheet`), mit dem Wurf, dem
+/// Unterschied zum Getragenen und „Kaufen“ statt Anlegen. Bis dahin stand
+/// unter dem Raster eine eigene Detailfläche (`ShopItemTile`), die anders
+/// aussah als alles, was man nach dem Kauf vom Stück sieht.
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
@@ -47,8 +48,6 @@ class ShopScreen extends ConsumerStatefulWidget {
 }
 
 class _ShopScreenState extends ConsumerState<ShopScreen> {
-  String? _gewaehlt;
-
   @override
   Widget build(BuildContext context) {
     final gold = ref.watch(goldProvider);
@@ -98,50 +97,34 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final angebote = ref.watch(dailyOffersProvider);
     final loadout = ref.watch(loadoutProvider);
     final rung = ref.watch(ladderProvider).highestDefeated;
-    // Im Rundgang ist das Angebot des Mentors vorgewählt (07.11.2026).
-    final vorgewaehlt = angebote.firstWhere(
-      (c) => c.uid.endsWith('-mentor'),
-      orElse: () => angebote.first,
-    );
-    final gewaehlt = angebote.firstWhere(
-      (c) => c.uid == _gewaehlt,
-      orElse: () => vorgewaehlt,
-    );
-    final item = gewaehlt.item;
-    final block = loadout.blockFor(
-      gewaehlt,
-      availableGold: gold,
-      highestRung: rung,
-    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
       children: <Widget>[
         _Raster(
           copies: angebote,
-          gewaehlteUid: gewaehlt.uid,
-          isOwned: (_) => false,
-          isEquipped: (_) => false,
           // Ob es schon in der Sammlung steht: je besessen, auch verkauft.
           gesammelt: (c) => loadout.everOwnedIds.contains(c.itemId),
           blockFor: (c) =>
               loadout.blockFor(c, availableGold: gold, highestRung: rung),
-          onWaehle: (uid) => setState(() => _gewaehlt = uid),
+          onWaehle: _zeige,
         ),
-        const SizedBox(height: 14),
-        if (item != null)
-          ShopItemTile(
-            copy: gewaehlt,
-            block: block,
-            missingGold: gewaehlt.paid - gold,
-            worn: loadout.equippedCopyIn(item.slot),
-            requiredRung: GearGates.rungFor(item.rarity),
-            abilityLine: itemAbilityText(item),
-            setPieces: loadout.equippedPiecesOf(item.setId ?? ''),
-            onBuy: () => _buy(context, ref, gewaehlt),
-            mentorAngebot: gewaehlt.uid.endsWith('-mentor'),
-          ),
       ],
+    );
+  }
+
+  /// Das Blatt des Angebots — „Kaufen“ darin kauft hier, damit die Feier
+  /// auf dem Laden läuft und nicht auf dem Blatt, das dabei zugeht.
+  void _zeige(GearCopy angebot) {
+    final item = angebot.item;
+    if (item == null) return;
+    unawaited(
+      showGearSheet(
+        context,
+        item,
+        angebot: angebot,
+        onKaufen: () => _buy(context, ref, angebot),
+      ),
     );
   }
 
@@ -209,25 +192,19 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 class _Raster extends StatelessWidget {
   const _Raster({
     required this.copies,
-    required this.gewaehlteUid,
-    required this.isOwned,
-    required this.isEquipped,
     required this.gesammelt,
     required this.blockFor,
     required this.onWaehle,
   });
 
   final List<GearCopy> copies;
-  final String? gewaehlteUid;
-  final bool Function(GearCopy) isOwned;
-  final bool Function(GearCopy) isEquipped;
   final bool Function(GearCopy) gesammelt;
 
   /// **Dieselbe Frage wie beim Kaufknopf.** Stünde die Bedingung hier ein
   /// zweites Mal, zeigte die Kachel irgendwann „kaufbar" und der Knopf
   /// „zu teuer" (`gotchas.md`, „Zwei Stellen").
   final PurchaseBlock? Function(GearCopy) blockFor;
-  final void Function(String uid) onWaehle;
+  final void Function(GearCopy) onWaehle;
 
   /// Höhe einer Kachel. Fest, damit sie nicht an der Fensterbreite hängt;
   /// 141 lässt dem Bild rund 90 Punkte, also wird ein 256er Bild knapp
@@ -247,23 +224,21 @@ class _Raster extends StatelessWidget {
               SizedBox(
                 width: breite,
                 height: _hoehe,
-                // Der Mentor zeigt im Rundgang auf sein Angebot. Ist es
-                // gewählt, bleibt es im Licht, und der Punkt sitzt auf
-                // „Kaufen“.
+                // Der Mentor zeigt im Rundgang auf sein Angebot; im Blatt
+                // sitzt sein Punkt dann auf „Kaufen“.
                 child: Zeigefinger(
                   schritt: Schritt.laden,
                   aktiv: copy.uid.endsWith('-mentor'),
-                  punkt: copy.uid != gewaehlteUid,
                   eng: true,
                   radius: 10,
                   child: ShopItemCell(
                     copy: copy,
-                    isSelected: copy.uid == gewaehlteUid,
-                    isOwned: isOwned(copy),
-                    isEquipped: isEquipped(copy),
+                    isSelected: false,
+                    isOwned: false,
+                    isEquipped: false,
                     gesammelt: gesammelt(copy),
                     block: blockFor(copy),
-                    onTap: () => onWaehle(copy.uid),
+                    onTap: () => onWaehle(copy),
                   ),
                 ),
               ),

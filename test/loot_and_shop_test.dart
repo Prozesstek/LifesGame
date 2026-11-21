@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
-import 'package:lifes_game/gear/widgets/shop_item_tile.dart';
+import 'package:lifes_game/gear/widgets/gear_sheet.dart';
 import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/copy_text.dart';
@@ -345,26 +345,38 @@ void main() {
           reason: item.name,
         );
       }
+      // Gewählt wird nichts mehr: Ein Tipp öffnet das Blatt.
       expect(
         tester.widgetList<ShopItemCell>(zellen).where((z) => z.isSelected),
-        hasLength(1),
+        isEmpty,
       );
     });
 
-    testWidgets('die Detailfläche zeigt den Wurf, nicht den Katalog', (
+    testWidgets('ein Tipp öffnet das Blatt mit dem Wurf, nicht dem Katalog', (
       tester,
     ) async {
+      // AktivesBrett, 21.11.2026: „mach die Info beim Shop so wie beim
+      // Inventar“ — dasselbe Blatt wie in der Ausrüstung.
       useTallView(tester);
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
+      expect(find.byType(GearSheet), findsNothing);
 
       final erstes = tester
           .widgetList<ShopItemCell>(find.byType(ShopItemCell))
           .first
           .copy;
+      await tester.tap(find.byType(ShopItemCell).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(GearSheet), findsOneWidget);
+      expect(find.byKey(GearSheet.kaufenKey), findsOneWidget);
+      // Ein Angebot hat nichts zum Anlegen oder Verkaufen.
+      expect(find.widgetWithText(FilledButton, 'Anlegen'), findsNothing);
+      expect(find.widgetWithText(FilledButton, 'Verkaufen'), findsNothing);
       // Jeder Wert steht in einer eigenen Zeile.
       for (final zeile in CopyText.lines(erstes)) {
-        expect(find.textContaining(zeile.valueText), findsWidgets);
+        expect(find.text(zeile.zahlText), findsWidgets);
+        expect(find.text(zeile.label), findsWidgets);
       }
     });
 
@@ -380,10 +392,14 @@ void main() {
       )) {
         expect(zelle.isOutOfReach, isTrue);
       }
+      await tester.tap(find.byType(ShopItemCell).first);
+      await tester.pumpAndSettle();
       final kaufen = tester.widget<FilledButton>(
-        find.byKey(ShopItemTile.kaufenKey),
+        find.byKey(GearSheet.kaufenKey),
       );
       expect(kaufen.onPressed, isNull);
+      // Ein grauer Knopf sagt, warum.
+      expect(find.textContaining('Gold.'), findsOneWidget);
     });
 
     testWidgets('kaufen legt das Angebot ins Inventar, einmal', (tester) async {
@@ -395,18 +411,31 @@ void main() {
         tester.element(find.byType(ShopScreen)),
       );
       final angebot = container.read(dailyOffersProvider).first;
-      await tester.tap(find.byKey(ShopItemTile.kaufenKey));
+      await tester.tap(find.byType(ShopItemCell).first);
       await tester.pumpAndSettle();
-      while (find
-          .widgetWithText(FilledButton, 'Weiter')
-          .evaluate()
-          .isNotEmpty) {
-        await tester.tap(find.widgetWithText(FilledButton, 'Weiter').last);
+      await tester.tap(find.byKey(GearSheet.kaufenKey));
+      await tester.pumpAndSettle();
+      // Die Feiern danach: „Weiter“ und „Weiter geht's“ (Sammeln kommt
+      // über „Beim Händler“).
+      final weiter = find.ancestor(
+        of: find.textContaining('Weiter'),
+        matching: find.byType(FilledButton),
+      );
+      while (weiter.evaluate().isNotEmpty) {
+        await tester.tap(weiter.last);
         await tester.pumpAndSettle();
       }
 
       expect(container.read(loadoutProvider).owns(angebot.uid), isTrue);
-      expect(find.byIcon(Icons.check_circle), findsWidgets);
+      // Das Blatt ist zu; wer es wieder öffnet, sieht „Gekauft“.
+      expect(find.byType(GearSheet), findsNothing);
+      await tester.tap(find.byType(ShopItemCell).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Gekauft'), findsOneWidget);
+      expect(
+        tester.widget<FilledButton>(find.byKey(GearSheet.kaufenKey)).onPressed,
+        isNull,
+      );
     });
 
     testWidgets('der Laden hat kein Inventar mehr', (tester) async {
