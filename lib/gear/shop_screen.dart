@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:abilities/abilities.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +20,9 @@ import '../ui/gold_icon.dart';
 import '../ui/palette.dart';
 import '../ui/schild_leiste.dart';
 import 'gear_controller.dart';
-import 'weapon_ability_line.dart';
-import 'widgets/shop_item_cell.dart';
-import 'widgets/shop_item_tile.dart';
+import 'widgets/laden_bild.dart';
+import 'widgets/laden_fach.dart';
+import 'widgets/laden_tafel.dart';
 
 /// Der Laden — seit ADR-0048 ein **Tagesladen**.
 ///
@@ -34,9 +35,15 @@ import 'widgets/shop_item_tile.dart';
 /// der Ausrüstungs-Bildschirm kann (ADR-0057). Alles Besessene steht
 /// jetzt dort, auch „Alles Schlechtere verkaufen“.
 ///
-/// **Die Detailfläche ist nie leer.** Beim Wechsel rückt die Wahl auf das
-/// erste Stück. Ein leeres Feld mit „bitte wählen" wäre ein zweiter
-/// Schritt für etwas, das ohnehin nur eine Antwort hat.
+/// **Der Laden ist ein Laden** (AktivesBrett, 21.11.2026): oben die Wand
+/// mit Regalen und dem Händler, links daneben eine Tafel, darunter sein
+/// Tresen mit sechs Fächern — ein gemaltes Bild (`LadenBild`), auf das die
+/// App Tafel und Fächer legt. Ein Tipp auf ein Fach schreibt das Stück
+/// auf die Tafel, dort steht „Kaufen“.
+///
+/// **Die Tafel ist nie leer.** Am Anfang steht das erste Angebot darauf,
+/// im Rundgang das des Mentors. Ein leeres Feld mit „bitte wählen" wäre
+/// ein zweiter Schritt für etwas, das ohnehin nur eine Antwort hat.
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
@@ -54,6 +61,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final gold = ref.watch(goldProvider);
 
     return Scaffold(
+      backgroundColor: LadenBild.tresen,
+      // **Das Bild beginnt ganz oben** (AktivesBrett, 21.11.2026): Das
+      // Schild „Laden“ hängt in seinen Dachbalken, nicht darüber.
+      extendBodyBehindAppBar: true,
       appBar: SchildLeiste(
         leading: const ZurueckPfeil(schritt: Schritt.sperren),
         titel: 'Laden',
@@ -83,7 +94,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       body: MentorFlaeche(
         ort: MentorOrt.laden,
         child: SafeArea(
-          child: Center(
+          top: false,
+          child: Align(
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: ShopScreen.maxWidth),
               child: _heute(gold),
@@ -98,7 +111,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final angebote = ref.watch(dailyOffersProvider);
     final loadout = ref.watch(loadoutProvider);
     final rung = ref.watch(ladderProvider).highestDefeated;
-    // Im Rundgang ist das Angebot des Mentors vorgewählt (07.11.2026).
+    // Im Rundgang steht das Angebot des Mentors auf der Tafel (07.11.2026).
     final vorgewaehlt = angebote.firstWhere(
       (c) => c.uid.endsWith('-mentor'),
       orElse: () => angebote.first,
@@ -107,41 +120,92 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       (c) => c.uid == _gewaehlt,
       orElse: () => vorgewaehlt,
     );
-    final item = gewaehlt.item;
-    final block = loadout.blockFor(
-      gewaehlt,
-      availableGold: gold,
-      highestRung: rung,
-    );
+    PurchaseBlock? blockFor(GearCopy c) =>
+        loadout.blockFor(c, availableGold: gold, highestRung: rung);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-      children: <Widget>[
-        _Raster(
-          copies: angebote,
-          gewaehlteUid: gewaehlt.uid,
-          isOwned: (_) => false,
-          isEquipped: (_) => false,
-          // Ob es schon in der Sammlung steht: je besessen, auch verkauft.
-          gesammelt: (c) => loadout.everOwnedIds.contains(c.itemId),
-          blockFor: (c) =>
-              loadout.blockFor(c, availableGold: gold, highestRung: rung),
-          onWaehle: (uid) => setState(() => _gewaehlt = uid),
-        ),
-        const SizedBox(height: 14),
-        if (item != null)
-          ShopItemTile(
-            copy: gewaehlt,
-            block: block,
-            missingGold: gewaehlt.paid - gold,
-            worn: loadout.equippedCopyIn(item.slot),
-            requiredRung: GearGates.rungFor(item.rarity),
-            abilityLine: itemAbilityText(item),
-            setPieces: loadout.equippedPiecesOf(item.setId ?? ''),
-            onBuy: () => _buy(context, ref, gewaehlt),
-            mentorAngebot: gewaehlt.uid.endsWith('-mentor'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final breite = constraints.maxWidth;
+        final skala = breite / LadenBild.breite;
+        final obenHoehe = LadenBild.hoehe * skala;
+        // Was unter dem Bild bleibt, gehört dem Tresen — aber nie so wenig,
+        // dass ein Fach unbedienbar klein würde; dann rollt der Laden.
+        final tresenHoehe = math.max(
+          constraints.maxHeight - obenHoehe,
+          _Tresen.mindestHoehe,
+        );
+        final tafel = LadenBild.tafel;
+
+        return SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                width: breite,
+                height: obenHoehe,
+                child: Stack(
+                  children: <Widget>[
+                    const Positioned.fill(
+                      child: Image(
+                        image: AssetImage(LadenBild.pfad),
+                        fit: BoxFit.fill,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                    ),
+                    Positioned.fromRect(
+                      rect: Rect.fromLTRB(
+                        tafel.left * skala,
+                        tafel.top * skala,
+                        tafel.right * skala,
+                        tafel.bottom * skala,
+                      ),
+                      child: LadenTafel(
+                        key: ValueKey<String>('tafel-${gewaehlt.uid}'),
+                        angebot: gewaehlt,
+                        block: blockFor(gewaehlt),
+                        fehlendesGold: gewaehlt.paid - gold,
+                        getragen: gewaehlt.item == null
+                            ? null
+                            : loadout.equippedCopyIn(gewaehlt.item!.slot),
+                        onKaufen: () => _buy(context, ref, gewaehlt),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: breite,
+                height: tresenHoehe,
+                child: _Tresen(
+                  faecher: <Widget>[
+                    for (final angebot in angebote.take(6))
+                      // Der Mentor zeigt im Rundgang auf sein Angebot;
+                      // steht es auf der Tafel, sitzt der Punkt auf
+                      // „Kaufen“.
+                      Zeigefinger(
+                        schritt: Schritt.laden,
+                        aktiv: angebot.uid.endsWith('-mentor'),
+                        punkt: angebot.uid != gewaehlt.uid,
+                        eng: true,
+                        radius: 8,
+                        child: LadenFach(
+                          angebot: angebot,
+                          block: blockFor(angebot),
+                          gewaehlt: angebot.uid == gewaehlt.uid,
+                          // Ob es schon in der Sammlung steht: je besessen,
+                          // auch verkauft.
+                          gesammelt: loadout.everOwnedIds.contains(
+                            angebot.itemId,
+                          ),
+                          onTap: () => setState(() => _gewaehlt = angebot.uid),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-      ],
+        );
+      },
     );
   }
 
@@ -200,74 +264,98 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   }
 }
 
-/// Exemplare als Raster.
-///
-/// **Kein `GridView` mit `childAspectRatio`.** Der koppelt die Zellenhöhe
-/// an die Fensterbreite und hat in diesem Projekt schon einmal eine ganze
-/// Knopfreihe verschluckt (`docs/context/gotchas.md`). Hier rechnet
-/// [ShopItemCell.sideFor] die Breite aus, und die Höhe steht fest.
-class _Raster extends StatelessWidget {
-  const _Raster({
-    required this.copies,
-    required this.gewaehlteUid,
-    required this.isOwned,
-    required this.isEquipped,
-    required this.gesammelt,
-    required this.blockFor,
-    required this.onWaehle,
-  });
+/// **Der Tresen des Händlers** unter dem Bild (AktivesBrett, 21.11.2026):
+/// links und rechts ein Pfosten, dazwischen die Rückwand, darauf drei mal
+/// zwei Fächer, **alle gleich groß** — so groß, wie Platz ist, und mit
+/// gleichem Abstand nach allen Seiten.
+class _Tresen extends StatelessWidget {
+  const _Tresen({required this.faecher});
 
-  final List<GearCopy> copies;
-  final String? gewaehlteUid;
-  final bool Function(GearCopy) isOwned;
-  final bool Function(GearCopy) isEquipped;
-  final bool Function(GearCopy) gesammelt;
+  final List<Widget> faecher;
 
-  /// **Dieselbe Frage wie beim Kaufknopf.** Stünde die Bedingung hier ein
-  /// zweites Mal, zeigte die Kachel irgendwann „kaufbar" und der Knopf
-  /// „zu teuer" (`gotchas.md`, „Zwei Stellen").
-  final PurchaseBlock? Function(GearCopy) blockFor;
-  final void Function(String uid) onWaehle;
+  /// Darunter würde ein Fach zu klein; dann rollt der Laden.
+  static const double mindestHoehe = 260;
 
-  /// Höhe einer Kachel. Fest, damit sie nicht an der Fensterbreite hängt;
-  /// 141 lässt dem Bild rund 90 Punkte, also wird ein 256er Bild knapp
-  /// vergrössert statt verkleinert.
-  static const double _hoehe = 141;
+  static const int spalten = 3;
+  static const double abstand = 12;
+
+  /// Ein Fach ist höchstens so viel höher als breit.
+  static const double hoechstensHoch = 1.45;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final breite = ShopItemCell.sideFor(constraints.maxWidth);
-        return Wrap(
-          spacing: ShopItemCell.gap,
-          runSpacing: ShopItemCell.gap,
-          children: <Widget>[
-            for (final copy in copies)
-              SizedBox(
-                width: breite,
-                height: _hoehe,
-                // Der Mentor zeigt im Rundgang auf sein Angebot. Ist es
-                // gewählt, bleibt es im Licht, und der Punkt sitzt auf
-                // „Kaufen“.
-                child: Zeigefinger(
-                  schritt: Schritt.laden,
-                  aktiv: copy.uid.endsWith('-mentor'),
-                  punkt: copy.uid != gewaehlteUid,
-                  eng: true,
-                  radius: 10,
-                  child: ShopItemCell(
-                    copy: copy,
-                    isSelected: copy.uid == gewaehlteUid,
-                    isOwned: isOwned(copy),
-                    isEquipped: isEquipped(copy),
-                    gesammelt: gesammelt(copy),
-                    block: blockFor(copy),
-                    onTap: () => onWaehle(copy.uid),
-                  ),
+        const pfosten = LadenBild.pfostenBreite;
+        final innenBreite = constraints.maxWidth - 2 * pfosten;
+        final fachBreite = (innenBreite - (spalten + 1) * abstand) / spalten;
+        final reihen = (faecher.length / spalten).ceil();
+        final fachHoehe = math.min(
+          fachBreite * hoechstensHoch,
+          (constraints.maxHeight - (reihen + 1) * abstand) / reihen,
+        );
+        return ColoredBox(
+          color: LadenBild.tresen,
+          child: Stack(
+            children: <Widget>[
+              const Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: pfosten,
+                child: Image(
+                  image: AssetImage(LadenBild.pfostenLinks),
+                  repeat: ImageRepeat.repeatY,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
                 ),
               ),
-          ],
+              const Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: pfosten,
+                child: Image(
+                  image: AssetImage(LadenBild.pfostenRechts),
+                  repeat: ImageRepeat.repeatY,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  pfosten + abstand,
+                  abstand,
+                  pfosten + abstand,
+                  abstand,
+                ),
+                // Mittig im Tresen: Unter dem Bild ist auf hohen Handys
+                // viel Platz, und oben angeklebt stünden die Fächer gedrängt.
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    for (var r = 0; r < reihen; r++) ...<Widget>[
+                      if (r > 0) const SizedBox(height: abstand),
+                      Row(
+                        children: <Widget>[
+                          for (var c = 0; c < spalten; c++) ...<Widget>[
+                            if (c > 0) const SizedBox(width: abstand),
+                            SizedBox(
+                              width: fachBreite,
+                              height: fachHoehe,
+                              child: r * spalten + c < faecher.length
+                                  ? faecher[r * spalten + c]
+                                  : null,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:habits/habits.dart';
-import 'package:lifes_game/gear/widgets/shop_item_tile.dart';
+import 'package:lifes_game/gear/widgets/laden_tafel.dart';
 import 'package:lifes_game/action/hero_power.dart';
 import 'package:lifes_game/combat/ladder_controller.dart';
 import 'package:lifes_game/gear/copy_text.dart';
@@ -12,7 +12,7 @@ import 'package:lifes_game/gear/equipment_screen.dart';
 import 'package:lifes_game/gear/gear_controller.dart';
 import 'package:lifes_game/gear/shop_screen.dart';
 import 'package:lifes_game/gear/widgets/rarity_badge.dart';
-import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
+import 'package:lifes_game/gear/widgets/laden_fach.dart';
 import 'package:lifes_game/habits/habits_controller.dart';
 import 'package:lifes_game/progression/level_provider.dart';
 import 'package:lifes_game/save/save_data.dart';
@@ -282,11 +282,11 @@ void main() {
       useTallView(tester);
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
-      expect(find.byKey(ShopItemCell.gesammeltKey), findsNothing);
+      expect(find.byKey(LadenFach.gesammeltKey), findsNothing);
 
       final erstes = tester
-          .widget<ShopItemCell>(find.byType(ShopItemCell).first)
-          .copy;
+          .widget<LadenFach>(find.byType(LadenFach).first)
+          .angebot;
       final schonGehabt = const Loadout.empty()
           .addFree(angebot(erstes.itemId))
           .sell('test-${erstes.itemId}');
@@ -295,12 +295,12 @@ void main() {
 
       expect(
         find.descendant(
-          of: find.byType(ShopItemCell).first,
-          matching: find.byKey(ShopItemCell.gesammeltKey),
+          of: find.byType(LadenFach).first,
+          matching: find.byKey(LadenFach.gesammeltKey),
         ),
         findsOneWidget,
       );
-      expect(find.byKey(ShopItemCell.gesammeltKey), findsOneWidget);
+      expect(find.byKey(LadenFach.gesammeltKey), findsOneWidget);
     });
 
     testWidgets('heute: sechs Angebote, eins je Platz', (tester) async {
@@ -308,63 +308,90 @@ void main() {
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
 
-      final zellen = tester.widgetList<ShopItemCell>(find.byType(ShopItemCell));
+      final zellen = tester.widgetList<LadenFach>(find.byType(LadenFach));
       expect(zellen, hasLength(GearSlot.values.length));
       expect(
-        zellen.map((z) => z.copy.item!.slot).toSet(),
+        zellen.map((z) => z.angebot.item!.slot).toSet(),
         GearSlot.values.toSet(),
       );
     });
 
-    testWidgets('jedes Angebot trägt Rahmen und Namen seiner Seltenheit', (
+    testWidgets('jedes Fach trägt Rand und Namen seiner Seltenheit', (
       tester,
     ) async {
-      // Auch das gewählte: Die Wahl liegt als Ring außen herum, statt
-      // den Rahmen umzufärben.
+      // Auf dem dunklen Inneren des Fachs: der Name im Ton für dunklen
+      // Grund, der Rand im Rahmenton der Seltenheit.
       useTallView(tester);
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
 
-      final zellen = find.byType(ShopItemCell);
+      final faecher = find.byType(LadenFach);
       for (var i = 0; i < GearSlot.values.length; i++) {
-        final zelle = zellen.at(i);
-        final item = tester.widget<ShopItemCell>(zelle).copy.item!;
-        final name = find.descendant(of: zelle, matching: find.text(item.name));
-        final kachel = tester.widget<Container>(
-          find.ancestor(of: name, matching: find.byType(Container)).first,
-        );
-
+        final fach = faecher.at(i);
+        final item = tester.widget<LadenFach>(fach).angebot.item!;
+        final name = find.descendant(of: fach, matching: find.text(item.name));
         expect(
           tester.widget<Text>(name).style!.color,
-          RarityBadge.colorOf(item.rarity),
+          RarityBadge.colorOnDarkOf(item.rarity),
           reason: item.name,
         );
+        final rand = tester.widget<DecoratedBox>(
+          find.ancestor(of: name, matching: find.byType(DecoratedBox)).first,
+        );
         expect(
-          (kachel.decoration! as BoxDecoration).border!.top.color,
+          (rand.decoration as BoxDecoration).border!.top.color.withValues(
+            alpha: 1,
+          ),
           RarityBadge.rahmenOf(item.rarity),
           reason: item.name,
         );
       }
+      // Eins steht auf der Tafel.
       expect(
-        tester.widgetList<ShopItemCell>(zellen).where((z) => z.isSelected),
+        tester.widgetList<LadenFach>(faecher).where((f) => f.gewaehlt),
         hasLength(1),
       );
     });
 
-    testWidgets('die Detailfläche zeigt den Wurf, nicht den Katalog', (
-      tester,
-    ) async {
+    testWidgets('ein Tipp schreibt das Fach auf die Tafel', (tester) async {
+      // AktivesBrett, 21.11.2026: Tafel links neben dem Händler.
+      useTallView(tester);
+      await tester.pumpWidget(app(stand()));
+      await tester.pumpAndSettle();
+
+      final zweites = tester.widget<LadenFach>(find.byType(LadenFach).at(1));
+      expect(
+        tester.widget<LadenTafel>(find.byType(LadenTafel)).angebot.uid,
+        isNot(zweites.angebot.uid),
+      );
+      await tester.tap(find.byType(LadenFach).at(1));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<LadenTafel>(find.byType(LadenTafel)).angebot.uid,
+        zweites.angebot.uid,
+      );
+      expect(
+        tester.widget<LadenFach>(find.byType(LadenFach).at(1)).gewaehlt,
+        isTrue,
+      );
+    });
+
+    testWidgets('die Tafel zeigt den Wurf, nicht den Katalog', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
 
       final erstes = tester
-          .widgetList<ShopItemCell>(find.byType(ShopItemCell))
+          .widgetList<LadenFach>(find.byType(LadenFach))
           .first
-          .copy;
-      // Jeder Wert steht in einer eigenen Zeile.
+          .angebot;
+      // Jeder Wert steht auf der Tafel in einer eigenen Zeile.
+      final tafel = find.byType(LadenTafel);
       for (final zeile in CopyText.lines(erstes)) {
-        expect(find.textContaining(zeile.valueText), findsWidgets);
+        expect(
+          find.descendant(of: tafel, matching: find.text(zeile.zahlText)),
+          findsWidgets,
+        );
       }
     });
 
@@ -375,15 +402,17 @@ void main() {
       await tester.pumpWidget(app(const SaveData()));
       await tester.pumpAndSettle();
 
-      for (final zelle in tester.widgetList<ShopItemCell>(
-        find.byType(ShopItemCell),
+      for (final zelle in tester.widgetList<LadenFach>(
+        find.byType(LadenFach),
       )) {
         expect(zelle.isOutOfReach, isTrue);
       }
       final kaufen = tester.widget<FilledButton>(
-        find.byKey(ShopItemTile.kaufenKey),
+        find.byKey(LadenTafel.kaufenKey),
       );
       expect(kaufen.onPressed, isNull);
+      // Ein grauer Knopf sagt, warum.
+      expect(find.textContaining('Noch '), findsOneWidget);
     });
 
     testWidgets('kaufen legt das Angebot ins Inventar, einmal', (tester) async {
@@ -395,13 +424,16 @@ void main() {
         tester.element(find.byType(ShopScreen)),
       );
       final angebot = container.read(dailyOffersProvider).first;
-      await tester.tap(find.byKey(ShopItemTile.kaufenKey));
+      await tester.tap(find.byKey(LadenTafel.kaufenKey));
       await tester.pumpAndSettle();
-      while (find
-          .widgetWithText(FilledButton, 'Weiter')
-          .evaluate()
-          .isNotEmpty) {
-        await tester.tap(find.widgetWithText(FilledButton, 'Weiter').last);
+      // Die Feiern danach: „Weiter“ und „Weiter geht's“ (Sammeln kommt
+      // über „Beim Händler“).
+      final weiter = find.ancestor(
+        of: find.textContaining('Weiter'),
+        matching: find.byType(FilledButton),
+      );
+      while (weiter.evaluate().isNotEmpty) {
+        await tester.tap(weiter.last);
         await tester.pumpAndSettle();
       }
 

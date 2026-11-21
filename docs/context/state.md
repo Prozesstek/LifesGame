@@ -12,7 +12,55 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.11.2026 · Frederik
+**Zuletzt aktualisiert:** 21.11.2026 · AktivesBrett
+
+---
+
+## 21.11.2026: der Laden ist ein Laden
+
+AktivesBrett schickte ein Bild (ein Laden mit Händler, Tafel und Tresen)
+und eine Skizze: „mach den Shop bitte so … kannst einfach das Bild so
+benutzen, musst nur die einzelnen Elemente anpassen“.
+
+| Was | Wie |
+|---|---|
+| **Bild** | `assets/UI/Laden.jpg` (494 × 648), aus seinem Bild: Tafel und Fächer leer gemalt, die eingemalten Gegenstände und der englische Text weg, die App-Knöpfe oben rechts weggerechnet, die Leiste unten (Gold, BUY, LEAVE) abgeschnitten |
+| **Tafel** | oben links: Bild, Name in der Farbe der Seltenheit, Wurf, Werte gegen das Getragene, Kampf, „Kaufen“ — oder warum nicht; feste Größe, rollt innen |
+| **Fächer** | sechs im Tresen: Stück und Name im Inneren, Preis auf der Planke; was auf der Tafel steht, trägt weiße Winkel |
+| **Lage** | alle Rechtecke an einer Stelle (`LadenBild`) |
+| **Weg** | `ShopItemCell`, `ShopItemTile`; PR #241 (das Blatt im Laden) ist damit überholt |
+
+**Ohne Rückfrage entschieden:** „Kaufen“ steht ohne Preis auf der Tafel,
+der Preis steht auf der Planke des Fachs. Die Seltenheit hat eine dritte
+Farbspalte für dunklen Grund (`RarityBadge.colorOnDarkOf`). Unter dem
+Bild ist der Grund in der Farbe des Tresens.
+
+**Danach** (AktivesBrett, mit einem zweiten Bild): **Das Bild beginnt
+ganz oben**, das Schild „Laden“ hängt in seinen Dachbalken über der Tafel,
+daneben Zurück-Pfeil und Gold (`extendBodyBehindAppBar`). Das neue Bild
+(432 × 530) hatte Schild, Pfeil, Sprechblase und Gold eingemalt — sie sind
+weggerechnet und liegen unter den echten. Die Preise richten ihre Größe
+nach der Planke.
+
+**Und** (AktivesBrett: „die Items sind nicht symmetrisch, mach die
+Boxen etwas größer und mehr nach unten“): Die Fächer sind nicht mehr Teil
+des Bildes — im gemalten Tresen war die rechte Spalte schmaler. Das Bild
+endet an der Tresenkante (432 × 312); darunter baut die App den Tresen
+selbst: zwei Pfosten aus dem Bild, dunkle Rückwand, sechs **gleich große**
+Fächer aus einem ausgeschnittenen Fach (`Laden_Fach.png`, gedehnt nur im
+dunklen Inneren), so groß wie Platz ist und **mittig im Tresen**.
+
+App 1221. In 390 × 844 gerendert.
+
+### Offen
+
+- **Woher das Bild stammt**, ist nicht geklärt — es sieht nach einem
+  KI-Bild aus (oben rechts waren Knöpfe einer App mit abfotografiert).
+  **Vor dem Store klären**; bis dahin steht es nicht in einer
+  HERKUNFT-Datei.
+- Oben, wo Schild, Pfeil und Gold eingemalt waren, ist das Bild verwischt — verdeckt von den echten.
+- Das Bild ist nicht im Pixelstil der übrigen App gemalt.
+- **Frederik hat es nicht gesehen.**
 
 ---
 
