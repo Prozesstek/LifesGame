@@ -24,6 +24,7 @@ import 'ui/holz.dart';
 import 'ui/menue_leiste.dart';
 import 'ui/palette.dart';
 import 'ui/phone_frame.dart';
+import 'ui/schrift.dart';
 
 /// Startet die App, nachdem der Spielstand gelesen ist.
 ///
@@ -295,6 +296,10 @@ class _LifesGameAppState extends State<LifesGameApp> {
 
     return ThemeData(
       colorScheme: scheme,
+      // **Die Schrift der App** (21.11.2026, Frederik): Alegreya Sans für
+      // alles, was keine eigene Schrift nennt. Das Lernbuch (`BuchStil`)
+      // und die Titel (`MenueLeiste`) setzen ihre selbst und bleiben.
+      fontFamily: Schrift.app,
       scaffoldBackgroundColor: Palette.background,
       useMaterial3: true,
 

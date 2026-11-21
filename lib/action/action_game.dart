@@ -9,6 +9,7 @@ import 'package:gear/gear.dart';
 
 import '../audio/sound_effects.dart';
 import '../ui/palette.dart';
+import '../ui/schrift.dart';
 import 'action_sprites.dart';
 import 'beute_am_boden.dart';
 import 'beute_bild.dart';
@@ -1447,6 +1448,7 @@ class ActionGame extends Game {
         text: TextSpan(
           text: popup.text,
           style: TextStyle(
+            fontFamily: Schrift.app,
             fontSize: 13 * popup.size,
             fontWeight: FontWeight.bold,
             color: popup.color.withValues(alpha: popup.opacity),
