@@ -103,7 +103,7 @@ durch die Grube ersetzt und gelöscht.
 | `lib/combat/widgets/loot_dialog.dart` | die Beute des Wächters: fragen, ob ein Schlüssel sie öffnet, und zeigen, was fiel | Flutter |
 | `lib/combat/widgets/loot_reveal.dart` | wie die Truhe aufgeht: Schlüssel ins Schloss, aufplatzen in der Farbe der Seltenheit, das Stück springt heraus — **läuft einmal und hält an** | Flutter |
 | `lib/gear/weapon_ability_line.dart` | was eine Waffe an Fähigkeit mitbringt — reine Rechnung | Flutter |
-| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; zwei Spalten: Schriftton (`colorOf`, Marke und Name) und Rahmenton (`rahmenOf`, der Rand um ein Stück) | Flutter |
+| `lib/gear/widgets/rarity_badge.dart` | die Seltenheit als Marke — **die einzige Farbtabelle**, auch für Fähigkeiten; drei Spalten: Schriftton (`colorOf`, Marke und Name), Rahmenton (`rahmenOf`, der Rand um ein Stück) und Schrift auf dunklem Grund (`colorOnDarkOf`, Tafel und Fächer im Laden) | Flutter |
 | `packages/abilities/` | woher eine Fähigkeit kommt, reines Dart, 43 Tests | nur Dart-SDK |
 | `packages/abilities/lib/src/ability_catalog.dart` | die Fähigkeiten und ihre Bedingungen — und die **Ultimates** (`ultimates`), die nie unter den wählbaren stehen | nur Dart-SDK |
 | `packages/identity/` | Name und verdiente Titel (nur der Wortlaut), reines Dart, 25 Tests | nur Dart-SDK |
@@ -249,14 +249,16 @@ durch die Grube ersetzt und gelöscht.
 | `lib/habits/widgets/weekday_picker.dart` | sieben Kreise Mo bis So; wie die Wochentage heißen — **eine Tabelle** (`Wochentage`) | Flutter |
 | `lib/habits/widgets/streak_freeze_card.dart` | der Knopf, der gestern deckt — nur wenn es etwas zu retten gibt | Flutter |
 | `lib/gear/gear_controller.dart` | Riverpod-Brücke Inventar ↔ UI, **enthält keine Regeln** | Flutter |
-| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
+| `lib/gear/shop_screen.dart` | der Laden: **nur kaufen**, sechs Angebote am Tag — Besessenes steht in der Ausrüstung (Issue #88); **ein gemaltes Bild** (21.11.2026): oben links die Tafel, rechts der Händler, darunter sein Tresen mit sechs Fächern — ein Tipp auf ein Fach schreibt es auf die Tafel, dort steht „Kaufen“; im Rundgang zeigt der Mentor auf das Angebot für ihn | Flutter |
+| `lib/gear/widgets/laden_bild.dart` | **wo im Ladenbild was liegt** — Tafel und die sechs Fächer (Rahmen, Inneres, Planke) in Bildpunkten von `assets/UI/Laden.jpg`; wer das Bild tauscht, misst hier neu | Flutter |
+| `lib/gear/widgets/laden_tafel.dart` | **die Tafel**: Bild, Name, Seltenheit, Wurf, Werte gegen das Getragene, Kampf, „Kaufen“ oder warum nicht — feste Größe, rollt innen; rechnet nichts (`Loadout.blockFor`) | Flutter |
+| `lib/gear/widgets/laden_fach.dart` | **ein Fach im Tresen**: Stück und Name im Inneren, Preis auf der Planke, weiße Winkel, wenn es auf der Tafel steht, das Zeichen der Sammlung | Flutter |
 | `lib/gear/equipment_screen.dart` | **die Ausrüstung** ([ADR-0057](docs/decisions/0057-ausruestung-bekommt-einen-eigenen-bereich.md)): sechs Plätze, darunter **der Rucksack** — jedes Exemplar eine Kachel mit Pfeil und Schloss, in vier Ordnungen, Aufräumen je Seltenheit ([ADR-0081](docs/decisions/0081-der-rucksack-und-das-schloss.md)); **gewechselt wird per Ziehen**; im Rundgang zeigt der Mentor aufs Sperren | Flutter |
 | `lib/gear/widgets/gear_sheet.dart` | das Blatt eines Stücks: **nur das angetippte Exemplar** (26.10.), seine Werte **mit dem Unterschied zum Getragenen je Wert**, „Qualität“ beim Namen, **„Kampf“ in ganzen Sätzen** (`weaponKampfText`, `rarityKampfText` in `weapon_ability_line.dart`), darunter Knöpfe nebeneinander, ganz unten der Verkauf (13.11.2026); **Angelegtes hat keinen Verkaufen-Knopf** — `Loadout.sellAll` verkauft es nie | Flutter |
 | `lib/gear/gear_grouping.dart` | wie der Katalog geordnet wird: A–Z, Platz, Seltenheit, Set; reine Rechnung | Flutter |
 | `lib/gear/sell_flow.dart` | **der einzige Weg zu verkaufen**: ein Exemplar, alles Schlechtere einer Seltenheit **oder die Auswahl mit Häkchen**, mit Rückfrage und Feier | Flutter |
 | `lib/gear/verkauf_auswahl.dart` | **was ein Häkchen bekommen darf** (nie Angelegtes oder Gesperrtes) und was die Auswahl bringt — reine Rechnung, eine Stelle für Siegerblatt und Rucksack (ADR-0083) | Flutter |
 | `lib/gear/widgets/verkauf_leiste.dart` | Auswahl an/aus — **der Knopf ein Beutel voller Münzen** (`assets/UI/Verkaufen.png`) und „Verkaufen“ mit Anzahl und Gold | Flutter |
-| `lib/gear/widgets/shop_item_cell.dart` | ein Exemplar als Kachel im Raster — wählt, kauft nicht; im Laden mit dem Zeichen der Sammlung, wenn man das Stück schon einmal hatte | Flutter |
 | `lib/character/character_screen.dart` | Kopf, Beständigkeit, Werte mit Herkunft, Wege zu Ausrüstung und Fähigkeiten | Flutter |
 | `lib/character/widgets/consistency_card.dart` | die Streak-Zahlen und der Satz darunter | Flutter |
 | `lib/character/abilities_screen.dart` | **die Fähigkeiten** ([ADR-0049](docs/decisions/0049-faehigkeiten-bekommen-einen-eigenen-bereich.md)): vier Plätze, darunter **nur die eigenen** ([ADR-0082](docs/decisions/0082-nur-eigene-faehigkeiten.md)), **ein Raster ohne Überschriften** in drei Ordnungen; **Platz antippen, dann eine Fähigkeit** — oder ziehen | Flutter |
@@ -378,7 +380,7 @@ Packages.
 flutter pub get
 flutter run -d chrome    # laufen lassen (Windows-Desktop geht mangels VS nicht)
 flutter build apk --release --dart-define-from-file=feedback.json  # APK mit Feedback (ADR-0101)
-flutter test             # 1219 Tests
+flutter test             # 1221 Tests
 flutter analyze          # muss sauber sein
 
 # Balance der Grube prüfen -- seit ADR-0039 die maßgebliche Simulation

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gear/gear.dart';
 import 'package:lifes_game/gear/gear_icon.dart';
-import 'package:lifes_game/gear/widgets/shop_item_cell.dart';
+import 'package:lifes_game/gear/widgets/laden_bild.dart';
 
 /// Die Bilder auf den Item-Kacheln im Laden.
 ///
@@ -111,24 +111,38 @@ void main() {
     });
   });
 
-  group('Das Raster teilt die Breite', () {
-    // 390 Pixel Bildschirm minus 16 Rand je Seite.
-    const breite = 358.0;
+  group('Tafel und Fächer liegen im Ladenbild', () {
+    const bild = Rect.fromLTWH(0, 0, LadenBild.breite, LadenBild.hoehe);
 
-    test('drei Kacheln füllen eine Reihe ganz aus', () {
-      final seite = ShopItemCell.sideFor(breite);
-
-      expect(
-        seite * ShopItemCell.columns +
-            ShopItemCell.gap * (ShopItemCell.columns - 1),
-        closeTo(breite, 0.01),
-      );
+    test('alles liegt innerhalb des Bildes', () {
+      expect(bild.contains(LadenBild.tafel.topLeft), isTrue);
+      expect(bild.contains(LadenBild.tafel.bottomRight), isTrue);
+      for (final fach in LadenBild.faecher) {
+        expect(fach.rahmen.left, greaterThanOrEqualTo(0));
+        expect(fach.rahmen.right, lessThanOrEqualTo(LadenBild.breite));
+        expect(fach.rahmen.bottom, lessThanOrEqualTo(LadenBild.hoehe));
+        // Inneres und Planke liegen im Rahmen, die Planke darunter.
+        expect(fach.rahmen.contains(fach.innen.center), isTrue);
+        expect(fach.planke.top, greaterThanOrEqualTo(fach.innen.bottom));
+      }
     });
 
-    test('eine Kachel bleibt auf dem Handy bedienbar', () {
-      // Unter 44 Pixeln ist eine Tippfläche auf einem Handy unzuverlässig
-      // — und ein Name in zwei Zeilen passt dort ohnehin nicht mehr.
-      expect(ShopItemCell.sideFor(breite), greaterThan(44));
+    test('sechs Fächer, keine zwei überlappen, keins unter der Tafel', () {
+      expect(LadenBild.faecher, hasLength(6));
+      for (final (i, a) in LadenBild.faecher.indexed) {
+        expect(a.rahmen.overlaps(LadenBild.tafel), isFalse);
+        for (final b in LadenBild.faecher.skip(i + 1)) {
+          expect(a.rahmen.overlaps(b.rahmen), isFalse);
+        }
+      }
+    });
+
+    test('ein Fach bleibt auf dem Handy bedienbar', () {
+      // 390 Punkte Bildschirm: Unter 44 ist eine Tippfläche unzuverlässig.
+      const skala = 390 / LadenBild.breite;
+      for (final fach in LadenBild.faecher) {
+        expect(fach.rahmen.width * skala, greaterThan(44));
+      }
     });
   });
 }
