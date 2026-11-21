@@ -123,7 +123,7 @@ class LadenFach extends StatelessWidget {
               // Auf der Planke: der Preis — oder ein Haken, wenn gekauft.
               Positioned.fromRect(
                 rect: planke,
-                child: Center(child: _preis(gekauft, blass)),
+                child: Center(child: _preis(gekauft, blass, planke.height)),
               ),
               if (gesammelt)
                 const Positioned(
@@ -147,11 +147,14 @@ class LadenFach extends StatelessWidget {
     );
   }
 
-  Widget _preis(bool gekauft, double blass) {
+  /// Der Preis passt in die Planke: Schrift und Münze richten sich nach
+  /// ihrer Höhe, nicht umgekehrt.
+  Widget _preis(bool gekauft, double blass, double hoehe) {
+    final groesse = (hoehe * 0.95).clamp(9.0, 15.0);
     if (gekauft) {
-      return const Icon(
+      return Icon(
         Icons.check_circle,
-        size: 18,
+        size: groesse,
         color: Palette.textOnDarkDim,
         semanticLabel: 'gekauft',
       );
@@ -162,15 +165,16 @@ class LadenFach extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (block == PurchaseBlock.gesperrt) ...<Widget>[
-            const Icon(Icons.lock, size: 13, color: Palette.textOnDark),
+            Icon(Icons.lock, size: groesse, color: Palette.textOnDark),
             const SizedBox(width: 3),
           ],
-          const GoldIcon(size: 15),
+          GoldIcon(size: groesse),
           const SizedBox(width: 4),
           Text(
             '${angebot.paid}',
-            style: const TextStyle(
-              fontSize: 15,
+            style: TextStyle(
+              fontSize: groesse,
+              height: 1,
               fontWeight: FontWeight.bold,
               color: Palette.textOnDark,
               shadows: _schatten,

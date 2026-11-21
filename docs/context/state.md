@@ -35,6 +35,13 @@ der Preis steht auf der Planke des Fachs. Die Seltenheit hat eine dritte
 Farbspalte für dunklen Grund (`RarityBadge.colorOnDarkOf`). Unter dem
 Bild ist der Grund in der Farbe des Tresens.
 
+**Danach** (AktivesBrett, mit einem zweiten Bild): **Das Bild beginnt
+ganz oben**, das Schild „Laden“ hängt in seinen Dachbalken über der Tafel,
+daneben Zurück-Pfeil und Gold (`extendBodyBehindAppBar`). Das neue Bild
+(432 × 530) hatte Schild, Pfeil, Sprechblase und Gold eingemalt — sie sind
+weggerechnet und liegen unter den echten. Die Preise richten ihre Größe
+nach der Planke.
+
 App 1221. In 390 × 844 gerendert.
 
 ### Offen
@@ -43,7 +50,7 @@ App 1221. In 390 × 844 gerendert.
   KI-Bild aus (oben rechts waren Knöpfe einer App mit abfotografiert).
   **Vor dem Store klären**; bis dahin steht es nicht in einer
   HERKUNFT-Datei.
-- Oben rechts ist eine leicht verwischte Stelle, wo die Knöpfe waren.
+- Oben, wo Schild, Pfeil und Gold eingemalt waren, ist das Bild verwischt — verdeckt von den echten.
 - Das Bild ist nicht im Pixelstil der übrigen App gemalt.
 - **Frederik hat es nicht gesehen.**
 

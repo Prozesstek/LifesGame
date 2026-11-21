@@ -61,6 +61,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
     return Scaffold(
       backgroundColor: LadenBild.tresen,
+      // **Das Bild beginnt ganz oben** (AktivesBrett, 21.11.2026): Das
+      // Schild „Laden“ hängt in seinen Dachbalken, nicht darüber.
+      extendBodyBehindAppBar: true,
       appBar: SchildLeiste(
         leading: const ZurueckPfeil(schritt: Schritt.sperren),
         titel: 'Laden',
@@ -90,6 +93,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       body: MentorFlaeche(
         ort: MentorOrt.laden,
         child: SafeArea(
+          top: false,
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
