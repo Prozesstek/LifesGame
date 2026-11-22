@@ -148,19 +148,58 @@ abstract final class GearRolls {
   }
 }
 
-/// Die sechs Angebote des Tages — eins je Platz, aus dem Datum gewürfelt.
+/// Die neun Angebote des Tages, aus dem Datum gewürfelt: eins je Platz,
+/// dazu [extras] auf gewürfelten Plätzen (AktivesBrett, 22.11.2026).
 ///
 /// **Nichts davon wird gespeichert.** Wer heute ein Angebot kauft, hat
-/// ein Exemplar mit der Uid `laden-<tag>-<platz>`; morgen gibt es neue.
-/// Die Seltenheit richtet sich nach der tiefsten geschafften Stufe, also
-/// sehen zwei Spieler denselben Laden nur, solange sie gleich weit sind.
+/// ein Exemplar mit der Uid `laden-<tag>-<platz>` oder
+/// `laden-<tag>-extra<n>`; morgen gibt es neue. Die Seltenheit richtet
+/// sich nach der tiefsten geschafften Stufe, also sehen zwei Spieler
+/// denselben Laden nur, solange sie gleich weit sind.
 abstract final class DailyShop {
+  /// Wie viele Angebote es über eins je Platz hinaus gibt.
+  static const int extras = 3;
+
+  /// Wie oft ein Extra neu würfelt, wenn sein Stück schon im Laden liegt.
+  static const int _versuche = 8;
+
   /// [dayIndex] zählt die Tage seit dem 1.1.1970 — so rechnet auch die
   /// Tagestruhe. [highestRung] ist die tiefste geschaffte Stufe.
   static List<GearCopy> offersFor(int dayIndex, {required int highestRung}) {
-    return List<GearCopy>.unmodifiable(<GearCopy>[
+    final angebote = <GearCopy>[
       for (final slot in GearSlot.values) _offer(dayIndex, slot, highestRung),
-    ]);
+    ];
+    for (var n = 0; n < extras; n++) {
+      angebote.add(_extra(dayIndex, n, highestRung, angebote));
+    }
+    return List<GearCopy>.unmodifiable(angebote);
+  }
+
+  /// Ein Angebot auf einem gewürfelten Platz — möglichst ein Stück, das
+  /// heute noch nicht im Laden liegt.
+  static GearCopy _extra(
+    int dayIndex,
+    int n,
+    int highestRung,
+    List<GearCopy> schon,
+  ) {
+    final dice = GearDice(dayIndex * 37 + n * 104729 + 9001);
+    final belegt = {for (final c in schon) c.itemId};
+    late GearItem item;
+    for (var i = 0; i < _versuche; i++) {
+      final slot = GearSlot.values[(dice.next() * GearSlot.values.length)
+          .floor()
+          .clamp(0, GearSlot.values.length - 1)];
+      final rarity = GearRolls.rollRarity(highestRung, dice);
+      item = GearRolls.pick(slot, rarity, dice);
+      if (!belegt.contains(item.id)) break;
+    }
+    return GearCopy(
+      uid: 'laden-$dayIndex-extra$n',
+      itemId: item.id,
+      bonus: GearRolls.rollBonus(item, dice),
+      paid: item.price,
+    );
   }
 
   /// **Das Angebot des Mentors** (Frederik, 07.11.2026): Im Rundgang am
@@ -177,8 +216,11 @@ abstract final class DailyShop {
     if (offers.any((o) => o.paid <= billig)) return offers;
     final item = GearCatalog.all.firstWhere((i) => i.price == billig);
     final geschenk = mentorAngebot(dayIndex);
+    // Nur das Angebot je Platz wird ersetzt, kein Extra desselben Platzes —
+    // sonst stünde das Geschenk zweimal mit derselben Uid im Laden.
+    final platz = offers.indexWhere((o) => o.item?.slot == item.slot);
     return List<GearCopy>.unmodifiable(<GearCopy>[
-      for (final o in offers) o.item?.slot == item.slot ? geschenk : o,
+      for (var i = 0; i < offers.length; i++) i == platz ? geschenk : offers[i],
     ]);
   }
 

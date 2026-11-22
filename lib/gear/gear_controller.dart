@@ -195,7 +195,7 @@ final dayIndexProvider = Provider<int>((ref) {
   return dayNumberOf(ref.watch(todayProvider));
 });
 
-/// Die sechs Angebote des Tagesladens (ADR-0048).
+/// Die neun Angebote des Tagesladens (ADR-0048).
 ///
 /// Gewürfelt in `package:gear` aus dem Datum und der tiefsten
 /// geschafften Stufe; hier steht nur, woher beides kommt.

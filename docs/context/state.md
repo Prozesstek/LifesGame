@@ -31,7 +31,19 @@ ein klein wenig dicker“.
 **Ohne Rückfrage entschieden:** Nur der Laden bekommt den dickeren Rand;
 Rucksack, Blatt und Siegerblatt bleiben bei 2.
 
-App 1219. In 390 × 844 gerendert. **Frederik hat es nicht gesehen.**
+**Danach** (AktivesBrett: „noch eine reihe items … sodass wir dann
+insgesamt 9 items haben“): **Der Laden hat neun Angebote** — die sechs
+je Platz wie bisher (gleiche Uids, Gekauftes bleibt gekauft), dazu drei
+auf gewürfelten Plätzen (`DailyShop.extras`, Uid `laden-<tag>-extra<n>`),
+die möglichst kein Stück doppelt zeigen. Das Angebot des Mentors ersetzt
+nur das eine je Platz. Unter 420 Punkten Tresen rollt der Laden, statt
+die Fächer zu quetschen.
+
+**Ohne Rückfrage entschieden:** Mehr Angebote sind mehr Auswahl, kein
+Gold mehr; `runway_sim` ist nicht neu gelaufen.
+
+App 1219, gear 146 (vorher 144). In 390 × 844 im Browser angesehen.
+**Frederik hat es nicht gesehen.**
 
 ---
 

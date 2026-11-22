@@ -303,13 +303,13 @@ void main() {
       expect(find.byKey(LadenFach.gesammeltKey), findsOneWidget);
     });
 
-    testWidgets('heute: sechs Angebote, eins je Platz', (tester) async {
+    testWidgets('heute: neun Angebote, jeder Platz dabei', (tester) async {
       useTallView(tester);
       await tester.pumpWidget(app(stand()));
       await tester.pumpAndSettle();
 
       final zellen = tester.widgetList<LadenFach>(find.byType(LadenFach));
-      expect(zellen, hasLength(GearSlot.values.length));
+      expect(zellen, hasLength(GearSlot.values.length + DailyShop.extras));
       expect(
         zellen.map((z) => z.angebot.item!.slot).toSet(),
         GearSlot.values.toSet(),

@@ -26,7 +26,7 @@ import 'widgets/laden_tafel.dart';
 
 /// Der Laden — seit ADR-0048 ein **Tagesladen**.
 ///
-/// Sechs Angebote, eins je Platz, aus dem Datum gewürfelt. Jedes ist ein
+/// Neun Angebote, eins je Platz und drei gewürfelte, aus dem Datum. Jedes ist ein
 /// fertiges Exemplar mit eigenen Werten; der Preis hängt an der
 /// Seltenheit, nicht am Wurf. Um Mitternacht kommt eine neue Auswahl.
 ///
@@ -177,7 +177,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 height: tresenHoehe,
                 child: _Tresen(
                   faecher: <Widget>[
-                    for (final angebot in angebote.take(6))
+                    for (final angebot in angebote)
                       // Der Mentor zeigt im Rundgang auf sein Angebot;
                       // steht es auf der Tafel, sitzt der Punkt auf
                       // „Kaufen“.
@@ -274,7 +274,7 @@ class _Tresen extends StatelessWidget {
   final List<Widget> faecher;
 
   /// Darunter würde ein Fach zu klein; dann rollt der Laden.
-  static const double mindestHoehe = 260;
+  static const double mindestHoehe = 420;
 
   static const int spalten = 3;
   static const double abstand = 12;
