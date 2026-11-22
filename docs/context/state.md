@@ -96,10 +96,9 @@ App 1221. In 390 × 844 gerendert.
 
 ### Offen
 
-- **Woher das Bild stammt**, ist nicht geklärt — es sieht nach einem
-  KI-Bild aus (oben rechts waren Knöpfe einer App mit abfotografiert).
-  **Vor dem Store klären**; bis dahin steht es nicht in einer
-  HERKUNFT-Datei.
+- ~~Woher das Bild stammt~~ — **mit Gemini erzeugt** (AktivesBrett,
+  22.11.), steht in `assets/UI/HERKUNFT.md`. **Vor dem Store** prüfen,
+  ob Geminis Bedingungen die kommerzielle Nutzung erlauben.
 - Oben, wo Schild, Pfeil und Gold eingemalt waren, ist das Bild verwischt — verdeckt von den echten.
 - Das Bild ist nicht im Pixelstil der übrigen App gemalt.
 - **Frederik hat es nicht gesehen.**
