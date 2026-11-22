@@ -12,7 +12,49 @@
 > Wohin es geht, steht in [`ziele.md`](ziele.md) — mit Terminen und mit der
 > Liste dessen, was bis zum MVP ausdrücklich **nicht** angefasst wird.
 
-**Zuletzt aktualisiert:** 21.11.2026 · AktivesBrett
+**Zuletzt aktualisiert:** 22.11.2026 · AktivesBrett
+
+---
+
+## 22.11.2026: die Fächer im Laden tragen den Holzrahmen
+
+AktivesBrett, mit Screenshot: „im shop bitte den Holz rahmen wie den den
+wir überall haben rein packen und den farbigen rahmen um die items …
+ein klein wenig dicker“.
+
+| Was | Wie |
+|---|---|
+| **Rahmen** | jedes Fach liegt im Holzrahmen der App (`GehrungsMaler`), innen dunkel; das ausgeschnittene Fach `Laden_Fach.png` ist gelöscht |
+| **Seltenheit** | der Rand ums Stück ist im Laden 3 statt 2 Punkte dick und nicht mehr halb durchsichtig (`LadenFach.seltenheitsRand`) |
+| **Preis** | steht unter dem Stück im Inneren, nicht mehr auf einer Planke |
+
+**Ohne Rückfrage entschieden:** Nur der Laden bekommt den dickeren Rand;
+Rucksack, Blatt und Siegerblatt bleiben bei 2.
+
+**Danach** (AktivesBrett: „noch eine reihe items … sodass wir dann
+insgesamt 9 items haben“): **Der Laden hat neun Angebote** — die sechs
+je Platz wie bisher (gleiche Uids, Gekauftes bleibt gekauft), dazu drei
+auf gewürfelten Plätzen (`DailyShop.extras`, Uid `laden-<tag>-extra<n>`),
+die möglichst kein Stück doppelt zeigen. Das Angebot des Mentors ersetzt
+nur das eine je Platz. Unter 420 Punkten Tresen rollt der Laden, statt
+die Fächer zu quetschen.
+
+**Ohne Rückfrage entschieden:** Mehr Angebote sind mehr Auswahl, kein
+Gold mehr; `runway_sim` ist nicht neu gelaufen.
+
+App 1219, gear 146 (vorher 144). In 390 × 844 im Browser angesehen.
+
+**Und** (AktivesBrett, mit eigenem Bild „Neu laden.jpg“): **Das Ladenbild
+ist jetzt eins mit Tresen** (432 × 608) — größere, leere Tafel, Platte,
+darunter das dunkle Innere. Die Fächer stehen **ganz unten** darin; das
+Bild rutscht nach oben, wenn sie Platz brauchen, aber nie so weit, dass
+das Schild in die Tafel hängt — dann rollt der Laden (360 × 640).
+**Die Tafel nach seiner Skizze**: Bild oben links in der Ecke, daneben
+nur Name und Qualität, die Werte darunter über die ganze Breite,
+„Kaufen“ klein und mittig als Holzplanke. Seltenheit und Platz stehen
+nicht mehr da; „Noch 160 Gold“ bleibt.
+
+**Frederik hat es nicht gesehen.**
 
 ---
 

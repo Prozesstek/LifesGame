@@ -97,13 +97,36 @@ void main() {
   });
 
   group('Der Tagesladen', () {
-    test('sechs Angebote, eins je Platz', () {
+    test('neun Angebote: eins je Platz, dazu drei Extras', () {
       final heute = DailyShop.offersFor(20355, highestRung: 0);
-      expect(heute, hasLength(6));
+      expect(heute, hasLength(GearSlot.values.length + DailyShop.extras));
+      expect(heute, hasLength(9));
       expect(
-        heute.map((c) => c.item!.slot).toSet(),
-        GearSlot.values.toSet(),
+        heute.take(GearSlot.values.length).map((c) => c.item!.slot),
+        GearSlot.values,
       );
+      expect(heute.map((c) => c.uid).toSet(), hasLength(heute.length));
+    });
+
+    test('die Extras sind fast nie ein Stück, das schon daliegt', () {
+      var doppelt = 0;
+      for (var tag = 20000; tag < 20200; tag++) {
+        final heute = DailyShop.offersFor(tag, highestRung: 30);
+        if (heute.map((c) => c.itemId).toSet().length < heute.length) {
+          doppelt++;
+        }
+      }
+      expect(doppelt, lessThan(10));
+    });
+
+    test('das Angebot des Mentors ersetzt genau eines', () {
+      for (var tag = 20000; tag < 20200; tag++) {
+        final heute = DailyShop.mitMentorAngebot(
+          DailyShop.offersFor(tag, highestRung: 30),
+          tag,
+        );
+        expect(heute.map((c) => c.uid).toSet(), hasLength(heute.length));
+      }
     });
 
     test('derselbe Tag gibt denselben Laden, ein anderer einen anderen', () {

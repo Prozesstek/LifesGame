@@ -11,37 +11,26 @@ import 'dart:ui';
 ///
 /// **Die Fächer sind nicht im Bild** (AktivesBrett, 21.11.2026: „die Items
 /// sind nicht symmetrisch“): Im gemalten Tresen war die rechte Spalte
-/// schmaler. Jetzt ist es **ein** Fach, aus dem Bild geschnitten
-/// (`Laden_Fach.png`), sechsmal gleich groß gelegt — gedehnt wird nur sein
-/// dunkles Inneres ([fachMitte]), Holzrand und Planke bleiben, wie sie sind.
+/// schmaler. Die App legt sechs gleich große Fächer darunter, jedes im
+/// Holzrahmen der App (`LadenFach`, 22.11.2026).
 abstract final class LadenBild {
   static const String pfad = 'assets/UI/Laden.jpg';
 
   static const double breite = 432;
-  static const double hoehe = 312;
+  static const double hoehe = 608;
 
-  /// Das dunkle Innere der Tafel.
-  static const Rect tafel = Rect.fromLTRB(16, 103, 202, 266);
+  /// Wo der Inhalt der Tafel steht — ihr dunkles Inneres, oben so weit
+  /// frei, dass das Schild „Laden“ nichts verdeckt.
+  static const Rect tafel = Rect.fromLTRB(22, 106, 232, 366);
 
-  /// Ein leeres Fach: Holzrand, dunkles Inneres, unten die Planke.
-  static const String fach = 'assets/UI/Laden_Fach.png';
-
-  /// Was beim Dehnen eines Fachs mitwächst — das dunkle Innere. Alles
-  /// außen herum (Rand, Planke) bleibt so groß wie im Bild.
-  static const Rect fachMitte = Rect.fromLTRB(10, 9, 114, 72);
-
-  /// Wie weit das dunkle Innere vom Rand des Fachs absteht, und wie hoch
-  /// die Planke unten ist — in Bildpunkten, im Fach gleich Punkten.
-  static const double fachRand = 8;
-  static const double fachOben = 7;
-  static const double plankeOben = 24;
-  static const double plankeUnten = 10;
+  /// Ab hier ist das Bild Tresen: das dunkle Innere unter der Platte.
+  static const double tresenOben = 417;
 
   /// Die Pfosten links und rechts am Tresen.
   static const String pfostenLinks = 'assets/UI/Laden_Pfosten_links.png';
   static const String pfostenRechts = 'assets/UI/Laden_Pfosten_rechts.png';
   static const double pfostenBreite = 12;
 
-  /// Die Rückwand des Tresens, zwischen den Fächern.
-  static const Color tresen = Color(0xFF3E2918);
+  /// Das dunkle Innere des Tresens, zwischen den Fächern — aus dem Bild.
+  static const Color tresen = Color(0xFF331D0F);
 }

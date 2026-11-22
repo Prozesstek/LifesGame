@@ -111,22 +111,12 @@ void main() {
     });
   });
 
-  group('Tafel und Fach im Ladenbild', () {
+  group('Tafel im Ladenbild', () {
     const bild = Rect.fromLTWH(0, 0, LadenBild.breite, LadenBild.hoehe);
 
     test('die Tafel liegt innerhalb des Bildes', () {
       expect(bild.contains(LadenBild.tafel.topLeft), isTrue);
       expect(bild.contains(LadenBild.tafel.bottomRight), isTrue);
-    });
-
-    test('beim Dehnen wächst nur das Innere, Rand und Planke bleiben', () {
-      // Das gemalte Fach ist 124 x 100; die Mitte liegt ganz darin, und
-      // die Planke unten liegt außerhalb der Mitte.
-      const fach = Rect.fromLTWH(0, 0, 124, 100);
-      const mitte = LadenBild.fachMitte;
-      expect(fach.contains(mitte.topLeft), isTrue);
-      expect(fach.contains(mitte.bottomRight), isTrue);
-      expect(100 - LadenBild.plankeOben, greaterThanOrEqualTo(mitte.bottom));
     });
   });
 }
