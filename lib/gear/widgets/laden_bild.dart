@@ -17,16 +17,20 @@ abstract final class LadenBild {
   static const String pfad = 'assets/UI/Laden.jpg';
 
   static const double breite = 432;
-  static const double hoehe = 312;
+  static const double hoehe = 608;
 
-  /// Das dunkle Innere der Tafel.
-  static const Rect tafel = Rect.fromLTRB(16, 103, 202, 266);
+  /// Wo der Inhalt der Tafel steht — ihr dunkles Inneres, oben so weit
+  /// frei, dass das Schild „Laden“ nichts verdeckt.
+  static const Rect tafel = Rect.fromLTRB(22, 104, 232, 366);
+
+  /// Ab hier ist das Bild Tresen: das dunkle Innere unter der Platte.
+  static const double tresenOben = 417;
 
   /// Die Pfosten links und rechts am Tresen.
   static const String pfostenLinks = 'assets/UI/Laden_Pfosten_links.png';
   static const String pfostenRechts = 'assets/UI/Laden_Pfosten_rechts.png';
   static const double pfostenBreite = 12;
 
-  /// Die Rückwand des Tresens, zwischen den Fächern.
-  static const Color tresen = Color(0xFF3E2918);
+  /// Das dunkle Innere des Tresens, zwischen den Fächern — aus dem Bild.
+  static const Color tresen = Color(0xFF331D0F);
 }

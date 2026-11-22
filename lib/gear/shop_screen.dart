@@ -126,83 +126,98 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final breite = constraints.maxWidth;
+        final hoehe = constraints.maxHeight;
         final skala = breite / LadenBild.breite;
-        final obenHoehe = LadenBild.hoehe * skala;
-        // Was unter dem Bild bleibt, gehört dem Tresen — aber nie so wenig,
-        // dass ein Fach unbedienbar klein würde; dann rollt der Laden.
-        final tresenHoehe = math.max(
-          constraints.maxHeight - obenHoehe,
-          _Tresen.mindestHoehe,
+        // Der Tresen beginnt dort, wo im Bild das dunkle Innere unter der
+        // Platte anfängt. Brauchen die Fächer mehr Platz, als darunter
+        // bleibt, rutscht das Bild nach oben (AktivesBrett, 22.11.2026) —
+        // aber nie so weit, dass das Schild „Laden“ in die Tafel hängt;
+        // reicht auch das nicht, rollt der Laden.
+        final brauchtTresen = _Tresen.hoeheFuer(breite, angebote.length);
+        final schildUnten =
+            MediaQuery.paddingOf(context).top +
+            const SchildLeiste(titel: '').preferredSize.height;
+        final hoechstens = math.max(
+          0.0,
+          LadenBild.tafel.top * skala - schildUnten,
         );
+        final schieben = (LadenBild.tresenOben * skala + brauchtTresen - hoehe)
+            .clamp(0.0, hoechstens);
+        final tresenY = LadenBild.tresenOben * skala - schieben;
+        final gesamt = math.max(hoehe, tresenY + brauchtTresen);
         final tafel = LadenBild.tafel;
 
         return SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                width: breite,
-                height: obenHoehe,
-                child: Stack(
-                  children: <Widget>[
-                    const Positioned.fill(
-                      child: Image(
-                        image: AssetImage(LadenBild.pfad),
-                        fit: BoxFit.fill,
-                        filterQuality: FilterQuality.medium,
-                      ),
-                    ),
-                    Positioned.fromRect(
-                      rect: Rect.fromLTRB(
-                        tafel.left * skala,
-                        tafel.top * skala,
-                        tafel.right * skala,
-                        tafel.bottom * skala,
-                      ),
-                      child: LadenTafel(
-                        key: ValueKey<String>('tafel-${gewaehlt.uid}'),
-                        angebot: gewaehlt,
-                        block: blockFor(gewaehlt),
-                        fehlendesGold: gewaehlt.paid - gold,
-                        getragen: gewaehlt.item == null
-                            ? null
-                            : loadout.equippedCopyIn(gewaehlt.item!.slot),
-                        onKaufen: () => _buy(context, ref, gewaehlt),
-                      ),
-                    ),
-                  ],
+          child: SizedBox(
+            width: breite,
+            height: gesamt,
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              children: <Widget>[
+                Positioned(
+                  left: 0,
+                  top: -schieben,
+                  width: breite,
+                  height: LadenBild.hoehe * skala,
+                  child: const Image(
+                    image: AssetImage(LadenBild.pfad),
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.medium,
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: breite,
-                height: tresenHoehe,
-                child: _Tresen(
-                  faecher: <Widget>[
-                    for (final angebot in angebote)
-                      // Der Mentor zeigt im Rundgang auf sein Angebot;
-                      // steht es auf der Tafel, sitzt der Punkt auf
-                      // „Kaufen“.
-                      Zeigefinger(
-                        schritt: Schritt.laden,
-                        aktiv: angebot.uid.endsWith('-mentor'),
-                        punkt: angebot.uid != gewaehlt.uid,
-                        eng: true,
-                        radius: 8,
-                        child: LadenFach(
-                          angebot: angebot,
-                          block: blockFor(angebot),
-                          gewaehlt: angebot.uid == gewaehlt.uid,
-                          // Ob es schon in der Sammlung steht: je besessen,
-                          // auch verkauft.
-                          gesammelt: loadout.everOwnedIds.contains(
-                            angebot.itemId,
+                Positioned.fromRect(
+                  rect: Rect.fromLTRB(
+                    tafel.left * skala,
+                    tafel.top * skala - schieben,
+                    tafel.right * skala,
+                    tafel.bottom * skala - schieben,
+                  ),
+                  child: LadenTafel(
+                    key: ValueKey<String>('tafel-${gewaehlt.uid}'),
+                    angebot: gewaehlt,
+                    block: blockFor(gewaehlt),
+                    fehlendesGold: gewaehlt.paid - gold,
+                    getragen: gewaehlt.item == null
+                        ? null
+                        : loadout.equippedCopyIn(gewaehlt.item!.slot),
+                    onKaufen: () => _buy(context, ref, gewaehlt),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: tresenY,
+                  bottom: 0,
+                  child: _Tresen(
+                    faecher: <Widget>[
+                      for (final angebot in angebote)
+                        // Der Mentor zeigt im Rundgang auf sein Angebot;
+                        // steht es auf der Tafel, sitzt der Punkt auf
+                        // „Kaufen“.
+                        Zeigefinger(
+                          schritt: Schritt.laden,
+                          aktiv: angebot.uid.endsWith('-mentor'),
+                          punkt: angebot.uid != gewaehlt.uid,
+                          eng: true,
+                          radius: 8,
+                          child: LadenFach(
+                            angebot: angebot,
+                            block: blockFor(angebot),
+                            gewaehlt: angebot.uid == gewaehlt.uid,
+                            // Ob es schon in der Sammlung steht: je besessen,
+                            // auch verkauft.
+                            gesammelt: loadout.everOwnedIds.contains(
+                              angebot.itemId,
+                            ),
+                            onTap: () =>
+                                setState(() => _gewaehlt = angebot.uid),
                           ),
-                          onTap: () => setState(() => _gewaehlt = angebot.uid),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -264,17 +279,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   }
 }
 
-/// **Der Tresen des Händlers** unter dem Bild (AktivesBrett, 21.11.2026):
-/// links und rechts ein Pfosten, dazwischen die Rückwand, darauf drei mal
-/// zwei Fächer, **alle gleich groß** — so groß, wie Platz ist, und mit
-/// gleichem Abstand nach allen Seiten.
+/// **Der Tresen des Händlers** unter der Platte (AktivesBrett,
+/// 21.11.2026): links und rechts ein Pfosten, dazwischen das dunkle Innere,
+/// darin drei Spalten Fächer, **alle gleich groß** und **ganz unten**
+/// (22.11.2026). Er liegt über dem Bild, wo es selbst schon Tresen ist, und
+/// führt es nach unten weiter.
 class _Tresen extends StatelessWidget {
   const _Tresen({required this.faecher});
 
   final List<Widget> faecher;
-
-  /// Darunter würde ein Fach zu klein; dann rollt der Laden.
-  static const double mindestHoehe = 420;
 
   static const int spalten = 3;
   static const double abstand = 12;
@@ -282,13 +295,27 @@ class _Tresen extends StatelessWidget {
   /// Ein Fach ist höchstens so viel höher als breit.
   static const double hoechstensHoch = 1.45;
 
+  /// So hoch soll ein Fach sein — gemessen an seiner Breite.
+  static const double gewuenschtHoch = 1.25;
+
+  static double _fachBreite(double breite) =>
+      (breite - 2 * LadenBild.pfostenBreite - (spalten + 1) * abstand) /
+      spalten;
+
+  /// Wie hoch der Tresen sein muss, damit [anzahl] Fächer in gewünschter
+  /// Höhe hineinpassen.
+  static double hoeheFuer(double breite, int anzahl) {
+    final reihen = (anzahl / spalten).ceil();
+    return reihen * _fachBreite(breite) * gewuenschtHoch +
+        (reihen + 1) * abstand;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         const pfosten = LadenBild.pfostenBreite;
-        final innenBreite = constraints.maxWidth - 2 * pfosten;
-        final fachBreite = (innenBreite - (spalten + 1) * abstand) / spalten;
+        final fachBreite = _fachBreite(constraints.maxWidth);
         final reihen = (faecher.length / spalten).ceil();
         final fachHoehe = math.min(
           fachBreite * hoechstensHoch,
@@ -329,10 +356,10 @@ class _Tresen extends StatelessWidget {
                   pfosten + abstand,
                   abstand,
                 ),
-                // Mittig im Tresen: Unter dem Bild ist auf hohen Handys
-                // viel Platz, und oben angeklebt stünden die Fächer gedrängt.
+                // Ganz unten im Tresen (AktivesBrett, 22.11.2026): Was
+                // darüber frei bleibt, gehört dem Bild.
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     for (var r = 0; r < reihen; r++) ...<Widget>[
                       if (r > 0) const SizedBox(height: abstand),

@@ -43,6 +43,17 @@ die Fächer zu quetschen.
 Gold mehr; `runway_sim` ist nicht neu gelaufen.
 
 App 1219, gear 146 (vorher 144). In 390 × 844 im Browser angesehen.
+
+**Und** (AktivesBrett, mit eigenem Bild „Neu laden.jpg“): **Das Ladenbild
+ist jetzt eins mit Tresen** (432 × 608) — größere, leere Tafel, Platte,
+darunter das dunkle Innere. Die Fächer stehen **ganz unten** darin; das
+Bild rutscht nach oben, wenn sie Platz brauchen, aber nie so weit, dass
+das Schild in die Tafel hängt — dann rollt der Laden (360 × 640).
+**Die Tafel nach seiner Skizze**: Bild oben links in der Ecke, daneben
+nur Name und Qualität, die Werte darunter über die ganze Breite,
+„Kaufen“ klein und mittig als Holzplanke. Seltenheit und Platz stehen
+nicht mehr da; „Noch 160 Gold“ bleibt.
+
 **Frederik hat es nicht gesehen.**
 
 ---

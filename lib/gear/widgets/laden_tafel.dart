@@ -43,12 +43,12 @@ class LadenTafel extends StatelessWidget {
   static const Key kaufenKey = ValueKey<String>('laden-kaufen');
 
   static const TextStyle _klein = TextStyle(
-    fontSize: 10.5,
+    fontSize: 12,
     height: 1.25,
     color: Palette.textOnDarkDim,
   );
   static const TextStyle _zahl = TextStyle(
-    fontSize: 10.5,
+    fontSize: 12,
     height: 1.25,
     fontWeight: FontWeight.bold,
     color: Palette.textOnDark,
@@ -62,81 +62,89 @@ class LadenTafel extends StatelessWidget {
     final pfad = GearIcons.forItemId(item.id);
     final farbe = RarityBadge.colorOnDarkOf(item.rarity);
 
+    // Oben links das Bild, daneben Name und Qualität; darunter die Werte
+    // über die ganze Breite, unten mittig „Kaufen“ (AktivesBrett,
+    // 22.11.2026). Seltenheit und Platz stehen nicht da — die Seltenheit
+    // sagen Rahmen und Farbe des Namens, den Platz das Bild.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(0, 0, 2, 2),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Links das Bild im Rahmen der Seltenheit, darunter „Kaufen“ —
-          // wie auf einem Preisschild.
-          SizedBox(
-            width: 52,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: const Color(0x33000000),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: RarityBadge.rahmenOf(item.rarity),
-                      width: RarityBadge.rahmenBreite,
-                    ),
+          Row(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0x33000000),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: RarityBadge.rahmenOf(item.rarity),
+                    width: RarityBadge.rahmenBreite,
                   ),
-                  child: pfad != null
-                      ? PixelArt(
-                          assetPath: pfad,
-                          side: 40,
-                          fallback: _ersatz(item),
-                        )
-                      : _ersatz(item),
                 ),
-                const Spacer(),
-                _KaufKnopf(angebot: angebot, block: block, onKaufen: onKaufen),
-              ],
-            ),
+                child: pfad != null
+                    ? PixelArt(
+                        assetPath: pfad,
+                        side: _bild,
+                        fallback: _ersatz(item),
+                      )
+                    : _ersatz(item),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      item.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.1,
+                        fontWeight: FontWeight.bold,
+                        color: farbe,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(CopyText.qualitaet(angebot), style: _klein),
+                    if (_grund case final String grund)
+                      Text(
+                        grund,
+                        style: _zahl.copyWith(
+                          color: block == PurchaseBlock.zuWenigGold
+                              ? Palette.enemyOnDark
+                              : Palette.goldOnDark,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 8),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    item.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.1,
-                      fontWeight: FontWeight.bold,
-                      color: farbe,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${item.rarity.label} · ${item.slot.label} · '
-                    '${CopyText.qualitaet(angebot)}',
-                    style: _klein,
-                  ),
-                  if (_grund case final String grund)
-                    Text(
-                      grund,
-                      style: _zahl.copyWith(
-                        color: block == PurchaseBlock.zuWenigGold
-                            ? Palette.enemyOnDark
-                            : Palette.goldOnDark,
-                      ),
-                    ),
-                  const SizedBox(height: 4),
                   for (final zeile in CopyText.lines(angebot, worn: getragen))
                     _WertZeile(zeile: zeile),
                   if (kampf != null) ...<Widget>[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(kampf, style: _klein),
                   ],
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Center(
+            child: _KaufKnopf(
+              angebot: angebot,
+              block: block,
+              onKaufen: onKaufen,
             ),
           ),
         ],
@@ -144,9 +152,12 @@ class LadenTafel extends StatelessWidget {
     );
   }
 
+  /// Wie groß das Bild oben links steht.
+  static const double _bild = 48;
+
   static Widget _ersatz(GearItem item) => Icon(
     GearIcons.fallbackFor(item.slot),
-    size: 40,
+    size: _bild,
     color: Palette.textOnDark,
   );
 
@@ -217,46 +228,33 @@ class _KaufKnopf extends StatelessWidget {
       schritt: Schritt.laden,
       aktiv: angebot.uid.endsWith('-mentor') && block == null,
       radius: 6,
-      child: SizedBox(
-        width: 52,
-        height: 30,
-        child: FilledButton(
-          key: LadenTafel.kaufenKey,
-          onPressed: block == null ? onKaufen : null,
-          // **Nicht die gemalte Planke**: Die ist für 88 Punkte gemalt und
-          // zerfällt auf 52. Hier ein schlichtes Brett im Ton der Tafel.
-          style: FilledButton.styleFrom(
-            minimumSize: Size.zero,
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            backgroundColor: const Color(0xFF9A6234),
-            disabledBackgroundColor: const Color(0xFF4A3424),
-            foregroundColor: Palette.textOnDark,
-            disabledForegroundColor: Palette.textOnDarkDim,
-            backgroundBuilder: (context, states, child) => child!,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-              side: const BorderSide(color: Color(0xFF2A1A10), width: 1.5),
-            ),
-            // Der Stil eines Knopfs erbt die Schrift des Themes nicht.
-            textStyle: const TextStyle(
+      // Die Holzplanke der App — über das Theme, wie jeder andere Knopf.
+      child: FilledButton(
+        key: LadenTafel.kaufenKey,
+        onPressed: block == null ? onKaufen : null,
+        // Klein (AktivesBrett, 22.11.2026); die Planke nennt keine Schrift,
+        // hier die der App.
+        style: const ButtonStyle(
+          minimumSize: WidgetStatePropertyAll<Size>(Size(64, 28)),
+          padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
+            EdgeInsets.symmetric(horizontal: 10),
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          textStyle: WidgetStatePropertyAll<TextStyle>(
+            TextStyle(
               fontFamily: Schrift.app,
-              fontSize: 12,
               fontWeight: FontWeight.bold,
+              fontSize: 12,
+              shadows: <Shadow>[
+                Shadow(color: Color(0xCC1A0E05), offset: Offset(1, 1)),
+              ],
             ),
           ),
-          // Der Preis steht schon auf der Planke des Fachs.
-          child: gekauft
-              ? const Icon(
-                  Icons.check_circle,
-                  size: 18,
-                  semanticLabel: 'Gekauft',
-                )
-              : Text(
-                  'Kaufen',
-                  semanticsLabel: 'Kaufen für ${angebot.paid} Gold',
-                ),
         ),
+        // Der Preis steht schon im Fach.
+        child: gekauft
+            ? const Icon(Icons.check_circle, size: 14, semanticLabel: 'Gekauft')
+            : Text('Kaufen', semanticsLabel: 'Kaufen für ${angebot.paid} Gold'),
       ),
     );
   }
