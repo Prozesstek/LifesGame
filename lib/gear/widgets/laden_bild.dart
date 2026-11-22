@@ -21,7 +21,7 @@ abstract final class LadenBild {
 
   /// Wo der Inhalt der Tafel steht — ihr dunkles Inneres, oben so weit
   /// frei, dass das Schild „Laden“ nichts verdeckt.
-  static const Rect tafel = Rect.fromLTRB(22, 104, 232, 366);
+  static const Rect tafel = Rect.fromLTRB(22, 106, 232, 366);
 
   /// Ab hier ist das Bild Tresen: das dunkle Innere unter der Platte.
   static const double tresenOben = 417;

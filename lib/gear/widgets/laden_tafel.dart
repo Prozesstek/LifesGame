@@ -232,19 +232,14 @@ class _KaufKnopf extends StatelessWidget {
       child: FilledButton(
         key: LadenTafel.kaufenKey,
         onPressed: block == null ? onKaufen : null,
-        // Klein (AktivesBrett, 22.11.2026); die Planke nennt keine Schrift,
-        // hier die der App.
+        // Die Planke in normaler Größe; sie nennt keine Schrift, hier die
+        // der App.
         style: const ButtonStyle(
-          minimumSize: WidgetStatePropertyAll<Size>(Size(64, 28)),
-          padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
-            EdgeInsets.symmetric(horizontal: 10),
-          ),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           textStyle: WidgetStatePropertyAll<TextStyle>(
             TextStyle(
               fontFamily: Schrift.app,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 15,
               shadows: <Shadow>[
                 Shadow(color: Color(0xCC1A0E05), offset: Offset(1, 1)),
               ],
@@ -253,7 +248,7 @@ class _KaufKnopf extends StatelessWidget {
         ),
         // Der Preis steht schon im Fach.
         child: gekauft
-            ? const Icon(Icons.check_circle, size: 14, semanticLabel: 'Gekauft')
+            ? const Icon(Icons.check_circle, size: 18, semanticLabel: 'Gekauft')
             : Text('Kaufen', semanticsLabel: 'Kaufen für ${angebot.paid} Gold'),
       ),
     );
