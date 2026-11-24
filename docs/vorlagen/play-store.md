@@ -174,6 +174,7 @@ Ein geschlossener Test mit Fremden ist schon eine Verbreitung.
 - [ ] Länder: Deutschland, Österreich, Schweiz.
 - [ ] Store-Eintrag: Titel (höchstens 30 Zeichen), Kurzbeschreibung (80),
       Beschreibung (4.000), Icon 512 × 512, Feature-Grafik 1024 × 500.
+      Texte als Entwurf in [`docs/store/beschreibung.md`](../store/beschreibung.md).
 - [ ] Mindestens zwei Screenshots. **Die lange Seite darf höchstens
       doppelt so lang sein wie die kurze**: 390 × 844 und die meisten
       Handy-Bildschirme (20 : 9) sind zu schmal. In 1080 × 1920 rendern.
