@@ -121,10 +121,10 @@ unter `tool/pixel/`; `tool/kreis_zeichen.py` ist gelöscht.
 
 Die lernbaren:
 
-- [ ] Funkenstoß (fc994)
+- [x] Funkenstoß — Feuerball von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (22.11.2026); **Herkunft der Vorlage offen**
 - [ ] Steinhaut (fc664)
 - [ ] Wurzelgriff (fc1067)
-- [ ] Aurastrom (fc980)
+- [x] Aurastrom — ein blauer Strom mit Tropfen von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Blütentau (fc969)
 - [ ] Klingenwirbel (fc1004)
 - [ ] Frostnebel (fc1015)
@@ -139,7 +139,7 @@ Die lernbaren:
 - [ ] Kraftschlag (fc1005)
 - [ ] Zehrung (fc1063)
 - [ ] Sammeln (fc1042)
-- [ ] Atemzug (fc1040)
+- [x] Atemzug — ein Gesicht im Profil, das grüne Wirbel ausatmet, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glutspur (fc1000)
 - [ ] Fanghaken (fc393)
 - [ ] Glückstrank (fc960)
@@ -147,7 +147,7 @@ Die lernbaren:
 - [ ] Schnappfalle (fc128)
 - [ ] Falke (fc1818)
 - [ ] Steinschlag (fc209)
-- [ ] Rankenpeitsche (fc1071)
+- [x] Rankenpeitsche — Ranke mit leuchtendem Schlag von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Rückenwind (fc725)
 - [ ] Eisball (fc1009)
 - [ ] Wassergrube (fc786)
@@ -161,7 +161,7 @@ Die Grundangriffe der Waffen:
 - [ ] Doppelstich (fc721)
 - [ ] Sammelschlag (fc985)
 - [ ] Spalter (fc1022)
-- [ ] Doppelschuss (fc1011)
+- [x] Doppelschuss — Bogen mit zwei Pfeilen von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64, danach von ihm von Hand nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Sonnenhieb (fc1038)
 
 ## 10. Ausrüstung auf der Figur (`assets/character/Charakter_*.png`)
