@@ -72,7 +72,15 @@ im Kampf schwächer zu sehen) und **Wurzelgriff** (verschlungene
 Dornenwurzeln, ebenso eher dunkel). **Zinseszins heißt jetzt
 Klingenrausch** und trägt gekreuzte Klingen mit Glutkanten (nachgebessert;
 die Id `zinseszins` bleibt, die Werte-Zeile heißt „Steigerung“;
-`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Bei Vorlagen,
+`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). **Blütentau**
+trägt eine grüne Blüte mit Tautropfen (nachgebessert), **Frostnebel**
+Eiskristalle über einer Nebelwolke, **Schnappfalle** ein Tellereisen mit
+Kette (dunkel, im Kampf schwächer zu sehen), **Glückstrank** eine
+Flasche mit Regenbogen-Wirbel (nachgebessert), **Parade** einen
+Rundschild, an dem ein Schlag in Funken zerspringt
+(`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Beim Verpixeln zählt seitdem nur
+Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
+der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
 Farbe statt des Mittels — sonst werden Gold und Blau blass; das Verfahren
 liegt bisher nur als Probe, nicht in `sprite_verpixeln.py`. **Woher die Vorlagen stammen, ist

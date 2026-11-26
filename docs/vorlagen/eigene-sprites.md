@@ -125,9 +125,9 @@ Die lernbaren:
 - [ ] Steinhaut (fc664)
 - [x] Wurzelgriff — ein Busch aus verschlungenen Dornenwurzeln, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [x] Aurastrom — ein blauer Strom mit Tropfen von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
-- [ ] Blütentau (fc969)
+- [x] Blütentau — eine grüne Blüte mit Tautropfen und Funken, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Klingenwirbel (fc1004)
-- [ ] Frostnebel (fc1015)
+- [x] Frostnebel — Eiskristalle über einer Nebelwolke, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Prisma-Barriere (fc1024)
 - [ ] Donnerkeil (fc1025)
 - [ ] Sandsturm (fc1031)
@@ -142,9 +142,9 @@ Die lernbaren:
 - [x] Atemzug — ein Gesicht im Profil, das grüne Wirbel ausatmet, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glutspur (fc1000)
 - [x] Fanghaken — Wurfhaken am Seil mit Speed-Linien, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
-- [ ] Glückstrank (fc960)
+- [x] Glückstrank — eine Flasche mit Regenbogen-Wirbel, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Wiederkehr (fc1019)
-- [ ] Schnappfalle (fc128)
+- [x] Schnappfalle — ein Tellereisen mit Kette, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Falke (fc1818)
 - [ ] Steinschlag (fc209)
 - [x] Rankenpeitsche — Ranke mit leuchtendem Schlag von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (26.11.2026); **Herkunft der Vorlage offen**
