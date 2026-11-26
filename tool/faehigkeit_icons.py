@@ -321,7 +321,9 @@ BILDER = {
     'Kampfrausch': kampfrausch,
     'Kriegsschrei': kriegsschrei,
     'Spiegelbild': spiegelbild,
-    'Parade': parade,
+    # Parade trägt seit dem 26.11.2026 AktivesBretts Schild mit Funken —
+    # nicht mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
+    # 'Parade': parade,
     # Ruhepuls trägt seit dem 26.11.2026 AktivesBretts Herzschlag — nicht
     # mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
     # 'Ruhepuls': ruhepuls,

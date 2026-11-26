@@ -76,7 +76,9 @@ die Id `zinseszins` bleibt, die Werte-Zeile heißt „Steigerung“;
 trägt eine grüne Blüte mit Tautropfen (nachgebessert), **Frostnebel**
 Eiskristalle über einer Nebelwolke, **Schnappfalle** ein Tellereisen mit
 Kette (dunkel, im Kampf schwächer zu sehen), **Glückstrank** eine
-Flasche mit Regenbogen-Wirbel (nachgebessert). Beim Verpixeln zählt seitdem nur
+Flasche mit Regenbogen-Wirbel (nachgebessert), **Parade** einen
+Rundschild, an dem ein Schlag in Funken zerspringt
+(`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Beim Verpixeln zählt seitdem nur
 Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
 der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
