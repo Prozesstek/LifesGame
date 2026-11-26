@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:abilities/abilities.dart';
 import 'package:action_combat/action_combat.dart';
 import 'package:flutter/material.dart';
@@ -688,24 +690,25 @@ class _Kachel extends StatelessWidget {
 
   final VoidCallback onTap;
 
-  static const double _bildSeite = 36;
+  /// Das Bild füllt den Platz über dem Namen (AktivesBrett, 26.11.2026) —
+  /// so groß, wie die Kachel es zulässt.
+  Widget _bild(double seite) => Ausgegraut(
+    aktiv: !unlocked,
+    child: MoveBild(
+      moveId: ability.moveId,
+      side: seite,
+      fallback: Icon(
+        Icons.bolt,
+        size: seite * 0.6,
+        color: unlocked ? Palette.accent : Palette.muted,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final farbe = RarityBadge.colorOfStufe(ability.rarity.index);
     final name = pitNameOf(ability.moveId) ?? ability.moveId;
-
-    final bild = Ausgegraut(
-      aktiv: !unlocked,
-      child: MoveBild(
-        moveId: ability.moveId,
-        side: _bildSeite,
-        fallback: Icon(
-          Icons.bolt,
-          color: unlocked ? Palette.accent : Palette.muted,
-        ),
-      ),
-    );
 
     return Opacity(
       opacity: ausgeblendet ? 0.3 : 1,
@@ -722,7 +725,7 @@ class _Kachel extends StatelessWidget {
               onTap: onTap,
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
+                padding: const EdgeInsets.fromLTRB(3, 4, 3, 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: ohneRand && !imEinsatz
@@ -735,44 +738,53 @@ class _Kachel extends StatelessWidget {
                         ),
                 ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: <Widget>[
-                        bild,
-                        if (neu)
-                          Positioned(
-                            right: -6,
-                            top: -6,
-                            child: ZielPunkt(
-                              key: neuKey(ability.moveId),
-                              groesse: 12,
-                            ),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, platz) => Center(
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: <Widget>[
+                              _bild(
+                                math
+                                    .min(platz.maxWidth, platz.maxHeight)
+                                    .floorToDouble(),
+                              ),
+                              if (neu)
+                                Positioned(
+                                  right: -6,
+                                  top: -6,
+                                  child: ZielPunkt(
+                                    key: neuKey(ability.moveId),
+                                    groesse: 12,
+                                  ),
+                                ),
+                              if (!unlocked)
+                                const Positioned(
+                                  right: -2,
+                                  bottom: -2,
+                                  child: Icon(
+                                    Icons.lock,
+                                    size: 12,
+                                    color: Palette.muted,
+                                  ),
+                                ),
+                              if (imEinsatz)
+                                const Positioned(
+                                  right: -2,
+                                  bottom: -2,
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    size: 12,
+                                    color: Palette.accent,
+                                  ),
+                                ),
+                            ],
                           ),
-                        if (!unlocked)
-                          const Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Icon(
-                              Icons.lock,
-                              size: 12,
-                              color: Palette.muted,
-                            ),
-                          ),
-                        if (imEinsatz)
-                          const Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Icon(
-                              Icons.check_circle,
-                              size: 12,
-                              color: Palette.accent,
-                            ),
-                          ),
-                      ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       name,
                       textAlign: TextAlign.center,
