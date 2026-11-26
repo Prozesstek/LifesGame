@@ -59,7 +59,9 @@ nicht mehr da; „Noch 160 Gold“ bleibt.
 **Zuletzt:** Funkenstoß trägt einen neuen Feuerball — AktivesBretts
 Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64
 gebracht (`assets/Faehigkeiten/Funkenstoss.png`), ebenso **Rankenpeitsche**
-(eine Ranke mit leuchtendem Schlag). **Woher die Vorlagen stammen, ist
+(eine Ranke mit leuchtendem Schlag) und **Doppelschuss**, der
+Grundangriff des Langbogens (Bogen mit zwei Pfeilen, von AktivesBrett
+danach von Hand nachgebessert). **Woher die Vorlagen stammen, ist
 offen**; vor dem Store klären. Dazu füllt das Bild jeder Kachel im
 Fähigkeiten-Raster jetzt den ganzen Platz über dem Namen, statt fest
 36 Punkte (AktivesBrett: „die Fähigkeiten-Icons sind sehr klein“).

@@ -161,7 +161,7 @@ Die Grundangriffe der Waffen:
 - [ ] Doppelstich (fc721)
 - [ ] Sammelschlag (fc985)
 - [ ] Spalter (fc1022)
-- [ ] Doppelschuss (fc1011)
+- [x] Doppelschuss — Bogen mit zwei Pfeilen von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64, danach von ihm von Hand nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Sonnenhieb (fc1038)
 
 ## 10. Ausrüstung auf der Figur (`assets/character/Charakter_*.png`)
