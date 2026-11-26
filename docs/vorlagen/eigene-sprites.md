@@ -121,7 +121,7 @@ unter `tool/pixel/`; `tool/kreis_zeichen.py` ist gelöscht.
 
 Die lernbaren:
 
-- [ ] Funkenstoß (fc994)
+- [x] Funkenstoß — Feuerball von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (22.11.2026); **Herkunft der Vorlage offen**
 - [ ] Steinhaut (fc664)
 - [ ] Wurzelgriff (fc1067)
 - [ ] Aurastrom (fc980)
