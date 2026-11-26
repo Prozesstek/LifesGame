@@ -123,7 +123,7 @@ Die lernbaren:
 
 - [x] Funkenstoß — Feuerball von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (22.11.2026); **Herkunft der Vorlage offen**
 - [ ] Steinhaut (fc664)
-- [ ] Wurzelgriff (fc1067)
+- [x] Wurzelgriff — ein Busch aus verschlungenen Dornenwurzeln, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [x] Aurastrom — ein blauer Strom mit Tropfen von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Blütentau (fc969)
 - [ ] Klingenwirbel (fc1004)
