@@ -320,7 +320,9 @@ BILDER = {
     'Kriegsschrei': kriegsschrei,
     'Spiegelbild': spiegelbild,
     'Parade': parade,
-    'Ruhepuls': ruhepuls,
+    # Ruhepuls trägt seit dem 26.11.2026 AktivesBretts Herzschlag — nicht
+    # mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
+    # 'Ruhepuls': ruhepuls,
     # Kettenblitz trägt seit dem 26.11.2026 AktivesBretts Blitz — nicht
     # mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
     # 'Kettenblitz': kettenblitz,
