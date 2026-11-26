@@ -141,7 +141,7 @@ Die lernbaren:
 - [ ] Sammeln (fc1042)
 - [x] Atemzug — ein Gesicht im Profil, das grüne Wirbel ausatmet, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glutspur (fc1000)
-- [ ] Fanghaken (fc393)
+- [x] Fanghaken — Wurfhaken am Seil mit Speed-Linien, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glückstrank (fc960)
 - [ ] Wiederkehr (fc1019)
 - [ ] Schnappfalle (fc128)

@@ -66,7 +66,9 @@ Blitz; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr) und
 **Atemzug** (ein Gesicht, das grüne Wirbel ausatmet) und **Aurastrom**
 (ein blauer Strom mit Tropfen) und **Ruhepuls** (Herzschlag-Linie mit
 Herz, enger Ausschnitt, von AktivesBrett nachgebessert;
-`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Bei Vorlagen,
+`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr) und **Fanghaken**
+(Wurfhaken am Seil mit Speed-Linien, nachgebessert; auf dunklem Grund
+im Kampf schwächer zu sehen). Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
 Farbe statt des Mittels — sonst werden Gold und Blau blass; das Verfahren
 liegt bisher nur als Probe, nicht in `sprite_verpixeln.py`. **Woher die Vorlagen stammen, ist
