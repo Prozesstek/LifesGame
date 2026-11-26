@@ -58,8 +58,9 @@ nicht mehr da; „Noch 160 Gold“ bleibt.
 
 **Zuletzt:** Funkenstoß trägt einen neuen Feuerball — AktivesBretts
 Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64
-gebracht (`assets/Faehigkeiten/Funkenstoss.png`). **Woher die Vorlage
-stammt, ist offen**; vor dem Store klären.
+gebracht (`assets/Faehigkeiten/Funkenstoss.png`), ebenso **Rankenpeitsche**
+(eine Ranke mit leuchtendem Schlag). **Woher die Vorlagen stammen, ist
+offen**; vor dem Store klären.
 
 ---
 

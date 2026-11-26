@@ -147,7 +147,7 @@ Die lernbaren:
 - [ ] Schnappfalle (fc128)
 - [ ] Falke (fc1818)
 - [ ] Steinschlag (fc209)
-- [ ] Rankenpeitsche (fc1071)
+- [x] Rankenpeitsche — Ranke mit leuchtendem Schlag von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Rückenwind (fc725)
 - [ ] Eisball (fc1009)
 - [ ] Wassergrube (fc786)
