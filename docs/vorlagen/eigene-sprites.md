@@ -139,7 +139,7 @@ Die lernbaren:
 - [ ] Kraftschlag (fc1005)
 - [ ] Zehrung (fc1063)
 - [ ] Sammeln (fc1042)
-- [ ] Atemzug (fc1040)
+- [x] Atemzug — ein Gesicht im Profil, das grüne Wirbel ausatmet, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glutspur (fc1000)
 - [ ] Fanghaken (fc393)
 - [ ] Glückstrank (fc960)

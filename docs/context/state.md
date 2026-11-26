@@ -62,7 +62,8 @@ gebracht (`assets/Faehigkeiten/Funkenstoss.png`), ebenso **Rankenpeitsche**
 (eine Ranke mit leuchtendem Schlag) und **Doppelschuss**, der
 Grundangriff des Langbogens (Bogen mit zwei Pfeilen, von AktivesBrett
 danach von Hand nachgebessert) und **Kettenblitz** (ein verästelter
-Blitz; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Bei Vorlagen,
+Blitz; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr) und
+**Atemzug** (ein Gesicht, das grüne Wirbel ausatmet). Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
 Farbe statt des Mittels — sonst werden Gold und Blau blass; das Verfahren
 liegt bisher nur als Probe, nicht in `sprite_verpixeln.py`. **Woher die Vorlagen stammen, ist
