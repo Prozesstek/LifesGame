@@ -125,7 +125,7 @@ Die lernbaren:
 - [ ] Steinhaut (fc664)
 - [x] Wurzelgriff — ein Busch aus verschlungenen Dornenwurzeln, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [x] Aurastrom — ein blauer Strom mit Tropfen von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
-- [ ] Blütentau (fc969)
+- [x] Blütentau — eine grüne Blüte mit Tautropfen und Funken, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Klingenwirbel (fc1004)
 - [ ] Frostnebel (fc1015)
 - [ ] Prisma-Barriere (fc1024)
