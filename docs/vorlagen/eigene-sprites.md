@@ -142,7 +142,7 @@ Die lernbaren:
 - [x] Atemzug — ein Gesicht im Profil, das grüne Wirbel ausatmet, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glutspur (fc1000)
 - [x] Fanghaken — Wurfhaken am Seil mit Speed-Linien, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
-- [ ] Glückstrank (fc960)
+- [x] Glückstrank — eine Flasche mit Regenbogen-Wirbel, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Wiederkehr (fc1019)
 - [x] Schnappfalle — ein Tellereisen mit Kette, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Falke (fc1818)
