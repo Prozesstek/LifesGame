@@ -127,7 +127,7 @@ Die lernbaren:
 - [x] Aurastrom — ein blauer Strom mit Tropfen von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [x] Blütentau — eine grüne Blüte mit Tautropfen und Funken, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Klingenwirbel (fc1004)
-- [ ] Frostnebel (fc1015)
+- [x] Frostnebel — Eiskristalle über einer Nebelwolke, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Prisma-Barriere (fc1024)
 - [ ] Donnerkeil (fc1025)
 - [ ] Sandsturm (fc1031)
