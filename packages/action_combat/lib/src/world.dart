@@ -544,7 +544,7 @@ class ActionWorld {
   /// Wie viele Treffer der Kampfrausch gerade zählt.
   int get rageStacks => _rageStacks;
 
-  /// Wie oft [id] gerade gestapelt ist (Zinseszins) — 0 ohne Stapel.
+  /// Wie oft [id] gerade gestapelt ist (Klingenrausch) — 0 ohne Stapel.
   int stacksOf(String id) {
     final stand = _stacking[id];
     return stand == null || stand.left <= 0 ? 0 : stand.stacks;
