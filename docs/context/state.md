@@ -66,6 +66,12 @@ Blitz; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr) und
 **Atemzug** (ein Gesicht, das grüne Wirbel ausatmet) und **Aurastrom**
 (ein blauer Strom mit Tropfen) und **Ruhepuls** (Herzschlag-Linie mit
 Herz, enger Ausschnitt, von AktivesBrett nachgebessert;
+`tool/faehigkeit_icons.py` zeichnet ihn nicht mehr) und **Fanghaken**
+(Wurfhaken am Seil mit Speed-Linien, nachgebessert; auf dunklem Grund
+im Kampf schwächer zu sehen) und **Wurzelgriff** (verschlungene
+Dornenwurzeln, ebenso eher dunkel). **Zinseszins heißt jetzt
+Klingenrausch** und trägt gekreuzte Klingen mit Glutkanten (nachgebessert;
+die Id `zinseszins` bleibt, die Werte-Zeile heißt „Steigerung“;
 `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
 Farbe statt des Mittels — sonst werden Gold und Blau blass; das Verfahren

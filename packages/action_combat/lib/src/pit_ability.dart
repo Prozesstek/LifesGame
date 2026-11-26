@@ -1364,9 +1364,13 @@ abstract final class PitAbilities {
   /// Ein Schlag, der mit jeder Wiederholung wächst — die 1%-Methode als
   /// Klinge. Billig und schnell bereit: Bezahlt wird mit Mana, nicht mit
   /// Warten (ADR-0073, Mana als Bremse).
+  ///
+  /// **Hieß bis zum 26.11.2026 „Zinseszins“** (AktivesBrett: „nenn die
+  /// Fähigkeit in Klingenrausch um“). Die Id bleibt, sonst fiele sie aus
+  /// jedem Spielstand.
   static const PitAbility zinseszins = PitAbility(
     id: 'zinseszins',
-    name: 'Zinseszins',
+    name: 'Klingenrausch',
     kind: PitKind.angriff,
     manaCost: 10,
     cooldown: 2,

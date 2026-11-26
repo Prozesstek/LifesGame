@@ -228,7 +228,7 @@ Episch gesetzt und Bestform und Rückspulen als Ultimates gewählt.
 
 | # | Name | Bausteine | Ziel | Mana | Abklingzeit | Seltenheit | Quelle | Farbe | Icon / Animation |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Zinseszins | **Stacking** + Schlag 0,8 × Angriff: jede Wiederholung binnen 4 s trifft 20 % härter, bis 5-mal | Richtung | 10 | 2 s | Gewöhnlich | „Zwei Minuten reichen“ | klinge | Klinge vor drei wachsenden Säulen |
+| 1 | Zinseszins (seit 26.11.2026 **Klingenrausch**) | **Stacking** + Schlag 0,8 × Angriff: jede Wiederholung binnen 4 s trifft 20 % härter, bis 5-mal | Richtung | 10 | 2 s | Gewöhnlich | „Zwei Minuten reichen“ | klinge | Klinge vor drei wachsenden Säulen |
 | 2 | Schattenschritt | **Blink** bis 4 Felder + **Unsichtbarkeit** 2 s; der erste Treffer daraus ×1,5 | Richtung | 18 | 9 s | Ungewöhnlich | „Warum keiner hilft“ | seele | eine Gestalt mit Streifen dahinter; der Held wird durchscheinend |
 | 3 | Kampfrausch | **Passiv**, **Rage**: je eingesteckten Treffer +4 %, bis 10-mal, fällt nach 4 s ohne Treffer ab | — | — | — | Selten | „Gefühle regulieren“ | lava | drei Klauenhiebe; Glutpunkte um den Helden, einer je Treffer |
 | 4 | Kriegsschrei | **Stun** um den Helden (2 Felder) 0,8 s + Self-Buff Angriff +20 %, 6 s | um den Helden | 24 | 15 s | Selten | „Wie ein Muskel wächst“ | blitz | ein Horn, aus dem drei Bögen schallen |

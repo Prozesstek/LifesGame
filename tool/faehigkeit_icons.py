@@ -314,7 +314,9 @@ def rueckspulen():
 
 
 BILDER = {
-    'Zinseszins': zinseszins,
+    # Zinseszins (heute Klingenrausch) trägt seit dem 26.11.2026
+    # AktivesBretts gekreuzte Klingen — nicht mehr hier gezeichnet.
+    # 'Zinseszins': zinseszins,
     'Schattenschritt': schattenschritt,
     'Kampfrausch': kampfrausch,
     'Kriegsschrei': kriegsschrei,

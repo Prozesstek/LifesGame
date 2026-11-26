@@ -439,7 +439,7 @@ void _wirkung(PitEffect effect, int? attack, List<PitStat> stats) {
       ));
     case Stacking(:final step, :final window, :final maxStacks):
       stats.add((
-        label: 'Zinseszins',
+        label: 'Steigerung',
         value:
             '+${(step * 100).round()} % je Wiederholung binnen '
             '${pitNumber(window)} s, bis $maxStacks×',
