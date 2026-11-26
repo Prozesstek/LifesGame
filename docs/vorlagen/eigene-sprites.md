@@ -144,7 +144,7 @@ Die lernbaren:
 - [x] Fanghaken — Wurfhaken am Seil mit Speed-Linien, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block und von ihm nachgebessert (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Glückstrank (fc960)
 - [ ] Wiederkehr (fc1019)
-- [ ] Schnappfalle (fc128)
+- [x] Schnappfalle — ein Tellereisen mit Kette, von AktivesBretts Vorlage, verpixelt mit der häufigsten Farbe je Block (26.11.2026); **Herkunft der Vorlage offen**
 - [ ] Falke (fc1818)
 - [ ] Steinschlag (fc209)
 - [x] Rankenpeitsche — Ranke mit leuchtendem Schlag von AktivesBretts Vorlage, mit `tool/sprite_verpixeln.py --ohne-umriss` auf 64 × 64 (26.11.2026); **Herkunft der Vorlage offen**
