@@ -330,7 +330,9 @@ BILDER = {
     # Kettenblitz trägt seit dem 26.11.2026 AktivesBretts Blitz — nicht
     # mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
     # 'Kettenblitz': kettenblitz,
-    'Rammbock': rammbock,
+    # Rammbock trägt seit dem 28.11.2026 AktivesBretts Widderkopf im Feuer —
+    # nicht mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
+    # 'Rammbock': rammbock,
     'ZweiterAtem': zweiter_atem,
     'Bestform': bestform,
     'Rueckspulen': rueckspulen,
