@@ -79,7 +79,8 @@ Kette (dunkel, im Kampf schwächer zu sehen), **Glückstrank** eine
 Flasche mit Regenbogen-Wirbel (nachgebessert), **Parade** einen
 Rundschild, an dem ein Schlag in Funken zerspringt, **Rammbock** einen
 Rammbock mit Widderkopf im Feuerkranz (nachgebessert; beide zeichnet
-`tool/faehigkeit_icons.py` nicht mehr). Beim Verpixeln zählt seitdem nur
+`tool/faehigkeit_icons.py` nicht mehr), **Prisma-Barriere** einen
+Kristallschild in Blau und Violett mit Splittern (nachgebessert). Beim Verpixeln zählt seitdem nur
 Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
 der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
