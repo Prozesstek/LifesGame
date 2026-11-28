@@ -81,7 +81,9 @@ Rundschild, an dem ein Schlag in Funken zerspringt, **Rammbock** einen
 Rammbock mit Widderkopf im Feuerkranz (nachgebessert; beide zeichnet
 `tool/faehigkeit_icons.py` nicht mehr), **Prisma-Barriere** einen
 Kristallschild in Blau und Violett mit Splittern (nachgebessert),
-**Rückenwind** einen türkisen Windstoß mit Wirbeln (nachgebessert). Beim Verpixeln zählt seitdem nur
+**Rückenwind** einen türkisen Windstoß mit Wirbeln (nachgebessert),
+**Sammeln** zwei Hände, die ein Herz in einem grünen Wirbel halten
+(nachgebessert). Beim Verpixeln zählt seitdem nur
 Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
 der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
