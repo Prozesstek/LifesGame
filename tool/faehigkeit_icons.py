@@ -317,7 +317,9 @@ BILDER = {
     # Zinseszins (heute Klingenrausch) trägt seit dem 26.11.2026
     # AktivesBretts gekreuzte Klingen — nicht mehr hier gezeichnet.
     # 'Zinseszins': zinseszins,
-    'Schattenschritt': schattenschritt,
+    # Schattenschritt trägt seit dem 28.11.2026 AktivesBretts Gestalt im
+    # Schatten — nicht mehr hier gezeichnet, sonst überschriebe ein Lauf ihn.
+    # 'Schattenschritt': schattenschritt,
     'Kampfrausch': kampfrausch,
     'Kriegsschrei': kriegsschrei,
     'Spiegelbild': spiegelbild,

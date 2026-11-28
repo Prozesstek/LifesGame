@@ -83,7 +83,9 @@ Rammbock mit Widderkopf im Feuerkranz (nachgebessert; beide zeichnet
 Kristallschild in Blau und Violett mit Splittern (nachgebessert),
 **Rückenwind** einen türkisen Windstoß mit Wirbeln (nachgebessert),
 **Sammeln** zwei Hände, die ein Herz in einem grünen Wirbel halten
-(nachgebessert). Beim Verpixeln zählt seitdem nur
+(nachgebessert), **Schattenschritt** eine Gestalt in Kapuze, die
+violett verwischt davonstürzt (nachgebessert; auf dunklem Grund im Kampf
+schwächer zu sehen; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr). Beim Verpixeln zählt seitdem nur
 Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
 der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
