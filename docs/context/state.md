@@ -86,7 +86,8 @@ Kristallschild in Blau und Violett mit Splittern (nachgebessert),
 (nachgebessert), **Schattenschritt** eine Gestalt in Kapuze, die
 violett verwischt davonstürzt (nachgebessert; auf dunklem Grund im Kampf
 schwächer zu sehen; `tool/faehigkeit_icons.py` zeichnet ihn nicht mehr), **Wiederkehr** einen Bumerang in einem
-blauen Wirbel (nachgebessert). Beim Verpixeln zählt seitdem nur
+blauen Wirbel (nachgebessert), **Zehrung** einen blutroten Schlag mit
+Spritzern und Schwaden. Beim Verpixeln zählt seitdem nur
 Weiß als Hintergrund, das mit dem Bildrand zusammenhängt — sonst bekam
 der helle Nebel Löcher. Bei Vorlagen,
 die schon Pixel-Art sind, nimmt das Verpixeln je Block die **häufigste**
